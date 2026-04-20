@@ -37,15 +37,15 @@ test("shard owner-family and save-boundary summaries preserve descriptive gate l
     getShardSaveBoundarySummary({
       ownerShellTermsChecked: ["ShardMining"],
       saveFamilyTermsChecked: ["PlayerProfileData", "CloudSavePlayerProfile"],
-      probeResults: {
+      boundaryEvidence: {
         metadataNeighborhoodHasSaveTerms: false,
         level0HasSaveTerms: false,
         ownerShellWithSaveOverlapCount: 0,
         directShardPlayerProfileContext: false,
         directSerializedRowDefinitionRecovered: true,
         runtimeOwnedStateShellRecovered: true,
-        traceRegistryHasOwnedStateTarget: true,
-        traceOwnedStateOutcomeKind: "non-local-injection-seam"
+        ownedStateTargetRecovered: true,
+        ownedStateOutcomeKind: "non-local-injection-seam"
       },
       recoveredDirectRowDefinitionPayload: {
         ownerType: "ShardMining"
@@ -58,15 +58,15 @@ test("shard owner-family and save-boundary summaries preserve descriptive gate l
       hasSeparationBoundary: true,
       hasDirectRowDefinitionPayload: true,
       hasRuntimeOwnedStateShell: true,
-      hasTraceOwnedStateTarget: true,
-      hasTraceOwnedStatePopulationBridge: false,
-      traceOwnedStateOutcomeKind: "non-local-injection-seam",
+      hasOwnedStateTarget: true,
+      hasOwnedStatePopulationBridge: false,
+      ownedStateOutcomeKind: "non-local-injection-seam",
       ownerAnchor: "ShardMining / ShardUpgradeInfo",
       saveAnchor: "PlayerProfileData",
       cloudSaveAnchor: "CloudSavePlayerProfile",
       directPayloadAnchor: "ShardMining",
       runtimeShellAnchor: "ShardMining.upgradeInfoList",
-      traceOwnedStateLabel:
+      ownedStateStatusLabel:
         "Trace rules out a local upgradeInfoList bridge and still cannot name a deeper wrapper handoff; owned state stays at a non-local injection seam",
       overlapLabel: "zero direct overlap",
       ownerTermCount: 1

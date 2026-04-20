@@ -8,11 +8,11 @@
     "titleEffectBoundary": "data/shard-milestone-title-effect-boundary.v1.json",
     "effectTextHandlerBoundary": "data/shard-effect-text-handler-boundary.v1.json",
     "payloadBoundary": "data/shard-milestone-payload-boundary.v1.json",
-    "saveBoundary": "data/shard-save-boundary.v1.json",
+    "saveBoundary": "data/shard-save-boundary.v2.json",
     "bonusSlotProbe": "data/shard-bonus-slot-probe.v1.json",
     "costMethodProbe": "data/shard-cost-method-probe.v1.json",
     "costNativeProbe": "data/shard-cost-native-probe.v1.json",
-    "handoffBoundary": "data/shard-milestone-handoff-boundary.v1.json",
+    "handoffBoundary": "data/shard-milestone-handoff-boundary.v2.json",
     "typeMetadataProbe": "data/shard-type-metadata-probe.v1.json"
   },
   "reachableFamily": {

@@ -48,7 +48,7 @@
   },
   "provenance": {
     "policy": "Copy TokenShop rows, token-bank evidence, and Daily Tokenium evidence into centralized TokenShop views while preserving the committed source file or transient regeneration command for each embedded slice.",
-    "transientProbePolicy": "Historical TokenShop probes should not remain live dependencies; when their evidence is copied forward, keep the regeneration command instead of a permanent pointer to the old report shape.",
+    "transientProbePolicy": "Historical TokenShop probes should not remain live dependencies; when their evidence is copied forward, keep the regeneration command or DB-backed target-bundle identity instead of a permanent pointer to an old report shape.",
     "sourceRecords": [
       {
         "id": "token-shop-values",
@@ -85,8 +85,8 @@
         "persistence": "transient",
         "command": "python scripts\\unity\\unity_trace_bundle.py --family token-shop --level structured",
         "expectedOutputs": [
-          "workbench/trace-runs/token-shop-atu3-cells-effect.json",
-          "workbench/trace-runs/token-shop-family-structure.json"
+          "db:materialized-target-bundle:token-shop-atu3-cells-effect",
+          "db:materialized-target-bundle:token-shop-family-structure"
         ]
       }
     ]
@@ -95,7 +95,7 @@
     "canonical": [],
     "boundary": [
       "data/token-shop-row-level-owner.json",
-      "data/token-shop-save-boundary.json",
+      "data/token-shop-save-boundary.v2.json",
       "data/token-shop-row-remap-boundary.json",
       "data/token-shop-late-atu-boundary.json",
       "data/token-bank-formula-boundary.json"
@@ -124,10 +124,8 @@
       "daily-tokenium"
     ],
     "archiveAfterReplacement": [
-      "data/daily-tokenium-lane-probe.json",
-      "data/daily-tokenium-owner-probe.json",
-      "data/unity-probe-report.json",
-      "data/lm244-targeted-probe.json"
+      "data/unity-apk-extract-report.json",
+      "data/uabea-extract-report.json"
     ],
     "archiveReview": [
       {
@@ -137,33 +135,21 @@
         "replacementSource": "data/system-units/token-shop.v1.json"
       },
       {
-        "path": "data/daily-tokenium-lane-probe.json",
-        "status": "archive-candidate",
-        "reason": "The live TokenShop unit and trace path already rebuild the action and owner seams from direct extraction plus bounded trace evidence.",
-        "replacementSource": "data/system-units/token-shop.v1.json"
-      },
-      {
-        "path": "data/daily-tokenium-owner-probe.json",
-        "status": "archive-candidate",
-        "reason": "The live TokenShop unit no longer depends on this probe as an active source.",
-        "replacementSource": "data/system-units/token-shop.v1.json"
-      },
-      {
-        "path": "data/unity-probe-report.json",
+        "path": "data/unity-apk-extract-report.json",
         "status": "archive-candidate",
         "reason": "This is no longer a live TokenShop source and keeping it active risks conflicting with newer direct level0 and metadata-backed mappings.",
         "replacementSource": "data/system-units/token-shop.v1.json"
       },
       {
-        "path": "data/lm244-targeted-probe.json",
+        "path": "data/uabea-extract-report.json",
         "status": "archive-candidate",
-        "reason": "This targeted probe is no longer part of the active TokenShop product path.",
+        "reason": "The remaining asset-field report is useful for extractor validation but should not expand back into a parallel TokenShop row-remap lane.",
         "replacementSource": "data/system-units/token-shop.v1.json"
       }
     ],
     "requirementsBeforeArchive": [
       "App spend summaries must resolve from the centralized TokenShop unit or explicit projections of it.",
-      "Trace must keep citing grounded boundaries without depending on the historical probe reports.",
+      "Trace must keep citing grounded boundaries without depending on exported trace-run reports as primary runtime state.",
       "Any transient TokenShop evidence folded into the centralized unit must carry the command used to regenerate it."
     ]
   }

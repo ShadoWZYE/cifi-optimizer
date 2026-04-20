@@ -231,7 +231,7 @@ async function buildTokenShopUnit() {
   const unitInventory = await readJson("data/units/token-shop.v1.json");
   const tokenShopValues = await readJson("data/token-shop-values.json");
   const tokenShopCanonical = await readJson("data/tokenshop-canonical-v1.json");
-  const tokenShopSaveBoundary = await readJson("data/token-shop-save-boundary.json");
+  const tokenShopSaveBoundary = await readJson("data/token-shop-save-boundary.v2.json");
   const tokenShopRowLevelOwner = await readJson("data/token-shop-row-level-owner.json");
   const tokenShopRowRemapBoundary = await readJson("data/token-shop-row-remap-boundary.json");
   const tokenShopLateAtuBoundary = await readJson("data/token-shop-late-atu-boundary.json");
@@ -286,7 +286,7 @@ async function buildTokenShopUnit() {
           tokenShopRowLevelOwner,
           ["token-shop-row-level-owner"]
         ),
-        save: datasetSection("data/token-shop-save-boundary.json", tokenShopSaveBoundary, [
+        save: datasetSection("data/token-shop-save-boundary.v2.json", tokenShopSaveBoundary, [
           "token-shop-row-remap-boundary"
         ]),
         remap: datasetSection(
@@ -416,7 +416,7 @@ async function buildMultiverseMarketUnit() {
     "data/multiverse-market-owner-family.json"
   );
   const multiverseMarketSaveBoundary = await readJson(
-    "data/multiverse-market-save-boundary.json"
+    "data/multiverse-market-save-boundary.v2.json"
   );
   const multiverseMarketMarketMemberBoundary = await readJson(
     "data/multiverse-market-market-member-boundary.json"
@@ -462,7 +462,7 @@ async function buildMultiverseMarketUnit() {
         "multiverse-market-values"
       ]),
       saveBoundary: datasetSection(
-        "data/multiverse-market-save-boundary.json",
+        "data/multiverse-market-save-boundary.v2.json",
         multiverseMarketSaveBoundary,
         ["multiverse-market-save-boundary"]
       ),
@@ -649,11 +649,11 @@ async function buildShardsUnit() {
     "data/shard-milestone-row-alignment-boundary.v1.json"
   );
   const shardMilestoneHandoffBoundary = await readJson(
-    "data/shard-milestone-handoff-boundary.v1.json"
+    "data/shard-milestone-handoff-boundary.v2.json"
   );
-  const shardSaveBoundary = await readJson("data/shard-save-boundary.v1.json");
+  const shardSaveBoundary = await readJson("data/shard-save-boundary.v2.json");
   const shardMilestoneSaveOwnerCandidates = await readJson(
-    "data/shard-milestone-save-owner-candidates.v1.json"
+    "data/shard-milestone-save-owner-candidates.v2.json"
   );
   const shardCostModelBoundary = await readJson("data/shard-cost-model-boundary.v1.json");
   const shardCostScreenshotCalibration = await readJson(
@@ -748,18 +748,18 @@ async function buildShardsUnit() {
           ["shard-save-boundary"]
         ),
         handoff: datasetSection(
-          "data/shard-milestone-handoff-boundary.v1.json",
+          "data/shard-milestone-handoff-boundary.v2.json",
           shardMilestoneHandoffBoundary,
           ["shard-save-boundary"]
         )
       }
     },
     ownedState: {
-      saveBoundary: datasetSection("data/shard-save-boundary.v1.json", shardSaveBoundary, [
+      saveBoundary: datasetSection("data/shard-save-boundary.v2.json", shardSaveBoundary, [
         "shard-save-boundary"
       ]),
       saveOwnerCandidates: datasetSection(
-        "data/shard-milestone-save-owner-candidates.v1.json",
+        "data/shard-milestone-save-owner-candidates.v2.json",
         shardMilestoneSaveOwnerCandidates,
         ["shard-save-boundary"]
       ),

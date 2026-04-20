@@ -3,9 +3,9 @@
   "generated": "2026-04-16",
   "description": "Grounded TokenShop dataset - all fields verified from APK analysis",
   "source_priority": [
-    "uabea-probe-report.json (field offsets, method RVAs)",
-    "tokenshop-cost-model.json (extracted cost/bonus values)",
-    "tokenshop-model-recovery.json (verified formulas)"
+    "data/uabea-extract-report.json (field offsets, method RVAs)",
+    "data/token-shop-values.json (grounded TokenShop row and cost fields)",
+    "data/token-shop-row-remap-boundary.json (checked shell-to-prefab and title-side joins)"
   ],
   "formulas": {
     "cost": {
@@ -21,7 +21,7 @@
     "description": "Tier unlock thresholds based on total levels in previous tiers. Method names verified from game: get_TotalT1TokenLevels, get_TotalT2TokenLevels etc. Exact threshold constants NOT extracted - values below are ASSUMED/heuristic from pattern analysis.",
     "status": "unverified_assumption",
     "provenance_note": "Threshold values (25, 50, 100, 150) are pattern-based guesses, not verified from IL2CPP binary. Labeled as 'assumed' per AGENTS.md data provenance rule.",
-    "source": "unity-trace-bundle.json (method names), uabea-probe-report.json (SaveData fields)",
+    "source": "DB-backed trace bundle materialization (method names), uabea-extract-report.json (SaveData fields)",
     "tier_thresholds": {
       "t1": { "min_levels": 0, "always_unlocked": true },
       "t2": { "min_levels": 25, "description": "ASSUMED: Unlock at 25 total T1 levels", "fields": ["ATU13Level", "ATU14Level", "ATU15Level", "ATU16Level", "ATU17Level", "ATU18Level"] },
@@ -39,7 +39,7 @@
   },
   "save_data": {
     "description": "ATU upgrade levels stored in SaveData class",
-    "source": "uabea-probe-report.json -> saveData type",
+    "source": "uabea-extract-report.json -> saveData type",
     "count": 28,
     "offsets": {
       "ATU1Level": {
@@ -168,7 +168,7 @@
   },
   "token_shop": {
     "description": "TokenShop controller class - holds cost/bonus field values",
-    "source": "uabea-probe-report.json -> tokenShop type",
+    "source": "uabea-extract-report.json -> tokenShop type",
     "cost_field_offsets": {
       "ATU24StartCost": {
         "offset": 1288,

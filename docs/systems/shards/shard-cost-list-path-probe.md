@@ -1,6 +1,6 @@
 # Shard Cost List Path Probe
 
-Source: [`data/shard-cost-method-probe.v1.json`](data/shard-cost-method-probe.v1.json), [`data/uabea-probe-report.json`](data/uabea-probe-report.json), and disassembly of [`workbench/apk/base/libil2cpp.so`](workbench/apk/base/libil2cpp.so).
+Source: [`data/shard-cost-method-probe.v1.json`](data/shard-cost-method-probe.v1.json), [`data/uabea-extract-report.json`](data/uabea-extract-report.json), and disassembly of [`workbench/apk/base/libil2cpp.so`](workbench/apk/base/libil2cpp.so).
 
 ## Grounded conclusions
 

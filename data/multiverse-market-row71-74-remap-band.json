@@ -7,8 +7,8 @@
     "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
     "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
     "actionShell": "data/multiverse-market-action-shell.json",
-    "uabeaProbeReport": "data/uabea-probe-report.json",
-    "unityProbeReport": "data/unity-probe-report.json",
+    "uabeaProbeReport": "data/uabea-extract-report.json",
+    "unityProbeReport": "data/unity-apk-extract-report.json",
     "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },

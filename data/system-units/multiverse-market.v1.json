@@ -19,12 +19,12 @@
   },
   "provenance": {
     "policy": "Copy Multiverse Market boundary and support data into centralized market views while preserving committed source files and regeneration commands for transient extraction evidence.",
-    "transientProbePolicy": "If a market identity or UI-shell clue is first recovered through a transient probe, record the exact command used to regenerate that report before embedding the value.",
+    "transientProbePolicy": "If a market identity or UI-shell clue is first recovered through a transient probe, record the exact command or DB-backed target-bundle identity used to regenerate it before embedding the value.",
     "sourceRecords": [
       {
         "id": "multiverse-market-save-boundary",
         "kind": "dataset",
-        "path": "data/multiverse-market-save-boundary.json",
+        "path": "data/multiverse-market-save-boundary.v2.json",
         "role": "boundary",
         "persistence": "committed"
       },
@@ -77,8 +77,7 @@
         "persistence": "transient",
         "command": "python scripts\\unity\\unity_trace_bundle.py --target multiverse-market-save-owner-boundary --level structured",
         "expectedOutputs": [
-          "workbench/trace-runs/multiverse-market-save-owner-boundary.json",
-          "workbench/trace-runs/multiverse-market-save-owner-boundary.md"
+          "db:materialized-target-bundle:multiverse-market-save-owner-boundary"
         ]
       }
     ]
@@ -86,7 +85,7 @@
   "views": {
     "canonical": [],
     "boundary": [
-      "data/multiverse-market-save-boundary.json",
+      "data/multiverse-market-save-boundary.v2.json",
       "data/multiverse-market-market-member-boundary.json",
       "data/multiverse-market-savedata-import-boundary.json",
       "data/multiverse-market-row69-74-identity-source-boundary.json",
@@ -118,33 +117,25 @@
       "ui-shell"
     ],
     "archiveAfterReplacement": [
-      "data/unity-probe-report.json",
-      "data/lm244-targeted-probe.json",
-      "data/multiverse-market-row78-83-assignment-site-probe.json"
+      "data/unity-apk-extract-report.json"
     ],
     "archiveReview": [
       {
-        "path": "data/uabea-probe-report.json",
+        "path": "data/uabea-extract-report.json",
         "status": "archive-candidate",
         "reason": "This is no longer an active Multiverse market source and newer unit-backed boundaries now carry the live market conclusions.",
         "replacementSource": "data/system-units/multiverse-market.v1.json"
       },
       {
-        "path": "data/unity-probe-report.json",
+        "path": "data/unity-apk-extract-report.json",
         "status": "archive-candidate",
         "reason": "The active market unit now carries the bounded save-owner and row-identity views without depending on the old generic probe output.",
         "replacementSource": "data/system-units/multiverse-market.v1.json"
       },
       {
-        "path": "data/lm244-targeted-probe.json",
-        "status": "archive-candidate",
-        "reason": "This targeted probe is no longer part of the active market path.",
-        "replacementSource": "data/system-units/multiverse-market.v1.json"
-      },
-      {
-        "path": "data/multiverse-market-row78-83-assignment-site-probe.json",
-        "status": "defer",
-        "reason": "This still carries unresolved anomaly context around sparse row-local controls and should not be archived until those boundaries are normalized into a clearer permanent market section.",
+        "path": "data/multiverse-market-text-provenance-path-boundary.json",
+        "status": "keep",
+        "reason": "The surviving boundary dataset now embeds the row78-83 slot walk, assignment-site, and runtime-lane conclusions that replaced the standalone probe artifacts.",
         "replacementSource": "data/system-units/multiverse-market.v1.json"
       }
     ],
@@ -162,8 +153,7 @@
       "persistence": "transient",
       "command": "python scripts\\unity\\unity_trace_bundle.py --target multiverse-market-save-owner-boundary --level structured",
       "expectedOutputs": [
-        "workbench/trace-runs/multiverse-market-save-owner-boundary.json",
-        "workbench/trace-runs/multiverse-market-save-owner-boundary.md"
+        "db:materialized-target-bundle:multiverse-market-save-owner-boundary"
       ]
     }
   ],
@@ -782,11 +772,12 @@
         }
       },
       "saveBoundary": {
-        "sourcePath": "data/multiverse-market-save-boundary.json",
+        "sourcePath": "data/multiverse-market-save-boundary.v2.json",
         "provenanceSources": [
           "multiverse-market-save-boundary"
         ],
         "data": {
+          "dataset": "multiverse-market-save-boundary.v2",
           "generatedAt": "2026-04-07",
           "sources": {
             "actionShellProbe": "tmp-multiverse-row-text-probe.json",
@@ -806,12 +797,12 @@
             "FillPlayerProfileData",
             "CloudSavePlayerProfile"
           ],
-          "probeResults": {
+          "boundaryEvidence": {
             "actionShellWithSaveOverlapCount": 0,
             "metadataNeighborhoodHasActionTerms": true,
             "metadataNeighborhoodHasSaveTerms": true,
-            "metadataProbeHasSaveTerms": false,
-            "level0ProbeHasSaveTerms": false
+            "metadataDirectCheckHasSaveTerms": false,
+            "level0DirectCheckHasSaveTerms": false
           },
           "crossBoundaryTypedOwnerStatus": {
             "status": "declaring-owner-closed-market-wrapper-still-unresolved",
@@ -837,7 +828,7 @@
           "sources": {
             "probeScript": "scripts/unity/metadata_neighborhood_probe.py",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-            "typedProbeReport": "data/uabea-probe-report.json",
+            "typedProbeReport": "data/uabea-extract-report.json",
             "metadata": "workbench/apk/base/global-metadata.dat",
             "nativeBinary": "workbench/apk/base/libil2cpp.so"
           },
@@ -1075,7 +1066,7 @@
             "actionShell": "data/multiverse-market-action-shell.json",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
             "validatedRows": "data/multiverse-market-values.json",
-            "typedProbeReport": "data/uabea-probe-report.json",
+            "typedProbeReport": "data/uabea-extract-report.json",
             "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md"
           },
           "canonicalSplit": {
@@ -1111,7 +1102,7 @@
                     "claim": "validatedBuyHooks includes BuyIS71"
                   },
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names include IS71Level and MultiverseMarket exact field names include IS71ID"
                   }
                 ]
@@ -1133,7 +1124,7 @@
                     "claim": "validatedBuyHooks includes BuyIS72"
                   },
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names include IS72Level and MultiverseMarket exact field names include IS72ID"
                   }
                 ]
@@ -1155,7 +1146,7 @@
                     "claim": "validatedBuyHooks includes BuyIS73"
                   },
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names include IS73Level and MultiverseMarket exact field names include IS73ID"
                   }
                 ]
@@ -1177,7 +1168,7 @@
                     "claim": "validatedBuyHooks includes BuyIS74"
                   },
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names include IS74Level and MultiverseMarket exact field names include IS74ID"
                   }
                 ]
@@ -1204,15 +1195,15 @@
             },
             "evidence": [
               {
-                "artifact": "data/uabea-probe-report.json",
+                "artifact": "data/uabea-extract-report.json",
                 "claim": "SaveData exact field names include IS1Level, IS24Level, IS25Level, and IS110Level"
               },
               {
-                "artifact": "data/uabea-probe-report.json",
+                "artifact": "data/uabea-extract-report.json",
                 "claim": "the checked typed probe does not recover IS0Level or IS111Level"
               },
               {
-                "artifact": "data/uabea-probe-report.json",
+                "artifact": "data/uabea-extract-report.json",
                 "claim": "InscryptionsDone is the next checked typed SaveData neighbor after IS110Level and remains a dual declaration on SaveData and PlayerProfileData"
               }
             ]
@@ -1244,11 +1235,11 @@
                 "why": "This is the exact contiguous SaveData-owned IS*Level span recovered from the checked typed field table. Exact typed recovery proves IS1Level as the lower boundary, IS110Level as the upper boundary, and the absence of typed IS0Level and IS111Level, while the checked rows 71-74 overlap still anchors that wider run to validated Emporium rows so the whole span is safe to preserve as compatibility-only raw Emporium import truth without claiming canonical row identity or planner-ready semantics.",
                 "evidence": [
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names include IS1Level through IS110Level in one contiguous typed family"
                   },
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "the checked typed probe does not recover IS0Level or IS111Level and places InscryptionsDone immediately after IS110Level on SaveData"
                   },
                   {
@@ -1329,7 +1320,7 @@
                 ],
                 "evidence": [
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names place EsotericR1Trades through EsotericR9Trades immediately after InscryptionsDone and then continue into NecrumR1Trades through NecrumR9Trades"
                   },
                   {
@@ -1351,7 +1342,7 @@
                 ],
                 "evidence": [
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names continue from NecrumR9Trades into Mech1Unlocked, Mech1Units, Mech1Upg1Level, Mech1Upg2Level, Mech1MissionsProgress, FinalMech1MainBonus, Mech1MissionsCompleted, and Mech2Unlocked before continuing into Mech2Units"
                   },
                   {
@@ -1372,7 +1363,7 @@
         ],
         "traceScope": "multiverse-market-save-owner-boundary",
         "requestSignature": "01e596a425c49ecf",
-        "builtAt": "2026-04-20T03:17:47.429696",
+        "builtAt": "2026-04-20T03:20:25.449381",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": null,
@@ -26050,8 +26041,8 @@
             "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
             "actionShell": "data/multiverse-market-action-shell.json",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-            "unityProbeReport": "data/unity-probe-report.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
             "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -26352,7 +26343,7 @@
           "sources": {
             "row6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
             "marketMemberBoundary": "data/multiverse-market-market-member-boundary.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
             "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -26437,7 +26428,7 @@
               "repoLocalConsumerSearchSourcesWithoutCandidateHits": [
                 "data/system-units/multiverse-market.v1.json",
                 "data/system-units/trace.v1.json",
-                "workbench/trace-runs/multiverse-market-save-owner-boundary.json"
+                "db:materialized-target-bundle:multiverse-market-save-owner-boundary"
               ],
               "adjacentConsumerOrViewSymbolsRecovered": [],
               "conclusion": "The checked candidate catalog or relation field names are only recovered in the alternate UABEA field-table export; the current centralized market unit and bounded trace surfaces still do not recover a consumer path that reads those carriers back into player-facing inscription labels."
@@ -26492,8 +26483,8 @@
             "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
             "actionShell": "data/multiverse-market-action-shell.json",
             "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
-            "unityProbeReport": "data/unity-probe-report.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
             "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -26594,8 +26585,8 @@
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
             "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
             "actionShell": "data/multiverse-market-action-shell.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
-            "unityProbeReport": "data/unity-probe-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
             "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -26736,8 +26727,8 @@
           "sources": {
             "row6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
-            "unityProbeReport": "data/unity-probe-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
           "checkedPositiveBindings": [
@@ -26758,11 +26749,11 @@
                   "claim": "metadata neighborhood preserves IS78Level, BuyIS78, TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source path in one nearby UI shell"
                 },
                 {
-                  "artifact": "data/uabea-probe-report.json",
-                  "claim": "UABEA probe preserves IS78Level, IS78ID, BuyIS78, MultiverseMarket.BuyIS78(), TextHandlerMarkets, and ChrystosEmporiumUpgrade78-ID78"
+                  "artifact": "data/uabea-extract-report.json",
+                  "claim": "UABEA extract report preserves IS78Level, IS78ID, BuyIS78, MultiverseMarket.BuyIS78(), TextHandlerMarkets, and ChrystosEmporiumUpgrade78-ID78"
                 },
                 {
-                  "artifact": "data/unity-probe-report.json",
+                  "artifact": "data/unity-apk-extract-report.json",
                   "claim": "Unity probe preserves the player-facing string anchor Inscryption 78 Ouroboros Orbs beside the same TextHandlerMarkets.cs source path, but that sparse anchor is not the recovered live effect-text binding"
                 }
               ]
@@ -26784,11 +26775,11 @@
                   "claim": "metadata neighborhood preserves IS83Level, BuyIS83, TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source path in one nearby UI shell"
                 },
                 {
-                  "artifact": "data/uabea-probe-report.json",
-                  "claim": "UABEA probe preserves IS83Level, IS83ID, BuyIS83, MultiverseMarket.BuyIS83(), TextHandlerMarkets, and ChrystosEmporiumUpgrade83-ID83"
+                  "artifact": "data/uabea-extract-report.json",
+                  "claim": "UABEA extract report preserves IS83Level, IS83ID, BuyIS83, MultiverseMarket.BuyIS83(), TextHandlerMarkets, and ChrystosEmporiumUpgrade83-ID83"
                 },
                 {
-                  "artifact": "data/unity-probe-report.json",
+                  "artifact": "data/unity-apk-extract-report.json",
                   "claim": "Unity probe preserves the player-facing string anchor Inscryption 83 Fast-Loop ML beside the same TextHandlerMarkets.cs source path, but no checked repo-local binding from that anchor to live effect text is recovered"
                 }
               ]
@@ -26840,8 +26831,8 @@
           "dataset": "multiverse-market-69-74-anomaly-provenance",
           "sources": {
             "rawAppSideAsset": "workbench/unity/joined/level0",
-            "rawUnityProbeReport": "data/unity-probe-report.json",
-            "rawUabeaProbeReport": "data/uabea-probe-report.json",
+            "rawUnityProbeReport": "data/unity-apk-extract-report.json",
+            "rawUabeaProbeReport": "data/uabea-extract-report.json",
             "derivedPrefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
             "derivedRow7174RemapBand": "data/multiverse-market-row71-74-remap-band.json",
             "derivedNumberingStabilityBoundary": "data/multiverse-market-inscription-numbering-stability-boundary.json",
@@ -26897,13 +26888,13 @@
               "stageId": "raw-app-side-probe-reports",
               "classification": "raw-app-side",
               "artifacts": [
-                "data/unity-probe-report.json",
-                "data/uabea-probe-report.json"
+                "data/unity-apk-extract-report.json",
+                "data/uabea-extract-report.json"
               ],
               "evidence": [
-                "unity-probe-report preserves both the earlier direct prefab shells ChrystosEmporiumUpgrade59 through ChrystosEmporiumUpgrade62 and the remapped shell ChrystosEmporiumUpgrade69-ID57.",
-                "uabea-probe-report preserves ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62 as GameObject names.",
-                "uabea-probe-report also preserves same-number save-side and hook-side names IS69Level through IS74Level, IS69ID through IS74ID, and BuyIS69 through BuyIS74."
+                "unity-apk-extract-report preserves both the earlier direct prefab shells ChrystosEmporiumUpgrade59 through ChrystosEmporiumUpgrade62 and the remapped shell ChrystosEmporiumUpgrade69-ID57.",
+                "uabea-extract-report preserves ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62 as GameObject names.",
+                "uabea-extract-report also preserves same-number save-side and hook-side names IS69Level through IS74Level, IS69ID through IS74ID, and BuyIS69 through BuyIS74."
               ],
               "anomalyPresent": true
             },
@@ -26955,8 +26946,8 @@
             "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
             "row7174RemapBand": "data/multiverse-market-row71-74-remap-band.json",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
-            "unityProbeReport": "data/unity-probe-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
             "nearbyIdentityBindingPattern": "data/multiverse-market-nearby-identity-binding-pattern.json",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -27624,14 +27615,14 @@
             "nearbyIdentityBindingPattern": "data/multiverse-market-nearby-identity-binding-pattern.json",
             "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
-            "unityProbeReport": "data/unity-probe-report.json",
-            "rowSeededAssetProbe": "data/multiverse-market-row78-83-seeded-reference-probe.json",
-            "textComponentProbe": "data/multiverse-market-row78-83-text-components-probe.json",
-            "assignmentSiteProbe": "data/multiverse-market-row78-83-assignment-site-probe.json",
-            "runtimeSurfaceProbe": "data/unity-runtime-surface-probe.json",
-            "runtimeCodeProbe": "data/multiverse-market-text-runtime-probe.json",
-            "tmpRowTextProbe": "tmp-multiverse-row-text-probe.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
+            "rowSeededAssetProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-seeded-slot-walk",
+            "textComponentProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-component-walk",
+            "assignmentSiteProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-assignment-site-summary",
+            "runtimeSurfaceProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
+            "runtimeCodeProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
+            "tmpRowTextProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-checked-negative-row-text-continuation",
             "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -27682,7 +27673,7 @@
             },
             "assignmentSiteRecovery": {
               "status": "serialized-row-local-ownership-only",
-              "artifact": "data/multiverse-market-row78-83-assignment-site-probe.json",
+              "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-assignment-site-summary",
               "candidateProducerScriptsChecked": [
                 "TextHandlerMarkets",
                 "MultiverseMarket"
@@ -27714,27 +27705,27 @@
                 "claim": "the same neighborhood preserves TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source-path clue"
               },
               {
-                "artifact": "data/unity-probe-report.json",
+                "artifact": "data/unity-apk-extract-report.json",
                 "claim": "the repo preserves a direct Unity string anchor Inscryption 78 Ouroboros Orbs"
               },
               {
-                "artifact": "data/multiverse-market-row78-83-seeded-reference-probe.json",
+                "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-seeded-slot-walk",
                 "claim": "the live-asset seed walk from ChrystosEmporiumUpgrade78-ID78 and ChrystosEmporiumUpgrade83-ID83 recovers mirrored row-local slot GameObjects named CurrentBonusText, BonusDescriptionText, PerLevelBonusText, DescriptionText, IDText, and IconBox"
               },
               {
-                "artifact": "data/multiverse-market-row78-83-text-components-probe.json",
+                "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-component-walk",
                 "claim": "the seeded component walk recovers concrete UnityEngine.UI.Text components on the row-local CurrentBonusText, BonusDescriptionText, PerLevelBonusText, and DescriptionText objects, plus adjacent Image, Outline, and Shadow components"
               },
               {
-                "artifact": "data/multiverse-market-row78-83-assignment-site-probe.json",
+                "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-assignment-site-summary",
                 "claim": "the assignment-site scan recovers only row-local ownership edges such as GameObject to Text or Outline or Shadow or Image plus RectTransform and CanvasRenderer backlinks, with zero serialized TextHandlerMarkets or MultiverseMarket producer links into those row-local text components"
               },
               {
-                "artifact": "data/unity-runtime-surface-probe.json",
+                "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
                 "claim": "the lightweight IL2CPP runtime surface now recovers typed TextHandlerMarkets fields such as IS1BonusText through IS110BonusText, IS1IDText through IS110IDText, IS78BaseBonusText, and IS83BaseBonusText, plus native RVAs for SetAllChrystosEmporiumTexts, SetAllBaseBonusTexts, SetIS1BonusText through SetIS110BonusText, SetIS1IDText through SetIS110IDText, SetIS78BaseBonusText, SetIS83BaseBonusText, and the virtual UnityEngine.UI.Text.set_text surface, while exposing no CurrentBonusText-named field or SetCurrentBonusText writer family and no SetISNDescriptionText family on TextHandlerMarkets"
               },
               {
-                "artifact": "data/multiverse-market-text-runtime-probe.json",
+                "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
                 "claim": "the runtime code probe shows SetAllChrystosEmporiumTexts calling SetAllBaseBonusTexts and SetAllBonusTexts, the row-78 and row-83 SetISNBaseBonusText methods ending in a UnityEngine.UI.Text virtual-dispatch write pattern after composing their base-bonus strings, and the parallel SetIS78BonusText and SetIS83BonusText methods ending in the same write pattern after sourcing payload values from MultiverseMarket.get_FinalIS78Bonus() and MultiverseMarket.get_FinalIS83Bonus() through GeneralFunctionsManager.BigDoubleToText or System.Int32.ToString, the runtime metadata-init helper, the null-reference throw helper, and System.String.Concat"
               }
             ],
@@ -28017,7 +28008,7 @@
         ],
         "traceScope": "multiverse-market-save-owner-boundary",
         "requestSignature": "01e596a425c49ecf",
-        "builtAt": "2026-04-20T03:17:47.429696",
+        "builtAt": "2026-04-20T03:20:25.449381",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": null,
@@ -35431,11 +35422,12 @@
   "boundaries": {
     "saveOwner": {
       "saveBoundary": {
-        "sourcePath": "data/multiverse-market-save-boundary.json",
+        "sourcePath": "data/multiverse-market-save-boundary.v2.json",
         "provenanceSources": [
           "multiverse-market-save-boundary"
         ],
         "data": {
+          "dataset": "multiverse-market-save-boundary.v2",
           "generatedAt": "2026-04-07",
           "sources": {
             "actionShellProbe": "tmp-multiverse-row-text-probe.json",
@@ -35455,12 +35447,12 @@
             "FillPlayerProfileData",
             "CloudSavePlayerProfile"
           ],
-          "probeResults": {
+          "boundaryEvidence": {
             "actionShellWithSaveOverlapCount": 0,
             "metadataNeighborhoodHasActionTerms": true,
             "metadataNeighborhoodHasSaveTerms": true,
-            "metadataProbeHasSaveTerms": false,
-            "level0ProbeHasSaveTerms": false
+            "metadataDirectCheckHasSaveTerms": false,
+            "level0DirectCheckHasSaveTerms": false
           },
           "crossBoundaryTypedOwnerStatus": {
             "status": "declaring-owner-closed-market-wrapper-still-unresolved",
@@ -35486,7 +35478,7 @@
           "sources": {
             "probeScript": "scripts/unity/metadata_neighborhood_probe.py",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-            "typedProbeReport": "data/uabea-probe-report.json",
+            "typedProbeReport": "data/uabea-extract-report.json",
             "metadata": "workbench/apk/base/global-metadata.dat",
             "nativeBinary": "workbench/apk/base/libil2cpp.so"
           },
@@ -35724,7 +35716,7 @@
             "actionShell": "data/multiverse-market-action-shell.json",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
             "validatedRows": "data/multiverse-market-values.json",
-            "typedProbeReport": "data/uabea-probe-report.json",
+            "typedProbeReport": "data/uabea-extract-report.json",
             "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md"
           },
           "canonicalSplit": {
@@ -35760,7 +35752,7 @@
                     "claim": "validatedBuyHooks includes BuyIS71"
                   },
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names include IS71Level and MultiverseMarket exact field names include IS71ID"
                   }
                 ]
@@ -35782,7 +35774,7 @@
                     "claim": "validatedBuyHooks includes BuyIS72"
                   },
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names include IS72Level and MultiverseMarket exact field names include IS72ID"
                   }
                 ]
@@ -35804,7 +35796,7 @@
                     "claim": "validatedBuyHooks includes BuyIS73"
                   },
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names include IS73Level and MultiverseMarket exact field names include IS73ID"
                   }
                 ]
@@ -35826,7 +35818,7 @@
                     "claim": "validatedBuyHooks includes BuyIS74"
                   },
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names include IS74Level and MultiverseMarket exact field names include IS74ID"
                   }
                 ]
@@ -35853,15 +35845,15 @@
             },
             "evidence": [
               {
-                "artifact": "data/uabea-probe-report.json",
+                "artifact": "data/uabea-extract-report.json",
                 "claim": "SaveData exact field names include IS1Level, IS24Level, IS25Level, and IS110Level"
               },
               {
-                "artifact": "data/uabea-probe-report.json",
+                "artifact": "data/uabea-extract-report.json",
                 "claim": "the checked typed probe does not recover IS0Level or IS111Level"
               },
               {
-                "artifact": "data/uabea-probe-report.json",
+                "artifact": "data/uabea-extract-report.json",
                 "claim": "InscryptionsDone is the next checked typed SaveData neighbor after IS110Level and remains a dual declaration on SaveData and PlayerProfileData"
               }
             ]
@@ -35893,11 +35885,11 @@
                 "why": "This is the exact contiguous SaveData-owned IS*Level span recovered from the checked typed field table. Exact typed recovery proves IS1Level as the lower boundary, IS110Level as the upper boundary, and the absence of typed IS0Level and IS111Level, while the checked rows 71-74 overlap still anchors that wider run to validated Emporium rows so the whole span is safe to preserve as compatibility-only raw Emporium import truth without claiming canonical row identity or planner-ready semantics.",
                 "evidence": [
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names include IS1Level through IS110Level in one contiguous typed family"
                   },
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "the checked typed probe does not recover IS0Level or IS111Level and places InscryptionsDone immediately after IS110Level on SaveData"
                   },
                   {
@@ -35978,7 +35970,7 @@
                 ],
                 "evidence": [
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names place EsotericR1Trades through EsotericR9Trades immediately after InscryptionsDone and then continue into NecrumR1Trades through NecrumR9Trades"
                   },
                   {
@@ -36000,7 +35992,7 @@
                 ],
                 "evidence": [
                   {
-                    "artifact": "data/uabea-probe-report.json",
+                    "artifact": "data/uabea-extract-report.json",
                     "claim": "SaveData exact field names continue from NecrumR9Trades into Mech1Unlocked, Mech1Units, Mech1Upg1Level, Mech1Upg2Level, Mech1MissionsProgress, FinalMech1MainBonus, Mech1MissionsCompleted, and Mech2Unlocked before continuing into Mech2Units"
                   },
                   {
@@ -36235,8 +36227,8 @@
             "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
             "actionShell": "data/multiverse-market-action-shell.json",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-            "unityProbeReport": "data/unity-probe-report.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
             "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -36537,7 +36529,7 @@
           "sources": {
             "row6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
             "marketMemberBoundary": "data/multiverse-market-market-member-boundary.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
             "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -36622,7 +36614,7 @@
               "repoLocalConsumerSearchSourcesWithoutCandidateHits": [
                 "data/system-units/multiverse-market.v1.json",
                 "data/system-units/trace.v1.json",
-                "workbench/trace-runs/multiverse-market-save-owner-boundary.json"
+                "db:materialized-target-bundle:multiverse-market-save-owner-boundary"
               ],
               "adjacentConsumerOrViewSymbolsRecovered": [],
               "conclusion": "The checked candidate catalog or relation field names are only recovered in the alternate UABEA field-table export; the current centralized market unit and bounded trace surfaces still do not recover a consumer path that reads those carriers back into player-facing inscription labels."
@@ -36677,8 +36669,8 @@
             "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
             "actionShell": "data/multiverse-market-action-shell.json",
             "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
-            "unityProbeReport": "data/unity-probe-report.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
             "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -36779,8 +36771,8 @@
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
             "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
             "actionShell": "data/multiverse-market-action-shell.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
-            "unityProbeReport": "data/unity-probe-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
             "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -36921,8 +36913,8 @@
           "sources": {
             "row6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
-            "unityProbeReport": "data/unity-probe-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
           "checkedPositiveBindings": [
@@ -36943,11 +36935,11 @@
                   "claim": "metadata neighborhood preserves IS78Level, BuyIS78, TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source path in one nearby UI shell"
                 },
                 {
-                  "artifact": "data/uabea-probe-report.json",
-                  "claim": "UABEA probe preserves IS78Level, IS78ID, BuyIS78, MultiverseMarket.BuyIS78(), TextHandlerMarkets, and ChrystosEmporiumUpgrade78-ID78"
+                  "artifact": "data/uabea-extract-report.json",
+                  "claim": "UABEA extract report preserves IS78Level, IS78ID, BuyIS78, MultiverseMarket.BuyIS78(), TextHandlerMarkets, and ChrystosEmporiumUpgrade78-ID78"
                 },
                 {
-                  "artifact": "data/unity-probe-report.json",
+                  "artifact": "data/unity-apk-extract-report.json",
                   "claim": "Unity probe preserves the player-facing string anchor Inscryption 78 Ouroboros Orbs beside the same TextHandlerMarkets.cs source path, but that sparse anchor is not the recovered live effect-text binding"
                 }
               ]
@@ -36969,11 +36961,11 @@
                   "claim": "metadata neighborhood preserves IS83Level, BuyIS83, TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source path in one nearby UI shell"
                 },
                 {
-                  "artifact": "data/uabea-probe-report.json",
-                  "claim": "UABEA probe preserves IS83Level, IS83ID, BuyIS83, MultiverseMarket.BuyIS83(), TextHandlerMarkets, and ChrystosEmporiumUpgrade83-ID83"
+                  "artifact": "data/uabea-extract-report.json",
+                  "claim": "UABEA extract report preserves IS83Level, IS83ID, BuyIS83, MultiverseMarket.BuyIS83(), TextHandlerMarkets, and ChrystosEmporiumUpgrade83-ID83"
                 },
                 {
-                  "artifact": "data/unity-probe-report.json",
+                  "artifact": "data/unity-apk-extract-report.json",
                   "claim": "Unity probe preserves the player-facing string anchor Inscryption 83 Fast-Loop ML beside the same TextHandlerMarkets.cs source path, but no checked repo-local binding from that anchor to live effect text is recovered"
                 }
               ]
@@ -37025,8 +37017,8 @@
           "dataset": "multiverse-market-69-74-anomaly-provenance",
           "sources": {
             "rawAppSideAsset": "workbench/unity/joined/level0",
-            "rawUnityProbeReport": "data/unity-probe-report.json",
-            "rawUabeaProbeReport": "data/uabea-probe-report.json",
+            "rawUnityProbeReport": "data/unity-apk-extract-report.json",
+            "rawUabeaProbeReport": "data/uabea-extract-report.json",
             "derivedPrefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
             "derivedRow7174RemapBand": "data/multiverse-market-row71-74-remap-band.json",
             "derivedNumberingStabilityBoundary": "data/multiverse-market-inscription-numbering-stability-boundary.json",
@@ -37082,13 +37074,13 @@
               "stageId": "raw-app-side-probe-reports",
               "classification": "raw-app-side",
               "artifacts": [
-                "data/unity-probe-report.json",
-                "data/uabea-probe-report.json"
+                "data/unity-apk-extract-report.json",
+                "data/uabea-extract-report.json"
               ],
               "evidence": [
-                "unity-probe-report preserves both the earlier direct prefab shells ChrystosEmporiumUpgrade59 through ChrystosEmporiumUpgrade62 and the remapped shell ChrystosEmporiumUpgrade69-ID57.",
-                "uabea-probe-report preserves ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62 as GameObject names.",
-                "uabea-probe-report also preserves same-number save-side and hook-side names IS69Level through IS74Level, IS69ID through IS74ID, and BuyIS69 through BuyIS74."
+                "unity-apk-extract-report preserves both the earlier direct prefab shells ChrystosEmporiumUpgrade59 through ChrystosEmporiumUpgrade62 and the remapped shell ChrystosEmporiumUpgrade69-ID57.",
+                "uabea-extract-report preserves ChrystosEmporiumUpgrade69-ID57 through ChrystosEmporiumUpgrade74-ID62 as GameObject names.",
+                "uabea-extract-report also preserves same-number save-side and hook-side names IS69Level through IS74Level, IS69ID through IS74ID, and BuyIS69 through BuyIS74."
               ],
               "anomalyPresent": true
             },
@@ -37140,8 +37132,8 @@
             "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
             "row7174RemapBand": "data/multiverse-market-row71-74-remap-band.json",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
-            "unityProbeReport": "data/unity-probe-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
             "nearbyIdentityBindingPattern": "data/multiverse-market-nearby-identity-binding-pattern.json",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -37809,14 +37801,14 @@
             "nearbyIdentityBindingPattern": "data/multiverse-market-nearby-identity-binding-pattern.json",
             "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
             "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
-            "unityProbeReport": "data/unity-probe-report.json",
-            "rowSeededAssetProbe": "data/multiverse-market-row78-83-seeded-reference-probe.json",
-            "textComponentProbe": "data/multiverse-market-row78-83-text-components-probe.json",
-            "assignmentSiteProbe": "data/multiverse-market-row78-83-assignment-site-probe.json",
-            "runtimeSurfaceProbe": "data/unity-runtime-surface-probe.json",
-            "runtimeCodeProbe": "data/multiverse-market-text-runtime-probe.json",
-            "tmpRowTextProbe": "tmp-multiverse-row-text-probe.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
+            "unityProbeReport": "data/unity-apk-extract-report.json",
+            "rowSeededAssetProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-seeded-slot-walk",
+            "textComponentProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-component-walk",
+            "assignmentSiteProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-assignment-site-summary",
+            "runtimeSurfaceProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
+            "runtimeCodeProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
+            "tmpRowTextProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-checked-negative-row-text-continuation",
             "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md",
             "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
           },
@@ -37867,7 +37859,7 @@
             },
             "assignmentSiteRecovery": {
               "status": "serialized-row-local-ownership-only",
-              "artifact": "data/multiverse-market-row78-83-assignment-site-probe.json",
+              "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-assignment-site-summary",
               "candidateProducerScriptsChecked": [
                 "TextHandlerMarkets",
                 "MultiverseMarket"
@@ -37899,27 +37891,27 @@
                 "claim": "the same neighborhood preserves TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source-path clue"
               },
               {
-                "artifact": "data/unity-probe-report.json",
+                "artifact": "data/unity-apk-extract-report.json",
                 "claim": "the repo preserves a direct Unity string anchor Inscryption 78 Ouroboros Orbs"
               },
               {
-                "artifact": "data/multiverse-market-row78-83-seeded-reference-probe.json",
+                "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-seeded-slot-walk",
                 "claim": "the live-asset seed walk from ChrystosEmporiumUpgrade78-ID78 and ChrystosEmporiumUpgrade83-ID83 recovers mirrored row-local slot GameObjects named CurrentBonusText, BonusDescriptionText, PerLevelBonusText, DescriptionText, IDText, and IconBox"
               },
               {
-                "artifact": "data/multiverse-market-row78-83-text-components-probe.json",
+                "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-component-walk",
                 "claim": "the seeded component walk recovers concrete UnityEngine.UI.Text components on the row-local CurrentBonusText, BonusDescriptionText, PerLevelBonusText, and DescriptionText objects, plus adjacent Image, Outline, and Shadow components"
               },
               {
-                "artifact": "data/multiverse-market-row78-83-assignment-site-probe.json",
+                "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-assignment-site-summary",
                 "claim": "the assignment-site scan recovers only row-local ownership edges such as GameObject to Text or Outline or Shadow or Image plus RectTransform and CanvasRenderer backlinks, with zero serialized TextHandlerMarkets or MultiverseMarket producer links into those row-local text components"
               },
               {
-                "artifact": "data/unity-runtime-surface-probe.json",
+                "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
                 "claim": "the lightweight IL2CPP runtime surface now recovers typed TextHandlerMarkets fields such as IS1BonusText through IS110BonusText, IS1IDText through IS110IDText, IS78BaseBonusText, and IS83BaseBonusText, plus native RVAs for SetAllChrystosEmporiumTexts, SetAllBaseBonusTexts, SetIS1BonusText through SetIS110BonusText, SetIS1IDText through SetIS110IDText, SetIS78BaseBonusText, SetIS83BaseBonusText, and the virtual UnityEngine.UI.Text.set_text surface, while exposing no CurrentBonusText-named field or SetCurrentBonusText writer family and no SetISNDescriptionText family on TextHandlerMarkets"
               },
               {
-                "artifact": "data/multiverse-market-text-runtime-probe.json",
+                "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
                 "claim": "the runtime code probe shows SetAllChrystosEmporiumTexts calling SetAllBaseBonusTexts and SetAllBonusTexts, the row-78 and row-83 SetISNBaseBonusText methods ending in a UnityEngine.UI.Text virtual-dispatch write pattern after composing their base-bonus strings, and the parallel SetIS78BonusText and SetIS83BonusText methods ending in the same write pattern after sourcing payload values from MultiverseMarket.get_FinalIS78Bonus() and MultiverseMarket.get_FinalIS83Bonus() through GeneralFunctionsManager.BigDoubleToText or System.Int32.ToString, the runtime metadata-init helper, the null-reference throw helper, and System.String.Concat"
               }
             ],
@@ -55873,7 +55865,7 @@
       ],
       "traceScope": "multiverse-market-save-owner-boundary",
       "requestSignature": "01e596a425c49ecf",
-      "builtAt": "2026-04-20T03:17:47.429696",
+      "builtAt": "2026-04-20T03:20:25.449381",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": null,
@@ -63289,7 +63281,7 @@
         ],
         "traceScope": "multiverse-market-save-owner-boundary",
         "requestSignature": "01e596a425c49ecf",
-        "builtAt": "2026-04-20T03:17:47.429696",
+        "builtAt": "2026-04-20T03:20:25.449381",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": null,

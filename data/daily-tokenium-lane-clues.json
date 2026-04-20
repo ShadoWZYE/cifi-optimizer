@@ -4,9 +4,9 @@
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0",
     "iapCatalog": "data/unity-textassets/IAPProductCatalog.txt",
-    "probe": "data/daily-tokenium-lane-probe.json",
+    "probe": "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence",
     "academySprite": "workbench/extract/assetripper-primary/Assets/Sprite/Aca.Tokenium553.json",
-    "uabeaProbe": "data/uabea-probe-report.json"
+    "uabeaProbe": "data/uabea-extract-report.json"
   },
   "ownerFamilyClues": [
     "SpaceAcademy",

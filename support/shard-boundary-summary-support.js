@@ -405,9 +405,9 @@ export function getShardSaveBoundarySummary(boundary) {
   const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked)
     ? boundary.saveFamilyTermsChecked
     : [];
-  const probeResults =
-    typeof boundary?.probeResults === "object" && boundary.probeResults
-      ? boundary.probeResults
+  const stateRecoveryChecks =
+    typeof boundary?.boundaryEvidence === "object" && boundary.boundaryEvidence
+      ? boundary.boundaryEvidence
       : {};
   const recoveredDirectRowDefinitionPayload =
     typeof boundary?.recoveredDirectRowDefinitionPayload === "object" &&
@@ -420,19 +420,17 @@ export function getShardSaveBoundarySummary(boundary) {
       : {};
   return {
     hasSeparationBoundary:
-      probeResults.metadataNeighborhoodHasSaveTerms === false &&
-      probeResults.level0HasSaveTerms === false &&
-      probeResults.ownerShellWithSaveOverlapCount === 0 &&
-      probeResults.directShardPlayerProfileContext === false &&
+      stateRecoveryChecks.metadataNeighborhoodHasSaveTerms === false &&
+      stateRecoveryChecks.level0HasSaveTerms === false &&
+      stateRecoveryChecks.ownerShellWithSaveOverlapCount === 0 &&
+      stateRecoveryChecks.directShardPlayerProfileContext === false &&
       saveFamilyTermsChecked.includes("PlayerProfileData") &&
       saveFamilyTermsChecked.includes("CloudSavePlayerProfile"),
-    hasDirectRowDefinitionPayload: probeResults.directSerializedRowDefinitionRecovered === true,
-    hasRuntimeOwnedStateShell: probeResults.runtimeOwnedStateShellRecovered === true,
-    hasTraceOwnedStateTarget: probeResults.traceRegistryHasOwnedStateTarget === true,
-    hasTraceOwnedStatePopulationBridge:
-      probeResults.traceWorkflowHasOwnedStatePopulationBridge === true,
-    traceOwnedStateOutcomeKind:
-      probeResults.traceOwnedStateOutcomeKind || "non-local-injection-seam",
+    hasDirectRowDefinitionPayload: stateRecoveryChecks.directSerializedRowDefinitionRecovered === true,
+    hasRuntimeOwnedStateShell: stateRecoveryChecks.runtimeOwnedStateShellRecovered === true,
+    hasOwnedStateTarget: stateRecoveryChecks.ownedStateTargetRecovered === true,
+    hasOwnedStatePopulationBridge: stateRecoveryChecks.ownedStatePopulationBridgeRecovered === true,
+    ownedStateOutcomeKind: stateRecoveryChecks.ownedStateOutcomeKind || "non-local-injection-seam",
     ownerAnchor: "ShardMining / ShardUpgradeInfo",
     saveAnchor: "PlayerProfileData",
     cloudSaveAnchor: "CloudSavePlayerProfile",
@@ -440,11 +438,11 @@ export function getShardSaveBoundarySummary(boundary) {
     runtimeShellAnchor: recoveredDeclaringRowModel.ownerType
       ? `${recoveredDeclaringRowModel.ownerType}.upgradeInfoList`
       : "ShardMining.upgradeInfoList",
-    traceOwnedStateLabel:
-      probeResults.traceWorkflowHasOwnedStatePopulationBridge === true
-        ? "Trace-owned-state population bridge recovered"
-        : probeResults.traceOwnedStateOutcomeKind === "deeper-wrapper-handoff"
-          ? "Trace does not recover a local bridge, but it does preserve a deeper wrapper handoff for owned state"
+    ownedStateStatusLabel:
+      stateRecoveryChecks.ownedStatePopulationBridgeRecovered === true
+        ? "Owned-state population bridge recovered"
+        : stateRecoveryChecks.ownedStateOutcomeKind === "deeper-wrapper-handoff"
+          ? "The current evidence does not recover a local bridge, but it does preserve a deeper wrapper handoff for owned state"
           : "Trace rules out a local upgradeInfoList bridge and still cannot name a deeper wrapper handoff; owned state stays at a non-local injection seam",
     overlapLabel: "zero direct overlap",
     ownerTermCount: ownerShellTermsChecked.length

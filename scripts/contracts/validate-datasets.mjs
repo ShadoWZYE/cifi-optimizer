@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import {
+  normalizeMultiverseMarketSaveBoundary,
+  normalizeShardMilestoneHandoffBoundary,
+  normalizeShardMilestoneSaveOwnerCandidates,
+  normalizeShardSaveBoundary,
+  normalizeTokenShopSaveBoundary
+} from "../../support/boundary-contract-normalizers.js";
 
 const REQUIRED_PROBE_DOC_PAIRS = [];
 
@@ -1415,6 +1422,7 @@ function validateShardMilestoneRowAlignmentBoundary(boundary) {
 }
 
 function validateShardSaveBoundary(boundary) {
+  boundary = normalizeShardSaveBoundary(boundary);
   expectNonEmptyString(boundary.dataset, "shard save boundary dataset id must be present");
   expectNonEmptyString(boundary.generatedAt, "shard save boundary generatedAt must be present");
   expectRecord(boundary.sources, "shard save boundary sources must be an object");
@@ -1430,7 +1438,7 @@ function validateShardSaveBoundary(boundary) {
     "sceneMonoBehaviourProbe",
     "unityTraceTargetRegistry",
     "traceSystemUnit",
-    "ownedStateTraceRun",
+    "ownedStateTargetBundle",
     "globalMetadata",
     "level0"
   ].forEach((field) => {
@@ -1447,7 +1455,10 @@ function validateShardSaveBoundary(boundary) {
     boundary.saveFamilyTermsChecked,
     "shard save boundary saveFamilyTermsChecked must be an array"
   );
-  expectRecord(boundary.probeResults, "shard save boundary probeResults must be an object");
+  expectRecord(
+    boundary.boundaryEvidence,
+    "shard save boundary boundaryEvidence must be an object"
+  );
   expectRecord(
     boundary.recoveredDeclaringRowModel,
     "shard save boundary recoveredDeclaringRowModel must be an object"
@@ -1493,62 +1504,62 @@ function validateShardSaveBoundary(boundary) {
     );
   });
   assert.equal(
-    boundary.probeResults.metadataNeighborhoodHasSaveTerms,
+    boundary.boundaryEvidence.metadataNeighborhoodHasSaveTerms,
     false,
     "shard save boundary metadataNeighborhoodHasSaveTerms drifted"
   );
   assert.equal(
-    boundary.probeResults.level0HasSaveTerms,
+    boundary.boundaryEvidence.level0HasSaveTerms,
     false,
     "shard save boundary level0HasSaveTerms drifted"
   );
   assert.equal(
-    boundary.probeResults.ownerShellWithSaveOverlapCount,
+    boundary.boundaryEvidence.ownerShellWithSaveOverlapCount,
     0,
     "shard save boundary ownerShellWithSaveOverlapCount drifted"
   );
   assert.equal(
-    boundary.probeResults.directShardPlayerProfileContext,
+    boundary.boundaryEvidence.directShardPlayerProfileContext,
     false,
     "shard save boundary directShardPlayerProfileContext drifted"
   );
   assert.equal(
-    boundary.probeResults.declaringRowModelRecovered,
+    boundary.boundaryEvidence.declaringRowModelRecovered,
     true,
     "shard save boundary declaringRowModelRecovered drifted"
   );
   assert.equal(
-    boundary.probeResults.directSerializedRowDefinitionRecovered,
+    boundary.boundaryEvidence.directSerializedRowDefinitionRecovered,
     true,
     "shard save boundary directSerializedRowDefinitionRecovered drifted"
   );
   assert.equal(
-    boundary.probeResults.runtimeOwnedStateShellRecovered,
+    boundary.boundaryEvidence.runtimeOwnedStateShellRecovered,
     true,
     "shard save boundary runtimeOwnedStateShellRecovered drifted"
   );
   assert.equal(
-    boundary.probeResults.traceRegistryHasOwnedStateTarget,
+    boundary.boundaryEvidence.ownedStateTargetRecovered,
     true,
-    "shard save boundary traceRegistryHasOwnedStateTarget drifted"
+    "shard save boundary ownedStateTargetRecovered drifted"
   );
   assert.equal(
-    boundary.probeResults.traceWorkflowHasOwnedStatePopulationBridge,
+    boundary.boundaryEvidence.ownedStatePopulationBridgeRecovered,
     false,
-    "shard save boundary traceWorkflowHasOwnedStatePopulationBridge drifted"
+    "shard save boundary ownedStatePopulationBridgeRecovered drifted"
   );
   assert.equal(
-    boundary.probeResults.traceOwnedStateOutcomeKind,
+    boundary.boundaryEvidence.ownedStateOutcomeKind,
     "non-local-injection-seam",
-    "shard save boundary traceOwnedStateOutcomeKind drifted"
+    "shard save boundary ownedStateOutcomeKind drifted"
   );
   assert.equal(
-    boundary.probeResults.runtimePopulationLocalProducerRecovered,
+    boundary.boundaryEvidence.runtimePopulationLocalProducerRecovered,
     false,
     "shard save boundary runtimePopulationLocalProducerRecovered drifted"
   );
   assert.equal(
-    boundary.probeResults.saveSideOwnerRecovered,
+    boundary.boundaryEvidence.saveSideOwnerRecovered,
     false,
     "shard save boundary saveSideOwnerRecovered drifted"
   );
@@ -1603,6 +1614,7 @@ function validateShardSaveBoundary(boundary) {
 }
 
 function validateShardMilestoneSaveOwnerCandidates(candidates) {
+  candidates = normalizeShardMilestoneSaveOwnerCandidates(candidates);
   expectNonEmptyString(
     candidates.dataset,
     "shard milestone save-owner candidates dataset id must be present"
@@ -1620,6 +1632,9 @@ function validateShardMilestoneSaveOwnerCandidates(candidates) {
     "handoffBoundary",
     "ownerFamilyBoundary",
     "payloadBoundary",
+    "unityTraceTargetRegistry",
+    "traceSystemUnit",
+    "ownedStateTargetBundle",
     "typeMetadataProbe",
     "extractionCandidateFamilies",
     "globalMetadata",
@@ -1754,9 +1769,9 @@ function validateShardMilestoneSaveOwnerCandidates(candidates) {
     "shard milestone save-owner candidates directSerializedRowDefinitionRecovered drifted"
   );
   assert.equal(
-    candidates.checkedOverlapStatistics.traceWorkflowHasOwnedStatePopulationBridge,
+    candidates.checkedOverlapStatistics.ownedStatePopulationBridgeRecovered,
     false,
-    "shard milestone save-owner candidates traceWorkflowHasOwnedStatePopulationBridge drifted"
+    "shard milestone save-owner candidates ownedStatePopulationBridgeRecovered drifted"
   );
   assert.equal(
     candidates.checkedOverlapStatistics.remainingSaveOwnerCandidateCount,
@@ -4968,6 +4983,7 @@ function validateShardTypeMetadataProbe(probe) {
 }
 
 function validateShardMilestoneHandoffBoundary(boundary) {
+  boundary = normalizeShardMilestoneHandoffBoundary(boundary);
   expectNonEmptyString(
     boundary.dataset,
     "shard milestone handoff boundary dataset id must be present"
@@ -4985,6 +5001,9 @@ function validateShardMilestoneHandoffBoundary(boundary) {
     "rowAlignmentBoundary",
     "typeMetadataProbe",
     "sceneMonoBehaviourProbe",
+    "unityTraceTargetRegistry",
+    "traceSystemUnit",
+    "ownedStateTargetBundle",
     "globalMetadata"
   ].forEach((field) => {
     expectNonEmptyString(
@@ -7393,6 +7412,7 @@ function validateTokenShopOwnerShell(shell) {
 }
 
 function validateTokenShopSaveBoundary(boundary) {
+  boundary = normalizeTokenShopSaveBoundary(boundary);
   expectNonEmptyString(
     boundary.generatedAt,
     "token shop save boundary generatedAt must be present"
@@ -7412,7 +7432,10 @@ function validateTokenShopSaveBoundary(boundary) {
     boundary.saveFamilyTermsChecked,
     "token shop save boundary saveFamilyTermsChecked must be an array"
   );
-  expectRecord(boundary.probeResults, "token shop save boundary probeResults must be an object");
+  expectRecord(
+    boundary.boundaryEvidence,
+    "token shop save boundary boundaryEvidence must be an object"
+  );
   expectArray(
     boundary.currentBoundary,
     "token shop save boundary currentBoundary must be an array"
@@ -7438,22 +7461,22 @@ function validateTokenShopSaveBoundary(boundary) {
     );
   });
   assert.equal(
-    boundary.probeResults.metadataHasSaveTerms,
+    boundary.boundaryEvidence.metadataHasSaveTerms,
     true,
     "token shop save boundary metadataHasSaveTerms drifted"
   );
   assert.equal(
-    boundary.probeResults.level0HasSaveTerms,
+    boundary.boundaryEvidence.level0HasSaveTerms,
     false,
     "token shop save boundary level0HasSaveTerms drifted"
   );
   assert.equal(
-    boundary.probeResults.ownerShellWithSaveOverlapCount,
+    boundary.boundaryEvidence.ownerShellWithSaveOverlapCount,
     0,
     "token shop save boundary overlap count drifted"
   );
   assert.equal(
-    boundary.probeResults.directTokenShopPlayerProfileContext,
+    boundary.boundaryEvidence.directTokenShopPlayerProfileContext,
     false,
     "token shop save boundary directTokenShopPlayerProfileContext drifted"
   );
@@ -9372,12 +9395,12 @@ function validateUnityTraceBundle(bundle) {
   assert.equal(bundle.dataset, "unity-trace-bundle", "unity trace bundle dataset id drifted");
   assert.equal(
     bundle.traceWorkflow.command,
-    "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--family <family-id>] [--query <query>] [--anchor <anchor>] [--extended-search <0|1|2>]",
+    "node scripts/unity/run_extract.mjs trace [--target <target-id>] [--family <family-id>] [--query <query>] [--anchor <anchor>] [--extended-search <0|1|2>]",
     "unity trace bundle command drifted"
   );
   assert.equal(
     bundle.traceWorkflow.plannerExample,
-    "node scripts/unity/run_probe.mjs trace --family <family-id> --query <query> --anchor <anchor> --extended-search <0|1|2>",
+    "node scripts/unity/run_extract.mjs trace --family <family-id> --query <query> --anchor <anchor> --extended-search <0|1|2>",
     "unity trace bundle planner example drifted"
   );
   assert.equal(
@@ -9575,6 +9598,7 @@ function validateUnityTraceTargetRegistry(registry) {
 }
 
 function validateMultiverseMarketSaveBoundary(boundary) {
+  boundary = normalizeMultiverseMarketSaveBoundary(boundary);
   expectNonEmptyString(
     boundary.generatedAt,
     "multiverse market save boundary generatedAt must be present"
@@ -9595,8 +9619,8 @@ function validateMultiverseMarketSaveBoundary(boundary) {
     "multiverse market save boundary saveFamilyTermsChecked must be an array"
   );
   expectRecord(
-    boundary.probeResults,
-    "multiverse market save boundary probeResults must be an object"
+    boundary.boundaryEvidence,
+    "multiverse market save boundary boundaryEvidence must be an object"
   );
   expectArray(
     boundary.currentBoundary,
@@ -9623,29 +9647,29 @@ function validateMultiverseMarketSaveBoundary(boundary) {
     );
   });
   assert.equal(
-    boundary.probeResults.actionShellWithSaveOverlapCount,
+    boundary.boundaryEvidence.actionShellWithSaveOverlapCount,
     0,
     "multiverse market save boundary overlap count drifted"
   );
   assert.equal(
-    boundary.probeResults.metadataNeighborhoodHasActionTerms,
+    boundary.boundaryEvidence.metadataNeighborhoodHasActionTerms,
     true,
     "multiverse market save boundary metadataNeighborhoodHasActionTerms drifted"
   );
   assert.equal(
-    boundary.probeResults.metadataNeighborhoodHasSaveTerms,
+    boundary.boundaryEvidence.metadataNeighborhoodHasSaveTerms,
     true,
     "multiverse market save boundary metadataNeighborhoodHasSaveTerms drifted"
   );
   assert.equal(
-    boundary.probeResults.metadataProbeHasSaveTerms,
+    boundary.boundaryEvidence.metadataDirectCheckHasSaveTerms,
     false,
-    "multiverse market save boundary metadataProbeHasSaveTerms drifted"
+    "multiverse market save boundary metadataDirectCheckHasSaveTerms drifted"
   );
   assert.equal(
-    boundary.probeResults.level0ProbeHasSaveTerms,
+    boundary.boundaryEvidence.level0DirectCheckHasSaveTerms,
     false,
-    "multiverse market save boundary level0ProbeHasSaveTerms drifted"
+    "multiverse market save boundary level0DirectCheckHasSaveTerms drifted"
   );
   expectRecord(
     boundary.crossBoundaryTypedOwnerStatus,
@@ -11380,7 +11404,7 @@ function validateMultiverseMarketSerializedLabelSourceBoundary(
     [
       "data/system-units/multiverse-market.v1.json",
       "data/system-units/trace.v1.json",
-      "workbench/trace-runs/multiverse-market-save-owner-boundary.json"
+      "db:materialized-target-bundle:multiverse-market-save-owner-boundary"
     ],
     "multiverse market serialized label-source boundary repoLocalConsumerSearchSourcesWithoutCandidateHits drifted"
   );
@@ -13727,11 +13751,11 @@ export async function validateBundledDatasets() {
     "../../data/shard-milestone-row-alignment-boundary.v1.json"
   );
   const shardMilestoneHandoffBoundary = await readJson(
-    "../../data/shard-milestone-handoff-boundary.v1.json"
+    "../../data/shard-milestone-handoff-boundary.v2.json"
   );
-  const shardSaveBoundary = await readJson("../../data/shard-save-boundary.v1.json");
+  const shardSaveBoundary = await readJson("../../data/shard-save-boundary.v2.json");
   const shardMilestoneSaveOwnerCandidates = await readJson(
-    "../../data/shard-milestone-save-owner-candidates.v1.json"
+    "../../data/shard-milestone-save-owner-candidates.v2.json"
   );
   const shardCostScreenshotCalibration = shardsUnit.models.cost.screenshotCalibration.data;
   const shardCostListPathProbe = shardsUnit.support.cost.listPathProbe.data;
@@ -13774,13 +13798,13 @@ export async function validateBundledDatasets() {
     "../../data/multiverse-market-owner-family.json"
   );
   const tokenShopOwnerShell = await readJson("../../data/token-shop-owner-shell.json");
-  const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.json");
+  const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.v2.json");
   const tokenShopRowLevelOwner = tokenShopUnit.boundaries.rows.rowLevelOwner.data;
   const tokenShopRowRemapBoundary = tokenShopUnit.boundaries.rows.remap.data;
   const tokenShopLateAtuBoundary = await readJson("../../data/token-shop-late-atu-boundary.json");
   const unityTraceTargetRegistry = await readJson("../../data/unity-trace-target-registry.json");
   const multiverseMarketSaveBoundary = await readJson(
-    "../../data/multiverse-market-save-boundary.json"
+    "../../data/multiverse-market-save-boundary.v2.json"
   );
   const multiverseMarketMarketMemberBoundary = await readJson(
     "../../data/multiverse-market-market-member-boundary.json"

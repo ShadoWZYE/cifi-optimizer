@@ -259,7 +259,7 @@ compatibility = {
 
 ### Extended Probe Results (2026-04-15)
 
-Ran `token_shop_title_discovery_probe.py` targeting specific path_ids:
+Historical note: this analysis originally used the now-removed `token_shop_title_discovery_probe.py` targeted by path ids:
 
 - **Path ID references found**: 0 (no method or text table references to path_ids 15839, 15804, etc.)
 - **Title methods found**: 0 (no `Set*TokenBoostTitle` style methods in metadata)
@@ -278,7 +278,7 @@ Analyzed raw level0 binary to trace shell-to-title connections:
 
 ### Complete Title Remap (VERIFIED 2026-04-15)
 
-All 28 ATU rows verified via binary trace + UABEA probe:
+All 28 ATU rows verified via binary trace + UABEA extract report:
 
 | ATU   | Path ID | Tier | Player-Facing Title               |
 | ----- | ------- | ---- | --------------------------------- |
@@ -365,4 +365,4 @@ All 28 ATU rows verified via binary trace + UABEA probe:
 - token-shop-row-level-owner.json - ATU family save location
 - token-shop-row-remap-boundary.json - Current remap blockers
 - game-data.snapshot.v1.json - Research track status
-- unity-probe-report.json - Prefab and text asset extraction
+- unity-apk-extract-report.json - Prefab and text asset extraction

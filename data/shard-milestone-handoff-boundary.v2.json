@@ -1,0 +1,94 @@
+{
+    "dataset":  "shard-milestone-handoff-boundary.v2",
+    "generatedAt":  "2026-04-15",
+    "sources":  {
+                    "shardMiningMetadataNeighborhood":  "data/shardmining-metadata-neighborhood.v1.json",
+                    "shardMetadataNeighborhood":  "data/shard-metadata-neighborhood.v1.json",
+                    "ownerFamilyBoundary":  "data/shard-owner-family-boundary.v1.json",
+                    "rowShellBoundary":  "data/shard-milestone-row-shell-boundary.v1.json",
+                    "rowAlignmentBoundary":  "data/shard-milestone-row-alignment-boundary.v1.json",
+                    "typeMetadataProbe":  "data/shard-type-metadata-probe.v1.json",
+                    "sceneMonoBehaviourProbe":  "data/shard-scene-monobehaviour-probe.v1.json",
+                    "unityTraceTargetRegistry":  "data/unity-trace-target-registry.json",
+                    "traceSystemUnit":  "data/system-units/trace.v1.json",
+                    "ownedStateTargetBundle":  "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population",
+                    "globalMetadata":  "workbench/apk/base/global-metadata.dat"
+                },
+    "shardControllerFamily":  "ShardMining, Assembly-CSharp",
+    "shardControllerRowShell":  {
+                                    "unlockHookRange":  {
+                                                            "start":  17,
+                                                            "end":  29,
+                                                            "count":  13
+                                                        },
+                                    "buyHookRange":  {
+                                                         "start":  0,
+                                                         "end":  0,
+                                                         "count":  1
+                                                     },
+                                    "textCheckerRange":  {
+                                                             "start":  0,
+                                                             "end":  12,
+                                                             "count":  13
+                                                         }
+                                },
+    "genericMilestoneLead":  {
+                                 "family":  "ConstructionMilestones, Assembly-CSharp",
+                                 "metadataPath":  "Assets\\Scripts\\Upgrades\\AcademyData\\ConstructionMilestones.cs",
+                                 "buyHookRange":  {
+                                                      "start":  1,
+                                                      "end":  57,
+                                                      "count":  57
+                                                  },
+                                 "textAndValueAnchors":  [
+                                                             "InitializeMilestones",
+                                                             "SetAllMilestoneTexts",
+                                                             "GetMilestoneDiamondValue",
+                                                             "GetMilestoneTokenValue",
+                                                             "GetClaimedMilestonesAmount"
+                                                         ]
+                             },
+    "recoveredDeclaringRowModel":  {
+                                       "ownerType":  "ShardMining",
+                                       "declaringField":  {
+                                                              "name":  "upgradeInfoList",
+                                                              "type":  "System.Collections.Generic.List`1\u003cShardMining+ShardUpgradeInfo\u003e",
+                                                              "fieldOffset":  5216
+                                                          },
+                                       "rowModelType":  {
+                                                            "fullName":  "ShardMining+ShardUpgradeInfo",
+                                                            "baseType":  "System.Object"
+                                                        },
+                                       "rowStateFields":  [
+                                                              {
+                                                                  "name":  "\u003cCost\u003ek__BackingField",
+                                                                  "type":  "BreakInfinity.BigDouble",
+                                                                  "fieldOffset":  16
+                                                              },
+                                                              {
+                                                                  "name":  "\u003cMaxLevel\u003ek__BackingField",
+                                                                  "type":  "System.Boolean",
+                                                                  "fieldOffset":  32
+                                                              },
+                                                              {
+                                                                  "name":  "\u003cIsUnlocked\u003ek__BackingField",
+                                                                  "type":  "System.Boolean",
+                                                                  "fieldOffset":  33
+                                                              }
+                                                          ]
+                                   },
+    "handoffFindings":  [
+                            "ShardMining keeps the shard-local row shell around UnlockMilestone17-29, BuyMilestone0, and Milestone0-12TextChecker.",
+                            "ConstructionMilestones keeps the dense generic numbered buy family BuyMilestone1-57 plus InitializeMilestones and SetAllMilestoneTexts.",
+                            "The direct ShardMining scene payload now also preserves the reachable SU0-29 row-definition family, so the controller-side shard family is no longer blocked on an academy-side package just to name row definitions.",
+                            "Checked type reflection now also recovers one shard-local declaring row-model tie: ShardMining.upgradeInfoList declares List\u003cShardMining+ShardUpgradeInfo\u003e with Cost, MaxLevel, and IsUnlocked row-state fields.",
+                            "ConstructionMilestones remains the nearby generic academy-side family, but it is no longer the deciding shard-owner seam because both the direct row-definition payload and the shard-local runtime row shell are already recovered on the shard side.",
+                            "The checked shard-owned-state trace now rules out a local producer that fills upgradeInfoList owned-state values and also does not recover any deeper wrapper handoff behind that shell.",
+                            "The remaining shard row-owner seam is now a trace-backed non-local injection seam behind upgradeInfoList rather than a fully unnamed controller-to-academy handoff."
+                        ],
+    "currentBoundary":  [
+                            "Treat this bundle as the current shard milestone handoff boundary between the shard-local ShardMining controller shell and the academy-side ConstructionMilestones numbered buy family, with the reachable row-definition family already recovered on direct ShardMining payload and the runtime row shell recovered on ShardMining.upgradeInfoList -\u003e ShardMining+ShardUpgradeInfo.",
+                            "Use it to keep future shard declaring-owner probes focused on the remaining player-owned row-state/save-owner seam instead of assuming the academy-side generic family is itself the recovered shard row model, a local shard trace already populates owned-state fields, or a deeper wrapper handoff is already known.",
+                            "This is a tighter shard-local blocker note, not recovered player-owned shard milestone state, not a verified row-label map, and not permission to reuse generic academy milestone numbering as shard truth."
+                        ]
+}

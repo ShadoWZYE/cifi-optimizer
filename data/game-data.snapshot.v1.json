@@ -239,8 +239,8 @@
         "data/shard-effect-text-handler-boundary.v1.json",
         "data/shard-milestone-row-shell-boundary.v1.json",
         "data/shard-milestone-row-alignment-boundary.v1.json",
-        "data/shard-milestone-handoff-boundary.v1.json",
-        "data/shard-save-boundary.v1.json",
+        "data/shard-milestone-handoff-boundary.v2.json",
+        "data/shard-save-boundary.v2.json",
         "data/shard-milestone-family-evidence.v1.json",
         "data/shard-cost-formula-model.v1.json",
         "data/shard-bonus-slot-probe.v1.json",
@@ -336,7 +336,7 @@
       ],
       "artifacts": [
         "data/multiverse-market-metadata-neighborhood.json",
-        "data/multiverse-market-save-boundary.json",
+        "data/multiverse-market-save-boundary.v2.json",
         "data/multiverse-market-market-member-boundary.json",
         "data/multiverse-market-range-boundary.json",
         "docs/systems/spend/multiverse-market-metadata-neighborhood.md"
@@ -583,7 +583,7 @@
         "docs/systems/spend/spend-system-verification.md",
         "docs/roadmap/active-grounding-boundaries.md",
         "data/token-shop-values.json",
-        "data/uabea-probe-report.json"
+        "data/uabea-extract-report.json"
       ],
       "artifacts": [
         "data/token-shop-values.json",
@@ -640,8 +640,8 @@
         "docs/systems/spend/token-shop-row-remap-verification.md",
         "data/system-units/token-shop.v1.json",
         "data/system-units/trace.v1.json",
-        "workbench/trace-runs/token-shop-family-structure.json",
-        "workbench/trace-runs/token-shop-atu3-cells-effect.json"
+        "db:materialized-target-bundle:token-shop-family-structure",
+        "db:materialized-target-bundle:token-shop-atu3-cells-effect"
       ],
       "artifacts": [
         "data/system-units/token-shop.v1.json",
@@ -703,7 +703,7 @@
         "docs/unity/unity-owner-map.md"
       ],
       "artifacts": [
-        "data/token-shop-save-boundary.json",
+        "data/token-shop-save-boundary.v2.json",
         "data/token-bank-controller-shell.json",
         "data/token-bank-formula-boundary.json",
         "data/token-bank-state-clues.json"

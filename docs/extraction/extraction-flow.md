@@ -2,12 +2,13 @@
 
 ## Purpose
 
-This repo no longer treats extraction as "run a probe, keep the probe output forever". The current
-goal is:
+This repo treats extraction as a DB-first evidence pipeline, not a single-probe report workflow.
+The current goal is:
 
 1. extract directly from grounded repo-local sources when possible
-2. keep one clean trace result per run
-3. promote only durable facts, blocker boundaries, and reusable models into `data/`
+2. persist evidence and semantic fragments into SQLite first
+3. reduce those fragments into canonical/materialized views
+4. export files only when a human explicitly wants a debug or distribution artifact
 
 ## Source order
 
@@ -40,9 +41,9 @@ That question determines:
 Use the trace runner as the front door:
 
 ```bash
-node scripts/unity/run_probe.mjs trace --family token-shop
-node scripts/unity/run_probe.mjs trace --target shard-cost-su0-structure
-node scripts/unity/run_probe.mjs trace --query "Antimatter Cores"
+node scripts/unity/run_extract.mjs trace --family token-shop
+node scripts/unity/run_extract.mjs trace --target shard-cost-su0-structure
+node scripts/unity/run_extract.mjs trace --query "Antimatter Cores"
 ```
 
 The trace now prefers direct extraction from:
@@ -50,10 +51,10 @@ The trace now prefers direct extraction from:
 - `global-metadata.dat`
 - `level0`
 - `assets`
-- the persistent Ghidra project when native behavior is needed
+- the DB-backed native extraction lane when native behavior is needed
 
 Trace state is persisted to SQLite first. Use `--export` only when you explicitly want derived
-`workbench/trace-runs/*.json` or `*.md` outputs for debugging or compatibility.
+debug artifacts under `workbench/trace-runs/` or `workbench/trace-exports/`.
 
 ### 3. Expand only when the bounded target is too shallow
 
@@ -158,7 +159,8 @@ Manual:
 
 ### 5. Classify the result
 
-After a trace or extraction pass, sort the result into one of four buckets:
+After a trace or extraction pass, classify what should become long-lived canonical state versus
+what should remain derived output:
 
 - canonical dataset
   Stable app-consumed truth
@@ -167,7 +169,7 @@ After a trace or extraction pass, sort the result into one of four buckets:
 - model or support dataset
   Reusable structured support such as a formula model
 - ephemeral run output
-  A trace run or search result that should stay in `workbench/`
+  A debug export that should stay in `workbench/`
 
 When a native trace succeeds, also classify the reconstructed bridge strength:
 
@@ -197,14 +199,16 @@ Do not promote:
 
 ## Current shape
 
-The repo is in transition:
+The repo's normal runtime path is now:
 
-- the live trace path is increasingly direct-source driven
-- older historical probe files still exist
-- the long-term target is a smaller canonical/boundary/model layer plus disposable trace runs
+1. canonical source-family resolution
+2. DB-backed extraction/evidence updates
+3. canonical reducers
+4. materialized native/trace/system/system-unit views
+5. optional export/debug rendering
 
 That means the right next step after a successful extraction is usually:
 
-1. keep the trace result ephemeral
-2. promote only the grounded subset
-3. delete or demote any probe artifact that is no longer a live input
+1. keep the evidence DB-backed
+2. promote only the grounded subset into canonical or system-unit state
+3. export a file only when a person or downstream static build actually needs one

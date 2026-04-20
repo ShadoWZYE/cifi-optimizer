@@ -56,7 +56,7 @@ metadata.
 
 Use repo probes first:
 
-- `data/uabea-probe-report.json`
+- `data/uabea-extract-report.json`
 - `data/system-units/trace.v1.json`
 - `workbench/apk/base/global-metadata.dat`
 - committed extraction outputs that already map owners, fields, or offsets

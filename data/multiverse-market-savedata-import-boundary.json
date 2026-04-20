@@ -8,7 +8,7 @@
     "actionShell": "data/multiverse-market-action-shell.json",
     "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
     "validatedRows": "data/multiverse-market-values.json",
-    "typedProbeReport": "data/uabea-probe-report.json",
+    "typedProbeReport": "data/uabea-extract-report.json",
     "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md"
   },
   "canonicalSplit": {
@@ -44,7 +44,7 @@
             "claim": "validatedBuyHooks includes BuyIS71"
           },
           {
-            "artifact": "data/uabea-probe-report.json",
+            "artifact": "data/uabea-extract-report.json",
             "claim": "SaveData exact field names include IS71Level and MultiverseMarket exact field names include IS71ID"
           }
         ]
@@ -66,7 +66,7 @@
             "claim": "validatedBuyHooks includes BuyIS72"
           },
           {
-            "artifact": "data/uabea-probe-report.json",
+            "artifact": "data/uabea-extract-report.json",
             "claim": "SaveData exact field names include IS72Level and MultiverseMarket exact field names include IS72ID"
           }
         ]
@@ -88,7 +88,7 @@
             "claim": "validatedBuyHooks includes BuyIS73"
           },
           {
-            "artifact": "data/uabea-probe-report.json",
+            "artifact": "data/uabea-extract-report.json",
             "claim": "SaveData exact field names include IS73Level and MultiverseMarket exact field names include IS73ID"
           }
         ]
@@ -110,7 +110,7 @@
             "claim": "validatedBuyHooks includes BuyIS74"
           },
           {
-            "artifact": "data/uabea-probe-report.json",
+            "artifact": "data/uabea-extract-report.json",
             "claim": "SaveData exact field names include IS74Level and MultiverseMarket exact field names include IS74ID"
           }
         ]
@@ -137,15 +137,15 @@
     },
     "evidence": [
       {
-        "artifact": "data/uabea-probe-report.json",
+        "artifact": "data/uabea-extract-report.json",
         "claim": "SaveData exact field names include IS1Level, IS24Level, IS25Level, and IS110Level"
       },
       {
-        "artifact": "data/uabea-probe-report.json",
+        "artifact": "data/uabea-extract-report.json",
         "claim": "the checked typed probe does not recover IS0Level or IS111Level"
       },
       {
-        "artifact": "data/uabea-probe-report.json",
+        "artifact": "data/uabea-extract-report.json",
         "claim": "InscryptionsDone is the next checked typed SaveData neighbor after IS110Level and remains a dual declaration on SaveData and PlayerProfileData"
       }
     ]
@@ -177,11 +177,11 @@
         "why": "This is the exact contiguous SaveData-owned IS*Level span recovered from the checked typed field table. Exact typed recovery proves IS1Level as the lower boundary, IS110Level as the upper boundary, and the absence of typed IS0Level and IS111Level, while the checked rows 71-74 overlap still anchors that wider run to validated Emporium rows so the whole span is safe to preserve as compatibility-only raw Emporium import truth without claiming canonical row identity or planner-ready semantics.",
         "evidence": [
           {
-            "artifact": "data/uabea-probe-report.json",
+            "artifact": "data/uabea-extract-report.json",
             "claim": "SaveData exact field names include IS1Level through IS110Level in one contiguous typed family"
           },
           {
-            "artifact": "data/uabea-probe-report.json",
+            "artifact": "data/uabea-extract-report.json",
             "claim": "the checked typed probe does not recover IS0Level or IS111Level and places InscryptionsDone immediately after IS110Level on SaveData"
           },
           {
@@ -262,7 +262,7 @@
         ],
         "evidence": [
           {
-            "artifact": "data/uabea-probe-report.json",
+            "artifact": "data/uabea-extract-report.json",
             "claim": "SaveData exact field names place EsotericR1Trades through EsotericR9Trades immediately after InscryptionsDone and then continue into NecrumR1Trades through NecrumR9Trades"
           },
           {
@@ -284,7 +284,7 @@
         ],
         "evidence": [
           {
-            "artifact": "data/uabea-probe-report.json",
+            "artifact": "data/uabea-extract-report.json",
             "claim": "SaveData exact field names continue from NecrumR9Trades into Mech1Unlocked, Mech1Units, Mech1Upg1Level, Mech1Upg2Level, Mech1MissionsProgress, FinalMech1MainBonus, Mech1MissionsCompleted, and Mech2Unlocked before continuing into Mech2Units"
           },
           {

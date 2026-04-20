@@ -4,7 +4,7 @@
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0",
     "probe": "tmp-token-bank-state-probe.json",
-    "uabeaProbe": "data/uabea-probe-report.json"
+    "uabeaProbe": "data/uabea-extract-report.json"
   },
   "tokenShopMethods": [
     "get_TokenBankCap",

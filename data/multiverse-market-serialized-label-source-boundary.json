@@ -4,7 +4,7 @@
   "sources": {
     "row6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
     "marketMemberBoundary": "data/multiverse-market-market-member-boundary.json",
-    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "uabeaProbeReport": "data/uabea-extract-report.json",
     "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },
@@ -89,7 +89,7 @@
       "repoLocalConsumerSearchSourcesWithoutCandidateHits": [
         "data/system-units/multiverse-market.v1.json",
         "data/system-units/trace.v1.json",
-        "workbench/trace-runs/multiverse-market-save-owner-boundary.json"
+        "db:materialized-target-bundle:multiverse-market-save-owner-boundary"
       ],
       "adjacentConsumerOrViewSymbolsRecovered": [],
       "conclusion": "The checked candidate catalog or relation field names are only recovered in the alternate UABEA field-table export; the current centralized market unit and bounded trace surfaces still do not recover a consumer path that reads those carriers back into player-facing inscription labels."

@@ -1,16 +1,16 @@
 {
   "dataset": "repo-data-framework.v1",
   "updatedAt": "2026-04-18",
-  "purpose": "Central system-level migration manifest for consolidating probe-era data into explicit canonical, boundary, model, and support views without deleting original source files first.",
+  "purpose": "Central system-level manifest for the DB-first architecture, mapping canonical data, boundaries, models, support inputs, and exported read models by system.",
   "targetState": {
-    "goal": "Make app, trace, and planner code consume centralized system units instead of individual probe files or narrow migration slices.",
+    "goal": "Make app, trace, and planner code consume DB-backed system units and materialized views instead of narrow file-shaped intermediates.",
     "principles": [
       "Centralize data by the actual in-game system it belongs to.",
       "Keep canonical, boundary, model, support, and historical-probe roles explicit inside each system unit.",
-      "Preserve old files until every live read has been moved behind a centralized system unit.",
+      "Use DB-backed canonical/materialized state as runtime truth.",
+      "Preserve old files only while they still serve as raw inputs, static exports, or deliberate reference/debug artifacts.",
       "Do not promote assumed or heuristic fields into canonical truth.",
-      "Treat probe-era files as source material until equivalent centralized projections exist.",
-      "When data is copied into a centralized unit, preserve verbose provenance and regeneration commands for transient probe-derived inputs."
+      "When data is copied into a centralized unit, preserve verbose provenance and regeneration commands for transient derived inputs."
     ]
   },
   "roles": [
@@ -36,8 +36,8 @@
     },
     {
       "id": "historical-probe",
-      "label": "Historical probe input",
-      "description": "Retained source material slated for later archival once centralized system units replace all live reads."
+      "label": "Historical reference input",
+      "description": "Retained reference/debug source material slated for later archival or isolation once DB-backed and exported replacements are sufficient."
     }
   ],
   "migrationUnits": [
@@ -82,9 +82,9 @@
           "data/shard-effect-text-handler-boundary.v1.json",
           "data/shard-milestone-row-shell-boundary.v1.json",
           "data/shard-milestone-row-alignment-boundary.v1.json",
-          "data/shard-milestone-handoff-boundary.v1.json",
-          "data/shard-save-boundary.v1.json",
-          "data/shard-milestone-save-owner-candidates.v1.json"
+          "data/shard-milestone-handoff-boundary.v2.json",
+          "data/shard-save-boundary.v2.json",
+          "data/shard-milestone-save-owner-candidates.v2.json"
         ],
         "model": [
           "data/shard-cost-formula-model.v1.json"
@@ -96,7 +96,7 @@
       },
       "notes": [
         "Shard data should be consumed as one system with internal family, owned-state, and cost slices.",
-        "The split shard migration files were useful as a transition step but should not be the long-term shared data shape."
+        "The split shard files were useful as a transition step but should not be the long-term shared runtime shape."
       ]
     },
     {
@@ -133,7 +133,7 @@
       },
       "notes": [
         "Player-state is the shared app boundary and should become a first-class centralized system unit.",
-        "The current repo still expresses most player-state structure in code and docs; the alias audit is the first committed data-side projection of that boundary."
+        "The current repo still expresses some player-state structure in code and docs; the alias audit is the first committed data-side projection of that boundary."
       ]
     },
     {
@@ -165,7 +165,7 @@
       "inputs": {
         "canonical": [],
         "boundary": [
-          "data/token-shop-save-boundary.json",
+          "data/token-shop-save-boundary.v2.json",
           "data/token-shop-row-remap-boundary.json",
           "data/token-shop-late-atu-boundary.json",
           "data/token-bank-formula-boundary.json"
@@ -186,7 +186,7 @@
       },
       "notes": [
         "TokenShop should converge into one system unit with row, token-bank, and Daily Tokenium projections instead of many shell or clue bundles.",
-        "ATU3 effect-chain remains the canonical trace lane for the system."
+        "ATU3 effect-chain remains a useful trace lane for the system, but the runtime truth path is now DB-backed target bundles and semantic views."
       ]
     },
     {
@@ -214,7 +214,7 @@
       "inputs": {
         "canonical": [],
         "boundary": [
-          "data/multiverse-market-save-boundary.json",
+          "data/multiverse-market-save-boundary.v2.json",
           "data/multiverse-market-market-member-boundary.json",
           "data/multiverse-market-savedata-import-boundary.json",
           "data/multiverse-market-row69-74-identity-source-boundary.json",
@@ -263,25 +263,26 @@
       ],
       "plannerConsumers": [
         "scripts/unity/unity_trace_bundle.py",
-        "scripts/unity/run_probe.mjs"
+        "scripts/unity/run_extract.mjs"
       ],
       "inputs": {
         "canonical": [],
         "boundary": [],
         "model": [],
-          "support": [
-            "data/unity-trace-target-registry.json",
-            "workbench/trace-runs/token-shop-family-structure.json",
-            "workbench/trace-runs/token-shop-atu3-cells-effect.json",
-            "workbench/trace-runs/shard-cost-su0-structure.json",
-            "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
-            "workbench/trace-runs/multiverse-market-save-owner-boundary.json"
-          ],
+        "support": [
+          "data/unity-trace-target-registry.json",
+          "db:materialized-target-bundle:token-shop-family-structure",
+          "db:materialized-target-bundle:token-shop-atu3-cells-effect",
+          "db:materialized-target-bundle:shard-cost-su0-structure",
+          "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population",
+          "db:materialized-target-bundle:multiverse-market-save-owner-boundary",
+          "db:materialized-system-unit:trace:v1"
+        ],
         "historicalProbe": []
       },
       "notes": [
         "Trace stays the orchestration layer for extraction and bounded follow-up.",
-        "System units are the promotion targets behind trace rather than a replacement for trace."
+        "Trace runtime truth now lives in DB-backed native, semantic, and target-bundle materializations rather than persistent trace-run files."
       ]
     }
   ]

@@ -150,21 +150,21 @@ Validation command: `npm run verify:data`
 - Label: Shard milestone handoff boundary
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/shard-milestone-handoff-boundary.v1.json`
+  - `data/shard-milestone-handoff-boundary.v2.json`
 
 ### `shard-save-boundary`
 
 - Label: Shard save boundary
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/shard-save-boundary.v1.json`
+  - `data/shard-save-boundary.v2.json`
 
 ### `shard-milestone-save-owner-candidates`
 
 - Label: Shard milestone save-owner candidates
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/shard-milestone-save-owner-candidates.v1.json`
+  - `data/shard-milestone-save-owner-candidates.v2.json`
 
 ### `shard-cost-formula-model`
 
@@ -311,7 +311,7 @@ Validation command: `npm run verify:data`
 - Label: Token shop save boundary
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/token-shop-save-boundary.json`
+  - `data/token-shop-save-boundary.v2.json`
 
 ### `token-shop-late-atu-boundary`
 
@@ -332,7 +332,7 @@ Validation command: `npm run verify:data`
 - Label: Multiverse market save boundary
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/multiverse-market-save-boundary.json`
+  - `data/multiverse-market-save-boundary.v2.json`
 
 ### `multiverse-market-market-member-boundary`
 

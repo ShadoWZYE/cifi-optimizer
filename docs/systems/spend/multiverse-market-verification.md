@@ -13,7 +13,7 @@ It exists because the repo had already proven the `MultiverseMarket` owner and l
 - Repo-local owner evidence:
   - [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
   - [`data/multiverse-market-values.json`](data/multiverse-market-values.json)
-  - [`data/lm244-targeted-probe.json`](data/lm244-targeted-probe.json)
+  - [`data/multiverse-market-text-provenance-path-boundary.json`](data/multiverse-market-text-provenance-path-boundary.json)
   - [`docs/systems/spend/multiverse-market-state-verification.md`](docs/multiverse-market-state-verification.md)
   - [`docs/unity/unity-audit-playbook.md`](docs/unity-audit-playbook.md)
 

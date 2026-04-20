@@ -2,7 +2,7 @@
   "dataset": "shard-milestone-row-model-boundary.v1",
   "generatedAt": "2026-04-04",
   "sources": {
-    "ownerFamilyProbe": "data/shard-owner-family-probe.v1.json",
+    "ownerFamilyProbe": "data/shard-owner-family-boundary.v1.json#embedded-owner-probe-summary",
     "rowShellBoundary": "data/shard-milestone-row-shell-boundary.v1.json",
     "rowAlignmentBoundary": "data/shard-milestone-row-alignment-boundary.v1.json",
     "costModelBoundary": "data/shard-cost-model-boundary.v1.json",

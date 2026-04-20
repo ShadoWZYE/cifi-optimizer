@@ -138,16 +138,16 @@ const shardMilestoneRowAlignmentBoundary = JSON.parse(
 );
 const shardMilestoneHandoffBoundary = JSON.parse(
   await readFile(
-    new URL("../data/shard-milestone-handoff-boundary.v1.json", import.meta.url),
+    new URL("../data/shard-milestone-handoff-boundary.v2.json", import.meta.url),
     "utf8"
   )
 );
 const shardSaveBoundary = JSON.parse(
-  await readFile(new URL("../data/shard-save-boundary.v1.json", import.meta.url), "utf8")
+  await readFile(new URL("../data/shard-save-boundary.v2.json", import.meta.url), "utf8")
 );
 const shardMilestoneSaveOwnerCandidates = JSON.parse(
   await readFile(
-    new URL("../data/shard-milestone-save-owner-candidates.v1.json", import.meta.url),
+    new URL("../data/shard-milestone-save-owner-candidates.v2.json", import.meta.url),
     "utf8"
   )
 );
@@ -225,7 +225,7 @@ const tokenShopOwnerShellData = JSON.parse(
   await readFile(new URL("../data/token-shop-owner-shell.json", import.meta.url), "utf8")
 );
 const tokenShopSaveBoundaryData = JSON.parse(
-  await readFile(new URL("../data/token-shop-save-boundary.json", import.meta.url), "utf8")
+  await readFile(new URL("../data/token-shop-save-boundary.v2.json", import.meta.url), "utf8")
 );
 const tokenShopRowLevelOwnerData = generatedTokenShopSystemUnit.boundaries.rows.rowLevelOwner.data;
 const tokenShopRowRemapBoundaryData = generatedTokenShopSystemUnit.boundaries.rows.remap.data;
@@ -236,7 +236,10 @@ const unityTraceTargetRegistryData = JSON.parse(
   await readFile(new URL("../data/unity-trace-target-registry.json", import.meta.url), "utf8")
 );
 const multiverseMarketSaveBoundaryData = JSON.parse(
-  await readFile(new URL("../data/multiverse-market-save-boundary.json", import.meta.url), "utf8")
+  await readFile(
+    new URL("../data/multiverse-market-save-boundary.v2.json", import.meta.url),
+    "utf8"
+  )
 );
 const multiverseMarketMarketMemberBoundaryData = JSON.parse(
   await readFile(
@@ -376,15 +379,6 @@ const shardOwnerFamilyDoc = await readFile(
   new URL("../docs/systems/shards/shard-owner-family-verification.md", import.meta.url),
   "utf8"
 );
-const shardOwnerFamilyProbe = JSON.parse(
-  await readFile(new URL("../data/shard-owner-family-probe.v1.json", import.meta.url), "utf8")
-);
-const shardVsConstructionOwnerProbe = JSON.parse(
-  await readFile(
-    new URL("../data/shard-vs-construction-owner-probe.v1.json", import.meta.url),
-    "utf8"
-  )
-);
 const shardMetadataNeighborhoodDoc = await readFile(
   new URL("../docs/systems/shards/shard-metadata-neighborhood.md", import.meta.url),
   "utf8"
@@ -465,14 +459,6 @@ const tokenShopRowRemapVerificationDoc = await readFile(
   new URL("../docs/systems/spend/token-shop-row-remap-verification.md", import.meta.url),
   "utf8"
 );
-const shardOwnedStateTraceDoc = await readFile(
-  new URL("../workbench/trace-runs/shard-owned-state-upgradeinfolist-population.md", import.meta.url),
-  "utf8"
-);
-const tokenShopAtu3EffectTraceDoc = await readFile(
-  new URL("../workbench/trace-runs/token-shop-atu3-cells-effect.md", import.meta.url),
-  "utf8"
-);
 const multiverseMarketDoc = await readFile(
   new URL("../docs/systems/spend/multiverse-market-values.md", import.meta.url),
   "utf8"
@@ -522,10 +508,11 @@ const unityAuditPlaybook = await readFile(
   "utf8"
 );
 const devServer = await readFile(new URL("../scripts/dev-server.mjs", import.meta.url), "utf8");
-const probeRunner = await readFile(
-  new URL("../scripts/unity/run_probe.mjs", import.meta.url),
+const extractRunner = await readFile(
+  new URL("../scripts/unity/run_extract.mjs", import.meta.url),
   "utf8"
 );
+const probeRunner = await readFile(new URL("../scripts/unity/run_probe.mjs", import.meta.url), "utf8");
 const launcherVbs = await readFile(new URL("../launch-cifi.vbs", import.meta.url), "utf8");
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const repoRoot = fileURLToPath(new URL("../", import.meta.url));
@@ -552,6 +539,7 @@ const normalizedRecommendationFeedSupportModule = collapseWhitespace(
 const normalizedShardEvidenceSupportModule = collapseWhitespace(shardEvidenceSupportModule);
 const normalizedShipPlannerSupportModule = collapseWhitespace(shipPlannerSupportModule);
 const normalizedSpendBoundarySummaryJs = collapseWhitespace(spendBoundarySummaryJs);
+const normalizedExtractRunner = collapseWhitespace(extractRunner);
 const normalizedProbeRunner = collapseWhitespace(probeRunner);
 const bootstrapDatasetBindings = getBootstrapDatasetBindings(appJs);
 const hardAssert = {
@@ -1723,7 +1711,7 @@ assert.ok(
     /Do not infer that UnlockMilestone17 already maps/.test(line)
   )
 );
-assert.equal(shardMilestoneHandoffBoundary.dataset, "shard-milestone-handoff-boundary.v1");
+assert.equal(shardMilestoneHandoffBoundary.dataset, "shard-milestone-handoff-boundary.v2");
 assert.equal(shardMilestoneHandoffBoundary.shardControllerFamily, "ShardMining, Assembly-CSharp");
 assert.deepEqual(shardMilestoneHandoffBoundary.shardControllerRowShell.unlockHookRange, {
   start: 17,
@@ -1793,17 +1781,17 @@ assert.ok(
     /not recovered player-owned shard milestone state/.test(line)
   )
 );
-assert.equal(shardSaveBoundary.dataset, "shard-save-boundary.v1");
+assert.equal(shardSaveBoundary.dataset, "shard-save-boundary.v2");
 assert.ok(shardSaveBoundary.ownerShellTermsChecked.includes("ShardMining"));
 assert.ok(shardSaveBoundary.ownerShellTermsChecked.includes("UpdateShardCostList"));
 assert.ok(shardSaveBoundary.saveFamilyTermsChecked.includes("PlayerProfileData"));
 assert.ok(shardSaveBoundary.saveFamilyTermsChecked.includes("CloudSavePlayerProfile"));
-assert.equal(shardSaveBoundary.probeResults.metadataNeighborhoodHasSaveTerms, false);
-assert.equal(shardSaveBoundary.probeResults.level0HasSaveTerms, false);
-assert.equal(shardSaveBoundary.probeResults.ownerShellWithSaveOverlapCount, 0);
-assert.equal(shardSaveBoundary.probeResults.directShardPlayerProfileContext, false);
-assert.equal(shardSaveBoundary.probeResults.declaringRowModelRecovered, true);
-assert.equal(shardSaveBoundary.probeResults.saveSideOwnerRecovered, false);
+assert.equal(shardSaveBoundary.boundaryEvidence.metadataNeighborhoodHasSaveTerms, false);
+assert.equal(shardSaveBoundary.boundaryEvidence.level0HasSaveTerms, false);
+assert.equal(shardSaveBoundary.boundaryEvidence.ownerShellWithSaveOverlapCount, 0);
+assert.equal(shardSaveBoundary.boundaryEvidence.directShardPlayerProfileContext, false);
+assert.equal(shardSaveBoundary.boundaryEvidence.declaringRowModelRecovered, true);
+assert.equal(shardSaveBoundary.boundaryEvidence.saveSideOwnerRecovered, false);
 assert.equal(shardSaveBoundary.recoveredDeclaringRowModel.ownerType, "ShardMining");
 assert.equal(shardSaveBoundary.recoveredDeclaringRowModel.declaringField.name, "upgradeInfoList");
 assert.equal(
@@ -1816,7 +1804,7 @@ assert.deepEqual(
 );
 assert.ok(shardSaveBoundary.currentBoundary.some((line) => /zero checked overlap/.test(line)));
 assert.ok(shardSaveBoundary.currentBoundary.some((line) => /upgradeInfoList/.test(line)));
-assert.equal(shardMilestoneSaveOwnerCandidates.dataset, "shard-milestone-save-owner-candidates.v1");
+assert.equal(shardMilestoneSaveOwnerCandidates.dataset, "shard-milestone-save-owner-candidates.v2");
 assert.equal(
   shardMilestoneSaveOwnerCandidates.recoveredDeclaringRowModel.id,
   "shardmining-upgradeinfolist-row-model"
@@ -2894,13 +2882,14 @@ assert.equal(tokenShopOwnerShellData.sourcePresence.metadata.ClaimBankedTokens, 
 assert.equal(tokenShopOwnerShellData.sourcePresence.level0.TokenShop, 1);
 assert.equal(tokenShopOwnerShellData.sourcePresence.level0.ClaimBankedTokens, 1);
 assert.ok(tokenShopSaveBoundaryData.ownerShellTermsChecked.includes("TokenShop"));
+assert.equal(tokenShopSaveBoundaryData.dataset, "token-shop-save-boundary.v2");
 assert.ok(tokenShopSaveBoundaryData.ownerShellTermsChecked.includes("ClaimBankedTokens"));
 assert.ok(tokenShopSaveBoundaryData.saveFamilyTermsChecked.includes("PlayerProfileData"));
 assert.ok(tokenShopSaveBoundaryData.saveFamilyTermsChecked.includes("CloudSavePlayerProfile"));
-assert.equal(tokenShopSaveBoundaryData.probeResults.metadataHasSaveTerms, true);
-assert.equal(tokenShopSaveBoundaryData.probeResults.level0HasSaveTerms, false);
-assert.equal(tokenShopSaveBoundaryData.probeResults.ownerShellWithSaveOverlapCount, 0);
-assert.equal(tokenShopSaveBoundaryData.probeResults.directTokenShopPlayerProfileContext, false);
+assert.equal(tokenShopSaveBoundaryData.boundaryEvidence.metadataHasSaveTerms, true);
+assert.equal(tokenShopSaveBoundaryData.boundaryEvidence.level0HasSaveTerms, false);
+assert.equal(tokenShopSaveBoundaryData.boundaryEvidence.ownerShellWithSaveOverlapCount, 0);
+assert.equal(tokenShopSaveBoundaryData.boundaryEvidence.directTokenShopPlayerProfileContext, false);
 assert.equal(tokenShopRowLevelOwnerData.dataset, "token-shop-row-level-owner");
 assert.equal(tokenShopRowLevelOwnerData.typedSaveDataFieldTableRecovery.fieldOwner, "SaveData");
 assert.equal(tokenShopRowLevelOwnerData.typedSaveDataFieldTableRecovery.fieldCount, 4461);
@@ -3905,14 +3894,15 @@ assert.ok(multiverseMarketSaveBoundaryData.saveFamilyTermsChecked.includes("Play
 assert.ok(
   multiverseMarketSaveBoundaryData.saveFamilyTermsChecked.includes("CloudSavePlayerProfile")
 );
-assert.equal(multiverseMarketSaveBoundaryData.probeResults.actionShellWithSaveOverlapCount, 0);
+assert.equal(multiverseMarketSaveBoundaryData.dataset, "multiverse-market-save-boundary.v2");
+assert.equal(multiverseMarketSaveBoundaryData.boundaryEvidence.actionShellWithSaveOverlapCount, 0);
 assert.equal(
-  multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasActionTerms,
+  multiverseMarketSaveBoundaryData.boundaryEvidence.metadataNeighborhoodHasActionTerms,
   true
 );
-assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasSaveTerms, true);
-assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataProbeHasSaveTerms, false);
-assert.equal(multiverseMarketSaveBoundaryData.probeResults.level0ProbeHasSaveTerms, false);
+assert.equal(multiverseMarketSaveBoundaryData.boundaryEvidence.metadataNeighborhoodHasSaveTerms, true);
+assert.equal(multiverseMarketSaveBoundaryData.boundaryEvidence.metadataDirectCheckHasSaveTerms, false);
+assert.equal(multiverseMarketSaveBoundaryData.boundaryEvidence.level0DirectCheckHasSaveTerms, false);
 const multiverseMarketInscryptionsEntry = multiverseMarketMetadataNeighborhoodData.results.find(
   (entry) => entry.anchor === "InscryptionsDone"
 );
@@ -4607,12 +4597,12 @@ assert.deepEqual(multiverseMarketSaveBoundaryData.saveFamilyTermsChecked, [
   "FillPlayerProfileData",
   "CloudSavePlayerProfile"
 ]);
-assert.equal(multiverseMarketSaveBoundaryData.probeResults.actionShellWithSaveOverlapCount, 0);
+assert.equal(multiverseMarketSaveBoundaryData.boundaryEvidence.actionShellWithSaveOverlapCount, 0);
 assert.equal(
-  multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasActionTerms,
+  multiverseMarketSaveBoundaryData.boundaryEvidence.metadataNeighborhoodHasActionTerms,
   true
 );
-assert.equal(multiverseMarketSaveBoundaryData.probeResults.metadataNeighborhoodHasSaveTerms, true);
+assert.equal(multiverseMarketSaveBoundaryData.boundaryEvidence.metadataNeighborhoodHasSaveTerms, true);
 assert.deepEqual(multiverseMarketSaveBoundaryData.crossBoundaryTypedOwnerStatus, {
   status: "declaring-owner-closed-market-wrapper-still-unresolved",
   exactDeclaringOwner: "SaveData",
@@ -4849,7 +4839,7 @@ assertDatasetContractEntry(
 );
 assertDatasetContractEntry(
   "multiverse-market-save-boundary",
-  "data/multiverse-market-save-boundary.json"
+  "data/multiverse-market-save-boundary.v2.json"
 );
 assertDatasetContractEntry(
   "multiverse-market-market-member-boundary",
@@ -5232,7 +5222,7 @@ assert.deepEqual(
   [
     "data/system-units/multiverse-market.v1.json",
     "data/system-units/trace.v1.json",
-    "workbench/trace-runs/multiverse-market-save-owner-boundary.json"
+    "db:materialized-target-bundle:multiverse-market-save-owner-boundary"
   ]
 );
 assert.deepEqual(
@@ -6055,8 +6045,8 @@ withRequiredValue(tokenShopRowRemapTrack, "expected token-shop row remap track",
       "docs/systems/spend/token-shop-row-remap-verification.md",
       "data/system-units/token-shop.v1.json",
       "data/system-units/trace.v1.json",
-      "workbench/trace-runs/token-shop-family-structure.json",
-      "workbench/trace-runs/token-shop-atu3-cells-effect.json"
+      "db:materialized-target-bundle:token-shop-family-structure",
+      "db:materialized-target-bundle:token-shop-atu3-cells-effect"
     ],
       requiredArtifacts: [
         "data/system-units/token-shop.v1.json",
@@ -6064,7 +6054,7 @@ withRequiredValue(tokenShopRowRemapTrack, "expected token-shop row remap track",
         "data/token-shop-late-atu-boundary.json"
       ],
     forbiddenSources: [
-      "data/unity-probe-report.json",
+      "data/unity-apk-extract-report.json",
       "data/daily-tokenium-lane-probe.json",
       "data/daily-tokenium-owner-probe.json",
       "data/lm244-targeted-probe.json"
@@ -6279,27 +6269,29 @@ assert.match(shardOwnerFamilyDoc, /UnlockMilestone17/);
 assert.match(shardOwnerFamilyDoc, /Milestone12TextChecker/);
 assert.match(shardOwnerFamilyDoc, /data\/shard-milestone-row-shell-boundary\.v1\.json/);
 assert.match(shardOwnerFamilyDoc, /data\/shard-milestone-row-alignment-boundary\.v1\.json/);
-assert.match(shardOwnerFamilyDoc, /data\/shard-milestone-handoff-boundary\.v1\.json/);
+assert.match(shardOwnerFamilyDoc, /data\/shard-milestone-handoff-boundary\.v2\.json/);
 assert.match(
   shardOwnerFamilyDoc,
   /splits into `UnlockMilestone17-29`, `Milestone0-12TextChecker`, and `BuyMilestone0`/
 );
-assert.match(shardOwnerFamilyDoc, /data\/shard-save-boundary\.v1\.json/);
+assert.match(shardOwnerFamilyDoc, /data\/shard-save-boundary\.v2\.json/);
 assert.match(shardOwnerFamilyDoc, /BuyMilestone1-57/);
 assert.match(shardOwnerFamilyDoc, /generic or academy-side milestone family/);
-assert.equal(shardOwnerFamilyProbe[0].file, "workbench\\unity\\joined\\level0");
-assert.ok(
-  shardOwnerFamilyProbe.some((entry) => entry.match_count > 0),
-  "expected shard owner-family probe matches"
+assert.equal(
+  shardOwnerFamilyBoundary.embeddedOwnerProbeSummary.sourceFile,
+  "workbench/unity/joined/level0"
 );
-assert.equal(shardVsConstructionOwnerProbe[0].file, "workbench\\unity\\joined\\level0");
-assert.ok(
-  shardVsConstructionOwnerProbe.some(
-    (entry) =>
-      entry.matches?.some((match) => match.value === "ConstructionMilestones, Assembly-CSharp") &&
-      entry.matches?.some((match) => match.value === "ShardMining, Assembly-CSharp")
-  ),
-  "expected side-by-side shard vs construction owner probe hits"
+assert.equal(
+  shardOwnerFamilyBoundary.embeddedOwnerProbeSummary.strongestOwnerHit,
+  "ShardMining, Assembly-CSharp"
+);
+assert.deepEqual(shardOwnerFamilyBoundary.embeddedConstructionComparisonSummary.sideBySideFamilies, [
+  "ShardMining, Assembly-CSharp",
+  "ConstructionMilestones, Assembly-CSharp"
+]);
+assert.equal(
+  shardOwnerFamilyBoundary.embeddedConstructionComparisonSummary.sourceFile,
+  "workbench/unity/joined/level0"
 );
 assert.equal(shardMetadataNeighborhood.metadata, "workbench\\apk\\base\\global-metadata.dat");
 assert.equal(shardBonusMetadataNeighborhood.metadata, "workbench\\apk\\base\\global-metadata.dat");
@@ -6433,30 +6425,6 @@ assert.match(
   tokenShopRowRemapVerificationDoc,
   /AdManager, Assembly-CSharp.*chest consumer family/i
 );
-
-assert.match(shardOwnedStateTraceDoc, /Target: `shard-owned-state-upgradeinfolist-population`/);
-assert.match(
-  shardOwnedStateTraceDoc,
-  /Registry target: `shard-owned-state-upgradeinfolist-population` from `shard-owned-state`/
-);
-assert.match(shardOwnedStateTraceDoc, /Kind: `non-local-injection-seam`/);
-assert.match(shardOwnedStateTraceDoc, /Result: `checked non-local injection seam preserved`/);
-assert.match(shardOwnedStateTraceDoc, /Shell field: `upgradeInfoList`/);
-assert.match(shardOwnedStateTraceDoc, /## Trace graph/);
-assert.match(shardOwnedStateTraceDoc, /runtime-shell-to-owner-lists/);
-assert.match(shardOwnedStateTraceDoc, /## Solved vs blocked/);
-assert.match(shardOwnedStateTraceDoc, /## Decision summary/);
-assert.match(shardOwnedStateTraceDoc, /Verdict: `quarantine`/);
-assert.match(shardOwnedStateTraceDoc, /Baseline: `upgradeInfoList` path id `5216`/);
-assert.match(tokenShopAtu3EffectTraceDoc, /Target: `token-shop-atu3-cells-effect`/);
-assert.match(
-  tokenShopAtu3EffectTraceDoc,
-  /Registry target: `token-shop-atu3-cells-effect` from `token-shop`/
-);
-assert.match(tokenShopAtu3EffectTraceDoc, /Shell field: `ATU3Button`/);
-assert.match(tokenShopAtu3EffectTraceDoc, /## Trace graph/);
-assert.match(tokenShopAtu3EffectTraceDoc, /## Decision summary/);
-assert.match(tokenShopAtu3EffectTraceDoc, /Verdict: `quarantine`/);
 
 assert.match(multiverseMarketDoc, /## Integration status/);
 assert.match(multiverseMarketDoc, /CostBox-InscryptionsDone/);
@@ -7090,7 +7058,12 @@ assert.equal(
 );
 assert.equal(pkg.scripts.dev, "node ./scripts/dev-server.mjs");
 assert.equal(pkg.scripts["lint:docs"], "node ./scripts/contracts/lint-doc-portability.mjs");
-assert.equal(pkg.scripts["probe:build"], "node ./scripts/unity/run_probe.mjs build");
+assert.equal(pkg.scripts["extract:build"], "node ./scripts/unity/run_extract.mjs build");
+assert.equal(pkg.scripts["extract:asset"], "node ./scripts/unity/run_extract.mjs asset");
+assert.equal(pkg.scripts["extract:asset:run"], "node ./scripts/unity/run_extract.mjs asset:run");
+assert.equal(pkg.scripts["extract:trace"], "node ./scripts/unity/run_extract.mjs trace");
+assert.equal(pkg.scripts["probe:build"], "npm run extract:build");
+assert.equal(pkg.scripts["probe:trace"], "npm run extract:trace --");
 assert.equal(pkg.scripts["verify:data"], "node ./scripts/contracts/validate-datasets.mjs");
 assert.equal(
   pkg.scripts["verify:vendoring"],
@@ -7099,23 +7072,26 @@ assert.equal(
 assert.equal(pkg.scripts["check:syntax"], "node ./scripts/contracts/check-js-syntax.mjs");
 assert.equal(pkg.scripts.test, "node ./tests/smoke.mjs");
 assert.equal(pkg.scripts["test:unit"], "node ./scripts/tests/run-unit-tests.mjs");
-assert.match(normalizedProbeRunner, /build:\s*\{/);
-assert.match(probeRunner, /Probe artifact is stale:/);
-assert.match(probeRunner, /npm run probe:build/);
-assert.match(probeRunner, /dotnet", \["restore", probeProject\]/);
-assert.match(probeRunner, /readdirSync\(probeSourceDir\)/);
-assert.match(probeRunner, /\.NET 8 SDK was not found on PATH/);
-assert.match(normalizedProbeRunner, /trace:\s*\{/);
-assert.match(probeRunner, /const extraArgs = process\.argv\.slice\(3\)/);
-assert.match(pkg.scripts["probe:trace"], /run_probe\.mjs trace/);
-assert.match(unityAuditPlaybook, /`npm run probe:build`/);
-assert.match(unityAuditPlaybook, /fails fast and tells you to run `npm run probe:build`/);
+assert.match(normalizedProbeRunner, /compatibility wrapper/i);
+assert.match(probeRunner, /run_extract\.mjs/);
+assert.match(normalizedExtractRunner, /build:\s*\{/);
+assert.match(extractRunner, /Extraction artifact is stale:/);
+assert.match(extractRunner, /npm run extract:build/);
+assert.match(extractRunner, /dotnet", \["restore", probeProject\]/);
+assert.match(extractRunner, /readdirSync\(probeSourceDir\)/);
+assert.match(extractRunner, /\.NET 8 SDK was not found on PATH/);
+assert.match(normalizedExtractRunner, /trace:\s*\{/);
+assert.match(extractRunner, /const extraArgs = process\.argv\.slice\(3\)/);
+assert.match(unityAuditPlaybook, /preferred alias: `npm run extract:build`/);
+assert.match(unityAuditPlaybook, /legacy alias: `npm run probe:build`/);
+assert.match(unityAuditPlaybook, /fails fast and tells you to run `npm run extract:build`/);
 assert.match(unityAuditPlaybook, /no longer silently reuses a stale cached build/);
 assert.match(unityAuditPlaybook, /api\.nuget\.org/);
-assert.match(unityAuditPlaybook, /`npm run probe:trace -- --query <query> --anchor <anchor>`/);
+assert.match(unityAuditPlaybook, /preferred alias: `npm run extract:trace -- --query <query> --anchor <anchor>`/);
+assert.match(unityAuditPlaybook, /legacy alias: `npm run probe:trace -- --query <query> --anchor <anchor>`/);
 assert.match(
   unityAuditPlaybook,
-  /or pin an exact preset with `npm run probe:trace -- --target <target-id> --anchor <anchor>`/
+  /or pin an exact preset with `npm run extract:trace -- --target <target-id> --anchor <anchor>`/
 );
 assert.match(unityAuditPlaybook, /data\/system-units\/trace\.v1\.json/);
 assert.match(unityAuditPlaybook, /data\/unity-trace-target-registry\.json/);
@@ -7140,11 +7116,6 @@ assert.match(
   /typed proved edges, negative edges, provenance-strength tags, and one solved-vs-blocked comparison shape/
 );
 assert.match(unityAuditPlaybook, /wire`, `quarantine`, or `keep researching`/);
-assert.match(shardOwnedStateTraceDoc, /Typed execution anchors/i);
-assert.match(
-  shardOwnedStateTraceDoc,
-  /Signal summary: \d+ high-signal, \d+ supporting, \d+ incidental, 0 suppressed-noise/
-);
 assert.deepEqual(await lintDocPortability(repoRoot), []);
 const vendoringLayout = await verifyVendoringLayout(repoRoot);
 assert.deepEqual(vendoringLayout.regressions, []);
@@ -7179,8 +7150,8 @@ assert.match(datasetContractsDoc, /data\/shard-milestone-title-effect-boundary\.
 assert.match(datasetContractsDoc, /data\/shard-effect-text-handler-boundary\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-milestone-row-shell-boundary\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/shard-milestone-row-alignment-boundary\.v1\.json/);
-assert.match(datasetContractsDoc, /data\/shard-milestone-handoff-boundary\.v1\.json/);
-assert.match(datasetContractsDoc, /data\/shard-save-boundary\.v1\.json/);
+assert.match(datasetContractsDoc, /data\/shard-milestone-handoff-boundary\.v2\.json/);
+assert.match(datasetContractsDoc, /data\/shard-save-boundary\.v2\.json/);
 assert.match(datasetContractsDoc, /data\/system-units\/player-state\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/system-units\/shards\.v1\.json/);
 assert.match(datasetContractsDoc, /data\/system-units\/token-shop\.v1\.json/);

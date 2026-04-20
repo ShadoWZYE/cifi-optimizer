@@ -6,6 +6,25 @@ import { createShardEvidenceSupport } from "../support/shard-evidence-support.js
 function createTestSupport(overrides = {}) {
   const grounding = overrides.grounding ?? {};
   const plannerState = overrides.plannerState ?? {};
+  const shardSystemView = {
+    family: {
+      grounded: {
+        milestones: grounding.milestones ?? null,
+        observedBehaviors: grounding.observedBehaviors ?? null,
+        provenance: grounding.provenance ?? null
+      },
+      familyEvidence: grounding.milestoneFamilyEvidence ?? null
+    },
+    cost: {
+      bonusSlotProbe: grounding.bonusSlotProbe ?? null,
+      costParameterProbe: grounding.costParameterProbe ?? null,
+      costNativeProbe: grounding.costNativeProbe ?? null
+    },
+    ownedState: {
+      saveBoundary: grounding.saveBoundary ?? null,
+      saveOwnerCandidates: grounding.saveOwnerCandidates ?? null
+    }
+  };
   return createShardEvidenceSupport({
     formatShardNumber(value) {
       return String(value);
@@ -16,8 +35,8 @@ function createTestSupport(overrides = {}) {
     getShardEffectTextHandlerBoundarySummary(boundary) {
       return boundary ?? { hasBoundary: false };
     },
-    getShardGrounding() {
-      return grounding;
+    getShardSystemView() {
+      return shardSystemView;
     },
     getShardMilestoneRowModelBoundarySummary(boundary) {
       return (
@@ -164,9 +183,9 @@ test("grounded summary and provenance helpers keep descriptive evidence labels",
         uncertaintyLog: [{ status: "conflict_detected", what_is_missing: "Row owner unresolved." }]
       },
       saveBoundary: {
-        probeResults: {
+        boundaryEvidence: {
           saveSideOwnerRecovered: false,
-          traceOwnedStateOutcomeKind: "non-local-injection-seam"
+          ownedStateOutcomeKind: "non-local-injection-seam"
         },
         recoveredDeclaringRowModel: {
           ownerType: "ShardMining",

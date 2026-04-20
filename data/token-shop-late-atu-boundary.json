@@ -4,11 +4,11 @@
   "sources": {
     "tokenShopExtract": "data/token-shop-values.json",
     "tokenShopRowRemapBoundary": "data/token-shop-row-remap-boundary.json",
-    "uabeaProbe": "data/uabea-probe-report.json",
-    "unityProbe": "data/unity-probe-report.json",
-    "dailyTokeniumLaneProbe": "data/daily-tokenium-lane-probe.json",
-    "dailyTokeniumOwnerProbe": "data/daily-tokenium-owner-probe.json",
-    "lm244TargetedProbe": "data/lm244-targeted-probe.json",
+    "uabeaProbe": "data/uabea-extract-report.json",
+    "unityProbe": "data/unity-apk-extract-report.json",
+    "dailyTokeniumLaneProbe": "data/token-shop-late-atu-boundary.json#embedded-late-atu-action-evidence",
+    "dailyTokeniumOwnerProbe": "data/token-shop-late-atu-boundary.json#embedded-late-atu-title-evidence",
+    "lm244TargetedProbe": "data/token-shop-late-atu-boundary.json#embedded-late-atu-prefab-evidence",
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0"
   },

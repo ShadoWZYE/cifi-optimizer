@@ -26,8 +26,9 @@ from trace_extractors import (
 
 
 ROOT = Path(__file__).resolve().parents[2]
-JSON_OUT = ROOT / "data" / "unity-trace-bundle.json"
-MD_OUT = ROOT / "docs" / "unity" / "unity-trace-bundle.md"
+TRACE_EXPORTS_DIR = ROOT / "workbench" / "trace-exports"
+JSON_OUT = TRACE_EXPORTS_DIR / "unity-trace-bundle.json"
+MD_OUT = TRACE_EXPORTS_DIR / "unity-trace-bundle.md"
 REGISTRY_PATH = ROOT / "data" / "unity-trace-target-registry.json"
 METADATA_PATH = ROOT / "workbench" / "apk" / "base" / "global-metadata.dat"
 UNITY_JOINED_DIR = ROOT / "workbench" / "unity" / "joined"
@@ -245,7 +246,7 @@ def get_unity_source_keys(obj: Any) -> set[str]:
 
 def get_unity_source_path(source_id: str) -> Path | None:
     if source_id == "level0":
-        return PRIMARY_SOURCE_PATHS["level0"]
+        return CANONICAL_SOURCE_PATHS["level0"]
     return ASSET_SOURCE_MEMBER_PATHS.get(source_id)
 
 
@@ -3004,7 +3005,7 @@ NUMERIC_RE = re.compile(r"^\d+$")
 METHOD_RE = re.compile(r"^(?:get_|set_|Buy|Claim|Check|Start|Stop|Set|Fill|Open|Close|Display|Convert|Attach|Initialize|Update|On)[A-Za-z0-9_<>]+$")
 CLASSLIKE_RE = re.compile(r"^[A-Z][A-Za-z0-9_<>]+$")
 
-PRIMARY_SOURCE_PATHS = {
+CANONICAL_SOURCE_PATHS = {
     "metadata": METADATA_PATH,
     "level0": ROOT / "workbench" / "unity" / "joined" / "level0",
     "native": ROOT / "workbench" / "apk" / "base" / "libil2cpp.so",
@@ -3015,58 +3016,42 @@ ASSET_SOURCE_MEMBER_PATHS = {
     "globalgamemanagers": ROOT / "workbench" / "unity" / "joined" / "globalgamemanagers.assets",
 }
 
-COMPATIBILITY_SOURCE_PATHS = {
+SUPPORT_DATASET_PATHS = {
     "tokenShopExtract": ROOT / "data" / "token-shop-values.json",
     "tokenShopRowRemapBoundary": ROOT / "data" / "token-shop-row-remap-boundary.json",
     "tokenShopLateAtuBoundary": ROOT / "data" / "token-shop-late-atu-boundary.json",
     "shardCostNativeProbe": ROOT / "data" / "shard-cost-native-probe.v1.json",
     "shardCostFormulaModel": ROOT / "data" / "shard-cost-formula-model.v1.json",
-    "shardSaveBoundary": ROOT / "data" / "shard-save-boundary.v1.json",
-    "shardMilestoneSaveOwnerCandidates": ROOT / "data" / "shard-milestone-save-owner-candidates.v1.json",
+    "shardSaveBoundary": ROOT / "data" / "shard-save-boundary.v2.json",
+    "shardMilestoneSaveOwnerCandidates": ROOT / "data" / "shard-milestone-save-owner-candidates.v2.json",
     "multiverseMarketMemberBoundary": ROOT / "data" / "multiverse-market-market-member-boundary.json",
     "multiverseMarketSaveDataImportBoundary": ROOT / "data" / "multiverse-market-savedata-import-boundary.json",
     "multiverseMarketRangeBoundary": ROOT / "data" / "multiverse-market-range-boundary.json",
 }
 
-CONCRETE_SOURCE_PATHS = {
-    **PRIMARY_SOURCE_PATHS,
+SOURCE_REFERENCE_PATHS = {
+    **CANONICAL_SOURCE_PATHS,
     **ASSET_SOURCE_MEMBER_PATHS,
-    **COMPATIBILITY_SOURCE_PATHS,
+    **SUPPORT_DATASET_PATHS,
 }
 
-# Internal concrete-path lookup for compatibility-only helpers and legacy citations.
-ALL_SOURCE_PATHS = CONCRETE_SOURCE_PATHS
-
-PRIMARY_SOURCE_ROLE_TEXT = {
+CANONICAL_SOURCE_ROLE_TEXT = {
     "metadata": "Primary raw declaration-side source from global-metadata.dat.",
     "level0": "Primary direct Unity scene/object extraction from level0.",
     "assets": "Primary shared Unity assets family spanning sharedassets0 and globalgamemanagers.",
     "native": "Primary native executable source from libil2cpp.so via DB-backed native extraction.",
 }
 
-COMPATIBILITY_SOURCE_ROLE_TEXT = {
-    "tokenShopExtract": "Compatibility/import artifact preserving one historical TokenShop owner-payload extraction.",
-    "tokenShopRowRemapBoundary": "Compatibility/debug artifact preserving one historical TokenShop row-remap boundary pass.",
-    "tokenShopLateAtuBoundary": "Compatibility/debug artifact preserving one historical late-ATU boundary pass.",
-    "shardCostNativeProbe": "Compatibility/reference artifact preserving one historical shard native-probe result.",
-    "shardCostFormulaModel": "Compatibility/reference artifact preserving one historical shard cost model export.",
-    "shardSaveBoundary": "Compatibility/reference artifact preserving one historical shard save-boundary export.",
-    "shardMilestoneSaveOwnerCandidates": "Compatibility/reference artifact preserving one historical shard save-owner narrowing pass.",
-    "multiverseMarketMemberBoundary": "Compatibility/reference artifact preserving one historical market member-boundary pass.",
-    "multiverseMarketSaveDataImportBoundary": "Compatibility/reference artifact preserving one historical market import-boundary pass.",
-    "multiverseMarketRangeBoundary": "Compatibility/reference artifact preserving one historical market range-boundary pass.",
-}
-
 ASSET_SOURCE_MEMBERS = tuple(ASSET_SOURCE_MEMBER_PATHS.keys())
-PRIMARY_SOURCE_IDS = ("metadata", "level0", "assets", "native")
+CANONICAL_SOURCE_IDS = ("metadata", "level0", "assets", "native")
 
 
 def get_source_reference(source_id: str) -> str:
     if source_id == "assets":
         return " + ".join(repo_relative(path) for path in ASSET_SOURCE_MEMBER_PATHS.values())
     if source_id == "tokenShopExtract":
-        return f"{repo_relative(METADATA_PATH)} + {repo_relative(PRIMARY_SOURCE_PATHS['level0'])}"
-    path = CONCRETE_SOURCE_PATHS.get(source_id)
+        return f"{repo_relative(METADATA_PATH)} + {repo_relative(CANONICAL_SOURCE_PATHS['level0'])}"
+    path = SOURCE_REFERENCE_PATHS.get(source_id)
     if path is None:
         raise KeyError(f"Unknown source id: {source_id}")
     return repo_relative(path)
@@ -3139,8 +3124,8 @@ def get_source_search_modes(source_id: str) -> list[str]:
     return ["exact-structured"] if source_id != "metadata" else ["exact-string", "bounded-containment"]
 
 
-def canonicalize_primary_source_id(source_id: str) -> str:
-    if source_id in PRIMARY_SOURCE_IDS:
+def canonicalize_source_family_id(source_id: str) -> str:
+    if source_id in CANONICAL_SOURCE_IDS:
         return source_id
     if source_id in ASSET_SOURCE_MEMBER_PATHS:
         return "assets"
@@ -3512,14 +3497,14 @@ def resolve_source_catalog(registry: dict[str, Any], family_ids: list[str]) -> t
             if source_id == "assets":
                 source_paths[source_id] = UNITY_JOINED_DIR
             else:
-                source_paths[source_id] = PRIMARY_SOURCE_PATHS[source_id]
+                source_paths[source_id] = CANONICAL_SOURCE_PATHS[source_id]
             source_roles.append(
                 {
                     "sourceId": source_id,
                     "path": get_source_reference(source_id),
                     "familyId": family_id,
                     "familyLabel": family["label"],
-                    "role": PRIMARY_SOURCE_ROLE_TEXT[source_id],
+                    "role": CANONICAL_SOURCE_ROLE_TEXT[source_id],
                 }
             )
     return source_paths, source_roles
@@ -3530,7 +3515,7 @@ def get_active_source_ids_for_target(target: dict[str, Any]) -> list[str]:
     seen: set[str] = set()
 
     def add(source_id: str) -> None:
-        source_id = canonicalize_primary_source_id(source_id)
+        source_id = canonicalize_source_family_id(source_id)
         if source_id not in seen:
             seen.add(source_id)
             active_ids.append(source_id)
@@ -3542,7 +3527,7 @@ def get_active_source_ids_for_target(target: dict[str, Any]) -> list[str]:
     add("native")
 
     if not active_ids:
-        return list(PRIMARY_SOURCE_IDS)
+        return list(CANONICAL_SOURCE_IDS)
     return active_ids
 
 
@@ -4923,7 +4908,7 @@ def build_mod_trace_graph(
     def make_level0_citation(term: str, locator: str, note: str) -> dict[str, Any]:
         return {
             "sourceId": "level0",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]),
             "term": term,
             "locator": locator,
             "note": note,
@@ -5039,7 +5024,7 @@ def build_mod_trace_graph(
                 *[
                     {
                         "sourceId": "level0",
-                        "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]),
+                        "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]),
                         "term": str(item.get("interaction")),
                         "locator": "$.rowRecovery.presentationUpdatePath.interactionToRenderPaths",
                         "note": f"{item.get('hierarchyPath')} -> {item.get('renderNode')}",
@@ -5311,7 +5296,7 @@ def build_mk1_trace_graph(
             make_node(shell_node, "shell-anchor", f"{shell_window['shellField']} path_id {shell_window['shellPathId']}", "present", "The exact target shell survives in the committed TokenShop payload."),
             make_node(owner_node, "owner-field-block", ", ".join(shell_window["ownerFieldBlock"]), "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
             make_node(metadata_node, "metadata-neighborhood", "ATU5Button + MK1TokenBoost metadata neighborhood", "present", "Metadata still keeps the shell anchor and MK1TokenBoost declaration area together."),
-            make_node(action_node, "action-hook", "BuyMK1TokenBoost", "present", "The committed probe set preserves the matching MK1 buy hook."),
+            make_node(action_node, "action-hook", "BuyMK1TokenBoost", "present", "The committed support datasets preserve the matching MK1 buy hook."),
             make_node(prefab_node, "prefab-identity", "NewTokenUPGPrefab.T1.MK1Booster", "present", "The exact token prefab identity is preserved."),
             make_node(support_node, "title-candidate", "1. MK1 Generator Output,", "present", "A detached MK1 generator support-text candidate is preserved."),
             make_node(roster_node, "neighbor-title-roster", "Mk2 Generator Booster", "present", "Neighboring generator-booster titles remain preserved in the owner-side roster."),
@@ -5423,7 +5408,7 @@ def build_mk3_bridge_trace_graph(
             make_node(shell_node, "shell-anchor", f"{shell_window['shellField']} path_id {shell_window['shellPathId']}", "present", "The exact target shell survives in the committed TokenShop payload."),
             make_node(owner_node, "owner-field-block", ", ".join(shell_window["ownerFieldBlock"]), "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
             make_node(metadata_node, "metadata-neighborhood", "ATU7Button + MK3TokenBoost metadata neighborhood", "present", "Metadata still keeps the shell anchor and MK3TokenBoost declaration area together."),
-            make_node(action_node, "action-hook", "BuyMK3TokenBoost", "present", "The committed probe set preserves the matching MK3 buy hook."),
+            make_node(action_node, "action-hook", "BuyMK3TokenBoost", "present", "The committed support datasets preserve the matching MK3 buy hook."),
             make_node(prefab_node, "prefab-identity", "NewTokenUPGPrefab.T1.MK3Booster", "present", "The exact token prefab identity is preserved."),
         ],
         "edges": edges,
@@ -5524,7 +5509,7 @@ def build_atu3_effect_trace_graph(
             "exact-shell-to-action-hook",
             "present",
             "supporting",
-            "The metadata neighborhood and checked lane probe preserve BuyCellBoost as the exact named action hook for the same CellBoost family.",
+            "The metadata neighborhood and checked lane support datasets preserve BuyCellBoost as the exact named action hook for the same CellBoost family.",
             [
                 cite_hit(metadata_source, metadata_shell_hit),
                 cite_hit(metadata_source, metadata_owner_hit),
@@ -5613,7 +5598,7 @@ def build_atu3_effect_trace_graph(
         "nodes": [
             make_node(shell_node, "shell-anchor", f"{shell_window['shellField']} path_id {shell_window['shellPathId']}", "present", "The exact target shell survives in the committed TokenShop payload."),
             make_node(owner_node, "owner-field-block", ", ".join(shell_window["ownerFieldBlock"]), "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
-            make_node(action_node, "action-hook", "BuyCellBoost", "present", "The committed probe set preserves the matching cells buy hook."),
+            make_node(action_node, "action-hook", "BuyCellBoost", "present", "The committed support datasets preserve the matching cells buy hook."),
             make_node(shared_system_node, "shared-effect-system", "Cells Booster (Chests)", "present", "A shared cells-from-chests gameplay effect surface is preserved."),
             make_node(effect_text_node, "player-effect-text", "+1 Seconds timeskip to Cells Gained from Token & Diamond Chests", "present", "The player-facing effect text survives on the same shared chest-effect lane."),
             make_node(parameter_node, "parameter-surface", "CellBoostBonus = 1, CellBoostMaxLevel = 60", "present", "The raw CellBoost parameter surface bounds the effect lane without naming the applier."),
@@ -5703,7 +5688,7 @@ def build_mod_vs_blocked_diff(
                 *[
                     {
                         "sourceId": "level0",
-                        "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]),
+                        "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]),
                         "term": str(slot.get("name")),
                         "locator": "$.rowRecovery.presentationUpdatePath.slots.title",
                         "note": str(slot.get("hierarchyPath")),
@@ -5713,7 +5698,7 @@ def build_mod_vs_blocked_diff(
                 *[
                     {
                         "sourceId": "level0",
-                        "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]),
+                        "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]),
                         "term": term,
                         "locator": "$.rowRecovery.detachedTextCandidates",
                         "note": "Detached text candidate, not a direct rendered row title.",
@@ -5776,7 +5761,7 @@ def build_mod_vs_blocked_diff(
             "id": "atu4-rendered-title-and-update-path",
             "label": "ATU4 rendered title and update path",
             "status": "blocked",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]),
             "shellField": shell_window["shellField"],
             "shellPathId": shell_window["shellPathId"],
             "comparisonShape": blocked_edges,
@@ -5939,7 +5924,7 @@ def build_mk1_vs_blocked_diff(
             "id": "atu5-trace-row-bridge",
             "label": "ATU5 trace-backed row bridge",
             "status": "cleared",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopExtract"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]),
             "shellField": baseline["shellField"],
             "shellPathId": baseline["shellPathId"],
             "comparisonShape": baseline_edges,
@@ -5949,7 +5934,7 @@ def build_mk1_vs_blocked_diff(
             "id": target_id,
             "label": target["label"],
             "status": "blocked",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
             "shellField": blocked["shellField"],
             "shellPathId": blocked["shellPathId"],
             "comparisonShape": blocked_edges,
@@ -6013,7 +5998,7 @@ def build_mk3_vs_blocked_diff(
             ],
         },
         {
-            "type": "multi-probe-prefab-corroboration",
+            "type": "multi-support-prefab-corroboration",
             "status": "present",
             "provenanceStrength": "supporting",
             "statement": "The solved bridge is corroborated by multiple checked prefab surfaces.",
@@ -6112,7 +6097,7 @@ def build_mk3_vs_blocked_diff(
             "id": "atu7-trace-row-bridge",
             "label": "ATU7 trace-backed row bridge",
             "status": "cleared",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopExtract"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]),
             "shellField": baseline["shellField"],
             "shellPathId": baseline["shellPathId"],
             "comparisonShape": baseline_edges,
@@ -6122,7 +6107,7 @@ def build_mk3_vs_blocked_diff(
             "id": target_id,
             "label": target["label"],
             "status": "blocked",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
             "shellField": blocked["shellField"],
             "shellPathId": blocked["shellPathId"],
             "comparisonShape": blocked_edges,
@@ -6134,7 +6119,7 @@ def build_mk3_vs_blocked_diff(
             "blockedMissingEdgeTypes": blocked_missing,
             "solvedVsBlockedSummary": [
                 "Both rows preserve the direct serialized shell-to-owner-block adjacency.",
-                "The solved ATU7 trace now preserves one checked row-specific buy hook, one exact MK3Booster prefab identity, and multi-probe prefab corroboration.",
+                "The solved ATU7 trace now preserves one checked row-specific buy hook, one exact MK3Booster prefab identity, and multi-support prefab corroboration.",
                 "ATU3 remains narrower and more blocked because its action, prefab, and title clues still do not converge on one exact shell join.",
             ],
         },
@@ -6305,7 +6290,7 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "id": "atu3-effect-driven-chain",
             "label": "ATU3 effect-driven chain",
             "status": "cleared",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
             "shellField": baseline["shellField"],
             "shellPathId": baseline["shellPathId"],
             "comparisonShape": baseline_edges,
@@ -6315,7 +6300,7 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "id": target_id,
             "label": "ATU3 prefab/title split",
             "status": "blocked",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
             "shellField": blocked["shellField"],
             "shellPathId": blocked["shellPathId"],
             "comparisonShape": blocked_edges,
@@ -6723,7 +6708,7 @@ def build_atu3_chest_consumer_read_trace_graph(
         "nodes": [
             make_node(shell_node, "shell-anchor", f"{shell_window['shellField']} path_id {shell_window['shellPathId']}", "present", "The exact target shell survives in the committed TokenShop payload."),
             make_node(owner_node, "owner-field-block", ", ".join(shell_window["ownerFieldBlock"]), "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
-            make_node(consumer_family_node, "consumer-family", "AdManager, Assembly-CSharp + chest support systems", "present", "The concrete chest consumer family is preserved in committed probe artifacts."),
+            make_node(consumer_family_node, "consumer-family", "AdManager, Assembly-CSharp + chest support systems", "present", "The concrete chest consumer family is preserved in committed support datasets."),
             make_node(routine_family_node, "consumer-routine-family", "TokenChestRoutine + DiamondChestRoutine neighborhood", "present", "The token and diamond chest routine family is preserved."),
             make_node(getter_node, "cell-gain-getter-shell", "get_SmallAdCellGains + get_BigAdCellGains", "present", "The chest cell-gain getter shell survives in committed metadata."),
             make_node(booster_node, "booster-bonus-shell", "SetBoosterAdBonus + get_FinalBoosterAdBonus + FinalBoosterAdBonus", "present", "The internal booster bonus aggregation shell is preserved."),
@@ -6953,7 +6938,7 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "id": "atu3-chest-consumer-handoff",
             "label": "ATU3 chest consumer handoff",
             "status": "cleared",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
             "shellField": baseline["shellField"],
             "shellPathId": baseline["shellPathId"],
             "comparisonShape": baseline_edges,
@@ -6963,7 +6948,7 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "id": "atu3-effect-driven-chain",
             "label": "ATU3 effect-driven chain",
             "status": "blocked",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
             "shellField": blocked["shellField"],
             "shellPathId": blocked["shellPathId"],
             "comparisonShape": blocked_edges,
@@ -7314,7 +7299,7 @@ def build_family_structure_diff(
             "id": "token-shop-family-structure",
             "label": "TokenShop solved family structure",
             "status": "cleared",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopExtract"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]),
             "shellField": "ATU1Button, ATU2Button, ATU4Button, ATU5Button, ATU6Button, ATU7Button",
             "shellPathId": "solved-subset",
             "comparisonShape": baseline_edges,
@@ -7324,7 +7309,7 @@ def build_family_structure_diff(
             "id": target_id,
             "label": target["label"],
             "status": "blocked",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopLateAtuBoundary"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopLateAtuBoundary"]),
             "shellField": "ATU3Button plus ATU24Button through ATU28Button",
             "shellPathId": "bounded-unresolved-neighborhoods",
             "comparisonShape": blocked_edges,
@@ -7395,12 +7380,12 @@ def build_surface_bundle(
 ) -> dict[str, Any]:
     terms = list(dict.fromkeys([*surface["terms"], *anchors]))
     anchor_specs = build_anchor_specs(terms, "surface-search")
-    primary_source_ids = unique_strings([canonicalize_primary_source_id(source_id) for source_id in surface["sourceIds"]])
-    sources = [collect_source_hits(documents, source_id, anchor_specs, shell_window) for source_id in primary_source_ids]
+    canonical_source_ids = unique_strings([canonicalize_source_family_id(source_id) for source_id in surface["sourceIds"]])
+    sources = [collect_source_hits(documents, source_id, anchor_specs, shell_window) for source_id in canonical_source_ids]
 
     if extended_search > 0:
         for source_id in available_source_ids:
-            if source_id in primary_source_ids:
+            if source_id in canonical_source_ids:
                 continue
             source_entry = collect_source_hits(documents, source_id, anchor_specs, shell_window)
             if source_entry["hitCount"] <= 0:
@@ -7726,8 +7711,8 @@ def build_token_shop_mod_trace(target_id: str, target: dict[str, Any], anchors: 
             "candidateTerms": [action_method, prefab_identity],
             "bridgeCleared": True,
             "bridgeHits": [
-                {"surfaceId": "action-lane", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": action_method},
-                {"surfaceId": "prefab-lane", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": prefab_identity},
+                {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": action_method},
+                {"surfaceId": "prefab-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": prefab_identity},
             ],
             "result": "direct asset/native row bridge recovered",
         },
@@ -7758,8 +7743,8 @@ def build_token_shop_mk1_trace(target_id: str, target: dict[str, Any], anchors: 
             "candidateTerms": [config["shellField"], trace_bridge["supportingActionHook"], trace_bridge["prefabIdentity"]],
             "bridgeCleared": True,
             "bridgeHits": [
-                {"surfaceId": "action-lane", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": trace_bridge["supportingActionHook"]},
-                {"surfaceId": "prefab-lane", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": trace_bridge["prefabIdentity"]},
+                {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": trace_bridge["supportingActionHook"]},
+                {"surfaceId": "prefab-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": trace_bridge["prefabIdentity"]},
             ],
             "result": "checked object bridge recovered",
         },
@@ -7790,8 +7775,8 @@ def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], an
             "candidateTerms": [config["shellField"], trace_bridge["supportingActionHook"], trace_bridge["prefabIdentity"]],
             "bridgeCleared": True,
             "bridgeHits": [
-                {"surfaceId": "action-lane", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": trace_bridge["supportingActionHook"]},
-                {"surfaceId": "prefab-lane", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": trace_bridge["prefabIdentity"]},
+                {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": trace_bridge["supportingActionHook"]},
+                {"surfaceId": "prefab-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": trace_bridge["prefabIdentity"]},
             ],
             "result": "checked object bridge recovered",
         },
@@ -7831,9 +7816,9 @@ def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], a
             "candidateTerms": [config["shellField"], "BuyCellBoost", "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."],
             "bridgeCleared": True,
             "bridgeHits": [
-                {"surfaceId": "action-lane", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": "BuyCellBoost"},
-                {"surfaceId": "shared-effect-title", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"},
-                {"surfaceId": "shared-effect-text", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."},
+                {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyCellBoost"},
+                {"surfaceId": "shared-effect-title", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"},
+                {"surfaceId": "shared-effect-text", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."},
             ],
             "result": "checked action-to-shared-effect chain recovered",
         },
@@ -7863,10 +7848,10 @@ def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str,
             "candidateTerms": [config["shellField"], "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "AdManager, Assembly-CSharp", "<TokenChestRoutine>d__149", "<FinalDiamondChestBonus>k__BackingField"],
             "bridgeCleared": True,
             "bridgeHits": [
-                {"surfaceId": "shared-effect-title", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"},
-                {"surfaceId": "consumer-family", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": "AdManager, Assembly-CSharp"},
-                {"surfaceId": "consumer-routines", "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]), "term": "<TokenChestRoutine>d__149"},
-                {"surfaceId": "consumer-routines", "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]), "term": "<FinalDiamondChestBonus>k__BackingField"},
+                {"surfaceId": "shared-effect-title", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"},
+                {"surfaceId": "consumer-family", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "AdManager, Assembly-CSharp"},
+                {"surfaceId": "consumer-routines", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "<TokenChestRoutine>d__149"},
+                {"surfaceId": "consumer-routines", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "<FinalDiamondChestBonus>k__BackingField"},
             ],
             "result": "checked shared-effect-to-consumer-family handoff recovered",
         },
@@ -7906,7 +7891,7 @@ def build_atu3_consumer_read_vs_consumer_diff(target_id: str, target: dict[str, 
             "id": "atu3-consumer-internal-read",
             "label": "ATU3 consumer-internal read shell",
             "status": "cleared",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
             "shellField": baseline["shellField"],
             "shellPathId": baseline["shellPathId"],
             "comparisonShape": baseline_edges,
@@ -7916,7 +7901,7 @@ def build_atu3_consumer_read_vs_consumer_diff(target_id: str, target: dict[str, 
             "id": target_id,
             "label": "ATU3 chest consumer seam",
             "status": "blocked",
-            "sourcePath": repo_relative(ALL_SOURCE_PATHS["tokenShopRowRemapBoundary"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
             "shellField": blocked["shellField"],
             "shellPathId": blocked["shellPathId"],
             "comparisonShape": blocked_edges,
@@ -7950,10 +7935,10 @@ def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict
             "candidateTerms": [config["shellField"], "AdManager, Assembly-CSharp", "get_SmallAdCellGains", "SetBoosterAdBonus", "get_FinalBoosterAdBonus"],
             "bridgeCleared": True,
             "bridgeHits": [
-                {"surfaceId": "consumer-family", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": "AdManager, Assembly-CSharp"},
-                {"surfaceId": "cell-gain-getters", "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]), "term": "get_SmallAdCellGains"},
-                {"surfaceId": "booster-bonus-shell", "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]), "term": "SetBoosterAdBonus"},
-                {"surfaceId": "booster-bonus-shell", "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]), "term": "get_FinalBoosterAdBonus"},
+                {"surfaceId": "consumer-family", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "AdManager, Assembly-CSharp"},
+                {"surfaceId": "cell-gain-getters", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "get_SmallAdCellGains"},
+                {"surfaceId": "booster-bonus-shell", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "SetBoosterAdBonus"},
+                {"surfaceId": "booster-bonus-shell", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "get_FinalBoosterAdBonus"},
             ],
             "result": "checked consumer-internal bonus shell recovered",
         },
@@ -8014,10 +7999,10 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
             ],
             "bridgeCleared": True,
             "bridgeHits": [
-                {"surfaceId": "bridge-proxies", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": "BuyTokenBoost"},
-                {"surfaceId": "bridge-proxies", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": "BuyMK1TokenBoost"},
-                {"surfaceId": "prefab-roster", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T1.MK2Booster"},
-                {"surfaceId": "title-text-surfaces", "sourcePath": repo_relative(ALL_SOURCE_PATHS["level0"]), "term": "Mk2 Generator Booster"},
+                {"surfaceId": "bridge-proxies", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyTokenBoost"},
+                {"surfaceId": "bridge-proxies", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyMK1TokenBoost"},
+                {"surfaceId": "prefab-roster", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T1.MK2Booster"},
+                {"surfaceId": "title-text-surfaces", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "Mk2 Generator Booster"},
             ],
             "result": "checked family structure audit recovered",
         },
@@ -8034,7 +8019,7 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
 
 def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
     config = target["strategyConfig"]
-    native_probe = documents["shardCostNativeProbe"]
+    native_support_dataset = documents["shardCostNativeProbe"]
     formula_model = documents["shardCostFormulaModel"]
     save_owner_candidates = documents["shardMilestoneSaveOwnerCandidates"]
     metadata_source = collect_source_hits(
@@ -8043,7 +8028,7 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
         build_anchor_specs([config["ownerType"], config["accessor"], *config["parameterShell"], "GetShardCostList", "UpdateShardCostList", "MilestoneCostList", *anchors], "surface-search"),
     )
     shell_window = {
-        "source": repo_relative(ALL_SOURCE_PATHS["metadata"]),
+        "source": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
         "shellField": config["accessor"],
         "shellPathId": "runtime-getter",
         "shellObjectOffset": None,
@@ -8061,14 +8046,14 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
         },
         {
             "id": "native-getter",
-            "label": "Shard native getter probe",
+            "label": "Shard native getter support dataset",
             "terms": [config["accessor"], *config["parameterShell"][:3]],
             "sources": [
                 make_surface_source(
                     "shardCostNativeProbe",
                     [
                         make_surface_hit(config["accessor"], "$.rows[0].name"),
-                        *[make_surface_hit(field, "$.rows[0].operandFieldNames") for field in native_probe["rows"][0]["operandFieldNames"]],
+                        *[make_surface_hit(field, "$.rows[0].operandFieldNames") for field in native_support_dataset["rows"][0]["operandFieldNames"]],
                     ],
                 )
             ],
@@ -8095,7 +8080,7 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
         "traceGraph": {
             "nodes": [
                 make_node("shard-owner", "owner-type", config["ownerType"], "present", "ShardUpgradeInfo remains the checked shard-local data carrier."),
-                make_node("shard-getter", "getter", config["accessor"], "present", "The row0 shard cost accessor is preserved in committed structure probes."),
+                make_node("shard-getter", "getter", config["accessor"], "present", "The row0 shard cost accessor is preserved in committed structure datasets."),
                 make_node("shard-parameter-shell", "parameter-shell", ", ".join(config["parameterShell"]), "present", "The row0 shard parameter shell is preserved as direct field names."),
                 make_node("shard-evaluator", "evaluator-structure", "deterministic evaluator structure", "present", "The canonical shard-cost structure model and deterministic evaluator exist."),
             ],
@@ -8134,8 +8119,8 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
                     "native-parameter-read",
                     "present",
                     "direct",
-                    "The native getter probe directly reads SU0StartCost, SU0CostExponent, and SU0GrowthExponent from the row0 getter body.",
-                    [cite_row_boundary("shardCostNativeProbe", "$.rows[0].operandFieldNames", ", ".join(native_probe["rows"][0]["operandFieldNames"]))],
+                    "The native getter support dataset directly reads SU0StartCost, SU0CostExponent, and SU0GrowthExponent from the row0 getter body.",
+                    [cite_row_boundary("shardCostNativeProbe", "$.rows[0].operandFieldNames", ", ".join(native_support_dataset["rows"][0]["operandFieldNames"]))],
                 ),
                 make_edge(
                     "shard-parameter-shell-to-evaluator",
@@ -8162,12 +8147,12 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
         "bridgeCheck": {
             "candidateTerms": config["parameterShell"],
             "bridgeCleared": True,
-            "bridgeHits": [{"surfaceId": "native-getter", "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardCostNativeProbe"]), "term": config["accessor"]}],
+            "bridgeHits": [{"surfaceId": "native-getter", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["shardCostNativeProbe"]), "term": config["accessor"]}],
             "result": "checked getter-to-parameter-shell structure recovered",
         },
         "solvedVsBlockedDiff": {
-            "baseline": {"id": "shard-cost-su0-structure", "label": "Shard SU0 structural baseline", "status": "cleared", "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardCostFormulaModel"]), "shellField": config["accessor"], "shellPathId": "runtime-getter", "comparisonShape": [{"type": "getter-family", "status": "present"}, {"type": "getter-to-parameter-shell", "status": "present"}, {"type": "native-parameter-read", "status": "present"}, {"type": "deterministic-evaluator", "status": "present"}], "groundedConclusion": "The shard SU0 getter-to-parameter-shell structure is grounded enough to preserve as a quarantined structural baseline."},
-            "blockedTarget": {"id": "shard-cost-planner-safe-output", "label": "Shard planner-safe cost output", "status": "blocked", "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardCostFormulaModel"]), "shellField": config["accessor"], "shellPathId": "planner-output", "comparisonShape": [{"type": "automated-calibration-closure", "status": "missing"}, {"type": "planner-safe-cost-output", "status": "missing"}, {"type": "save-owner-recovery", "status": "missing"}], "groundedConclusion": "The shard planner-safe output target remains blocked by calibration, approval, and save-owner recovery."},
+            "baseline": {"id": "shard-cost-su0-structure", "label": "Shard SU0 structural baseline", "status": "cleared", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["shardCostFormulaModel"]), "shellField": config["accessor"], "shellPathId": "runtime-getter", "comparisonShape": [{"type": "getter-family", "status": "present"}, {"type": "getter-to-parameter-shell", "status": "present"}, {"type": "native-parameter-read", "status": "present"}, {"type": "deterministic-evaluator", "status": "present"}], "groundedConclusion": "The shard SU0 getter-to-parameter-shell structure is grounded enough to preserve as a quarantined structural baseline."},
+            "blockedTarget": {"id": "shard-cost-planner-safe-output", "label": "Shard planner-safe cost output", "status": "blocked", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["shardCostFormulaModel"]), "shellField": config["accessor"], "shellPathId": "planner-output", "comparisonShape": [{"type": "automated-calibration-closure", "status": "missing"}, {"type": "planner-safe-cost-output", "status": "missing"}, {"type": "save-owner-recovery", "status": "missing"}], "groundedConclusion": "The shard planner-safe output target remains blocked by calibration, approval, and save-owner recovery."},
             "delta": {
                 "sharedPresentEdgeTypes": ["getter-family", "getter-to-parameter-shell", "native-parameter-read"],
                 "baselineOnlyPresentEdgeTypes": ["deterministic-evaluator"],
@@ -8234,8 +8219,10 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
     shard_scene_hit = maybe_find_hit(level0_scene_source, config["sceneOwner"])
     shard_scene_path_id = save_boundary["recoveredDirectRowDefinitionPayload"]["sceneObject"]["pathId"]
 
-    local_bridge_recovered = save_boundary["probeResults"].get("runtimePopulationLocalProducerRecovered") is True
-    wrapper_handoff_recovered = save_boundary["probeResults"].get("saveSideOwnerRecovered") is True
+    # Historical v1 shard-save datasets used `probeResults`; keep the fallback isolated here.
+    boundary_evidence = save_boundary.get("boundaryEvidence", save_boundary.get("probeResults", {}))
+    local_bridge_recovered = boundary_evidence.get("runtimePopulationLocalProducerRecovered") is True
+    wrapper_handoff_recovered = boundary_evidence.get("saveSideOwnerRecovered") is True
     if local_bridge_recovered:
         outcome_kind = "local-runtime-population-bridge"
         outcome_label = "Local runtime population bridge"
@@ -8297,7 +8284,7 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
         bridge_result = "checked non-local injection seam preserved"
 
     shell_window = {
-        "source": repo_relative(ALL_SOURCE_PATHS["metadata"]),
+        "source": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
         "shellField": recovered_runtime_shell["declaringField"]["name"],
         "shellPathId": recovered_runtime_shell["declaringField"]["fieldOffset"],
         "shellObjectOffset": shard_scene_path_id,
@@ -8537,9 +8524,9 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
             "candidateTerms": [config["runtimeShell"], *row_state_fields, *local_hooks_checked[:4]],
             "bridgeCleared": True,
             "bridgeHits": [
-                {"surfaceId": "runtime-shell", "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]), "term": recovered_runtime_shell["declaringField"]["name"]},
-                {"surfaceId": "owner-list-watchers", "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]), "term": local_hooks_checked[0]},
-                {"surfaceId": "save-gap", "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardMilestoneSaveOwnerCandidates"]), "term": save_owner_candidates["remainingSaveOwnerCandidates"][0]["label"]},
+                {"surfaceId": "runtime-shell", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": recovered_runtime_shell["declaringField"]["name"]},
+                {"surfaceId": "owner-list-watchers", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": local_hooks_checked[0]},
+                {"surfaceId": "save-gap", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["shardMilestoneSaveOwnerCandidates"]), "term": save_owner_candidates["remainingSaveOwnerCandidates"][0]["label"]},
             ],
             "result": bridge_result,
         },
@@ -8548,7 +8535,7 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
                 "id": "shard-owned-state-upgradeinfolist-population",
                 "label": "Shard owned-state population boundary",
                 "status": "cleared",
-                "sourcePath": repo_relative(ALL_SOURCE_PATHS["shardSaveBoundary"]),
+                "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["shardSaveBoundary"]),
                 "shellField": recovered_runtime_shell["declaringField"]["name"],
                 "shellPathId": recovered_runtime_shell["declaringField"]["fieldOffset"],
                 "comparisonShape": comparison_shape,
@@ -8558,7 +8545,7 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
                 "id": "shard-owned-state-local-bridge",
                 "label": "Shard local owned-state producer",
                 "status": "blocked",
-                "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]),
+                "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
                 "shellField": recovered_runtime_shell["declaringField"]["name"],
                 "shellPathId": "owned-state-bridge",
                 "comparisonShape": blocked_shape,
@@ -8625,7 +8612,7 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
         build_anchor_specs(["BuyIS71", "MultiverseMarket", config["saveOwner"], *anchors], "surface-search"),
     )
     shell_window = {
-        "source": repo_relative(ALL_SOURCE_PATHS["metadata"]),
+        "source": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
         "shellField": "get_Market",
         "shellPathId": "typed-accessor",
         "shellObjectOffset": None,
@@ -8701,12 +8688,12 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
         "bridgeCheck": {
             "candidateTerms": [config["accessorBridge"], config["saveOwner"], config["typedSpan"]],
             "bridgeCleared": True,
-            "bridgeHits": [{"surfaceId": "accessor-bridge", "sourcePath": repo_relative(ALL_SOURCE_PATHS["metadata"]), "term": "get_Market"}],
+            "bridgeHits": [{"surfaceId": "accessor-bridge", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "get_Market"}],
             "result": "checked accessor-to-save-owner boundary recovered",
         },
         "solvedVsBlockedDiff": {
-            "baseline": {"id": "multiverse-market-save-owner-boundary", "label": "Emporium save-owner boundary", "status": "cleared", "sourcePath": repo_relative(ALL_SOURCE_PATHS["multiverseMarketSaveDataImportBoundary"]), "shellField": config["accessorBridge"], "shellPathId": "typed-accessor", "comparisonShape": [{"type": "accessor-bridge", "status": "present"}, {"type": "typed-save-owner", "status": "present"}, {"type": "compatibility-import-span", "status": "present"}], "groundedConclusion": "The Emporium accessor-to-SaveData owner boundary is grounded enough to preserve as compatibility-only truth."},
-            "blockedTarget": {"id": "multiverse-market-canonical-import", "label": "Emporium canonical import", "status": "blocked", "sourcePath": repo_relative(ALL_SOURCE_PATHS["multiverseMarketSaveDataImportBoundary"]), "shellField": config["saveOwner"], "shellPathId": "canonical-import", "comparisonShape": [{"type": "typed-market-field-recovery", "status": "missing"}, {"type": "canonical-import-admissibility", "status": "missing"}, {"type": "broad-row-identity-remap", "status": "missing"}], "groundedConclusion": "Canonical import remains blocked even though the wider save-owner boundary is grounded."},
+            "baseline": {"id": "multiverse-market-save-owner-boundary", "label": "Emporium save-owner boundary", "status": "cleared", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["multiverseMarketSaveDataImportBoundary"]), "shellField": config["accessorBridge"], "shellPathId": "typed-accessor", "comparisonShape": [{"type": "accessor-bridge", "status": "present"}, {"type": "typed-save-owner", "status": "present"}, {"type": "compatibility-import-span", "status": "present"}], "groundedConclusion": "The Emporium accessor-to-SaveData owner boundary is grounded enough to preserve as compatibility-only truth."},
+            "blockedTarget": {"id": "multiverse-market-canonical-import", "label": "Emporium canonical import", "status": "blocked", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["multiverseMarketSaveDataImportBoundary"]), "shellField": config["saveOwner"], "shellPathId": "canonical-import", "comparisonShape": [{"type": "typed-market-field-recovery", "status": "missing"}, {"type": "canonical-import-admissibility", "status": "missing"}, {"type": "broad-row-identity-remap", "status": "missing"}], "groundedConclusion": "Canonical import remains blocked even though the wider save-owner boundary is grounded."},
             "delta": {
                 "sharedPresentEdgeTypes": ["accessor-bridge", "typed-save-owner"],
                 "baselineOnlyPresentEdgeTypes": ["compatibility-import-span"],
@@ -8813,7 +8800,7 @@ def build_decision_summary(target: dict[str, Any], trace_payload: dict[str, Any]
     }
 
 
-def get_priority_preload_documents(target: dict[str, Any]) -> list[str]:
+def get_priority_support_documents(target: dict[str, Any]) -> list[str]:
     family_id = target["familyId"]
     if family_id == "exploration":
         return ["tokenShopExtract", "tokenShopRowRemapBoundary", "shardCostFormulaModel", "multiverseMarketMemberBoundary"]
@@ -8858,12 +8845,12 @@ def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list
         resolved_depth_search = target.get("defaultDepth", 0) if depth_search is None else depth_search
     execution_anchor_specs = build_anchor_specs(anchors, "execution-anchor")
     expanded_anchor_specs = build_anchor_specs(planner_resolution["expandedAnchors"], "planner-expanded-anchor")
-    documents = TraceDocumentCache(COMPATIBILITY_SOURCE_PATHS)
-    documents.preload(get_priority_preload_documents(target))
+    support_documents = TraceDocumentCache(SUPPORT_DATASET_PATHS)
+    support_documents.preload(get_priority_support_documents(target))
     trace_payload = (
-        build_generic_explore_trace(anchors, list(source_paths.keys()), documents)
+        build_generic_explore_trace(anchors, list(source_paths.keys()), support_documents)
         if is_generic_explore
-        else build_trace_payload(selected_target_id, target, anchors, documents, list(source_paths.keys()), extended_search, resolved_depth_search)
+        else build_trace_payload(selected_target_id, target, anchors, support_documents, list(source_paths.keys()), extended_search, resolved_depth_search)
     )
     native_anchor_values = _collect_native_trace_terms(target, planner_resolution, trace_payload)
     native_trace = collect_native_trace(
@@ -8890,9 +8877,9 @@ def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list
         "dataset": "unity-trace-bundle",
         "generatedAt": datetime.now().isoformat(timespec="seconds"),
         "traceWorkflow": {
-            "command": "node scripts/unity/run_probe.mjs trace [--target <target-id>] [--family <family-id>] [--query <query>] [--anchor <anchor>] [--extended-search <0|1|2>]",
-            "directExample": "node scripts/unity/run_probe.mjs trace --target <target-id> --anchor <anchor>",
-            "plannerExample": "node scripts/unity/run_probe.mjs trace --family <family-id> --query <query> --anchor <anchor> --extended-search <0|1|2>",
+            "command": "node scripts/unity/run_extract.mjs trace [--target <target-id>] [--family <family-id>] [--query <query>] [--anchor <anchor>] [--extended-search <0|1|2>]",
+            "directExample": "node scripts/unity/run_extract.mjs trace --target <target-id> --anchor <anchor>",
+            "plannerExample": "node scripts/unity/run_extract.mjs trace --family <family-id> --query <query> --anchor <anchor> --extended-search <0|1|2>",
             "acceptedAnchors": target["acceptedAnchors"],
             "targetResolution": "explicit target, explicit family, or checked query planner plus family-aware anchor expansion",
             "readsCommittedSourcesOnly": True,
@@ -9502,9 +9489,9 @@ def sanitize_run_label(value: str) -> str:
 def build_trace_asset_set() -> dict[str, Any]:
     asset_paths = [
         METADATA_PATH,
-        PRIMARY_SOURCE_PATHS["level0"],
+        CANONICAL_SOURCE_PATHS["level0"],
         *ASSET_SOURCE_MEMBER_PATHS.values(),
-        PRIMARY_SOURCE_PATHS["native"],
+        CANONICAL_SOURCE_PATHS["native"],
     ]
     fingerprint_parts: list[str] = []
     inputs: list[dict[str, Any]] = []
@@ -10039,7 +10026,7 @@ def main() -> None:
     parser.add_argument("--max-steps", type=int, default=5,
                         help="Maximum analysis steps in chain")
     parser.add_argument("--chain", action="append", default=[],
-                        help="Additional probe scripts to run in sequence")
+                        help="Additional extractor scripts to run in sequence")
     parser.add_argument("--continue-on-error", action="store_true",
                         help="Continue pipeline even if a step fails")
     
@@ -10128,3 +10115,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

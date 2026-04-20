@@ -1,6 +1,6 @@
 # Shard Cost Method Probe
 
-Source: [`data/uabea-probe-report.json`](data/uabea-probe-report.json) plus the native code bytes in [`workbench/apk/base/libil2cpp.so`](workbench/apk/base/libil2cpp.so).
+Source: [`data/uabea-extract-report.json`](data/uabea-extract-report.json) plus the native code bytes in [`workbench/apk/base/libil2cpp.so`](workbench/apk/base/libil2cpp.so).
 
 ## Grounded conclusions
 

@@ -63,7 +63,7 @@ The SaveData object is at a known offset. Look for code that:
 | Item             | Status        | Source              |
 | ---------------- | ------------- | ------------------- |
 | Method names     | ✅ Verified   | Metadata (0xa0d50+) |
-| Field offsets    | ✅ Verified   | UABEA probe         |
+| Field offsets    | ✅ Verified   | UABEA extract report         |
 | Ghidra installed | ✅ Available  | tools/ghidra/       |
 | JDK 21 installed | ✅ Available  | tools/jdk/          |
 | Threshold values | ⚠️ Incomplete | Native binary       |
@@ -100,5 +100,5 @@ comparison logic, not just byte matches.
 ## References
 
 - Trace unit: `data/system-units/trace.v1.json` (embedded live trace-run metadata offsets)
-- UABEA probe: `data/uabea-probe-report.json` (SaveData field offsets 1916-1919)
+- UABEA extract report: `data/uabea-extract-report.json` (SaveData field offsets 1916-1919)
 - General workflow: `docs/extraction/ghidra-il2cpp-workflow.md`

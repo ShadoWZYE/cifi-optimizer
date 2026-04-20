@@ -33,7 +33,7 @@ These categories are already meaningful and should stay:
   - example: `multiverse-market-savedata-import-boundary.json`
 - reusable structural models
   - example: `shard-cost-formula-model.v1.json`
-  - example: `tokenshop-cost-model.json`
+  - example: `token-shop-row-remap-boundary.json`
 - registry and contract files
   - example: `unity-trace-target-registry.json`
   - example: `bundled-dataset-contract.v1.json`
@@ -42,14 +42,14 @@ These categories are already meaningful and should stay:
 
 The largest remaining weight is probe output that is no longer part of the live trace product path.
 
-Examples:
+Examples that were still bloating the active surface before the 2026-04-20 reduction pass:
 
 - `daily-tokenium-lane-probe.json`
 - `daily-tokenium-owner-probe.json`
 - `lm244-targeted-probe.json`
-- `unity-probe-report.json`
-- `uabea-probe-report.json`
-- `shard-owner-family-probe.v1.json`
+- `test-both-flags.json`
+- `test-no-metadata.json`
+- `token-shop-scene-probe.json`
 - `multiverse-market-row78-83-assignment-site-probe.json`
 
 These are useful as research history, but they are not good canonical state.

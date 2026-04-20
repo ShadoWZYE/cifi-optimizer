@@ -2,22 +2,22 @@
 
 ## Purpose
 
-`data/data-framework.v1.json` is the central migration manifest for the repo's data refactor.
+`data/data-framework.v1.json` is the central manifest for the repo's DB-first data architecture.
 
-It does not replace the existing datasets yet. It classifies them, groups them into future
-centralized system units, and records which files are still:
+It classifies data by system, records which inputs still matter, and describes how those inputs
+feed DB-backed system units and exported read models:
 
 - canonical
 - boundary
 - model
 - support
-- historical probe input
+- historical reference input
 
-The intent is to make later cleanup mechanical:
+The intent is to keep cleanup mechanical and explicit:
 
-1. move live reads behind one centralized system unit
-2. verify app, trace, and tests consume that unit or an explicit projection of it
-3. archive or delete old probe-era files only after the live reads are gone
+1. move live runtime reads behind DB-backed materialized system units
+2. verify app, trace, and tests consume those views or an explicit export projection
+3. archive or delete old file-shaped intermediates only after no live path depends on them
 
 ## Why this exists
 
@@ -26,7 +26,7 @@ The repo currently has:
 - app-consumed datasets
 - trace-consumed datasets
 - reusable boundary/model datasets
-- historical probe outputs still living beside them
+- historical reference/debug outputs still living beside them
 - a PlayerProfile boundary that still lives mostly in code and docs
 
 Without one central map, cleanup becomes guesswork. The framework manifest gives each file a
@@ -47,7 +47,7 @@ These are the target roles inside centralized units:
 - `support`
   Shared grounded support that can still power UI or trace summaries
 - `historical-probe`
-  Only the source material that is still live or still needed during the migration window
+  Only the reference/debug source material still needed during the migration window
 
 ### 2. System units
 
@@ -99,8 +99,16 @@ And seeds first unit files in:
 - `data/units/multiverse-market.v1.json`
 - `data/units/trace.v1.json`
 
-These unit files do not replace the old datasets yet. They are the concrete format targets future
-rewrites should move toward.
+These unit files are now a thin declarative inventory/spec layer for exported system units. They
+describe:
+
+- the system/unit identity
+- the intended subsystems and source roles
+- provenance and archive-review policy
+- the shape that `scripts/contracts/generate-system-units.mjs` should export
+
+The runtime source of truth is the SQLite-backed materialization layer, not the inventory files
+themselves.
 
 The final generated unit shape should collapse embedded data into:
 
@@ -114,7 +122,7 @@ The final generated unit shape should collapse embedded data into:
 The older `sections` shape can survive temporarily as a compatibility mirror while runtime code is
 still being rewired, but it is no longer the target end state.
 
-The repo now also starts generating actual centralized system datasets in:
+The repo also generates explicit exported system datasets in:
 
 - `data/system-units/player-state.v1.json`
 - `data/system-units/token-shop.v1.json`
@@ -122,8 +130,8 @@ The repo now also starts generating actual centralized system datasets in:
 - `data/system-units/shards.v1.json`
 - `data/system-units/trace.v1.json`
 
-Those files embed copied data plus provenance and are the first real step away from inventory-only
-unit manifests.
+Those files embed copied data plus provenance and act as static/export read models when the app is
+not running against the local DB-backed engine.
 
 Unit manifests and generated units can now also carry an archive review inside `replacementPlan`.
 Use it to distinguish:
@@ -139,11 +147,11 @@ Use it to distinguish:
 
 ### Adding a new consolidation step
 
-When you want to replace a probe-era file:
+When you want to replace a stale file-oriented input:
 
 1. identify the system unit it belongs to
 2. move the live app/trace/test read to the unit's target dataset or projection
-3. once all live reads are gone, remove the file from the unit's active `historicalProbe` view
+3. once all live runtime reads are gone, remove the file from the unit's active `historicalProbe` view
 4. keep it only in the archive plan until you are ready to archive or delete it
 
 ### Adding a new extraction family
@@ -157,7 +165,7 @@ If a new system does not fit an existing unit:
 5. define the subsystem slices it needs
 6. describe the intended app, trace, or planner consumer path
 
-Do not add a new probe file without deciding which system unit it belongs to.
+Do not add a new derived file-shaped artifact without deciding which system unit or export path it belongs to.
 
 ### UI-related data
 
@@ -175,7 +183,7 @@ Split UI data into its own unit only when all of the following become true:
 
 1. the data is primarily shared presentation metadata rather than mechanic grounding
 2. multiple systems consume the same normalized UI structure
-3. the unit can stay stable without depending on unresolved probe-era joins
+3. the unit can stay stable without depending on unresolved historical joins
 4. moving it out would reduce duplication instead of creating a second source of truth
 
 Until then, prefer:
@@ -231,7 +239,7 @@ That means:
 - the centralized unit should eventually embed normalized data directly
 - provenance should explain where that embedded data came from
 - committed source datasets should be referenced by path
-- transient probe-era evidence should record the command that regenerates the report instead of
+- transient derived evidence should record the command that regenerates the report instead of
   turning the transient report into a permanent dependency
 
 Typical provenance records are:

@@ -21,7 +21,7 @@ from elftools.elf.elffile import ELFFile  # type: ignore
 
 
 METHOD_PROBE_PATH = ROOT / "data" / "shard-cost-method-probe.v1.json"
-UABEA_REPORT_PATH = ROOT / "data" / "uabea-probe-report.json"
+UABEA_REPORT_PATH = ROOT / "data" / "uabea-extract-report.json"
 PARAMETER_PROBE_PATH = ROOT / "data" / "shard-cost-parameter-probe.v1.json"
 LIBIL2CPP_PATH = ROOT / "workbench" / "apk" / "base" / "libil2cpp.so"
 JSON_OUT = ROOT / "data" / "shard-cost-native-probe.v1.json"
@@ -106,7 +106,7 @@ def load_field_offset_map() -> dict[int, str]:
             if isinstance(offset, int) and isinstance(name, str):
                 mapping[offset] = name
         return mapping
-    raise RuntimeError("ShardMining field metadata missing from uabea-probe-report.json")
+    raise RuntimeError("ShardMining field metadata missing from uabea-extract-report.json")
 
 
 def load_plt_symbol_map() -> dict[str, str]:
@@ -1642,7 +1642,7 @@ def main() -> None:
         "generatedAt": str(date.today()),
         "source": {
             "methodProbe": "data/shard-cost-method-probe.v1.json",
-            "uabeaProbeReport": "data/uabea-probe-report.json",
+            "uabeaProbeReport": "data/uabea-extract-report.json",
             "libIl2cpp": "workbench/apk/base/libil2cpp.so",
             "vendorManual": ".vendor_manual",
         },

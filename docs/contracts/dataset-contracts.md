@@ -5,7 +5,7 @@ Defines the minimum contract for bundled JSON assets the app can treat as shippe
 ## Sources of truth
 
 - `data/bundled-dataset-contract.v1.json` — checked-in contract manifest
-- `data/data-framework.v1.json` — central migration manifest for consolidating probe-era files into explicit system units
+- `data/data-framework.v1.json` — central manifest for mapping canonical inputs and exported system-unit views in the DB-first architecture
 - `docs/contracts/dataset-refresh-checklist.md` — operator checklist for dataset promotion or refresh
 - `docs/contracts/data-framework.md` — guide for the centralized data migration model
 
@@ -134,14 +134,16 @@ Prevent:
 
 ### Shard milestone handoff boundary
 
-- file: `data/shard-milestone-handoff-boundary.v1.json`
+- canonical file: `data/shard-milestone-handoff-boundary.v2.json`
+- historical/raw predecessor: `data/shard-milestone-handoff-boundary.v1.json`
 - classification: `extracted-mechanics`
 - must contain the narrowed `ShardMining` row-shell ranges, the academy-side `ConstructionMilestones` numbered buy-family range, and explicit boundary framing for the unresolved handoff between them
 - useful for narrowing the remaining declaring-owner seam and future shard row-owner probes, not itself a recovered player-owned row model or planner-safe numbering map
 
 ### Shard save boundary
 
-- file: `data/shard-save-boundary.v1.json`
+- canonical file: `data/shard-save-boundary.v2.json`
+- historical/raw predecessor: `data/shard-save-boundary.v1.json`
 - classification: `extracted-mechanics`
 - must contain the narrowed shard-specific owner-shell terms, the checked save-family terms, and an explicit zero-overlap result across the current shard-local contexts
 
@@ -239,7 +241,8 @@ Prevent:
   - `data/multiverse-market-prefab-remap-boundary.json`
   - `data/multiverse-market-action-shell.json`
   - `data/multiverse-market-owner-family.json`
-  - `data/multiverse-market-save-boundary.json`
+  - canonical: `data/multiverse-market-save-boundary.v2.json`
+  - historical/raw predecessor: `data/multiverse-market-save-boundary.json`
   - `data/multiverse-market-market-member-boundary.json`
   - `data/tokenium-naming-clues.json`
   - `data/token-bank-state-clues.json`
@@ -248,7 +251,8 @@ Prevent:
   - `data/token-shop-cost-lanes.json`
   - `data/spend-action-lane-clues.json`
   - `data/token-shop-owner-shell.json`
-  - `data/token-shop-save-boundary.json`
+  - canonical: `data/token-shop-save-boundary.v2.json`
+  - historical/raw predecessor: `data/token-shop-save-boundary.json`
   - `data/token-bank-controller-shell.json`
 - classification: `extracted-mechanics`
 - must contain source paths, explicit grounded boundaries, and unresolved-gap-safe framing
@@ -263,6 +267,12 @@ Every grounded data note or dataset promotion should keep this order explicit:
 3. community gap-filling last
 
 If a note or refresh cannot point back to that order, it is not ready to become shipped repo truth.
+
+## Contract lifecycle
+
+- current canonical contract versions drive runtime helpers, generators, validators, and system-unit exports
+- older versions remain readable only through explicit compatibility or import layers
+- historical datasets are provenance, not active schema truth
 
 ## Validation path
 

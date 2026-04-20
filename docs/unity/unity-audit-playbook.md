@@ -41,27 +41,34 @@ These remain external prerequisites:
 - `.NET 8 SDK` only if rebuilding `tools/unity/CifiAssetProbe`
 - LDPlayer only if recreating raw extracts from the emulator
 
-Repo-local npm probe wrappers:
+Repo-local npm extraction wrappers:
 
-- `npm run probe:build`
+- preferred alias: `npm run extract:build`
+  - legacy alias: `npm run probe:build`
   - restores and rebuilds `tools/unity/CifiAssetProbe/bin/probe-run` from committed repo state
   - keeps `.dotnet`, `.nuget/packages`, and `.appdata` inside the repo
   - requires local `.NET 8 SDK`; the first restore also needs NuGet network access unless the repo-local package cache is already warm
-- `npm run probe:uabea`
+- preferred alias: `npm run extract:uabea`
+  - legacy alias: `npm run probe:uabea`
   - rebuilds and runs `tools/unity/CifiAssetProbe`
   - keeps `.dotnet`, `.nuget/packages`, and `.appdata` inside the repo
   - if the runnable probe artifact is missing, the wrapper restores and rebuilds it automatically
-  - if `Program.cs`, `CifiAssetProbe.csproj`, or `NuGet.Config` is newer than `bin/probe-run/CifiAssetProbe.dll`, the wrapper fails fast and tells you to run `npm run probe:build`
-- `npm run probe:shards:parameters`
+  - if `Program.cs`, `CifiAssetProbe.csproj`, or `NuGet.Config` is newer than `bin/probe-run/CifiAssetProbe.dll`, the wrapper fails fast and tells you to run `npm run extract:build`
+- preferred alias: `npm run extract:shards:parameters`
+  - legacy alias: `npm run probe:shards:parameters`
   - historical extraction lane only; do not treat its output as a shipped app or trace dependency
-- `npm run probe:shards:type-metadata`
+- preferred alias: `npm run extract:shards:type-metadata`
+  - legacy alias: `npm run probe:shards:type-metadata`
   - historical extraction lane only; keep for provenance review when a newer centralized shard unit does not yet subsume a type-side clue
-- `npm run probe:shards:method`
+- preferred alias: `npm run extract:shards:method`
+  - legacy alias: `npm run probe:shards:method`
   - historical extraction lane only; current live shard cost flow should prefer the centralized shard unit plus formula/calibration data
-- `npm run probe:shards:cost-native`
+- preferred alias: `npm run extract:shards:cost-native`
+  - legacy alias: `npm run probe:shards:cost-native`
   - historical extraction lane only; use when reviewing archived shard cost evidence, not as a primary shipped dataset refresh
-- `npm run probe:trace -- --query <query> --anchor <anchor>`
-  - or pin an exact preset with `npm run probe:trace -- --target <target-id> --anchor <anchor>`
+- preferred alias: `npm run extract:trace -- --query <query> --anchor <anchor>`
+  - legacy alias: `npm run probe:trace -- --query <query> --anchor <anchor>`
+  - or pin an exact preset with `npm run extract:trace -- --target <target-id> --anchor <anchor>`
   - persists DB-backed trace state first; add `--export` only when you want derived `workbench/trace-runs/` outputs
   - those DB-backed target bundles are then projected into `data/system-units/trace.v1.json` and the other `data/system-units/*.json` read models by `node scripts/contracts/generate-system-units.mjs`
   - reads the checked target registry in `data/unity-trace-target-registry.json`
@@ -176,12 +183,12 @@ If resuming on another machine:
 3. run:
    - `python scripts/unity/token_shop_parse.py`
    - `python scripts/unity/multiverse_market_parse.py`
-   - `npm run probe:build`
-   - `npm run probe:uabea`
-   - `npm run probe:shards:parameters`
-   - `npm run probe:shards:type-metadata`
-   - `npm run probe:shards:method`
-   - `npm run probe:shards:cost-native`
+   - `npm run extract:build`
+   - `npm run extract:uabea`
+   - `npm run extract:shards:parameters`
+   - `npm run extract:shards:type-metadata`
+   - `npm run extract:shards:method`
+   - `npm run extract:shards:cost-native`
 4. inspect the grounded outputs in `docs/` and `data/`
 5. continue by targeting the next unresolved owner object, not by returning to broad string scraping
 
@@ -198,11 +205,11 @@ The current repo-local candidate ranking for that step is recorded in:
 ## Portability Notes
 
 - `scripts/unity/uabea_probe.ps1` resolves the repo root from its own path and is clone-location agnostic.
-- `scripts/unity/run_probe.mjs` is the npm entry point for the probe wrappers and keeps `.dotnet`, `.nuget`, and `.appdata` repo-local before invoking `dotnet`.
-- `npm run probe:build` is the minimal reproducible rebuild path for the runnable probe artifact from repo state.
+- `scripts/unity/run_extract.mjs` is the primary npm entry point for extraction/materialization wrappers and keeps `.dotnet`, `.nuget`, and `.appdata` repo-local before invoking `dotnet`.
+- `npm run extract:build` is the minimal reproducible rebuild path for the runnable probe artifact from repo state. `npm run probe:build` remains a compatibility alias.
 - `scripts/unity/token_shop_parse.py` and `scripts/unity/multiverse_market_parse.py` also resolve the repo root from their own path and are clone-location agnostic.
 - The npm wrappers are path-portable, but they are not dependency-free: they still require local `dotnet`, Python, restored LFS assets, and the committed `.vendor_manual` libraries for the native shard probe.
-- The first `npm run probe:build` on a machine may need outbound access to `api.nuget.org` to populate the repo-local `.nuget/packages` cache before later rebuilds can stay repo-local.
+- The first `npm run extract:build` on a machine may need outbound access to `api.nuget.org` to populate the repo-local `.nuget/packages` cache before later rebuilds can stay repo-local.
 - The `.NET` wrapper no longer silently reuses a stale cached build. It only reuses `tools/unity/CifiAssetProbe/bin/probe-run` when the checked runnable artifact is newer than the local probe source inputs.
 - On Windows, the wrapper accepts either `python` or `py -3`. On macOS/Linux, it looks for `python3` first and falls back to `python`.
 - The current wrappers assume a shell environment that can execute `node`, `dotnet`, and Python from `PATH`; they do not bootstrap those toolchains for a fresh machine.
@@ -244,5 +251,6 @@ If those gaps remain open, keep the system in extraction and verification docs r
 - Full save/export decoding is still unresolved.
 - `MultiverseMarket` is only partially decoded; the post-validated late block still needs a second-pass parser.
 - Community naming should not be substituted for in-game names unless clearly labeled as external.
+
 
 

@@ -5,8 +5,8 @@
     "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
     "row7174RemapBand": "data/multiverse-market-row71-74-remap-band.json",
     "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-    "uabeaProbeReport": "data/uabea-probe-report.json",
-    "unityProbeReport": "data/unity-probe-report.json",
+    "uabeaProbeReport": "data/uabea-extract-report.json",
+    "unityProbeReport": "data/unity-apk-extract-report.json",
     "nearbyIdentityBindingPattern": "data/multiverse-market-nearby-identity-binding-pattern.json",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },

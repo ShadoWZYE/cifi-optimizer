@@ -1,10 +1,10 @@
-# Unity Probe Tool Inventory
+# Unity Extraction Tool Inventory
 
 This document provides a comprehensive inventory of all extraction and analysis tools in the repository. Tools are organized by capability and purpose.
 
 ## Overview
 
-The repo uses a centralized probe runner (`scripts/unity/run_probe.mjs`) that provides:
+The repo uses a centralized extraction runner (`scripts/unity/run_extract.mjs`) that provides:
 
 - **Generalized commands** - Parameterized extraction for any target/anchor
 - **Pipeline chaining** - Multi-step analysis with `--chain` and `--max-steps`
@@ -20,25 +20,35 @@ Related workflow docs:
 
 | Command                        | Purpose                       | Produces Committed Artifacts?      |
 | ------------------------------ | ----------------------------- | ---------------------------------- |
-| `node run_probe.mjs build`     | Build C# AssetProbe           | No (build artifact)                |
-| `node run_probe.mjs probe`     | Run C# AssetProbe directly    | Yes (data/uabea-probe-report.json) |
-| `node run_probe.mjs probe:run` | Build + run in one command    | Yes                                |
-| `node run_probe.mjs trace`     | Generalized trace bundle      | No (DB-backed trace state; optional exports can be generated on demand) |
-| `node run_probe.mjs compile`   | Canonical dataset compilation | Yes                                |
-| `node run_probe.mjs pipeline`  | Multi-step extraction         | Yes                                |
+| `node run_extract.mjs build`     | Build C# asset extractor      | No (build artifact)                |
+| `node run_extract.mjs asset`     | Run C# asset extractor        | Yes (data/uabea-extract-report.json) |
+| `node run_extract.mjs asset:run` | Build + run in one command    | Yes                                |
+| `node run_extract.mjs trace`     | Materialize target bundle     | No (DB-backed trace state; optional exports can be generated on demand) |
+| `node run_extract.mjs compile`   | System-unit export refresh    | Yes                                |
+| `node run_extract.mjs pipeline`  | Multi-step extraction         | Yes                                |
 
-**C# Probe performance flags (with probe/probe:run):**
+Preferred npm aliases now mirror the DB-first extraction model:
+
+- `npm run extract:build`
+- `npm run extract:uabea`
+- `npm run extract:trace`
+- `npm run extract:shards:*`
+
+Legacy `probe:*` npm scripts are retained as operator-facing compatibility aliases over the same
+DB-first behavior.
+
+**C# asset extraction performance flags (with asset/asset:run):**
 
 - `--quick`: Metadata only, no fields/methods (~25x faster)
 - `--no-metadata`: Skip Cpp2IL load, use cache
 - `--term <name>`: Only process types matching name
 - `--report <path>`: Output report path
 
-### 0. C# Asset Probe (Native .NET)
+### 0. C# Asset Extractor (Native .NET)
 
 | Executable                             | Purpose                                                       | Output                         | Performance Flags                      |
 | -------------------------------------- | ------------------------------------------------------------- | ------------------------------ | -------------------------------------- |
-| `tools/unity/CifiAssetProbe/` (csproj) | High-performance IL2CPP/C# metadata extractor using LibCpp2IL | `data/uabea-probe-report.json` | `--quick`, `--no-metadata`, `--term X` |
+| `tools/unity/CifiAssetProbe/` (csproj) | High-performance IL2CPP/C# metadata extractor using LibCpp2IL | `data/uabea-extract-report.json` | `--quick`, `--no-metadata`, `--term X` |
 
 **Performance flags:**
 
@@ -51,7 +61,7 @@ Related workflow docs:
 ```bash
 cd tools/unity/CifiAssetProbe
 dotnet build
-dotnet run -- --report ../../data/uabea-probe-report.json --quick
+dotnet run -- --report ../../data/uabea-extract-report.json --quick
 dotnet run -- --term SaveData --quick
 ```
 
@@ -75,38 +85,31 @@ dotnet run -- --term SaveData --quick
 
 | Script                   | Purpose                                                      | Committed Output?               |
 | ------------------------ | ------------------------------------------------------------ | ------------------------------- |
-| `run_probe.mjs`          | Centralized probe runner with generalized CLI                | No                              |
+| `run_extract.mjs`        | Primary extraction runner with generalized CLI               | No                              |
+| `run_probe.mjs`          | Legacy compatibility wrapper over `run_extract.mjs`          | No                              |
 | `unity_trace_bundle.py`  | Trace bundle generator - extracts and analyzes Unity objects | No (stores DB-backed trace fragments/views; optional exports can write derived per-target outputs under `workbench/trace-runs/`) |
-| `unity_probe_helpers.py` | Reusable Unity probing methods                               | No (utility)                    |
+| `unity_extract_helpers.py` | Reusable Unity probing methods                               | No (utility)                    |
 | `portable_paths.py`      | Path resolution helpers                                      | No (utility)                    |
 
 ### 2. APK/Unity Extraction
 
 | Script                           | Purpose                              | Committed Output? |
 | -------------------------------- | ------------------------------------ | ----------------- |
-| `unity_apk_probe.py`             | Generic APK/Unity object extraction  | No                |
+| `unity_extract_report.py`             | Generic APK/Unity object extraction  | No                |
 | `unity_textasset_dump.py`        | TextAsset string extraction          | No                |
-| `unity_targeted_string_probe.py` | Targeted string search               | No                |
+| `unity_targeted_string_report.py` | Targeted string search               | No                |
 | `metadata_neighborhood_probe.py` | Metadata field neighborhood analysis | No                |
 
-### 3. TokenShop Extraction (11 scripts)
+### 3. TokenShop Extraction (reduced active surface)
 
 | Script                                | Purpose                            | Committed Output?                 |
 | ------------------------------------- | ---------------------------------- | --------------------------------- |
-| `token_shop_scene_probe.py`           | TokenShop scene object extraction  | Yes (intermediate)                |
 | `token_shop_parse.py`                 | TokenShop field/method parsing     | Yes (intermediate)                |
-| `token_shop_title_discovery_probe.py` | Player-facing title discovery      | Yes                               |
-| `tokenshop_complete_parse.py`         | Complete TokenShop data extraction | Yes                               |
-| `tokenshop_optimizer_data.py`         | Optimizer-ready data formatting    | Yes                               |
-| `tokenshop_ui_mapping.py`             | UI text mapping                    | Yes (`tokenshop-ui-mapping.json`) |
-| `tokenshop_cost_formula.py`           | Cost formula analysis              | No                                |
-| `tokenshop_cost_native_probe.py`      | Native code cost probing           | No                                |
 | `tokenshop_cost_native_analyzer.py`   | Native cost analysis               | No                                |
-| `tokenshop_cost_method_probe.py`      | Method-level cost extraction       | No                                |
-| `tokenshop_cost_tracer.py`            | Cost tracer                        | No                                |
-| `tokenshop_atucost_probe.py`          | ATU-specific cost probe            | No                                |
-| `tokenshop_getcost_analyzer.py`       | getCost method analysis            | No                                |
-| `tokenshop_formula_discovery.py`      | Formula discovery                  | No                                |
+
+The older TokenShop scene/title/optimizer generator chain was removed after the repo converged on
+`data/tokenshop-canonical-v1.json`, `data/token-shop-row-remap-boundary.json`, and DB-backed trace
+materialization as the active surfaces.
 
 ### 4. Shard Extraction (8 scripts)
 
@@ -121,22 +124,17 @@ dotnet run -- --term SaveData --quick
 | `shard_milestone_save_owner_candidates.py` | Save owner candidate analysis   | Yes                |
 | `shard_scene_monobehaviour_probe.py`       | MonoBehaviour probe             | No                 |
 
-### 5. Multiverse Market Extraction (2 scripts)
+### 5. Multiverse Market Extraction
 
 | Script                                    | Purpose              | Committed Output? |
 | ----------------------------------------- | -------------------- | ----------------- |
 | `multiverse_market_parse.py`              | Market data parsing  | Yes               |
-| `multiverse_market_text_runtime_probe.py` | Text runtime probing | Yes               |
 
 ### 6. Debug/Development Tools
 
 | Script                      | Purpose                           |
 | --------------------------- | --------------------------------- |
-| `debug_button_structure.py` | Debug ATU button structure        |
-| `debug_mono_readable.py`    | Debug MonoBehaviour readability   |
-| `debug_mono_script.py`      | Debug MonoBehaviour script issues |
 | `check_dtm.py`              | Quick DTM check                   |
-| `check_formula_fields.py`   | Formula field validation          |
 
 ### 8. Binary Analysis (Ghidra)
 
@@ -165,7 +163,7 @@ native helper families.
 
 **Supported workflow**
 
-1. Use metadata/UABEA probes to recover names, types, and offsets.
+1. Use metadata/UABEA extraction to recover names, types, and offsets.
 2. Build one persistent analyzed Ghidra project for `libil2cpp.so`.
 3. Reuse that project with `process-project` searches instead of re-importing.
 4. Bridge native findings back to managed names through offsets and surrounding evidence.
@@ -182,7 +180,9 @@ python scripts/unity/ghidra_headless.py process-project cifi-full libil2cpp.so -
 ```
 
 `ghidra_headless.py` now forces headless settings/cache/temp files into `workbench/ghidra-runtime/`
-so runs do not depend on writable `%APPDATA%` profile state. The persistent project is still
+so runs do not depend on writable `%APPDATA%` profile state. Treat `workbench/ghidra-runtime/` as
+ephemeral operational state: it is safe to delete when no Ghidra job is running, and it is not
+part of the repo's durable runtime truth. The persistent project is still
 single-lock: do not run multiple `process-project` or `build-project` commands against `cifi-full`
 at the same time.
 
@@ -310,7 +310,6 @@ the sole source of original Unity object structure. See
 
 | Script                                   | Purpose                             | Committed Output?                   |
 | ---------------------------------------- | ----------------------------------- | ----------------------------------- |
-| `scripts/compile_tokenshop_canonical.py` | Compile canonical TokenShop dataset | Yes (`tokenshop-canonical-v1.json`) |
 | `scripts/contracts/generate-system-units.mjs` | Export app-facing system-unit read models from DB-backed target bundles and canonical repo data | Yes (`data/system-units/*.json`) |
 | `scripts/contracts/system_unit_db.py` | Inspect/materialize DB-backed target-bundle and system-unit views for app/runtime integration | No |
 | `score_extraction_candidates.py`         | Score extraction candidates         | No                                  |
@@ -325,7 +324,7 @@ Local app/runtime note:
 ### Basic Trace
 
 ```bash
-node scripts/unity/run_probe.mjs trace \
+node scripts/unity/run_extract.mjs trace \
   --family token-shop
 ```
 
@@ -348,7 +347,7 @@ is declared.
 ### With Hierarchy Level
 
 ```bash
-node scripts/unity/run_probe.mjs trace \
+node scripts/unity/run_extract.mjs trace \
   --target shard-owned-state \
   --anchor upgradeInfoList \
   --level structured
@@ -357,7 +356,7 @@ node scripts/unity/run_probe.mjs trace \
 ### Ambiguous Explore
 
 ```bash
-node scripts/unity/run_probe.mjs trace \
+node scripts/unity/run_extract.mjs trace \
   --query SomeUnknownLabel \
   --level structured
 ```
@@ -374,7 +373,7 @@ the TokenShop family default `ATU3` compare lane and routes directly to
 ### Pipeline with Resume
 
 ```bash
-node scripts/unity/run_probe.mjs pipeline \
+node scripts/unity/run_extract.mjs pipeline \
   --target TokenShop \
   --anchors ATU1Button ATU2Button ATU3Button \
   --output data/tokenshop-canonical-v1.json \
@@ -384,7 +383,7 @@ node scripts/unity/run_probe.mjs pipeline \
 ### Force Regeneration
 
 ```bash
-node scripts/unity/run_probe.mjs trace \
+node scripts/unity/run_extract.mjs trace \
   --target token-shop-atu3-cells-effect \
   --anchor ATU3Button \
   --extended-search 1 \
@@ -395,7 +394,7 @@ node scripts/unity/run_probe.mjs trace \
 ### Continue on Error
 
 ```bash
-node scripts/unity/run_probe.mjs pipeline \
+node scripts/unity/run_extract.mjs pipeline \
   --target TokenShop \
   --continue-on-error
 ```
@@ -453,6 +452,9 @@ Use `python scripts/unity/unity_trace_bundle.py ... --export` when you explicitl
 trace-run JSON/Markdown export. Normal trace runs persist to SQLite only and do not require the
 `workbench/trace-runs/*.json` or `*.md` files to exist.
 
+Top-level `tmp-*.json`, `tmp-*.md`, `tmp-*.py`, and `scripts/**/__pycache__/` contents are
+ephemeral scratch/runtime artifacts and should not be treated as durable repo state.
+
 The markdown trace output now also includes:
 
 - reconstructed owners
@@ -467,17 +469,19 @@ That section is the main native bridge summary when IL2CPP strips the original n
 
 For backwards compatibility, old commands still work:
 
-- `node run_probe.mjs shards:parameters`
-- `node run_probe.mjs shards:type-metadata`
-- `node run_probe.mjs shards:method`
-- `node run_probe.mjs shards:cost-native`
+- `node run_extract.mjs probe`
+- `node run_extract.mjs probe:run`
+- `node run_extract.mjs shards:parameters`
+- `node run_extract.mjs shards:type-metadata`
+- `node run_extract.mjs shards:method`
+- `node run_extract.mjs shards:cost-native`
 
-## Adding New Probes
+## Adding New Extraction Commands
 
-To add a new probe script:
+To add a new extraction script:
 
-1. Follow the standard interface in `unity_probe_helpers.py`
-2. Add to appropriate category in commandTemplates in `run_probe.mjs`
+1. Follow the standard interface in `unity_extract_helpers.py`
+2. Add to the appropriate category in `commandTemplates` in `run_extract.mjs`
 3. Document in this inventory
 4. Update committed output list in `docs/repo/artifacts.md`
 
@@ -487,3 +491,4 @@ To add a new probe script:
 - Scripts marked "No" are utilities, debug tools, or intermediate processing
 - All extraction scripts should accept CLI arguments for target/anchor flexibility
 - Use `--level` to control output hierarchy (raw, structured, both)
+

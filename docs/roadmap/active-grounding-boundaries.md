@@ -47,9 +47,9 @@ Continue the same lane by default, and if the current probe cannot clear the blo
   - `docs/systems/shards/shard-system-verification.md`
   - `docs/systems/shards/shard-owner-family-verification.md`
   - `data/shard-milestone-family-evidence.v1.json`
-  - `data/shard-milestone-handoff-boundary.v1.json`
-  - `data/shard-save-boundary.v1.json`
-  - `data/shard-milestone-save-owner-candidates.v1.json`
+  - `data/shard-milestone-handoff-boundary.v2.json`
+  - `data/shard-save-boundary.v2.json`
+  - `data/shard-milestone-save-owner-candidates.v2.json`
 
 ### `spend-multiverse-savedata-import-surface`
 

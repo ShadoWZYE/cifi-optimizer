@@ -33,7 +33,7 @@
     "owned-state": {
       "summary": "Owned-state blocker and save-owner seam conclusions for shard milestone state.",
       "seedOutputs": [
-        "data/shard-save-boundary.v1.json"
+        "data/shard-save-boundary.v2.json"
       ]
     },
     "cost": {
@@ -47,7 +47,7 @@
   },
   "provenance": {
     "policy": "Copy shard family, owned-state, and cost data into centralized shard views while preserving the committed boundary/model source or the regeneration command for transient extraction evidence.",
-    "transientProbePolicy": "If a shard value is initially copied from a transient extraction report, record the command that regenerates the report before treating the embedded value as current.",
+    "transientProbePolicy": "If a shard value is initially copied from a transient extraction report, record the command or DB-backed target-bundle identity that regenerates it before treating the embedded value as current.",
     "sourceRecords": [
       {
         "id": "shard-family-evidence",
@@ -59,7 +59,7 @@
       {
         "id": "shard-save-boundary",
         "kind": "dataset",
-        "path": "data/shard-save-boundary.v1.json",
+        "path": "data/shard-save-boundary.v2.json",
         "role": "boundary",
         "persistence": "committed"
       },
@@ -77,8 +77,7 @@
         "persistence": "transient",
         "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-owned-state-upgradeinfolist-population --level structured",
         "expectedOutputs": [
-          "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
-          "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.md"
+          "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population"
         ]
       },
       {
@@ -88,8 +87,7 @@
         "persistence": "transient",
         "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-cost-su0-structure --level structured",
         "expectedOutputs": [
-          "workbench/trace-runs/shard-cost-su0-structure.json",
-          "workbench/trace-runs/shard-cost-su0-structure.md"
+          "db:materialized-target-bundle:shard-cost-su0-structure"
         ]
       }
     ]
@@ -110,9 +108,9 @@
       "data/shard-effect-text-handler-boundary.v1.json",
       "data/shard-milestone-row-shell-boundary.v1.json",
       "data/shard-milestone-row-alignment-boundary.v1.json",
-      "data/shard-milestone-handoff-boundary.v1.json",
-      "data/shard-save-boundary.v1.json",
-      "data/shard-milestone-save-owner-candidates.v1.json"
+      "data/shard-milestone-handoff-boundary.v2.json",
+      "data/shard-save-boundary.v2.json",
+      "data/shard-milestone-save-owner-candidates.v2.json"
     ],
     "model": [
       "data/shard-cost-formula-model.v1.json",

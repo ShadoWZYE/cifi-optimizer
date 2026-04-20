@@ -9,8 +9,8 @@ Fully map the TokenShop system from game assets to extend beyond the current 13 
 ### Methodology
 
 1. Analyzed `data/token-shop-values.json` for field structure and cost data
-2. Cross-referenced with `data/unity-probe-report.json` for prefab identities
-3. Cross-referenced with `data/uabea-probe-report.json` for object instances
+2. Cross-referenced with `data/unity-apk-extract-report.json` for prefab identities
+3. Cross-referenced with `data/uabea-extract-report.json` for object instances
 4. Examined `data/spend-action-lane-clues.json` for buy hooks
 5. Reviewed `data/token-shop-row-remap-boundary.json` for existing evidence
 
@@ -38,7 +38,7 @@ Fully map the TokenShop system from game assets to extend beyond the current 13 
 
 #### Evidence for T2 Duo Boosters (ATU14-18)
 
-From uabea-probe-report.json:
+From uabea-extract-report.json:
 
 - `NewTokenUPGPrefab.T2.DuoBoosterOne` (line 167226)
 - `NewTokenUPGPrefab.T2.DuoBoosterTwo` (line 167126)
@@ -63,7 +63,7 @@ From token-shop-row-remap-boundary.json:
 - BuyTrio1Boost and BuyTrio2Boost hooks exist in metadata
 - T3Trio1 and T3Trio2 fields in token-shop-values.json
 
-From unity-probe-report.json:
+From unity-apk-extract-report.json:
 
 - `NewTokenUPGPrefab.T3.TrinityBoosterOne` exists
 
@@ -132,11 +132,11 @@ From token-shop-row-remap-boundary.json:
 ### Data Sources
 
 - token-shop-values.json: Complete field structure (227 fields)
-- unity-probe-report.json: Prefab roster (NewTokenUPGPrefab.\*)
-- uabea-probe-report.json: Object instances (line 167116+)
+- unity-apk-extract-report.json: Prefab roster (NewTokenUPGPrefab.\*)
+- uabea-extract-report.json: Object instances (line 167116+)
 - token-shop-row-remap-boundary.json: Existing evidence
 - spend-action-lane-clues.json: Buy hooks (BuyTrio1Boost, BuyTrio2Boost)
-- daily-tokenium-lane-probe.json: BuyDuo1-5Boost, BuyTrio1Boost, BuyTrio2Boost, BuyATU24-28
+- token-shop-row-remap-boundary.json / token-shop-late-atu-boundary.json: preserved embedded Daily Tokenium buy-family evidence for BuyDuo1-5Boost, BuyTrio1Boost, BuyTrio2Boost, and BuyATU24-28
 
 ### Summary
 

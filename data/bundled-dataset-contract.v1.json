@@ -174,7 +174,7 @@
       "label": "Shard milestone handoff boundary",
       "classification": "extracted-mechanics",
       "files": [
-        "data/shard-milestone-handoff-boundary.v1.json"
+        "data/shard-milestone-handoff-boundary.v2.json"
       ]
     },
     {
@@ -182,7 +182,7 @@
       "label": "Shard save boundary",
       "classification": "extracted-mechanics",
       "files": [
-        "data/shard-save-boundary.v1.json"
+        "data/shard-save-boundary.v2.json"
       ]
     },
     {
@@ -190,7 +190,7 @@
       "label": "Shard milestone save-owner candidates",
       "classification": "extracted-mechanics",
       "files": [
-        "data/shard-milestone-save-owner-candidates.v1.json"
+        "data/shard-milestone-save-owner-candidates.v2.json"
       ]
     },
     {
@@ -358,7 +358,7 @@
       "label": "Token shop save boundary",
       "classification": "extracted-mechanics",
       "files": [
-        "data/token-shop-save-boundary.json"
+        "data/token-shop-save-boundary.v2.json"
       ]
     },
     {
@@ -382,7 +382,7 @@
       "label": "Multiverse market save boundary",
       "classification": "extracted-mechanics",
       "files": [
-        "data/multiverse-market-save-boundary.json"
+        "data/multiverse-market-save-boundary.v2.json"
       ]
     },
     {

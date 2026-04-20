@@ -6,8 +6,8 @@ This note records where the settled `69-74` inscription anomaly first appears in
 
 - Raw app-side evidence preserved repo-locally already contains the anomaly:
   - [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
-  - [`data/unity-probe-report.json`](data/unity-probe-report.json)
-  - [`data/uabea-probe-report.json`](data/uabea-probe-report.json)
+  - [`data/unity-apk-extract-report.json`](data/unity-apk-extract-report.json)
+  - [`data/uabea-extract-report.json`](data/uabea-extract-report.json)
 - Repo-local derived summaries preserve that same split without changing its meaning:
   - [`data/multiverse-market-prefab-remap-boundary.json`](data/multiverse-market-prefab-remap-boundary.json)
   - [`data/multiverse-market-row71-74-remap-band.json`](data/multiverse-market-row71-74-remap-band.json)

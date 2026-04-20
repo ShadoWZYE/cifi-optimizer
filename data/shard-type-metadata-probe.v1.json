@@ -2,7 +2,7 @@
   "dataset": "shard-type-metadata-probe.v1",
   "generatedAt": "2026-04-06",
   "source": {
-    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "uabeaProbeReport": "data/uabea-extract-report.json",
     "probeMethod": "direct LibCpp2IL Assembly-CSharp type reflection via CifiAssetProbe"
   },
   "targets": {

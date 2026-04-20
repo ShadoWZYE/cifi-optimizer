@@ -6,17 +6,21 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-OUTPUT_PATH = ROOT / "data" / "shard-milestone-save-owner-candidates.v1.json"
+OUTPUT_PATH = ROOT / "data" / "shard-milestone-save-owner-candidates.v2.json"
 
 
 def build_dataset() -> dict[str, object]:
     return {
-        "dataset": "shard-milestone-save-owner-candidates.v1",
+        "dataset": "shard-milestone-save-owner-candidates.v2",
         "generatedAt": str(date.today()),
         "sources": {
-            "shardSaveBoundary": "data/shard-save-boundary.v1.json",
+            "shardSaveBoundary": "data/shard-save-boundary.v2.json",
+            "handoffBoundary": "data/shard-milestone-handoff-boundary.v2.json",
             "ownerFamilyBoundary": "data/shard-owner-family-boundary.v1.json",
             "payloadBoundary": "data/shard-milestone-payload-boundary.v1.json",
+            "unityTraceTargetRegistry": "data/unity-trace-target-registry.json",
+            "traceSystemUnit": "data/system-units/trace.v1.json",
+            "ownedStateTargetBundle": "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population",
             "typeMetadataProbe": "data/shard-type-metadata-probe.v1.json",
             "extractionCandidateFamilies": "data/extraction-candidate-families.v1.json",
             "globalMetadata": "workbench/apk/base/global-metadata.dat",
@@ -78,6 +82,8 @@ def build_dataset() -> dict[str, object]:
             "shardOwnerShellTermsChecked": 12,
             "ownerShellWithSaveOverlapCount": 0,
             "directShardPlayerProfileContext": False,
+            "ownedStatePopulationBridgeRecovered": False,
+            "ownedStateOutcomeKind": "non-local-injection-seam",
             "candidateTypeCount": 2
         },
         "warnings": [

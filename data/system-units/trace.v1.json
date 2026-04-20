@@ -5,7 +5,7 @@
   "generatedAt": "2026-04-18",
   "generatedBy": "scripts/contracts/generate-system-units.mjs",
   "unitInventoryRef": "data/units/trace.v1.json",
-  "summary": "Central trace orchestration unit for registry, stable live trace-run outputs, and promotion-target definitions while centralized system units become the promotion targets behind trace.",
+  "summary": "Central trace orchestration unit for the registry, DB-backed target/system materializations, and promotion-target definitions.",
   "liveConsumers": {
     "appStatePaths": [],
     "traceTargets": [
@@ -17,12 +17,12 @@
     ],
     "plannerConsumers": [
       "scripts/unity/unity_trace_bundle.py",
-      "scripts/unity/run_probe.mjs"
+      "scripts/unity/run_extract.mjs"
     ]
   },
   "provenance": {
-    "policy": "Trace remains orchestration, so provenance here should preserve the registry contract plus the commands that regenerate the stable transient trace outputs embedded into the centralized unit.",
-    "transientProbePolicy": "Stable workbench trace outputs are disposable; preserve the command that regenerates them instead of treating the workbench files as shipped dependencies.",
+    "policy": "Trace remains orchestration, so provenance here should preserve the registry contract plus the commands that regenerate the DB-backed target/system materializations exposed through exported units.",
+    "transientProbePolicy": "Optional trace-run files are disposable debug exports; preserve the command that regenerates the DB-backed views instead of treating exported files as shipped dependencies.",
     "sourceRecords": [
       {
         "id": "trace-registry",
@@ -38,8 +38,8 @@
         "persistence": "transient",
         "command": "python scripts\\unity\\unity_trace_bundle.py --family token-shop --level structured",
         "expectedOutputs": [
-          "workbench/trace-runs/token-shop-atu3-cells-effect.json",
-          "workbench/trace-runs/token-shop-family-structure.json"
+          "db:materialized-target-bundle:token-shop-atu3-cells-effect",
+          "db:materialized-target-bundle:token-shop-family-structure"
         ]
       },
       {
@@ -49,8 +49,7 @@
         "persistence": "transient",
         "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-cost-su0-structure --level structured",
         "expectedOutputs": [
-          "workbench/trace-runs/shard-cost-su0-structure.json",
-          "workbench/trace-runs/shard-cost-su0-structure.md"
+          "db:materialized-target-bundle:shard-cost-su0-structure"
         ]
       },
       {
@@ -60,8 +59,7 @@
         "persistence": "transient",
         "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-owned-state-upgradeinfolist-population --level structured",
         "expectedOutputs": [
-          "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
-          "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.md"
+          "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population"
         ]
       },
       {
@@ -71,8 +69,7 @@
         "persistence": "transient",
         "command": "python scripts\\unity\\unity_trace_bundle.py --target multiverse-market-save-owner-boundary --level structured",
         "expectedOutputs": [
-          "workbench/trace-runs/multiverse-market-save-owner-boundary.json",
-          "workbench/trace-runs/multiverse-market-save-owner-boundary.md"
+          "db:materialized-target-bundle:multiverse-market-save-owner-boundary"
         ]
       }
     ]
@@ -83,11 +80,12 @@
     "model": [],
     "support": [
       "data/unity-trace-target-registry.json",
-      "workbench/trace-runs/token-shop-family-structure.json",
-      "workbench/trace-runs/token-shop-atu3-cells-effect.json",
-      "workbench/trace-runs/shard-cost-su0-structure.json",
-      "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
-      "workbench/trace-runs/multiverse-market-save-owner-boundary.json"
+      "db:materialized-target-bundle:token-shop-family-structure",
+      "db:materialized-target-bundle:token-shop-atu3-cells-effect",
+      "db:materialized-target-bundle:shard-cost-su0-structure",
+      "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population",
+      "db:materialized-target-bundle:multiverse-market-save-owner-boundary",
+      "db:materialized-system-unit:trace:v1"
     ],
     "historicalProbe": []
   },
@@ -113,8 +111,8 @@
       "persistence": "transient",
       "command": "python scripts\\unity\\unity_trace_bundle.py --family token-shop --level structured",
       "expectedOutputs": [
-        "workbench/trace-runs/token-shop-atu3-cells-effect.json",
-        "workbench/trace-runs/token-shop-family-structure.json"
+        "db:materialized-target-bundle:token-shop-atu3-cells-effect",
+        "db:materialized-target-bundle:token-shop-family-structure"
       ]
     },
     {
@@ -124,8 +122,7 @@
       "persistence": "transient",
       "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-cost-su0-structure --level structured",
       "expectedOutputs": [
-        "workbench/trace-runs/shard-cost-su0-structure.json",
-        "workbench/trace-runs/shard-cost-su0-structure.md"
+        "db:materialized-target-bundle:shard-cost-su0-structure"
       ]
     },
     {
@@ -135,8 +132,7 @@
       "persistence": "transient",
       "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-owned-state-upgradeinfolist-population --level structured",
       "expectedOutputs": [
-        "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
-        "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.md"
+        "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population"
       ]
     },
     {
@@ -146,8 +142,7 @@
       "persistence": "transient",
       "command": "python scripts\\unity\\unity_trace_bundle.py --target multiverse-market-save-owner-boundary --level structured",
       "expectedOutputs": [
-        "workbench/trace-runs/multiverse-market-save-owner-boundary.json",
-        "workbench/trace-runs/multiverse-market-save-owner-boundary.md"
+        "db:materialized-target-bundle:multiverse-market-save-owner-boundary"
       ]
     }
   ],
@@ -1679,7 +1674,7 @@
         ],
         "traceScope": "token-shop-family-structure",
         "requestSignature": "bc8bef98dea5ad51",
-        "builtAt": "2026-04-20T03:17:47.970575",
+        "builtAt": "2026-04-20T03:20:25.990273",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": null,
@@ -93152,7 +93147,7 @@
         ],
         "traceScope": "token-shop-atu3-cells-effect",
         "requestSignature": "05e55cd08cfbdd8d",
-        "builtAt": "2026-04-20T03:17:47.556782",
+        "builtAt": "2026-04-20T03:20:25.580283",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": null,
@@ -182298,7 +182293,7 @@
         ],
         "traceScope": "shard-cost-su0-structure",
         "requestSignature": "42dd01b02fa06a53",
-        "builtAt": "2026-04-20T03:17:47.492427",
+        "builtAt": "2026-04-20T03:20:25.512141",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": null,
@@ -184583,7 +184578,7 @@
         ],
         "traceScope": "shard-owned-state-upgradeinfolist-population",
         "requestSignature": "9eb67ca7838c2c50",
-        "builtAt": "2026-04-20T03:17:47.500862",
+        "builtAt": "2026-04-20T03:20:25.521708",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": null,
@@ -196478,7 +196473,7 @@
         ],
         "traceScope": "multiverse-market-save-owner-boundary",
         "requestSignature": "01e596a425c49ecf",
-        "builtAt": "2026-04-20T03:17:47.429696",
+        "builtAt": "2026-04-20T03:20:25.449381",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": null,
@@ -205466,7 +205461,7 @@
       ],
       "traceScope": "token-shop-family-structure",
       "requestSignature": "bc8bef98dea5ad51",
-      "builtAt": "2026-04-20T03:17:47.970575",
+      "builtAt": "2026-04-20T03:20:25.990273",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": null,
@@ -296939,7 +296934,7 @@
       ],
       "traceScope": "token-shop-atu3-cells-effect",
       "requestSignature": "05e55cd08cfbdd8d",
-      "builtAt": "2026-04-20T03:17:47.556782",
+      "builtAt": "2026-04-20T03:20:25.580283",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": null,
@@ -386085,7 +386080,7 @@
       ],
       "traceScope": "shard-cost-su0-structure",
       "requestSignature": "42dd01b02fa06a53",
-      "builtAt": "2026-04-20T03:17:47.492427",
+      "builtAt": "2026-04-20T03:20:25.512141",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": null,
@@ -388370,7 +388365,7 @@
       ],
       "traceScope": "shard-owned-state-upgradeinfolist-population",
       "requestSignature": "9eb67ca7838c2c50",
-      "builtAt": "2026-04-20T03:17:47.500862",
+      "builtAt": "2026-04-20T03:20:25.521708",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": null,
@@ -400265,7 +400260,7 @@
       ],
       "traceScope": "multiverse-market-save-owner-boundary",
       "requestSignature": "01e596a425c49ecf",
-      "builtAt": "2026-04-20T03:17:47.429696",
+      "builtAt": "2026-04-20T03:20:25.449381",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": null,

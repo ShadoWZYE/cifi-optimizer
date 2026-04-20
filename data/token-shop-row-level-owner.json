@@ -2,7 +2,7 @@
   "generatedAt": "2026-04-07",
   "dataset": "token-shop-row-level-owner",
   "sources": {
-    "uabeaProbe": "data/uabea-probe-report.json",
+    "uabeaProbe": "data/uabea-extract-report.json",
     "tokenShopExtract": "data/token-shop-values.json",
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0"

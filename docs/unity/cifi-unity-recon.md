@@ -5,7 +5,7 @@ This document records extractable Unity-side signals from the LDPlayer install o
 Scope:
 - Grounded names and save-related symbols from `global-metadata.dat`
 - Extracted file locations from the emulator
-- Repeatable probe outputs from `scripts/unity/unity_apk_probe.py`
+- Repeatable extracted reports from `scripts/unity/unity_extract_report.py`
 
 Current status:
 - The game exposes external files at `/storage/emulated/0/Android/data/com.OctocubeGamesCompany.CIFI/files`
@@ -13,7 +13,7 @@ Current status:
 - Both decode from base64 into binary payloads, but they are not plaintext and do not match each other byte-for-byte
 - IL2CPP metadata exposes save and gameplay symbols that are directly useful for grounding optimiser imports
 
-Findings from the first APK probe:
+Findings from the first APK extract pass:
 - Save/cloud code paths are explicit in metadata:
   - `Assets\Scripts\Data&Saving\Nakama\Backups.cs`
   - `Assets\Scripts\Data&Saving\Nakama\Cloud.cs`
@@ -76,12 +76,12 @@ Current conclusion:
 - `AchievementInscryptionsReward` and `FinalIS*` symbols remain effect/reward clues rather than recovered saved-balance fields
 
 Generated artifacts:
-- `scripts/unity/unity_apk_probe.py`
+- `scripts/unity/unity_extract_report.py`
 - `scripts/unity/unity_textasset_dump.py`
 - `scripts/unity/metadata_neighborhood_probe.py`
-- `docs/unity/unity-probe-report.md`
+- `docs/unity/unity-extract-report.md`
 - `docs/systems/spend/multiverse-market-metadata-neighborhood.md`
-- `data/unity-probe-report.json`
+- `data/unity-apk-extract-report.json`
 - `data/multiverse-market-metadata-neighborhood.json`
 - `data/unity-textassets-manifest.json`
 - `data/unity-iap-summary.json`

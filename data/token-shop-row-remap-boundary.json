@@ -3,11 +3,11 @@
   "dataset": "token-shop-row-remap-boundary",
   "sources": {
     "tokenShopExtract": "data/token-shop-values.json",
-    "uabeaProbe": "data/uabea-probe-report.json",
-    "unityProbe": "data/unity-probe-report.json",
-    "dailyTokeniumLaneProbe": "data/daily-tokenium-lane-probe.json",
-    "dailyTokeniumOwnerProbe": "data/daily-tokenium-owner-probe.json",
-    "lm244TargetedProbe": "data/lm244-targeted-probe.json",
+    "uabeaProbe": "data/uabea-extract-report.json",
+    "unityProbe": "data/unity-apk-extract-report.json",
+    "dailyTokeniumLaneProbe": "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence",
+    "dailyTokeniumOwnerProbe": "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-owner-evidence",
+    "lm244TargetedProbe": "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence",
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0"
   },
@@ -88,9 +88,9 @@
         {
           "surface": "generic TokenShop text hooks",
           "checkedArtifacts": [
-            "data/unity-probe-report.json",
-            "data/daily-tokenium-lane-probe.json",
-            "data/lm244-targeted-probe.json"
+            "data/unity-apk-extract-report.json",
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence",
+            "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence"
           ],
           "preservedNeighbors": [
             "SetAllTokenShopTexts",
@@ -101,7 +101,7 @@
         {
           "surface": "token-side tokens title candidates",
           "checkedArtifacts": [
-            "data/unity-probe-report.json"
+            "data/unity-apk-extract-report.json"
           ],
           "preservedNeighbors": [
             "Tokens Booster",
@@ -112,7 +112,7 @@
         {
           "surface": "diamond-side tokens title candidate",
           "checkedArtifacts": [
-            "data/unity-probe-report.json"
+            "data/unity-apk-extract-report.json"
           ],
           "preservedNeighbors": [
             ">Diamond Upgrade 9 - TokensBoost"
@@ -204,9 +204,9 @@
         {
           "surface": "generic TokenShop text hooks",
           "checkedArtifacts": [
-            "data/unity-probe-report.json",
-            "data/daily-tokenium-lane-probe.json",
-            "data/lm244-targeted-probe.json"
+            "data/unity-apk-extract-report.json",
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence",
+            "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence"
           ],
           "preservedNeighbors": [
             "SetAllTokenShopTexts",
@@ -217,7 +217,7 @@
         {
           "surface": "token-side mod title candidate",
           "checkedArtifacts": [
-            "data/unity-probe-report.json"
+            "data/unity-apk-extract-report.json"
           ],
           "preservedNeighbors": [
             "Token Ultima: MP"
@@ -227,7 +227,7 @@
         {
           "surface": "diamond-side mod title candidate",
           "checkedArtifacts": [
-            "data/unity-probe-report.json"
+            "data/unity-apk-extract-report.json"
           ],
           "preservedNeighbors": [
             ":Diamond Upgrade 11 - ModBoost"
@@ -285,9 +285,9 @@
         {
           "surface": "generic TokenShop text hooks",
           "checkedArtifacts": [
-            "data/unity-probe-report.json",
-            "data/daily-tokenium-lane-probe.json",
-            "data/lm244-targeted-probe.json"
+            "data/unity-apk-extract-report.json",
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence",
+            "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence"
           ],
           "preservedNeighbors": [
             "SetAllTokenShopTexts",
@@ -298,10 +298,10 @@
         {
           "surface": "MK1 generator support-text cluster",
           "checkedArtifacts": [
-            "data/unity-probe-report.json",
-            "data/daily-tokenium-lane-probe.json",
-            "data/daily-tokenium-owner-probe.json",
-            "data/lm244-targeted-probe.json"
+            "data/unity-apk-extract-report.json",
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence",
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-owner-evidence",
+            "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence"
           ],
           "preservedNeighbors": [
             "1. MK1 Generator Output,",
@@ -313,7 +313,7 @@
         {
           "surface": "neighboring generator title roster gap",
           "checkedArtifacts": [
-            "data/daily-tokenium-owner-probe.json"
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-owner-evidence"
           ],
           "preservedNeighbors": [
             "Mk2 Generator Booster",
@@ -559,7 +559,7 @@
       {
         "surface": "BuyCellBoost",
         "checkedArtifacts": [
-          "data/daily-tokenium-lane-probe.json"
+          "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence"
         ],
         "preservedNeighbors": [
           "StartCellBostHold",
@@ -571,8 +571,8 @@
       {
         "surface": "diamond-special CellsBoost prefab or title",
         "checkedArtifacts": [
-          "data/lm244-targeted-probe.json",
-          "data/unity-probe-report.json"
+          "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence",
+          "data/unity-apk-extract-report.json"
         ],
         "preservedNeighbors": [
           "NewDiamondUPGPrefab.Specials.CellsBoost",
@@ -583,8 +583,8 @@
       {
         "surface": "token-prefab or Token Ultima: Cells title",
         "checkedArtifacts": [
-          "data/uabea-probe-report.json",
-          "data/unity-probe-report.json"
+          "data/uabea-extract-report.json",
+          "data/unity-apk-extract-report.json"
         ],
         "preservedNeighbors": [
           "NewTokenUPGPrefab.T1.CellsPerChestBooster",
