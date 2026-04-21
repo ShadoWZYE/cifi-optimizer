@@ -87,12 +87,21 @@
           "data/shard-milestone-save-owner-candidates.v2.json"
         ],
         "model": [
-          "data/shard-cost-formula-model.v1.json"
+          "data/shard-cost-formula-model.v1.json",
+          "data/shard-cost-screenshot-calibration.v1.json"
         ],
         "support": [
-          "data/shard-milestone-family-evidence.v1.json"
+          "data/shard-milestone-family-evidence.v1.json",
+          "data/shard-cost-list-path-probe.v1.json",
+          "data/shard-bonus-slot-probe.v1.json"
         ],
-        "historicalProbe": []
+        "historicalProbe": [
+          "data/shard-scene-monobehaviour-probe.v1.json",
+          "data/shard-type-metadata-probe.v1.json",
+          "data/shard-cost-parameter-probe.v1.json",
+          "data/shard-cost-method-probe.v1.json",
+          "data/shard-cost-native-probe.v1.json"
+        ]
       },
       "notes": [
         "Shard data should be consumed as one system with internal family, owned-state, and cost slices.",
@@ -177,12 +186,15 @@
           "data/tokenium-naming-clues.json",
           "data/token-bank-state-clues.json",
           "data/daily-tokenium-lane-clues.json",
-          "data/token-shop-cost-lanes.json",
+          "data/token-shop-trace-support.v1.json",
           "data/spend-action-lane-clues.json",
           "data/token-shop-owner-shell.json",
           "data/token-bank-controller-shell.json"
         ],
-        "historicalProbe": []
+        "historicalProbe": [
+          "data/uabea-extract-report.json",
+          "data/unity-apk-extract-report.json"
+        ]
       },
       "notes": [
         "TokenShop should converge into one system unit with row, token-bank, and Daily Tokenium projections instead of many shell or clue bundles.",
@@ -234,7 +246,10 @@
           "data/multiverse-market-action-shell.json",
           "data/multiverse-market-owner-family.json"
         ],
-        "historicalProbe": []
+        "historicalProbe": [
+          "data/uabea-extract-report.json",
+          "data/unity-apk-extract-report.json"
+        ]
       },
       "notes": [
         "Multiverse Market should converge into one system unit with save-owner, row-identity, and UI-shell projections.",

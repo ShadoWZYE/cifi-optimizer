@@ -2,11 +2,15 @@
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterator
+
+ROOT = Path(__file__).resolve().parents[2]
+TRACE_REGISTRY_PATH = ROOT / "data" / "unity-trace-target-registry.json"
 
 
 DB_SCHEMA_VERSION = 7
@@ -63,12 +67,61 @@ SINGLETON_ASPECTS = {
     "managed_graph_full",
 }
 
+REPO_DATASET_REF_RE = re.compile(r"data/[A-Za-z0-9._/-]+\.json")
+LEGACY_DATASET_MARKERS = (
+    "-probe",
+    "_probe",
+    "extract-report",
+    "savedata-import-boundary",
+    "compatibility",
+    ".v1.json",
+)
+
+
+def _collect_payload_provenance_signals(value: Any) -> dict[str, Any]:
+    text = _payload_key(value)
+    dataset_refs = sorted(set(REPO_DATASET_REF_RE.findall(text)))
+    legacy_refs = [
+        ref
+        for ref in dataset_refs
+        if any(marker in ref for marker in LEGACY_DATASET_MARKERS)
+    ]
+    compatibility_markers = sorted(
+        {
+            marker
+            for marker in (
+                "compatibility" if "compatibility" in text else None,
+                "compatibility-only" if "compatibility-only" in text else None,
+                "quarantine" if "quarantine" in text else None,
+                "fallback" if "fallback" in text else None,
+                "historical" if "historical" in text else None,
+            )
+            if marker
+        }
+    )
+    risk_level = "db-native"
+    if legacy_refs:
+        risk_level = "legacy-support-influence"
+    elif dataset_refs:
+        risk_level = "repo-support-influence"
+    return {
+        "repoDatasetRefs": dataset_refs,
+        "legacyDatasetRefs": legacy_refs,
+        "compatibilityMarkers": compatibility_markers,
+        "riskLevel": risk_level,
+    }
+
 
 def _load_json(path: Path) -> dict[str, Any] | None:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return None
+
+
+def _load_trace_registry_target(target_id: str) -> dict[str, Any]:
+    registry = _load_json(TRACE_REGISTRY_PATH) or {}
+    return dict(((registry.get("targets") or {}).get(str(target_id) or "")) or {})
 
 
 def _json_dumps(value: Any) -> str:
@@ -108,9 +161,22 @@ def _normalize_result_terms(result: dict[str, Any], search_terms: list[str]) -> 
     normalized = [str(term).strip() for term in search_terms if str(term).strip()]
     if normalized:
         return normalized
+    explicit_terms = result.get("searchTerms") or result.get("search_strings") or []
+    if isinstance(explicit_terms, list):
+        normalized = [str(term).strip() for term in explicit_terms if str(term).strip()]
+        if normalized:
+            return normalized
+    direct_terms = result.get("terms") or {}
+    if isinstance(direct_terms, dict):
+        normalized = [str(term).strip() for term in direct_terms.keys() if str(term).strip()]
+        if normalized:
+            return normalized
     bridges = result.get("termBridges") or {}
     if isinstance(bridges, dict):
         return [str(term).strip() for term in bridges.keys() if str(term).strip()]
+    functions = result.get("functions") or {}
+    if isinstance(functions, dict):
+        return [str(term).strip() for term in functions.keys() if str(term).strip()]
     return []
 
 
@@ -251,6 +317,7 @@ def _merge_managed_graphs(payloads: list[dict[str, Any]]) -> dict[str, Any]:
 
 SYSTEM_TRACE_FRAGMENT_KINDS = {
     "system_scope_fragment",
+    "assessment_fragment",
     "formula_fragment",
     "threshold_fragment",
     "dependency_fragment",
@@ -455,7 +522,11 @@ def _reduce_semantic_fragment(fragment_kind: str, rows: list[sqlite3.Row]) -> tu
     support = _support_metadata_from_rows(ordered)
     canonical_payload = _json_loads(ordered[0]["payload_json"], None)
     if isinstance(canonical_payload, dict):
-        canonical_payload = dict(canonical_payload)
+        canonical_payload = _normalize_assessment_owned_payload(
+            fragment_kind,
+            canonical_payload,
+            str(ordered[0]["trace_scope"] or ""),
+        )
         canonical_payload["support"] = support
     alternates = [
         {
@@ -474,6 +545,744 @@ def _reduce_semantic_fragment(fragment_kind: str, rows: list[sqlite3.Row]) -> tu
         "reducer": "semantic-fragment-best-rank-v1",
     }
     return canonical_payload, alternates, provenance, "semantic-fragment-best-rank-v1"
+
+
+def _normalize_assessment_owned_payload(
+    fragment_kind: str,
+    payload: dict[str, Any] | None,
+    trace_scope: str,
+) -> dict[str, Any] | None:
+    if not isinstance(payload, dict):
+        return payload
+    if fragment_kind not in {"reconstruction_note_fragment", "progression_fragment"}:
+        return payload
+    normalized = dict(payload)
+    target_id = str(normalized.get("targetId") or trace_scope or "").strip()
+    normalized.pop("decisionSummary", None)
+    if target_id and not str(normalized.get("assessmentSemanticKey") or "").strip():
+        normalized["assessmentSemanticKey"] = f"target-assessment:{target_id}"
+    return normalized
+
+
+def _trace_surface(payload: dict[str, Any], surface_id: str) -> dict[str, Any] | None:
+    for surface in payload.get("surfaces", []) or []:
+        if isinstance(surface, dict) and str(surface.get("id")) == surface_id:
+            return surface
+    return None
+
+
+def _trace_surface_source(surface: dict[str, Any] | None, source_id: str) -> dict[str, Any] | None:
+    if not isinstance(surface, dict):
+        return None
+    for source in surface.get("sources", []) or []:
+        if isinstance(source, dict) and str(source.get("sourceId")) == source_id:
+            return source
+    return None
+
+
+def _trace_source_hit(source_entry: dict[str, Any] | None, term: str) -> dict[str, Any] | None:
+    if not isinstance(source_entry, dict):
+        return None
+    for hit in source_entry.get("hits", []) or []:
+        if not isinstance(hit, dict):
+            continue
+        if str(hit.get("term")) == term or term in (hit.get("matchedTerms") or []):
+            return hit
+    return None
+
+
+def _trace_citation(source_entry: dict[str, Any] | None, hit: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not isinstance(source_entry, dict) or not isinstance(hit, dict):
+        return None
+    if "jsonPath" in hit:
+        locator = hit["jsonPath"]
+    elif "pathId" in hit:
+        locator = "{} path_id {}".format(hit.get("objectType", "unity-object"), hit["pathId"])
+    elif str(source_entry.get("sourceId")) == "metadata" and "offset" in hit:
+        locator = f"metadata offset {hit['offset']}"
+    elif "offset" in hit:
+        locator = f"offset {hit['offset']}"
+    else:
+        locator = "direct-hit"
+    return {
+        "sourceId": source_entry.get("sourceId"),
+        "sourcePath": source_entry.get("sourcePath"),
+        "term": hit.get("term"),
+        "locator": locator,
+    }
+
+
+def _compact_trace_citations(*citations: dict[str, Any] | None) -> list[dict[str, Any]]:
+    compacted: list[dict[str, Any]] = []
+    for citation in citations:
+        if not isinstance(citation, dict):
+            continue
+        if citation not in compacted:
+            compacted.append(citation)
+    return compacted
+
+
+def _unique_strings(values: list[str]) -> list[str]:
+    output: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        text = str(value or "").strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        output.append(text)
+    return output
+
+
+def _collect_trace_support_metadata(
+    trace_scope: str,
+    target_id: str,
+    fragment_provenances: list[dict[str, Any]],
+) -> dict[str, Any]:
+    contributing_jobs: list[str] = []
+    corroborating_fragment_ids: list[int] = []
+    for provenance in fragment_provenances:
+        for job_id in provenance.get("sourceJobIds", []) or []:
+            job_str = str(job_id)
+            if job_str and job_str not in contributing_jobs:
+                contributing_jobs.append(job_str)
+        for fragment_id in provenance.get("fragmentIds", []) or []:
+            try:
+                value = int(fragment_id)
+            except (TypeError, ValueError):
+                continue
+            if value not in corroborating_fragment_ids:
+                corroborating_fragment_ids.append(value)
+    return {
+        "contributingJobs": contributing_jobs,
+        "contributingTargets": [target_id],
+        "contributingTraceScopes": [trace_scope],
+        "corroboratingFragmentIds": corroborating_fragment_ids,
+        "supportingEvidenceCount": len(corroborating_fragment_ids),
+    }
+
+
+def _derive_shard_owned_state_semantic_scope(
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+) -> dict[str, Any] | None:
+    if trace_scope != "shard-owned-state-upgradeinfolist-population":
+        return None
+    shell_window = dict(payload.get("shellWindow") or {})
+    if not shell_window:
+        return None
+    target = dict(payload.get("target") or {})
+    strategy_config = dict(target.get("strategyConfig") or {})
+    scene_surface = _trace_surface(payload, "scene-owner")
+    runtime_surface = _trace_surface(payload, "runtime-shell")
+    watcher_surface = _trace_surface(payload, "owner-list-watchers")
+    save_surface = _trace_surface(payload, "save-gap")
+    handoff_surface = _trace_surface(payload, "handoff-boundary")
+    level0_scene_source = _trace_surface_source(scene_surface, "level0")
+    metadata_runtime_source = _trace_surface_source(runtime_surface, "metadata")
+    metadata_watcher_source = _trace_surface_source(watcher_surface, "metadata")
+    metadata_save_source = _trace_surface_source(save_surface, "metadata")
+    metadata_handoff_source = _trace_surface_source(handoff_surface, "metadata")
+
+    scene_owner_name = str(strategy_config.get("sceneOwner") or "")
+    declaring_field = str(shell_window.get("shellField") or "") or "upgradeInfoList"
+    runtime_label = next(
+        (
+            str(term)
+            for term in (runtime_surface or {}).get("terms", []) or []
+            if isinstance(term, str) and "->" in term
+        ),
+        f"{scene_owner_name}.{declaring_field} -> ShardMining+ShardUpgradeInfo" if scene_owner_name else declaring_field,
+    )
+    if "." in runtime_label:
+        scene_owner_name = runtime_label.split(".", 1)[0].strip()
+    if not scene_owner_name:
+        scene_owner_name = next(
+            (
+                str(hit.get("term"))
+                for hit in (level0_scene_source or {}).get("hits", []) or []
+                if isinstance(hit, dict) and str(hit.get("term") or "")
+            ),
+            "",
+        )
+    scene_hit = _trace_source_hit(level0_scene_source, scene_owner_name) if scene_owner_name else None
+    row_model_full_name = runtime_label.split("->", 1)[1].strip() if "->" in runtime_label else "ShardMining+ShardUpgradeInfo"
+    row_state_fields = []
+    for entry in shell_window.get("window", []) or []:
+        if not isinstance(entry, dict) or str(entry.get("group")) != "runtime-row-state":
+            continue
+        field_name = str(entry.get("field") or "").strip()
+        if not field_name:
+            continue
+        hit = _trace_source_hit(metadata_runtime_source, field_name)
+        row_state_fields.append(
+            {
+                "name": field_name,
+                "fieldOffset": (_trace_citation(metadata_runtime_source, hit) or {}).get("locator"),
+                "evidence": _trace_citation(metadata_runtime_source, hit),
+            }
+        )
+
+    owner_list_candidates = ["upgradeInfoList", "MaxedMilestonesList", "UnlockedMilestonesList", "MilestoneCostList"]
+    local_hook_candidates = [
+        "InitializeShards",
+        "InitializeMaxLevelBools",
+        "UpdateUnlockedMilestonesList",
+        "UpdateMaxedMilestonesList",
+        "CheckAllMilestoneLevelFills",
+    ]
+    save_family_candidates = ["PlayerProfileData", "GetPlayerProfileData", "FillPlayerProfileData", "CloudSavePlayerProfile"]
+    handoff_candidates = [str(strategy_config.get("genericLead") or ""), "ConstructionMilestones"]
+
+    owner_list_fields = [
+        term for term in owner_list_candidates
+        if _trace_source_hit(metadata_runtime_source, term) is not None or _trace_source_hit(metadata_watcher_source, term) is not None
+    ]
+    local_hooks = [term for term in local_hook_candidates if _trace_source_hit(metadata_watcher_source, term) is not None]
+    save_family_terms = [term for term in save_family_candidates if _trace_source_hit(metadata_save_source, term) is not None]
+    handoff_terms = [term for term in handoff_candidates if term and _trace_source_hit(metadata_handoff_source, term) is not None]
+
+    trace_graph = dict(payload.get("traceGraph") or {})
+    negative_edge_types = {
+        str(edge.get("type"))
+        for edge in trace_graph.get("negativeEdges", []) or []
+        if isinstance(edge, dict) and str(edge.get("type") or "")
+    }
+    positive_edge_types = {
+        str(edge.get("type"))
+        for edge in trace_graph.get("edges", []) or []
+        if isinstance(edge, dict) and str(edge.get("type") or "")
+    }
+    if "local-runtime-population-bridge" in positive_edge_types:
+        outcome_kind = "local-runtime-population-bridge"
+    elif "deeper-wrapper-handoff" in positive_edge_types:
+        outcome_kind = "deeper-wrapper-handoff"
+    elif {
+        "local-runtime-population-bridge",
+        "deeper-wrapper-handoff-recovery",
+    }.issubset(negative_edge_types):
+        outcome_kind = "non-local-injection-seam"
+    else:
+        outcome_kind = str((payload.get("outcome") or {}).get("kind") or "")
+    if outcome_kind == "local-runtime-population-bridge":
+        outcome = {
+            "kind": outcome_kind,
+            "label": "Local runtime population bridge",
+            "summary": "The trace now preserves one shard-local construction bridge that populates upgradeInfoList owned-state values directly.",
+            "nodeLabel": "Local ShardMining population bridge",
+            "statement": "Raw trace evidence now preserves one local ShardMining-side producer that fills upgradeInfoList owned-state values.",
+            "citations": [],
+        }
+    elif outcome_kind == "deeper-wrapper-handoff":
+        outcome = {
+            "kind": outcome_kind,
+            "label": "Deeper wrapper handoff",
+            "summary": "The trace now preserves a deeper save-side wrapper handoff for player-owned shard row state even though it does not stop on a local ShardMining producer.",
+            "nodeLabel": "Recovered deeper save-side wrapper",
+            "statement": "Raw trace evidence now preserves one deeper wrapper handoff for player-owned shard row state behind upgradeInfoList.",
+            "citations": [],
+        }
+    elif outcome_kind == "non-local-injection-seam":
+        outcome = {
+            "kind": outcome_kind,
+            "label": "Non-local injection seam",
+            "summary": "The trace rules out a local upgradeInfoList population bridge and still cannot name a deeper wrapper handoff, so owned-state values remain bounded as a non-local injection seam.",
+            "nodeLabel": "Non-local save-side injection seam",
+            "statement": "The raw trace now narrows the owned-state path to a non-local seam: direct definitions and the runtime shell are recovered locally, but owned-state values still arrive from a source the repo cannot yet name.",
+            "citations": _compact_trace_citations(
+                _trace_citation(metadata_save_source, _trace_source_hit(metadata_save_source, "PlayerProfileData")),
+                _trace_citation(metadata_watcher_source, _trace_source_hit(metadata_watcher_source, "InitializeShards")),
+            ),
+        }
+    else:
+        outcome = {
+            "kind": "research-gap",
+            "label": "Research gap",
+            "summary": "The trace still lacks enough recovered shard owned-state structure to classify the bridge as local, wrapper-side, or a bounded non-local seam.",
+            "nodeLabel": "Unclassified owned-state gap",
+            "statement": "The raw trace does not yet preserve enough evidence to classify the owned-state bridge shape.",
+            "citations": _compact_trace_citations(
+                _trace_citation(metadata_watcher_source, _trace_source_hit(metadata_watcher_source, "InitializeShards")),
+            ),
+        }
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        str(target.get("id") or trace_scope),
+        [
+            dict(provenance.get("shellWindow") or {}),
+            dict(provenance.get("surfaces") or {}),
+            dict(provenance.get("traceGraph") or {}),
+            dict(provenance.get("outcome") or {}),
+            dict(provenance.get("bridgeCheck") or {}),
+        ],
+    )
+    return {
+        "scopeId": "shard-owned-state:upgradeinfolist-population",
+        "scopeType": "trace-target-support",
+        "familyId": "shard-owned-state",
+        "sceneOwner": {
+            "name": scene_owner_name,
+            "pathId": scene_hit.get("pathId") if isinstance(scene_hit, dict) else None,
+            "evidence": _trace_citation(level0_scene_source, scene_hit),
+        },
+        "runtimeShell": {
+            "label": runtime_label,
+            "ownerType": scene_owner_name,
+            "declaringField": {
+                "name": declaring_field,
+                "fieldOffset": shell_window.get("shellPathId"),
+                "evidence": _trace_citation(metadata_runtime_source, _trace_source_hit(metadata_runtime_source, declaring_field)),
+            },
+            "rowModelType": {
+                "fullName": row_model_full_name,
+                "evidence": _trace_citation(metadata_runtime_source, _trace_source_hit(metadata_runtime_source, row_model_full_name)),
+            },
+            "rowStateFields": row_state_fields,
+        },
+        "ownerListFields": owner_list_fields,
+        "localHooks": local_hooks,
+        "saveFamilyTerms": save_family_terms,
+        "handoffTerms": handoff_terms,
+        "bridgeAssessment": {
+            "localBridgeRecovered": outcome_kind == "local-runtime-population-bridge",
+            "wrapperHandoffRecovered": outcome_kind == "deeper-wrapper-handoff",
+            "result": outcome_kind or "non-local-injection-seam",
+            "checkedLocalHooks": local_hooks,
+            "checkedSaveFamilyTerms": save_family_terms,
+            "checkedHandoffTerms": handoff_terms,
+        },
+        "outcome": outcome,
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_token_shop_row_semantic_scope(
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+) -> dict[str, Any] | None:
+    target = dict(payload.get("target") or {})
+    if str(target.get("familyId") or "") != "token-shop":
+        return None
+    row_recovery = dict(payload.get("rowRecovery") or {})
+    semantic_scope_id = str(row_recovery.get("semanticScopeId") or "").strip()
+    if not semantic_scope_id.startswith("row:"):
+        return None
+    semantic_graph = dict(row_recovery.get("semanticGraph") or {})
+    semantic_search_plan = dict(row_recovery.get("semanticSearchPlan") or {})
+    if not semantic_graph and not semantic_search_plan:
+        return None
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        str(target.get("id") or trace_scope),
+        [
+            dict(provenance.get("shellWindow") or {}),
+            dict(provenance.get("surfaces") or {}),
+            dict(provenance.get("traceGraph") or {}),
+            dict(provenance.get("nativeReconstruction") or {}),
+            dict(provenance.get("rowRecovery") or {}),
+        ],
+    )
+    return {
+        "scopeId": semantic_scope_id,
+        "scopeType": "row",
+        "familyId": "token-shop",
+        "targetId": str(target.get("id") or ""),
+        "traceScope": trace_scope,
+        "rowShellField": row_recovery.get("shellField"),
+        "semanticGraph": semantic_graph,
+        "semanticSearchPlan": semantic_search_plan,
+        "closureStatus": dict(row_recovery.get("closureStatus") or {}),
+        "literalSchemaRecovery": dict(row_recovery.get("literalSchemaRecovery") or {}),
+        "literalTextRecovery": dict(row_recovery.get("literalTextRecovery") or {}),
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _load_materialized_term_payload(
+    conn: sqlite3.Connection,
+    term: str,
+) -> tuple[dict[str, Any], dict[str, Any]] | tuple[None, None]:
+    row = conn.execute(
+        """
+        SELECT payload_json, provenance_json
+        FROM materialized_term_views
+        WHERE term = ?
+        ORDER BY updated_at DESC
+        LIMIT 1
+        """,
+        (term,),
+    ).fetchone()
+    if row is None:
+        return None, None
+    return _json_loads(row["payload_json"], {}), _json_loads(row["provenance_json"], {})
+
+
+def _derive_token_shop_updater_display_semantic_scope(
+    conn: sqlite3.Connection,
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+    assessment_summary: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    if trace_scope != "token-shop-atu4-mod":
+        return None
+    target = dict(payload.get("target") or {})
+    if str(target.get("familyId") or "") != "token-shop":
+        return None
+    row_recovery = dict(payload.get("rowRecovery") or {})
+    semantic_scope_id = "token-shop-updater-display:ATU4"
+    row_scope_id = str(row_recovery.get("semanticScopeId") or "").strip() or "row:ATU4Button"
+    trace_payload = dict(payload.get("tracePayload") or {})
+    trace_graph = dict((trace_payload.get("traceGraph") or {}))
+    decision_summary = dict(assessment_summary or {})
+    strategy_config = dict(target.get("strategyConfig") or {})
+
+    shell_field = str(strategy_config.get("shellField") or "") or "ATU4Button"
+    purchase_action = "BuyModBoost"
+    updater_terms = ["SetTokenTexts", "SetAllTokenShopTexts"]
+    parameter_terms = [
+        "ModBoostStartCost",
+        "ModBoostAdditiveCost",
+        "ModBoostBonus",
+        "ModBoostMaxLevel",
+    ]
+    related_update_terms = [
+        "SetAdChestTexts",
+        "SetAllBoosterAdTexts",
+        "SetBoosterAdSecondsTexts",
+        "SetBoosterBonusTexts",
+        "SetDiamondTexts",
+    ]
+
+    term_payloads: dict[str, dict[str, Any]] = {}
+    term_provenance: dict[str, dict[str, Any]] = {}
+    for term in [shell_field, purchase_action, *updater_terms, *parameter_terms]:
+        payload_entry, provenance_entry = _load_materialized_term_payload(conn, term)
+        if payload_entry is None:
+            continue
+        term_payloads[term] = payload_entry
+        term_provenance[term] = provenance_entry or {}
+
+    if shell_field not in term_payloads or purchase_action not in term_payloads:
+        return None
+
+    set_token_payload = term_payloads.get("SetTokenTexts") or {}
+    set_all_payload = term_payloads.get("SetAllTokenShopTexts") or {}
+    purchase_payload = term_payloads.get(purchase_action) or {}
+
+    bridge_plan = dict((set_token_payload.get("bridgePlans") or {}).get("SetTokenTexts") or {})
+    managed_reconstruction = dict(set_token_payload.get("managedReconstruction") or {})
+    purchase_reconstruction = dict(purchase_payload.get("managedReconstruction") or {})
+    owner_to_terms = dict(managed_reconstruction.get("ownerToTerms") or purchase_reconstruction.get("ownerToTerms") or {})
+    purchase_owner_cluster = dict(owner_to_terms.get(purchase_action) or {})
+
+    parameter_shell = []
+    for term in parameter_terms:
+        payload_entry = term_payloads.get(term) or {}
+        ascii_hits = list(((payload_entry.get("ascii_targets") or {}).get(term) or []))
+        provenance_entry = term_provenance.get(term) or {}
+        parameter_shell.append(
+            {
+                "term": term,
+                "asciiHitCount": len(ascii_hits),
+                "sourceJobIds": sorted(
+                    set(
+                        str(job_id)
+                        for job_id in ((provenance_entry.get("ascii_targets") or {}).get("sourceJobIds") or [])
+                        if str(job_id)
+                    )
+                ),
+            }
+        )
+
+    positive_edge_types = [
+        str(edge.get("type"))
+        for edge in trace_graph.get("edges", []) or []
+        if isinstance(edge, dict) and str(edge.get("type") or "")
+    ]
+    negative_edge_types = [
+        str(edge.get("type"))
+        for edge in trace_graph.get("negativeEdges", []) or []
+        if isinstance(edge, dict) and str(edge.get("type") or "")
+    ]
+    blocked_edges = list(decision_summary.get("blockedEdgeTypes") or negative_edge_types)
+    updater_linkage_status = (
+        "updater-cluster-recovered-display-path-open"
+        if "generic-text-hook-cluster" in positive_edge_types and blocked_edges
+        else "updater-cluster-recovered"
+    )
+
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        str(target.get("id") or trace_scope),
+        [
+            dict(provenance.get("traceGraph") or {}),
+            dict(provenance.get("rowRecovery") or {}),
+            dict(provenance.get("nativeReconstruction") or {}),
+        ],
+    )
+    support["termViews"] = {
+        term: {
+            "sourceJobIds": sorted(
+                {
+                    str(job_id)
+                    for bucket in (term_provenance.get(term) or {}).values()
+                    if isinstance(bucket, dict)
+                    for job_id in (bucket.get("sourceJobIds") or [])
+                    if str(job_id)
+                }
+            )
+        }
+        for term in [shell_field, purchase_action, *updater_terms, *parameter_terms]
+        if term in term_provenance
+    }
+
+    return {
+        "scopeId": semantic_scope_id,
+        "scopeType": "updater-display",
+        "familyId": "token-shop",
+        "targetId": str(target.get("id") or ""),
+        "traceScope": trace_scope,
+        "rowScopeId": row_scope_id,
+        "rowShell": {
+            "field": shell_field,
+            "pathId": row_recovery.get("shellPathId"),
+        },
+        "purchaseAction": {
+            "term": purchase_action,
+            "relatedTerms": _unique_strings(
+                [
+                    *list(purchase_owner_cluster.get("relatedTerms") or []),
+                    shell_field,
+                    *updater_terms,
+                ]
+            ),
+        },
+        "displayUpdaters": {
+            "primaryTerms": updater_terms,
+            "relatedTerms": _unique_strings(
+                [
+                    *related_update_terms,
+                    *list(bridge_plan.get("fallbackTerms") or []),
+                ]
+            ),
+            "bridgePlan": {
+                "strategy": bridge_plan.get("bridgeStrategy"),
+                "selectedNativeCoreTerms": list(bridge_plan.get("selectedNativeCoreTerms") or []),
+                "selectedContextTerms": list(bridge_plan.get("selectedContextTerms") or []),
+            },
+        },
+        "parameterShell": parameter_shell,
+        "assessment": {
+            "status": updater_linkage_status,
+            "supportingEdgeTypes": _unique_strings(positive_edge_types),
+            "blockedEdgeTypes": blocked_edges,
+            "decisionVerdict": decision_summary.get("verdict"),
+        },
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_target_assessment_fragment(
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+) -> dict[str, Any] | None:
+    target = dict(payload.get("target") or {})
+    target_id = str(target.get("id") or trace_scope).strip()
+    family_id = str(target.get("familyId") or "").strip()
+    if not target_id:
+        return None
+    trace_graph = dict(payload.get("traceGraph") or {})
+    proved_edges = list(trace_graph.get("edges") or [])
+    negative_edges = list(trace_graph.get("negativeEdges") or [])
+    negative_types = [
+        str(edge.get("type"))
+        for edge in negative_edges
+        if isinstance(edge, dict) and str(edge.get("type") or "")
+    ]
+    diff = dict(((payload.get("solvedVsBlockedDiff") or {}).get("delta") or {}))
+    baseline_gap = list(diff.get("blockedMissingEdgeTypes") or negative_types)
+    native_summary = dict(payload.get("nativeReconstruction") or {})
+    rules = dict(target.get("outputSummaryRules") or {})
+    if not rules and target_id:
+        rules = dict((_load_trace_registry_target(target_id) or {}).get("outputSummaryRules") or {})
+
+    if not rules:
+        verdict = "explore"
+        summary = "This run is exploratory only. Use the surviving source hits to choose or define a bounded family trace."
+    else:
+        wire = dict(rules.get("wire") or {})
+        quarantine = dict(rules.get("quarantine") or {})
+        if len(proved_edges) >= int(wire.get("minPresentEdges", 0) or 0) and len(negative_edges) <= int(wire.get("maxNegativeEdges", 0) or 0):
+            verdict = "wire"
+        elif len(proved_edges) >= int(quarantine.get("minPresentEdges", 0) or 0) and all(edge_type in (quarantine.get("allowedNegativeEdgeTypes") or []) for edge_type in negative_types):
+            verdict = "quarantine"
+        else:
+            verdict = "keep researching"
+        summary_messages = dict(rules.get("messages") or {})
+        summary = str(summary_messages.get("research" if verdict == "keep researching" else verdict) or "").strip()
+
+    promoted_owner = str(native_summary.get("promotedOwner") or "").strip()
+    promoted_methods = [str(value) for value in (native_summary.get("promotedMethods") or []) if str(value).strip()]
+    promoted_fields = [str(value) for value in (native_summary.get("promotedFields") or []) if str(value).strip()]
+    if promoted_owner:
+        chain_bits: list[str] = []
+        if promoted_methods:
+            chain_bits.append("methods {}".format(", ".join(promoted_methods[:3])))
+        if promoted_fields:
+            chain_bits.append("fields {}".format(", ".join(promoted_fields[:4])))
+        if chain_bits:
+            summary = "{} Native reconstruction now ties this lane to {} via {}.".format(
+                summary,
+                promoted_owner,
+                " and ".join(chain_bits),
+            ).strip()
+        else:
+            summary = "{} Native reconstruction now ties this lane to {}.".format(summary, promoted_owner).strip()
+
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        target_id,
+        [
+            dict(provenance.get("traceGraph") or {}),
+            dict(provenance.get("nativeReconstruction") or {}),
+            dict(provenance.get("solvedVsBlockedDiff") or {}),
+        ],
+    )
+    return {
+        "semanticKey": f"target-assessment:{trace_scope}",
+        "scopeType": "target-assessment",
+        "traceScope": trace_scope,
+        "targetId": target_id,
+        "familyId": family_id,
+        "decisionSummary": {
+            "verdict": verdict,
+            "summary": summary,
+            "provedEdgeCount": len(proved_edges),
+            "negativeEdgeCount": len(negative_edges),
+            "baselineGap": baseline_gap,
+            "supportingEdgeTypes": [
+                str(edge.get("type"))
+                for edge in proved_edges
+                if isinstance(edge, dict) and str(edge.get("type") or "")
+            ],
+            "blockedEdgeTypes": negative_types,
+        },
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_reducer_semantic_fragments(
+    conn: sqlite3.Connection,
+    trace_groups: dict[tuple[str, str, str, str], dict[str, Any]],
+) -> list[dict[str, Any]]:
+    entries: list[dict[str, Any]] = []
+    for (project_name, project_file, trace_scope, _request_signature), value in trace_groups.items():
+        payload = dict(value.get("payload") or {})
+        provenance = dict(value.get("provenance") or {})
+        assessment_fragment = _derive_target_assessment_fragment(trace_scope, payload, provenance)
+        assessment_summary = dict((assessment_fragment or {}).get("decisionSummary") or {})
+        if assessment_fragment is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "assessment_fragment",
+                    "fragment_key": str(assessment_fragment.get("semanticKey") or ""),
+                    "payload": assessment_fragment,
+                    "provenance": {
+                        **dict(assessment_fragment.get("support") or {}),
+                        "reducer": "derived-target-assessment-fragment-v1",
+                    },
+                    "reducer_version": "derived-target-assessment-fragment-v1",
+                }
+            )
+        shard_scope = _derive_shard_owned_state_semantic_scope(trace_scope, payload, provenance)
+        if shard_scope is None:
+            shard_scope = None
+        else:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "semantic_scope_fragment",
+                    "fragment_key": str(shard_scope.get("scopeId") or ""),
+                    "payload": shard_scope,
+                    "provenance": {
+                        **dict(shard_scope.get("support") or {}),
+                        "reducer": "derived-shard-owned-state-semantic-scope-v2",
+                    },
+                    "reducer_version": "derived-shard-owned-state-semantic-scope-v2",
+                }
+            )
+        token_shop_scope = _derive_token_shop_row_semantic_scope(trace_scope, payload, provenance)
+        if token_shop_scope is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "semantic_scope_fragment",
+                    "fragment_key": str(token_shop_scope.get("scopeId") or ""),
+                    "payload": token_shop_scope,
+                    "provenance": {
+                        **dict(token_shop_scope.get("support") or {}),
+                        "reducer": "derived-token-shop-row-semantic-scope-v1",
+                    },
+                    "reducer_version": "derived-token-shop-row-semantic-scope-v1",
+                }
+            )
+        token_shop_updater_scope = _derive_token_shop_updater_display_semantic_scope(
+            conn,
+            trace_scope,
+            payload,
+            provenance,
+            assessment_summary,
+        )
+        if token_shop_updater_scope is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "semantic_scope_fragment",
+                    "fragment_key": str(token_shop_updater_scope.get("scopeId") or ""),
+                    "payload": token_shop_updater_scope,
+                    "provenance": {
+                        **dict(token_shop_updater_scope.get("support") or {}),
+                        "reducer": "derived-token-shop-updater-display-semantic-scope-v1",
+                    },
+                    "reducer_version": "derived-token-shop-updater-display-semantic-scope-v1",
+                }
+            )
+    return entries
+
+
+def _is_ignored_legacy_trace_fragment(row: sqlite3.Row) -> bool:
+    fragment_kind = str(row["fragment_kind"])
+    fragment_key = str(row["fragment_key"])
+    trace_scope = str(row["trace_scope"])
+    script_name = str(row["script_name"] or "")
+    if (
+        fragment_kind == "semantic_scope_fragment"
+        and fragment_key == "shard-owned-state:upgradeinfolist-population"
+        and trace_scope == fragment_key
+        and script_name == "trace_extractors.py"
+    ):
+        return True
+    if (
+        fragment_kind == "semantic_scope_fragment"
+        and fragment_key.startswith("row:")
+        and trace_scope == fragment_key
+        and script_name == "trace_extractors.py"
+    ):
+        return True
+    return False
 
 
 def _build_semantic_coverage_summary(
@@ -578,6 +1387,18 @@ def _build_target_bundle_projection(
     trace_scope: str,
     request_signature: str,
 ) -> dict[str, Any]:
+    assessment_fragment = dict((semantic_views.get("assessment_fragment") or {}).get(f"target-assessment:{trace_scope}") or {})
+    decision_summary = dict(assessment_fragment.get("decisionSummary") or {})
+    if not decision_summary:
+        decision_summary = {
+            "verdict": "missing-canonical-assessment",
+            "summary": "Canonical assessment fragment is missing for this target bundle. Rebuild trace views before trusting verdict state.",
+            "provedEdgeCount": 0,
+            "negativeEdgeCount": 0,
+            "baselineGap": [],
+            "supportingEdgeTypes": [],
+            "blockedEdgeTypes": [],
+        }
     return {
         "dataset": payload.get("dataset", "unity-trace-bundle"),
         "generatedAt": payload.get("generatedAt"),
@@ -595,7 +1416,7 @@ def _build_target_bundle_projection(
         "literalStatus": payload.get("literalStatus"),
         "runtimeStatus": payload.get("runtimeStatus"),
         "closureStatus": payload.get("closureStatus"),
-        "decisionSummary": payload.get("decisionSummary"),
+        "decisionSummary": decision_summary,
         "sourceFamilies": _build_canonical_source_projection(payload),
         "nativeView": _build_native_view_projection(payload),
         "systemViews": system_payload,
@@ -1608,7 +2429,10 @@ class GhidraCacheDB:
             search_terms = list(job.get("search_strings", []))
             if not result or stale_check(result, search_terms):
                 continue
-            self._upsert_evidence_rows(self._extract_evidence_rows(job, result))
+            evidence_rows = self._extract_evidence_rows(job, result)
+            if not evidence_rows:
+                continue
+            self._upsert_evidence_rows(evidence_rows)
         self._rebuild_canonical_and_materialized()
 
     def get_completed_process_jobs(self, project_name: str, project_file: str) -> list[dict[str, Any]]:
@@ -1964,6 +2788,26 @@ class GhidraCacheDB:
             placeholders = ",".join("?" for _ in normalized)
             conn.execute("DELETE FROM jobs WHERE job_id IN ({})".format(placeholders), tuple(normalized))
 
+    def clear_job_local_artifacts(self, job_ids: list[str]) -> None:
+        normalized = sorted({str(job_id).strip() for job_id in job_ids if str(job_id).strip()})
+        if not normalized:
+            return
+        now = datetime.now().isoformat()
+        with self.connect() as conn:
+            placeholders = ",".join("?" for _ in normalized)
+            conn.execute(
+                """
+                UPDATE jobs
+                SET output_file = NULL,
+                    job_file = NULL,
+                    marker_file = NULL,
+                    log_file = NULL,
+                    updated_at = ?
+                WHERE job_id IN ({})
+                """.format(placeholders),
+                (now, *normalized),
+            )
+
     def invalidate_jobs(
         self,
         job_id: str | None = None,
@@ -2196,12 +3040,8 @@ class GhidraCacheDB:
         runtime_instance = row_recovery.get("runtimeInstanceRecovery") or {}
         runtime_evaluator = row_recovery.get("runtimeEvaluatorRecovery") or {}
         presentation_update = row_recovery.get("presentationUpdatePath") or {}
-        semantic_graph = row_recovery.get("semanticGraph") or {}
-        semantic_search_plan = row_recovery.get("semanticSearchPlan") or {}
         trace_graph = dataset.get("traceGraph") or {}
         closure_status = dataset.get("closureStatus") or {}
-        decision_summary = dataset.get("decisionSummary") or {}
-
         for key, value in dataset.items():
             if key == "traceRun":
                 continue
@@ -2216,8 +3056,8 @@ class GhidraCacheDB:
                     "payload": value,
                     "source_job_id": source_job_id if key in {"nativeTrace", "nativeReconstruction"} else "",
                     "source_term": ",".join(source_terms) if key in {"nativeTrace", "nativeReconstruction"} else "",
-                    "confidence": 1.0 if key in {"nativeTrace", "nativeReconstruction", "traceGraph", "decisionSummary"} else 0.9,
-                    "reducer_priority": 100 if key in {"nativeTrace", "nativeReconstruction", "traceGraph", "decisionSummary"} else 90,
+                    "confidence": 1.0 if key in {"nativeTrace", "nativeReconstruction", "traceGraph"} else 0.9,
+                    "reducer_priority": 100 if key in {"nativeTrace", "nativeReconstruction", "traceGraph"} else 90,
                     "schema_version": int(dataset.get("nativeTrace", {}).get("result", {}).get("schemaVersion", SCHEMA_VERSION_FLOOR) or SCHEMA_VERSION_FLOOR),
                     "script_name": "unity_trace_bundle.py",
                     "producer_version": producer_version,
@@ -2253,9 +3093,9 @@ class GhidraCacheDB:
                 "presentationUpdatePath": presentation_update,
             },
             "progression_fragment": {
+                "assessmentSemanticKey": f"target-assessment:{trace_scope}",
                 "runtimeEvaluatorRecovery": runtime_evaluator,
                 "runtimeStatus": dataset.get("runtimeStatus"),
-                "decisionSummary": decision_summary,
             },
             "owner_controller_fragment": {
                 "ownerFieldBlock": row_recovery.get("ownerFieldBlock"),
@@ -2268,15 +3108,10 @@ class GhidraCacheDB:
                 "runtimeInstanceRecovery": runtime_instance,
                 "nativeReconstruction": dataset.get("nativeReconstruction"),
             },
-            "semantic_scope_fragment": {
-                "semanticScopeId": row_recovery.get("semanticScopeId"),
-                "semanticGraph": semantic_graph,
-                "semanticSearchPlan": semantic_search_plan,
-            },
             "reconstruction_note_fragment": {
+                "assessmentSemanticKey": f"target-assessment:{trace_scope}",
                 "bridgeCheck": dataset.get("bridgeCheck"),
                 "groundedConclusion": dataset.get("groundedConclusion"),
-                "decisionSummary": decision_summary,
                 "currentBoundary": dataset.get("currentBoundary"),
             },
         }
@@ -2418,6 +3253,8 @@ class GhidraCacheDB:
             ).fetchall()
             grouped: dict[tuple[str, str, str, str, str, str], list[sqlite3.Row]] = {}
             for row in rows:
+                if _is_ignored_legacy_trace_fragment(row):
+                    continue
                 key = (
                     str(row["project_name"]),
                     str(row["project_file"]),
@@ -2434,12 +3271,19 @@ class GhidraCacheDB:
                 ordered = sorted(fragment_rows, key=_rank_row, reverse=True)
                 selected = ordered[0]
                 selected_ids = [int(row["fragment_id"]) for row in ordered]
+                canonical_payload = _json_loads(selected["payload_json"], None)
+                canonical_payload = _normalize_assessment_owned_payload(
+                    fragment_kind,
+                    canonical_payload if isinstance(canonical_payload, dict) else None,
+                    trace_scope,
+                )
                 provenance = {
                     "fragmentIds": selected_ids,
                     "sourceJobIds": [str(row["source_job_id"]) for row in ordered if str(row["source_job_id"])],
                     "sourceTerms": [str(row["source_term"]) for row in ordered if str(row["source_term"])],
                     "reducer": "best-rank",
                 }
+                provenance["payloadSignals"] = _collect_payload_provenance_signals(canonical_payload)
                 alternates = [
                     {
                         "fragmentId": int(row["fragment_id"]),
@@ -2450,7 +3294,6 @@ class GhidraCacheDB:
                     }
                     for row in ordered[1:]
                 ]
-                canonical_payload = _json_loads(selected["payload_json"], None)
                 conn.execute(
                     """
                     INSERT INTO canonical_trace_fragments(
@@ -2486,9 +3329,18 @@ class GhidraCacheDB:
             for semantic_key, fragment_rows in semantic_groups.items():
                 project_name, project_file, fragment_kind, fragment_key = semantic_key
                 canonical_payload, alternates, provenance, reducer_version = _reduce_semantic_fragment(fragment_kind, fragment_rows)
+                provenance = {
+                    **provenance,
+                    "payloadSignals": _collect_payload_provenance_signals(
+                        {
+                            "canonical": canonical_payload,
+                            "alternates": alternates,
+                        }
+                    ),
+                }
                 conn.execute(
                     """
-                    INSERT INTO canonical_semantic_fragments(
+                    INSERT OR REPLACE INTO canonical_semantic_fragments(
                         project_name, project_file, fragment_kind, fragment_key, canonical_payload_json,
                         alternate_payloads_json, provenance_json, reducer_version, built_at
                     ) VALUES(?,?,?,?,?,?,?,?,?)
@@ -2521,6 +3373,69 @@ class GhidraCacheDB:
                     }
                 )
 
+            for entry in _derive_reducer_semantic_fragments(conn, trace_groups):
+                semantic_key = (
+                    str(entry["project_name"]),
+                    str(entry["project_file"]),
+                    str(entry["fragment_kind"]),
+                    str(entry["fragment_key"]),
+                )
+                payload = dict(entry["payload"] or {})
+                alternates: list[dict[str, Any]] = []
+                provenance = {
+                    **dict(entry.get("provenance") or {}),
+                    "payloadSignals": _collect_payload_provenance_signals(
+                        {
+                            "canonical": payload,
+                            "alternates": alternates,
+                        }
+                    ),
+                }
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO canonical_semantic_fragments(
+                        project_name, project_file, fragment_kind, fragment_key, canonical_payload_json,
+                        alternate_payloads_json, provenance_json, reducer_version, built_at
+                    ) VALUES(?,?,?,?,?,?,?,?,?)
+                    """,
+                    (
+                        semantic_key[0],
+                        semantic_key[1],
+                        semantic_key[2],
+                        semantic_key[3],
+                        _json_dumps(payload),
+                        _json_dumps(alternates),
+                        _json_dumps(provenance),
+                        str(entry.get("reducer_version") or "semantic-fragment-derived-v1"),
+                        datetime.now().isoformat(),
+                    ),
+                )
+                canonical_semantic_lookup[semantic_key] = {
+                    "payload": payload,
+                    "alternates": alternates,
+                    "provenance": provenance,
+                }
+                canonical_semantic_entries = [
+                    existing
+                    for existing in canonical_semantic_entries
+                    if not (
+                        existing["project_name"] == semantic_key[0]
+                        and existing["project_file"] == semantic_key[1]
+                        and existing["fragment_kind"] == semantic_key[2]
+                        and existing["fragment_key"] == semantic_key[3]
+                    )
+                ]
+                canonical_semantic_entries.append(
+                    {
+                        "project_name": semantic_key[0],
+                        "project_file": semantic_key[1],
+                        "fragment_kind": semantic_key[2],
+                        "fragment_key": semantic_key[3],
+                        "payload": payload,
+                        "provenance": provenance,
+                    }
+                )
+
             for (project_name, project_file, trace_scope, request_signature), value in trace_groups.items():
                 payload = dict(value["payload"])
                 payload.setdefault("dataset", "unity-trace-bundle")
@@ -2537,7 +3452,12 @@ class GhidraCacheDB:
                         trace_scope,
                         request_signature,
                         _json_dumps(payload),
-                        _json_dumps(value["provenance"]),
+                        _json_dumps(
+                            {
+                                **value["provenance"],
+                                "payloadSignals": _collect_payload_provenance_signals(payload),
+                            }
+                        ),
                         "trace-fragment-best-rank-v1",
                         datetime.now().isoformat(),
                     ),
@@ -2565,7 +3485,12 @@ class GhidraCacheDB:
                         trace_scope,
                         request_signature,
                         _json_dumps(system_payload),
-                        _json_dumps(system_provenance),
+                        _json_dumps(
+                            {
+                                **system_provenance,
+                                "payloadSignals": _collect_payload_provenance_signals(system_payload),
+                            }
+                        ),
                         "system-trace-best-rank-v1",
                         datetime.now().isoformat(),
                     ),
@@ -2575,6 +3500,11 @@ class GhidraCacheDB:
                     for kind in SYSTEM_TRACE_FRAGMENT_KINDS
                     if isinstance(payload.get(kind), dict) and str((payload.get(kind) or {}).get("semanticKey", ""))
                 ]
+                if trace_scope == "shard-owned-state-upgradeinfolist-population":
+                    semantic_keys.append(("semantic_scope_fragment", "shard-owned-state:upgradeinfolist-population"))
+                if trace_scope == "token-shop-atu4-mod":
+                    semantic_keys.append(("semantic_scope_fragment", "token-shop-updater-display:ATU4"))
+                semantic_keys.append(("assessment_fragment", f"target-assessment:{trace_scope}"))
                 semantic_views = {}
                 semantic_alternates = {}
                 semantic_provenance = {}
@@ -2608,6 +3538,7 @@ class GhidraCacheDB:
                     "semantic": semantic_provenance,
                     "semanticAlternates": semantic_alternates,
                     "semanticCoverage": {"traceScope": trace_scope, "source": "canonical_semantic_fragments"},
+                    "payloadSignals": _collect_payload_provenance_signals(target_bundle_payload),
                 }
                 conn.execute(
                     """
@@ -2761,6 +3692,7 @@ class GhidraCacheDB:
         exported_path: str | None = None,
     ) -> None:
         built_at = datetime.now().isoformat()
+        payload_signals = _collect_payload_provenance_signals(payload)
         with self.connect() as conn:
             conn.execute(
                 """
@@ -2778,7 +3710,12 @@ class GhidraCacheDB:
                     system_id,
                     version,
                     _json_dumps(payload),
-                    _json_dumps(provenance or {}),
+                    _json_dumps(
+                        {
+                            **(provenance or {}),
+                            "payloadSignals": payload_signals,
+                        }
+                    ),
                     reducer_version,
                     built_at,
                     exported_path,
@@ -2931,7 +3868,9 @@ class GhidraCacheDB:
         trace_scope: str | None = None,
         request_signature: str | None = None,
         fragment_kind: str | None = None,
+        fragment_key: str | None = None,
         source_job_id: str | None = None,
+        script_name: str | None = None,
         reason: str = "manual-trace-invalidate",
     ) -> list[int]:
         clauses = ["1=1"]
@@ -2945,9 +3884,15 @@ class GhidraCacheDB:
         if fragment_kind:
             clauses.append("fragment_kind = ?")
             params.append(fragment_kind)
+        if fragment_key:
+            clauses.append("fragment_key = ?")
+            params.append(fragment_key)
         if source_job_id:
             clauses.append("source_job_id = ?")
             params.append(source_job_id)
+        if script_name:
+            clauses.append("script_name = ?")
+            params.append(script_name)
         invalidated: list[int] = []
         with self.connect() as conn:
             rows = conn.execute(

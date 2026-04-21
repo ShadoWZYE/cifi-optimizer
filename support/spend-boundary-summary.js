@@ -41,24 +41,28 @@ export function getTokenShopCostLaneSummary(clues) {
     ? clues.dailyTokeniumModifierGroups
     : [];
   const diamondGroups = Array.isArray(clues?.diamondGroups) ? clues.diamondGroups : [];
-  const playerFacingClues = Array.isArray(clues?.playerFacingClues) ? clues.playerFacingClues : [];
+  const tracePresentation =
+    typeof clues?.tracePresentation === "object" && clues.tracePresentation
+      ? clues.tracePresentation
+      : {};
 
   return {
     hasLaneSplit:
       tokenSpendGroups.includes("TokenBoost") &&
       diamondGroups.includes("DiamondBoost") &&
       dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
-      playerFacingClues.includes("CostBox-Tokens") &&
-      playerFacingClues.includes("CostBox-Tokenium"),
+      tracePresentation.costShell === "CostBox" &&
+      tracePresentation.descriptionRenderNode === "DescText",
     keepsDailyTokeniumSeparate:
       dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
       dailyTokeniumModifierGroups.includes("TokenDailiesT3") &&
-      playerFacingClues.includes("Mission Materials Booster"),
+      tracePresentation.costRenderNode === "CostText",
     tokenLaneLabel: "TokenBoost",
     diamondLaneLabel: "DiamondBoost",
     dailyLaneLabel: "TokenDailiesT2",
-    tokensShellLabel: "CostBox-Tokens",
-    tokeniumShellLabel: "CostBox-Tokenium"
+    costShellLabel: tracePresentation.costShell ?? "CostBox",
+    costRenderLabel: tracePresentation.costRenderNode ?? "CostText",
+    descriptionRenderLabel: tracePresentation.descriptionRenderNode ?? "DescText"
   };
 }
 

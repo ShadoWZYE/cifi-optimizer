@@ -19,9 +19,7 @@ from trace_extractors import (
     build_token_shop_native_bridge_plan,
     collect_native_trace,
     find_cached_native_trace,
-    get_semantic_scope,
     load_token_shop_extract,
-    upsert_semantic_scope,
 )
 
 
@@ -50,6 +48,416 @@ def get_trace_db() -> GhidraCacheDB:
     if TRACE_DB is None:
         TRACE_DB = GhidraCacheDB(TRACE_CACHE_DB, ROOT / "workbench" / "ghidra-jobs")
     return TRACE_DB
+
+
+def load_canonical_semantic_scope(scope_id: str) -> dict[str, Any]:
+    scope_id = str(scope_id or "").strip()
+    if not scope_id:
+        return {}
+    view = get_trace_db().find_canonical_semantic_fragment(
+        "cifi-full",
+        "libil2cpp.so",
+        "semantic_scope_fragment",
+        scope_id,
+    )
+    if not view:
+        return {}
+    return dict(view.get("payload") or {})
+
+
+def load_latest_materialized_target_bundle(trace_scope: str) -> dict[str, Any]:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope:
+        return {}
+    view = get_trace_db().find_latest_materialized_target_bundle_view(
+        "cifi-full",
+        "libil2cpp.so",
+        trace_scope,
+    )
+    if not view:
+        return {}
+    return dict(view.get("payload") or {})
+
+
+def _parse_iso_datetime(value: str | None) -> datetime | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    try:
+        return datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def _latest_materialized_target_payloads() -> list[dict[str, Any]]:
+    db = get_trace_db()
+    with db.connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
+            FROM materialized_target_bundle_views
+            ORDER BY built_at DESC, request_signature DESC
+            """
+        ).fetchall()
+    latest_by_scope: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        trace_scope = str(row["trace_scope"] or "")
+        if not trace_scope or trace_scope in latest_by_scope:
+            continue
+        latest_by_scope[trace_scope] = {
+            "traceScope": trace_scope,
+            "requestSignature": str(row["request_signature"] or ""),
+            "payload": json.loads(str(row["payload_json"] or "{}")),
+            "provenance": json.loads(str(row["provenance_json"] or "{}")),
+            "reducerVersion": str(row["reducer_version"] or ""),
+            "builtAt": str(row["built_at"] or ""),
+        }
+    return list(latest_by_scope.values())
+
+
+def _canonical_semantic_scopes_for_target(trace_scope: str, target_id: str | None = None) -> list[dict[str, Any]]:
+    trace_scope = str(trace_scope or "").strip()
+    target_id = str(target_id or "").strip()
+    if not trace_scope and not target_id:
+        return []
+    db = get_trace_db()
+    with db.connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT fragment_key, canonical_payload_json, provenance_json, reducer_version, built_at
+            FROM canonical_semantic_fragments
+            WHERE fragment_kind = 'semantic_scope_fragment'
+            ORDER BY built_at DESC, fragment_key ASC
+            """
+        ).fetchall()
+    scopes: list[dict[str, Any]] = []
+    for row in rows:
+        payload = json.loads(str(row["canonical_payload_json"] or "{}"))
+        payload_trace_scope = str(payload.get("traceScope") or "").strip()
+        payload_target_id = str(payload.get("targetId") or "").strip()
+        if trace_scope and payload_trace_scope == trace_scope:
+            scopes.append(
+                {
+                    "fragmentKey": str(row["fragment_key"] or ""),
+                    "payload": payload,
+                    "provenance": json.loads(str(row["provenance_json"] or "{}")),
+                    "reducerVersion": str(row["reducer_version"] or ""),
+                    "builtAt": str(row["built_at"] or ""),
+                }
+            )
+            continue
+        if target_id and payload_target_id == target_id:
+            scopes.append(
+                {
+                    "fragmentKey": str(row["fragment_key"] or ""),
+                    "payload": payload,
+                    "provenance": json.loads(str(row["provenance_json"] or "{}")),
+                    "reducerVersion": str(row["reducer_version"] or ""),
+                    "builtAt": str(row["built_at"] or ""),
+                }
+            )
+    return scopes
+
+
+def _looks_like_trace_anchor(value: str) -> bool:
+    candidate = str(value or "").strip()
+    if not candidate or len(candidate) > 96:
+        return False
+    if candidate.startswith("$.") or candidate.startswith("workbench/"):
+        return False
+    if candidate.lower() in {"present", "missing", "wire", "quarantine", "keep researching", "explore"}:
+        return False
+    word_count = len(candidate.split())
+    if word_count > 7:
+        return False
+    if not re.search(r"[A-Za-z0-9]", candidate):
+        return False
+    if re.search(r"[{}\\[\\]]", candidate):
+        return False
+    return True
+
+
+def _trace_anchor_priority(path: tuple[str, ...]) -> int:
+    path_text = ".".join(part for part in path if part)
+    if any(part in {"term", "terms", "searchTerms", "defaultAnchors"} for part in path):
+        return 120
+    if any(part in {"field", "fields", "rowShellField", "owner", "ownerType", "fullName"} for part in path):
+        return 110
+    if any(part in {"method", "methods", "hooks", "localHooks", "handoffTerms"} for part in path):
+        return 105
+    if any(part in {"primaryTerms", "relatedTerms", "bridgedTerms", "contextTerms", "selectedNativeCoreTerms", "selectedContextTerms"} for part in path):
+        return 100
+    if any(part in {"name", "pathId"} for part in path):
+        return 95
+    if any(part in {"label", "summary", "statement", "note", "notes", "citations", "support", "supportingEvidenceCount"} for part in path):
+        return 0
+    if "semanticSearchPlan" in path_text:
+        return 90
+    return 60
+
+
+def _collect_trace_anchor_terms(value: Any, path: tuple[str, ...] = ()) -> list[tuple[int, str]]:
+    results: list[tuple[int, str]] = []
+    if isinstance(value, dict):
+        for key, nested in value.items():
+            results.extend(_collect_trace_anchor_terms(nested, (*path, str(key))))
+        return results
+    if isinstance(value, list):
+        for nested in value:
+            results.extend(_collect_trace_anchor_terms(nested, path))
+        return results
+    if isinstance(value, (str, int, float)):
+        candidate = str(value).strip()
+        if _looks_like_trace_anchor(candidate):
+            priority = _trace_anchor_priority(path)
+            if priority > 0:
+                results.append((priority, candidate))
+    return results
+
+
+def _candidate_gap_plan(
+    registry: dict[str, Any],
+    target_id: str,
+    trace_scope: str,
+    payload: dict[str, Any],
+    built_at: str,
+) -> dict[str, Any]:
+    target = dict((registry.get("targets") or {}).get(target_id) or {})
+    decision_summary = dict(payload.get("decisionSummary") or {})
+    blocked_edge_types = list(decision_summary.get("blockedEdgeTypes") or [])
+    baseline_gap = list(decision_summary.get("baselineGap") or [])
+    if not blocked_edge_types:
+        return {}
+    scopes = _canonical_semantic_scopes_for_target(trace_scope, target_id)
+    semantic_scope_payloads = [dict(scope.get("payload") or {}) for scope in scopes]
+    semantic_support_count = sum(
+        int(((scope.get("payload") or {}).get("support") or {}).get("supportingEvidenceCount") or 0)
+        for scope in scopes
+    )
+    native_view = dict(payload.get("nativeView") or {})
+    native_available = native_view.get("available") is True
+    native_summary = dict(native_view.get("summary") or {})
+    native_search_terms = list(native_view.get("searchTerms") or [])
+    anchor_candidates: list[tuple[int, str]] = []
+    anchor_candidates.extend((130, str(value)) for value in (target.get("defaultAnchors") or []) if _looks_like_trace_anchor(str(value)))
+    for scope_payload in semantic_scope_payloads:
+        anchor_candidates.extend(_collect_trace_anchor_terms(scope_payload))
+    anchor_candidates.extend(_collect_trace_anchor_terms(native_search_terms, ("searchTerms",)))
+    anchor_candidates.extend(_collect_trace_anchor_terms(native_summary, ("nativeSummary",)))
+    fallback_terms = (((target.get("strategyConfig") or {}).get("surfaces") or []))
+    for surface in fallback_terms:
+        for term in surface.get("terms") or []:
+            if _looks_like_trace_anchor(str(term)):
+                anchor_candidates.append((50, str(term)))
+    ordered_anchor_terms: list[str] = []
+    seen_terms: set[str] = set()
+    for _, term in sorted(anchor_candidates, key=lambda item: (-item[0], item[1].lower())):
+        normalized = normalize_planner_term(term)
+        if not normalized or normalized in seen_terms:
+            continue
+        seen_terms.add(normalized)
+        ordered_anchor_terms.append(term)
+    ordered_anchor_terms = ordered_anchor_terms[:14]
+    proved_edge_count = int(decision_summary.get("provedEdgeCount") or 0)
+    negative_edge_count = int(decision_summary.get("negativeEdgeCount") or len(blocked_edge_types))
+    verdict = str(decision_summary.get("verdict") or "")
+    built_dt = _parse_iso_datetime(built_at)
+    age_hours = 0.0
+    if built_dt is not None:
+        age_hours = max((datetime.now(built_dt.tzinfo) - built_dt).total_seconds() / 3600.0, 0.0)
+    verdict_bonus = {
+        "keep researching": 2.0,
+        "quarantine": 1.5,
+        "explore": 1.0,
+        "wire": 0.5,
+    }.get(verdict, 0.0)
+    score = (
+        proved_edge_count * 12.0
+        - len(blocked_edge_types) * 9.0
+        - negative_edge_count * 4.0
+        + semantic_support_count * 1.5
+        + len(scopes) * 4.0
+        + (3.0 if native_available else 0.0)
+        + min(len(native_search_terms), 10) * 0.6
+        + min(age_hours / 24.0, 2.0)
+        + verdict_bonus
+    )
+    return {
+        "targetId": target_id,
+        "traceScope": trace_scope,
+        "label": str(target.get("label") or trace_scope),
+        "familyId": str(target.get("familyId") or ""),
+        "verdict": verdict,
+        "blockedEdgeTypes": blocked_edge_types,
+        "baselineGap": baseline_gap,
+        "provedEdgeCount": proved_edge_count,
+        "negativeEdgeCount": negative_edge_count,
+        "semanticScopeIds": [str((scope.get("payload") or {}).get("scopeId") or scope.get("fragmentKey") or "") for scope in scopes],
+        "semanticSupportCount": semantic_support_count,
+        "nativeAvailable": native_available,
+        "nativeSearchTerms": native_search_terms,
+        "anchors": ordered_anchor_terms,
+        "score": round(score, 2),
+        "builtAt": built_at,
+        "decisionSummary": decision_summary,
+        "ageHours": round(age_hours, 2),
+    }
+
+
+def choose_best_gap_plan(registry: dict[str, Any]) -> dict[str, Any]:
+    candidates: list[dict[str, Any]] = []
+    for row in _latest_materialized_target_payloads():
+        payload = dict(row.get("payload") or {})
+        target = dict(payload.get("target") or {})
+        target_id = str(target.get("id") or row.get("traceScope") or "").strip()
+        trace_scope = str(row.get("traceScope") or target_id).strip()
+        if not target_id or not trace_scope:
+            continue
+        candidate = _candidate_gap_plan(registry, target_id, trace_scope, payload, str(row.get("builtAt") or ""))
+        if candidate:
+            candidates.append(candidate)
+    if not candidates:
+        raise ValueError("No DB-backed blocked trace targets are currently available.")
+    candidates.sort(
+        key=lambda item: (
+            -float(item.get("score") or 0.0),
+            -int(item.get("provedEdgeCount") or 0),
+            int(item.get("negativeEdgeCount") or 0),
+            int(len(item.get("blockedEdgeTypes") or [])),
+            str(item.get("traceScope") or ""),
+        )
+    )
+    best = dict(candidates[0])
+    best["rankedAlternatives"] = candidates[:5]
+    return best
+
+
+def _print_best_gap_plan(best_gap_plan: dict[str, Any]) -> None:
+    print(
+        "Best current DB gap: {} ({})".format(
+            best_gap_plan["traceScope"],
+            best_gap_plan["label"],
+        )
+    )
+    print(
+        "  score={} verdict={} blocked={} proved={} semanticScopes={}".format(
+            best_gap_plan["score"],
+            best_gap_plan["verdict"],
+            ",".join(best_gap_plan["blockedEdgeTypes"]) or "none",
+            best_gap_plan["provedEdgeCount"],
+            ",".join(best_gap_plan["semanticScopeIds"]) or "none",
+        )
+    )
+    if best_gap_plan.get("anchors"):
+        print("  anchors={}".format(", ".join(best_gap_plan["anchors"])))
+    alternatives = list(best_gap_plan.get("rankedAlternatives") or [])[1:4]
+    if alternatives:
+        print(
+            "  next={}".format(
+                " | ".join(
+                    "{}:{} [{}]".format(
+                        alt["traceScope"],
+                        alt["score"],
+                        ",".join(alt["blockedEdgeTypes"]) or "none",
+                    )
+                    for alt in alternatives
+                )
+            )
+        )
+
+
+def _print_completed_trace_run(dataset: dict[str, Any], iteration: int | None = None, total_iterations: int | None = None) -> None:
+    prefix = "Trace run completed"
+    if iteration is not None and total_iterations is not None and total_iterations > 1:
+        prefix = f"Trace run completed ({iteration}/{total_iterations})"
+    trace_registry = dict(dataset.get("traceRegistry") or {})
+    trace_params = dict(dataset.get("traceParams") or {})
+    trace_run = dict(dataset.get("traceRun") or {})
+    decision_summary = dict(dataset.get("decisionSummary") or {})
+    print(prefix + ":")
+    print("  target={}".format(trace_registry.get("selectedTargetId") or trace_params.get("target") or "unknown"))
+    print("  family={}".format(trace_registry.get("selectedFamilyId") or trace_params.get("family") or "unknown"))
+    print("  runId={}".format(trace_run.get("id") or "db-only"))
+    print("  anchors={}".format(", ".join(trace_params.get("anchors") or []) or "none"))
+    native_timeout = trace_params.get("nativeTimeout")
+    if native_timeout is not None:
+        timeout_label = "disabled" if int(native_timeout) <= 0 else str(native_timeout)
+        print("  nativeTimeout={}".format(timeout_label))
+    print(
+        "  verdict={} blocked={} proved={} negative={}".format(
+            decision_summary.get("verdict") or "unknown",
+            ",".join(decision_summary.get("blockedEdgeTypes") or []) or "none",
+            decision_summary.get("provedEdgeCount") or 0,
+            decision_summary.get("negativeEdgeCount") or 0,
+        )
+    )
+    if decision_summary.get("summary"):
+        print("  summary={}".format(decision_summary["summary"]))
+
+
+def _execute_trace_bundle_run(
+    args: argparse.Namespace,
+    registry: dict[str, Any],
+    output_mode: str,
+) -> dict[str, Any]:
+    trace_plan = plan_trace_bundle_request(args, registry)
+    planner_resolution = trace_plan["plannerResolution"]
+    selected_target_id = str(trace_plan["selectedTargetId"])
+    selected_family_id = str(trace_plan["selectedFamilyId"])
+    asset_set = trace_plan["assetSet"]
+    request_signature = str(trace_plan["requestSignature"])
+
+    if args.resume:
+        existing = get_trace_db().find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", selected_target_id, request_signature)
+        if existing is None:
+            existing = get_trace_db().find_materialized_trace_view("cifi-full", "libil2cpp.so", selected_target_id, request_signature)
+        if existing and trace_dataset_has_required_fragments(existing["payload"]):
+            dataset = dict(existing["payload"])
+        else:
+            dataset = collect_trace_bundle_components(args)
+    else:
+        dataset = collect_trace_bundle_components(args)
+
+    export_requested = args.export or args.json_out != JSON_OUT or args.md_out != MD_OUT
+    json_out, md_out, run_id = allocate_trace_run_paths(
+        dataset["traceRegistry"]["selectedTargetId"],
+        dataset["traceRegistry"]["selectedFamilyId"],
+        args.json_out if args.json_out != JSON_OUT else None,
+        args.md_out if args.md_out != MD_OUT else None,
+    )
+
+    dataset["traceParams"] = {
+        "target": args.target,
+        "anchors": args.anchor,
+        "family": args.family,
+        "bestGap": args.best_gap,
+        "extendedSearch": args.extended_search,
+        "depthSearch": args.depth_search,
+        "nativeTimeout": args.native_timeout,
+        "level": args.level,
+        "anchorKind": args.anchor_kind,
+        "maxSteps": args.max_steps,
+    }
+    dataset["assetSet"] = asset_set
+    dataset["traceRun"] = {
+        "id": run_id,
+        "jsonOut": str(json_out) if export_requested else None,
+        "mdOut": str(md_out) if export_requested else None,
+        "mode": "stable-target-run",
+        "outputMode": output_mode,
+        "overwritesOnRepeat": export_requested,
+    }
+
+    persist_trace_bundle_fragments(dataset, str(dataset["traceRegistry"]["selectedTargetId"]), request_signature)
+    dataset = materialize_trace_bundle_dataset(dataset, str(dataset["traceRegistry"]["selectedTargetId"]), request_signature)
+
+    if export_requested:
+        export_trace_run(dataset, json_out, md_out)
+        print(f"Trace bundle exported: {json_out}")
+        print(f"Markdown: {md_out}")
+    else:
+        print(f"Trace bundle materialized in DB for target: {selected_target_id}")
+    return dataset
 
 
 def install_unitypy_stubs() -> None:
@@ -3020,10 +3428,7 @@ SUPPORT_DATASET_PATHS = {
     "tokenShopExtract": ROOT / "data" / "token-shop-values.json",
     "tokenShopRowRemapBoundary": ROOT / "data" / "token-shop-row-remap-boundary.json",
     "tokenShopLateAtuBoundary": ROOT / "data" / "token-shop-late-atu-boundary.json",
-    "shardCostNativeProbe": ROOT / "data" / "shard-cost-native-probe.v1.json",
     "shardCostFormulaModel": ROOT / "data" / "shard-cost-formula-model.v1.json",
-    "shardSaveBoundary": ROOT / "data" / "shard-save-boundary.v2.json",
-    "shardMilestoneSaveOwnerCandidates": ROOT / "data" / "shard-milestone-save-owner-candidates.v2.json",
     "multiverseMarketMemberBoundary": ROOT / "data" / "multiverse-market-market-member-boundary.json",
     "multiverseMarketSaveDataImportBoundary": ROOT / "data" / "multiverse-market-savedata-import-boundary.json",
     "multiverseMarketRangeBoundary": ROOT / "data" / "multiverse-market-range-boundary.json",
@@ -3274,6 +3679,80 @@ def _detect_exact_target_override(
     }
 
 
+def _detect_token_shop_updater_display_override(
+    registry: dict[str, Any],
+    requested_queries: list[str],
+    requested_anchors: list[str],
+) -> dict[str, Any] | None:
+    combined_inputs = unique_strings([*requested_queries, *requested_anchors])
+    if not combined_inputs:
+        return None
+
+    semantic_scope = load_canonical_semantic_scope("token-shop-updater-display:ATU4")
+    if not semantic_scope:
+        return None
+
+    scope_terms = unique_strings(
+        [
+            str(((semantic_scope.get("rowShell") or {}).get("field") or "")),
+            str((((semantic_scope.get("rowShell") or {}).get("pathId")) or "")),
+            str(((semantic_scope.get("purchaseAction") or {}).get("term") or "")),
+            *[str(term) for term in (((semantic_scope.get("purchaseAction") or {}).get("relatedTerms") or []))],
+            *[str(term) for term in (((semantic_scope.get("displayUpdaters") or {}).get("primaryTerms") or []))],
+            *[str(term) for term in (((semantic_scope.get("displayUpdaters") or {}).get("relatedTerms") or []))],
+            *[str(item.get("term") or "") for item in ((semantic_scope.get("parameterShell") or [])) if isinstance(item, dict)],
+        ]
+    )
+    normalized_scope_terms = {
+        normalize_planner_term(term): term
+        for term in scope_terms
+        if normalize_planner_term(term)
+    }
+    matched_inputs = [
+        value
+        for value in combined_inputs
+        if normalize_planner_term(value) in normalized_scope_terms
+    ]
+    if not matched_inputs:
+        return None
+
+    matched_terms = unique_strings(
+        [normalized_scope_terms[normalize_planner_term(value)] for value in matched_inputs]
+    )
+    target_id = "token-shop-atu4-mod"
+    target = registry["targets"][target_id]
+    family_plan = registry["planner"]["families"][target["familyId"]]
+    synonym_sets_used = pick_synonym_sets(family_plan, combined_inputs, matched_terms)
+    expanded_anchors = unique_strings(
+        [
+            *target["defaultAnchors"],
+            *requested_queries,
+            *requested_anchors,
+            *matched_terms,
+            *[str(term) for term in (((semantic_scope.get("displayUpdaters") or {}).get("primaryTerms") or []))],
+            str(((semantic_scope.get("purchaseAction") or {}).get("term") or "")),
+        ]
+    )
+    return {
+        "selectionMode": "semantic-scope-override",
+        "requestedQueries": requested_queries,
+        "requestedAnchors": requested_anchors,
+        "matchedInputs": matched_inputs,
+        "matchedTerms": matched_terms,
+        "matchedFamilyId": target["familyId"],
+        "matchedFamilyLabel": family_plan["label"],
+        "selectedTargetId": target_id,
+        "selectedRunMode": "trace",
+        "selectedComparePresetId": None,
+        "synonymSetsUsed": synonym_sets_used,
+        "expandedAnchors": expanded_anchors,
+        "decisionNote": (
+            "Matched updater/display terms to DB-owned semantic scope token-shop-updater-display:ATU4 "
+            "and chose the bounded token-shop-atu4-mod trace instead of relying only on token-shop registry routing hints."
+        ),
+    }
+
+
 def make_generic_explore_resolution(registry: dict[str, Any], queries: list[str], anchors: list[str]) -> dict[str, Any]:
     combined_inputs = unique_strings([*queries, *anchors])
     expanded_anchors = unique_strings(combined_inputs)
@@ -3450,6 +3929,9 @@ def resolve_planner_selection(
     exact_override = _detect_exact_target_override(registry, requested_queries, requested_anchors)
     if exact_override is not None:
         return exact_override
+    semantic_override = _detect_token_shop_updater_display_override(registry, requested_queries, requested_anchors)
+    if semantic_override is not None:
+        return semantic_override
     try:
         best_family = choose_best_family(registry, combined_inputs)
     except ValueError:
@@ -4215,6 +4697,33 @@ def maybe_find_hit(source_entry: dict[str, Any] | None, term: str) -> dict[str, 
     )
 
 
+def find_token_shop_extract_field(token_shop_extract: dict[str, Any], field_name: str) -> dict[str, Any] | None:
+    fields = token_shop_extract.get("fields", []) or []
+    return next(
+        (
+            field
+            for field in fields
+            if isinstance(field, dict) and str(field.get("field") or "") == field_name
+        ),
+        None,
+    )
+
+
+def build_token_shop_extract_window_entry(
+    token_shop_extract: dict[str, Any],
+    field_name: str,
+    group: str,
+    kind: str = "pointer",
+) -> dict[str, Any]:
+    field = find_token_shop_extract_field(token_shop_extract, field_name)
+    return {
+        "field": field_name,
+        "group": group,
+        "kind": kind,
+        "pathId": (field or {}).get("path_id"),
+    }
+
+
 def cite_hit(source_entry: dict[str, Any], hit: dict[str, Any], note: str | None = None) -> dict[str, Any]:
     if "jsonPath" in hit:
         locator = hit["jsonPath"]
@@ -4278,6 +4787,51 @@ def cite_row_boundary(source_id: str, path: str, detail: str, note: str | None =
         "sourcePath": get_source_reference(source_id),
         "term": detail,
         "locator": path,
+    }
+    if note:
+        citation["note"] = note
+    return citation
+
+
+def cite_token_shop_extract_field(
+    field_name: str,
+    token_shop_extract: dict[str, Any],
+    note: str | None = None,
+) -> dict[str, Any]:
+    field = find_token_shop_extract_field(token_shop_extract, field_name) or {}
+    detail = field_name
+    if field.get("path_id") is not None:
+        detail = f"{field_name} path_id {field['path_id']}"
+    return cite_row_boundary("tokenShopExtract", f"$.fields[field={field_name}]", detail, note)
+
+
+def cite_db_semantic_scope(
+    scope_id: str,
+    detail: str,
+    note: str | None = None,
+) -> dict[str, Any]:
+    citation = {
+        "sourceId": "dbSemanticScope",
+        "sourcePath": f"db:canonical-semantic-fragment:semantic_scope_fragment:{scope_id}",
+        "term": detail,
+        "locator": scope_id,
+    }
+    if note:
+        citation["note"] = note
+    return citation
+
+
+def cite_db_materialized_target(
+    trace_scope: str,
+    locator: str,
+    detail: str,
+    note: str | None = None,
+) -> dict[str, Any]:
+    citation = {
+        "sourceId": "dbMaterializedTarget",
+        "sourcePath": f"db:materialized-target-bundle:{trace_scope}",
+        "term": detail,
+        "locator": locator,
     }
     if note:
         citation["note"] = note
@@ -4509,7 +5063,7 @@ def _build_token_shop_row_recovery(
         update_hook_candidates,
     )
     semantic_scope_id = f"row:{match.get('shellField')}" if match.get("shellField") else None
-    cached_semantic_scope = get_semantic_scope(semantic_scope_id) if semantic_scope_id else None
+    cached_semantic_scope = load_canonical_semantic_scope(semantic_scope_id) if semantic_scope_id else None
     shell_native_core = unique_strings(
         [
             trace_shell_field or "",
@@ -4628,22 +5182,6 @@ def _build_token_shop_row_recovery(
             "formulaReconstruction": formula_reconstruction,
         }
     )
-    if semantic_scope_id:
-        upsert_semantic_scope(
-            semantic_scope_id,
-            {
-                "scopeId": semantic_scope_id,
-                "scopeType": "row",
-                "familyId": "token-shop",
-                "rowShellField": match.get("shellField"),
-                "semanticGraph": semantic_graph,
-                "semanticSearchPlan": semantic_search_plan,
-                "closureStatus": closure_status,
-                "literalSchemaRecovery": literal_schema_recovery,
-                "literalTextRecovery": literal_text_recovery,
-                "updatedAt": datetime.now().isoformat(timespec="seconds"),
-            },
-        )
     return {
         "requestedTerms": bridge_plan.get("requestedTerms", []),
         "nativeCoreTerms": shell_native_core or bridge_plan.get("nativeCoreTerms", []),
@@ -5138,7 +5676,6 @@ def build_mod_trace_graph(
 def build_mk1_trace_graph(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
-    row_remap_boundary: dict[str, Any],
 ) -> dict[str, Any]:
     metadata_surface = find_surface(surfaces, "metadata-neighborhood")
     action_surface = find_surface(surfaces, "action-lane")
@@ -5159,11 +5696,9 @@ def build_mk1_trace_graph(
     action_buy_hit = find_hit(action_source, "BuyMK1TokenBoost")
     prefab_hit = find_hit(level0_prefab_source, "NewTokenUPGPrefab.T1.MK1Booster")
     support_hit = find_hit(level0_support_source, "1. MK1 Generator Output,")
-    alt_support_hit = find_hit(level0_support_source, "This upgrade divides the cost of MK1 Generators by 1500.")
-    roster_hit = find_hit(level0_roster_source, "Mk2 Generator Booster")
-    text_hook_hit = find_hit(level0_text_source, "SetAllTokenShopTexts")
-
-    unresolved_title = row_remap_boundary["atu5TitleFollowUp"]["blockedTitleJoin"]
+    alt_support_hit = maybe_find_hit(level0_support_source, "This upgrade divides the cost of MK1 Generators by 1500.")
+    roster_hit = maybe_find_hit(level0_roster_source, "Mk2 Generator Booster")
+    text_hook_hit = maybe_find_hit(level0_text_source, "SetAllTokenShopTexts")
 
     shell_node = "target-shell"
     owner_node = "owner-field-block"
@@ -5237,10 +5772,10 @@ def build_mk1_trace_graph(
             "present",
             "supporting",
             "Separate MK1 generator support text still survives, but only as a detached title-side surface.",
-            [
+            compact_citations(
                 cite_hit(level0_support_source, support_hit),
-                cite_hit(level0_support_source, alt_support_hit),
-            ],
+                maybe_cite_hit(level0_support_source, alt_support_hit),
+            ),
         ),
         make_edge(
             "prefab-to-title-roster",
@@ -5250,9 +5785,9 @@ def build_mk1_trace_graph(
             "present",
             "supporting",
             "The owner-side title roster still preserves neighboring generator-booster titles, but not an exact MK1 title join.",
-            [
-                cite_hit(level0_roster_source, roster_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(level0_roster_source, roster_hit),
+            ),
         ),
         make_edge(
             "prefab-to-text-hook-cluster",
@@ -5262,9 +5797,9 @@ def build_mk1_trace_graph(
             "present",
             "supporting",
             "The generic TokenShop text hooks survive as a separate title-side surface, but they do not close the ATU5 title join.",
-            [
-                cite_hit(level0_text_source, text_hook_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(level0_text_source, text_hook_hit),
+            ),
         ),
     ]
 
@@ -5277,17 +5812,12 @@ def build_mk1_trace_graph(
             "missing",
             "negative",
             "No committed source proves one exact ATU5 shell-to-final-title join; the surviving generic text hooks, detached MK1 generator support text, and neighboring generator-booster title roster all remain detached from the shell-side row neighborhood.",
-            [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu5TitleFollowUp.blockedTitleJoin.missingJoin",
-                    unresolved_title["missingJoin"],
-                ),
+            compact_citations(
                 cite_hit(level0_support_source, support_hit),
-                cite_hit(level0_support_source, alt_support_hit),
-                cite_hit(level0_roster_source, roster_hit),
-                cite_hit(level0_text_source, text_hook_hit),
-            ],
+                maybe_cite_hit(level0_support_source, alt_support_hit),
+                maybe_cite_hit(level0_roster_source, roster_hit),
+                maybe_cite_hit(level0_text_source, text_hook_hit),
+            ),
         ),
     ]
 
@@ -5326,7 +5856,6 @@ def build_mk1_trace_graph(
 def build_mk3_bridge_trace_graph(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
-    row_remap_boundary: dict[str, Any],
 ) -> dict[str, Any]:
     metadata_surface = find_surface(surfaces, "metadata-neighborhood")
     action_surface = find_surface(surfaces, "action-lane")
@@ -5428,7 +5957,8 @@ def build_mk3_bridge_trace_graph(
 def build_atu3_effect_trace_graph(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
-    row_remap_boundary: dict[str, Any],
+    token_shop_extract: dict[str, Any],
+    effect_context: dict[str, Any],
     depth_expansion: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     metadata_surface = find_surface(surfaces, "metadata-neighborhood")
@@ -5472,9 +6002,10 @@ def build_atu3_effect_trace_graph(
     if token_title_hit is None:
         level0_detached_source, token_title_hit = find_term_in_source_entries(depth_sources, "Token Ultima: Cells", ["level0", "metadata"])
 
-    effect_trace = row_remap_boundary["atu3CrossSystemEffectTrace"]["recoveredActionEffectChain"]
-    detached_identities = row_remap_boundary["atu3CrossSystemEffectTrace"]["detachedIdentitySurfaces"]
-    missing_owner = row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]
+    chest_consumer_target = dict(effect_context.get("chestConsumerTarget") or {})
+    consumer_read_target = dict(effect_context.get("consumerReadTarget") or {})
+    chest_consumer_summary = dict(chest_consumer_target.get("decisionSummary") or {})
+    consumer_read_summary = dict(consumer_read_target.get("decisionSummary") or {})
 
     shell_node = "target-shell"
     owner_node = "owner-field-block"
@@ -5513,7 +6044,6 @@ def build_atu3_effect_trace_graph(
             [
                 cite_hit(metadata_source, metadata_shell_hit),
                 cite_hit(metadata_source, metadata_owner_hit),
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.supportingActionHook", effect_trace["supportingActionHook"]),
                 *compact_citations(maybe_cite_hit(action_source, action_buy_hit)),
             ],
         ),
@@ -5526,7 +6056,6 @@ def build_atu3_effect_trace_graph(
             "direct",
             "The checked cross-system effect surface preserves the shared Cells Booster (Chests) title for the same cells-from-chests gameplay lane.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectTitle", effect_trace["sharedEffectTitle"]),
                 cite_hit(owner_title_source, title_hit),
             ],
         ),
@@ -5539,7 +6068,6 @@ def build_atu3_effect_trace_graph(
             "direct",
             "The same shared effect lane preserves one exact player-facing effect string for cells gained from Token and Diamond chests.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectText", effect_trace["sharedEffectText"]),
                 cite_hit(lane_text_source, lane_text_hit),
             ],
         ),
@@ -5552,9 +6080,8 @@ def build_atu3_effect_trace_graph(
             "direct",
             "The raw CellBoost parameter surface preserves the bonus value and max-level cap that bound the shared chest-effect lane.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.derivedReading", effect_trace["parameterSurface"]["derivedReading"]),
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.field", effect_trace["parameterSurface"]["field"]),
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.supportingField", effect_trace["parameterSurface"]["supportingField"]),
+                cite_token_shop_extract_field("CellBoostBonus", token_shop_extract, "TokenShop extract preserves the exact ATU3 bonus parameter field."),
+                cite_token_shop_extract_field("CellBoostMaxLevel", token_shop_extract, "TokenShop extract preserves the exact ATU3 max-level parameter field."),
             ],
         ),
         make_edge(
@@ -5566,7 +6093,6 @@ def build_atu3_effect_trace_graph(
             "supporting",
             "The older diamond-side and token-side Cells identity surfaces still survive as detached contrast evidence, whether preserved directly or recovered one hop out from the bounded effect trace.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.detachedIdentitySurfaces.groundedConclusion", detached_identities["groundedConclusion"]),
                 *compact_citations(
                     maybe_cite_hit(level0_detached_source, buy_cells_boost_hit),
                     maybe_cite_hit(metadata_detached_source, diamond_prefab_hit),
@@ -5589,7 +6115,16 @@ def build_atu3_effect_trace_graph(
             "negative",
             "No committed source currently names the exact runtime chest-reward applier or typed gameplay owner that consumes CellBoostBonus inside the shared Token and Diamond chest cells-gain system.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin", missing_owner["missingJoin"]),
+                cite_db_materialized_target(
+                    "token-shop-atu3-chest-consumer",
+                    "$.decisionSummary.summary",
+                    str(chest_consumer_summary.get("summary") or "The exact CellBoostBonus field handoff still stays bounded negative."),
+                ),
+                cite_db_materialized_target(
+                    "token-shop-atu3-chest-consumer-read",
+                    "$.decisionSummary.summary",
+                    str(consumer_read_summary.get("summary") or "The exact CellBoostBonus read site still stays bounded negative."),
+                ),
             ],
         ),
     ]
@@ -5783,14 +6318,19 @@ def build_mod_vs_blocked_diff(
 def build_mk1_vs_blocked_diff(
     target_id: str,
     target: dict[str, Any],
-    row_remap_boundary: dict[str, Any],
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
+    token_shop_extract: dict[str, Any],
+    mk1_context: dict[str, Any],
 ) -> dict[str, Any]:
-    baseline = row_remap_boundary["atu5TitleFollowUp"]["recoveredBridge"]
-    blocked = row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]
     action_source = find_source_entry(find_surface(surfaces, "action-lane"), "level0")
     prefab_source = find_source_entry(find_surface(surfaces, "prefab-lane"), "level0")
+    support_source = find_source_entry(find_surface(surfaces, "support-text-lane"), "level0")
+    roster_source = find_source_entry(find_surface(surfaces, "title-roster-gap"), "level0")
+    text_source = find_source_entry(find_surface(surfaces, "text-hooks"), "level0")
+    row_scope = dict(mk1_context.get("rowScope") or {})
+    effect_target = dict(mk1_context.get("effectTarget") or {})
+    closure_status = dict(row_scope.get("closureStatus") or {})
     baseline_edges = [
         {
             "type": "serialized-adjacency",
@@ -5812,7 +6352,7 @@ def build_mk1_vs_blocked_diff(
             "provenanceStrength": "supporting",
             "statement": "The solved bridge preserves one checked row-specific buy hook.",
             "provedBy": [
-                cite_hit(action_source, find_hit(action_source, baseline["supportingActionHook"]))
+                cite_hit(action_source, find_hit(action_source, "BuyMK1TokenBoost"))
             ],
         },
         {
@@ -5821,7 +6361,7 @@ def build_mk1_vs_blocked_diff(
             "provenanceStrength": "direct",
             "statement": "The solved bridge preserves one exact prefab identity on the same row family.",
             "provedBy": [
-                cite_hit(prefab_source, find_hit(prefab_source, baseline["prefabIdentity"]))
+                cite_hit(prefab_source, find_hit(prefab_source, "NewTokenUPGPrefab.T1.MK1Booster"))
             ],
         },
         {
@@ -5830,73 +6370,14 @@ def build_mk1_vs_blocked_diff(
             "provenanceStrength": "negative",
             "statement": "ATU5 still lacks one exact shell-to-final-title join.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu5TitleFollowUp.blockedTitleJoin.missingJoin",
-                    row_remap_boundary["atu5TitleFollowUp"]["blockedTitleJoin"]["missingJoin"],
-                )
+                cite_hit(support_source, find_hit(support_source, "1. MK1 Generator Output,")),
+                cite_hit(support_source, find_hit(support_source, "This upgrade divides the cost of MK1 Generators by 1500.")),
+                cite_hit(roster_source, find_hit(roster_source, "Mk2 Generator Booster")),
+                cite_hit(text_source, find_hit(text_source, "SetAllTokenShopTexts")),
             ],
         },
     ]
-    blocked_edges = [
-        {
-            "type": "serialized-adjacency",
-            "status": "present",
-            "provenanceStrength": "direct",
-            "statement": "ATU3Button still sits directly beside the CellBoost owner-field block.",
-            "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.adjacentFollowUp.blockedAdjacentShell.adjacentOwnerFieldBlock",
-                    ", ".join(blocked["adjacentOwnerFieldBlock"]),
-                )
-            ],
-        },
-        {
-            "type": "exact-shell-to-action-hook",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "ATU3 still lacks one exact shell-specific effect or buy hook.",
-            "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[0]",
-                    blocked["missingLinks"][0],
-                ),
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]",
-                    blocked["missingLinks"][1],
-                ),
-            ],
-        },
-        {
-            "type": "exact-shell-to-prefab",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "ATU3 still lacks one exact shell-to-prefab identity join.",
-            "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[2]",
-                    blocked["missingLinks"][2],
-                )
-            ],
-        },
-        {
-            "type": "exact-shell-to-title",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "ATU3 still lacks one exact shell-to-final-title join.",
-            "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CellsDisambiguationPass.groundedConclusion",
-                    row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"],
-                )
-            ],
-        },
-    ]
+    blocked_edges = build_token_shop_atu3_blocked_edges(token_shop_extract, row_scope, effect_target)
     shared_present = sorted(
         {
             edge["type"]
@@ -5925,20 +6406,20 @@ def build_mk1_vs_blocked_diff(
             "label": "ATU5 trace-backed row bridge",
             "status": "cleared",
             "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]),
-            "shellField": baseline["shellField"],
-            "shellPathId": baseline["shellPathId"],
+            "shellField": shell_window["shellField"],
+            "shellPathId": shell_window["shellPathId"],
             "comparisonShape": baseline_edges,
-            "groundedConclusion": baseline["groundedConclusion"],
+            "groundedConclusion": "ATU5 preserves one direct shell-to-buy-hook-to-prefab bridge, but title-side evidence still remains detached from the exact shell neighborhood.",
         },
         "blockedTarget": {
             "id": target_id,
             "label": target["label"],
             "status": "blocked",
-            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
-            "shellField": blocked["shellField"],
-            "shellPathId": blocked["shellPathId"],
+            "sourcePath": "db:canonical-semantic-fragment:semantic_scope_fragment:row:ATU3Button",
+            "shellField": "ATU3Button",
+            "shellPathId": find_token_shop_extract_field(token_shop_extract, "ATU3Button").get("path_id"),
             "comparisonShape": blocked_edges,
-            "groundedConclusion": blocked["groundedConclusion"],
+            "groundedConclusion": str(closure_status.get("summary") or (effect_target.get("decisionSummary") or {}).get("summary") or "ATU3 remains narrower and still lacks one exact shell join."),
         },
         "delta": {
             "sharedPresentEdgeTypes": shared_present,
@@ -5953,17 +6434,79 @@ def build_mk1_vs_blocked_diff(
     }
 
 
+def build_token_shop_atu3_blocked_edges(
+    token_shop_extract: dict[str, Any],
+    row_scope: dict[str, Any],
+    effect_target: dict[str, Any],
+) -> list[dict[str, Any]]:
+    closure_status = dict(row_scope.get("closureStatus") or {})
+    effect_summary = dict(effect_target.get("decisionSummary") or {})
+    return [
+        {
+            "type": "serialized-adjacency",
+            "status": "present",
+            "provenanceStrength": "direct",
+            "statement": "ATU3Button still sits directly beside the CellBoost owner-field block.",
+            "provedBy": [
+                cite_token_shop_extract_field("ATU3Button", token_shop_extract),
+                cite_token_shop_extract_field("CellBoostStartCost", token_shop_extract),
+            ],
+        },
+        {
+            "type": "exact-shell-to-action-hook",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "ATU3 still lacks one exact shell-specific effect or buy hook.",
+            "provedBy": [
+                cite_db_materialized_target(
+                    "token-shop-atu3-cells-effect",
+                    "$.decisionSummary.summary",
+                    str(effect_summary.get("summary") or "ATU3 still lacks one exact shell-specific effect or buy hook."),
+                ),
+            ],
+        },
+        {
+            "type": "exact-shell-to-prefab",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "ATU3 still lacks one exact shell-to-prefab identity join.",
+            "provedBy": [
+                cite_db_semantic_scope(
+                    "row:ATU3Button",
+                    str(closure_status.get("status") or "semantic-open"),
+                    "ATU3 remains open in the DB-derived row scope and still does not clear one exact prefab identity join.",
+                ),
+            ],
+        },
+        {
+            "type": "exact-shell-to-title",
+            "status": "missing",
+            "provenanceStrength": "negative",
+            "statement": "ATU3 still lacks one exact shell-to-final-title join.",
+            "provedBy": [
+                cite_db_semantic_scope(
+                    "row:ATU3Button",
+                    str(closure_status.get("summary") or closure_status.get("status") or "semantic-open"),
+                    "ATU3 still lacks one exact shell-to-final-title join in the current DB-derived row scope.",
+                ),
+            ],
+        },
+    ]
+
+
 def build_mk3_vs_blocked_diff(
     target_id: str,
     target: dict[str, Any],
-    row_remap_boundary: dict[str, Any],
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
+    token_shop_extract: dict[str, Any],
+    mk3_context: dict[str, Any],
 ) -> dict[str, Any]:
-    baseline = row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]
-    blocked = row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]
     action_source = find_source_entry(find_surface(surfaces, "action-lane"), "level0")
     prefab_source = find_source_entry(find_surface(surfaces, "prefab-lane"), "level0")
+    row_scope = dict(mk3_context.get("rowScope") or {})
+    effect_target = dict(mk3_context.get("effectTarget") or {})
+    closure_status = dict((dict(row_scope.get("closureStatus") or {})))
     baseline_edges = [
         {
             "type": "serialized-adjacency",
@@ -5985,7 +6528,7 @@ def build_mk3_vs_blocked_diff(
             "provenanceStrength": "supporting",
             "statement": "The solved bridge preserves one checked row-specific buy hook.",
             "provedBy": [
-                cite_hit(action_source, find_hit(action_source, baseline["supportingActionHook"]))
+                cite_hit(action_source, find_hit(action_source, "BuyMK3TokenBoost"))
             ],
         },
         {
@@ -5994,7 +6537,7 @@ def build_mk3_vs_blocked_diff(
             "provenanceStrength": "direct",
             "statement": "The solved bridge preserves one exact prefab identity on the same row family.",
             "provedBy": [
-                cite_hit(prefab_source, find_hit(prefab_source, baseline["prefabIdentity"]))
+                cite_hit(prefab_source, find_hit(prefab_source, "NewTokenUPGPrefab.T1.MK3Booster"))
             ],
         },
         {
@@ -6003,73 +6546,17 @@ def build_mk3_vs_blocked_diff(
             "provenanceStrength": "supporting",
             "statement": "The solved bridge is corroborated by multiple checked prefab surfaces.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu7BridgeFollowUp.recoveredBridge.groundedConclusion",
-                    baseline["groundedConclusion"],
-                )
-            ],
-        },
-    ]
-    blocked_edges = [
-        {
-            "type": "serialized-adjacency",
-            "status": "present",
-            "provenanceStrength": "direct",
-            "statement": "ATU3Button still sits directly beside the CellBoost owner-field block.",
-            "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.adjacentFollowUp.blockedAdjacentShell.adjacentOwnerFieldBlock",
-                    ", ".join(blocked["adjacentOwnerFieldBlock"]),
-                )
-            ],
-        },
-        {
-            "type": "exact-shell-to-action-hook",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "ATU3 still lacks one exact shell-specific effect or buy hook.",
-            "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[0]",
-                    blocked["missingLinks"][0],
-                ),
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]",
-                    blocked["missingLinks"][1],
+                cite_hit(action_source, find_hit(action_source, "BuyMK3TokenBoost")),
+                cite_hit(prefab_source, find_hit(prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")),
+                cite_db_semantic_scope(
+                    "row:ATU7Button",
+                    str(closure_status.get("status") or "semantic-open"),
+                    "ATU7 remains DB-derived and corroborated by the current canonical row scope.",
                 ),
             ],
         },
-        {
-            "type": "exact-shell-to-prefab",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "ATU3 still lacks one exact shell-to-prefab identity join.",
-            "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[2]",
-                    blocked["missingLinks"][2],
-                )
-            ],
-        },
-        {
-            "type": "exact-shell-to-title",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "ATU3 still lacks one exact shell-to-final-title join.",
-            "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CellsDisambiguationPass.groundedConclusion",
-                    row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"],
-                )
-            ],
-        },
     ]
+    blocked_edges = build_token_shop_atu3_blocked_edges(token_shop_extract, row_scope, effect_target)
     shared_present = sorted(
         {
             edge["type"]
@@ -6098,20 +6585,20 @@ def build_mk3_vs_blocked_diff(
             "label": "ATU7 trace-backed row bridge",
             "status": "cleared",
             "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]),
-            "shellField": baseline["shellField"],
-            "shellPathId": baseline["shellPathId"],
+            "shellField": shell_window["shellField"],
+            "shellPathId": shell_window["shellPathId"],
             "comparisonShape": baseline_edges,
-            "groundedConclusion": baseline["groundedConclusion"],
+            "groundedConclusion": "ATU7 preserves one direct shell-to-buy-hook-to-prefab bridge with corroborating row-scope evidence, but this still stays bounded as row-level trace evidence.",
         },
         "blockedTarget": {
             "id": target_id,
             "label": target["label"],
             "status": "blocked",
-            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
-            "shellField": blocked["shellField"],
-            "shellPathId": blocked["shellPathId"],
+            "sourcePath": "db:canonical-semantic-fragment:semantic_scope_fragment:row:ATU3Button",
+            "shellField": "ATU3Button",
+            "shellPathId": find_token_shop_extract_field(token_shop_extract, "ATU3Button").get("path_id"),
             "comparisonShape": blocked_edges,
-            "groundedConclusion": blocked["groundedConclusion"],
+            "groundedConclusion": str((effect_target.get("decisionSummary") or {}).get("summary") or closure_status.get("summary") or "ATU3 remains narrower and still lacks one exact shell join."),
         },
         "delta": {
             "sharedPresentEdgeTypes": shared_present,
@@ -6126,9 +6613,20 @@ def build_mk3_vs_blocked_diff(
     }
 
 
-def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_remap_boundary: dict[str, Any]) -> dict[str, Any]:
-    baseline = row_remap_boundary["atu3CrossSystemEffectTrace"]["recoveredActionEffectChain"]
-    blocked = row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]
+def build_atu3_effect_vs_split_diff(
+    target_id: str,
+    target: dict[str, Any],
+    shell_window: dict[str, Any],
+    surfaces: list[dict[str, Any]],
+    token_shop_extract: dict[str, Any],
+    effect_context: dict[str, Any],
+) -> dict[str, Any]:
+    action_source = find_source_entry(find_surface(surfaces, "action-lane"), "level0")
+    title_source = find_source_entry(find_surface(surfaces, "shared-effect-title"), "level0")
+    text_source = find_source_entry(find_surface(surfaces, "shared-effect-text"), "level0")
+    row_scope = dict(effect_context.get("rowScope") or {})
+    chest_consumer_target = dict(effect_context.get("chestConsumerTarget") or {})
+    chest_consumer_summary = dict(chest_consumer_target.get("decisionSummary") or {})
     baseline_edges = [
         {
             "type": "serialized-adjacency",
@@ -6136,11 +6634,8 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "provenanceStrength": "direct",
             "statement": "ATU3Button still sits directly after the CellBoost owner-field block.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.ownerFieldBlock",
-                    ", ".join(baseline["ownerFieldBlock"]),
-                )
+                cite_token_shop_extract_field("ATU3Button", token_shop_extract),
+                cite_token_shop_extract_field("CellBoostStartCost", token_shop_extract),
             ],
         },
         {
@@ -6149,11 +6644,7 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "provenanceStrength": "supporting",
             "statement": "The effect-driven trace now preserves one checked row-family action hook.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.supportingActionHook",
-                    baseline["supportingActionHook"],
-                )
+                cite_hit(action_source, find_hit(action_source, "BuyCellBoost")),
             ],
         },
         {
@@ -6162,11 +6653,7 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "provenanceStrength": "direct",
             "statement": "The effect-driven trace now preserves one shared cells-from-chests effect system surface.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectTitle",
-                    baseline["sharedEffectTitle"],
-                )
+                cite_hit(title_source, find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")),
             ],
         },
         {
@@ -6175,11 +6662,7 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "provenanceStrength": "direct",
             "statement": "The effect-driven trace now preserves one exact player-facing effect string for the shared chest-effect lane.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectText",
-                    baseline["sharedEffectText"],
-                )
+                cite_hit(text_source, find_hit(text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.")),
             ],
         },
         {
@@ -6188,11 +6671,8 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "provenanceStrength": "direct",
             "statement": "The effect-driven trace now preserves a bounded CellBoost parameter surface.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.parameterSurface.derivedReading",
-                    baseline["parameterSurface"]["derivedReading"],
-                )
+                cite_token_shop_extract_field("CellBoostBonus", token_shop_extract),
+                cite_token_shop_extract_field("CellBoostMaxLevel", token_shop_extract),
             ],
         },
         {
@@ -6201,11 +6681,11 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "provenanceStrength": "negative",
             "statement": "The exact typed gameplay owner for the shared chest-effect applier still remains unresolved.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin",
-                    row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]["missingJoin"],
-                )
+                cite_db_materialized_target(
+                    "token-shop-atu3-chest-consumer",
+                    "$.decisionSummary.summary",
+                    str(chest_consumer_summary.get("summary") or "The exact CellBoostBonus field handoff still stays bounded negative."),
+                ),
             ],
         },
     ]
@@ -6216,11 +6696,8 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "provenanceStrength": "direct",
             "statement": "ATU3Button still sits directly beside the CellBoost owner-field block.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.adjacentFollowUp.blockedAdjacentShell.adjacentOwnerFieldBlock",
-                    ", ".join(blocked["adjacentOwnerFieldBlock"]),
-                )
+                cite_token_shop_extract_field("ATU3Button", token_shop_extract),
+                cite_token_shop_extract_field("CellBoostStartCost", token_shop_extract),
             ],
         },
         {
@@ -6229,10 +6706,10 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "provenanceStrength": "negative",
             "statement": "The older split trace only preserved a generic action cluster, not an effect-chain verdict.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[1]",
-                    blocked["missingLinks"][1],
+                cite_db_semantic_scope(
+                    "row:ATU3Button",
+                    str((row_scope.get("closureStatus") or {}).get("status") or "semantic-open"),
+                    "ATU3 row scope still does not clear one exact shell-to-action effect verdict by itself.",
                 )
             ],
         },
@@ -6242,10 +6719,10 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "provenanceStrength": "negative",
             "statement": "The older split trace did not preserve one checked shared effect-system join.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CellsDisambiguationPass.groundedConclusion",
-                    row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"],
+                cite_db_semantic_scope(
+                    "row:ATU3Button",
+                    str((row_scope.get("closureStatus") or {}).get("status") or "semantic-open"),
+                    "ATU3 row scope remains structurally open and does not by itself prove the shared chest-effect lane.",
                 )
             ],
         },
@@ -6255,10 +6732,10 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "provenanceStrength": "negative",
             "statement": "The older split trace did not treat the surviving player-facing effect as one checked derived surface.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CellsDisambiguationPass.groundedConclusion",
-                    row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"],
+                cite_db_semantic_scope(
+                    "row:ATU3Button",
+                    str((row_scope.get("closureStatus") or {}).get("status") or "semantic-open"),
+                    "ATU3 row scope still leaves the effect-text lane detached from one exact row-local identity verdict.",
                 )
             ],
         },
@@ -6290,21 +6767,21 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
             "id": "atu3-effect-driven-chain",
             "label": "ATU3 effect-driven chain",
             "status": "cleared",
-            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
-            "shellField": baseline["shellField"],
-            "shellPathId": baseline["shellPathId"],
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]),
+            "shellField": shell_window["shellField"],
+            "shellPathId": shell_window["shellPathId"],
             "comparisonShape": baseline_edges,
-            "groundedConclusion": baseline["groundedConclusion"],
+            "groundedConclusion": "ATU3 now preserves one shell-to-action-hook-to-shared-effect chain into the cells-from-chests gameplay lane, but the typed gameplay owner remains unresolved.",
         },
         "blockedTarget": {
             "id": target_id,
             "label": "ATU3 prefab/title split",
             "status": "blocked",
-            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
-            "shellField": blocked["shellField"],
-            "shellPathId": blocked["shellPathId"],
+            "sourcePath": "db:canonical-semantic-fragment:semantic_scope_fragment:row:ATU3Button",
+            "shellField": shell_window["shellField"],
+            "shellPathId": shell_window["shellPathId"],
             "comparisonShape": blocked_edges,
-            "groundedConclusion": blocked["groundedConclusion"],
+            "groundedConclusion": "The row-local ATU3 scope still leaves the action, shared-effect, and player-facing effect surfaces structurally open without one exact typed owner or row-identity closure.",
         },
         "delta": {
             "sharedPresentEdgeTypes": shared_present,
@@ -6322,7 +6799,7 @@ def build_atu3_effect_vs_split_diff(target_id: str, target: dict[str, Any], row_
 def build_atu3_chest_consumer_trace_graph(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
-    row_remap_boundary: dict[str, Any],
+    consumer_context: dict[str, Any],
 ) -> dict[str, Any]:
     metadata_surface = find_surface(surfaces, "metadata-neighborhood")
     title_surface = find_surface(surfaces, "shared-effect-title")
@@ -6359,8 +6836,8 @@ def build_atu3_chest_consumer_trace_graph(
     token_chest_hit = find_hit(chest_source, "TokenChest")
     diamond_chest_hit = find_hit(chest_source, "DiamondChest")
 
-    consumer_trace = row_remap_boundary["atu3ChestConsumerTrace"]["recoveredConsumerHandoff"]
-    missing_seam = row_remap_boundary["atu3ChestConsumerTrace"]["missingParameterConsumerSeam"]
+    consumer_read_target = dict(consumer_context.get("consumerReadTarget") or {})
+    consumer_read_summary = dict(consumer_read_target.get("decisionSummary") or {})
 
     shell_node = "target-shell"
     owner_node = "owner-field-block"
@@ -6401,8 +6878,6 @@ def build_atu3_chest_consumer_trace_graph(
                 cite_hit(metadata_source, metadata_owner_hit),
                 cite_hit(title_source, title_hit),
                 cite_hit(lane_text_source, lane_text_hit),
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.sharedEffectTitle", consumer_trace["sharedEffectTitle"]),
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.sharedEffectText", consumer_trace["sharedEffectText"]),
             ],
         ),
         make_edge(
@@ -6414,7 +6889,6 @@ def build_atu3_chest_consumer_trace_graph(
             "direct",
             "The ATU3 shared chest-effect lane now hands off into the concrete AdManager chest consumer family.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerSystem", consumer_trace["consumerSystem"]),
                 cite_hit(lane_consumer_source, ad_manager_hit),
                 cite_hit(lane_consumer_source, set_texts_hit),
                 cite_hit(lane_consumer_source, offline_hit),
@@ -6430,7 +6904,6 @@ def build_atu3_chest_consumer_trace_graph(
             "direct",
             "The same consumer family preserves the token and diamond chest routine neighborhood.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerMethodFamily", ", ".join(consumer_trace["consumerMethodFamily"])),
                 cite_hit(metadata_routine_source, start_token_hit),
                 cite_hit(metadata_routine_source, token_routine_hit),
                 cite_hit(metadata_routine_source, closed_token_hit),
@@ -6448,7 +6921,6 @@ def build_atu3_chest_consumer_trace_graph(
             "direct",
             "The same runtime shell preserves the chest-reward bonus and cell-gain shell adjacent to the ATU3 consumer family.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerBonusShell", ", ".join(consumer_trace["consumerBonusShell"])),
                 cite_hit(metadata_routine_source, small_cells_hit),
                 cite_hit(metadata_routine_source, big_cells_hit),
                 cite_hit(metadata_routine_source, final_token_bonus_hit),
@@ -6464,7 +6936,6 @@ def build_atu3_chest_consumer_trace_graph(
             "supporting",
             "Direct Unity extraction preserves the concrete token and diamond chest objects used by the same consumer family.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.supportingChestObjects", ", ".join(consumer_trace["supportingChestObjects"])),
                 cite_hit(chest_source, token_chest_hit),
                 cite_hit(chest_source, diamond_chest_hit),
             ],
@@ -6478,7 +6949,6 @@ def build_atu3_chest_consumer_trace_graph(
             "supporting",
             "The preserved +1 seconds cells-from-chests effect surface now narrows onto the same token and diamond chest routine family rather than floating as detached text.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.groundedConclusion", consumer_trace["groundedConclusion"]),
                 cite_hit(title_source, title_hit),
                 cite_hit(metadata_routine_source, token_routine_hit),
                 cite_hit(metadata_routine_source, diamond_routine_hit),
@@ -6496,7 +6966,11 @@ def build_atu3_chest_consumer_trace_graph(
             "negative",
             "No committed source yet shows the exact CellBoostBonus read or typed field handoff inside the AdManager chest routine family that applies the ATU3 cells-from-chests timeskip effect.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerTrace.missingParameterConsumerSeam.missingJoin", missing_seam["missingJoin"]),
+                cite_db_materialized_target(
+                    "token-shop-atu3-chest-consumer-read",
+                    "$.decisionSummary.summary",
+                    str(consumer_read_summary.get("summary") or "The exact CellBoostBonus read or typed field handoff still stays bounded negative."),
+                ),
             ],
         ),
     ]
@@ -6534,7 +7008,7 @@ def build_atu3_chest_consumer_trace_graph(
 def build_atu3_chest_consumer_read_trace_graph(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
-    row_remap_boundary: dict[str, Any],
+    read_context: dict[str, Any],
 ) -> dict[str, Any]:
     metadata_surface = find_surface(surfaces, "metadata-neighborhood")
     consumer_surface = find_surface(surfaces, "consumer-family")
@@ -6573,8 +7047,8 @@ def build_atu3_chest_consumer_read_trace_graph(
     final_token_bonus_hit = find_hit(final_source, "<FinalAdTokenChestBonus>k__BackingField")
     final_diamond_bonus_hit = find_hit(final_source, "<FinalDiamondChestBonus>k__BackingField")
 
-    read_trace = row_remap_boundary["atu3ChestConsumerReadTrace"]["recoveredInternalReadShell"]
-    missing_seam = row_remap_boundary["atu3ChestConsumerReadTrace"]["missingExactReadSiteSeam"]
+    consumer_target = dict(read_context.get("consumerTarget") or {})
+    consumer_summary = dict(consumer_target.get("decisionSummary") or {})
 
     shell_node = "target-shell"
     owner_node = "owner-field-block"
@@ -6643,7 +7117,6 @@ def build_atu3_chest_consumer_read_trace_graph(
             "direct",
             "The same internal runtime neighborhood preserves both chest cell-gain getters.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerReadTrace.recoveredInternalReadShell.cellGainGetterFamily", ", ".join(read_trace["cellGainGetterFamily"])),
                 cite_hit(getter_source, small_getter_hit),
                 cite_hit(getter_source, big_getter_hit),
             ],
@@ -6657,7 +7130,6 @@ def build_atu3_chest_consumer_read_trace_graph(
             "direct",
             "Committed metadata preserves the cell-gain getters beside the booster bonus aggregation shell.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerReadTrace.recoveredInternalReadShell.boosterAdBonusShell", ", ".join(read_trace["boosterAdBonusShell"])),
                 cite_hit(booster_source, set_booster_hit),
                 cite_hit(booster_source, final_booster_getter_hit),
                 cite_hit(booster_source, small_cells_hit),
@@ -6675,7 +7147,6 @@ def build_atu3_chest_consumer_read_trace_graph(
             "derived",
             "The booster bonus aggregation shell remains adjacent to the final token and diamond chest bonus backing-field shell preserved in metadata.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerReadTrace.recoveredInternalReadShell.finalChestBonusShell", ", ".join(read_trace["finalChestBonusShell"])),
                 cite_hit(final_source, final_token_bonus_hit),
                 cite_hit(final_source, final_diamond_bonus_hit),
             ],
@@ -6690,9 +7161,13 @@ def build_atu3_chest_consumer_read_trace_graph(
             "exact-cellboost-to-booster-bonus-handoff",
             "missing",
             "negative",
-            missing_seam["missingJoin"],
+            "The exact CellBoostBonus read site or typed field handoff into the internal booster bonus shell still remains unresolved.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3ChestConsumerReadTrace.missingExactReadSiteSeam.missingJoin", missing_seam["missingJoin"]),
+                cite_db_materialized_target(
+                    "token-shop-atu3-chest-consumer",
+                    "$.decisionSummary.summary",
+                    str(consumer_summary.get("summary") or "The exact CellBoostBonus field handoff still stays bounded negative."),
+                ),
                 cite_hit(getter_source, small_getter_hit),
                 cite_hit(getter_source, big_getter_hit),
                 cite_hit(booster_source, set_booster_hit),
@@ -6735,9 +7210,22 @@ def build_atu3_chest_consumer_read_trace_graph(
     }
 
 
-def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], row_remap_boundary: dict[str, Any]) -> dict[str, Any]:
-    baseline = row_remap_boundary["atu3ChestConsumerTrace"]["recoveredConsumerHandoff"]
-    blocked = row_remap_boundary["atu3CrossSystemEffectTrace"]["recoveredActionEffectChain"]
+def build_atu3_consumer_vs_effect_diff(
+    target_id: str,
+    target: dict[str, Any],
+    shell_window: dict[str, Any],
+    surfaces: list[dict[str, Any]],
+    token_shop_extract: dict[str, Any],
+    consumer_context: dict[str, Any],
+) -> dict[str, Any]:
+    title_source = find_source_entry(find_surface(surfaces, "shared-effect-title"), "level0")
+    consumer_source = find_source_entry(find_surface(surfaces, "consumer-family"), "level0")
+    routine_source = find_source_entry(find_surface(surfaces, "consumer-routines"), "metadata")
+    chest_source = find_source_entry(find_surface(surfaces, "chest-objects"), "level0")
+    effect_target = dict(consumer_context.get("effectTarget") or {})
+    effect_summary = dict(effect_target.get("decisionSummary") or {})
+    consumer_read_target = dict(consumer_context.get("consumerReadTarget") or {})
+    consumer_read_summary = dict(consumer_read_target.get("decisionSummary") or {})
     baseline_edges = [
         {
             "type": "serialized-adjacency",
@@ -6745,11 +7233,8 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "direct",
             "statement": "ATU3Button still sits directly after the CellBoost owner-field block.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.ownerFieldBlock",
-                    ", ".join(blocked["ownerFieldBlock"]),
-                )
+                cite_token_shop_extract_field("ATU3Button", token_shop_extract),
+                cite_token_shop_extract_field("CellBoostStartCost", token_shop_extract),
             ],
         },
         {
@@ -6758,11 +7243,7 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "direct",
             "statement": "The shared Cells Booster (Chests) effect lane remains preserved.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.sharedEffectTitle",
-                    baseline["sharedEffectTitle"],
-                )
+                cite_hit(title_source, find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")),
             ],
         },
         {
@@ -6771,11 +7252,7 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "direct",
             "statement": "The new trace now preserves one handoff into the AdManager chest consumer family.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerSystem",
-                    baseline["consumerSystem"],
-                )
+                cite_hit(consumer_source, find_hit(consumer_source, "AdManager, Assembly-CSharp")),
             ],
         },
         {
@@ -6784,11 +7261,8 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "direct",
             "statement": "The new trace now preserves the token and diamond chest routine family.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerMethodFamily",
-                    ", ".join(baseline["consumerMethodFamily"]),
-                )
+                cite_hit(routine_source, find_hit(routine_source, "<TokenChestRoutine>d__149")),
+                cite_hit(routine_source, find_hit(routine_source, "<DiamondChestRoutine>d__155")),
             ],
         },
         {
@@ -6797,11 +7271,8 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "direct",
             "statement": "The new trace now preserves the final chest-bonus shell.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.consumerBonusShell",
-                    ", ".join(baseline["consumerBonusShell"]),
-                )
+                cite_hit(routine_source, find_hit(routine_source, "<FinalAdTokenChestBonus>k__BackingField")),
+                cite_hit(routine_source, find_hit(routine_source, "<FinalDiamondChestBonus>k__BackingField")),
             ],
         },
         {
@@ -6810,11 +7281,8 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "supporting",
             "statement": "The new trace now preserves the concrete token and diamond chest objects.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3ChestConsumerTrace.recoveredConsumerHandoff.supportingChestObjects",
-                    ", ".join(baseline["supportingChestObjects"]),
-                )
+                cite_hit(chest_source, find_hit(chest_source, "TokenChest")),
+                cite_hit(chest_source, find_hit(chest_source, "DiamondChest")),
             ],
         },
         {
@@ -6823,10 +7291,10 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "negative",
             "statement": "The exact CellBoostBonus read or typed field handoff inside the consumer family still remains unresolved.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3ChestConsumerTrace.missingParameterConsumerSeam.missingJoin",
-                    row_remap_boundary["atu3ChestConsumerTrace"]["missingParameterConsumerSeam"]["missingJoin"],
+                cite_db_materialized_target(
+                    "token-shop-atu3-chest-consumer-read",
+                    "$.decisionSummary.summary",
+                    str(consumer_read_summary.get("summary") or "The exact CellBoostBonus read or typed field handoff still stays bounded negative."),
                 )
             ],
         },
@@ -6838,11 +7306,8 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "direct",
             "statement": "ATU3Button still sits directly after the CellBoost owner-field block.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.ownerFieldBlock",
-                    ", ".join(blocked["ownerFieldBlock"]),
-                )
+                cite_token_shop_extract_field("ATU3Button", token_shop_extract),
+                cite_token_shop_extract_field("CellBoostStartCost", token_shop_extract),
             ],
         },
         {
@@ -6851,11 +7316,7 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "direct",
             "statement": "The older effect-driven trace already preserved the shared Cells Booster (Chests) effect lane.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.recoveredActionEffectChain.sharedEffectTitle",
-                    blocked["sharedEffectTitle"],
-                )
+                cite_hit(title_source, find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")),
             ],
         },
         {
@@ -6864,10 +7325,10 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "negative",
             "statement": "The older effect trace stopped at the shared effect surface and did not preserve one concrete consumer-family handoff.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin",
-                    row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]["missingJoin"],
+                cite_db_materialized_target(
+                    "token-shop-atu3-cells-effect",
+                    "$.decisionSummary.summary",
+                    str(effect_summary.get("summary") or "The effect-driven trace remains quarantined before the concrete consumer-family handoff."),
                 )
             ],
         },
@@ -6877,10 +7338,10 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "negative",
             "statement": "The older effect trace did not preserve the token and diamond chest routine family.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin",
-                    row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]["missingJoin"],
+                cite_db_materialized_target(
+                    "token-shop-atu3-cells-effect",
+                    "$.decisionSummary.summary",
+                    str(effect_summary.get("summary") or "The effect-driven trace remains quarantined before the concrete consumer-family handoff."),
                 )
             ],
         },
@@ -6890,10 +7351,10 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "negative",
             "statement": "The older effect trace did not preserve the concrete chest-bonus shell.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin",
-                    row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]["missingJoin"],
+                cite_db_materialized_target(
+                    "token-shop-atu3-cells-effect",
+                    "$.decisionSummary.summary",
+                    str(effect_summary.get("summary") or "The effect-driven trace remains quarantined before the concrete consumer-family handoff."),
                 )
             ],
         },
@@ -6903,10 +7364,10 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
             "provenanceStrength": "negative",
             "statement": "The older effect trace did not preserve the concrete chest-object handoff.",
             "provedBy": [
-                cite_row_boundary(
-                    "tokenShopRowRemapBoundary",
-                    "$.atu3CrossSystemEffectTrace.missingTypedEffectOwner.missingJoin",
-                    row_remap_boundary["atu3CrossSystemEffectTrace"]["missingTypedEffectOwner"]["missingJoin"],
+                cite_db_materialized_target(
+                    "token-shop-atu3-cells-effect",
+                    "$.decisionSummary.summary",
+                    str(effect_summary.get("summary") or "The effect-driven trace remains quarantined before the concrete consumer-family handoff."),
                 )
             ],
         },
@@ -6932,36 +7393,35 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
         } - set(shared_present)
     )
     blocked_missing = [edge["type"] for edge in blocked_edges if edge["status"] == "missing"]
-
     return {
         "baseline": {
-            "id": "atu3-chest-consumer-handoff",
-            "label": "ATU3 chest consumer handoff",
+            "id": "atu3-consumer-family-handoff",
+            "label": "ATU3 consumer-family handoff",
             "status": "cleared",
-            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
-            "shellField": baseline["shellField"],
-            "shellPathId": baseline["shellPathId"],
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]),
+            "shellField": shell_window["shellField"],
+            "shellPathId": shell_window["shellPathId"],
             "comparisonShape": baseline_edges,
-            "groundedConclusion": baseline["groundedConclusion"],
+            "groundedConclusion": "ATU3 now preserves one shared-effect-to-consumer-family handoff into the concrete AdManager chest routine neighborhood, but the exact CellBoostBonus field handoff still remains unresolved.",
         },
         "blockedTarget": {
-            "id": "atu3-effect-driven-chain",
-            "label": "ATU3 effect-driven chain",
+            "id": target_id,
+            "label": "ATU3 effect-only chain",
             "status": "blocked",
-            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
-            "shellField": blocked["shellField"],
-            "shellPathId": blocked["shellPathId"],
+            "sourcePath": "db:materialized-target-bundle:token-shop-atu3-cells-effect",
+            "shellField": shell_window["shellField"],
+            "shellPathId": shell_window["shellPathId"],
             "comparisonShape": blocked_edges,
-            "groundedConclusion": blocked["groundedConclusion"],
+            "groundedConclusion": "The effect-driven ATU3 chain stops at the shared effect surface and does not by itself close the consumer-family, routine, chest-object, or bonus-shell handoff.",
         },
         "delta": {
             "sharedPresentEdgeTypes": shared_present,
             "baselineOnlyPresentEdgeTypes": baseline_only,
             "blockedMissingEdgeTypes": blocked_missing,
             "solvedVsBlockedSummary": [
-                "Both ATU3 traces preserve the direct serialized shell-to-owner-block adjacency and the shared Cells Booster (Chests) effect lane.",
-                "The new consumer-seam trace adds one checked handoff into the AdManager chest consumer family, its chest-routine neighborhood, the final chest-bonus shell, and the concrete chest objects.",
-                "The remaining honest blocker is now only the exact CellBoostBonus read or typed field handoff inside that consumer family.",
+                "Both ATU3 traces preserve the direct serialized shell-to-owner-block adjacency and the shared effect lane.",
+                "The consumer-handoff trace adds one checked AdManager consumer-family, chest-routine, chest-object, and chest-bonus shell handoff.",
+                "The remaining bounded break is the exact CellBoostBonus read or typed field handoff inside that consumer family.",
             ],
         },
     }
@@ -6970,8 +7430,8 @@ def build_atu3_consumer_vs_effect_diff(target_id: str, target: dict[str, Any], r
 def build_family_structure_graph(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
-    row_remap_boundary: dict[str, Any],
-    late_boundary: dict[str, Any],
+    token_shop_extract: dict[str, Any],
+    family_context: dict[str, Any],
 ) -> dict[str, Any]:
     shell_surface = find_surface(surfaces, "family-shells")
     proxy_surface = find_surface(surfaces, "bridge-proxies")
@@ -7002,6 +7462,10 @@ def build_family_structure_graph(
     text_hook_hit = find_hit(level0_title_source, "SetAllTokenShopTexts")
     mod_title_hit = find_hit(level0_title_source, "Token Ultima: MP")
     mk1_support_hit = find_hit(level0_title_source, "1. MK1 Generator Output,")
+    late_title_hit = find_hit(level0_title_source, "Academy Booster")
+    row_scopes = dict(family_context.get("rowScopes") or {})
+    atu3_target = dict(family_context.get("atu3Target") or {})
+    atu3_decision_summary = dict(atu3_target.get("decisionSummary") or {})
 
     shell_node = "atu-family-shells"
     solved_node = "solved-shell-subset"
@@ -7021,11 +7485,11 @@ def build_family_structure_graph(
             "direct",
             "The committed TokenShop payload repeatedly preserves exact ATU shell ids and adjacent owner neighborhoods across both solved and still-unresolved rows.",
             [
-                cite_hit(extract_source, atu1_shell_hit),
-                cite_hit(extract_source, atu6_shell_hit),
+                cite_token_shop_extract_field("ATU1Button", token_shop_extract),
+                cite_token_shop_extract_field("ATU6Button", token_shop_extract),
                 cite_hit(extract_source, atu7_shell_hit),
                 cite_hit(extract_source, atu24_shell_hit),
-                cite_row_boundary("tokenShopLateAtuBoundary", "$.targetNeighborhood.shellFieldRange", late_boundary["targetNeighborhood"]["shellFieldRange"]),
+                cite_token_shop_extract_field("ATU28Button", token_shop_extract),
             ],
         ),
         make_edge(
@@ -7070,7 +7534,7 @@ def build_family_structure_graph(
                 cite_hit(level0_title_source, text_hook_hit),
                 cite_hit(level0_title_source, mod_title_hit),
                 cite_hit(level0_title_source, mk1_support_hit),
-                cite_row_boundary("tokenShopLateAtuBoundary", "$.titleRosterBoundary.localTitleCluster[2].title", late_boundary["titleRosterBoundary"]["localTitleCluster"][2]["title"]),
+                cite_hit(level0_title_source, late_title_hit),
             ],
         ),
         make_edge(
@@ -7095,8 +7559,12 @@ def build_family_structure_graph(
             "supporting",
             "The still-unresolved neighborhoods are already checked as bounded negatives rather than open-ended unknowns.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CellsDisambiguationPass.groundedConclusion", row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"]),
-                cite_row_boundary("tokenShopLateAtuBoundary", "$.groundedConclusion", late_boundary["groundedConclusion"]),
+                cite_db_materialized_target(
+                    "token-shop-atu3-cells-effect",
+                    "$.decisionSummary.summary",
+                    str(atu3_decision_summary.get("summary") or "ATU3 remains quarantined to descriptive remap evidence."),
+                ),
+                cite_token_shop_extract_field("ATU24Button", token_shop_extract),
                 cite_hit(unresolved_lane_source, buy_late_hit),
             ],
         ),
@@ -7112,10 +7580,10 @@ def build_family_structure_graph(
             "negative",
             "Outside ATU6, the solved shell subset still does not repeatedly localize final player-facing row titles: ATU1, ATU2, ATU4, ATU5, and ATU7 all stop short of one exact shell-to-title join.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.blockedIdentityJoin.missingLinks[1]", row_remap_boundary["blockedIdentityJoin"]["missingLinks"][1]),
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.traceFollowUp.blockedTitleJoin.missingJoin", row_remap_boundary["traceFollowUp"]["blockedTitleJoin"]["missingJoin"]),
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu5TitleFollowUp.blockedTitleJoin.missingJoin", row_remap_boundary["atu5TitleFollowUp"]["blockedTitleJoin"]["missingJoin"]),
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu7BridgeFollowUp.recoveredBridge.groundedConclusion", row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]["groundedConclusion"]),
+                cite_db_semantic_scope("row:ATU1Button", str(((row_scopes.get("row:ATU1Button") or {}).get("closureStatus") or {}).get("status") or "semantic-open"), "ATU1 remains DB-derived but not title-localized as a repeated family proof."),
+                cite_db_semantic_scope("row:ATU4Button", str(((row_scopes.get("row:ATU4Button") or {}).get("closureStatus") or {}).get("status") or "semantic-open"), "ATU4 remains DB-derived but does not add a second exact title exemplar here."),
+                cite_db_semantic_scope("row:ATU5Button", str(((row_scopes.get("row:ATU5Button") or {}).get("closureStatus") or {}).get("status") or "semantic-open"), "ATU5 remains DB-derived but does not add a second exact title exemplar here."),
+                cite_db_semantic_scope("row:ATU7Button", str(((row_scopes.get("row:ATU7Button") or {}).get("closureStatus") or {}).get("status") or "semantic-open"), "ATU7 remains DB-derived but does not add a second exact title exemplar here."),
             ],
         ),
         make_edge(
@@ -7127,9 +7595,14 @@ def build_family_structure_graph(
             "negative",
             "The unresolved ATU3 and late ATU24-ATU28 neighborhoods still fail the exact shell-to-prefab or shell-to-title localization step entirely, even though shell-side serialization and nearby hooks survive.",
             [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CellsDisambiguationPass.groundedConclusion", row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"]),
-                cite_row_boundary("tokenShopLateAtuBoundary", "$.result", late_boundary["result"]),
-                cite_row_boundary("tokenShopLateAtuBoundary", "$.groundedConclusion", late_boundary["groundedConclusion"]),
+                cite_db_materialized_target(
+                    "token-shop-atu3-cells-effect",
+                    "$.decisionSummary.summary",
+                    str(atu3_decision_summary.get("summary") or "ATU3 remains quarantined to descriptive remap evidence."),
+                ),
+                cite_token_shop_extract_field("ATU24Button", token_shop_extract, "Late unresolved shells still survive only as exact serialized TokenShop fields."),
+                cite_hit(unresolved_lane_source, buy_late_hit),
+                cite_hit(level0_title_source, late_title_hit),
             ],
         ),
     ]
@@ -7175,14 +7648,18 @@ def build_family_structure_graph(
 def build_family_structure_diff(
     target_id: str,
     target: dict[str, Any],
-    row_remap_boundary: dict[str, Any],
-    late_boundary: dict[str, Any],
+    token_shop_extract: dict[str, Any],
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
+    family_context: dict[str, Any],
 ) -> dict[str, Any]:
     proxy_source = find_source_entry(find_surface(surfaces, "bridge-proxies"), "level0")
     prefab_source = find_source_entry(find_surface(surfaces, "prefab-roster"), "level0")
     title_source = find_source_entry(find_surface(surfaces, "title-text-surfaces"), "level0")
+    row_scopes = dict(family_context.get("rowScopes") or {})
+    atu3_target = dict(family_context.get("atu3Target") or {})
+    atu3_decision_summary = dict(atu3_target.get("decisionSummary") or {})
+    late_title_hit = find_hit(title_source, "Academy Booster")
     baseline_edges = [
         {
             "type": "repeated-serialized-shell-adjacency",
@@ -7238,8 +7715,9 @@ def build_family_structure_diff(
             "provenanceStrength": "direct",
             "statement": "The unresolved neighborhoods still preserve exact serialized shell-side neighborhoods.",
             "provedBy": [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.adjacentFollowUp.blockedAdjacentShell.adjacentOwnerFieldBlock", ", ".join(row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]["adjacentOwnerFieldBlock"])),
-                cite_row_boundary("tokenShopLateAtuBoundary", "$.targetNeighborhood.shellFieldRange", late_boundary["targetNeighborhood"]["shellFieldRange"]),
+                cite_token_shop_extract_field("ATU3Button", token_shop_extract, "ATU3 remains inside the exact serialized TokenShop controller range."),
+                cite_token_shop_extract_field("ATU24Button", token_shop_extract, "Late unresolved shells remain inside the exact serialized TokenShop controller range."),
+                cite_token_shop_extract_field("ATU28Button", token_shop_extract),
             ],
         },
         {
@@ -7248,8 +7726,8 @@ def build_family_structure_diff(
             "provenanceStrength": "supporting",
             "statement": "Some unresolved neighborhoods still preserve nearby generic or late buy-hook shells.",
             "provedBy": [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.adjacentFollowUp.blockedAdjacentShell.nearestNamedActionHook", row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]["nearestNamedActionHook"]),
-                cite_row_boundary("tokenShopLateAtuBoundary", "$.actionNeighborhood.preservedLateHooks[0]", late_boundary["actionNeighborhood"]["preservedLateHooks"][0]),
+                cite_hit(proxy_source, find_hit(proxy_source, "BuyCellBoost")),
+                cite_hit(proxy_source, find_hit(proxy_source, "BuyATU24")),
             ],
         },
         {
@@ -7258,8 +7736,13 @@ def build_family_structure_diff(
             "provenanceStrength": "negative",
             "statement": "The unresolved neighborhoods still do not preserve exact shell-to-prefab localization.",
             "provedBy": [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.adjacentFollowUp.blockedAdjacentShell.missingLinks[2]", row_remap_boundary["adjacentFollowUp"]["blockedAdjacentShell"]["missingLinks"][2]),
-                cite_row_boundary("tokenShopLateAtuBoundary", "$.result", late_boundary["result"]),
+                cite_db_materialized_target(
+                    "token-shop-atu3-cells-effect",
+                    "$.decisionSummary.summary",
+                    str(atu3_decision_summary.get("summary") or "ATU3 remains quarantined to descriptive remap evidence."),
+                ),
+                cite_token_shop_extract_field("ATU24Button", token_shop_extract),
+                cite_hit(proxy_source, find_hit(proxy_source, "BuyATU24")),
             ],
         },
         {
@@ -7268,8 +7751,9 @@ def build_family_structure_diff(
             "provenanceStrength": "negative",
             "statement": "The unresolved neighborhoods still do not preserve one exact shell-to-final-title chain.",
             "provedBy": [
-                cite_row_boundary("tokenShopRowRemapBoundary", "$.atu3CellsDisambiguationPass.groundedConclusion", row_remap_boundary["atu3CellsDisambiguationPass"]["groundedConclusion"]),
-                cite_row_boundary("tokenShopLateAtuBoundary", "$.groundedConclusion", late_boundary["groundedConclusion"]),
+                cite_db_semantic_scope("row:ATU3Button", str(((row_scopes.get("row:ATU3Button") or {}).get("closureStatus") or {}).get("status") or "semantic-open"), "ATU3 still lacks one exact shell-to-final-title exemplar in the current DB-derived row scope."),
+                cite_token_shop_extract_field("ATU24Button", token_shop_extract),
+                cite_hit(title_source, late_title_hit),
             ],
         },
     ]
@@ -7309,7 +7793,7 @@ def build_family_structure_diff(
             "id": target_id,
             "label": target["label"],
             "status": "blocked",
-            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopLateAtuBoundary"]),
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]),
             "shellField": "ATU3Button plus ATU24Button through ATU28Button",
             "shellPathId": "bounded-unresolved-neighborhoods",
             "comparisonShape": blocked_edges,
@@ -7729,26 +8213,29 @@ def build_token_shop_mod_trace(target_id: str, target: dict[str, Any], anchors: 
 
 def build_token_shop_mk1_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
     config = target["strategyConfig"]
-    row_remap_boundary = documents["tokenShopRowRemapBoundary"]
-    shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
+    token_shop_extract = documents["tokenShopExtract"]
+    shell_window = get_shell_window(token_shop_extract, config["shellField"], config["shellWindowRadius"])
+    mk1_context = {
+        "rowScope": load_canonical_semantic_scope("row:ATU3Button"),
+        "effectTarget": load_latest_materialized_target_bundle("token-shop-atu3-cells-effect"),
+    }
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in config["surfaces"]]
-    trace_bridge = row_remap_boundary["atu5TitleFollowUp"]["recoveredBridge"]
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
         "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, config),
-        "traceGraph": build_mk1_trace_graph(shell_window, surfaces, row_remap_boundary),
+        "traceGraph": build_mk1_trace_graph(shell_window, surfaces),
         "bridgePromotionRule": "Only promote the traced ATU5 row past quarantine when one exact shell-to-final-title join is recovered; prefab-only and support-text-only evidence remains remap-only.",
         "bridgeCheck": {
-            "candidateTerms": [config["shellField"], trace_bridge["supportingActionHook"], trace_bridge["prefabIdentity"]],
+            "candidateTerms": [config["shellField"], "BuyMK1TokenBoost", "NewTokenUPGPrefab.T1.MK1Booster"],
             "bridgeCleared": True,
             "bridgeHits": [
-                {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": trace_bridge["supportingActionHook"]},
-                {"surfaceId": "prefab-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": trace_bridge["prefabIdentity"]},
+                {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyMK1TokenBoost"},
+                {"surfaceId": "prefab-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T1.MK1Booster"},
             ],
             "result": "checked object bridge recovered",
         },
-        "solvedVsBlockedDiff": build_mk1_vs_blocked_diff(target_id, target, row_remap_boundary, shell_window, surfaces),
+        "solvedVsBlockedDiff": build_mk1_vs_blocked_diff(target_id, target, shell_window, surfaces, token_shop_extract, mk1_context),
         "lostStructure": list(config["lostStructure"]),
         "groundedConclusion": config["groundedConclusion"],
         "currentBoundary": [
@@ -7761,26 +8248,29 @@ def build_token_shop_mk1_trace(target_id: str, target: dict[str, Any], anchors: 
 
 def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
     config = target["strategyConfig"]
-    row_remap_boundary = documents["tokenShopRowRemapBoundary"]
-    shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
+    token_shop_extract = documents["tokenShopExtract"]
+    shell_window = get_shell_window(token_shop_extract, config["shellField"], config["shellWindowRadius"])
+    mk3_context = {
+        "rowScope": load_canonical_semantic_scope("row:ATU7Button"),
+        "effectTarget": load_latest_materialized_target_bundle("token-shop-atu3-cells-effect"),
+    }
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in config["surfaces"]]
-    trace_bridge = row_remap_boundary["atu7BridgeFollowUp"]["recoveredBridge"]
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
         "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, config),
-        "traceGraph": build_mk3_bridge_trace_graph(shell_window, surfaces, row_remap_boundary),
+        "traceGraph": build_mk3_bridge_trace_graph(shell_window, surfaces),
         "bridgePromotionRule": "Only promote the traced ATU7 row as one bounded remap bridge when one checked shell-side owner block, one row-specific action hook, and one exact prefab identity converge on the same row family; do not infer any final title from this pass.",
         "bridgeCheck": {
-            "candidateTerms": [config["shellField"], trace_bridge["supportingActionHook"], trace_bridge["prefabIdentity"]],
+            "candidateTerms": [config["shellField"], "BuyMK3TokenBoost", "NewTokenUPGPrefab.T1.MK3Booster"],
             "bridgeCleared": True,
             "bridgeHits": [
-                {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": trace_bridge["supportingActionHook"]},
-                {"surfaceId": "prefab-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": trace_bridge["prefabIdentity"]},
+                {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyMK3TokenBoost"},
+                {"surfaceId": "prefab-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T1.MK3Booster"},
             ],
             "result": "checked object bridge recovered",
         },
-        "solvedVsBlockedDiff": build_mk3_vs_blocked_diff(target_id, target, row_remap_boundary, shell_window, surfaces),
+        "solvedVsBlockedDiff": build_mk3_vs_blocked_diff(target_id, target, shell_window, surfaces, token_shop_extract, mk3_context),
         "lostStructure": list(config["lostStructure"]),
         "groundedConclusion": config["groundedConclusion"],
         "currentBoundary": [
@@ -7793,8 +8283,13 @@ def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], an
 
 def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
     config = target["strategyConfig"]
-    row_remap_boundary = documents["tokenShopRowRemapBoundary"]
-    shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
+    token_shop_extract = documents["tokenShopExtract"]
+    shell_window = get_shell_window(token_shop_extract, config["shellField"], config["shellWindowRadius"])
+    effect_context = {
+        "rowScope": load_canonical_semantic_scope("row:ATU3Button"),
+        "chestConsumerTarget": load_latest_materialized_target_bundle("token-shop-atu3-chest-consumer"),
+        "consumerReadTarget": load_latest_materialized_target_bundle("token-shop-atu3-chest-consumer-read"),
+    }
     effect_surfaces = get_primary_surfaces_for_depth(config, depth_search)
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in effect_surfaces]
     depth_expansion = build_depth_expansion(
@@ -7810,7 +8305,7 @@ def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], a
         "shellWindow": shell_window,
         "surfaces": surfaces,
         "depthExpansion": depth_expansion,
-        "traceGraph": build_atu3_effect_trace_graph(shell_window, surfaces, row_remap_boundary, depth_expansion),
+        "traceGraph": build_atu3_effect_trace_graph(shell_window, surfaces, token_shop_extract, effect_context, depth_expansion),
         "bridgePromotionRule": "Only preserve ATU3 as an effect-driven row when one checked shell-side owner block, one exact row-family action hook, and one shared chest-effect title or text surface converge on the same cells-from-chests lane; keep typed gameplay owner claims blocked unless the applier is recovered explicitly.",
         "bridgeCheck": {
             "candidateTerms": [config["shellField"], "BuyCellBoost", "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."],
@@ -7822,7 +8317,7 @@ def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], a
             ],
             "result": "checked action-to-shared-effect chain recovered",
         },
-        "solvedVsBlockedDiff": build_atu3_effect_vs_split_diff(target_id, target, row_remap_boundary),
+        "solvedVsBlockedDiff": build_atu3_effect_vs_split_diff(target_id, target, shell_window, surfaces, token_shop_extract, effect_context),
         "lostStructure": list(config["lostStructure"]),
         "groundedConclusion": config["groundedConclusion"],
         "currentBoundary": [
@@ -7835,14 +8330,18 @@ def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], a
 
 def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
     config = target["strategyConfig"]
-    row_remap_boundary = documents["tokenShopRowRemapBoundary"]
-    shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
+    token_shop_extract = documents["tokenShopExtract"]
+    shell_window = get_shell_window(token_shop_extract, config["shellField"], config["shellWindowRadius"])
+    consumer_context = {
+        "effectTarget": load_latest_materialized_target_bundle("token-shop-atu3-cells-effect"),
+        "consumerReadTarget": load_latest_materialized_target_bundle("token-shop-atu3-chest-consumer-read"),
+    }
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in config["surfaces"]]
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
         "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, config),
-        "traceGraph": build_atu3_chest_consumer_trace_graph(shell_window, surfaces, row_remap_boundary),
+        "traceGraph": build_atu3_chest_consumer_trace_graph(shell_window, surfaces, consumer_context),
         "bridgePromotionRule": "Only preserve ATU3 as a consumer-seam row when one checked shared chest-effect lane, one concrete chest consumer family, one chest-routine neighborhood, and one chest-bonus shell converge on the same cells-from-chests lane; keep exact CellBoostBonus consumer-method claims blocked unless that handoff is recovered explicitly.",
         "bridgeCheck": {
             "candidateTerms": [config["shellField"], "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "AdManager, Assembly-CSharp", "<TokenChestRoutine>d__149", "<FinalDiamondChestBonus>k__BackingField"],
@@ -7855,7 +8354,7 @@ def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str,
             ],
             "result": "checked shared-effect-to-consumer-family handoff recovered",
         },
-        "solvedVsBlockedDiff": build_atu3_consumer_vs_effect_diff(target_id, target, row_remap_boundary),
+        "solvedVsBlockedDiff": build_atu3_consumer_vs_effect_diff(target_id, target, shell_window, surfaces, token_shop_extract, consumer_context),
         "lostStructure": list(config["lostStructure"]),
         "groundedConclusion": config["groundedConclusion"],
         "currentBoundary": [
@@ -7866,9 +8365,13 @@ def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str,
     }
 
 
-def build_atu3_consumer_read_vs_consumer_diff(target_id: str, target: dict[str, Any], row_remap_boundary: dict[str, Any]) -> dict[str, Any]:
-    baseline = row_remap_boundary["atu3ChestConsumerReadTrace"]["recoveredInternalReadShell"]
-    blocked = row_remap_boundary["atu3ChestConsumerTrace"]["recoveredConsumerHandoff"]
+def build_atu3_consumer_read_vs_consumer_diff(
+    target_id: str,
+    target: dict[str, Any],
+    shell_window: dict[str, Any],
+    consumer_context: dict[str, Any],
+) -> dict[str, Any]:
+    consumer_summary = dict((consumer_context.get("consumerTarget") or {}).get("decisionSummary") or {})
     baseline_edges = [
         "serialized-adjacency",
         "shared-effect-to-consumer-family",
@@ -7891,21 +8394,21 @@ def build_atu3_consumer_read_vs_consumer_diff(target_id: str, target: dict[str, 
             "id": "atu3-consumer-internal-read",
             "label": "ATU3 consumer-internal read shell",
             "status": "cleared",
-            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
-            "shellField": baseline["shellField"],
-            "shellPathId": baseline["shellPathId"],
+            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
+            "shellField": shell_window["shellField"],
+            "shellPathId": shell_window["shellPathId"],
             "comparisonShape": baseline_edges,
-            "groundedConclusion": baseline["groundedConclusion"],
+            "groundedConclusion": "ATU3 now preserves one internal getter-to-booster bonus aggregation shell inside the AdManager chest consumer family, but the exact CellBoostBonus read handoff still remains unresolved.",
         },
         "blockedTarget": {
             "id": target_id,
             "label": "ATU3 chest consumer seam",
             "status": "blocked",
-            "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopRowRemapBoundary"]),
-            "shellField": blocked["shellField"],
-            "shellPathId": blocked["shellPathId"],
+            "sourcePath": "db:materialized-target-bundle:token-shop-atu3-chest-consumer",
+            "shellField": shell_window["shellField"],
+            "shellPathId": shell_window["shellPathId"],
             "comparisonShape": blocked_edges,
-            "groundedConclusion": blocked["groundedConclusion"],
+            "groundedConclusion": str(consumer_summary.get("summary") or "The exact CellBoostBonus field handoff still stays bounded negative."),
         },
         "delta": {
             "sharedPresentEdgeTypes": shared_present,
@@ -7922,14 +8425,16 @@ def build_atu3_consumer_read_vs_consumer_diff(target_id: str, target: dict[str, 
 
 def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
     config = target["strategyConfig"]
-    row_remap_boundary = documents["tokenShopRowRemapBoundary"]
     shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
+    read_context = {
+        "consumerTarget": load_latest_materialized_target_bundle("token-shop-atu3-chest-consumer"),
+    }
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in config["surfaces"]]
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
         "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, config),
-        "traceGraph": build_atu3_chest_consumer_read_trace_graph(shell_window, surfaces, row_remap_boundary),
+        "traceGraph": build_atu3_chest_consumer_read_trace_graph(shell_window, surfaces, read_context),
         "bridgePromotionRule": "Only preserve ATU3 as a consumer-internal read trace when one checked chest consumer family, one chest routine neighborhood, one cell-gain getter shell, and one booster bonus aggregation shell converge on the same cells-from-chests lane; keep the exact CellBoostBonus runtime read blocked unless that handoff is recovered explicitly.",
         "bridgeCheck": {
             "candidateTerms": [config["shellField"], "AdManager, Assembly-CSharp", "get_SmallAdCellGains", "SetBoosterAdBonus", "get_FinalBoosterAdBonus"],
@@ -7942,7 +8447,7 @@ def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict
             ],
             "result": "checked consumer-internal bonus shell recovered",
         },
-        "solvedVsBlockedDiff": build_atu3_consumer_read_vs_consumer_diff(target_id, target, row_remap_boundary),
+        "solvedVsBlockedDiff": build_atu3_consumer_read_vs_consumer_diff(target_id, target, shell_window, read_context),
         "lostStructure": list(config["lostStructure"]),
         "groundedConclusion": config["groundedConclusion"],
         "currentBoundary": [
@@ -7955,8 +8460,20 @@ def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict
 
 def build_token_shop_family_structure_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
     config = target["strategyConfig"]
-    row_remap_boundary = documents["tokenShopRowRemapBoundary"]
-    late_boundary = documents["tokenShopLateAtuBoundary"]
+    token_shop_extract = documents["tokenShopExtract"]
+    family_context = {
+        "rowScopes": {
+            scope_id: load_canonical_semantic_scope(scope_id)
+            for scope_id in (
+                "row:ATU1Button",
+                "row:ATU3Button",
+                "row:ATU4Button",
+                "row:ATU5Button",
+                "row:ATU7Button",
+            )
+        },
+        "atu3Target": load_latest_materialized_target_bundle("token-shop-atu3-cells-effect"),
+    }
     surfaces = []
     shell_window = {
         "source": get_source_reference("tokenShopExtract"),
@@ -7969,23 +8486,31 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
             "ATU24Button through ATU28Button late shell neighborhood",
         ],
         "window": [
-            {"field": "ATU1Button", "group": "solved-shell", "kind": "pointer", "pathId": row_remap_boundary["adjacentFollowUp"]["recoveredAdditionalBridge"]["shellPathId"]},
-            {"field": "ATU2Button", "group": "solved-shell", "kind": "pointer", "pathId": row_remap_boundary["recoveredBridge"]["shellPathId"]},
-            {"field": "ATU4Button", "group": "solved-shell", "kind": "pointer", "pathId": row_remap_boundary["traceFollowUp"]["recoveredBridge"]["shellPathId"]},
-            {"field": "ATU5Button", "group": "solved-shell", "kind": "pointer", "pathId": row_remap_boundary["atu5TitleFollowUp"]["recoveredBridge"]["shellPathId"]},
-            {"field": "ATU6Button", "group": "solved-shell", "kind": "pointer", "pathId": row_remap_boundary["verifiedTitleJoin"]["shellPathId"]},
-            {"field": "ATU3Button", "group": "blocked-shell", "kind": "pointer", "pathId": row_remap_boundary["atu3CellsDisambiguationPass"]["shellPathId"]},
-            {"field": "ATU24Button through ATU28Button", "group": "blocked-shell", "kind": "range", "pathId": late_boundary["targetNeighborhood"]["shellFieldRange"]},
+            build_token_shop_extract_window_entry(token_shop_extract, "ATU1Button", "solved-shell"),
+            build_token_shop_extract_window_entry(token_shop_extract, "ATU2Button", "solved-shell"),
+            build_token_shop_extract_window_entry(token_shop_extract, "ATU4Button", "solved-shell"),
+            build_token_shop_extract_window_entry(token_shop_extract, "ATU5Button", "solved-shell"),
+            build_token_shop_extract_window_entry(token_shop_extract, "ATU6Button", "solved-shell"),
+            build_token_shop_extract_window_entry(token_shop_extract, "ATU3Button", "blocked-shell"),
+            {"field": "ATU24Button through ATU28Button", "group": "blocked-shell", "kind": "range", "pathId": "ATU24Button path_id 15797 through ATU28Button path_id 15813"},
         ],
     }
     for surface in config["surfaces"]:
-        surfaces.append(build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search))
+        surface_config = dict(surface)
+        source_ids = [
+            source_id
+            for source_id in (surface_config.get("sourceIds") or [])
+            if source_id != "tokenShopRowRemapBoundary"
+        ]
+        if source_ids:
+            surface_config["sourceIds"] = source_ids
+        surfaces.append(build_surface_bundle(surface_config, anchors, documents, shell_window, available_source_ids, extended_search))
 
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
         "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, config),
-        "traceGraph": build_family_structure_graph(shell_window, surfaces, row_remap_boundary, late_boundary),
+        "traceGraph": build_family_structure_graph(shell_window, surfaces, token_shop_extract, family_context),
         "bridgePromotionRule": "This target is a bounded family audit only. Do not promote any new TokenShop row remaps, planner behavior, or player-facing labels from it.",
         "bridgeCheck": {
             "candidateTerms": [
@@ -8006,7 +8531,7 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
             ],
             "result": "checked family structure audit recovered",
         },
-        "solvedVsBlockedDiff": build_family_structure_diff(target_id, target, row_remap_boundary, late_boundary, shell_window, surfaces),
+        "solvedVsBlockedDiff": build_family_structure_diff(target_id, target, token_shop_extract, shell_window, surfaces, family_context),
         "lostStructure": list(config["lostStructure"]),
         "groundedConclusion": config["groundedConclusion"],
         "currentBoundary": [
@@ -8019,9 +8544,6 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
 
 def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
     config = target["strategyConfig"]
-    native_support_dataset = documents["shardCostNativeProbe"]
-    formula_model = documents["shardCostFormulaModel"]
-    save_owner_candidates = documents["shardMilestoneSaveOwnerCandidates"]
     metadata_source = collect_source_hits(
         documents,
         "metadata",
@@ -8045,32 +8567,19 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
             ],
         },
         {
-            "id": "native-getter",
-            "label": "Shard native getter support dataset",
+            "id": "metadata-row0-structure",
+            "label": "Shard metadata row0 structure",
             "terms": [config["accessor"], *config["parameterShell"][:3]],
             "sources": [
-                make_surface_source(
-                    "shardCostNativeProbe",
-                    [
-                        make_surface_hit(config["accessor"], "$.rows[0].name"),
-                        *[make_surface_hit(field, "$.rows[0].operandFieldNames") for field in native_support_dataset["rows"][0]["operandFieldNames"]],
-                    ],
-                )
+                metadata_source
             ],
         },
         {
-            "id": "formula-model",
-            "label": "Shard formula model",
+            "id": "runtime-cache-lifecycle",
+            "label": "Shard runtime cache lifecycle",
             "terms": ["GetShardCostList", "UpdateShardCostList", "MilestoneCostList"],
             "sources": [
-                make_surface_source(
-                    "shardCostFormulaModel",
-                    [
-                        make_surface_hit("GetShardCostList", "$.runtimeGetterRules.cacheLifecycle.listBuilderMethod"),
-                        make_surface_hit("UpdateShardCostList", "$.runtimeGetterRules.cacheLifecycle.refreshMethod"),
-                        make_surface_hit("MilestoneCostList", "$.runtimeGetterRules.cacheLifecycle.cacheField"),
-                    ],
-                )
+                metadata_source
             ],
         },
     ]
@@ -8116,11 +8625,15 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
                     "shard-native-to-parameter-shell",
                     "shard-getter",
                     "shard-parameter-shell",
-                    "native-parameter-read",
+                    "metadata-row0-parameter-shell",
                     "present",
                     "direct",
-                    "The native getter support dataset directly reads SU0StartCost, SU0CostExponent, and SU0GrowthExponent from the row0 getter body.",
-                    [cite_row_boundary("shardCostNativeProbe", "$.rows[0].operandFieldNames", ", ".join(native_support_dataset["rows"][0]["operandFieldNames"]))],
+                    "Metadata preserves the same row0 parameter shell directly beside get_SU0Cost without importing an external shard-cost support dataset.",
+                    [
+                        cite_hit(metadata_source, find_hit(metadata_source, config["parameterShell"][0])),
+                        cite_hit(metadata_source, find_hit(metadata_source, config["parameterShell"][1])),
+                        cite_hit(metadata_source, find_hit(metadata_source, config["parameterShell"][2])),
+                    ],
                 ),
                 make_edge(
                     "shard-parameter-shell-to-evaluator",
@@ -8129,17 +8642,18 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
                     "deterministic-evaluator",
                     "present",
                     "supporting",
-                    "The canonical shard-cost formula model and deterministic evaluator preserve the same getter family as a checked structural model.",
+                    "Metadata preserves the runtime shard-cost cache lifecycle through GetShardCostList, UpdateShardCostList, and MilestoneCostList.",
                     [
-                        cite_row_boundary("shardCostFormulaModel", "$.completionFlags.canonicalDatasetShipped", str(formula_model["completionFlags"]["canonicalDatasetShipped"])),
-                        cite_row_boundary("shardCostFormulaModel", "$.completionFlags.deterministicEvaluatorImplemented", str(formula_model["completionFlags"]["deterministicEvaluatorImplemented"])),
+                        cite_hit(metadata_source, find_hit(metadata_source, "GetShardCostList")),
+                        cite_hit(metadata_source, find_hit(metadata_source, "UpdateShardCostList")),
+                        cite_hit(metadata_source, find_hit(metadata_source, "MilestoneCostList")),
                     ],
                 ),
             ],
             "negativeEdges": [
-                make_edge("shard-missing-calibration", "shard-evaluator", "shard-evaluator", "automated-calibration-closure", "missing", "negative", "Automated calibration is not yet implemented, so the structural evaluator is not calibration-closed.", [cite_row_boundary("shardCostFormulaModel", "$.completionFlags.automatedCalibrationImplemented", str(formula_model["completionFlags"]["automatedCalibrationImplemented"]))]),
-                make_edge("shard-missing-planner-safe-output", "shard-evaluator", "shard-evaluator", "planner-safe-cost-output", "missing", "negative", "Planner-safe shard cost output is still explicitly unapproved.", [cite_row_boundary("shardCostFormulaModel", "$.completionFlags.plannerSafeCostOutputApproved", str(formula_model["completionFlags"]["plannerSafeCostOutputApproved"]))]),
-                make_edge("shard-missing-save-owner", "shard-owner", "shard-evaluator", "save-owner-recovery", "missing", "negative", "Shard save-owner recovery is still unresolved and must stay separate from the structural cost model.", [cite_row_boundary("shardMilestoneSaveOwnerCandidates", "$.warnings[0]", save_owner_candidates["warnings"][0])]),
+                make_edge("shard-missing-calibration", "shard-evaluator", "shard-evaluator", "automated-calibration-closure", "missing", "negative", "Automated calibration is not yet reconstructed from raw metadata/native evidence in this target, so the structural evaluator is not calibration-closed.", []),
+                make_edge("shard-missing-planner-safe-output", "shard-evaluator", "shard-evaluator", "planner-safe-cost-output", "missing", "negative", "Planner-safe shard cost output remains intentionally blocked until calibration closure is recovered from raw evidence.", []),
+                make_edge("shard-missing-save-owner", "shard-owner", "shard-evaluator", "save-owner-recovery", "missing", "negative", "This shard-cost target still lacks direct save-side owner recovery and must stay separate from owned-state claims.", []),
             ],
             "claimLedger": [],
         },
@@ -8147,18 +8661,18 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
         "bridgeCheck": {
             "candidateTerms": config["parameterShell"],
             "bridgeCleared": True,
-            "bridgeHits": [{"surfaceId": "native-getter", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["shardCostNativeProbe"]), "term": config["accessor"]}],
+            "bridgeHits": [{"surfaceId": "metadata-row0-structure", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": config["accessor"]}],
             "result": "checked getter-to-parameter-shell structure recovered",
         },
         "solvedVsBlockedDiff": {
-            "baseline": {"id": "shard-cost-su0-structure", "label": "Shard SU0 structural baseline", "status": "cleared", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["shardCostFormulaModel"]), "shellField": config["accessor"], "shellPathId": "runtime-getter", "comparisonShape": [{"type": "getter-family", "status": "present"}, {"type": "getter-to-parameter-shell", "status": "present"}, {"type": "native-parameter-read", "status": "present"}, {"type": "deterministic-evaluator", "status": "present"}], "groundedConclusion": "The shard SU0 getter-to-parameter-shell structure is grounded enough to preserve as a quarantined structural baseline."},
-            "blockedTarget": {"id": "shard-cost-planner-safe-output", "label": "Shard planner-safe cost output", "status": "blocked", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["shardCostFormulaModel"]), "shellField": config["accessor"], "shellPathId": "planner-output", "comparisonShape": [{"type": "automated-calibration-closure", "status": "missing"}, {"type": "planner-safe-cost-output", "status": "missing"}, {"type": "save-owner-recovery", "status": "missing"}], "groundedConclusion": "The shard planner-safe output target remains blocked by calibration, approval, and save-owner recovery."},
+            "baseline": {"id": "shard-cost-su0-structure", "label": "Shard SU0 structural baseline", "status": "cleared", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "shellField": config["accessor"], "shellPathId": "runtime-getter", "comparisonShape": [{"type": "getter-family", "status": "present"}, {"type": "getter-to-parameter-shell", "status": "present"}, {"type": "metadata-row0-parameter-shell", "status": "present"}, {"type": "deterministic-evaluator", "status": "present"}], "groundedConclusion": "The shard SU0 getter-to-parameter-shell structure is grounded enough to preserve as a quarantined structural baseline."},
+            "blockedTarget": {"id": "shard-cost-planner-safe-output", "label": "Shard planner-safe cost output", "status": "blocked", "sourcePath": "workflow:shard-cost-trace-policy", "shellField": config["accessor"], "shellPathId": "planner-output", "comparisonShape": [{"type": "automated-calibration-closure", "status": "missing"}, {"type": "planner-safe-cost-output", "status": "missing"}, {"type": "save-owner-recovery", "status": "missing"}], "groundedConclusion": "The shard planner-safe output target remains blocked by calibration, approval, and save-owner recovery."},
             "delta": {
-                "sharedPresentEdgeTypes": ["getter-family", "getter-to-parameter-shell", "native-parameter-read"],
+                "sharedPresentEdgeTypes": ["getter-family", "getter-to-parameter-shell", "metadata-row0-parameter-shell"],
                 "baselineOnlyPresentEdgeTypes": ["deterministic-evaluator"],
                 "blockedMissingEdgeTypes": ["automated-calibration-closure", "planner-safe-cost-output", "save-owner-recovery"],
                 "solvedVsBlockedSummary": [
-                    "The solved shard baseline preserves one direct getter-family, parameter-shell, and native-field-read chain.",
+                    "The solved shard baseline preserves one direct getter-family, parameter-shell, and metadata-backed row0 structure chain.",
                     "The same family also preserves one deterministic evaluator structure model.",
                     "Planner-safe output stays blocked because calibration, approval, and save-owner recovery are still explicitly negative.",
                 ],
@@ -8167,7 +8681,7 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
         "lostStructure": [
             "Exact per-level shard costs remain unresolved.",
             "Planner-safe shard ranking, ROI, and affordability output remains blocked.",
-            save_owner_candidates["warnings"][0],
+            "Save-owner recovery for shard milestone state remains unresolved in this cost-only trace target.",
         ],
         "groundedConclusion": "The shard SU0 cost trace is structurally grounded. The repo preserves one checked getter-to-parameter-shell chain and one deterministic evaluator structure, but calibration closure, planner-safe cost output, and save-owner recovery all remain blocked.",
         "currentBoundary": [
@@ -8178,33 +8692,127 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
     }
 
 
+def _collect_recovered_terms(source_entries: list[dict[str, Any]], candidates: list[str]) -> list[str]:
+    recovered: list[str] = []
+    for term in candidates:
+        for source_entry in source_entries:
+            if maybe_find_hit(source_entry, term) is not None:
+                recovered.append(term)
+                break
+    return unique_strings(recovered)
+
+
+def _build_shard_owned_state_semantic_scope(
+    config: dict[str, Any],
+    metadata_runtime_source: dict[str, Any],
+    metadata_watcher_source: dict[str, Any],
+    metadata_save_source: dict[str, Any],
+    metadata_handoff_source: dict[str, Any],
+    level0_scene_source: dict[str, Any],
+    shard_scene_hit: dict[str, Any] | None,
+) -> dict[str, Any]:
+    row_state_candidates = ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"]
+    owner_list_candidates = ["upgradeInfoList", "MaxedMilestonesList", "UnlockedMilestonesList", "MilestoneCostList"]
+    local_hook_candidates = [
+        "InitializeShards",
+        "InitializeMaxLevelBools",
+        "UpdateUnlockedMilestonesList",
+        "UpdateMaxedMilestonesList",
+        "CheckAllMilestoneLevelFills",
+    ]
+    save_family_candidates = ["PlayerProfileData", "GetPlayerProfileData", "FillPlayerProfileData", "CloudSavePlayerProfile"]
+    handoff_candidates = [config["genericLead"], "ConstructionMilestones"]
+
+    declaring_field_name = next(
+        (term for term in owner_list_candidates if maybe_find_hit(metadata_runtime_source, term) is not None),
+        "upgradeInfoList",
+    )
+    row_model_name = next(
+        (term for term in ("ShardMining+ShardUpgradeInfo",) if maybe_find_hit(metadata_runtime_source, term) is not None),
+        "ShardMining+ShardUpgradeInfo",
+    )
+    declaring_field_hit = maybe_find_hit(metadata_runtime_source, declaring_field_name)
+    scene_owner_citation = maybe_cite_hit(level0_scene_source, shard_scene_hit)
+    row_model_hit = maybe_find_hit(metadata_runtime_source, row_model_name)
+    row_state_fields = []
+    for term in row_state_candidates:
+        hit = maybe_find_hit(metadata_runtime_source, term)
+        if hit is None:
+            continue
+        citation = maybe_cite_hit(metadata_runtime_source, hit)
+        row_state_fields.append(
+            {
+                "name": term,
+                "fieldOffset": citation.get("locator") if citation else None,
+                "evidence": citation,
+            }
+        )
+
+    return {
+        "scopeId": "shard-owned-state:upgradeinfolist-population",
+        "scopeType": "trace-target-support",
+        "familyId": "shard-owned-state",
+        "sceneOwner": {
+            "name": config["sceneOwner"],
+            "pathId": shard_scene_hit.get("pathId") if isinstance(shard_scene_hit, dict) else None,
+            "evidence": scene_owner_citation,
+        },
+        "runtimeShell": {
+            "label": f"{config['sceneOwner']}.{declaring_field_name} -> {row_model_name}",
+            "ownerType": config["sceneOwner"],
+            "declaringField": {
+                "name": declaring_field_name,
+                "fieldOffset": maybe_cite_hit(metadata_runtime_source, declaring_field_hit).get("locator") if declaring_field_hit is not None else None,
+                "evidence": maybe_cite_hit(metadata_runtime_source, declaring_field_hit),
+            },
+            "rowModelType": {
+                "fullName": row_model_name,
+                "evidence": maybe_cite_hit(metadata_runtime_source, row_model_hit),
+            },
+            "rowStateFields": row_state_fields,
+        },
+        "ownerListFields": _collect_recovered_terms([metadata_runtime_source, metadata_watcher_source], owner_list_candidates),
+        "localHooks": _collect_recovered_terms([metadata_watcher_source], local_hook_candidates),
+        "saveFamilyTerms": _collect_recovered_terms([metadata_save_source], save_family_candidates),
+        "handoffTerms": _collect_recovered_terms([metadata_handoff_source], handoff_candidates),
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+    }
+
+
 def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str]) -> dict[str, Any]:
     config = target["strategyConfig"]
-    save_boundary = documents["shardSaveBoundary"]
-    save_owner_candidates = documents["shardMilestoneSaveOwnerCandidates"]
-
-    recovered_runtime_shell = save_boundary["recoveredDeclaringRowModel"]
-    row_state_fields = [field["name"] for field in recovered_runtime_shell["rowStateFields"]]
-    owner_list_fields = ["MaxedMilestonesList", "UnlockedMilestonesList", "MilestoneCostList", "upgradeInfoList"]
+    row_state_candidates = ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"]
+    owner_list_candidates = ["upgradeInfoList", "MaxedMilestonesList", "UnlockedMilestonesList", "MilestoneCostList"]
+    local_hook_candidates = [
+        "InitializeShards",
+        "InitializeMaxLevelBools",
+        "UpdateUnlockedMilestonesList",
+        "UpdateMaxedMilestonesList",
+        "CheckAllMilestoneLevelFills",
+    ]
+    save_family_candidates = ["PlayerProfileData", "GetPlayerProfileData", "FillPlayerProfileData", "CloudSavePlayerProfile"]
     metadata_anchor_specs = build_anchor_specs(
         unique_strings(
             [
                 config["sceneOwner"],
                 "ShardMining+ShardUpgradeInfo",
-                recovered_runtime_shell["declaringField"]["name"],
-                *row_state_fields,
-                *owner_list_fields,
+                *owner_list_candidates,
+                *row_state_candidates,
                 *anchors,
             ]
         ),
         "surface-search",
     )
     metadata_runtime_source = collect_source_hits(documents, "metadata", metadata_anchor_specs)
-    local_hooks_checked = list(save_boundary["runtimeConstructionBoundary"]["localHooksChecked"])
     metadata_watcher_source = collect_source_hits(
         documents,
         "metadata",
-        build_anchor_specs([*local_hooks_checked, *owner_list_fields, *anchors], "surface-search"),
+        build_anchor_specs([*local_hook_candidates, *owner_list_candidates, *anchors], "surface-search"),
+    )
+    metadata_save_source = collect_source_hits(
+        documents,
+        "metadata",
+        build_anchor_specs([*save_family_candidates, config["saveCandidate"], *anchors], "surface-search"),
     )
     metadata_handoff_source = collect_source_hits(
         documents,
@@ -8217,83 +8825,57 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
         build_anchor_specs([config["sceneOwner"], *anchors], "surface-search"),
     )
     shard_scene_hit = maybe_find_hit(level0_scene_source, config["sceneOwner"])
-    shard_scene_path_id = save_boundary["recoveredDirectRowDefinitionPayload"]["sceneObject"]["pathId"]
-
-    # Historical v1 shard-save datasets used `probeResults`; keep the fallback isolated here.
-    boundary_evidence = save_boundary.get("boundaryEvidence", save_boundary.get("probeResults", {}))
-    local_bridge_recovered = boundary_evidence.get("runtimePopulationLocalProducerRecovered") is True
-    wrapper_handoff_recovered = boundary_evidence.get("saveSideOwnerRecovered") is True
-    if local_bridge_recovered:
-        outcome_kind = "local-runtime-population-bridge"
-        outcome_label = "Local runtime population bridge"
-        outcome_summary = (
-            "The trace now preserves one shard-local construction bridge that populates upgradeInfoList owned-state values directly."
-        )
-        outcome_node_label = "Local ShardMining population bridge"
-        outcome_statement = (
-            "Committed shard boundary evidence now preserves one local ShardMining-side producer that fills upgradeInfoList owned-state values."
-        )
-        outcome_citations = [
-            cite_row_boundary(
-                "shardSaveBoundary",
-                "$.runtimeConstructionBoundary.traceResult",
-                save_boundary["runtimeConstructionBoundary"]["traceResult"][1],
-            )
-        ]
-        bridge_result = "checked local runtime population bridge recovered"
-    elif wrapper_handoff_recovered:
-        outcome_kind = "deeper-wrapper-handoff"
-        outcome_label = "Deeper wrapper handoff"
-        outcome_summary = (
-            "The trace now preserves a deeper save-side wrapper handoff for player-owned shard row state even though it does not stop on a local ShardMining producer."
-        )
-        outcome_node_label = "Recovered deeper save-side wrapper"
-        outcome_statement = (
-            "Committed shard boundary evidence now preserves one deeper wrapper handoff for player-owned shard row state behind upgradeInfoList."
-        )
-        outcome_citations = [
-            cite_row_boundary(
-                "shardMilestoneSaveOwnerCandidates",
-                "$.currentBoundary",
-                save_owner_candidates["currentBoundary"][0],
-            )
-        ]
-        bridge_result = "checked deeper wrapper handoff recovered"
-    else:
-        outcome_kind = "non-local-injection-seam"
-        outcome_label = "Non-local injection seam"
-        outcome_summary = (
-            "The trace rules out a local upgradeInfoList population bridge and still cannot name a deeper wrapper handoff, so owned-state values remain bounded as a non-local injection seam."
-        )
-        outcome_node_label = "Non-local save-side injection seam"
-        outcome_statement = (
-            "The committed shard boundary set now narrows the owned-state path to a non-local seam: direct definitions and the runtime shell are recovered locally, but owned-state values still arrive from a source the repo cannot yet name."
-        )
-        outcome_citations = [
-            cite_row_boundary(
-                "shardSaveBoundary",
-                "$.currentBoundary[2]",
-                save_boundary["currentBoundary"][2],
-            ),
-            cite_row_boundary(
-                "shardMilestoneSaveOwnerCandidates",
-                "$.confidenceNotes[1]",
-                save_owner_candidates["confidenceNotes"][1],
-            ),
-        ]
-        bridge_result = "checked non-local injection seam preserved"
+    shard_scene_path_id = shard_scene_hit.get("pathId") if isinstance(shard_scene_hit, dict) else None
+    shard_scope = _build_shard_owned_state_semantic_scope(
+        config,
+        metadata_runtime_source,
+        metadata_watcher_source,
+        metadata_save_source,
+        metadata_handoff_source,
+        level0_scene_source,
+        shard_scene_hit,
+    )
+    canonical_shard_scope = load_canonical_semantic_scope("shard-owned-state:upgradeinfolist-population")
+    if canonical_shard_scope:
+        shard_scope["bridgeAssessment"] = dict(canonical_shard_scope.get("bridgeAssessment") or {})
+        shard_scope["outcome"] = dict(canonical_shard_scope.get("outcome") or {})
+    recovered_runtime_shell = dict(shard_scope.get("runtimeShell") or {})
+    row_state_fields = [field["name"] for field in recovered_runtime_shell.get("rowStateFields", []) if isinstance(field, dict) and field.get("name")]
+    owner_list_fields = list(shard_scope.get("ownerListFields") or [])
+    save_family_terms = list(shard_scope.get("saveFamilyTerms") or [])
+    local_hooks_checked = list(shard_scope.get("localHooks") or [])
+    bridge_assessment = dict(shard_scope.get("bridgeAssessment") or {})
+    local_bridge_recovered = bool(bridge_assessment.get("localBridgeRecovered"))
+    wrapper_handoff_recovered = bool(bridge_assessment.get("wrapperHandoffRecovered"))
+    outcome_payload = dict(shard_scope.get("outcome") or {})
+    outcome_kind = str(outcome_payload.get("kind") or "research-gap")
+    outcome_label = str(outcome_payload.get("label") or "Canonical verdict pending")
+    outcome_summary = str(outcome_payload.get("summary") or "The canonical shard owned-state verdict has not been materialized yet.")
+    outcome_node_label = str(outcome_payload.get("nodeLabel") or "Owned-state verdict pending")
+    outcome_statement = str(outcome_payload.get("statement") or "DB-owned canonical verdict is not available yet for this shard-owned-state target.")
+    outcome_citations = list(outcome_payload.get("citations") or [])
+    bridge_result = {
+        "local-runtime-population-bridge": "checked local runtime population bridge recovered",
+        "deeper-wrapper-handoff": "checked deeper wrapper handoff recovered",
+        "non-local-injection-seam": "checked non-local injection seam preserved",
+    }.get(outcome_kind, "checked shard owned-state gap remains unclassified")
 
     shell_window = {
         "source": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
-        "shellField": recovered_runtime_shell["declaringField"]["name"],
-        "shellPathId": recovered_runtime_shell["declaringField"]["fieldOffset"],
+        "shellField": recovered_runtime_shell.get("declaringField", {}).get("name"),
+        "shellPathId": recovered_runtime_shell.get("declaringField", {}).get("fieldOffset"),
         "shellObjectOffset": shard_scene_path_id,
         "ownerFieldBlock": row_state_fields,
         "window": [
-            {"field": recovered_runtime_shell["declaringField"]["name"], "group": "runtime-shell", "kind": "field", "value": recovered_runtime_shell["declaringField"]["type"]},
+            {
+                "field": recovered_runtime_shell.get("declaringField", {}).get("name"),
+                "group": "runtime-shell",
+                "kind": "field",
+                "value": recovered_runtime_shell.get("label") or recovered_runtime_shell.get("declaringField", {}).get("name"),
+            },
             *[
-                {"field": field["name"], "group": "runtime-row-state", "kind": "field", "value": field["type"]}
-                for field in recovered_runtime_shell["rowStateFields"]
+                {"field": field["name"], "group": "runtime-row-state", "kind": "field", "value": field.get("type") or field["name"]}
+                for field in recovered_runtime_shell.get("rowStateFields", [])
             ],
         ],
     }
@@ -8302,7 +8884,7 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
         {
             "id": "scene-owner",
             "label": "Direct scene owner",
-            "terms": [config["sceneOwner"], config["runtimeShell"], *anchors],
+            "terms": [config["sceneOwner"], recovered_runtime_shell.get("label") or config["runtimeShell"], *anchors],
             "sources": [
                 level0_scene_source,
                 metadata_runtime_source,
@@ -8311,7 +8893,7 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
         {
             "id": "runtime-shell",
             "label": "upgradeInfoList runtime shell",
-            "terms": [config["runtimeShell"], *row_state_fields, *anchors],
+            "terms": [recovered_runtime_shell.get("label") or config["runtimeShell"], *row_state_fields, *anchors],
             "sources": [
                 metadata_runtime_source,
             ],
@@ -8337,24 +8919,7 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
             "label": "Save-side blocker",
             "terms": [config["saveCandidate"], "PlayerProfileData", "CloudSavePlayerProfile", *anchors],
             "sources": [
-                make_surface_source(
-                    "shardMilestoneSaveOwnerCandidates",
-                    [
-                        make_surface_hit(
-                            save_owner_candidates["remainingSaveOwnerCandidates"][0]["label"],
-                            "$.remainingSaveOwnerCandidates[0].label",
-                        ),
-                        make_surface_hit("PlayerProfileData", "$.remainingSaveOwnerCandidates[0].candidateFieldClusters"),
-                        make_surface_hit("CloudSavePlayerProfile", "$.remainingSaveOwnerCandidates[0].candidateFieldClusters"),
-                    ],
-                ),
-                make_surface_source(
-                    "shardSaveBoundary",
-                    [
-                        make_surface_hit("PlayerProfileData", "$.saveFamilyTermsChecked"),
-                        make_surface_hit("CloudSavePlayerProfile", "$.saveFamilyTermsChecked"),
-                    ],
-                ),
+                metadata_save_source,
             ],
         },
     ]
@@ -8365,7 +8930,7 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
         "nodes": [
             make_node("shard-scene-owner", "scene-owner", f"{config['sceneOwner']} path_id {shard_scene_path_id}", "present", "The direct level0 ShardMining MonoBehaviour object is preserved."),
             make_node("shard-definition-family", "definition-payload", "Direct ShardMining SU0-29 definition payload", "present", "The reachable row-definition family is preserved directly on the ShardMining scene object."),
-            make_node("shard-runtime-shell", "runtime-shell", config["runtimeShell"], "present", "The owned-state shell is preserved as upgradeInfoList -> ShardMining+ShardUpgradeInfo."),
+            make_node("shard-runtime-shell", "runtime-shell", recovered_runtime_shell.get("label") or config["runtimeShell"], "present", "The owned-state shell is preserved as upgradeInfoList -> ShardMining+ShardUpgradeInfo."),
             make_node("shard-owner-list-shell", "owner-list-shell", ", ".join(owner_list_fields), "present", "ShardMining preserves adjacent list shells that watch milestone cost and bool state."),
             make_node("shard-local-hooks", "watcher-hooks", ", ".join(local_hooks_checked), "present", "Shard-local watcher hooks around costs, unlock lists, max-level lists, and progress fills are preserved."),
             make_node("shard-owned-state-outcome", "owned-state-outcome", outcome_node_label, "present", outcome_summary),
@@ -8381,8 +8946,12 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
                 "The direct level0 ShardMining MonoBehaviour object still holds the reachable shard definition family locally.",
                 [
                     *compact_citations(maybe_cite_hit(level0_scene_source, shard_scene_hit)),
-                    cite_row_boundary("shardSaveBoundary", "$.recoveredDirectRowDefinitionPayload.sceneObject.pathId", str(shard_scene_path_id)),
-                    cite_row_boundary("shardSaveBoundary", "$.recoveredDirectRowDefinitionPayload.ownerType", save_boundary["recoveredDirectRowDefinitionPayload"]["ownerType"]),
+                    {
+                        "sourceId": "metadata",
+                        "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
+                        "locator": "term",
+                        "term": config["sceneOwner"],
+                    },
                 ],
             ),
             make_edge(
@@ -8396,9 +8965,14 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
                 [
                     *compact_citations(
                         maybe_cite_hit(metadata_runtime_source, maybe_find_hit(metadata_runtime_source, config["sceneOwner"])),
-                        maybe_cite_hit(metadata_runtime_source, maybe_find_hit(metadata_runtime_source, recovered_runtime_shell["declaringField"]["name"])),
+                        maybe_cite_hit(metadata_runtime_source, maybe_find_hit(metadata_runtime_source, recovered_runtime_shell.get("declaringField", {}).get("name", ""))),
                     ),
-                    cite_row_boundary("shardSaveBoundary", "$.recoveredDeclaringRowModel.rowModelType.fullName", recovered_runtime_shell["rowModelType"]["fullName"]),
+                    {
+                        "sourceId": "metadata",
+                        "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
+                        "locator": "term",
+                        "term": recovered_runtime_shell.get("rowModelType", {}).get("fullName"),
+                    },
                 ],
             ),
             make_edge(
@@ -8462,11 +9036,6 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
                 "negative",
                 "The checked shard-local watcher hooks still do not recover any exact write, constructor, or setup path that populates upgradeInfoList owned-state values locally.",
                 [
-                    cite_row_boundary(
-                        "shardSaveBoundary",
-                        "$.runtimeConstructionBoundary.traceResult[1]",
-                        save_boundary["runtimeConstructionBoundary"]["traceResult"][1],
-                    ),
                     *compact_citations(maybe_cite_hit(metadata_watcher_source, maybe_find_hit(metadata_watcher_source, "InitializeShards"))),
                 ],
             )
@@ -8481,18 +9050,9 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
                 "deeper-wrapper-handoff-recovery",
                 "missing",
                 "negative",
-                "The repo still does not recover an exact deeper wrapper or save-side owner behind upgradeInfoList even though a PlayerProfile-side shard member shell remains the leading unresolved candidate.",
+                "The repo still does not recover an exact deeper wrapper or save-side owner behind upgradeInfoList even though PlayerProfile-side save-family terms remain the leading unresolved search area.",
                 [
-                    cite_row_boundary(
-                        "shardMilestoneSaveOwnerCandidates",
-                        "$.remainingSaveOwnerCandidates[0].label",
-                        save_owner_candidates["remainingSaveOwnerCandidates"][0]["label"],
-                    ),
-                    cite_row_boundary(
-                        "shardMilestoneSaveOwnerCandidates",
-                        "$.currentBoundary[0]",
-                        save_owner_candidates["currentBoundary"][0],
-                    ),
+                    *compact_citations(maybe_cite_hit(metadata_save_source, maybe_find_hit(metadata_save_source, "PlayerProfileData"))),
                 ],
             )
         )
@@ -8521,12 +9081,12 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
         },
         "bridgePromotionRule": "Only promote player-owned shard state past descriptive quarantine when one exact local population bridge or deeper save-side wrapper handoff is recovered explicitly.",
         "bridgeCheck": {
-            "candidateTerms": [config["runtimeShell"], *row_state_fields, *local_hooks_checked[:4]],
+            "candidateTerms": [recovered_runtime_shell.get("label") or config["runtimeShell"], *row_state_fields, *local_hooks_checked[:4]],
             "bridgeCleared": True,
             "bridgeHits": [
-                {"surfaceId": "runtime-shell", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": recovered_runtime_shell["declaringField"]["name"]},
-                {"surfaceId": "owner-list-watchers", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": local_hooks_checked[0]},
-                {"surfaceId": "save-gap", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["shardMilestoneSaveOwnerCandidates"]), "term": save_owner_candidates["remainingSaveOwnerCandidates"][0]["label"]},
+                {"surfaceId": "runtime-shell", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": recovered_runtime_shell.get("declaringField", {}).get("name")},
+                {"surfaceId": "owner-list-watchers", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": local_hooks_checked[0] if local_hooks_checked else None},
+                {"surfaceId": "save-gap", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "PlayerProfileData"},
             ],
             "result": bridge_result,
         },
@@ -8535,9 +9095,9 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
                 "id": "shard-owned-state-upgradeinfolist-population",
                 "label": "Shard owned-state population boundary",
                 "status": "cleared",
-                "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["shardSaveBoundary"]),
-                "shellField": recovered_runtime_shell["declaringField"]["name"],
-                "shellPathId": recovered_runtime_shell["declaringField"]["fieldOffset"],
+                "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
+                "shellField": recovered_runtime_shell.get("declaringField", {}).get("name"),
+                "shellPathId": recovered_runtime_shell.get("declaringField", {}).get("fieldOffset"),
                 "comparisonShape": comparison_shape,
                 "groundedConclusion": outcome_summary,
             },
@@ -8546,7 +9106,7 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
                 "label": "Shard local owned-state producer",
                 "status": "blocked",
                 "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
-                "shellField": recovered_runtime_shell["declaringField"]["name"],
+                "shellField": recovered_runtime_shell.get("declaringField", {}).get("name"),
                 "shellPathId": "owned-state-bridge",
                 "comparisonShape": blocked_shape,
                 "groundedConclusion": "A recovered local producer or deeper wrapper handoff is still required before player-owned shard state can be named safely.",
@@ -8569,7 +9129,7 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
         },
         "lostStructure": [
             "Shard-local watcher hooks still sit beside upgradeInfoList, UnlockedMilestonesList, MaxedMilestonesList, and MilestoneCostList without one committed write path into IsUnlocked, MaxLevel, or current milestone progress.",
-            "The leading PlayerProfile-side shard member shell remains an unresolved candidate rather than a recovered declaring wrapper or serialized payload owner.",
+            "PlayerProfile-side save-family terms remain only a search area rather than a recovered declaring wrapper or serialized payload owner.",
             "Keep the owned-state result quarantined to blocker evidence only; it does not reopen planner math, affordability, ROI, ETA, or canonical state.playerProfile promotion.",
         ],
         "groundedConclusion": outcome_summary,
@@ -8583,9 +9143,6 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
 
 def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
     config = target["strategyConfig"]
-    member_boundary = documents["multiverseMarketMemberBoundary"]
-    import_boundary = documents["multiverseMarketSaveDataImportBoundary"]
-    range_boundary = documents["multiverseMarketRangeBoundary"]
     metadata_accessor_source = collect_source_hits(
         documents,
         "metadata",
@@ -8599,7 +9156,20 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
     metadata_ordered_source = collect_source_hits(
         documents,
         "metadata",
-        build_anchor_specs(["SetIS71CostText", "IS71Level", "IS72Level", *anchors], "surface-search"),
+        build_anchor_specs(
+            [
+                "SetIS71CostText",
+                "SetIS72CostText",
+                "SetIS73CostText",
+                "SetIS74CostText",
+                "IS71Level",
+                "IS72Level",
+                "IS73Level",
+                "IS74Level",
+                *anchors,
+            ],
+            "surface-search",
+        ),
     )
     level0_accessor_source = collect_source_hits(
         documents,
@@ -8609,7 +9179,7 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
     level0_action_source = collect_source_hits(
         documents,
         "level0",
-        build_anchor_specs(["BuyIS71", "MultiverseMarket", config["saveOwner"], *anchors], "surface-search"),
+        build_anchor_specs(["BuyIS71", "BuyIS72", "BuyIS73", "BuyIS74", "MultiverseMarket", config["saveOwner"], *anchors], "surface-search"),
     )
     shell_window = {
         "source": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
@@ -8638,16 +9208,9 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
         {
             "id": "save-owner-span",
             "label": "SaveData owner span",
-            "terms": [config["saveOwner"], "IS1Level", "IS110Level", "InscryptionsDone", "compatibility.unmappedSystemState.multiverseMarket"],
+            "terms": [config["saveOwner"], "IS1Level", "IS110Level", "InscryptionsDone", config["compatibilityImportTargetPath"]],
             "sources": [
                 metadata_owner_source,
-                make_surface_source(
-                    "multiverseMarketSaveDataImportBoundary",
-                    [
-                        make_surface_hit(config["saveOwner"], "$.typedSpanBoundary.declaringOwner"),
-                        make_surface_hit("compatibility.unmappedSystemState.multiverseMarket", "$.boundedImportConclusion.importTargetPath"),
-                    ],
-                )
             ],
         },
         {
@@ -8655,7 +9218,6 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
             "label": "Ordered overlap",
             "terms": [str(item) for item in config["orderedOverlap"]],
             "sources": [
-                make_surface_source("multiverseMarketRangeBoundary", [make_surface_hit(str(item), "$.overlapIds") for item in range_boundary["overlapIds"]]),
                 metadata_ordered_source,
                 level0_action_source,
             ],
@@ -8669,18 +9231,88 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
                 make_node("market-accessor", "accessor-bridge", config["accessorBridge"], "present", "The checked PlayerProfileHandler.get_Market accessor bridge is preserved."),
                 make_node("market-owner", "declaring-owner", config["saveOwner"], "present", "SaveData remains the exact checked wider owner."),
                 make_node("market-span", "typed-span", config["typedSpan"], "present", "The exact contiguous IS1Level through IS110Level span is preserved."),
-                make_node("market-import", "compatibility-import", "compatibility.unmappedSystemState.multiverseMarket", "present", "The compatibility-only import target is preserved."),
+                make_node("market-import", "compatibility-import", config["compatibilityImportTargetPath"], "present", "The compatibility-only import target is preserved."),
             ],
             "edges": [
                 make_edge("market-accessor-to-owner", "market-accessor", "market-owner", "accessor-bridge", "present", "direct", "Metadata and level0 preserve the get_Market accessor bridge, its MultiverseMarket return type, and the wider SaveData ownership boundary.", [cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "PlayerProfileHandler")), cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "get_Market")), cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "MultiverseMarket")), cite_hit(metadata_owner_source, find_hit(metadata_owner_source, config["saveOwner"]))]),
                 make_edge("market-owner-to-span", "market-owner", "market-span", "typed-save-owner", "present", "direct", "Metadata directly preserves the SaveData-owned Emporium span from IS1Level through IS110Level beside InscryptionsDone.", [cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS1Level")), cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS110Level")), cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "InscryptionsDone"))]),
-                make_edge("market-span-to-import", "market-span", "market-import", "compatibility-import-span", "present", "supporting", "The exact IS span is preserved as compatibility-only raw Emporium truth, not canonical PlayerProfile import.", [cite_row_boundary("multiverseMarketSaveDataImportBoundary", "$.boundedImportConclusion.importTargetPath", import_boundary["boundedImportConclusion"]["importTargetPath"])]),
-                make_edge("market-overlap-support", "market-span", "market-import", "ordered-row-overlap", "present", "supporting", "Rows 71-74 still anchor the wider IS span to checked Emporium ordering plus the surviving SetIS71CostText and BuyIS71 row-side surfaces.", [cite_row_boundary("multiverseMarketRangeBoundary", "$.overlapIds", ", ".join(str(item) for item in range_boundary["overlapIds"])), cite_hit(metadata_ordered_source, find_hit(metadata_ordered_source, "SetIS71CostText")), cite_hit(level0_action_source, find_hit(level0_action_source, "BuyIS71"))]),
+                make_edge(
+                    "market-span-to-import",
+                    "market-span",
+                    "market-import",
+                    "compatibility-import-span",
+                    "present",
+                    "supporting",
+                    "The exact IS span is preserved as compatibility-only raw Emporium truth under {} rather than canonical PlayerProfile import.".format(config["compatibilityImportTargetPath"]),
+                    [
+                        cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS1Level")),
+                        cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS110Level")),
+                        cite_hit(level0_action_source, find_hit(level0_action_source, "BuyIS71")),
+                    ],
+                ),
+                make_edge(
+                    "market-overlap-support",
+                    "market-span",
+                    "market-import",
+                    "ordered-row-overlap",
+                    "present",
+                    "supporting",
+                    "Rows 71-74 still anchor the wider IS span to checked Emporium ordering through direct IS71-74 metadata terms plus the surviving SetIS71-74CostText and BuyIS71-74 row-side surfaces.",
+                    [
+                        cite_hit(metadata_ordered_source, find_hit(metadata_ordered_source, "IS71Level")),
+                        cite_hit(metadata_ordered_source, find_hit(metadata_ordered_source, "IS74Level")),
+                        cite_hit(metadata_ordered_source, find_hit(metadata_ordered_source, "SetIS71CostText")),
+                        cite_hit(metadata_ordered_source, find_hit(metadata_ordered_source, "SetIS74CostText")),
+                        cite_hit(level0_action_source, find_hit(level0_action_source, "BuyIS71")),
+                        cite_hit(level0_action_source, find_hit(level0_action_source, "BuyIS74")),
+                    ],
+                ),
             ],
             "negativeEdges": [
-                make_edge("market-missing-typed-market-field", "market-accessor", "market-owner", "typed-market-field-recovery", "missing", "negative", "No typed Market or MultiverseMarket field is recovered directly on PlayerProfileHandler, PlayerProfileData, or SaveData.", [cite_row_boundary("multiverseMarketMemberBoundary", "$.negativeTypedSaveDataMarketChecks", ", ".join(member_boundary["negativeTypedSaveDataMarketChecks"]))]),
-                make_edge("market-missing-canonical-import", "market-span", "market-import", "canonical-import-admissibility", "missing", "negative", "Canonical import remains explicitly empty even though the compatibility-only import target is preserved.", [cite_row_boundary("multiverseMarketSaveDataImportBoundary", "$.boundedImportConclusion.exactCanonicalImportSafeSubsetLabel", import_boundary["boundedImportConclusion"]["exactCanonicalImportSafeSubsetLabel"])]),
-                make_edge("market-missing-broad-row-remap", "market-span", "market-import", "broad-row-identity-remap", "missing", "negative", "Broader row identity or remap stays blocked outside the checked 71-74 ordered overlap.", [cite_row_boundary("multiverseMarketSaveDataImportBoundary", "$.checkedIsToRowOrderBoundary.blockedWiderMapping[0]", import_boundary["checkedIsToRowOrderBoundary"]["blockedWiderMapping"][0])]),
+                make_edge(
+                    "market-missing-typed-market-field",
+                    "market-accessor",
+                    "market-owner",
+                    "typed-market-field-recovery",
+                    "missing",
+                    "negative",
+                    "The checked direct trace still only recovers the PlayerProfileHandler.get_Market accessor bridge and the wider SaveData-owned IS span, not a typed Market or MultiverseMarket field on PlayerProfileHandler, PlayerProfileData, or SaveData.",
+                    [
+                        cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "PlayerProfileHandler")),
+                        cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "get_Market")),
+                        cite_hit(metadata_owner_source, find_hit(metadata_owner_source, config["saveOwner"])),
+                        cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS1Level")),
+                        cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS110Level")),
+                    ],
+                ),
+                make_edge(
+                    "market-missing-canonical-import",
+                    "market-span",
+                    "market-import",
+                    "canonical-import-admissibility",
+                    "missing",
+                    "negative",
+                    "Canonical import remains explicitly {} even though the compatibility-only import target is preserved.".format(config["canonicalImportSafeSubsetLabel"]),
+                    [
+                        cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "InscryptionsDone")),
+                        cite_hit(level0_action_source, find_hit(level0_action_source, "BuyIS74")),
+                    ],
+                ),
+                make_edge(
+                    "market-missing-broad-row-remap",
+                    "market-span",
+                    "market-import",
+                    "broad-row-identity-remap",
+                    "missing",
+                    "negative",
+                    config["broaderRowRemapStatus"],
+                    [
+                        cite_hit(metadata_ordered_source, find_hit(metadata_ordered_source, "IS71Level")),
+                        cite_hit(metadata_ordered_source, find_hit(metadata_ordered_source, "IS74Level")),
+                        cite_hit(level0_action_source, find_hit(level0_action_source, "BuyIS71")),
+                        cite_hit(level0_action_source, find_hit(level0_action_source, "BuyIS74")),
+                    ],
+                ),
             ],
             "claimLedger": [],
         },
@@ -8692,8 +9324,8 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
             "result": "checked accessor-to-save-owner boundary recovered",
         },
         "solvedVsBlockedDiff": {
-            "baseline": {"id": "multiverse-market-save-owner-boundary", "label": "Emporium save-owner boundary", "status": "cleared", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["multiverseMarketSaveDataImportBoundary"]), "shellField": config["accessorBridge"], "shellPathId": "typed-accessor", "comparisonShape": [{"type": "accessor-bridge", "status": "present"}, {"type": "typed-save-owner", "status": "present"}, {"type": "compatibility-import-span", "status": "present"}], "groundedConclusion": "The Emporium accessor-to-SaveData owner boundary is grounded enough to preserve as compatibility-only truth."},
-            "blockedTarget": {"id": "multiverse-market-canonical-import", "label": "Emporium canonical import", "status": "blocked", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["multiverseMarketSaveDataImportBoundary"]), "shellField": config["saveOwner"], "shellPathId": "canonical-import", "comparisonShape": [{"type": "typed-market-field-recovery", "status": "missing"}, {"type": "canonical-import-admissibility", "status": "missing"}, {"type": "broad-row-identity-remap", "status": "missing"}], "groundedConclusion": "Canonical import remains blocked even though the wider save-owner boundary is grounded."},
+            "baseline": {"id": "multiverse-market-save-owner-boundary", "label": "Emporium save-owner boundary", "status": "cleared", "sourcePath": repo_relative(REGISTRY_PATH), "shellField": config["accessorBridge"], "shellPathId": "typed-accessor", "comparisonShape": [{"type": "accessor-bridge", "status": "present"}, {"type": "typed-save-owner", "status": "present"}, {"type": "compatibility-import-span", "status": "present"}], "groundedConclusion": "The Emporium accessor-to-SaveData owner boundary is grounded enough to preserve as compatibility-only truth."},
+            "blockedTarget": {"id": "multiverse-market-canonical-import", "label": "Emporium canonical import", "status": "blocked", "sourcePath": repo_relative(REGISTRY_PATH), "shellField": config["saveOwner"], "shellPathId": "canonical-import", "comparisonShape": [{"type": "typed-market-field-recovery", "status": "missing"}, {"type": "canonical-import-admissibility", "status": "missing"}, {"type": "broad-row-identity-remap", "status": "missing"}], "groundedConclusion": "Canonical import remains blocked even though the wider save-owner boundary is grounded."},
             "delta": {
                 "sharedPresentEdgeTypes": ["accessor-bridge", "typed-save-owner"],
                 "baselineOnlyPresentEdgeTypes": ["compatibility-import-span"],
@@ -8705,7 +9337,7 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
                 ],
             },
         },
-        "lostStructure": [import_boundary["checkedIsToRowOrderBoundary"]["blockedWiderMapping"][0], import_boundary["checkedIsToRowOrderBoundary"]["blockedWiderMapping"][1], import_boundary["boundedImportConclusion"]["blockedBy"][2]],
+        "lostStructure": list(config["blockedStructure"]),
         "groundedConclusion": "The multiverse-market save-owner trace is grounded enough to preserve a checked accessor-to-SaveData owner boundary and a compatibility-only IS1Level through IS110Level span, but canonical import and broader row identity remain blocked.",
         "currentBoundary": [
             "This target preserves save-owner and compatibility-import truth only.",
@@ -8740,66 +9372,6 @@ def build_trace_payload(target_id: str, target: dict[str, Any], anchors: list[st
     raise ValueError(f"Unsupported unity trace strategy: {strategy}")
 
 
-def build_decision_summary(target: dict[str, Any], trace_payload: dict[str, Any], native_summary: dict[str, Any] | None = None) -> dict[str, Any]:
-    if "outputSummaryRules" not in target:
-        native_note = ""
-        promoted_owner = _select_promoted_native_owner(target, trace_payload, native_summary)
-        if promoted_owner and native_summary:
-            native_note = " Reconstructed native owner candidates: {}.".format(
-                ", ".join([promoted_owner["owner"], *native_summary.get("reconstructedOwners", [])][:3])
-            )
-        return {
-            "verdict": "explore",
-            "summary": "This run is exploratory only. Use the surviving source hits to choose or define a bounded family trace.{}".format(native_note),
-            "provedEdgeCount": len(trace_payload["traceGraph"]["edges"]),
-            "negativeEdgeCount": len(trace_payload["traceGraph"]["negativeEdges"]),
-            "baselineGap": [],
-            "supportingEdgeTypes": [edge["type"] for edge in trace_payload["traceGraph"]["edges"]],
-            "blockedEdgeTypes": [edge["type"] for edge in trace_payload["traceGraph"]["negativeEdges"]],
-        }
-    proved_edges = list(trace_payload["traceGraph"]["edges"])
-    negative_edges = list(trace_payload["traceGraph"]["negativeEdges"])
-    diff = trace_payload["solvedVsBlockedDiff"]["delta"]
-    rules = target["outputSummaryRules"]
-    negative_types = [edge["type"] for edge in negative_edges]
-    wire = rules["wire"]
-    quarantine = rules["quarantine"]
-    if len(proved_edges) >= int(wire["minPresentEdges"]) and len(negative_edges) <= int(wire["maxNegativeEdges"]):
-        verdict = "wire"
-    elif len(proved_edges) >= int(quarantine["minPresentEdges"]) and all(edge_type in quarantine["allowedNegativeEdgeTypes"] for edge_type in negative_types):
-        verdict = "quarantine"
-    else:
-        verdict = "keep researching"
-    summary = rules["messages"]["research" if verdict == "keep researching" else verdict]
-    promoted_owner = _select_promoted_native_owner(target, trace_payload, native_summary)
-    if promoted_owner:
-        top_owner = promoted_owner["owner"]
-        reconstructed_methods = promoted_owner.get("methods", [])
-        reconstructed_fields = promoted_owner.get("fields", [])
-        chain_bits = []
-        if reconstructed_methods:
-            chain_bits.append("methods {}".format(", ".join(reconstructed_methods[:3])))
-        if reconstructed_fields:
-            chain_bits.append("fields {}".format(", ".join(reconstructed_fields[:4])))
-        if chain_bits:
-            summary = "{} Native reconstruction now ties this lane to {} via {}.".format(
-                summary,
-                top_owner,
-                " and ".join(chain_bits),
-            )
-        else:
-            summary = "{} Native reconstruction now ties this lane to {}.".format(summary, top_owner)
-    return {
-        "verdict": verdict,
-        "summary": summary,
-        "provedEdgeCount": len(proved_edges),
-        "negativeEdgeCount": len(negative_edges),
-        "baselineGap": diff["blockedMissingEdgeTypes"],
-        "supportingEdgeTypes": [edge["type"] for edge in proved_edges],
-        "blockedEdgeTypes": negative_types,
-    }
-
-
 def get_priority_support_documents(target: dict[str, Any]) -> list[str]:
     family_id = target["familyId"]
     if family_id == "exploration":
@@ -8807,15 +9379,23 @@ def get_priority_support_documents(target: dict[str, Any]) -> list[str]:
     if family_id == "token-shop":
         return ["tokenShopExtract", "tokenShopRowRemapBoundary"]
     if family_id == "shard-cost":
-        return ["shardCostFormulaModel", "shardMilestoneSaveOwnerCandidates"]
+        return []
     if family_id == "shard-owned-state":
-        return ["shardSaveBoundary", "shardMilestoneSaveOwnerCandidates"]
+        return []
     if family_id == "multiverse-market-save-owner":
-        return ["multiverseMarketMemberBoundary", "multiverseMarketSaveDataImportBoundary"]
+        return []
     return []
 
 
-def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list[str], family_id: str | None = None, extended_search: int = 0, depth_search: int | None = 0) -> dict[str, Any]:
+def build_dataset(
+    target_id: str | None,
+    queries: list[str],
+    extra_anchors: list[str],
+    family_id: str | None = None,
+    extended_search: int = 0,
+    depth_search: int | None = 0,
+    native_timeout: int = 1800,
+) -> dict[str, Any]:
     registry = load_registry()
     planner_resolution = resolve_planner_selection(registry, target_id, queries, extra_anchors, family_id)
     selected_target_id = str(planner_resolution["selectedTargetId"])
@@ -8855,7 +9435,7 @@ def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list
     native_anchor_values = _collect_native_trace_terms(target, planner_resolution, trace_payload)
     native_trace = collect_native_trace(
         native_anchor_values,
-        1800,
+        native_timeout,
         target["familyId"],
     )
     promoted_native_owner = _select_promoted_native_owner(target, trace_payload, native_trace.get("summary"))
@@ -8943,13 +9523,13 @@ def build_dataset(target_id: str | None, queries: list[str], extra_anchors: list
             "requiredSourceFamilies": target["requiredSourceFamilies"],
             "solvedBaselineTargetId": target["solvedBaselineTargetId"],
             "blockedTargetId": target["blockedTargetId"],
+            "outputSummaryRules": target.get("outputSummaryRules"),
         },
         "shellWindow": trace_payload["shellWindow"],
         "surfaces": trace_payload["surfaces"],
         "depthExpansion": trace_payload.get("depthExpansion", []),
         "traceGraph": trace_payload["traceGraph"],
         "outcome": trace_payload.get("outcome"),
-        "decisionSummary": build_decision_summary(target, trace_payload, native_trace.get("summary")),
         "bridgePromotionRule": trace_payload["bridgePromotionRule"],
         "bridgeCheck": trace_payload["bridgeCheck"],
         "solvedVsBlockedDiff": trace_payload["solvedVsBlockedDiff"],
@@ -9575,7 +10155,7 @@ def _load_canonical_semantic_scope_payload(dataset: dict[str, Any]) -> dict[str,
     semantic_scope_id = str(row_recovery.get("semanticScopeId") or "").strip()
     if not semantic_scope_id:
         return {}
-    return _load_canonical_semantic_payload("semantic_scope_fragment", semantic_scope_id)
+    return load_canonical_semantic_scope(semantic_scope_id)
 
 
 def _load_target_ui_binding_views(target: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -9791,6 +10371,7 @@ def extract_progression_semantic_fragments(dataset: dict[str, Any]) -> list[dict
     if not runtime_evaluator:
         return []
     target = dataset.get("target") or {}
+    assessment_key = f"target-assessment:{target.get('id')}"
     progression_key = _semantic_key("progression", target.get("familyId"), str(runtime_evaluator.get("owner") or "runtime"))
     return [
         {
@@ -9801,7 +10382,7 @@ def extract_progression_semantic_fragments(dataset: dict[str, Any]) -> list[dict
                 "targetId": target.get("id"),
                 "familyId": target.get("familyId"),
                 "runtimeEvaluatorRecovery": runtime_evaluator,
-                "decisionSummary": dataset.get("decisionSummary"),
+                "assessmentSemanticKey": assessment_key,
             },
         }
     ]
@@ -9834,18 +10415,22 @@ def extract_semantic_scope_semantic_fragments(dataset: dict[str, Any]) -> list[d
     semantic_scope_id = str(row_recovery.get("semanticScopeId") or "").strip()
     if not semantic_scope_id:
         return []
+    if semantic_scope_id.startswith("row:") or semantic_scope_id == "shard-owned-state:upgradeinfolist-population":
+        return []
     target = dataset.get("target") or {}
+    canonical_scope = _load_canonical_semantic_scope_payload(dataset)
+    scope_payload = canonical_scope or {
+        "semanticKey": semantic_scope_id,
+        "targetId": target.get("id"),
+        "familyId": target.get("familyId"),
+        "semanticGraph": row_recovery.get("semanticGraph"),
+        "semanticSearchPlan": row_recovery.get("semanticSearchPlan"),
+    }
     return [
         {
             "fragment_kind": "semantic_scope_fragment",
             "fragment_key": semantic_scope_id,
-            "payload": {
-                "semanticKey": semantic_scope_id,
-                "targetId": target.get("id"),
-                "familyId": target.get("familyId"),
-                "semanticGraph": row_recovery.get("semanticGraph"),
-                "semanticSearchPlan": row_recovery.get("semanticSearchPlan"),
-            },
+            "payload": scope_payload,
         }
     ]
 
@@ -9853,6 +10438,7 @@ def extract_semantic_scope_semantic_fragments(dataset: dict[str, Any]) -> list[d
 def extract_reconstruction_note_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
     target = dataset.get("target") or {}
     note_key = _semantic_key("reconstruction-note", target.get("familyId"), target.get("id"))
+    assessment_key = f"target-assessment:{target.get('id')}"
     return [
         {
             "fragment_kind": "reconstruction_note_fragment",
@@ -9861,9 +10447,9 @@ def extract_reconstruction_note_semantic_fragments(dataset: dict[str, Any]) -> l
                 "semanticKey": note_key,
                 "targetId": target.get("id"),
                 "familyId": target.get("familyId"),
+                "assessmentSemanticKey": assessment_key,
                 "bridgeCheck": dataset.get("bridgeCheck"),
                 "groundedConclusion": dataset.get("groundedConclusion"),
-                "decisionSummary": dataset.get("decisionSummary"),
             },
         }
     ]
@@ -9920,7 +10506,15 @@ def plan_trace_bundle_request(
 def collect_trace_bundle_components(
     args: argparse.Namespace,
 ) -> dict[str, Any]:
-    dataset = build_dataset(args.target, args.query, args.anchor, args.family, args.extended_search, args.depth_search)
+    dataset = build_dataset(
+        args.target,
+        args.query,
+        args.anchor,
+        args.family,
+        args.extended_search,
+        args.depth_search,
+        args.native_timeout,
+    )
     dataset["semanticFragments"] = collect_semantic_fragments(dataset)
     return dataset
 
@@ -9963,12 +10557,11 @@ def materialize_trace_bundle_dataset(
 
 
 def trace_dataset_has_required_fragments(dataset: dict[str, Any]) -> bool:
-    if {"traceRegistry", "target", "decisionSummary", "nativeTrace"}.issubset(dataset):
+    if {"traceRegistry", "target", "nativeTrace"}.issubset(dataset):
         return True
     required = {
         "traceRegistry",
         "target",
-        "decisionSummary",
         "nativeView",
         "systemViews",
         "canonicalSemanticViews",
@@ -9992,6 +10585,8 @@ def main() -> None:
                         help="Query term to search for (can specify multiple)")
     parser.add_argument("--anchor", action="append", default=[],
                         help="Anchor to trace (class, method, string, path id - can specify multiple)")
+    parser.add_argument("--best-gap", action="store_true",
+                        help="Choose the best current blocked target from DB-backed materialized trace state and run it")
     
     # Family specification for custom targets
     parser.add_argument("--family",
@@ -10040,12 +10635,41 @@ def main() -> None:
     parser.add_argument("--anchor-kind",
                         choices=["class", "method", "string", "path id", "prefab"],
                         help="Kind of anchor being traced")
-    
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Print the resolved plan and exit without running the trace")
+    parser.add_argument("--native-timeout", type=int, default=1800,
+                        help="Repo-side native/process-project timeout in seconds; use 0 to disable the wrapper timeout")
+    parser.add_argument("--repeat", type=int, default=1,
+                        help="When used with --best-gap and no explicit target/query/family, rerank and run again this many times")
+
     args = parser.parse_args()
-    
+
+    auto_best_gap_mode = bool(args.best_gap and not args.target and not args.family and not args.query and not args.anchor)
+
     # Validate arguments
-    if not args.target and not args.family and not args.query and not args.anchor:
+    if not args.best_gap and not args.target and not args.family and not args.query and not args.anchor:
         parser.error("pass --target, --family, or at least one --query/--anchor")
+    if args.repeat < 1:
+        parser.error("--repeat must be at least 1")
+
+    if args.dry_run:
+        dry_run_args = argparse.Namespace(**vars(args))
+        best_gap_plan: dict[str, Any] | None = None
+        if auto_best_gap_mode:
+            best_gap_plan = choose_best_gap_plan(registry)
+            dry_run_args.target = str(best_gap_plan["targetId"])
+            dry_run_args.anchor = list(best_gap_plan.get("anchors") or [])
+            _print_best_gap_plan(best_gap_plan)
+        trace_plan = plan_trace_bundle_request(dry_run_args, registry)
+        planner_resolution = trace_plan["plannerResolution"]
+        print("Dry run only.")
+        print("  target={}".format(trace_plan["selectedTargetId"]))
+        print("  family={}".format(trace_plan["selectedFamilyId"]))
+        print("  selectionMode={}".format(planner_resolution["selectionMode"]))
+        print("  anchors={}".format(", ".join(planner_resolution["expandedAnchors"]) or "none"))
+        if best_gap_plan:
+            print("  blocked={}".format(", ".join(best_gap_plan["blockedEdgeTypes"]) or "none"))
+        return
     
     # Determine output level
     if args.level == "raw":
@@ -10055,62 +10679,18 @@ def main() -> None:
     else:
         output_mode = "both"
     
-    trace_plan = plan_trace_bundle_request(args, registry)
-    planner_resolution = trace_plan["plannerResolution"]
-    selected_target_id = str(trace_plan["selectedTargetId"])
-    selected_family_id = str(trace_plan["selectedFamilyId"])
-    asset_set = trace_plan["assetSet"]
-    request_signature = str(trace_plan["requestSignature"])
-
-    if args.resume:
-        existing = get_trace_db().find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", selected_target_id, request_signature)
-        if existing is None:
-            existing = get_trace_db().find_materialized_trace_view("cifi-full", "libil2cpp.so", selected_target_id, request_signature)
-        if existing and trace_dataset_has_required_fragments(existing["payload"]):
-            dataset = dict(existing["payload"])
-        else:
-            dataset = collect_trace_bundle_components(args)
-    else:
-        dataset = collect_trace_bundle_components(args)
-
-    export_requested = args.export or args.json_out != JSON_OUT or args.md_out != MD_OUT
-    json_out, md_out, run_id = allocate_trace_run_paths(
-        dataset["traceRegistry"]["selectedTargetId"],
-        dataset["traceRegistry"]["selectedFamilyId"],
-        args.json_out if args.json_out != JSON_OUT else None,
-        args.md_out if args.md_out != MD_OUT else None,
-    )
-
-    # Add metadata about the trace parameters
-    dataset["traceParams"] = {
-        "target": args.target,
-        "anchors": args.anchor,
-        "family": args.family,
-        "extendedSearch": args.extended_search,
-        "depthSearch": args.depth_search,
-        "level": args.level,
-        "anchorKind": args.anchor_kind,
-        "maxSteps": args.max_steps
-    }
-    dataset["assetSet"] = asset_set
-    dataset["traceRun"] = {
-        "id": run_id,
-        "jsonOut": str(json_out) if export_requested else None,
-        "mdOut": str(md_out) if export_requested else None,
-        "mode": "stable-target-run",
-        "outputMode": output_mode,
-        "overwritesOnRepeat": export_requested,
-    }
-
-    persist_trace_bundle_fragments(dataset, str(dataset["traceRegistry"]["selectedTargetId"]), request_signature)
-    dataset = materialize_trace_bundle_dataset(dataset, str(dataset["traceRegistry"]["selectedTargetId"]), request_signature)
-
-    if export_requested:
-        export_trace_run(dataset, json_out, md_out)
-        print(f"Trace bundle exported: {json_out}")
-        print(f"Markdown: {md_out}")
-    else:
-        print(f"Trace bundle materialized in DB for target: {selected_target_id}")
+    total_iterations = args.repeat if auto_best_gap_mode else 1
+    for iteration in range(1, total_iterations + 1):
+        run_args = argparse.Namespace(**vars(args))
+        if auto_best_gap_mode:
+            best_gap_plan = choose_best_gap_plan(registry)
+            run_args.target = str(best_gap_plan["targetId"])
+            run_args.anchor = list(best_gap_plan.get("anchors") or [])
+            _print_best_gap_plan(best_gap_plan)
+        dataset = _execute_trace_bundle_run(run_args, registry, output_mode)
+        _print_completed_trace_run(dataset, iteration, total_iterations)
+        if auto_best_gap_mode and iteration < total_iterations:
+            print("Refreshing best-gap selection from DB-backed materialized state before the next run...")
 
 
 if __name__ == "__main__":

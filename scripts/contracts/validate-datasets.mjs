@@ -5966,7 +5966,6 @@ function validateTokenShop(tokenShop) {
   expectNonEmptyString(tokenShop.source.level0, "token shop level0 path must be present");
   expectArray(tokenShop.fields, "token shop fields must be an array");
   expectRecord(tokenShop.numeric_table, "token shop numeric_table must be an object");
-  expectArray(tokenShop.resource_icons, "token shop resource_icons must be an array");
   assert.ok(
     tokenShop.fields.length >= 50,
     "token shop fields should include the extracted payload"
@@ -5974,20 +5973,13 @@ function validateTokenShop(tokenShop) {
   ["TokenBoost", "DiamondBoost", "TokenBoostT2", "ATU25"].forEach((key) => {
     expectRecord(tokenShop.numeric_table[key], `token shop numeric_table.${key} must be present`);
   });
-  ["resourceicons/resource_tokenium", "resourceicons/resource_tokenium_cap"].forEach((icon) => {
-    assert.ok(
-      tokenShop.resource_icons.includes(icon),
-      `token shop resource_icons must include ${icon}`
-    );
-  });
   return {
     id: "token-shop",
     label: "Token shop extract",
     classification: "extracted-mechanics",
     stats: [
       `${tokenShop.fields.length} extracted fields`,
-      `${Object.keys(tokenShop.numeric_table).length} numeric groups`,
-      `${tokenShop.resource_icons.length} resource icons`
+      `${Object.keys(tokenShop.numeric_table).length} numeric groups`
     ]
   };
 }
@@ -6808,23 +6800,39 @@ function validateMultiverseMarketRowTextCoverage(coverage) {
   };
 }
 
-function validateTokenShopCostLanes(lanes) {
-  expectNonEmptyString(lanes.generatedAt, "token shop cost lanes generatedAt must be present");
-  expectRecord(lanes.sources, "token shop cost lanes sources must be an object");
-  ["tokenShopExtract", "level0", "probe"].forEach((field) => {
+function validateTokenShopTraceSupport(support) {
+  assert.equal(
+    support.dataset,
+    "token-shop-trace-support.v1",
+    "token shop trace support dataset id drifted"
+  );
+  expectNonEmptyString(
+    support.generatedAt,
+    "token shop trace support generatedAt must be present"
+  );
+  expectRecord(support.source, "token shop trace support source must be an object");
+  ["traceScope", "traceBundle", "tokenShopValues", "regenerationCommand"].forEach((field) => {
     expectNonEmptyString(
-      lanes.sources[field],
-      `token shop cost lanes sources.${field} must be present`
+      support.source[field],
+      `token shop trace support source.${field} must be present`
     );
   });
-  expectArray(lanes.tokenSpendGroups, "token shop cost lanes tokenSpendGroups must be an array");
+  expectRecord(
+    support.spendLanes?.costLanes,
+    "token shop trace support spendLanes.costLanes must be an object"
+  );
+  const lanes = support.spendLanes.costLanes;
+  expectArray(lanes.tokenSpendGroups, "token shop trace support tokenSpendGroups must be an array");
   expectArray(
     lanes.dailyTokeniumModifierGroups,
-    "token shop cost lanes dailyTokeniumModifierGroups must be an array"
+    "token shop trace support dailyTokeniumModifierGroups must be an array"
   );
-  expectArray(lanes.diamondGroups, "token shop cost lanes diamondGroups must be an array");
-  expectArray(lanes.playerFacingClues, "token shop cost lanes playerFacingClues must be an array");
-  expectArray(lanes.currentBoundary, "token shop cost lanes currentBoundary must be an array");
+  expectArray(lanes.diamondGroups, "token shop trace support diamondGroups must be an array");
+  expectRecord(
+    lanes.tracePresentation,
+    "token shop trace support tracePresentation must be an object"
+  );
+  expectArray(lanes.currentBoundary, "token shop trace support currentBoundary must be an array");
 
   [
     "TokenBoost",
@@ -6845,26 +6853,28 @@ function validateTokenShopCostLanes(lanes) {
   assert.deepEqual(
     lanes.diamondGroups,
     ["DiamondBoost"],
-    "token shop cost lanes diamondGroups drifted"
+    "token shop trace support diamondGroups drifted"
   );
-  [
-    "CostBox-Tokens",
-    "CostBox-Tokenium",
-    "Tokens Booster T1",
-    "Tokens Booster T2",
-    "Mission Materials Booster"
-  ].forEach((name) => {
-    assert.ok(lanes.playerFacingClues.includes(name), `token shop cost lanes missing ${name}`);
-  });
+  assert.equal(lanes.tracePresentation.costShell, "CostBox", "token shop trace support costShell drifted");
+  assert.equal(
+    lanes.tracePresentation.costRenderNode,
+    "CostText",
+    "token shop trace support costRenderNode drifted"
+  );
+  assert.equal(
+    lanes.tracePresentation.descriptionRenderNode,
+    "DescText",
+    "token shop trace support descriptionRenderNode drifted"
+  );
 
   return {
-    id: "token-shop-cost-lanes",
-    label: "Token shop cost lanes",
+    id: "token-shop-trace-support",
+    label: "Token shop trace support",
     classification: "extracted-mechanics",
     stats: [
       `${lanes.tokenSpendGroups.length} token spend groups`,
       `${lanes.dailyTokeniumModifierGroups.length} Daily Tokenium modifier groups`,
-      "TokenBoost, DiamondBoost, and TokenDailies stay on separate grounded cost lanes"
+      "TokenBoost, DiamondBoost, and TokenDailies stay on separate trace-produced cost lanes"
     ]
   };
 }
@@ -13764,7 +13774,6 @@ export async function validateBundledDatasets() {
   const shardMilestoneFamilyEvidence = await readJson(
     "../../data/shard-milestone-family-evidence.v1.json"
   );
-  const shardTypeMetadataProbe = shardsUnit.support.family.typeMetadataProbe.data;
   const extractionCandidateFamilies = await readJson(
     "../../data/extraction-candidate-families.v1.json"
   );
@@ -13789,7 +13798,7 @@ export async function validateBundledDatasets() {
   const multiverseMarketPrefabRemapBoundary = await readJson(
     "../../data/multiverse-market-prefab-remap-boundary.json"
   );
-  const tokenShopCostLanes = await readJson("../../data/token-shop-cost-lanes.json");
+  const tokenShopTraceSupport = await readJson("../../data/token-shop-trace-support.v1.json");
   const spendActionLaneClues = await readJson("../../data/spend-action-lane-clues.json");
   const multiverseMarketActionShell = await readJson(
     "../../data/multiverse-market-action-shell.json"
@@ -13946,7 +13955,7 @@ export async function validateBundledDatasets() {
     validateMultiverseMarketRangeBoundary(multiverseMarketRangeBoundary),
     validateMultiverseMarketRowTextCoverage(multiverseMarketRowTextCoverage),
     validateMultiverseMarketPrefabRemapBoundary(multiverseMarketPrefabRemapBoundary),
-    validateTokenShopCostLanes(tokenShopCostLanes),
+    validateTokenShopTraceSupport(tokenShopTraceSupport),
     validateSpendActionLaneClues(spendActionLaneClues),
     validateMultiverseMarketActionShell(multiverseMarketActionShell),
     validateMultiverseMarketOwnerFamily(multiverseMarketOwnerFamily),
@@ -14053,11 +14062,6 @@ export async function validateBundledDatasets() {
     shardsUnit.models.cost.screenshotCalibration.data.dataset,
     "shard-cost-screenshot-calibration.v1",
     "shards unit screenshotCalibration embedding drifted"
-  );
-  assert.equal(
-    shardsUnit.support.family.typeMetadataProbe.data.dataset,
-    "shard-type-metadata-probe.v1",
-    "shards unit typeMetadataProbe embedding drifted"
   );
   assert.equal(
     shardsUnit.support.cost.listPathProbe.data.dataset,

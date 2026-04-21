@@ -40,16 +40,6 @@
     }
   },
   "planner": {
-    "resolutionVersion": "v1",
-    "boundedRunModes": [
-      "trace",
-      "compare"
-    ],
-    "resolutionOrder": [
-      "explicit-target",
-      "family-query-match",
-      "family-default-target"
-    ],
     "familyOrder": [
       "token-shop",
       "shard-cost",
@@ -709,7 +699,6 @@
             "label": "Prefab identity roster",
             "sourceIds": [
               "tokenShopRowRemapBoundary",
-              "tokenShopLateAtuBoundary",
               "level0",
               "sharedassets0"
             ],
@@ -729,7 +718,6 @@
             "label": "Title and text surfaces",
             "sourceIds": [
               "tokenShopRowRemapBoundary",
-              "tokenShopLateAtuBoundary",
               "level0",
               "sharedassets0"
             ],
@@ -748,7 +736,6 @@
             "label": "Bounded unresolved neighborhoods",
             "sourceIds": [
               "tokenShopRowRemapBoundary",
-              "tokenShopLateAtuBoundary",
               "level0"
             ],
             "terms": [
@@ -1501,6 +1488,14 @@
         "accessorBridge": "PlayerProfileHandler.get_Market -> MultiverseMarket",
         "saveOwner": "SaveData",
         "typedSpan": "IS1Level through IS110Level",
+        "compatibilityImportTargetPath": "compatibility.unmappedSystemState.multiverseMarket",
+        "canonicalImportSafeSubsetLabel": "none",
+        "broaderRowRemapStatus": "Broader row identity or remap stays blocked outside the checked 71-74 ordered overlap.",
+        "blockedStructure": [
+          "The wider inscription ordering outside rows 71-74 is not yet grounded enough from checked repo-local evidence to promote broader IS*Level row mappings.",
+          "The checked repo-local evidence still does not recover player-facing row labels for rows 71-74, only their ordered row positions inside the larger inscription set.",
+          "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap"
+        ],
         "orderedOverlap": [
           71,
           72,

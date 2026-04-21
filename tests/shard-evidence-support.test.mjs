@@ -17,8 +17,7 @@ function createTestSupport(overrides = {}) {
     },
     cost: {
       bonusSlotProbe: grounding.bonusSlotProbe ?? null,
-      costParameterProbe: grounding.costParameterProbe ?? null,
-      costNativeProbe: grounding.costNativeProbe ?? null
+      formulaModel: grounding.formulaModel ?? null
     },
     ownedState: {
       saveBoundary: grounding.saveBoundary ?? null,
@@ -126,14 +125,10 @@ test("threshold, unlock, and computed bonus helpers preserve descriptive shard e
           }
         }
       },
-      costParameterProbe: {
-        unlockRequirementBlock: { values: [0, 25] },
-        rowAlignedTupleCandidates: [
-          {
-            row: 1,
-            bonusPerLevelValues: [1.5]
-          }
-        ]
+      formulaModel: {
+        verifiedParameters: {
+          unlockRequirementBlock: { values: [0, 25] }
+        }
       }
     }
   });

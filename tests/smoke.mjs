@@ -157,6 +157,9 @@ const shardCostListPathProbe = generatedShardsSystemUnit.support.cost.listPathPr
 const shardCostFormulaModel = JSON.parse(
   await readFile(new URL("../data/shard-cost-formula-model.v1.json", import.meta.url), "utf8")
 );
+const shardTypeMetadataProbe = JSON.parse(
+  await readFile(new URL("../data/shard-type-metadata-probe.v1.json", import.meta.url), "utf8")
+);
 const shardBonusSlotProbe = JSON.parse(
   await readFile(new URL("../data/shard-bonus-slot-probe.v1.json", import.meta.url), "utf8")
 );
@@ -166,7 +169,6 @@ const shardMilestoneFamilyEvidence = JSON.parse(
     "utf8"
   )
 );
-const shardTypeMetadataProbe = generatedShardsSystemUnit.support.family.typeMetadataProbe.data;
 const extractionCandidateFamilies = JSON.parse(
   await readFile(new URL("../data/extraction-candidate-families.v1.json", import.meta.url), "utf8")
 );
@@ -209,9 +211,10 @@ const multiverseMarketPrefabRemapBoundaryData = JSON.parse(
     "utf8"
   )
 );
-const tokenShopCostLanesData = JSON.parse(
-  await readFile(new URL("../data/token-shop-cost-lanes.json", import.meta.url), "utf8")
+const tokenShopTraceSupportData = JSON.parse(
+  await readFile(new URL("../data/token-shop-trace-support.v1.json", import.meta.url), "utf8")
 );
+const tokenShopCostLanesData = tokenShopTraceSupportData.spendLanes.costLanes;
 const spendActionLaneCluesData = JSON.parse(
   await readFile(new URL("../data/spend-action-lane-clues.json", import.meta.url), "utf8")
 );
@@ -984,7 +987,7 @@ const expectedBundledDatasetIds = [
   "multiverse-market-range-boundary",
   "multiverse-market-row-text-coverage",
   "multiverse-market-prefab-remap-boundary",
-  "token-shop-cost-lanes",
+  "token-shop-trace-support",
   "spend-action-lane-clues",
   "multiverse-market-action-shell",
   "multiverse-market-owner-family",
@@ -1084,11 +1087,22 @@ assert.ok(dataFramework.migrationUnits.some((unit) => unit.id === "multiverse-ma
 assert.ok(dataFramework.migrationUnits.some((unit) => unit.id === "trace"));
 assert.deepEqual(
   dataFramework.migrationUnits.find((unit) => unit.id === "shards")?.inputs?.historicalProbe,
-  []
+  [
+    "data/shard-scene-monobehaviour-probe.v1.json",
+    "data/shard-type-metadata-probe.v1.json",
+    "data/shard-cost-parameter-probe.v1.json",
+    "data/shard-cost-method-probe.v1.json",
+    "data/shard-cost-native-probe.v1.json"
+  ]
 );
 assert.deepEqual(
   dataFramework.migrationUnits.find((unit) => unit.id === "token-shop")?.inputs?.historicalProbe,
-  []
+  ["data/uabea-extract-report.json", "data/unity-apk-extract-report.json"]
+);
+assert.deepEqual(
+  dataFramework.migrationUnits.find((unit) => unit.id === "multiverse-market")?.inputs
+    ?.historicalProbe,
+  ["data/uabea-extract-report.json", "data/unity-apk-extract-report.json"]
 );
 assert.ok(
   dataFramework.migrationUnits.find((unit) => unit.id === "player-state")?.inputs?.support
@@ -1158,7 +1172,21 @@ assert.equal(playerStateUnit.unitId, "player-state");
 assert.equal(tokenShopSystemUnit.unitId, "token-shop");
 assert.equal(multiverseMarketSystemUnit.unitId, "multiverse-market");
 assert.equal(traceUnit.unitId, "trace");
-assert.deepEqual(tokenShopSystemUnit.views.historicalProbe, []);
+assert.deepEqual(tokenShopSystemUnit.views.historicalProbe, [
+  "data/uabea-extract-report.json",
+  "data/unity-apk-extract-report.json"
+]);
+assert.deepEqual(multiverseMarketSystemUnit.views.historicalProbe, [
+  "data/uabea-extract-report.json",
+  "data/unity-apk-extract-report.json"
+]);
+assert.deepEqual(shardSystemUnit.views.historicalProbe, [
+  "data/shard-scene-monobehaviour-probe.v1.json",
+  "data/shard-type-metadata-probe.v1.json",
+  "data/shard-cost-parameter-probe.v1.json",
+  "data/shard-cost-method-probe.v1.json",
+  "data/shard-cost-native-probe.v1.json"
+]);
 assert.ok(
   multiverseMarketSystemUnit.views.boundary.includes(
     "data/multiverse-market-market-member-boundary.json"
@@ -1291,10 +1319,6 @@ assert.equal(
 assert.equal(
   generatedShardsSystemUnit.models.cost.screenshotCalibration.data.dataset,
   "shard-cost-screenshot-calibration.v1"
-);
-assert.equal(
-  generatedShardsSystemUnit.support.family.typeMetadataProbe.data.dataset,
-  "shard-type-metadata-probe.v1"
 );
 assert.equal(
   generatedShardsSystemUnit.support.cost.listPathProbe.data.dataset,
@@ -2378,7 +2402,6 @@ assert.ok(
     /shared shard milestone evidence table/.test(line)
   )
 );
-assert.equal(shardTypeMetadataProbe.dataset, "shard-type-metadata-probe.v1");
 assert.equal(shardTypeMetadataProbe.targets.shardMining.fullName, "ShardMining");
 assert.ok(
   shardTypeMetadataProbe.targets.shardMining.ownerListFields.some(
@@ -2830,9 +2853,10 @@ assert.ok(tokenShopCostLanesData.tokenSpendGroups.includes("MK8TokenBoost"));
 assert.ok(tokenShopCostLanesData.dailyTokeniumModifierGroups.includes("TokenDailiesT2"));
 assert.ok(tokenShopCostLanesData.dailyTokeniumModifierGroups.includes("TokenDailiesT3"));
 assert.deepEqual(tokenShopCostLanesData.diamondGroups, ["DiamondBoost"]);
-assert.ok(tokenShopCostLanesData.playerFacingClues.includes("CostBox-Tokens"));
-assert.ok(tokenShopCostLanesData.playerFacingClues.includes("CostBox-Tokenium"));
-assert.ok(tokenShopCostLanesData.playerFacingClues.includes("Mission Materials Booster"));
+assert.equal(tokenShopTraceSupportData.dataset, "token-shop-trace-support.v1");
+assert.equal(tokenShopCostLanesData.tracePresentation.costShell, "CostBox");
+assert.equal(tokenShopCostLanesData.tracePresentation.costRenderNode, "CostText");
+assert.equal(tokenShopCostLanesData.tracePresentation.descriptionRenderNode, "DescText");
 assert.ok(spendActionLaneCluesData.tokenDirectBuyHooks.includes("BuyTokenBoost"));
 assert.ok(spendActionLaneCluesData.tokenDirectBuyHooks.includes("BuyMK1TokenBoost"));
 assert.ok(spendActionLaneCluesData.tokenDirectBuyHooks.includes("BuyMK8TokenBoost"));
@@ -6882,15 +6906,15 @@ assert.match(spendBoundarySummaryJs, /function getTokenShopCostLaneSummary/);
 assert.match(appJs, /TokenShop cost-lane split/);
 assert.match(
   appJs,
-  /TokenBoost, DiamondBoost, TokenDailiesT2, CostBox-Tokens, and CostBox-Tokenium available/
+  /TokenBoost, DiamondBoost, TokenDailiesT2, CostBox, and DescText available/
 );
 assert.match(
   appJs,
-  /TokenShop cost-lane clues now preserve \${tokenShopCostLaneSummary\.tokenLaneLabel}, \${tokenShopCostLaneSummary\.diamondLaneLabel}, \${tokenShopCostLaneSummary\.dailyLaneLabel}, \${tokenShopCostLaneSummary\.tokensShellLabel}, and \${tokenShopCostLaneSummary\.tokeniumShellLabel}/
+  /TokenShop trace support now preserves \${tokenShopCostLaneSummary\.tokenLaneLabel}, \${tokenShopCostLaneSummary\.diamondLaneLabel}, \${tokenShopCostLaneSummary\.dailyLaneLabel}, \${tokenShopCostLaneSummary\.costShellLabel}, and \${tokenShopCostLaneSummary\.descriptionRenderLabel}/
 );
 assert.match(
   appJs,
-  /This keeps TokenDailies on the Daily Tokenium modifier lane instead of mixing it into generic token spend rows/
+  /This keeps TokenDailies on the Daily Tokenium modifier lane while the shared \$\{tokenShopCostLaneSummary\.costRenderLabel\} or \$\{tokenShopCostLaneSummary\.descriptionRenderLabel\} path stays grounded in the trace materialization/
 );
 assert.match(spendBoundarySummaryJs, /function getSpendActionLaneSummary/);
 assert.match(appJs, /Spend action-lane split/);
@@ -6979,8 +7003,8 @@ assert.match(
 assert.match(spendBoundarySummaryJs, /"TokenBoost"/);
 assert.match(spendBoundarySummaryJs, /"DiamondBoost"/);
 assert.match(spendBoundarySummaryJs, /"TokenDailiesT2"/);
-assert.match(spendBoundarySummaryJs, /"CostBox-Tokens"/);
-assert.match(spendBoundarySummaryJs, /"CostBox-Tokenium"/);
+assert.match(spendBoundarySummaryJs, /"CostBox"/);
+assert.match(spendBoundarySummaryJs, /"DescText"/);
 assert.match(
   appJs,
   /These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels/

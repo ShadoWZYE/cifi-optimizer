@@ -2157,10 +2157,6 @@
       "UnlockReward": 1324247848,
       "group": "controller"
     }
-  },
-  "resource_icons": [
-    "resourceicons/resource_tokenium",
-    "resourceicons/resource_tokenium_cap"
-  ]
+  }
 }
 

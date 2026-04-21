@@ -26,8 +26,7 @@
     "family": {
       "summary": "Definition-side shard family evidence and player-facing descriptive grounding.",
       "seedOutputs": [
-        "data/shard-milestone-family-evidence.v1.json",
-        "data/shard-type-metadata-probe.v1.json"
+        "data/shard-milestone-family-evidence.v1.json"
       ]
     },
     "owned-state": {
@@ -119,9 +118,15 @@
     "support": [
       "data/shard-milestone-family-evidence.v1.json",
       "data/shard-cost-list-path-probe.v1.json",
-      "data/shard-type-metadata-probe.v1.json"
+      "data/shard-bonus-slot-probe.v1.json"
     ],
-    "historicalProbe": []
+    "historicalProbe": [
+      "data/shard-scene-monobehaviour-probe.v1.json",
+      "data/shard-type-metadata-probe.v1.json",
+      "data/shard-cost-parameter-probe.v1.json",
+      "data/shard-cost-method-probe.v1.json",
+      "data/shard-cost-native-probe.v1.json"
+    ]
   },
   "replacementPlan": {
     "seedOutputs": [
@@ -167,20 +172,20 @@
       },
       {
         "path": "data/shard-type-metadata-probe.v1.json",
-        "status": "defer",
-        "reason": "Typed schema recovery is still a distinct provenance source for owner and row-shape claims and should not be archived until that evidence is fully normalized into permanent shard boundaries.",
+        "status": "archive-candidate",
+        "reason": "Typed schema clues are now preserved through the surviving shard boundaries and formula model, so the raw type probe should remain historical-only rather than a live shard support surface.",
         "replacementSource": "data/system-units/shards.v1.json"
       },
       {
         "path": "data/shard-scene-monobehaviour-probe.v1.json",
         "status": "archive-candidate",
-        "reason": "The active shard unit no longer depends on this probe directly and its useful facts have already been folded into direct extraction-backed boundaries.",
+        "reason": "The active shard lane no longer consumes this probe directly; its narrowing facts are already folded into save-side and handoff boundaries, so it stays historical-only.",
         "replacementSource": "data/system-units/shards.v1.json"
       },
       {
         "path": "data/shard-cost-parameter-probe.v1.json",
         "status": "archive-candidate",
-        "reason": "The active shard cost lane no longer needs this as a first-class shipped input.",
+        "reason": "The active shard cost lane now reads verified parameter semantics from the canonical formula model instead of shipping this raw probe as a live support input.",
         "replacementSource": "data/system-units/shards.v1.json"
       },
       {
@@ -192,7 +197,7 @@
       {
         "path": "data/shard-cost-native-probe.v1.json",
         "status": "archive-candidate",
-        "reason": "Native probe facts are preserved through the shard unit and cost model provenance; keeping the raw probe first-class risks drifting against the normalized lane.",
+        "reason": "The active shard-cost trace lane now cites only the canonical formula model and save-owner boundary surfaces, so the raw native probe remains historical-only provenance rather than an active trace dependency.",
         "replacementSource": "data/system-units/shards.v1.json"
       }
     ],

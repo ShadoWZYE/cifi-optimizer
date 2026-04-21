@@ -11,7 +11,7 @@ from portable_paths import md_link
 
 
 ROOT = Path(__file__).resolve().parents[2]
-UABEA_REPORT_PATH = ROOT / "data" / "uabea-extract-report.json"
+UABEA_REPORT_PATH = ROOT / "data" / "uabea-type-metadata-support.v1.json"
 LIBIL2CPP_PATH = ROOT / "workbench" / "apk" / "base" / "libil2cpp.so"
 JSON_OUT = ROOT / "data" / "shard-cost-method-probe.v1.json"
 MD_OUT = ROOT / "docs" / "systems" / "shards" / "shard-cost-method-probe.md"
@@ -31,7 +31,7 @@ def load_shard_methods() -> list[dict[str, object]]:
     for entry in report.get("directTargetTypeMetadata", []):
         if entry.get("scriptName") == "ShardMining":
             return entry.get("methods", [])
-    raise RuntimeError("ShardMining method metadata missing from uabea-extract-report.json")
+    raise RuntimeError("ShardMining method metadata missing from uabea-type-metadata-support.v1.json")
 
 
 def build_method_entry(method: dict[str, object], next_rva: int | None, binary_blob: bytes) -> dict[str, object]:

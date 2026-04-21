@@ -51,6 +51,13 @@
     "transientProbePolicy": "Historical TokenShop probes should not remain live dependencies; when their evidence is copied forward, keep the regeneration command or DB-backed target-bundle identity instead of a permanent pointer to an old report shape.",
     "sourceRecords": [
       {
+        "id": "uabea-type-metadata-support",
+        "kind": "dataset",
+        "path": "data/uabea-type-metadata-support.v1.json",
+        "role": "support",
+        "persistence": "committed"
+      },
+      {
         "id": "token-shop-values",
         "kind": "dataset",
         "path": "data/token-shop-values.json",
@@ -88,6 +95,13 @@
           "db:materialized-target-bundle:token-shop-atu3-cells-effect",
           "db:materialized-target-bundle:token-shop-family-structure"
         ]
+      },
+      {
+        "id": "token-shop-trace-support",
+        "kind": "dataset",
+        "path": "data/token-shop-trace-support.v1.json",
+        "role": "support",
+        "persistence": "committed"
       }
     ]
   },
@@ -107,12 +121,15 @@
       "data/tokenium-naming-clues.json",
       "data/token-bank-state-clues.json",
       "data/daily-tokenium-lane-clues.json",
-      "data/token-shop-cost-lanes.json",
+      "data/token-shop-trace-support.v1.json",
       "data/spend-action-lane-clues.json",
       "data/token-shop-owner-shell.json",
       "data/token-bank-controller-shell.json"
     ],
-    "historicalProbe": []
+    "historicalProbe": [
+      "data/uabea-extract-report.json",
+      "data/unity-apk-extract-report.json"
+    ]
   },
   "replacementPlan": {
     "seedOutputs": [
@@ -129,6 +146,12 @@
     ],
     "archiveReview": [
       {
+        "path": "data/token-shop-cost-lanes.json",
+        "status": "archive",
+        "reason": "The old standalone TokenShop cost-lane probe has been replaced by data/token-shop-trace-support.v1.json, generated from the token-shop-family-structure trace bundle plus grounded TokenShop values.",
+        "replacementSource": "data/token-shop-trace-support.v1.json"
+      },
+      {
         "path": "data/token-shop-row-level-owner.json",
         "status": "keep",
         "reason": "This remains the distinct raw SaveData ATU owner boundary and is not yet superseded by the row-remap or trace-backed TokenShop views.",
@@ -137,13 +160,13 @@
       {
         "path": "data/unity-apk-extract-report.json",
         "status": "archive-candidate",
-        "reason": "This is no longer a live TokenShop source and keeping it active risks conflicting with newer direct level0 and metadata-backed mappings.",
+        "reason": "This is now a historical raw keyword/export artifact only; active TokenShop semantics already survive in committed boundaries, trace-backed views, and canonical support datasets.",
         "replacementSource": "data/system-units/token-shop.v1.json"
       },
       {
         "path": "data/uabea-extract-report.json",
         "status": "archive-candidate",
-        "reason": "The remaining asset-field report is useful for extractor validation but should not expand back into a parallel TokenShop row-remap lane.",
+        "reason": "The remaining typed extractor/debug need is reduced into data/uabea-type-metadata-support.v1.json, so the full raw report should stay historical-only rather than an active TokenShop surface.",
         "replacementSource": "data/system-units/token-shop.v1.json"
       }
     ],

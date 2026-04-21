@@ -54,18 +54,12 @@ Repo-local npm extraction wrappers:
   - keeps `.dotnet`, `.nuget/packages`, and `.appdata` inside the repo
   - if the runnable probe artifact is missing, the wrapper restores and rebuilds it automatically
   - if `Program.cs`, `CifiAssetProbe.csproj`, or `NuGet.Config` is newer than `bin/probe-run/CifiAssetProbe.dll`, the wrapper fails fast and tells you to run `npm run extract:build`
-- preferred alias: `npm run extract:shards:parameters`
-  - legacy alias: `npm run probe:shards:parameters`
-  - historical extraction lane only; do not treat its output as a shipped app or trace dependency
-- preferred alias: `npm run extract:shards:type-metadata`
-  - legacy alias: `npm run probe:shards:type-metadata`
-  - historical extraction lane only; keep for provenance review when a newer centralized shard unit does not yet subsume a type-side clue
-- preferred alias: `npm run extract:shards:method`
-  - legacy alias: `npm run probe:shards:method`
-  - historical extraction lane only; current live shard cost flow should prefer the centralized shard unit plus formula/calibration data
-- preferred alias: `npm run extract:shards:cost-native`
-  - legacy alias: `npm run probe:shards:cost-native`
-  - historical extraction lane only; use when reviewing archived shard cost evidence, not as a primary shipped dataset refresh
+- historical shard probe aliases still exist for provenance review:
+  - `npm run extract:shards:parameters`
+  - `npm run extract:shards:type-metadata`
+  - `npm run extract:shards:method`
+  - `npm run extract:shards:cost-native`
+  - treat them as archive/debug lanes only; the live shard lane should prefer `data/system-units/shards.v1.json`, `data/shard-cost-formula-model.v1.json`, `data/shard-save-boundary.v2.json`, and DB-backed trace materialization
 - preferred alias: `npm run extract:trace -- --query <query> --anchor <anchor>`
   - legacy alias: `npm run probe:trace -- --query <query> --anchor <anchor>`
   - or pin an exact preset with `npm run extract:trace -- --target <target-id> --anchor <anchor>`
@@ -79,10 +73,22 @@ Repo-local npm extraction wrappers:
   - emits a compact planner decision note plus a summary verdict such as `wire`, `quarantine`, or `keep researching` so Codex can read the bundle without manually reinterpreting the full graph first
   - current seeded trace families: `token-shop`, `shard-cost`, `shard-owned-state`, and `multiverse-market-save-owner`
   - the current committed token-shop planner path treats `token-shop-atu3-cells-effect` as the canonical ATU3 lane instead of the older negative split-row target
+  - `token-shop-family-structure` now recovers its solved-shell structure from `data/token-shop-values.json` plus DB-derived token-shop row scopes and the ATU3 materialized target, rather than from `data/token-shop-row-remap-boundary.json`
+  - `token-shop-atu3-cells-effect` now recovers its shell adjacency and parameter surface from `data/token-shop-values.json`, its effect/title/text surfaces from direct metadata and `level0`, and its remaining typed-owner gap from DB materialized ATU3 consumer lanes rather than from `data/token-shop-row-remap-boundary.json`
+  - `token-shop-atu3-chest-consumer` now recovers its consumer-family, chest-routine, chest-object, and bonus-shell structure from direct metadata and `level0`, while using the DB materialized `token-shop-atu3-chest-consumer-read` target only for the still-missing exact CellBoostBonus read-site seam
+  - `token-shop-atu3-chest-consumer-read` now recovers its getter and booster-bonus shell directly from metadata and uses the DB materialized `token-shop-atu3-chest-consumer` target only as the bounded negative comparator, so `data/token-shop-row-remap-boundary.json` no longer feeds either active ATU3 consumer trace scope
+  - `token-shop-atu5-mk1-title` now recovers its shell bridge and blocked title-side comparison from direct extract, metadata, and `level0` evidence plus the DB-derived `row:ATU3Button` scope and `token-shop-atu3-cells-effect` materialization, so `data/token-shop-row-remap-boundary.json` no longer feeds that active trace scope
+  - `token-shop-family-structure` now recovers its late unresolved shell/title contrast from direct `token-shop-values` fields, direct `level0` hits, and DB materialized ATU3 state, so `data/token-shop-late-atu-boundary.json` no longer feeds that active trace scope
+  - shard owned-state bridge verdicts now live in the reducer-owned canonical semantic scope `semantic_scope_fragment:shard-owned-state:upgradeinfolist-population`, and the DB materialized shard target bundle exposes that canonical `bridgeAssessment` / `outcome` payload instead of relying on bundle-authored verdict logic
+  - `data/token-shop-values.json` now carries only the irreducible TokenShop extract core used actively by the trace and spend lanes: source metadata, exact `fields`, and grounded `numeric_table`
 - `node scripts/contracts/generate-system-units.mjs`
   - reads canonical repo inputs plus DB-backed `materialized_target_bundle_views`
   - writes `data/system-units/*.json` only as exported app/browser read models
   - also persists matching `materialized_system_unit_views` in SQLite so app-facing system units are not a parallel file-first truth path
+- `python scripts/unity/ghidra_headless.py invalidate`
+  - supports evidence invalidation with `--script`
+  - supports trace-fragment-only invalidation with `--trace-scope`, `--trace-fragment`, `--trace-fragment-key`, `--trace-script`, and `--trace-request-signature`
+  - prefer the `--trace-*` flags when cleaning up DB-backed trace/materialized rows so evidence rows are not invalidated accidentally
 
 Important primary files:
 
@@ -213,6 +219,17 @@ The current repo-local candidate ranking for that step is recorded in:
 - The `.NET` wrapper no longer silently reuses a stale cached build. It only reuses `tools/unity/CifiAssetProbe/bin/probe-run` when the checked runnable artifact is newer than the local probe source inputs.
 - On Windows, the wrapper accepts either `python` or `py -3`. On macOS/Linux, it looks for `python3` first and falls back to `python`.
 - The current wrappers assume a shell environment that can execute `node`, `dotnet`, and Python from `PATH`; they do not bootstrap those toolchains for a fresh machine.
+- `data/uabea-extract-report.json` and `data/unity-apk-extract-report.json` should be treated as raw extraction exports or historical provenance inputs, not as default active support surfaces.
+- When only typed LibCpp2IL tables are needed from the UABEA export, prefer `data/uabea-type-metadata-support.v1.json`.
+- `shard-owned-state:upgradeinfolist-population` semantic scope is now reducer-owned in SQLite. It is refreshed during `rebuild_trace_views()` from persisted shard trace fragments rather than being a hand-maintained DB insert path.
+- token-shop row semantic scopes such as `row:ATU4Button` are also reducer-owned in SQLite. `unity_trace_bundle.py` still assembles row recovery inputs during a trace run, but canonical row semantic scopes are refreshed during `rebuild_trace_views()` instead of being inserted directly by the bundle.
+- `multiverse-market-save-owner-boundary` no longer consumes `data/multiverse-market-market-member-boundary.json` during active trace reconstruction. Its typed-field-negative edge now renders from direct metadata-side accessor and SaveData span recovery, while the remaining save-data import and ordered-overlap boundaries stay explicit.
+- `multiverse-market-save-owner-boundary` also no longer consumes `data/multiverse-market-range-boundary.json` during active trace reconstruction. The 71-74 ordered-overlap support now renders from direct metadata-side `IS71-74` and `SetIS71-74CostText` hits plus `level0` `BuyIS71-74` hits, leaving only the save-data import boundary explicit in the active multiverse lane.
+- `multiverse-market-save-owner-boundary` no longer consumes `data/multiverse-market-savedata-import-boundary.json` during active trace reconstruction either. The compatibility import target, canonical-import-empty label, and broader row-remap blocker text now come from the trace target registry plus direct metadata/row-side evidence, so the active multiverse lane is down to raw-source hits and the registry.
+- `data/unity-trace-target-registry.json` should now be treated as a thin trace catalog plus planner-policy shell, not as a structural truth layer. The current decomposition audit and remaining migration work are tracked in [`docs/unity/unity-trace-registry-decomposition.md`](docs/unity/unity-trace-registry-decomposition.md).
+- `token-shop-updater-display:ATU4` is now reducer-owned in SQLite. It derives a DB-backed updater/display semantic scope from the ATU4 evidence cluster (`ATU4Button`, `BuyModBoost`, `SetTokenTexts`, `SetAllTokenShopTexts`, and the `ModBoost*` parameter shell) and is surfaced through the `token-shop-atu4-mod` materialized target bundle.
+- Target-level `decisionSummary` is now reducer-owned in SQLite as `assessment_fragment` entries keyed like `target-assessment:<trace-scope>`. The bundle no longer emits its own raw verdict preview; DB-backed materialized target bundles consume the canonical assessment fragment rebuilt from trace state plus target rules, and missing assessment state is surfaced explicitly.
+- `reconstruction_note_fragment` and `progression_fragment` no longer embed copied verdict payloads either. They now carry `assessmentSemanticKey` references back to `target-assessment:<trace-scope>`, so verdict ownership stays single-source in canonical assessment state during rebuilds and exported system-unit views.
 
 ## Rework Guidance
 

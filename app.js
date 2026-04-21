@@ -2756,8 +2756,8 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${tokenShopCoverage.hasCoverage ? `TokenShop currently exposes ${tokenShopCoverage.numericGroupCount} extracted numeric families across ${tokenShopCoverage.tierLabel}, including ${tokenShopCoverage.namedLaneLabel}.` : "TokenShop extracted family coverage is not available in this build."}</p>
         <p class="meta">${tokenShopCoverage.hasControllerAnchors ? "The checked-in TokenShop payload also preserves direct controller anchors such as BankFill and TokenBankDescriptionText for the token-bank lane." : "The checked-in TokenShop payload does not yet preserve the expected token-bank controller anchors."}</p>
         <p class="meta">${tokeniumNamingSummary.hasNamingClues ? `Shipped assets now preserve ${tokeniumNamingSummary.resourceLabel} plus ${tokeniumNamingSummary.academyLabel}, and level0 keeps both ${tokeniumNamingSummary.tokenShellLabel} and ${tokeniumNamingSummary.tokeniumShellLabel}.` : "Token or tokenium naming clues are not available in this build."}</p>
-        <p class="meta">${tokenShopCostLaneSummary.hasLaneSplit ? `TokenShop cost-lane clues now preserve ${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.tokensShellLabel}, and ${tokenShopCostLaneSummary.tokeniumShellLabel}.` : "TokenShop cost-lane clues are not available in this build."}</p>
-        <p class="meta">${tokenShopCostLaneSummary.keepsDailyTokeniumSeparate ? "This keeps TokenDailies on the Daily Tokenium modifier lane instead of mixing it into generic token spend rows." : "The current build does not yet preserve a grounded split between TokenDailies and generic token spend rows."}</p>
+        <p class="meta">${tokenShopCostLaneSummary.hasLaneSplit ? `TokenShop trace support now preserves ${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel}.` : "TokenShop trace-produced cost-lane support is not available in this build."}</p>
+        <p class="meta">${tokenShopCostLaneSummary.keepsDailyTokeniumSeparate ? `This keeps TokenDailies on the Daily Tokenium modifier lane while the shared ${tokenShopCostLaneSummary.costRenderLabel} or ${tokenShopCostLaneSummary.descriptionRenderLabel} path stays grounded in the trace materialization.` : "The current build does not yet preserve a grounded split between TokenDailies and generic token spend rows."}</p>
         <p class="meta">${spendActionLaneSummary.hasActionSplit ? `Spend action-lane clues now preserve ${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, and ${spendActionLaneSummary.premiumModifierHook}.` : "Spend action-lane clues are not available in this build."}</p>
         <p class="meta">${spendActionLaneSummary.keepsDailyDirectHooksUnrecovered ? `The checked APK and Unity probe still returns zero ${spendActionLaneSummary.dailyHookT2} or ${spendActionLaneSummary.dailyHookT3} matches, so Daily Tokenium remains a modifier-side action lane rather than a recovered direct TokenShop purchase action.` : "The current build does not yet preserve the direct-hook gap between TokenDailies and other spend lanes."}</p>
         <p class="meta">${tokenShopOwnerShellSummary.hasOwnerShell ? `TokenShop owner-shell clues now preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook}.` : "TokenShop owner-shell clues are not available in this build."}</p>
@@ -4454,10 +4454,10 @@ function buildApkGroundingValidationCases() {
     cases.push({
       title: "TokenShop cost-lane split",
       expected:
-        "TokenBoost, DiamondBoost, TokenDailiesT2, CostBox-Tokens, and CostBox-Tokenium available",
+        "TokenBoost, DiamondBoost, TokenDailiesT2, CostBox, and DescText available",
       actual: tokenShopCostLaneSummary.hasLaneSplit
-        ? `${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.tokensShellLabel}, and ${tokenShopCostLaneSummary.tokeniumShellLabel} available`
-        : "Missing TokenShop cost-lane split clues",
+        ? `${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel} available`
+        : "Missing TokenShop trace-produced cost-lane support",
       pass:
         tokenShopCostLaneSummary.hasLaneSplit &&
         tokenShopCostLaneSummary.keepsDailyTokeniumSeparate,

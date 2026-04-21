@@ -248,7 +248,7 @@ Prevent:
   - `data/token-bank-state-clues.json`
   - `data/daily-tokenium-lane-clues.json`
   - `data/token-bank-formula-boundary.json`
-  - `data/token-shop-cost-lanes.json`
+  - `data/token-shop-trace-support.v1.json`
   - `data/spend-action-lane-clues.json`
   - `data/token-shop-owner-shell.json`
   - canonical: `data/token-shop-save-boundary.v2.json`

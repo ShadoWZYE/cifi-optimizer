@@ -10,7 +10,7 @@ from portable_paths import repo_relative
 
 
 ROOT = Path(__file__).resolve().parents[2]
-UABEA_REPORT_PATH = ROOT / "data" / "uabea-extract-report.json"
+UABEA_REPORT_PATH = ROOT / "data" / "uabea-type-metadata-support.v1.json"
 JSON_OUT = ROOT / "data" / "shard-type-metadata-probe.v1.json"
 MD_OUT = ROOT / "docs" / "systems" / "shards" / "shard-type-metadata-probe.md"
 

@@ -239,7 +239,7 @@ async function buildTokenShopUnit() {
   const tokenBankStateClues = await readJson("data/token-bank-state-clues.json");
   const dailyTokeniumLaneClues = await readJson("data/daily-tokenium-lane-clues.json");
   const tokenBankFormulaBoundary = await readJson("data/token-bank-formula-boundary.json");
-  const tokenShopCostLanes = await readJson("data/token-shop-cost-lanes.json");
+  const tokenShopTraceSupport = await readJson("data/token-shop-trace-support.v1.json");
   const spendActionLaneClues = await readJson("data/spend-action-lane-clues.json");
   const tokenShopOwnerShell = await readJson("data/token-shop-owner-shell.json");
   const tokenBankControllerShell = await readJson("data/token-bank-controller-shell.json");
@@ -328,9 +328,11 @@ async function buildTokenShopUnit() {
       )
     },
     spendLanes: {
-      costLanes: datasetSection("data/token-shop-cost-lanes.json", tokenShopCostLanes, [
-        "token-shop-values"
-      ]),
+      costLanes: datasetSection(
+        "data/token-shop-trace-support.v1.json",
+        tokenShopTraceSupport.spendLanes?.costLanes ?? {},
+        ["token-shop-values", "token-shop-trace-command"]
+      ),
       actionLaneClues: datasetSection(
         "data/spend-action-lane-clues.json",
         spendActionLaneClues,
@@ -661,10 +663,7 @@ async function buildShardsUnit() {
   );
   const shardCostListPathProbe = await readJson("data/shard-cost-list-path-probe.v1.json");
   const shardBonusSlotProbe = await readJson("data/shard-bonus-slot-probe.v1.json");
-  const shardCostParameterProbe = await readJson("data/shard-cost-parameter-probe.v1.json");
-  const shardCostNativeProbe = await readJson("data/shard-cost-native-probe.v1.json");
   const shardCostFormulaModel = await readJson("data/shard-cost-formula-model.v1.json");
-  const shardTypeMetadataProbe = await readJson("data/shard-type-metadata-probe.v1.json");
   const shardOwnedStateTrace = await traceRunSection(
     "shard-owned-state-upgradeinfolist-population",
     ["shard-owned-state-trace-command"]
@@ -699,11 +698,6 @@ async function buildShardsUnit() {
       familyEvidence: datasetSection(
         "data/shard-milestone-family-evidence.v1.json",
         shardFamilyEvidence,
-        ["shard-family-evidence"]
-      ),
-      typeMetadataProbe: datasetSection(
-        "data/shard-type-metadata-probe.v1.json",
-        shardTypeMetadataProbe,
         ["shard-family-evidence"]
       ),
       boundaries: {
@@ -786,16 +780,6 @@ async function buildShardsUnit() {
         shardBonusSlotProbe,
         ["shard-family-evidence"]
       ),
-      costParameterProbe: datasetSection(
-        "data/shard-cost-parameter-probe.v1.json",
-        shardCostParameterProbe,
-        ["shard-cost-formula-model"]
-      ),
-      costNativeProbe: datasetSection(
-        "data/shard-cost-native-probe.v1.json",
-        shardCostNativeProbe,
-        ["shard-cost-trace-command"]
-      ),
       formulaModel: datasetSection(
         "data/shard-cost-formula-model.v1.json",
         shardCostFormulaModel,
@@ -845,14 +829,11 @@ async function buildShardsUnit() {
     },
     support: {
       family: {
-        familyEvidence: sections.family.familyEvidence,
-        typeMetadataProbe: sections.family.typeMetadataProbe
+        familyEvidence: sections.family.familyEvidence
       },
       cost: {
         listPathProbe: sections.cost.listPathProbe,
-        bonusSlotProbe: sections.cost.bonusSlotProbe,
-        costParameterProbe: sections.cost.costParameterProbe,
-        costNativeProbe: sections.cost.costNativeProbe
+        bonusSlotProbe: sections.cost.bonusSlotProbe
       }
     },
     traceEvidence: {

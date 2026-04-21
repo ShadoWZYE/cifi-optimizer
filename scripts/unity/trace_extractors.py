@@ -30,6 +30,8 @@ LEVEL0_PATH = ROOT / "workbench" / "unity" / "joined" / "level0"
 
 TRACE_EXTRACTOR_CACHE: dict[str, Any] = {}
 TRACE_CACHE_DB: GhidraCacheDB | None = None
+MAX_PROCESS_PROJECT_SEARCH_TERMS = 160
+MAX_PROCESS_PROJECT_SEARCH_CHARS = 3500
 
 TOKEN_SHOP_SHELL_PATTERN = "ATU"
 
@@ -212,6 +214,23 @@ def _dedupe_terms(values: list[str]) -> list[str]:
         seen.add(lowered)
         output.append(trimmed)
     return output
+
+
+def _cap_process_project_search_terms(terms: list[str]) -> list[str]:
+    capped: list[str] = []
+    total_chars = 0
+    for term in normalize_native_search_terms(terms):
+        if len(capped) >= MAX_PROCESS_PROJECT_SEARCH_TERMS:
+            break
+        addition = len(term) + (1 if capped else 0)
+        if capped and total_chars + addition > MAX_PROCESS_PROJECT_SEARCH_CHARS:
+            break
+        if not capped and len(term) > MAX_PROCESS_PROJECT_SEARCH_CHARS:
+            capped.append(term[:MAX_PROCESS_PROJECT_SEARCH_CHARS])
+            break
+        capped.append(term)
+        total_chars += addition
+    return capped
 
 
 def _term_overlap_score(left: str, right: str) -> int:
@@ -1182,8 +1201,15 @@ def execute_native_trace_extraction(
         "requestSignature": request_signature,
     }
 
-    proc, payload = _run_process_project(search_terms)
+    process_search_terms = _cap_process_project_search_terms(search_terms)
+    proc, payload = _run_process_project(process_search_terms)
     result["returncode"] = proc.returncode
+    if process_search_terms != search_terms:
+        result["searchTermsTruncated"] = {
+            "requestedCount": len(search_terms),
+            "executedCount": len(process_search_terms),
+        }
+    result["searchTerms"] = process_search_terms
     if not payload:
         result["stdout"] = proc.stdout[-2000:]
         return result
@@ -1207,7 +1233,7 @@ def execute_native_trace_extraction(
 
     fallback_terms = list(extraction_plan.get("fallbackTerms", []))
     if not _native_result_has_signal(result.get("result")) and fallback_terms:
-        fallback_search_terms = normalize_native_search_terms([*search_terms, *fallback_terms])
+        fallback_search_terms = _cap_process_project_search_terms([*process_search_terms, *fallback_terms])
         cached_fallback = find_cached_native_trace(fallback_search_terms, family_hint=family_hint)
         fallback_result: dict[str, Any] | None = None
         if cached_fallback:

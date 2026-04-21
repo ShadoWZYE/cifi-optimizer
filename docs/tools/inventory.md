@@ -21,7 +21,7 @@ Related workflow docs:
 | Command                        | Purpose                       | Produces Committed Artifacts?      |
 | ------------------------------ | ----------------------------- | ---------------------------------- |
 | `node run_extract.mjs build`     | Build C# asset extractor      | No (build artifact)                |
-| `node run_extract.mjs asset`     | Run C# asset extractor        | Yes (data/uabea-extract-report.json) |
+| `node run_extract.mjs asset`     | Run C# asset extractor        | Yes (raw `data/uabea-extract-report.json`; reduced `data/uabea-type-metadata-support.v1.json`) |
 | `node run_extract.mjs asset:run` | Build + run in one command    | Yes                                |
 | `node run_extract.mjs trace`     | Materialize target bundle     | No (DB-backed trace state; optional exports can be generated on demand) |
 | `node run_extract.mjs compile`   | System-unit export refresh    | Yes                                |
@@ -48,7 +48,7 @@ DB-first behavior.
 
 | Executable                             | Purpose                                                       | Output                         | Performance Flags                      |
 | -------------------------------------- | ------------------------------------------------------------- | ------------------------------ | -------------------------------------- |
-| `tools/unity/CifiAssetProbe/` (csproj) | High-performance IL2CPP/C# metadata extractor using LibCpp2IL | `data/uabea-extract-report.json` | `--quick`, `--no-metadata`, `--term X` |
+| `tools/unity/CifiAssetProbe/` (csproj) | High-performance IL2CPP/C# metadata extractor using LibCpp2IL | Raw `data/uabea-extract-report.json` plus reduced `data/uabea-type-metadata-support.v1.json` | `--quick`, `--no-metadata`, `--term X` |
 
 **Performance flags:**
 
@@ -64,6 +64,10 @@ dotnet build
 dotnet run -- --report ../../data/uabea-extract-report.json --quick
 dotnet run -- --term SaveData --quick
 ```
+
+The full `uabea-extract-report.json` is now treated as a larger raw export or historical source.
+When an extractor/debug workflow only needs retained LibCpp2IL type, field, or method tables, it
+should prefer `data/uabea-type-metadata-support.v1.json`.
 
 **Expected performance (full binary ~11MB, ~3000 types):**
 | Mode | Time | Speedup vs Original |
@@ -88,6 +92,7 @@ dotnet run -- --term SaveData --quick
 | `run_extract.mjs`        | Primary extraction runner with generalized CLI               | No                              |
 | `run_probe.mjs`          | Legacy compatibility wrapper over `run_extract.mjs`          | No                              |
 | `unity_trace_bundle.py`  | Trace bundle generator - extracts and analyzes Unity objects | No (stores DB-backed trace fragments/views; optional exports can write derived per-target outputs under `workbench/trace-runs/`) |
+| `launch-trace-gap.bat`   | Repo-root launcher for the DB-selected best blocked trace target | No                           |
 | `unity_extract_helpers.py` | Reusable Unity probing methods                               | No (utility)                    |
 | `portable_paths.py`      | Path resolution helpers                                      | No (utility)                    |
 
@@ -111,18 +116,40 @@ The older TokenShop scene/title/optimizer generator chain was removed after the 
 `data/tokenshop-canonical-v1.json`, `data/token-shop-row-remap-boundary.json`, and DB-backed trace
 materialization as the active surfaces.
 
-### 4. Shard Extraction (8 scripts)
+Token-shop row semantic scopes are now reducer-owned in SQLite. `unity_trace_bundle.py` may still
+assemble row recovery payloads during a run, but canonical `semantic_scope_fragment` rows such as
+`row:ATU4Button` are refreshed during `rebuild_trace_views()` rather than being written directly by
+the bundle.
 
-| Script                                     | Purpose                         | Committed Output?  |
-| ------------------------------------------ | ------------------------------- | ------------------ |
-| `shard_scene_probe.py`                     | Shard scene object extraction   | Yes (intermediate) |
-| `shard_type_metadata_probe.py`             | Type metadata extraction        | Yes                |
-| `shard_cost_parameter_probe.py`            | Cost parameter field extraction | Yes                |
-| `shard_cost_method_probe.py`               | Cost method extraction          | Yes                |
-| `shard_cost_native_probe.py`               | Native code cost analysis       | Yes                |
-| `shard_bonus_slot_probe.py`                | Bonus slot probing              | Yes                |
-| `shard_milestone_save_owner_candidates.py` | Save owner candidate analysis   | Yes                |
-| `shard_scene_monobehaviour_probe.py`       | MonoBehaviour probe             | No                 |
+`unity_trace_bundle.py --best-gap` now asks the SQLite-backed materialized trace state for the
+highest-value remaining blocked target, derives anchors from canonical semantic scopes and native
+search terms where available, and runs that target without requiring a lane-specific manual target
+pick first. `launch-trace-gap.bat` is the repo-root wrapper over that mode and defaults to
+`--level structured`. Add `--dry-run` to preview the chosen target and anchors, or `--repeat N` to
+rerank from refreshed DB state and run again N times in sequence. Add `--native-timeout <seconds>`
+to control the repo-side Ghidra/process timeout; `--native-timeout 0` disables that wrapper timeout.
+Target verdict state is no longer authored by `unity_trace_bundle.py`; materialized target bundles
+now read reducer-owned `assessment_fragment` rows, and missing canonical assessment is surfaced as
+an explicit bundle status instead of a bundle-local fallback verdict. Related semantic fragments
+such as `reconstruction_note_fragment` and `progression_fragment` now point at that verdict state
+via `assessmentSemanticKey` rather than embedding copied `decisionSummary` payloads.
+
+### 4. Shard Extraction
+
+Active shard lane surfaces are now the centralized shard system unit, the DB-backed trace bundle
+targets, and a smaller set of committed support datasets. The older probe scripts below remain for
+historical regeneration or provenance review only unless a newer boundary/model explicitly calls for
+them again.
+
+| Script                                     | Current Role                    | Committed Output? |
+| ------------------------------------------ | ------------------------------- | ----------------- |
+| `shard_bonus_slot_probe.py`                | Active support extractor        | Yes               |
+| `shard_milestone_save_owner_candidates.py` | Active save-owner extractor     | Yes               |
+| `shard_scene_probe.py`                     | Historical scene narrowing      | Yes               |
+| `shard_type_metadata_probe.py`             | Historical type-side evidence   | Yes               |
+| `shard_cost_parameter_probe.py`            | Historical cost parameter probe | Yes               |
+| `shard_cost_method_probe.py`               | Historical cost method probe    | Yes               |
+| `shard_cost_native_probe.py`               | Historical native cost probe    | Yes               |
 
 ### 5. Multiverse Market Extraction
 
@@ -235,15 +262,14 @@ That graph is the long-lived cache shape. Exact merged jobs are still useful, bu
 reuse layer is now “what terms have we already searched and what graph evidence did those searches
 recover?” rather than only “have we already run this exact term set?”
 
-The wrapper also performs bounded automatic cleanup inside the workbench:
+The wrapper also performs automatic cleanup inside the workbench:
 
-- stale completed `process-project` jobs are removed automatically
-- orphaned cache result files are removed automatically
-- only a recent retained window of completed process jobs is kept
-- running jobs and non-process job types are left alone
+- once a job reaches a terminal state and its DB-backed reductions are rebuilt, the local
+  `workbench/ghidra-jobs/<job_id>/` files are removed automatically
+- matching `workbench/ghidra-cache/*_results.json` cache copies are removed automatically
+- the DB row remains as the durable control-plane record, but its local file pointers are cleared
 
-This keeps the repo-side native cache useful without letting old schema versions accumulate
-indefinitely.
+This keeps the repo-side native cache DB-first instead of retaining completed job artifacts on disk.
 
 Minimal maintenance hooks:
 
@@ -257,7 +283,11 @@ python scripts/unity/ghidra_headless.py reclaim
 python scripts/unity/ghidra_headless.py invalidate --term ModBoostBonus
 python scripts/unity/ghidra_headless.py invalidate --job-id process_20260418_163019
 python scripts/unity/ghidra_headless.py invalidate --schema-lt 6
+python scripts/unity/ghidra_headless.py invalidate --trace-scope shard-owned-state-upgradeinfolist-population --trace-fragment semantic_scope_fragment --trace-fragment-key shard-owned-state:upgradeinfolist-population --trace-script trace_extractors.py --trace-request-signature shard-owned-state:upgradeinfolist-population
 ```
+
+Use the `--trace-*` flags when you mean to invalidate trace fragments only. Keep `--script` for
+evidence rows; it is intentionally separate from `--trace-script`.
 
 - `rebuild-cache-db` now refreshes the full DB-backed runtime state by default:
   - native cache/index state
@@ -310,6 +340,8 @@ the sole source of original Unity object structure. See
 
 | Script                                   | Purpose                             | Committed Output?                   |
 | ---------------------------------------- | ----------------------------------- | ----------------------------------- |
+| `scripts/contracts/audit-db-contamination.py` | Audit SQLite evidence/materialization provenance for legacy support or compatibility influence | No |
+| `scripts/contracts/generate-trace-support-datasets.mjs` | Regenerate trace-produced support datasets that replace probe-era support files where the materialized trace bundle is sufficient | Yes (`data/*-trace-support*.json`) |
 | `scripts/contracts/generate-system-units.mjs` | Export app-facing system-unit read models from DB-backed target bundles and canonical repo data | Yes (`data/system-units/*.json`) |
 | `scripts/contracts/system_unit_db.py` | Inspect/materialize DB-backed target-bundle and system-unit views for app/runtime integration | No |
 | `score_extraction_candidates.py`         | Score extraction candidates         | No                                  |
@@ -467,7 +499,8 @@ That section is the main native bridge summary when IL2CPP strips the original n
 
 ## Legacy Commands
 
-For backwards compatibility, old commands still work:
+For backwards compatibility, old commands still work. The shard-prefixed ones are historical
+probe lanes only and should not be treated as live shard-unit refresh paths:
 
 - `node run_extract.mjs probe`
 - `node run_extract.mjs probe:run`

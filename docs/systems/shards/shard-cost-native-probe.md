@@ -1,6 +1,6 @@
 # Shard Cost Native Probe
 
-Source: [`data/shard-cost-method-probe.v1.json`](data/shard-cost-method-probe.v1.json), typed field offsets from [`data/uabea-extract-report.json`](data/uabea-extract-report.json), plus disassembly of [`workbench/apk/base/libil2cpp.so`](workbench/apk/base/libil2cpp.so) using the manually extracted local libraries in `.vendor_manual`.
+Source: [`data/shard-cost-method-probe.v1.json`](data/shard-cost-method-probe.v1.json), typed field offsets from [`data/uabea-type-metadata-support.v1.json`](data/uabea-type-metadata-support.v1.json), plus disassembly of [`workbench/apk/base/libil2cpp.so`](workbench/apk/base/libil2cpp.so) using the manually extracted local libraries in `.vendor_manual`.
 
 ## Grounded conclusions
 

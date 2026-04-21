@@ -54,8 +54,6 @@ export function buildShardSystemView(shardsSystemUnit) {
     cost: {
       costModelBoundary: shardsSystemUnit?.sections?.cost?.costModelBoundary?.data ?? null,
       bonusSlotProbe: shardsSystemUnit?.sections?.cost?.bonusSlotProbe?.data ?? null,
-      costParameterProbe: shardsSystemUnit?.sections?.cost?.costParameterProbe?.data ?? null,
-      costNativeProbe: shardsSystemUnit?.sections?.cost?.costNativeProbe?.data ?? null,
       formulaModel: shardsSystemUnit?.sections?.cost?.formulaModel?.data ?? null,
       screenshotCalibration:
         shardsSystemUnit?.sections?.cost?.screenshotCalibration?.data ?? null,

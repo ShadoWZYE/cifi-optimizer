@@ -15,11 +15,54 @@ export function createShardEvidenceSupport({
       provenance: shardSystem?.family?.grounded?.provenance ?? null,
       milestoneFamilyEvidence: shardSystem?.family?.familyEvidence ?? null,
       bonusSlotProbe: shardSystem?.cost?.bonusSlotProbe ?? null,
-      costParameterProbe: shardSystem?.cost?.costParameterProbe ?? null,
-      costNativeProbe: shardSystem?.cost?.costNativeProbe ?? null,
+      formulaModel: shardSystem?.cost?.formulaModel ?? null,
       saveBoundary: shardSystem?.ownedState?.saveBoundary ?? null,
       saveOwnerCandidates: shardSystem?.ownedState?.saveOwnerCandidates ?? null
     };
+  }
+
+  function getShardFormulaModel() {
+    return getShardGroundingCompatibilityView()?.formulaModel ?? {};
+  }
+
+  function getShardFormulaProfiles() {
+    const profiles =
+      getShardFormulaModel()?.runtimeGetterRules?.sharedStageLogic?.formulaApplicationProfiles;
+    return Array.isArray(profiles) ? profiles : [];
+  }
+
+  function getShardFormulaVerifiedParameters() {
+    const verified = getShardFormulaModel()?.verifiedParameters;
+    return verified && typeof verified === "object" ? verified : {};
+  }
+
+  function getShardRowClassForRow(row) {
+    const rowNumber = Number(row);
+    const rowClasses = Array.isArray(getShardFormulaModel()?.rowClasses)
+      ? getShardFormulaModel().rowClasses
+      : [];
+    return (
+      rowClasses.find(
+        (entry) => Array.isArray(entry?.rows) && entry.rows.includes(rowNumber)
+      ) || null
+    );
+  }
+
+  function buildDerivedThresholdStages(row) {
+    const rowClass = getShardRowClassForRow(row);
+    const stageCoverage = Array.isArray(rowClass?.stageCoverage) ? rowClass.stageCoverage : [];
+    const overLevelSeedModels = Array.isArray(getShardFormulaModel()?.derivedParameters?.overLevelSeedModels)
+      ? getShardFormulaModel().derivedParameters.overLevelSeedModels
+      : [];
+    return stageCoverage.map((minimumLevel) => {
+      const getterName = `get_OverLevel${minimumLevel}Exponent`;
+      const seed = overLevelSeedModels.find((entry) => entry?.getterName === getterName) || {};
+      return {
+        minimumLevel,
+        getterName,
+        baseFieldName: seed.baseFieldName || `OverLevel${minimumLevel}Base`
+      };
+    });
   }
 
   function formatThresholdScheduleSummary(thresholds = {}) {
@@ -113,27 +156,25 @@ export function createShardEvidenceSupport({
   }
 
   function getShardRowAlignedCostTuple(row) {
-    const tuples = Array.isArray(
-      getShardGroundingCompatibilityView()?.costParameterProbe?.rowAlignedTupleCandidates
+    const representativeRows = Array.isArray(
+      getShardFormulaVerifiedParameters()?.representativeNormalRows
     )
-      ? getShardGroundingCompatibilityView().costParameterProbe.rowAlignedTupleCandidates
+      ? getShardFormulaVerifiedParameters().representativeNormalRows
       : [];
-    return tuples.find((entry) => Number(entry.row) === Number(row)) || null;
+    return representativeRows.find((entry) => Number(entry.row) === Number(row)) || null;
   }
 
   function getShardRowDirectValues(row) {
     if (Number(row) === 0) {
-      const row0 = getShardGroundingCompatibilityView()?.costParameterProbe?.row0PreludeCandidate;
-      return Number(row0?.row) === 0 ? row0 : null;
+      const row0 = getShardFormulaVerifiedParameters()?.row0FieldShell;
+      return row0 && typeof row0 === "object" ? { row: 0, ...row0 } : null;
     }
     return getShardRowAlignedCostTuple(row);
   }
 
   function getShardExtractedUnlockRequirement(row) {
-    const values = Array.isArray(
-      getShardGroundingCompatibilityView()?.costParameterProbe?.unlockRequirementBlock?.values
-    )
-      ? getShardGroundingCompatibilityView().costParameterProbe.unlockRequirementBlock.values
+    const values = Array.isArray(getShardFormulaVerifiedParameters()?.unlockRequirementBlock?.values)
+      ? getShardFormulaVerifiedParameters().unlockRequirementBlock.values
       : [];
     const value = values[Number(row)];
     return Number.isFinite(Number(value)) ? Number(value) : null;
@@ -150,14 +191,39 @@ export function createShardEvidenceSupport({
 
   function getShardExtractedCostFieldMapping(row) {
     const directValues = getShardRowDirectValues(row);
-    return directValues?.strongestFieldOrderMapping || null;
+    if (directValues?.strongestFieldOrderMapping) {
+      return directValues.strongestFieldOrderMapping;
+    }
+    const exactValues = directValues?.exactBigDoubleValues;
+    if (!exactValues || typeof exactValues !== "object") {
+      return null;
+    }
+    const fieldNames = Object.keys(exactValues);
+    if (!fieldNames.length) {
+      return null;
+    }
+    return {
+      fieldNames,
+      values: Object.fromEntries(
+        fieldNames.map((fieldName) => [
+          fieldName,
+          exactValues[fieldName]?.label ?? exactValues[fieldName]
+        ])
+      )
+    };
   }
 
   function getShardNativeCostRowSummary(row) {
-    const rows = Array.isArray(getShardGroundingCompatibilityView()?.costNativeProbe?.rows)
-      ? getShardGroundingCompatibilityView().costNativeProbe.rows
-      : [];
-    return rows.find((entry) => Number(entry.row) === Number(row)) || null;
+    const rowNumber = Number(row);
+    const rowClass = getShardRowClassForRow(rowNumber);
+    if (!rowClass) {
+      return null;
+    }
+    return {
+      row: rowNumber,
+      thresholdStages: buildDerivedThresholdStages(rowNumber),
+      nativeFormulaClass: rowClass.nativeFormulaClass || rowClass.id || null
+    };
   }
 
   function formatShardNativeThresholdStage(stage) {
@@ -200,17 +266,10 @@ export function createShardEvidenceSupport({
   }
 
   function getShardFormulaApplicationProfile(row) {
-    const profiles = getShardGroundingCompatibilityView()?.costNativeProbe?.formulaApplicationProfiles;
-    if (!profiles) {
-      return null;
-    }
-    if (Number(row) === 0) {
-      return profiles.rowZero || null;
-    }
-    const normalRows = Array.isArray(profiles.normalRows) ? profiles.normalRows : [];
     return (
-      normalRows.find((entry) => Array.isArray(entry?.rows) && entry.rows.includes(Number(row))) ||
-      null
+      getShardFormulaProfiles().find(
+        (entry) => Array.isArray(entry?.rows) && entry.rows.includes(Number(row))
+      ) || null
     );
   }
 

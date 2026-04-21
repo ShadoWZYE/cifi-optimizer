@@ -314,11 +314,11 @@
       ]
     },
     {
-      "id": "token-shop-cost-lanes",
-      "label": "Token shop cost lanes",
+      "id": "token-shop-trace-support",
+      "label": "Token shop trace support",
       "classification": "extracted-mechanics",
       "files": [
-        "data/token-shop-cost-lanes.json"
+        "data/token-shop-trace-support.v1.json"
       ]
     },
     {

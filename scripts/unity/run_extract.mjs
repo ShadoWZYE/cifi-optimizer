@@ -330,10 +330,7 @@ function printUsage() {
   console.error("Compatibility aliases:");
   console.error("  probe                 - Legacy alias for asset");
   console.error("  probe:run             - Legacy alias for asset:run");
-  console.error("  shards:parameters     - Extract shard parameter fields");
-  console.error("  shards:type-metadata  - Extract shard type metadata");
-  console.error("  shards:method         - Extract shard method data");
-  console.error("  shards:cost-native   - Full shard cost extraction");
+  console.error("  shards:*              - Historical shard probe aliases retained for archive review");
   console.error("");
   console.error("Options:");
   console.error("  --target <id>         - Target identifier (e.g., token-shop-atu3-cells-effect)");

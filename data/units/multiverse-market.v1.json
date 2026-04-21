@@ -57,6 +57,13 @@
     "transientProbePolicy": "If a market identity or UI-shell clue is first recovered through a transient probe, record the exact command or DB-backed target-bundle identity used to regenerate it before embedding the value.",
     "sourceRecords": [
       {
+        "id": "uabea-type-metadata-support",
+        "kind": "dataset",
+        "path": "data/uabea-type-metadata-support.v1.json",
+        "role": "support",
+        "persistence": "committed"
+      },
+      {
         "id": "multiverse-market-save-boundary",
         "kind": "dataset",
         "path": "data/multiverse-market-save-boundary.v2.json",
@@ -140,7 +147,10 @@
       "data/multiverse-market-action-shell.json",
       "data/multiverse-market-owner-family.json"
     ],
-    "historicalProbe": []
+    "historicalProbe": [
+      "data/uabea-extract-report.json",
+      "data/unity-apk-extract-report.json"
+    ]
   },
   "replacementPlan": {
     "seedOutputs": [
@@ -152,19 +162,20 @@
       "ui-shell"
     ],
     "archiveAfterReplacement": [
+      "data/uabea-extract-report.json",
       "data/unity-apk-extract-report.json"
     ],
     "archiveReview": [
       {
         "path": "data/uabea-extract-report.json",
         "status": "archive-candidate",
-        "reason": "This is no longer an active Multiverse market source and newer unit-backed boundaries now carry the live market conclusions.",
+        "reason": "The small typed support core now lives in data/uabea-type-metadata-support.v1.json, while the full raw report is no longer an active Multiverse market source.",
         "replacementSource": "data/system-units/multiverse-market.v1.json"
       },
       {
         "path": "data/unity-apk-extract-report.json",
         "status": "archive-candidate",
-        "reason": "The active market unit now carries the bounded save-owner and row-identity views without depending on the old generic probe output.",
+        "reason": "The active market unit now carries the bounded save-owner and row-identity views without depending on the raw keyword/export report.",
         "replacementSource": "data/system-units/multiverse-market.v1.json"
       },
       {

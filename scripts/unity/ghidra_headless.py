@@ -17,7 +17,7 @@ Usage:
     python ghidra_headless.py cache <job_id> [--query string]
     python ghidra_headless.py rebuild-cache-db
     python ghidra_headless.py reclaim
-    python ghidra_headless.py invalidate [--job-id id] [--term value] [--aspect kind] [--script name] [--producer-version v] [--schema-lt N] [--trace-scope scope] [--trace-fragment kind]
+    python ghidra_headless.py invalidate [--job-id id] [--term value] [--aspect kind] [--script name] [--producer-version v] [--schema-lt N] [--trace-scope scope] [--trace-fragment kind] [--trace-fragment-key key] [--trace-script name] [--trace-request-signature sig]
     python ghidra_headless.py export-process-index [--out path]
     python ghidra_headless.py export-native-graph [--out path]
 """
@@ -49,7 +49,6 @@ CACHE_DB_FILE = CACHE_DIR / "ghidra_cache.sqlite3"
 PROJECT_DIR = ROOT / "workbench/ghidra-projects"
 JOBS_DIR = ROOT / "workbench/ghidra-jobs"
 GHIDRA_RUNTIME_DIR = ROOT / "workbench/ghidra-runtime"
-MAX_RECENT_PROCESS_JOBS = 16
 MAX_NATIVE_EXPANSION_TERMS_PER_REQUEST = 12
 DEFAULT_RUN_TIMEOUT = 1200
 DEFAULT_PROCESS_TIMEOUT = 1800
@@ -1005,6 +1004,7 @@ def _refresh_runtime_state(stages: list[str] | None = None) -> dict[str, Any]:
 
     if "native-cache" in selected_stages:
         db.rebuild_indices(_load_result_for_job, _process_result_is_stale)
+        prune_ghidra_artifacts()
         process_index = db.export_process_index()
         native_graph_index = db.export_native_graph_index()
         completed.append("native-cache")
@@ -1023,11 +1023,19 @@ def _refresh_runtime_state(stages: list[str] | None = None) -> dict[str, Any]:
     }
 
 
+def _rebuild_cache_views() -> tuple[dict[str, Any], dict[str, Any]]:
+    rebuild = _refresh_runtime_state(["native-cache"])
+    return rebuild["processIndex"], rebuild["nativeGraphIndex"]
+
+
 def _sync_job_file(job_info: dict[str, Any]) -> dict[str, Any]:
     job_id = str(job_info.get("job_id", "")).strip()
     if not job_id:
         return job_info
-    job_file = Path(str(job_info.get("job_file", JOBS_DIR / job_id / "job.json")))
+    job_file_value = str(job_info.get("job_file", "") or "").strip()
+    if not job_file_value and str(job_info.get("status", "")).lower() != "running":
+        return job_info
+    job_file = Path(job_file_value or str(JOBS_DIR / job_id / "job.json"))
     job_file.parent.mkdir(parents=True, exist_ok=True)
     job_file.write_text(json.dumps(job_info, indent=2), encoding="utf-8")
     job_info["job_file"] = str(job_file)
@@ -1140,55 +1148,32 @@ def prune_ghidra_artifacts() -> None:
         return
 
     db = _get_cache_db()
-    process_jobs: list[tuple[str, Path, dict[str, Any], dict[str, Any] | None]] = []
     jobs_to_remove: list[Path] = []
-    removed_job_ids: list[str] = []
-    newest_by_signature: dict[str, tuple[str, Path, dict[str, Any], dict[str, Any] | None]] = {}
+    pruned_job_ids: list[str] = []
 
     for job_dir in JOBS_DIR.iterdir():
         if not job_dir.is_dir():
             continue
         job_info = _load_json(job_dir / "job.json")
         if not job_info:
-            continue
-        if job_info.get("status") == "running":
-            continue
-        if job_info.get("mode") != "process-project":
-            continue
-        output_file = Path(str(job_info.get("output_file", "")))
-        result_payload = _load_json(output_file) if output_file.exists() else None
-        search_terms = normalize_search_terms(job_info.get("search_strings", []))
-        start_time = str(job_info.get("start_time", ""))
-        if result_payload is None or _process_result_is_stale(result_payload, search_terms):
             jobs_to_remove.append(job_dir)
             continue
-        candidate = (start_time, job_dir, job_info, result_payload)
-        process_jobs.append(candidate)
-        signature = _term_signature(search_terms)
-        previous = newest_by_signature.get(signature)
-        if previous is None or start_time > previous[0]:
-            newest_by_signature[signature] = candidate
-
-    process_jobs.sort(key=lambda item: item[0], reverse=True)
-    keep_job_ids = {entry[2].get("job_id") for entry in newest_by_signature.values()}
-    unique_signature_jobs = [entry for entry in process_jobs if entry[2].get("job_id") in keep_job_ids]
-    unique_signature_jobs.sort(key=lambda item: item[0], reverse=True)
-    keep_job_ids.update(entry[2].get("job_id") for entry in unique_signature_jobs[:MAX_RECENT_PROCESS_JOBS])
-    for _, job_dir, job_info, _ in process_jobs:
-        if job_info.get("job_id") not in keep_job_ids:
-            jobs_to_remove.append(job_dir)
+        if str(job_info.get("status", "")).lower() == "running":
+            continue
+        jobs_to_remove.append(job_dir)
 
     seen_job_ids: set[str] = set()
     for job_dir in jobs_to_remove:
         job_info = _load_json(job_dir / "job.json") or {}
         job_id = str(job_info.get("job_id", ""))
-        if job_id in seen_job_ids:
+        seen_key = job_id or str(job_dir)
+        if seen_key in seen_job_ids:
             continue
-        seen_job_ids.add(job_id)
-        _safe_remove_job_dir(job_dir)
+        seen_job_ids.add(seen_key)
         if job_id:
-            removed_job_ids.append(job_id)
-            _safe_remove_cache_file(CACHE_DIR / "{}_results.json".format(job_id))
+            pruned_job_ids.append(job_id)
+        _safe_remove_cache_file(CACHE_DIR / "{}_results.json".format(job_id))
+        _safe_remove_job_dir(job_dir)
 
     for cache_file in CACHE_DIR.glob("*_results.json"):
         job_id = cache_file.stem[:-8] if cache_file.stem.endswith("_results") else ""
@@ -1197,9 +1182,8 @@ def prune_ghidra_artifacts() -> None:
         if not (JOBS_DIR / job_id).exists():
             _safe_remove_cache_file(cache_file)
 
-    if removed_job_ids:
-        db.remove_jobs(removed_job_ids)
-    _rebuild_cache_views()
+    if pruned_job_ids:
+        db.clear_job_local_artifacts(pruned_job_ids)
 
 
 def _index_bucket(index: dict[str, Any], project_name: str, project_file: str, create: bool = False) -> list[dict[str, Any]]:
@@ -1246,6 +1230,8 @@ def _load_completed_process_job_candidates(project_name: str, project_file: str)
     stale_job_ids: list[str] = []
 
     for job_info in db.get_completed_process_jobs(project_name, project_file):
+        if not str(job_info.get("output_file", "") or "").strip():
+            continue
         result = _load_result_for_job(job_info)
         terms = normalize_search_terms(job_info.get("search_strings", []))
         if not result or _process_result_is_stale(result, terms):
@@ -1257,10 +1243,12 @@ def _load_completed_process_job_candidates(project_name: str, project_file: str)
 
     if stale_job_ids:
         for job_id in stale_job_ids:
-            db.invalidate(job_id=job_id, reason="stale-process-result")
+            db.invalidate_jobs(job_id=job_id, reason="stale-process-result")
         _rebuild_cache_views()
         fresh_candidates: list[dict[str, Any]] = []
         for job_info in db.get_completed_process_jobs(project_name, project_file):
+            if not str(job_info.get("output_file", "") or "").strip():
+                continue
             result = _load_result_for_job(job_info)
             terms = normalize_search_terms(job_info.get("search_strings", []))
             if not result or _process_result_is_stale(result, terms):
@@ -1706,7 +1694,7 @@ def _run_single_process_project_term(
 
 def _run_headless_command(
     command: list[str],
-    timeout: int,
+    timeout: int | None,
     log_file: Path,
 ) -> subprocess.CompletedProcess[str]:
     java_home = get_java_home()
@@ -1733,13 +1721,15 @@ def _run_headless_command(
     ]
     env["JAVA_TOOL_OPTIONS"] = "{} {}".format(java_tool_options, " ".join(ghidra_vmargs)).strip()
 
+    effective_timeout = None if timeout is None or int(timeout) <= 0 else max(int(timeout) + 30, 60)
+
     proc = subprocess.run(
         command,
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
-        timeout=max(timeout + 30, 60),
+        timeout=effective_timeout,
         check=False,
     )
     log_file.write_text(proc.stdout, encoding="utf-8")
@@ -2247,10 +2237,13 @@ def process_project(project_name: str, project_file: str, search_strings: list[s
 
 def poll_job(job_id: str) -> Optional[dict]:
     job_file = JOBS_DIR / job_id / "job.json"
-    if not job_file.exists():
-        print("Job {} not found".format(job_id))
-        return None
-    return _load_json(job_file)
+    if job_file.exists():
+        return _load_json(job_file)
+    job = _get_cache_db().get_job(job_id)
+    if job:
+        return job
+    print("Job {} not found".format(job_id))
+    return None
 
 
 def cache_results(job_info: dict) -> Optional[Path]:
@@ -2283,16 +2276,14 @@ def query_cache(query: str) -> list[dict]:
 
 
 def get_status() -> None:
-    if not JOBS_DIR.exists():
+    db = _get_cache_db()
+    with db.connect() as conn:
+        rows = conn.execute("SELECT * FROM jobs ORDER BY start_time DESC").fetchall()
+    jobs = [db._job_row_to_dict(row) for row in rows]
+    jobs = [job for job in jobs if job]
+    if not jobs:
         print("No jobs found")
         return
-
-    jobs = []
-    for directory in JOBS_DIR.iterdir():
-        if directory.is_dir():
-            job = _load_json(directory / "job.json")
-            if job:
-                jobs.append(job)
 
     for job in sorted(jobs, key=lambda item: item.get("start_time", ""), reverse=True):
         print("Job: {}".format(job["job_id"]))
@@ -2348,12 +2339,24 @@ def invalidate_cached_jobs(
     producer_version: str | None = None,
     trace_scope: str | None = None,
     trace_fragment: str | None = None,
+    trace_fragment_key: str | None = None,
+    trace_script_name: str | None = None,
+    trace_request_signature: str | None = None,
 ) -> dict[str, Any]:
     db = _get_cache_db()
     invalidated_jobs: list[str] = []
     invalidated_evidence: list[int] = []
     invalidated_trace_fragments: list[int] = []
-    if aspect_kind or script_name or producer_version:
+    if trace_scope or trace_fragment or trace_fragment_key or trace_script_name or trace_request_signature:
+        invalidated_trace_fragments = db.invalidate_trace_fragments(
+            trace_scope=trace_scope,
+            request_signature=trace_request_signature,
+            fragment_kind=trace_fragment,
+            fragment_key=trace_fragment_key,
+            source_job_id=job_id,
+            script_name=trace_script_name,
+        )
+    elif aspect_kind or script_name or producer_version:
         invalidated_evidence = db.invalidate_evidence(
             term=term,
             aspect_kind=aspect_kind,
@@ -2361,12 +2364,6 @@ def invalidate_cached_jobs(
             script_name=script_name,
             producer_version=producer_version,
             schema_lt=schema_lt,
-        )
-    elif trace_scope or trace_fragment:
-        invalidated_trace_fragments = db.invalidate_trace_fragments(
-            trace_scope=trace_scope,
-            fragment_kind=trace_fragment,
-            source_job_id=job_id,
         )
     else:
         invalidated_jobs = db.invalidate_jobs(
@@ -2591,6 +2588,9 @@ def main() -> None:
         producer_version = None
         trace_scope = None
         trace_fragment = None
+        trace_fragment_key = None
+        trace_script_name = None
+        trace_request_signature = None
         i = 2
         while i < len(sys.argv):
             if sys.argv[i] == "--job-id" and i + 1 < len(sys.argv):
@@ -2614,13 +2614,22 @@ def main() -> None:
             elif sys.argv[i] == "--trace-fragment" and i + 1 < len(sys.argv):
                 trace_fragment = sys.argv[i + 1]
                 i += 2
+            elif sys.argv[i] == "--trace-fragment-key" and i + 1 < len(sys.argv):
+                trace_fragment_key = sys.argv[i + 1]
+                i += 2
+            elif sys.argv[i] == "--trace-script" and i + 1 < len(sys.argv):
+                trace_script_name = sys.argv[i + 1]
+                i += 2
+            elif sys.argv[i] == "--trace-request-signature" and i + 1 < len(sys.argv):
+                trace_request_signature = sys.argv[i + 1]
+                i += 2
             elif sys.argv[i] == "--schema-lt" and i + 1 < len(sys.argv):
                 schema_lt = int(sys.argv[i + 1])
                 i += 2
             else:
                 i += 1
-        if not any(value is not None for value in (job_id, term, schema_lt, aspect_kind, script_name, producer_version, trace_scope, trace_fragment)):
-            print("Usage: ghidra_headless.py invalidate [--job-id id] [--term value] [--aspect kind] [--script name] [--producer-version v] [--schema-lt N] [--trace-scope scope] [--trace-fragment kind]")
+        if not any(value is not None for value in (job_id, term, schema_lt, aspect_kind, script_name, producer_version, trace_scope, trace_fragment, trace_fragment_key, trace_script_name, trace_request_signature)):
+            print("Usage: ghidra_headless.py invalidate [--job-id id] [--term value] [--aspect kind] [--script name] [--producer-version v] [--schema-lt N] [--trace-scope scope] [--trace-fragment kind] [--trace-fragment-key key] [--trace-script name] [--trace-request-signature sig]")
             sys.exit(1)
         print(
             json.dumps(
@@ -2633,6 +2642,9 @@ def main() -> None:
                     producer_version=producer_version,
                     trace_scope=trace_scope,
                     trace_fragment=trace_fragment,
+                    trace_fragment_key=trace_fragment_key,
+                    trace_script_name=trace_script_name,
+                    trace_request_signature=trace_request_signature,
                 ),
                 indent=2,
             )

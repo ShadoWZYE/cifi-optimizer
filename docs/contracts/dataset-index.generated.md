@@ -271,12 +271,12 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/multiverse-market-prefab-remap-boundary.json`
 
-### `token-shop-cost-lanes`
+### `token-shop-trace-support`
 
-- Label: Token shop cost lanes
+- Label: Token shop trace support
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/token-shop-cost-lanes.json`
+  - `data/token-shop-trace-support.v1.json`
 
 ### `spend-action-lane-clues`
 
