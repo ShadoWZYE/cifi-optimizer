@@ -561,6 +561,64 @@ const SHIP_FILTER_LABELS = {
   materials: "Mats"
 };
 
+const ROUTE_METADATA = {
+  overview: {
+    section: "Pilot tools",
+    title: "Command Center",
+    summary:
+      "Start from shared state, review grounded next steps, and move into the right tool lane without drifting into research surfaces.",
+    badge: "Core surface"
+  },
+  profile: {
+    section: "Pilot tools",
+    title: "Player Profile",
+    summary:
+      "Capture canonical account state, keep helpers labeled, and use the guided PlayerProfile import path when manual entry is not enough.",
+    badge: "Canonical state"
+  },
+  progression: {
+    section: "Pilot tools",
+    title: "Progression Bay",
+    summary:
+      "Use shard, loop, and TokenShop player-facing tools together while keeping each real subsystem on its own surface.",
+    badge: "Planner surface"
+  },
+  data: {
+    section: "Pilot tools",
+    title: "Import Hangar",
+    summary:
+      "Bring labeled data into the local snapshot, review normalized records, and keep OCR or other assisted flows visibly quarantined.",
+    badge: "Import surface"
+  },
+  ship: {
+    section: "Support tools",
+    title: "Ship Workbench",
+    summary:
+      "The ship system stays canonical, but planner calibration remains isolated from shared PlayerProfile truth.",
+    badge: "Planner support"
+  },
+  validation: {
+    section: "Support tools",
+    title: "Grounding Console",
+    summary:
+      "Run product, APK, and support checks with enough separation that verification does not overstate current product truth.",
+    badge: "Verification"
+  },
+  research: {
+    section: "Reference and exploration",
+    title: "Research Archive",
+    summary:
+      "Review grounded findings, open blockers, and future lanes before anything graduates into a product surface.",
+    badge: "Reference lane"
+  },
+  gem: {
+    section: "Reference and exploration",
+    title: "Gem Node Lab",
+    summary: "This planner remains experimental and quarantined away from the grounded MVP path.",
+    badge: "Experimental"
+  }
+};
+
 function makeDefaultShipFilters(source = {}) {
   return {
     cells: source.cells ?? true,
@@ -596,6 +654,9 @@ const state = {
   shardMilestoneCardOpenIds: [],
   route: "overview"
 };
+
+let profileAutoSaveTimer = null;
+let shipCalibrationAutoSaveTimer = null;
 
 bootstrap().catch((error) => console.error(error));
 
@@ -1372,17 +1433,26 @@ function bindNavigation() {
     state.route = button.dataset.page;
     renderNavigation();
   });
+
+  $(".workspace").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-route-target]");
+    if (!button) {
+      return;
+    }
+    const target = button.dataset.routeTarget;
+    if (!target) {
+      return;
+    }
+    state.route = target;
+    renderNavigation();
+  });
 }
 
 function bindProfileActions() {
   initTokenShopTierTabs();
 
-  $("#saveProfileBtn").addEventListener("click", () => {
-    state.playerProfile = collectProfileForm();
-    persistPlayerProfile();
-    setStatus("profileStatus", "Profile saved.", "success");
-    renderAll();
-  });
+  $("#profileForm").addEventListener("input", () => scheduleProfileAutoSave());
+  $("#profileForm").addEventListener("change", () => scheduleProfileAutoSave(0));
 
   $("#restoreDefaultsBtn").addEventListener("click", () => {
     state.playerProfile = normalizePlayerProfile(
@@ -1429,21 +1499,6 @@ function bindProfileActions() {
 
   $("#exportPlayerProfileBtn").addEventListener("click", () => {
     exportPlayerProfileJson();
-  });
-
-  $("#saveShipStateBtn").addEventListener("click", () => {
-    const inputs = $$("#shipPlayerStatePanel [data-ship-group][data-ship-field]");
-    const shipPlayerState = getShipCommunityToolState();
-    inputs.forEach((input) => {
-      const group = input.dataset.shipGroup;
-      const field = input.dataset.shipField;
-      const current = shipPlayerState[group][field];
-      shipPlayerState[group][field] =
-        typeof current === "boolean" ? input.checked : coerceInputValue(input.value);
-    });
-    persistPlayerProfile();
-    setStatus("shipPlayerStateStatus", "Community-tool ship calibration saved.", "success");
-    renderShipPanels();
   });
 }
 
@@ -1546,14 +1601,6 @@ function bindOptimizerActions() {
   });
   $("#runGemOptimizer").addEventListener("click", () => renderGemResults(runGemOptimization()));
   $("#runValidationSuite").addEventListener("click", renderValidationResults);
-  $("#saveShipConfigBtn").addEventListener("click", () => {
-    persistShipConfig();
-    setStatus(
-      "shipConfigStatus",
-      "Community-tool ship planner weights and loadouts saved.",
-      "success"
-    );
-  });
 }
 
 function renderAll() {
@@ -1579,6 +1626,16 @@ function renderNavigation() {
   $$(".page").forEach((page) => {
     page.classList.toggle("is-active", page.dataset.page === state.route);
   });
+
+  renderWorkspaceHero();
+}
+
+function renderWorkspaceHero() {
+  const metadata = ROUTE_METADATA[state.route] ?? ROUTE_METADATA.overview;
+  $("#workspaceSectionTag").textContent = metadata.section;
+  $("#workspaceTitle").textContent = metadata.title;
+  $("#workspaceSummary").textContent = metadata.summary;
+  $("#workspaceRouteBadge").textContent = metadata.badge;
 }
 
 function renderQuickPanels() {
@@ -1616,14 +1673,12 @@ function renderOverview() {
     renderRecommendationFeedSummary(recommendationFeed, "overview"),
     renderRecommendationFeedSupportNotice(recommendationFeedSupport, "overview"),
     ...recommendationFeed
-      .slice(0, 3)
+      .slice(0, 5)
       .map((item) =>
         makeRecommendationCard(item, item.module === "loop" ? "warning" : item.module)
       ),
     renderOverviewSupportSummary(apkValidation, supportValidation)
   ].join("");
-  $("#overviewSpendSnapshot").innerHTML =
-    renderSpendPlannerBoundary() + renderTokenShopOverviewAffordabilityModule();
 }
 
 function renderShipPlayerState() {
@@ -1653,6 +1708,16 @@ function renderShipPlayerState() {
         </article>
       `;
   }).join("");
+
+  $$("#shipPlayerStatePanel [data-ship-group][data-ship-field]").forEach((input) => {
+    const eventName = input.type === "checkbox" ? "change" : "input";
+    input.addEventListener(eventName, () =>
+      scheduleShipCalibrationAutoSave(input.type === "checkbox" ? 0 : 250)
+    );
+    if (input.type !== "checkbox") {
+      input.addEventListener("change", () => scheduleShipCalibrationAutoSave(0));
+    }
+  });
 }
 
 function renderSourceRegistry() {
@@ -1668,6 +1733,16 @@ function renderSourceRegistry() {
       detail: `${record.rows} rows from ${record.source}`
     }))
   ];
+
+  if (!records.length) {
+    $("#sourceRegistry").innerHTML = `
+      <article class="validation-card warn">
+        <strong>No source records yet</strong>
+        <p class="meta">Imported datasets and bundled reference sources will appear here once this snapshot starts collecting them.</p>
+      </article>
+    `;
+    return;
+  }
 
   $("#sourceRegistry").innerHTML = records
     .map(
@@ -1710,7 +1785,7 @@ function renderShipWeights() {
         </div>
         </article>
           <article class="snapshot-card ship-editor-surface ship-editor-surface-subtle">
-            <span class="snapshot-title">Ship planner toggles</span>
+          <span class="snapshot-title">Planner toggles</span>
           <p class="meta">These toggles affect the current ship-planner implementation. <code>softCap</code> keeps filtered resource lanes in play at a tiny flat priority of <code>0.01</code>.</p>
           <div class="mini-grid">
             <label class="mini-field">
@@ -1938,7 +2013,6 @@ function renderShipEditor() {
 
 function renderShipActions() {
   $("#shipActionPanel").innerHTML = `
-    <button class="action-button action-success" data-ship-action="apply">Apply</button>
     <button class="action-button" data-ship-action="undo">Undo</button>
     <button class="action-button action-danger" data-ship-action="clearShip">Reset selected ship</button>
     <button class="action-button action-danger" data-ship-action="clearLoadout">Clear active loadout</button>
@@ -1947,10 +2021,6 @@ function renderShipActions() {
   $$("#shipActionPanel [data-ship-action]").forEach((button) => {
     button.addEventListener("click", () => {
       const action = button.dataset.shipAction;
-      if (action === "apply") {
-        persistShipConfig();
-        setStatus("shipConfigStatus", "Applied ship planner changes.", "success");
-      }
       if (action === "undo") {
         undoLoadoutChange();
       }
@@ -1979,8 +2049,8 @@ function renderShipResults() {
 
   $("#shipResults").innerHTML = `
     ${renderSupportSurfaceNotice("Canonical ship system, provisional implementation", [
-      "These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels.",
-      "Treat the ship output as canonical-domain planning with external-model wiring still being remapped."
+      "These cards represent a real ship system, but the current implementation still uses planner calibration and some provisional labels.",
+      "Treat the ship output as canonical-domain planning with implementation wiring still being remapped."
     ])}
     ${[leadCard, ...shipRankings.slice(0, 3)]
       .filter(Boolean)
@@ -1996,6 +2066,12 @@ function renderProgressionResults(results) {
   const subsystemFeed = getProgressionSubsystemPartition(recommendationFeed);
   const selectedSubsystem = getSelectedProgressionSubsystem();
   renderProgressionSubsystemToggle(subsystemFeed);
+  const selectedLabels = {
+    shards: "Shard Mining keeps milestone and owned-state guidance together.",
+    loop: "Loop Prestige keeps warning-oriented pacing and anti-bricking notes separate from reset optimization.",
+    tokenShop:
+      "TokenShop keeps its checked-row editor and saved-state seam separate from shard and loop guidance."
+  };
   const sectionMarkup = {
     shards: renderShardSubsystemSection(subsystemFeed.shards),
     loop: renderProgressionSubsystemSection(
@@ -2015,6 +2091,16 @@ function renderProgressionResults(results) {
       ${renderRecommendationFeedSupportNotice(recommendationFeedSupport, "progression")}
     `;
   $("#progressionResults").innerHTML = `
+    <article class="preview-card">
+      <strong>${escapeHtml(
+        selectedSubsystem === "tokenShop"
+          ? "TokenShop surface"
+          : selectedSubsystem === "loop"
+            ? "Loop Prestige surface"
+            : "Shard Mining surface"
+      )}</strong>
+      <p class="meta">${escapeHtml(selectedLabels[selectedSubsystem])}</p>
+    </article>
     ${subsystemHeader}
     ${sectionMarkup[selectedSubsystem]}
   `;
@@ -2083,24 +2169,9 @@ function renderValidationResults() {
   const mvpResults = results.filter((item) => item.scope === "MVP");
   const apkResults = results.filter((item) => item.scope === "APK");
   const supportResults = results.filter((item) => item.scope === "Support");
-  $("#validationResults").innerHTML = [
-    renderSpendSaveSideBoundary(),
-    renderValidationSection(
-      "Grounded MVP checks",
-      "These checks contribute to the overview benchmark and track current grounded MVP behavior.",
-      mvpResults
-    ),
-    renderValidationSection(
-      "APK-grounding checks",
-      "These checks confirm extracted mechanic bundles and explicit mapping gates so available-but-unmapped systems do not get mixed into app truth.",
-      apkResults
-    ),
-    renderValidationSection(
-      "Support-surface checks",
-      "These checks cover quarantined support surfaces such as Gem Nodes. Keep them labeled, but do not treat them as MVP truth.",
-      supportResults
-    )
-  ].join("");
+  $("#validationMvpResults").innerHTML = renderValidationCards(mvpResults);
+  $("#validationApkResults").innerHTML = renderValidationCards(apkResults);
+  $("#validationSupportResults").innerHTML = renderValidationCards(supportResults);
 }
 
 function renderSpendSaveSideBoundary() {
@@ -2215,11 +2286,10 @@ function renderResearch() {
   const visibleTracks = orderedTracks.filter((track) =>
     state.researchView === "archived" ? track.status === "archived" : track.status !== "archived"
   );
+  $("#researchGuidancePanel").innerHTML = renderResearchGuidance();
+  $("#researchViewPanel").innerHTML = renderResearchViewSelector(orderedTracks);
   $("#researchResults").innerHTML = [
-    renderResearchGuidance(),
-    renderResearchViewSelector(orderedTracks),
     ...visibleTracks.map((track) => {
-      const nextSteps = Array.isArray(track.nextSteps) ? track.nextSteps : [];
       return `
     <article class="research-card">
       <div class="research-card-head">
@@ -2230,21 +2300,15 @@ function renderResearch() {
         <div class="pill-row">
           <span class="pill">${escapeHtml(getResearchTrackStatus(track))}</span>
           <span class="pill">${escapeHtml(getResearchTrackProgressLabel(track))}</span>
-          <span class="pill">${escapeHtml(getResearchTrackPhase(track))}</span>
-          <span class="pill">${escapeHtml(getResearchTrackSource(track))}</span>
         </div>
       </div>
       <p class="meta">${escapeHtml(track.goal)}</p>
-      ${renderResearchTrackProgress(track)}
-      ${renderResearchTrackSupport(track)}
-      <div class="meta-stack">
-        <p class="snapshot-title">${nextSteps.length ? "Remaining work" : "Archive note"}</p>
-        ${
-          nextSteps.length
-            ? `<ul class="research-step-list">${nextSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ul>`
-            : `<p class="meta">No active remaining work. This card stays here only as delivered foundation context for later roadmap slices.</p>`
-        }
-      </div>
+      ${renderResearchTrackSummary(track)}
+      <details class="field-collapse">
+        <summary>${escapeHtml(track.status === "archived" ? "Open foundation detail" : "Open evidence and track detail")}</summary>
+        ${renderResearchTrackProgress(track)}
+        ${renderResearchTrackSupport(track)}
+      </details>
     </article>
   `;
     }),
@@ -2612,6 +2676,29 @@ function renderResearchTrackProgress(track) {
   `;
 }
 
+function renderResearchTrackSummary(track) {
+  const contractModel = buildResearchTrackContractModel(track);
+  const progressModel = buildResearchTrackProgressModel(track);
+  const nextSteps = Array.isArray(track.nextSteps) ? track.nextSteps : [];
+
+  return `
+    <div class="meta-stack">
+      <p class="snapshot-title">${track.status === "archived" ? "Foundation status" : "Focus now"}</p>
+      <p class="meta">${escapeHtml(progressModel.currentSlice)}</p>
+      ${contractModel.blockedBy ? `<p class="meta"><strong>Blocker:</strong> ${escapeHtml(contractModel.blockedBy)}</p>` : ""}
+      ${contractModel.smallestShippableSlice ? `<p class="meta"><strong>Next slice:</strong> ${escapeHtml(contractModel.smallestShippableSlice)}</p>` : ""}
+      ${
+        nextSteps.length
+          ? `<div class="meta-stack"><p class="snapshot-title">Remaining work</p><ul class="research-step-list">${nextSteps
+              .slice(0, 3)
+              .map((step) => `<li>${escapeHtml(step)}</li>`)
+              .join("")}</ul></div>`
+          : '<p class="meta">No active remaining work. This card stays here only as delivered foundation context for later roadmap slices.</p>'
+      }
+    </div>
+  `;
+}
+
 function renderResearchTrackContract(track) {
   const model = buildResearchTrackContractModel(track);
 
@@ -2669,35 +2756,64 @@ function renderResearchTrackSupport(track) {
       shardSystem?.family?.boundaries?.rowAlignment
     );
     const saveBoundary = getShardSaveBoundarySummary(shardSystem?.ownedState?.saveBoundary);
+    const shardOwnerNotes = [
+      ownerBoundary.hasBoundary
+        ? `Owner-family boundary keeps ${ownerBoundary.screenController} as the strongest screen-controller family and ${ownerBoundary.dataCarrier} as the strongest shard-specific carrier trail.`
+        : "Shard owner-family boundary clues are not available in this build.",
+      ownerBoundary.hasFastBuyHooks
+        ? `Fast-buy and first-open hooks such as ${ownerBoundary.fastBuyHooksLabel} stay attached to that shard-specific controller shell.`
+        : "Expected shard-specific fast-buy hooks are incomplete in this build.",
+      ownerBoundary.hasBonusAnchors
+        ? `Bonus-field anchors such as ${ownerBoundary.bonusAnchorLabel} keep FinalSU-style fields tied to the shard-specific carrier candidate.`
+        : "Expected FinalSU bonus-field anchors are incomplete in this build.",
+      ownerBoundary.hasDowngradedGenericLead
+        ? `${ownerBoundary.genericLead} stays downgraded to a nearby generic milestone family because ${ownerBoundary.genericLeadReason}.`
+        : "The generic ConstructionMilestones comparison lead is incomplete in this build."
+    ];
+    const shardBoundaryNotes = [
+      finalSuBoundary.hasBoundary
+        ? `FinalSU boundary keeps ${finalSuBoundary.unlockRangeLabel}, ${finalSuBoundary.bonusFieldLabel}, and ${finalSuBoundary.bonusAccessorLabel} attached to ${finalSuBoundary.dataCarrier}.`
+        : "Shard FinalSU bonus-field boundary clues are not available in this build.",
+      payloadBoundary.hasBoundary
+        ? `Payload-watch boundary keeps ${payloadBoundary.milestoneStateLabel} attached to ${payloadBoundary.dataCarrier}, with cost-list hooks such as ${payloadBoundary.costAccessorLabel}.`
+        : "Shard milestone payload-watch boundary clues are not available in this build.",
+      costModelBoundary.hasBoundary
+        ? `Cost-model boundary keeps sampled shard cost windows ${costModelBoundary.costWindowLabel} attached to ${costModelBoundary.dataCarrier}.`
+        : "Shard cost-model boundary clues are not available in this build.",
+      rowModelBoundary.hasBoundary
+        ? `Row-model boundary keeps text-checker rows on ${rowModelBoundary.textCheckerRangeLabel} and unlock rows on ${rowModelBoundary.unlockRangeLabel}.`
+        : "Shard row-model boundary clues are not available in this build."
+    ];
+    const shardOpenIssues = [
+      rowModelBoundary.hasShardLocalBuySample && rowModelBoundary.hasGenericBuyFamily
+        ? `The buy seam still splits between shard-local ${rowModelBoundary.shardLocalBuyLabel} and generic ${rowModelBoundary.genericBuyLabel}.`
+        : "Expected shard buy-seam clues are incomplete in this build.",
+      titleEffectBoundary.hasBoundary
+        ? `Shipped title assets cover shard rows ${titleEffectBoundary.titleRangeLabel}, but row 28 still has conflicting shipped title candidates: ${titleEffectBoundary.row28ConflictLabel || "unknown"}.`
+        : "Shard title/effect boundary clues are not available in this build.",
+      effectTextHandlerBoundary.hasBoundary
+        ? `The strongest current shard bonus text handler is ${effectTextHandlerBoundary.textHandlerLabel}, not the generic ${effectTextHandlerBoundary.genericWriterLabel}.`
+        : "Shard effect-text handler boundary clues are not available in this build.",
+      saveBoundary.hasSeparationBoundary
+        ? `Shard save boundary keeps ${saveBoundary.ownerAnchor} separate from ${saveBoundary.saveAnchor} and ${saveBoundary.cloudSaveAnchor}, with ${saveBoundary.overlapLabel}.`
+        : "Shard save-boundary clues are not available in this build.",
+      "This improves the shard mapping gate, but it still does not recover player-owned shard milestone rows, player-facing labels, or planner-safe affordability inputs."
+    ];
     return `
       <div class="meta-stack">
         <p class="snapshot-title">Repo-local owner-family narrowing</p>
-        <p class="meta">${ownerBoundary.hasBoundary ? `The checked shard owner-family boundary now keeps ${ownerBoundary.screenController} as the strongest screen-controller family and ${ownerBoundary.dataCarrier} as the strongest shard-specific data-carrier trail.` : "Shard owner-family boundary clues are not available in this build."}</p>
-        <p class="meta">${ownerBoundary.hasFastBuyHooks ? `Fast-buy and first-open hooks such as ${ownerBoundary.fastBuyHooksLabel} stay attached to that shard-specific controller shell.` : "Expected shard-specific fast-buy hooks are incomplete in this build."}</p>
-        <p class="meta">${ownerBoundary.hasBonusAnchors ? `The same narrowed trail preserves bonus-field anchors such as ${ownerBoundary.bonusAnchorLabel}, which keeps FinalSU-style fields tied to the shard-specific carrier candidate instead of a generic milestone lead.` : "Expected FinalSU bonus-field anchors are incomplete in this build."}</p>
-        <p class="meta">${ownerBoundary.hasDowngradedGenericLead ? `${ownerBoundary.genericLead} stays downgraded to a nearby generic milestone family because ${ownerBoundary.genericLeadReason}.` : "The generic ConstructionMilestones comparison lead is incomplete in this build."}</p>
-        <p class="meta">${finalSuBoundary.hasBoundary ? `A checked FinalSU boundary now keeps ${finalSuBoundary.unlockRangeLabel}, ${finalSuBoundary.bonusFieldLabel}, and ${finalSuBoundary.bonusAccessorLabel} attached to ${finalSuBoundary.dataCarrier}.` : "Shard FinalSU bonus-field boundary clues are not available in this build."}</p>
-        <p class="meta">${finalSuBoundary.hasBoundary ? "That narrows the shard-specific field family further, but it still does not map those fields back to verified player-facing milestone rows." : "The current build does not yet preserve a checked FinalSU bonus-field boundary."}</p>
-        <p class="meta">${payloadBoundary.hasBoundary ? `A checked payload-watch boundary now keeps ${payloadBoundary.milestoneStateLabel} attached to ${payloadBoundary.dataCarrier}, with cost-list hooks such as ${payloadBoundary.costAccessorLabel}.` : "Shard milestone payload-watch boundary clues are not available in this build."}</p>
-        <p class="meta">${payloadBoundary.hasCostAndListHooks && payloadBoundary.hasProgressFillHooks && payloadBoundary.hasTickFields ? `The same shard-specific trail also keeps ${payloadBoundary.progressHookLabel} plus ${payloadBoundary.tickFieldLabel} grouped with ${payloadBoundary.costHookLabel}.` : "Expected shard payload-watch hooks are incomplete in this build."}</p>
-        <p class="meta">${costModelBoundary.hasBoundary ? `A checked cost-model boundary now keeps sampled shard cost windows ${costModelBoundary.costWindowLabel} attached to ${costModelBoundary.dataCarrier}.` : "Shard cost-model boundary clues are not available in this build."}</p>
-        <p class="meta">${costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell ? `The same shard-local family also preserves ${costModelBoundary.row0FieldLabel} beside ${costModelBoundary.row0FillLabel} and ${costModelBoundary.row0BonusLabel}.` : "Expected shard cost-parameter shell clues are incomplete in this build."}</p>
-        <p class="meta">${costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell ? `That is enough to support ${costModelBoundary.supportedOptimizerLabel}, but it still blocks ${costModelBoundary.blockedOptimizerLabel}.` : "The current build does not yet preserve a checked shard cost-model boundary."}</p>
-        <p class="meta">${rowModelBoundary.hasBoundary ? `A checked row-model boundary now keeps text-checker rows on ${rowModelBoundary.textCheckerRangeLabel} and unlock rows on ${rowModelBoundary.unlockRangeLabel}.` : "Shard row-model boundary clues are not available in this build."}</p>
-        <p class="meta">${rowModelBoundary.hasShardLocalBuySample && rowModelBoundary.hasGenericBuyFamily ? `The buy seam still splits between shard-local ${rowModelBoundary.shardLocalBuyLabel} and generic ${rowModelBoundary.genericBuyLabel}.` : "Expected shard buy-seam clues are incomplete in this build."}</p>
-        <p class="meta">${titleEffectBoundary.hasBoundary ? `Shipped title assets now cover shard rows ${titleEffectBoundary.titleRangeLabel}.` : "Shard title/effect boundary clues are not available in this build."}</p>
-        <p class="meta">${titleEffectBoundary.hasEffectPresentationFamily && titleEffectBoundary.hasBonusCalcSamples ? `The shipped effect shell keeps ${titleEffectBoundary.effectSlotLabel}, while row-local calc samples include ${titleEffectBoundary.bonusCalcLabel}.` : "Expected shard effect-family clues are incomplete in this build."}</p>
-        <p class="meta">${titleEffectBoundary.hasBoundary ? `Row 28 still has conflicting shipped title candidates: ${titleEffectBoundary.row28ConflictLabel || "unknown"}.` : "The current build does not yet preserve the shard title conflict note."}</p>
-        <p class="meta">${effectTextHandlerBoundary.hasBoundary ? `The strongest current shard bonus text handler is ${effectTextHandlerBoundary.textHandlerLabel}, not the generic ${effectTextHandlerBoundary.genericWriterLabel}.` : "Shard effect-text handler boundary clues are not available in this build."}</p>
-        <p class="meta">${effectTextHandlerBoundary.hasPresentationFamily && effectTextHandlerBoundary.hasBonusCalcSamples && effectTextHandlerBoundary.hasUiContextAnchors ? `That handler currently sits beside ${effectTextHandlerBoundary.uiContextLabel}, lines up with ${effectTextHandlerBoundary.presentationFamilyLabel}, and stays compatible with calc samples such as ${effectTextHandlerBoundary.bonusCalcLabel}.` : "Expected shard effect-text handler alignment clues are incomplete in this build."}</p>
-        <p class="meta">${rowShellBoundary.hasBoundary ? `A checked row-shell boundary now keeps ${rowShellBoundary.controllerHookLabel} attached to ${rowShellBoundary.screenController}, with partial row hooks such as ${rowShellBoundary.unlockHookLabel}.` : "Shard milestone row-shell boundary clues are not available in this build."}</p>
-        <p class="meta">${rowShellBoundary.hasUnlockHookSamples && rowShellBoundary.hasBuyHookSamples && rowShellBoundary.hasTextCheckerSamples ? `The same controller shell also preserves ${rowShellBoundary.buyHookLabel} plus ${rowShellBoundary.textCheckerLabel}, which is enough to narrow future row verification without claiming full row ownership or labels.` : "Expected shard milestone row-shell samples are incomplete in this build."}</p>
-        <p class="meta">${rowAlignmentBoundary.hasBoundary ? `A checked row-alignment boundary now keeps unlock hooks on ${rowAlignmentBoundary.unlockRangeLabel}, text-checker hooks on ${rowAlignmentBoundary.textCheckerRangeLabel}, and buy hooks on ${rowAlignmentBoundary.buyRangeLabel}.` : "Shard milestone row-alignment boundary clues are not available in this build."}</p>
-        <p class="meta">${rowAlignmentBoundary.hasZeroUnlockTextOverlap && rowAlignmentBoundary.hasBuyTextOverlap ? `The current partial row shell still has ${rowAlignmentBoundary.unlockTextOverlapLabel} direct overlap between unlock and text-checker ids, while buy and text-checker hooks only overlap on ${rowAlignmentBoundary.buyTextOverlapLabel}.` : "Expected shard row-shell alignment boundary results are incomplete in this build."}</p>
-        <p class="meta">${saveBoundary.hasSeparationBoundary ? `A checked shard save boundary now keeps ${saveBoundary.ownerAnchor} separate from ${saveBoundary.saveAnchor} and ${saveBoundary.cloudSaveAnchor}, with ${saveBoundary.overlapLabel}.` : "Shard save-boundary clues are not available in this build."}</p>
-        <p class="meta">${saveBoundary.hasSeparationBoundary && saveBoundary.hasDirectRowDefinitionPayload && saveBoundary.hasRuntimeOwnedStateShell ? `The split result is now explicit: ${saveBoundary.directPayloadAnchor} already carries the direct row-definition payload, while ${saveBoundary.runtimeShellAnchor} is still only the strongest recovered runtime shell for player-owned row state.` : "The current build does not yet preserve a clean shard save-boundary separation."}</p>
-        <p class="meta">${saveBoundary.hasSeparationBoundary ? "That keeps shard owner-family narrowing and save-side recovery as separate tasks, so the app should not infer player-owned shard milestone state from the current owner trail yet." : "The current build does not yet preserve a clean shard save-boundary separation."}</p>
-        <p class="meta">This improves the shard mapping gate, but it still does not recover player-owned shard milestone rows, player-facing labels, or planner-safe affordability inputs.</p>
+        <div class="meta-stack">
+          <p class="snapshot-title">Owner-family trail</p>
+          <ul class="research-step-list">${shardOwnerNotes.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+        <div class="meta-stack">
+          <p class="snapshot-title">Recovered boundaries</p>
+          <ul class="research-step-list">${shardBoundaryNotes.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+        <div class="meta-stack">
+          <p class="snapshot-title">Still blocked</p>
+          <ul class="research-step-list">${shardOpenIssues.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
       </div>
     `;
   }
@@ -2748,50 +2864,61 @@ function renderResearchTrackSupport(track) {
     const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(
       tokenShop?.tokenBank?.controllerShell
     );
+    const spendInputNotes = [
+      tokenShopCoverage.hasCoverage
+        ? `TokenShop currently exposes ${tokenShopCoverage.numericGroupCount} extracted numeric families across ${tokenShopCoverage.tierLabel}, including ${tokenShopCoverage.namedLaneLabel}.`
+        : "TokenShop extracted family coverage is not available in this build.",
+      tokenShopCostLaneSummary.hasLaneSplit
+        ? `Cost-lane support preserves ${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel}.`
+        : "TokenShop trace-produced cost-lane support is not available in this build.",
+      spendActionLaneSummary.hasActionSplit
+        ? `Action-lane clues preserve ${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, and ${spendActionLaneSummary.premiumModifierHook}.`
+        : "Spend action-lane clues are not available in this build.",
+      validatedCoverage.hasValidatedRows
+        ? `MultiverseMarket currently has ${validatedCoverage.count} validated rows across ids ${validatedCoverage.rangeLabel}.`
+        : "MultiverseMarket validated row coverage is not available in this build."
+    ];
+    const spendBoundaryNotes = [
+      tokenShopOwnerShellSummary.hasOwnerShell
+        ? `TokenShop owner-shell clues preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook}.`
+        : "TokenShop owner-shell clues are not available in this build.",
+      tokenShopSaveBoundarySummary.hasSeparationBoundary
+        ? `TokenShop save boundary keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.`
+        : "TokenShop save-boundary clues are not available in this build.",
+      multiverseMarketOwnerFamilySummary.hasOwnerFamily
+        ? `MultiverseMarket owner-family clues preserve ${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, ${multiverseMarketOwnerFamilySummary.textHandler}, ${multiverseMarketOwnerFamilySummary.batcher}, and ${multiverseMarketOwnerFamilySummary.costBox}.`
+        : "MultiverseMarket owner-family clues are not available in this build.",
+      multiverseMarketSaveBoundarySummary.hasSeparationBoundary
+        ? `MultiverseMarket save boundary keeps ${multiverseMarketSaveBoundarySummary.actionAnchor} separate from ${multiverseMarketSaveBoundarySummary.saveAnchor}, with ${multiverseMarketSaveBoundarySummary.overlapLabel}.`
+        : "MultiverseMarket save-boundary clues are not available in this build."
+    ];
+    const spendOpenIssues = [
+      marketMemberSummary.hasExactSaveDataProgressionOwner
+        ? `Save-side owner narrows to ${marketMemberSummary.exactSaveOwnerLabel}, but planner-ready owned-state inputs and canonical row-level imports remain blocked.`
+        : "Exact save-side owner recovery is still incomplete for the wider Emporium progression run.",
+      multiverseMarketRangeSummary.hasOverlap
+        ? `Validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} only overlap the recovered metadata run ${multiverseMarketRangeSummary.metadataRangeLabel} at ${multiverseMarketRangeSummary.overlapLabel}.`
+        : "The checked range boundary between validated rows and the recovered metadata run is not available in this build.",
+      dailyTokeniumSummary.hasPlayerFacingBoundary
+        ? "Daily Tokenium still behaves like a modifier-side reward lane, not a recovered TokenShop-only budget lane."
+        : "Player-facing Daily Tokenium lane strings are incomplete in this build.",
+      "This is enough to narrow future mapping work, but not enough to promote planner-ready owned-state inputs or canonical row-level imports yet."
+    ];
     return `
       <div class="meta-stack">
         <p class="snapshot-title">Grounded spend inputs</p>
-        <p class="meta">${tokenShopCoverage.hasCoverage ? `TokenShop currently exposes ${tokenShopCoverage.numericGroupCount} extracted numeric families across ${tokenShopCoverage.tierLabel}, including ${tokenShopCoverage.namedLaneLabel}.` : "TokenShop extracted family coverage is not available in this build."}</p>
-        <p class="meta">${tokenShopCoverage.hasControllerAnchors ? "The checked-in TokenShop payload also preserves direct controller anchors such as BankFill and TokenBankDescriptionText for the token-bank lane." : "The checked-in TokenShop payload does not yet preserve the expected token-bank controller anchors."}</p>
-        <p class="meta">${tokeniumNamingSummary.hasNamingClues ? `Shipped assets now preserve ${tokeniumNamingSummary.resourceLabel} plus ${tokeniumNamingSummary.academyLabel}, and level0 keeps both ${tokeniumNamingSummary.tokenShellLabel} and ${tokeniumNamingSummary.tokeniumShellLabel}.` : "Token or tokenium naming clues are not available in this build."}</p>
-        <p class="meta">${tokenShopCostLaneSummary.hasLaneSplit ? `TokenShop trace support now preserves ${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel}.` : "TokenShop trace-produced cost-lane support is not available in this build."}</p>
-        <p class="meta">${tokenShopCostLaneSummary.keepsDailyTokeniumSeparate ? `This keeps TokenDailies on the Daily Tokenium modifier lane while the shared ${tokenShopCostLaneSummary.costRenderLabel} or ${tokenShopCostLaneSummary.descriptionRenderLabel} path stays grounded in the trace materialization.` : "The current build does not yet preserve a grounded split between TokenDailies and generic token spend rows."}</p>
-        <p class="meta">${spendActionLaneSummary.hasActionSplit ? `Spend action-lane clues now preserve ${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, and ${spendActionLaneSummary.premiumModifierHook}.` : "Spend action-lane clues are not available in this build."}</p>
-        <p class="meta">${spendActionLaneSummary.keepsDailyDirectHooksUnrecovered ? `The checked APK and Unity probe still returns zero ${spendActionLaneSummary.dailyHookT2} or ${spendActionLaneSummary.dailyHookT3} matches, so Daily Tokenium remains a modifier-side action lane rather than a recovered direct TokenShop purchase action.` : "The current build does not yet preserve the direct-hook gap between TokenDailies and other spend lanes."}</p>
-        <p class="meta">${tokenShopOwnerShellSummary.hasOwnerShell ? `TokenShop owner-shell clues now preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook}.` : "TokenShop owner-shell clues are not available in this build."}</p>
-        <p class="meta">${tokenShopOwnerShellSummary.hasOwnerShell ? "That local TokenShop shell is enough to keep bank controls and adjacent device hooks grouped together, but not enough to promote player-owned bank values into planner state." : "The current build does not yet preserve a grounded TokenShop owner shell around the token-bank lane."}</p>
-        <p class="meta">${tokenShopSaveBoundarySummary.hasSeparationBoundary ? `The checked save boundary still keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.` : "TokenShop save-boundary clues are not available in this build."}</p>
-        <p class="meta">${tokenShopSaveBoundarySummary.hasSeparationBoundary ? "That means TokenShop ownership and PlayerProfile save recovery remain separate tasks, so the app should not infer saved bank values from owner-shell clues yet." : "The current build does not yet preserve a clean separation boundary between TokenShop ownership and PlayerProfile save recovery."}</p>
-        <p class="meta">${tokenBankControllerShellSummary.hasControllerShell ? `Token-bank controller shell now preserves ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.` : "Token-bank controller-shell clues are not available in this build."}</p>
-        <p class="meta">${tokenBankControllerShellSummary.hasControllerShell ? "That keeps the narrow bank controller cluster together without promoting it into saved-state ownership or formula truth." : "The current build does not yet preserve a narrow token-bank controller shell."}</p>
-        <p class="meta">${tokenBankStateSummary.hasControllerSplit ? `Token-bank controller clues now preserve ${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHandler}.` : "Token-bank controller or display split clues are not available in this build."}</p>
-        <p class="meta">${dailyTokeniumSummary.hasOwnerFamilyClues ? `Daily Tokenium lane clues now preserve ${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.missionFamilyLabel}, ${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, and ${dailyTokeniumSummary.premiumPack}.` : "Daily Tokenium owner-family clues are not available in this build."}</p>
-        <p class="meta">${dailyTokeniumSummary.hasPlayerFacingBoundary ? "Player-facing strings still frame Daily Tokenium as a farm-mission or Academy Menu reward lane that TokenShop and the Collector pack modify, not as a TokenShop-only budget lane." : "Player-facing Daily Tokenium lane strings are incomplete in this build."}</p>
-        <p class="meta">${tokenBankFormulaSummary.hasDerivedOutputBoundary ? `Token-bank formula clues now preserve ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} as a derived-output cluster.` : "Token-bank derived-output clues are not available in this build."}</p>
-        <p class="meta">${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? "That checked local cluster still does not join the current PlayerProfile save-family path, so FinalTokenBank outputs remain output-side clues rather than recovered saved-state fields." : "The checked derived-output cluster now overlaps the broader save-family search and needs review."}</p>
-        <p class="meta">${validatedCoverage.hasValidatedRows ? `MultiverseMarket currently has ${validatedCoverage.count} validated rows across ids ${validatedCoverage.rangeLabel}.` : "MultiverseMarket validated row coverage is not available in this build."}</p>
-        <p class="meta">${metadataSummary.recoveredIsRangeLabel ? `The checked-in save-side field run currently reaches ${metadataSummary.recoveredIsRangeLabel}, which is broader than the validated MultiverseMarket row block.` : "The checked-in save-side field run is not available in this build."}</p>
-        <p class="meta">${multiverseMarketRangeSummary.hasOverlap ? `The checked range boundary now shows that validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} share a first direct ordered overlap with the recovered metadata run ${multiverseMarketRangeSummary.metadataRangeLabel} at rows ${multiverseMarketRangeSummary.overlapLabel}.` : multiverseMarketRangeSummary.hasExplicitZeroOverlap ? `The checked range boundary now preserves a zero-overlap result between validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} and the recovered metadata run ${multiverseMarketRangeSummary.metadataRangeLabel}.` : "The checked range boundary between validated rows and the recovered metadata run is not available in this build."}</p>
-        <p class="meta">${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? `The validated row block also has direct text-handler coverage through ${multiverseMarketRowTextSummary.textHandler}, ${multiverseMarketRowTextSummary.textBatcher}, and ${multiverseMarketRowTextSummary.coveredCount} SetIS*CostText hooks.` : "Validated-row text-handler coverage is not available in this build."}</p>
-        <p class="meta">${multiverseMarketRowTextSummary.hasValidatedTextCoverage ? "That is row-label coverage for the validated block, not saved-state coverage, so it should not be used as proof of player-owned current levels." : "Validated-row text coverage is incomplete, so row-label support remains partially grounded."}</p>
-        <p class="meta">${multiverseMarketActionShellSummary.hasActionShell ? `The same checked action shell context reaches ${multiverseMarketActionShellSummary.buyRangeLabel} plus ${multiverseMarketActionShellSummary.costTextRangeLabel}, while only ${multiverseMarketActionShellSummary.validatedRangeLabel} stays numerically validated.` : "MultiverseMarket action-shell coverage is not available in this build."}</p>
-        <p class="meta">${multiverseMarketActionShellSummary.hasActionShell ? "That broader action shell is useful for mapping and UI recovery, but it should not be promoted as full numeric validation or saved-state coverage." : "The broader MultiverseMarket action shell is incomplete, so validated-row behavior should stay the narrower implementation boundary."}</p>
-        <p class="meta">${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? `MultiverseMarket owner-family clues now preserve ${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, ${multiverseMarketOwnerFamilySummary.textHandler}, ${multiverseMarketOwnerFamilySummary.batcher}, and ${multiverseMarketOwnerFamilySummary.costBox}.` : "MultiverseMarket owner-family clues are not available in this build."}</p>
-        <p class="meta">${multiverseMarketOwnerFamilySummary.hasCurrencyShell ? `The same checked shell also preserves ${multiverseMarketOwnerFamilySummary.resourceText}, ${multiverseMarketOwnerFamilySummary.achievementBar}, and ${multiverseMarketOwnerFamilySummary.currencyRangeLabel}, with validated samples such as ${multiverseMarketOwnerFamilySummary.firstValidatedCurrencyBox} and ${multiverseMarketOwnerFamilySummary.lastValidatedCurrencyBox}.` : "MultiverseMarket cost-lane UI shell clues are incomplete in this build."}</p>
-        <p class="meta">${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? "That is enough to keep the Emporium owner-family and Inscryptions cost-lane shell grounded, but not enough to recover player-owned balance fields or current row levels." : "The current build does not yet preserve a grounded MultiverseMarket owner-family shell."}</p>
-        <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? `The checked save boundary still keeps ${multiverseMarketSaveBoundarySummary.actionAnchor} separate from ${multiverseMarketSaveBoundarySummary.saveAnchor}, with ${multiverseMarketSaveBoundarySummary.overlapLabel}.` : "MultiverseMarket save-boundary clues are not available in this build."}</p>
-        <p class="meta">${multiverseMarketSaveBoundarySummary.hasSeparationBoundary ? "That means MultiverseMarket action-shell recovery and PlayerProfile save recovery remain separate tasks, so the app should not infer player-owned row levels from action-shell clues yet." : "The current build does not yet preserve a clean separation boundary between MultiverseMarket action-shell recovery and save-family recovery."}</p>
-        <p class="meta">${marketMemberSummary.hasBoundary ? `The newer checked market-member boundary now preserves ${marketMemberSummary.accessorLabel}, ${marketMemberSummary.memberLabel}, and nearby profile-side member shells such as ${marketMemberSummary.memberShellLabel}.` : "The newer checked market-member boundary is not available in this build."}</p>
-        <p class="meta">${marketMemberSummary.hasHandlerBridge ? `That same narrowed handoff also keeps ${marketMemberSummary.handlerBridgeLabel} beside ${marketMemberSummary.accessorLabel} and ${marketMemberSummary.memberLabel}.` : "The current build does not yet preserve the expected PlayerProfileHandler bridge clues for the market-member boundary."}</p>
-        <p class="meta">${marketMemberSummary.hasDirectMemberHandoff ? `The same direct neighborhood now also preserves ${marketMemberSummary.directMemberHandoffLabel}, while the exact typed probe recovers ${marketMemberSummary.typedSaveCacheLabel}, ${marketMemberSummary.typedPlayerProfileFieldTableLabel}, ${marketMemberSummary.typedSaveDataFieldTableLabel}, ${marketMemberSummary.typedSaveDataOwnerLabel}, and ${marketMemberSummary.negativeTypedMarketLabel}.` : "The current build does not yet preserve the expected direct member-handoff clues for the market-member boundary."}</p>
-        <p class="meta">${marketMemberSummary.hasBoundary ? `The same bridge also preserves sibling market-side accessors such as ${marketMemberSummary.siblingAccessorLabel}.` : "The current build does not yet preserve the expected sibling market-side accessor clues for the market-member boundary."}</p>
-        <p class="meta">${marketMemberSummary.hasProgressionPayloadBoundary ? `The broader field cluster still lives separately as ${marketMemberSummary.progressionPayloadLabel}, which is wider than the direct-member ${marketMemberSummary.memberLabel} shell itself.` : "The current build does not yet preserve the expected broader progression-payload field cluster."}</p>
-        <p class="meta">${marketMemberSummary.hasTypedPlayerProfileFieldTable && marketMemberSummary.rulesOutDirectPlayerProfileProgressionOwner ? `The same checked PlayerProfileData field table now also rules out flat direct ownership because ${marketMemberSummary.negativeTypedPlayerProfileProgressionLabel}, while the only recovered typed nested child still stays at ${marketMemberSummary.typedPlayerProfileNestedTypeLabel}.` : "The current build does not yet preserve the expected flat PlayerProfileData-versus-deeper-owner boundary for the wider progression run."}</p>
-        <p class="meta">${marketMemberSummary.hasExactSaveDataProgressionOwner ? `The checked save-side owner is now ${marketMemberSummary.exactSaveOwnerLabel} because ${marketMemberSummary.typedSaveDataOwnerLabel}.` : "The current build does not yet preserve an exact typed save-side owner for the wider Emporium progression run."}</p>
-        <p class="meta">${marketMemberSummary.hasCloudBridge ? `That combined neighborhood still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which keeps the ${marketMemberSummary.canonicalHostLabel} checked even while the metadata-only ${marketMemberSummary.memberLabel} shell stays unresolved as an exact typed field and ${marketMemberSummary.negativeTypedSaveDataMarketLabel}.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the market-member boundary."}</p>
-        <p class="meta">${marketMemberSummary.hasTypedSiblingContrast ? `Typed sibling contrast still exists through ${marketMemberSummary.typedSiblingContrastLabel}, but no equivalent typed Market or Inscryption owner has been recovered yet.` : "The current build does not yet preserve the expected typed sibling contrast clues for the market-member boundary."}</p>
-        <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so this track stays out of planner implementation and row remap even though the exact save owner is recovered.` : "The current build no longer preserves the expected direct-type-map gap for the market-member boundary and needs review."}</p>
-        <p class="meta">${marketMemberSummary.favorsDirectMemberBoundary && marketMemberSummary.hasExactSaveDataProgressionOwner ? `This is enough to narrow the save-side handoff to a checked ${marketMemberSummary.canonicalHostLabel}, confirm ${marketMemberSummary.negativeMultiverseFieldLabel}, rule out flat direct PlayerProfileData progression ownership, and recover ${marketMemberSummary.exactSaveOwnerLabel} as the declaring save model while the metadata-only Market shell remains unresolved.` : "This is enough to narrow future mapping work, but not enough to promote planner-ready owned-state inputs or canonical row-level imports yet."}</p>
+        <div class="meta-stack">
+          <p class="snapshot-title">Current grounded inputs</p>
+          <ul class="research-step-list">${spendInputNotes.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+        <div class="meta-stack">
+          <p class="snapshot-title">Recovered boundaries</p>
+          <ul class="research-step-list">${spendBoundaryNotes.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+        <div class="meta-stack">
+          <p class="snapshot-title">Still blocked</p>
+          <ul class="research-step-list">${spendOpenIssues.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
       </div>
     `;
   }
@@ -2811,18 +2938,43 @@ function renderResearchTrackSupport(track) {
     const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(
       tokenShop?.tokenBank?.formulaBoundary
     );
+    const tokenBankOwnerNotes = [
+      tokenShopOwnerShellSummary.hasOwnerShell
+        ? `TokenShop owner-shell clues preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook} as one local controller cluster.`
+        : "TokenShop owner-shell clues are not available in this build.",
+      tokenShopSaveBoundarySummary.hasSeparationBoundary
+        ? `The checked save boundary keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.`
+        : "TokenShop save-boundary clues are not available in this build.",
+      tokenBankControllerShellSummary.hasControllerShell
+        ? `The token-bank controller shell preserves ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.`
+        : "Token-bank controller-shell clues are not available in this build.",
+      tokenBankStateSummary.hasControllerSplit
+        ? `Display clues such as ${tokenBankStateSummary.displayShell} and ${tokenBankStateSummary.loopHook} stay beside controller methods like ${tokenBankStateSummary.capMethod}.`
+        : "Token-bank controller or display split clues are not available in this build."
+    ];
+    const tokenBankBlockedNotes = [
+      tokenBankFormulaSummary.hasDerivedOutputBoundary
+        ? `Derived-output cluster preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField}.`
+        : "Token-bank derived-output clues are not available in this build.",
+      tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext
+        ? "FinalTokenBank outputs remain non-owner clues rather than recovered saved-state fields."
+        : "The checked derived-output cluster now overlaps the broader save-family search and needs review.",
+      tokenBankStateSummary.hasCloudSaveShellBoundary
+        ? `Remaining CloudSavePlayerProfile evidence only preserves a metadata-side shell through ${tokenBankStateSummary.cloudSaveInfoRoutine}, ${tokenBankStateSummary.cloudSaveProfileRoutine}, and ${tokenBankStateSummary.cloudSaveStateMachine}.`
+        : "The narrowed CloudSavePlayerProfile shell boundary is not available in this build.",
+      "This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state."
+    ];
     return `
       <div class="meta-stack">
         <p class="snapshot-title">Current owner narrowing</p>
-        <p class="meta">${tokenShopOwnerShellSummary.hasOwnerShell ? `TokenShop owner-shell clues preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook} as one local controller cluster.` : "TokenShop owner-shell clues are not available in this build."}</p>
-        <p class="meta">${tokenShopSaveBoundarySummary.hasSeparationBoundary ? `The checked save boundary keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.` : "TokenShop save-boundary clues are not available in this build."}</p>
-        <p class="meta">${tokenBankControllerShellSummary.hasControllerShell ? `The checked token-bank controller shell also preserves ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.` : "Token-bank controller-shell clues are not available in this build."}</p>
-        <p class="meta">${tokenBankStateSummary.hasControllerSplit ? `Separate display and presentation clues such as ${tokenBankStateSummary.displayShell} and ${tokenBankStateSummary.loopHook} are still preserved beside controller methods like ${tokenBankStateSummary.capMethod}.` : "Token-bank controller or display split clues are not available in this build."}</p>
-        <p class="meta">${tokenBankFormulaSummary.hasDerivedOutputBoundary ? `The derived-output cluster still preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField}.` : "Token-bank derived-output clues are not available in this build."}</p>
-        <p class="meta">${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? "That output-side cluster still has no checked PlayerProfileData or CloudSavePlayerProfile join, so FinalTokenBank outputs remain non-owner clues rather than recovered saved-state fields." : "The checked derived-output cluster now overlaps the broader save-family search and needs review."}</p>
-        <p class="meta">${tokenBankStateSummary.hasCloudSaveShellBoundary ? `The remaining CloudSavePlayerProfile evidence now only preserves a metadata-side shell through ${tokenBankStateSummary.cloudSaveInfoRoutine}, ${tokenBankStateSummary.cloudSaveProfileRoutine}, and ${tokenBankStateSummary.cloudSaveStateMachine}, not a narrower typed wrapper.` : "The current build does not yet preserve the narrowed CloudSavePlayerProfile shell boundary for this lane."}</p>
-        <p class="meta">${tokenShopSaveBoundarySummary.hasSeparationBoundary && tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext && tokenBankStateSummary.hasCloudSaveShellBoundary ? "The remaining grounded save-side search therefore stays past the checked PlayerProfileData export bridge and the metadata-only CloudSavePlayerProfile shell, not on TokenShop methods, BigStatisticPrefab.TokenBankCap, or FinalTokenBank outputs." : "The current build does not yet preserve a grounded negative owner narrowing for the token-bank save-state lane."}</p>
-        <p class="meta">This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state.</p>
+        <div class="meta-stack">
+          <p class="snapshot-title">Recovered ownership trail</p>
+          <ul class="research-step-list">${tokenBankOwnerNotes.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+        <div class="meta-stack">
+          <p class="snapshot-title">Still blocked</p>
+          <ul class="research-step-list">${tokenBankBlockedNotes.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
       </div>
     `;
   }
@@ -2884,6 +3036,35 @@ function importPlayerProfileJson() {
       "warning"
     );
   }
+}
+
+function scheduleProfileAutoSave(delay = 250) {
+  clearTimeout(profileAutoSaveTimer);
+  profileAutoSaveTimer = setTimeout(() => {
+    state.playerProfile = collectProfileForm();
+    persistPlayerProfile();
+    renderQuickPanels();
+    renderOverview();
+    renderPlayerProfileBoundarySummary();
+    setStatus("profileStatus", "Profile updates saved automatically.", "success");
+  }, delay);
+}
+
+function scheduleShipCalibrationAutoSave(delay = 250) {
+  clearTimeout(shipCalibrationAutoSaveTimer);
+  shipCalibrationAutoSaveTimer = setTimeout(() => {
+    const inputs = $$("#shipPlayerStatePanel [data-ship-group][data-ship-field]");
+    const shipPlayerState = getShipCommunityToolState();
+    inputs.forEach((input) => {
+      const group = input.dataset.shipGroup;
+      const field = input.dataset.shipField;
+      const current = shipPlayerState[group][field];
+      shipPlayerState[group][field] =
+        typeof current === "boolean" ? input.checked : coerceInputValue(input.value);
+    });
+    persistPlayerProfile();
+    setStatus("shipPlayerStateStatus", "Planner calibration saved automatically.", "success");
+  }, delay);
 }
 
 function exportPlayerProfileJson() {
@@ -5234,174 +5415,6 @@ function getTokenShopProgressionModel() {
   });
 }
 
-function renderTokenShopOverviewAffordabilityModule() {
-  const summary = getTokenShopProgressionModel();
-  const sourceLine = summary.playerStateCount
-    ? `${summary.playerStateCount}/${summary.rows.length} checked player-state row${summary.playerStateCount === 1 ? "" : "s"} active before compatibility fallback.`
-    : "No checked player-state rows are active yet; compatibility import and default level 0 stay available.";
-
-  const tierUnlocks =
-    getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
-  const thresholds = tierUnlocks?.tier_thresholds || {};
-  const tierUnlockStates = calculateTierUnlockStatesForOverview(thresholds);
-
-  return `
-    <div class="meta-stack">
-      <p class="snapshot-title">TokenShop affordability by tier</p>
-      <p class="meta">Tiered display showing all 28 ATU rows grouped by tier. Rows in locked tiers are hidden. T2 unlocks at ${thresholds.t2?.min_levels || 25}+ total T1 levels, T3 at ${thresholds.t3?.min_levels || 50}+, T4 at ${thresholds.t4?.min_levels || 100}+, T5 at ${thresholds.t5?.min_levels || 150}+.</p>
-      <p class="meta">${escapeHtml(sourceLine)}</p>
-      <div class="tier-tabs">
-        <button type="button" class="tier-tab active" data-overview-tier="t1">T1</button>
-        <button type="button" class="tier-tab${tierUnlockStates.t2 ? "" : " disabled"}" data-overview-tier="t2">T2</button>
-        <button type="button" class="tier-tab${tierUnlockStates.t3 ? "" : " disabled"}" data-overview-tier="t3">T3</button>
-        <button type="button" class="tier-tab${tierUnlockStates.t4 ? "" : " disabled"}" data-overview-tier="t4">T4</button>
-        <button type="button" class="tier-tab${tierUnlockStates.t5 ? "" : " disabled"}" data-overview-tier="t5">T5</button>
-      </div>
-      <div class="pill-row">
-        <span class="pill">${typeof summary.currentTokens === "number" ? `${summary.affordableCount}/${summary.rows.length} affordable from ${formatBoundaryValue(summary.currentTokens)} Tokens` : "Affordability gated by missing Tokens"}</span>
-        <span class="pill">${summary.playerStateCount}/${summary.rows.length} checked player-state rows active</span>
-        <span class="pill">${summary.compatibilityCount}/${summary.rows.length} compatibility fallback rows active</span>
-        <span class="pill">${summary.defaultCount}/${summary.rows.length} defaulted to level 0</span>
-        <span class="pill">${summary.knownCapCount} at or above known cap</span>
-        <span class="pill">${escapeHtml(summary.displayRule)}</span>
-      </div>
-      <div class="preview-stack" id="overviewTokenShopGrid">
-        ${renderTokenShopOverviewTierRows("t1", summary.rows, summary)}
-      </div>
-      <p class="meta">Overview affordability only. No best-buy order, ROI, ranking, token-bank planner behavior, Daily Tokenium planner behavior, or canonical <code>state.playerProfile</code> promotion is added here.</p>
-    </div>
-  `;
-}
-
-function calculateTierUnlockStatesForOverview(thresholds) {
-  const model = getTokenShopProgressionModel();
-  const rows = model.rows || [];
-
-  const t1Rows = rows.slice(0, 12);
-  const t2Rows = rows.slice(12, 18);
-  const t3Rows = rows.slice(18, 23);
-  const t4Rows = rows.slice(23, 25);
-  const t5Rows = rows.slice(25, 28);
-
-  const t1Total = t1Rows.reduce((sum, r) => sum + (r.currentLevel || 0), 0);
-  const t2Total = t2Rows.reduce((sum, r) => sum + (r.currentLevel || 0), 0);
-  const t3Total = t3Rows.reduce((sum, r) => sum + (r.currentLevel || 0), 0);
-  const t4Total = t4Rows.reduce((sum, r) => sum + (r.currentLevel || 0), 0);
-
-  return {
-    t1: true,
-    t2: t1Total >= (thresholds.t2?.min_levels || 25),
-    t3: t1Total + t2Total >= (thresholds.t3?.min_levels || 50),
-    t4: t1Total + t2Total + t3Total >= (thresholds.t4?.min_levels || 100),
-    t5: t1Total + t2Total + t3Total + t4Total >= (thresholds.t5?.min_levels || 150)
-  };
-}
-
-function renderTokenShopOverviewTierRows(tier, allRows, summary) {
-  const tierToFieldMap = {
-    t1: [
-      "ATU1Level",
-      "ATU2Level",
-      "ATU3Level",
-      "ATU4Level",
-      "ATU5Level",
-      "ATU6Level",
-      "ATU7Level",
-      "ATU8Level",
-      "ATU9Level",
-      "ATU10Level",
-      "ATU11Level",
-      "ATU12Level"
-    ],
-    t2: ["ATU13Level", "ATU14Level", "ATU15Level", "ATU16Level", "ATU17Level", "ATU18Level"],
-    t3: ["ATU19Level", "ATU20Level", "ATU21Level", "ATU22Level", "ATU23Level"],
-    t4: ["ATU24Level", "ATU25Level"],
-    t5: ["ATU26Level", "ATU27Level", "ATU28Level"]
-  };
-
-  const tierFields = tierToFieldMap[tier] || [];
-  const tierRows = allRows.filter((r) => tierFields.includes(r.field));
-
-  if (tierRows.length === 0) {
-    return '<p class="meta">No rows available for this tier.</p>';
-  }
-
-  return tierRows
-    .map((row) => {
-      const displayTitle = tokenShopUi.getTokenShopRowDisplayTitle(row);
-      const bonusStripEntries = tokenShopUi.getTokenShopBonusStripEntries(row);
-      const playerFacingSupportText = tokenShopUi.getTokenShopPlayerFacingSupportText(row);
-      const nextKnownCostLabel = row.isMaxed
-        ? "No next cost within known cap"
-        : typeof row.nextKnownCost === "number"
-          ? formatBoundaryValue(row.nextKnownCost)
-          : "No known next cost";
-      const affordabilityLine = row.isMaxed
-        ? "No next purchase within known cap."
-        : row.isAffordable === true
-          ? "Affordable from current Tokens."
-          : row.isAffordable === false &&
-              typeof row.nextKnownCost === "number" &&
-              typeof summary.currentTokens === "number"
-            ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
-            : "Affordability unavailable until Tokens are entered.";
-
-      return `
-    <article class="preview-card token-shop-affordability-card">
-      <div class="token-shop-game-row">
-        <div class="token-shop-level-ring">
-          <span class="token-shop-level-value">${escapeHtml(formatBoundaryValue(row.currentLevel))}</span>
-          <span class="token-shop-level-divider">/</span>
-          <span class="token-shop-level-cap">${typeof row.maxLevel === "number" && Number.isFinite(row.maxLevel) ? escapeHtml(formatBoundaryValue(row.maxLevel)) : "?"}</span>
-        </div>
-        <div class="token-shop-main-lane">
-          <div class="token-shop-top-band">
-            <div class="token-shop-affordability-head">
-              <div class="meta-stack">
-                <strong>${escapeHtml(displayTitle)}</strong>
-                <div class="token-shop-row-tags">
-                  <span class="token-shop-row-tag">${escapeHtml(row.rowTypeLabel || "Checked row")}</span>
-                  ${row.identitySource ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.identitySource)}</span>` : ""}
-                </div>
-                <p class="meta token-shop-effect-line">${escapeHtml(tokenShopUi.formatTokenShopSentence(tokenShopUi.formatTokenShopEffectLine(row)))}</p>
-                ${playerFacingSupportText ? `<p class="meta">${escapeHtml(tokenShopUi.formatTokenShopSentence(playerFacingSupportText))}</p>` : ""}
-              </div>
-            </div>
-          </div>
-          <div class="token-shop-stat-strip">
-            ${bonusStripEntries
-              .map(
-                (entry) => `
-              <div class="validation-card warn token-shop-stat-card">
-                <span class="snapshot-title">Current vs next bonus - ${escapeHtml(entry.label)}</span>
-                <strong>${escapeHtml(entry.currentLabel)}</strong>
-                <p class="meta">Next ${escapeHtml(entry.nextLabel)}</p>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-          <div class="token-shop-editor-strip">
-            <div class="token-shop-editor-meta">
-              <p class="meta">Level ${escapeHtml(formatBoundaryValue(row.currentLevel))} - ${escapeHtml(row.currentLevelSourceLabel)}</p>
-              <p class="meta">${escapeHtml(tokenShopUi.getTokenShopRowGroundingSummary(row))}</p>
-              <p class="meta">${escapeHtml(row.maxStatus.label)}</p>
-              <p class="meta">${escapeHtml(row.currentVsNextBonus.detail)}</p>
-            </div>
-          </div>
-        </div>
-        <div class="token-shop-buy-panel">
-          <span class="token-shop-buy-label">${escapeHtml(tokenShopUi.getTokenShopActionLabel(row))}</span>
-          <strong>${escapeHtml(nextKnownCostLabel)}</strong>
-          <p class="meta">${escapeHtml(affordabilityLine)}</p>
-        </div>
-      </div>
-    </article>
-  `;
-    })
-    .join("");
-}
-
 function saveTokenShopProgressionLevel(fieldName, value) {
   if (!fieldName) {
     return;
@@ -5808,24 +5821,16 @@ function renderSupportSurfaceNotice(title, lines) {
   `;
 }
 
-function renderValidationSection(title, description, results) {
+function renderValidationCards(results) {
   if (!results.length) {
     return "";
   }
 
   return `
-    <section class="meta-stack">
-      <div class="panel-header">
-        <div>
-          <p class="eyebrow">Validation scope</p>
-          <h3>${escapeHtml(title)}</h3>
-        </div>
-      </div>
-      <p class="meta">${escapeHtml(description)}</p>
-      <div class="validation-grid">
-        ${results
-          .map(
-            (item) => `
+    <div class="validation-lane-cards">
+      ${results
+        .map(
+          (item) => `
           <article class="validation-card ${item.pass ? "pass" : "warn"}">
             <strong>${item.title}</strong>
             <p class="meta">${getValidationScopeMeta(item.scope)}</p>
@@ -5833,10 +5838,9 @@ function renderValidationSection(title, description, results) {
             <p class="meta">${item.actual}</p>
           </article>
         `
-          )
-          .join("")}
-      </div>
-    </section>
+        )
+        .join("")}
+    </div>
   `;
 }
 
@@ -6155,9 +6159,11 @@ function applyGeneratorOcrPreview() {
 
 function persistShipConfig(showStatus = false) {
   saveStoredJson(STORAGE_KEYS.shipConfig, state.shipConfig);
-  if (showStatus) {
-    setStatus("shipConfigStatus", "Community-tool ship planner state saved.", "success");
-  }
+  setStatus(
+    "shipConfigStatus",
+    showStatus ? "Ship planner state saved." : "Ship planner updates saved automatically.",
+    "success"
+  );
 }
 
 function getImportedRecordCount() {

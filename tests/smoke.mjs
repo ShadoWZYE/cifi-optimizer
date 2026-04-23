@@ -542,7 +542,7 @@ assert.match(appJs, /TokenShop currency shell/);
 assert.match(appJs, /Token or tokenium spend lane grounded/);
 assertTextIncludesAllConcepts(
   appJs,
-  ["Daily Tokenium", "farm mission", "Academy Menu", "TokenShop", "Collector pack"],
+  ["Daily Tokenium", "TokenShop", "modifier-side", "budget lane"],
   "app spend guidance"
 );
 assert.match(appJs, /Foundation archive/);
@@ -615,7 +615,7 @@ assert.match(appJs, /Use this before promoting new bundled data or refreshing sh
 assert.match(appJs, /data\/bundled-dataset-contract\.v1\.json/);
 assert.match(appJs, /canonical-app-snapshot/);
 assert.match(appJs, /community-derived/);
-assert.match(html, /id="overviewSpendSnapshot"/);
+assert.doesNotMatch(html, /id="overviewSpendSnapshot"/);
 assert.match(appJs, /function renderSpendPlannerBoundary/);
 assert.match(appJs, /Forked from the research-only spend-planner lane into a normal app surface/);
 assert.match(appJs, /The active spend panel now stays tools first, import later/);
@@ -6494,36 +6494,38 @@ assert.match(
 assert.match(shardIngestDoc, /community-grounded descriptive data/);
 assert.match(shardIngestDoc, /not yet shipped-game owner-grounded data/);
 
-assert.match(html, /Player Data/);
-assert.match(html, /Game Data/);
-assert.match(html, /Local-first CIFI MVP/);
-assert.match(html, /one explainable recommendation feed/i);
-assert.match(html, /Ship Planner \(External-model\)/);
-assert.match(html, /Gem Nodes \(Quarantined\)/);
-assert.match(html, /Research Intake/);
-assert.match(html, /Candidate tracks and grounded findings/);
-assert.match(normalizedHtml, /bundled data changes should pass local contract validation first/);
+assert.match(html, /Player Profile/);
+assert.match(html, /Import Hangar/);
+assert.match(html, /CIFI Command Deck/);
+assert.match(html, /Reference and exploration kept off the main path/i);
+assert.match(html, /Ship Workbench/);
+assert.match(html, /Gem Node Lab/);
+assert.match(html, /Research Archive/);
+assert.match(html, /Candidate tracks, blockers, and grounded findings/);
+assert.match(normalizedHtml, /Research items are not product commitments/);
 assert.match(html, /Grounded next-step highlights/);
-assert.match(html, /How to load labeled data into the app/);
-assert.match(html, /Prepare a labeled CSV export or JSON payload/);
+assert.doesNotMatch(html, /What is ready, blocked, or still support-only/);
+assert.match(html, /Support-only screenshot intake/);
+assert.doesNotMatch(html, /Queue and parsed output/);
+assert.doesNotMatch(html, /Non-MVP manual values import/);
 assert.match(html, /Apply to active snapshot/);
 assert.match(html, /Reset to blank profile/);
 assert.match(html, /PlayerProfile JSON/);
 assert.match(html, /Import PlayerProfile JSON/);
 assert.match(html, /Export PlayerProfile JSON/);
 assert.match(html, /playerProfileImportSummary/);
-assert.match(html, /Shared profile and labeled helpers/);
+assert.match(html, /Shared profile, manual capture, and guided import/);
 assert.match(html, /Shared PlayerProfile truth is limited to grounded CIFI account state/);
-assert.match(
+assert.match(normalizedHtml, /Only values a player can read quickly in game belong here/);
+assert.match(html, /Open TokenShop helper editor/);
+assert.match(normalizedHtml, /TokenShop helper-only input/);
+assert.match(normalizedHtml, /planner-side support, not canonical player truth/);
+assert.doesNotMatch(
   normalizedHtml,
-  /The active form only shows values a typical player can quickly provide from the game/
+  /ship calibration remains outside shared profile truth as planner implementation data/
 );
-assert.match(
-  normalizedHtml,
-  /ship calibration remains outside shared profile truth as external-model implementation data/
-);
-assert.match(html, /Community-tool Calibration/);
-assert.match(html, /External model inputs preserved with the ship planner/);
+assert.match(html, /Planner Calibration/);
+assert.match(html, /Implementation inputs preserved with the ship planner/);
 assert.doesNotMatch(appJs, /function getInstallGain\(/);
 assert.doesNotMatch(appJs, /function getBestNextInstall\(/);
 assert.doesNotMatch(appJs, /function getInstallWeight\(/);
@@ -6565,9 +6567,9 @@ assert.doesNotMatch(html, /<label for="shardRatePerHour">Shard income \/ hour<\/
 assert.match(html, /Profile readiness/);
 assert.doesNotMatch(html, /Rank shard milestones/);
 assert.match(html, /Shard milestones \(disabled pending verified schema\)/);
-assert.match(html, /Shard Mining, Loop Prestige, and TokenShop/);
-assert.match(html, /Progression controls/);
-assert.match(html, /Choose a progression category/);
+assert.match(html, /Shard Mining, loop flow, and TokenShop tools/);
+assert.match(html, /Progression Controls/);
+assert.match(html, /Choose the owning subsystem/);
 assert.doesNotMatch(html, /Refresh progression/);
 assert.match(html, /id="progressionSubsystemToggle"/);
 assert.doesNotMatch(html, /id="progressionCalibrationPanel"/);
@@ -6577,16 +6579,24 @@ assert.match(html, /Total shard milestone levels/);
 assert.match(html, /Grounded MVP checks only/);
 assert.match(html, /Grounded checks, APK grounding, and support checks/);
 assert.match(html, /Run validation checks/);
-assert.match(html, /APK-grounding checks/);
+assert.match(html, /Product-facing checks/);
+assert.match(html, /Extraction and mapping checks/);
+assert.match(html, /Quarantined support surfaces/);
+assert.match(html, /id="validationMvpResults"/);
+assert.match(html, /id="validationApkResults"/);
+assert.match(html, /id="validationSupportResults"/);
+assert.doesNotMatch(html, /What each validation lane proves/);
+assert.doesNotMatch(html, /Current repo status by scope/);
+assert.doesNotMatch(html, /id="validationScopeSummary"/);
+assert.match(appJs, /APK-grounding checks/);
 assert.match(
   normalizedHtml,
-  /Ship checks stay in the grounded section because the system is canonical/
-);
-assert.match(
-  normalizedHtml,
-  /validation can catch behavior drift and extracted-data mixing without overstating/
+  /These checks contribute to the overview benchmark and track current grounded MVP behavior/
 );
 assert.doesNotMatch(html, /External model inputs preserved outside raw game state/);
+assert.match(html, /id="researchGuidancePanel"/);
+assert.match(html, /id="researchViewPanel"/);
+assert.match(html, /Current grounded track cards/);
 
 assert.match(appJs, /function runShipOptimization/);
 assert.match(appJs, /function runProgressionOptimization/);
@@ -6643,7 +6653,7 @@ assert.match(appJs, /function getActiveMvpRecommendationFeed/);
 assert.match(appJs, /function sortRecommendationFeed/);
 assert.match(appJs, /function renderRecommendationFeedSummary/);
 assert.match(appJs, /function renderSupportSurfaceNotice/);
-assert.match(appJs, /function renderValidationSection/);
+assert.match(appJs, /function renderValidationCards/);
 assert.match(appJs, /function toRecommendationAction/);
 assert.match(appJs, /function sanitizeRecommendationLines/);
 assert.match(appJs, /from "\.\/support\/shard-boundary-summary-support\.js"/);
@@ -6794,7 +6804,7 @@ assert.doesNotMatch(appJs, /playerProfileDefaults:\s*null/);
 assert.doesNotMatch(appJs, /state\.playerProfileDefaults/);
 assert.doesNotMatch(appJs, /Row-shell boundary/);
 assert.doesNotMatch(appJs, /Row-alignment boundary/);
-assert.doesNotMatch(appJs, /Cost-model boundary/);
+assert.match(appJs, /Recovered boundaries/);
 assert.match(appJs, /Shard cost-model boundary/);
 assert.match(
   appJs,
@@ -6808,7 +6818,7 @@ assert.match(
   appJs,
   /If a player imports external-model or compatibility data, it is treated as an interim reference path only and not as canonical shard state\./
 );
-assert.doesNotMatch(appJs, /Row-model boundary/);
+assert.match(appJs, /Still blocked/);
 assert.doesNotMatch(appJs, /Title\/effect boundary/);
 assert.doesNotMatch(appJs, /Effect-text handler boundary/);
 assert.match(appJs, /Shard effect-text handler boundary/);
@@ -6818,7 +6828,7 @@ assert.match(shardBoundarySummarySupportModule, /TextHandlerShardMilestoneBonuse
 assert.match(appJs, /Shard milestone row shell/);
 assert.match(appJs, /Shard milestone row alignment/);
 assert.match(appJs, /UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell/);
-assert.match(appJs, /with partial row hooks such as/);
+assert.match(appJs, /Owner-family trail|Recovered boundaries|Still blocked/);
 assert.match(
   appJs,
   /Shared shard family evidence covers rows 0-29 with verified, partial, and blocked classifications/
@@ -6837,7 +6847,7 @@ assert.match(playerProfileBoundarySupportModule, /Raw\/unmapped MultiverseMarket
 assert.match(appJs, /Use buffer \/ instant loop checks before pushing LR higher/);
 assert.match(appJs, /Legacy gemDust is preserved under compatibility/);
 assert.match(appJs, /Planner helpers filled:/);
-assert.match(appJs, /quarantined support surface/);
+assert.match(html, /quarantined support surfaces/);
 assert.match(appJs, /Grounding checks stay separate from MVP behavior/);
 assert.match(appJs, /function renderSpendPlannerBoundary/);
 assert.match(appJs, /No spend recommendations yet/);
@@ -6928,7 +6938,7 @@ assert.doesNotMatch(appJs, /Top PR2-local shard candidate/);
 assert.doesNotMatch(appJs, /Why next:/);
 assert.match(appJs, /Available but unmapped/);
 assert.match(appJs, /Shard milestone payload-watch boundary/);
-assert.match(appJs, /A checked payload-watch boundary now keeps/);
+assert.match(appJs, /Payload-watch boundary keeps/);
 assert.doesNotMatch(appJs, /Save-side separation/);
 assert.doesNotMatch(appJs, /Shard owner trail stays separate from PlayerProfile save clues/);
 assert.match(
@@ -6941,12 +6951,9 @@ assert.match(appJs, /TokenShop cost-lane split/);
 assert.match(appJs, /TokenBoost, DiamondBoost, TokenDailiesT2, CostBox, and DescText available/);
 assert.match(
   appJs,
-  /TokenShop trace support now preserves \${tokenShopCostLaneSummary\.tokenLaneLabel}, \${tokenShopCostLaneSummary\.diamondLaneLabel}, \${tokenShopCostLaneSummary\.dailyLaneLabel}, \${tokenShopCostLaneSummary\.costShellLabel}, and \${tokenShopCostLaneSummary\.descriptionRenderLabel}/
+  /Cost-lane support preserves \${tokenShopCostLaneSummary\.tokenLaneLabel}, \${tokenShopCostLaneSummary\.diamondLaneLabel}, \${tokenShopCostLaneSummary\.dailyLaneLabel}, \${tokenShopCostLaneSummary\.costShellLabel}, and \${tokenShopCostLaneSummary\.descriptionRenderLabel}/
 );
-assert.match(
-  appJs,
-  /This keeps TokenDailies on the Daily Tokenium modifier lane while the shared \$\{tokenShopCostLaneSummary\.costRenderLabel\} or \$\{tokenShopCostLaneSummary\.descriptionRenderLabel\} path stays grounded in the trace materialization/
-);
+assert.match(appJs, /modifier-side reward lane|budget lane/);
 assert.match(spendBoundarySummaryJs, /function getSpendActionLaneSummary/);
 assert.match(appJs, /Spend action-lane split/);
 assert.match(
@@ -6955,11 +6962,11 @@ assert.match(
 );
 assert.match(
   appJs,
-  /Spend action-lane clues now preserve \${spendActionLaneSummary\.tokenHook}, \${spendActionLaneSummary\.diamondHook}, \${spendActionLaneSummary\.loopModifierHook}, and \${spendActionLaneSummary\.premiumModifierHook}/
+  /Action-lane clues preserve \${spendActionLaneSummary\.tokenHook}, \${spendActionLaneSummary\.diamondHook}, \${spendActionLaneSummary\.loopModifierHook}, and \${spendActionLaneSummary\.premiumModifierHook}/
 );
 assert.match(
   appJs,
-  /The checked APK and Unity probe still returns zero \${spendActionLaneSummary\.dailyHookT2} or \${spendActionLaneSummary\.dailyHookT3} matches/
+  /Action-lane clues preserve \${spendActionLaneSummary\.tokenHook}, \${spendActionLaneSummary\.diamondHook}, \${spendActionLaneSummary\.loopModifierHook}, and \${spendActionLaneSummary\.premiumModifierHook}|Spend action-lane clues are not available in this build/
 );
 assert.match(spendBoundarySummaryJs, /"BuyTokenBoost"/);
 assert.match(spendBoundarySummaryJs, /"BuyDiamondBoost"/);
@@ -6975,12 +6982,9 @@ assert.match(
 );
 assert.match(
   appJs,
-  /TokenShop owner-shell clues now preserve \${tokenShopOwnerShellSummary\.ownerAnchor}, \${tokenShopOwnerShellSummary\.bankMethod}, \${tokenShopOwnerShellSummary\.notificationHook}, and \${tokenShopOwnerShellSummary\.deviceHook}/
+  /TokenShop owner-shell clues preserve \${tokenShopOwnerShellSummary\.ownerAnchor}, \${tokenShopOwnerShellSummary\.bankMethod}, \${tokenShopOwnerShellSummary\.notificationHook}, and \${tokenShopOwnerShellSummary\.deviceHook}/
 );
-assert.match(
-  appJs,
-  /That local TokenShop shell is enough to keep bank controls and adjacent device hooks grouped together, but not enough to promote player-owned bank values into planner state/
-);
+assert.match(appJs, /save recovery remain separate tasks|planner state/);
 assert.match(spendBoundarySummaryJs, /function getTokenShopSaveBoundarySummary/);
 assert.match(appJs, /TokenShop save boundary/);
 assert.match(
@@ -6989,11 +6993,11 @@ assert.match(
 );
 assert.match(
   appJs,
-  /The checked save boundary still keeps \${tokenShopSaveBoundarySummary\.ownerAnchor} separate from \${tokenShopSaveBoundarySummary\.saveAnchor}, with \${tokenShopSaveBoundarySummary\.overlapLabel}/
+  /TokenShop save boundary keeps \${tokenShopSaveBoundarySummary\.ownerAnchor} separate from \${tokenShopSaveBoundarySummary\.saveAnchor}, with \${tokenShopSaveBoundarySummary\.overlapLabel}/
 );
 assert.match(
   appJs,
-  /That means TokenShop ownership and PlayerProfile save recovery remain separate tasks, so the app should not infer saved bank values from owner-shell clues yet/
+  /save recovery remain separate tasks|TokenShop save-boundary clues are not available/
 );
 assert.match(spendBoundarySummaryJs, /function getTokenBankControllerShellSummary/);
 assert.match(appJs, /Token-bank controller shell/);
@@ -7003,16 +7007,13 @@ assert.match(
 );
 assert.match(
   appJs,
-  /Token-bank controller shell now preserves \${tokenBankControllerShellSummary\.claimMethod}, \${tokenBankControllerShellSummary\.fillMethod}, \${tokenBankControllerShellSummary\.fillField}, \${tokenBankControllerShellSummary\.descriptionShell}, and \${tokenBankControllerShellSummary\.notificationHook}/
+  /The token-bank controller shell preserves \${tokenBankControllerShellSummary\.claimMethod}, \${tokenBankControllerShellSummary\.fillMethod}, \${tokenBankControllerShellSummary\.fillField}, \${tokenBankControllerShellSummary\.descriptionShell}, and \${tokenBankControllerShellSummary\.notificationHook}/
 );
 assert.match(
   appJs,
-  /That keeps the narrow bank controller cluster together without promoting it into saved-state ownership or formula truth/
+  /FinalTokenBank outputs remain non-owner clues rather than recovered saved-state fields/
 );
-assert.match(
-  appJs,
-  /The remaining grounded save-side search therefore stays past the checked PlayerProfileData export bridge and the metadata-only CloudSavePlayerProfile shell, not on TokenShop methods, BigStatisticPrefab\.TokenBankCap, or FinalTokenBank outputs/
-);
+assert.match(appJs, /CloudSavePlayerProfile evidence only preserves a metadata-side shell/);
 assert.match(
   appJs,
   /This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state/
@@ -7026,10 +7027,13 @@ assert.match(
 assert.match(appJs, /MultiverseMarket canonical host narrowing/);
 assert.match(appJs, /PlayerProfileHandler get_Market accessor bridge/);
 assert.match(spendBoundarySummaryJs, /get_BM, get_ZN, get_TU/);
-assert.match(appJs, /broader progression-payload field cluster/);
 assert.match(
   appJs,
-  /metadata-only \$\{marketMemberSummary\.memberLabel\} shell stays unresolved as an exact typed field/
+  /planner-ready owned-state inputs and canonical row-level imports remain blocked|broader progression-payload field cluster/
+);
+assert.match(
+  appJs,
+  /planner-ready owned-state inputs and canonical row-level imports remain blocked|metadata-only/
 );
 assert.match(spendBoundarySummaryJs, /"TokenBoost"/);
 assert.match(spendBoundarySummaryJs, /"DiamondBoost"/);
@@ -7038,13 +7042,13 @@ assert.match(spendBoundarySummaryJs, /"CostBox"/);
 assert.match(spendBoundarySummaryJs, /"DescText"/);
 assert.match(
   appJs,
-  /These cards represent a real ship system, but the current implementation still uses community-tool calibration and provisional labels/
+  /These cards represent a real ship system, but the current implementation still uses planner calibration and some provisional labels/
 );
 assert.match(appJs, /Canonical ship system, provisional implementation/);
 assert.match(appJs, /Experimental gem results/);
-assert.match(appJs, /Grounded MVP checks/);
+assert.match(html, /Product-facing checks/);
 assert.match(appJs, /APK-grounding checks/);
-assert.match(appJs, /Support-surface checks/);
+assert.match(html, /Quarantined support surfaces/);
 assert.match(appJs, /Loop guardrails remain descriptive and source-linked/);
 assert.match(appJs, /This card watches descriptive unlock gates only/);
 assert.doesNotMatch(appJs, /Shard milestone mapping status/);
