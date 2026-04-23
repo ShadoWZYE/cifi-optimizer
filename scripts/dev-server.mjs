@@ -4,12 +4,12 @@ import { tmpdir } from "node:os";
 import { extname, join, normalize } from "node:path";
 import { cwd } from "node:process";
 import { spawn } from "node:child_process";
-import { DatabaseSync } from "node:sqlite";
 import {
   createGeneratorOcrStageError,
   createMissingGeneratorOcrScriptError,
   resolveGeneratorOcrScriptPath
 } from "./ocr/generator-ocr-support.mjs";
+import { queryOne } from "./contracts/sqlite-compat.mjs";
 
 const root = cwd();
 const port = Number(process.env.PORT || 4173);
@@ -224,16 +224,6 @@ async function handleGeneratorOcr(request, response) {
   }
 }
 
-function withCacheDb(fn) {
-  const db = new DatabaseSync(cacheDbPath);
-  db.exec("PRAGMA busy_timeout=30000");
-  try {
-    return fn(db);
-  } finally {
-    db.close();
-  }
-}
-
 function handleSystemUnits(response, requestUrl) {
   const requestedIds = String(requestUrl.searchParams.get("ids") || "")
     .split(",")
@@ -243,17 +233,17 @@ function handleSystemUnits(response, requestUrl) {
     ? requestedIds
     : ["app-meta", "player-state", "shards", "token-shop", "multiverse-market"];
   try {
-    const result = withCacheDb((db) => {
-      const statement = db.prepare(`
+    const result = (() => {
+      const sql = `
         SELECT system_id, version, payload_json, provenance_json, reducer_version, built_at, exported_path
         FROM materialized_system_unit_views
         WHERE system_id = ? AND version = 'v1'
-      `);
+      `;
       const units = {};
       const missing = [];
       let latestBuiltAt = null;
       for (const systemId of systemIds) {
-        const row = statement.get(systemId);
+        const row = queryOne(cacheDbPath, sql, [systemId]);
         if (!row) {
           missing.push(systemId);
           continue;
@@ -264,7 +254,7 @@ function handleSystemUnits(response, requestUrl) {
         }
       }
       return { units, missing, builtAt: latestBuiltAt };
-    });
+    })();
     if (result.missing.length) {
       writeJson(response, 503, {
         error: "Missing DB-backed system-unit views.",

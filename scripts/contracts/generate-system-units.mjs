@@ -1,7 +1,7 @@
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { DatabaseSync } from "node:sqlite";
+import { queryOne } from "./sqlite-compat.mjs";
 
 import {
   createDefaultPlayerProfile,
@@ -65,44 +65,32 @@ async function pathExists(relativePath) {
   }
 }
 
-function withDb(fn) {
-  const db = new DatabaseSync(dbPath);
-  db.exec("PRAGMA busy_timeout=30000");
-  try {
-    return fn(db);
-  } finally {
-    db.close();
-  }
-}
-
 function fetchLatestMaterializedTargetBundle(traceScope) {
-  return withDb((db) => {
-    const row = db
-      .prepare(
-        `
+  const row = queryOne(
+    dbPath,
+    `
         SELECT trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
         FROM materialized_target_bundle_views
         WHERE project_name = ? AND project_file = ? AND trace_scope = ?
         ORDER BY built_at DESC, request_signature DESC
         LIMIT 1
-      `
-      )
-      .get("cifi-full", "libil2cpp.so", traceScope);
-    if (!row) {
-      throw new Error(
-        `Missing materialized target bundle view for trace scope "${traceScope}". ` +
-          `Refresh DB-backed trace materializations before generating system units.`
-      );
-    }
-    return {
-      traceScope: row.trace_scope,
-      requestSignature: row.request_signature,
-      payload: JSON.parse(row.payload_json),
-      provenance: row.provenance_json ? JSON.parse(row.provenance_json) : {},
-      reducerVersion: row.reducer_version,
-      builtAt: row.built_at
-    };
-  });
+      `,
+    ["cifi-full", "libil2cpp.so", traceScope]
+  );
+  if (!row) {
+    throw new Error(
+      `Missing materialized target bundle view for trace scope "${traceScope}". ` +
+        `Refresh DB-backed trace materializations before generating system units.`
+    );
+  }
+  return {
+    traceScope: row.trace_scope,
+    requestSignature: row.request_signature,
+    payload: JSON.parse(row.payload_json),
+    provenance: row.provenance_json ? JSON.parse(row.provenance_json) : {},
+    reducerVersion: row.reducer_version,
+    builtAt: row.built_at
+  };
 }
 
 function sanitizeTraceSemanticScope(scope) {
