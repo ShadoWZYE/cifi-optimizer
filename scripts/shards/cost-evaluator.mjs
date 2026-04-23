@@ -1,22 +1,24 @@
 import assert from "node:assert/strict";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { queryOne } from "../contracts/sqlite-compat.mjs";
+import { DatabaseSync } from "node:sqlite";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const dbPath = path.join(repoRoot, "workbench", "ghidra-cache", "ghidra_cache.sqlite3");
 
 function loadShardCostFormulaModel() {
-  {
-    const materializedRow = queryOne(
-      dbPath,
-      `
+  const db = new DatabaseSync(dbPath);
+  db.exec("PRAGMA busy_timeout=30000");
+  try {
+    const materializedRow = db
+      .prepare(
+        `
           SELECT payload_json
           FROM materialized_system_unit_views
           WHERE system_id = ? AND version = ?
-        `,
-      ["shard-cost-formula-model", "v1"]
-    );
+        `
+      )
+      .get("shard-cost-formula-model", "v1");
     if (materializedRow?.payload_json) {
       const payload = JSON.parse(materializedRow.payload_json);
       if (payload?.dataset === "shard-cost-formula-model.v1") {
@@ -24,15 +26,15 @@ function loadShardCostFormulaModel() {
       }
     }
 
-    const shardUnitRow = queryOne(
-      dbPath,
-      `
+    const shardUnitRow = db
+      .prepare(
+        `
           SELECT payload_json
           FROM materialized_system_unit_views
           WHERE system_id = ? AND version = ?
-        `,
-      ["shards", "v1"]
-    );
+        `
+      )
+      .get("shards", "v1");
     if (shardUnitRow?.payload_json) {
       const shardUnit = JSON.parse(shardUnitRow.payload_json);
       const payload = shardUnit?.sections?.cost?.formulaModel?.data ?? null;
@@ -40,6 +42,8 @@ function loadShardCostFormulaModel() {
         return payload;
       }
     }
+  } finally {
+    db.close();
   }
 
   throw new Error(
