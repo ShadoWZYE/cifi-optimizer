@@ -34,9 +34,9 @@ These categories are already meaningful and should stay:
 - reusable structural models
   - example: `shard-cost-formula-model.v1.json`
   - example: `token-shop-row-remap-boundary.json`
-- registry and contract files
-  - example: `unity-trace-target-registry.json`
+- contract files and archived compatibility catalogs
   - example: `bundled-dataset-contract.v1.json`
+  - example: archived `unity-trace-target-registry.json`
 
 ## What is still the main consolidation problem
 

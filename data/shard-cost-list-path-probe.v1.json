@@ -3,7 +3,7 @@
   "generatedAt": "2026-04-05",
   "source": {
     "methodProbe": "data/shard-cost-method-probe.v1.json",
-    "uabeaProbeReport": "data/uabea-extract-report.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
     "libIl2cpp": "workbench/apk/base/libil2cpp.so"
   },
   "ownerFields": {
@@ -64,3 +64,4 @@
     "Do not expose exact shard next-costs until the repo still proves how each get_SU*Cost getter itself assembles the returned BreakInfinity.BigDouble."
   ]
 }
+

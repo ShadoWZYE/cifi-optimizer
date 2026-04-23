@@ -4,7 +4,7 @@
     "probe": "tmp-multiverse-owner-family-probe.json",
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0",
-    "validatedRows": "data/multiverse-market-values.json"
+    "validatedRows": "data/archive/multiverse-market-values.json"
   },
   "ownerAnchors": [
     "MultiverseMarket, Assembly-CSharp",
@@ -41,3 +41,4 @@
     "This is enough to keep the MultiverseMarket owner-family and cost-lane shell grounded for future mapping work, but not enough to recover player-owned Inscryptions balance fields, current row levels, or the declaring save model."
   ]
 }
+

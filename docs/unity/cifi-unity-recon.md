@@ -5,7 +5,7 @@ This document records extractable Unity-side signals from the LDPlayer install o
 Scope:
 - Grounded names and save-related symbols from `global-metadata.dat`
 - Extracted file locations from the emulator
-- Repeatable extracted reports from `scripts/unity/unity_extract_report.py`
+- Manual raw-report helpers such as `scripts/unity/unity_extract_report.py`, `scripts/unity/unity_textasset_dump.py`, and `scripts/unity/unity_targeted_string_report.py` when DB-backed/system-unit surfaces do not answer the question directly
 
 Current status:
 - The game exposes external files at `/storage/emulated/0/Android/data/com.OctocubeGamesCompany.CIFI/files`
@@ -76,15 +76,21 @@ Current conclusion:
 - `AchievementInscryptionsReward` and `FinalIS*` symbols remain effect/reward clues rather than recovered saved-balance fields
 
 Generated artifacts:
-- `scripts/unity/unity_extract_report.py`
-- `scripts/unity/unity_textasset_dump.py`
-- `scripts/unity/metadata_neighborhood_probe.py`
+- `scripts/unity/unity_extract_report.py` (manual research helper only)
+- `scripts/unity/unity_textasset_dump.py` (manual research helper only)
+- `scripts/unity/unity_targeted_string_report.py` (manual research helper only)
+- historical metadata-neighborhood probing is now archived; active multiverse metadata neighborhood extraction is DB/exporter-owned
 - `docs/unity/unity-extract-report.md`
 - `docs/systems/spend/multiverse-market-metadata-neighborhood.md`
-- `data/unity-apk-extract-report.json`
-- `data/multiverse-market-metadata-neighborhood.json`
+- `data/archive/unity-apk-extract-report.json`
+- `data/archive/multiverse-market-metadata-neighborhood.json`
 - `data/unity-textassets-manifest.json`
 - `data/unity-iap-summary.json`
+
+Current owner boundary:
+
+- DB-backed/system-unit derivations are the active owner path for token-shop, multiverse, shard, and trace runtime work.
+- Archived raw reports remain useful for manual provenance checks, but they are not active runtime or export owners.
 
 Direct mechanics recovered so far:
 - The Unity `TextAsset` catalog `IAPProductCatalog` contains first-party store configuration with concrete pack effects and amounts.
@@ -108,4 +114,6 @@ Recommended use for MVP:
 - Use the metadata and UI strings to ground manual import labels and internal field names.
 - Do not assume the save blobs are safely parseable yet.
 - If deeper extraction is needed, the next step is targeted Unity asset parsing or an IL2CPP-oriented decoder for the `ObscuredFilePrefs` save path.
+
+
 

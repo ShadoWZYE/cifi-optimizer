@@ -1,15 +1,28 @@
 # Trace Registry Extension Guide
 
+Archived. The live trace path is DB-first now. This file remains only as historical guidance for
+how the old registry-target model was authored before subject resolution, execution planning,
+surface assembly, graph reuse, bridge policy, narrative, and assessment moved into reducer-owned
+SQLite fragments.
+
 ## Purpose
 
-Use the trace registry to encode how a family is recovered, not just what strings to search for.
-The registry lives in:
+The old registry used to encode how a family was recovered, not just what strings to search for.
+It is now only an archived compatibility artifact, referred to in current repo surfaces as:
 
-- `data/unity-trace-target-registry.json`
+- `archive:unity-trace-target-registry.json`
 
-The runtime that executes it lives in:
+The surviving runtime that replaced it lives in:
 
 - `scripts/unity/unity_trace_bundle.py`
+
+## Historical Notes
+
+Do not extend `data/archive/unity-trace-target-registry.json` for new work. Add DB-owned bootstrap,
+planning, support, surface, graph, bridge, narrative, or assessment fragments instead.
+
+If you are auditing old target records, the guidance below explains what the old file used to
+carry before the DB migration.
 
 ## When to add a new target
 

@@ -10,11 +10,32 @@ from pathlib import Path
 from typing import Any, Iterator
 
 ROOT = Path(__file__).resolve().parents[2]
-TRACE_REGISTRY_PATH = ROOT / "data" / "unity-trace-target-registry.json"
 
 
 DB_SCHEMA_VERSION = 7
 SCHEMA_VERSION_FLOOR = 7
+
+TRACE_FRAGMENT_TOP_LEVEL_KEYS = {
+    "assetSet",
+    "bridgePromotionRule",
+    "depthExpansion",
+    "depthSearch",
+    "executionAnchors",
+    "nativeReconstruction",
+    "nativeTrace",
+    "plannerResolution",
+    "rowRecovery",
+    "searchExpansion",
+    "shellWindow",
+    "sourceRoles",
+    "sources",
+    "surfaces",
+    "target",
+    "traceGraph",
+    "traceParams",
+    "traceRegistry",
+    "traceWorkflow",
+}
 
 ASPECT_PRIORITIES = {
     "bridge_plan": 98,
@@ -119,11 +140,6 @@ def _load_json(path: Path) -> dict[str, Any] | None:
         return None
 
 
-def _load_trace_registry_target(target_id: str) -> dict[str, Any]:
-    registry = _load_json(TRACE_REGISTRY_PATH) or {}
-    return dict(((registry.get("targets") or {}).get(str(target_id) or "")) or {})
-
-
 def _json_dumps(value: Any) -> str:
     return json.dumps(value, ensure_ascii=True, sort_keys=True)
 
@@ -155,6 +171,128 @@ def _dedupe_sequence(values: list[Any]) -> list[Any]:
         seen.add(key)
         result.append(value)
     return result
+
+
+def _unique_strings(values: list[str]) -> list[str]:
+    result: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        trimmed = str(value or "").strip()
+        if not trimmed or trimmed in seen:
+            continue
+        seen.add(trimmed)
+        result.append(trimmed)
+    return result
+
+
+def _collect_semantic_scope_subject_terms(scope_payload: dict[str, Any]) -> list[str]:
+    return _unique_strings(
+        [
+            str(scope_payload.get("scopeId") or ""),
+            str(((scope_payload.get("rowShell") or {}).get("field") or "")),
+            str((((scope_payload.get("rowShell") or {}).get("pathId")) or "")),
+            str(((scope_payload.get("purchaseAction") or {}).get("term") or "")),
+            str(scope_payload.get("sceneOwner") or ""),
+            str(scope_payload.get("declaringField") or ""),
+            str(scope_payload.get("runtimeShell") or ""),
+            *[
+                str(term)
+                for term in (((scope_payload.get("purchaseAction") or {}).get("relatedTerms") or []))
+            ],
+            *[
+                str(term)
+                for term in (((scope_payload.get("displayUpdaters") or {}).get("primaryTerms") or []))
+            ],
+            *[
+                str(term)
+                for term in (((scope_payload.get("displayUpdaters") or {}).get("relatedTerms") or []))
+            ],
+            *[
+                str(item.get("term") or "")
+                for item in ((scope_payload.get("parameterShell") or []))
+                if isinstance(item, dict)
+            ],
+        ]
+    )
+
+
+def _collect_resolution_terms_for_candidate(
+    target: dict[str, Any],
+    semantic_scope_payloads: list[dict[str, Any]],
+    include_legacy_targets: bool = False,
+) -> list[str]:
+    terms = _unique_strings(
+        [
+            str(target.get("label") or ""),
+            str(target.get("familyId") or ""),
+        ]
+    )
+    if include_legacy_targets:
+        terms.extend(
+            _unique_strings(
+                [
+                    str(target.get("id") or ""),
+                    str(target.get("traceScope") or ""),
+                ]
+            )
+        )
+    for scope_payload in semantic_scope_payloads:
+        scope_terms = _collect_semantic_scope_subject_terms(scope_payload)
+        terms.extend(scope_terms)
+        terms.extend(
+            _unique_strings(
+                [
+                    str(scope_payload.get("scopeType") or ""),
+                    str(scope_payload.get("familyId") or ""),
+                    str(scope_payload.get("targetId") or ""),
+                    str(scope_payload.get("traceScope") or ""),
+                ]
+            )
+        )
+    return _unique_strings(terms)
+
+
+def _collect_reconstruction_subject_terms(payload: dict[str, Any]) -> list[str]:
+    row_shell = dict(payload.get("rowShell") or {})
+    presentation = dict(payload.get("presentation") or {})
+    return _unique_strings(
+        [
+            str(payload.get("semanticKey") or ""),
+            str(payload.get("scopeType") or ""),
+            str(payload.get("familyId") or ""),
+            str(payload.get("traceScope") or ""),
+            str(payload.get("targetId") or ""),
+            str(row_shell.get("field") or ""),
+            str(row_shell.get("pathId") or ""),
+            *[str(role) for role in (presentation.get("slotRoles") or [])],
+        ]
+    )
+
+
+def _collect_family_graph_subject_terms(payload: dict[str, Any]) -> list[str]:
+    row_shells = list(payload.get("rowShells") or [])
+    return _unique_strings(
+        [
+            str(payload.get("semanticKey") or ""),
+            str(payload.get("scopeType") or ""),
+            str(payload.get("familyId") or ""),
+            str(payload.get("familyLabel") or ""),
+            str(payload.get("traceScope") or ""),
+            str(payload.get("targetId") or ""),
+            *[
+                str(item.get("field") or "")
+                for item in row_shells
+                if isinstance(item, dict)
+            ],
+            *[
+                str(item.get("pathId") or "")
+                for item in row_shells
+                if isinstance(item, dict) and item.get("pathId") is not None
+            ],
+            *[str(term) for term in (payload.get("coreTerms") or [])],
+            *[str(term) for term in (payload.get("supportingEdgeTypes") or [])],
+        ]
+    )
 
 
 def _normalize_result_terms(result: dict[str, Any], search_terms: list[str]) -> list[str]:
@@ -260,6 +398,52 @@ def _merge_managed_reconstructions(payloads: list[dict[str, Any]]) -> dict[str, 
     }
 
 
+def _managed_owner_matches_family(owner: str, family_hint: str | None) -> bool:
+    if not family_hint:
+        return True
+    lowered = owner.lower()
+    if family_hint.startswith("shard"):
+        return "shard" in lowered
+    if family_hint == "token-shop":
+        if any(noise in lowered for noise in ("tokenbank", "claimablebanktokens", "callback", "statemachine", "ugs")):
+            return False
+        return "tokenshop" in lowered or "arcade" in lowered or "atu" in lowered
+    if family_hint.startswith("multiverse-market"):
+        return "multiverse" in lowered or "market" in lowered or "inscryption" in lowered or "save" in lowered
+    return True
+
+
+def _prune_managed_reconstruction(payload: dict[str, Any]) -> dict[str, Any]:
+    family_hint = str(payload.get("familyHint") or "").strip() or None
+    if not family_hint:
+        return payload
+    owner_to_terms = dict(payload.get("ownerToTerms") or {})
+    scored_owners = list(payload.get("scoredOwners") or [])
+    allowed_owners = {
+        str(entry.get("owner") or "")
+        for entry in scored_owners
+        if str(entry.get("owner") or "") and _managed_owner_matches_family(str(entry.get("owner") or ""), family_hint)
+    }
+    if not allowed_owners:
+        return payload
+    pruned_owner_to_terms = {
+        owner: bucket
+        for owner, bucket in owner_to_terms.items()
+        if owner in allowed_owners
+    }
+    pruned_scored_owners = [
+        entry for entry in scored_owners
+        if str(entry.get("owner") or "") in allowed_owners
+    ]
+    pruned_scored_owners.sort(key=lambda item: (-int(item.get("score", 0) or 0), str(item.get("owner", "")).lower()))
+    return {
+        **payload,
+        "owners": [owner for owner in (payload.get("owners") or []) if owner in allowed_owners],
+        "ownerToTerms": pruned_owner_to_terms,
+        "scoredOwners": pruned_scored_owners,
+    }
+
+
 def _merge_managed_graphs(payloads: list[dict[str, Any]]) -> dict[str, Any]:
     owners_by_name: dict[str, dict[str, Any]] = {}
     term_nodes: list[dict[str, Any]] = []
@@ -315,9 +499,36 @@ def _merge_managed_graphs(payloads: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _prune_managed_graph(payload: dict[str, Any], family_hint: str | None, allowed_owners: set[str]) -> dict[str, Any]:
+    if not family_hint or not allowed_owners:
+        return payload
+    owner_nodes = [
+        entry for entry in (payload.get("owners") or [])
+        if str(entry.get("owner") or "") in allowed_owners
+    ]
+    edges = []
+    for edge in payload.get("edges", []) or []:
+        source = str(edge.get("from") or "")
+        edge_type = str(edge.get("type") or "")
+        if edge_type in {"owns-method", "owns-field", "uses-raw-value", "related-term"} and source and source not in allowed_owners:
+            continue
+        edges.append(edge)
+    return {
+        **payload,
+        "owners": owner_nodes,
+        "edges": edges,
+    }
+
+
 SYSTEM_TRACE_FRAGMENT_KINDS = {
-    "system_scope_fragment",
+    "execution_context_fragment",
     "assessment_fragment",
+    "target_narrative_fragment",
+    "execution_plan_fragment",
+    "surface_plan_fragment",
+    "graph_plan_fragment",
+    "bridge_policy_fragment",
+    "family_graph_fragment",
     "formula_fragment",
     "threshold_fragment",
     "dependency_fragment",
@@ -449,6 +660,8 @@ def _reduce_owner_controller_fragment(rows: list[sqlite3.Row]) -> tuple[dict[str
         "owner": _merge_scalar_field("owner", payloads, conflicts),
         "familyIds": _dedupe_sequence([payload.get("familyId") for payload in payloads if payload.get("familyId")]),
         "targetIds": _dedupe_sequence([payload.get("targetId") for payload in payloads if payload.get("targetId")]),
+        "ownerFieldBlocks": _dedupe_sequence([payload.get("ownerFieldBlock") for payload in payloads if payload.get("ownerFieldBlock")]),
+        "controllerBlocks": _dedupe_sequence([payload.get("controllerBlock") for payload in payloads if payload.get("controllerBlock")]),
         "ownerBlobRows": _dedupe_sequence([payload.get("ownerBlobRow") for payload in payloads if payload.get("ownerBlobRow")]),
         "runtimeEvaluatorRecoveries": _dedupe_sequence([payload.get("runtimeEvaluatorRecovery") for payload in payloads if payload.get("runtimeEvaluatorRecovery")]),
         "runtimeInstanceRecoveries": _dedupe_sequence([payload.get("runtimeInstanceRecovery") for payload in payloads if payload.get("runtimeInstanceRecovery")]),
@@ -484,6 +697,7 @@ def _reduce_ui_binding_fragment(rows: list[sqlite3.Row]) -> tuple[dict[str, Any]
         "role": _merge_scalar_field("role", payloads, conflicts),
         "familyIds": _dedupe_sequence([payload.get("familyId") for payload in payloads if payload.get("familyId")]),
         "targetIds": _dedupe_sequence([payload.get("targetId") for payload in payloads if payload.get("targetId")]),
+        "shellWindows": _dedupe_sequence([payload.get("shellWindow") for payload in payloads if payload.get("shellWindow")]),
         "values": _dedupe_sequence([item for payload in payloads for item in (payload.get("values") or [])]),
         "presentationUpdatePaths": _dedupe_sequence([payload.get("presentationUpdatePath") for payload in payloads if payload.get("presentationUpdatePath")]),
     }
@@ -522,7 +736,7 @@ def _reduce_semantic_fragment(fragment_kind: str, rows: list[sqlite3.Row]) -> tu
     support = _support_metadata_from_rows(ordered)
     canonical_payload = _json_loads(ordered[0]["payload_json"], None)
     if isinstance(canonical_payload, dict):
-        canonical_payload = _normalize_assessment_owned_payload(
+        canonical_payload = _normalize_reference_owned_payload(
             fragment_kind,
             canonical_payload,
             str(ordered[0]["trace_scope"] or ""),
@@ -547,13 +761,35 @@ def _reduce_semantic_fragment(fragment_kind: str, rows: list[sqlite3.Row]) -> tu
     return canonical_payload, alternates, provenance, "semantic-fragment-best-rank-v1"
 
 
-def _normalize_assessment_owned_payload(
+def _normalize_reference_owned_payload(
     fragment_kind: str,
     payload: dict[str, Any] | None,
     trace_scope: str,
 ) -> dict[str, Any] | None:
     if not isinstance(payload, dict):
         return payload
+    if fragment_kind == "rowRecovery":
+        return _sanitize_row_recovery_for_persistence(dict(payload))
+    if fragment_kind == "traceRegistry":
+        normalized = dict(payload)
+        normalized["catalogMode"] = "db-bootstrap"
+        normalized.pop("selectedTargetId", None)
+        normalized.pop("compatibilityTargetId", None)
+        normalized.pop("comparisonPresetId", None)
+        normalized.pop("comparisonPreset", None)
+        normalized.pop("solvedBaselineTargetId", None)
+        normalized.pop("blockedTargetId", None)
+        normalized.pop("path", None)
+        if not list(normalized.get("followUpSurfaces") or []):
+            normalized.pop("followUpSurfaces", None)
+        return normalized
+    if fragment_kind == "traceWorkflow":
+        normalized = dict(payload)
+        command = str(normalized.get("command") or "")
+        direct_example = str(normalized.get("directExample") or "")
+        normalized["command"] = command.replace("--legacy-targets ", "")
+        normalized["directExample"] = direct_example.replace("--legacy-targets ", "")
+        return normalized
     if fragment_kind not in {"reconstruction_note_fragment", "progression_fragment"}:
         return payload
     normalized = dict(payload)
@@ -561,6 +797,14 @@ def _normalize_assessment_owned_payload(
     normalized.pop("decisionSummary", None)
     if target_id and not str(normalized.get("assessmentSemanticKey") or "").strip():
         normalized["assessmentSemanticKey"] = f"target-assessment:{target_id}"
+    if fragment_kind == "reconstruction_note_fragment":
+        normalized.pop("groundedConclusion", None)
+        normalized.pop("currentBoundary", None)
+        normalized.pop("bridgeCheck", None)
+        if target_id and not str(normalized.get("narrativeSemanticKey") or "").strip():
+            normalized["narrativeSemanticKey"] = f"target-narrative:{target_id}"
+        if target_id and not str(normalized.get("bridgeComparisonSemanticKey") or "").strip():
+            normalized["bridgeComparisonSemanticKey"] = f"target-bridge-comparison:{target_id}"
     return normalized
 
 
@@ -662,6 +906,110 @@ def _collect_trace_support_metadata(
     }
 
 
+def _synthesize_surface_plan_from_registry(
+    trace_scope: str,
+    compatibility_target_id: str,
+    family_id: str,
+) -> dict[str, Any]:
+    strategy_config = dict(BOOTSTRAP_SUPPORT_CONTEXTS.get(compatibility_target_id) or {})
+    default_anchors = list(BOOTSTRAP_DEFAULT_ANCHORS.get(compatibility_target_id) or [])
+    if not strategy_config:
+        return {}
+    surface_plans: list[dict[str, Any]] = []
+    for surface in list(strategy_config.get("surfaces") or []):
+        if not isinstance(surface, dict):
+            continue
+        source_ids = [
+            str(source_id)
+            for source_id in (surface.get("sourceIds") or [])
+            if str(source_id or "").strip() and str(source_id) != "tokenShopRowRemapBoundary"
+        ]
+        surface_plans.append(
+            {
+                "id": str(surface.get("id") or ""),
+                "label": str(surface.get("label") or ""),
+                "terms": _unique_strings([str(item) for item in (surface.get("terms") or [])]),
+                "sourceIds": _unique_strings(source_ids),
+            }
+        )
+    if not surface_plans:
+        if compatibility_target_id == "shard-cost-su0-structure":
+            parameter_shell = [str(item) for item in (strategy_config.get("parameterShell") or []) if str(item).strip()]
+            accessor = str(strategy_config.get("accessor") or "").strip()
+            surface_plans = [
+                {
+                    "id": "cost-model-boundary",
+                    "label": "Shard cost-model boundary",
+                    "terms": list(default_anchors),
+                    "sourceIds": ["metadata"],
+                },
+                {
+                    "id": "metadata-row0-structure",
+                    "label": "Shard metadata row0 structure",
+                    "terms": [accessor, *parameter_shell[:3]],
+                    "sourceIds": ["metadata"],
+                },
+                {
+                    "id": "runtime-cache-lifecycle",
+                    "label": "Shard runtime cache lifecycle",
+                    "terms": ["GetShardCostList", "UpdateShardCostList", "MilestoneCostList"],
+                    "sourceIds": ["metadata"],
+                },
+            ]
+        elif compatibility_target_id == "multiverse-market-save-owner-boundary":
+            save_owner = str(strategy_config.get("saveOwner") or "").strip()
+            compatibility_import = str(strategy_config.get("compatibilityImportTargetPath") or "").strip()
+            ordered_overlap = [str(item) for item in (strategy_config.get("orderedOverlap") or []) if str(item).strip()]
+            surface_plans = [
+                {
+                    "id": "accessor-bridge",
+                    "label": "Accessor bridge",
+                    "terms": list(default_anchors),
+                    "sourceIds": ["metadata", "level0"],
+                },
+                {
+                    "id": "save-owner-span",
+                    "label": "SaveData owner span",
+                    "terms": [save_owner, "IS1Level", "IS110Level", "InscryptionsDone", compatibility_import],
+                    "sourceIds": ["metadata"],
+                },
+                {
+                    "id": "ordered-overlap",
+                    "label": "Ordered overlap",
+                    "terms": ordered_overlap,
+                    "sourceIds": ["metadata", "level0"],
+                },
+            ]
+        if not surface_plans:
+            return {}
+    shell_window = {
+        key: strategy_config.get(key)
+        for key in ("shellField", "shellPathId", "shellWindowSource", "shellWindowRadius")
+        if strategy_config.get(key) is not None
+    }
+    if not shell_window and compatibility_target_id == "shard-cost-su0-structure":
+        shell_window = {
+            "shellField": strategy_config.get("accessor"),
+            "shellPathId": "runtime-getter",
+            "shellWindowSource": "metadata",
+        }
+    elif not shell_window and compatibility_target_id == "multiverse-market-save-owner-boundary":
+        shell_window = {
+            "shellField": "get_Market",
+            "shellPathId": "typed-accessor",
+            "shellWindowSource": "metadata",
+        }
+    return {
+        "semanticKey": f"target-surface-plan:{trace_scope}",
+        "traceScope": trace_scope,
+        "targetId": compatibility_target_id or trace_scope,
+        "familyId": family_id or None,
+        "shellWindow": shell_window,
+        "surfacePlans": surface_plans,
+        "synthesized": True,
+    }
+
+
 def _derive_shard_owned_state_semantic_scope(
     trace_scope: str,
     payload: dict[str, Any],
@@ -673,7 +1021,8 @@ def _derive_shard_owned_state_semantic_scope(
     if not shell_window:
         return None
     target = dict(payload.get("target") or {})
-    strategy_config = dict(target.get("strategyConfig") or {})
+    target_id = str(target.get("id") or trace_scope).strip()
+    strategy_config = dict(BOOTSTRAP_SUPPORT_CONTEXTS.get(target_id) or {})
     scene_surface = _trace_surface(payload, "scene-owner")
     runtime_surface = _trace_surface(payload, "runtime-shell")
     watcher_surface = _trace_surface(payload, "owner-list-watchers")
@@ -866,7 +1215,7 @@ def _derive_token_shop_row_semantic_scope(
     target = dict(payload.get("target") or {})
     if str(target.get("familyId") or "") != "token-shop":
         return None
-    row_recovery = dict(payload.get("rowRecovery") or {})
+    row_recovery = _sanitize_row_recovery_for_persistence(dict(payload.get("rowRecovery") or {}))
     semantic_scope_id = str(row_recovery.get("semanticScopeId") or "").strip()
     if not semantic_scope_id.startswith("row:"):
         return None
@@ -874,6 +1223,13 @@ def _derive_token_shop_row_semantic_scope(
     semantic_search_plan = dict(row_recovery.get("semanticSearchPlan") or {})
     if not semantic_graph and not semantic_search_plan:
         return None
+    row_local_graph = _derive_token_shop_row_local_graph(row_recovery)
+    missing_seams = _derive_token_shop_row_missing_seams(row_local_graph, row_recovery)
+    compatibility_status = _derive_token_shop_row_compatibility_status(
+        row_local_graph,
+        missing_seams,
+        row_recovery,
+    )
     support = _collect_trace_support_metadata(
         trace_scope,
         str(target.get("id") or trace_scope),
@@ -892,11 +1248,11 @@ def _derive_token_shop_row_semantic_scope(
         "targetId": str(target.get("id") or ""),
         "traceScope": trace_scope,
         "rowShellField": row_recovery.get("shellField"),
+        "rowLocalGraph": row_local_graph,
+        "missingSeams": missing_seams,
         "semanticGraph": semantic_graph,
         "semanticSearchPlan": semantic_search_plan,
-        "closureStatus": dict(row_recovery.get("closureStatus") or {}),
-        "literalSchemaRecovery": dict(row_recovery.get("literalSchemaRecovery") or {}),
-        "literalTextRecovery": dict(row_recovery.get("literalTextRecovery") or {}),
+        "compatibilityStatus": compatibility_status,
         "updatedAt": datetime.now().isoformat(timespec="seconds"),
         "support": support,
     }
@@ -921,6 +1277,230 @@ def _load_materialized_term_payload(
     return _json_loads(row["payload_json"], {}), _json_loads(row["provenance_json"], {})
 
 
+def _load_canonical_semantic_fragment_payload(
+    conn: sqlite3.Connection,
+    fragment_kind: str,
+    fragment_key: str,
+) -> dict[str, Any]:
+    row = conn.execute(
+        """
+        SELECT canonical_payload_json
+        FROM canonical_semantic_fragments
+        WHERE fragment_kind = ? AND fragment_key = ?
+        LIMIT 1
+        """,
+        (fragment_kind, fragment_key),
+    ).fetchone()
+    if row is None:
+        return {}
+    return _json_loads(row["canonical_payload_json"], {})
+
+
+def _load_canonical_semantic_fragment_payloads(
+    conn: sqlite3.Connection,
+    fragment_kind: str,
+    fragment_key_like: str | None = None,
+) -> list[dict[str, Any]]:
+    query = """
+        SELECT canonical_payload_json
+        FROM canonical_semantic_fragments
+        WHERE fragment_kind = ?
+    """
+    params: list[Any] = [fragment_kind]
+    if fragment_key_like:
+        query += " AND fragment_key LIKE ?"
+        params.append(fragment_key_like)
+    rows = conn.execute(query, tuple(params)).fetchall()
+    return [_json_loads(row["canonical_payload_json"], {}) for row in rows]
+
+
+def _load_latest_trace_fragment_payload(
+    conn: sqlite3.Connection,
+    trace_scope: str,
+    fragment_kind: str,
+) -> Any:
+    row = conn.execute(
+        """
+        SELECT payload_json
+        FROM trace_fragments
+        WHERE trace_scope = ? AND fragment_kind = ? AND is_valid = 1
+        ORDER BY updated_at DESC
+        LIMIT 1
+        """,
+        (trace_scope, fragment_kind),
+    ).fetchone()
+    if row is None:
+        return None
+    return _json_loads(row["payload_json"], None)
+
+
+def _count_literal_candidates(literal_text_recovery: dict[str, Any]) -> int:
+    count = 0
+    for key, value in literal_text_recovery.items():
+        if key.endswith("Candidates") and isinstance(value, list):
+            count += len(value)
+    return count
+
+
+def _sanitize_row_recovery_for_persistence(row_recovery: dict[str, Any]) -> dict[str, Any]:
+    sanitized = dict(row_recovery or {})
+    literal_summary = dict(sanitized.get("literalRecoverySummary") or {})
+    if not literal_summary:
+        literal_schema = dict(sanitized.get("literalSchemaRecovery") or {})
+        literal_text = dict(sanitized.get("literalTextRecovery") or {})
+        schema_fields = [
+            str(item)
+            for item in (literal_schema.get("schemaFields") or literal_text.get("schemaFields") or [])
+            if str(item).strip()
+        ]
+        literal_summary = {
+            "status": str(literal_text.get("status") or literal_schema.get("status") or "").strip() or None,
+            "schemaFields": schema_fields,
+            "schemaFieldCount": len(schema_fields),
+            "title": str(literal_text.get("title") or "").strip() or None,
+            "description": str(literal_text.get("description") or "").strip() or None,
+            "shortEffectLabel": str(literal_text.get("shortEffectLabel") or "").strip() or None,
+            "outputLabel": str(literal_text.get("outputLabel") or "").strip() or None,
+            "bonusLabel": str(literal_text.get("bonusLabel") or "").strip() or None,
+            "titleCandidateCount": len(list(literal_text.get("titleCandidates") or [])),
+            "descriptionCandidateCount": len(list(literal_text.get("descriptionCandidates") or [])),
+            "shortEffectCandidateCount": len(list(literal_text.get("shortEffectCandidates") or [])),
+            "outputCandidateCount": len(list(literal_text.get("outputCandidates") or [])),
+            "bonusCandidateCount": len(list(literal_text.get("bonusCandidates") or [])),
+            "bonusMultiplier": str(literal_text.get("bonusMultiplier") or "").strip() or None,
+        }
+    sanitized["literalRecoverySummary"] = literal_summary
+    sanitized.pop("closureStatus", None)
+    sanitized.pop("literalSchemaRecovery", None)
+    sanitized.pop("literalTextRecovery", None)
+    return sanitized
+
+
+def _derive_token_shop_row_local_graph(row_recovery: dict[str, Any]) -> dict[str, Any]:
+    semantic_graph = dict(row_recovery.get("semanticGraph") or {})
+    presentation_update = dict(row_recovery.get("presentationUpdatePath") or {})
+    slots = dict(presentation_update.get("slots") or {})
+    literal_summary = dict(row_recovery.get("literalRecoverySummary") or {})
+    literal_text_recovery = dict(row_recovery.get("literalTextRecovery") or {})
+    title_slots = list(slots.get("title") or [])
+    description_slots = list(slots.get("description") or [])
+    cost_slots = list(slots.get("cost") or [])
+    formula_fields = _unique_strings(
+        [
+            str(edge.get("to") or "").replace("field:", "")
+            for edge in (semantic_graph.get("edges") or [])
+            if isinstance(edge, dict) and str(edge.get("type") or "") == "has-formula-field"
+        ]
+    )
+    edge_types = _unique_strings(
+        [
+            str(edge.get("type") or "")
+            for edge in (semantic_graph.get("edges") or [])
+            if isinstance(edge, dict) and str(edge.get("type") or "").strip()
+        ]
+    )
+    return {
+        "rowShell": {
+            "field": str(row_recovery.get("shellField") or "").strip() or None,
+            "pathId": row_recovery.get("shellPathId"),
+        },
+        "edgeTypes": edge_types,
+        "actionMethods": list(row_recovery.get("recoveredActionMethods") or []),
+        "prefabCandidates": list(row_recovery.get("prefabCandidates") or []),
+        "resolvedGameObjects": list(row_recovery.get("resolvedGameObjects") or []),
+        "slotRoles": _unique_strings(
+            [
+                *("title" if title_slots else []),
+                *("description" if description_slots else []),
+                *("cost" if cost_slots else []),
+                *(str(role) for role, slot_payload in slots.items() if slot_payload),
+            ]
+        ),
+        "updateHooks": list(presentation_update.get("updateHookCandidates") or []),
+        "formulaFields": formula_fields,
+        "formulaValues": list(row_recovery.get("recoveredFormulaValues") or []),
+        "textCandidateCount": len(list(row_recovery.get("textCandidates") or [])),
+        "detachedTextCandidateCount": len(list(row_recovery.get("detachedTextCandidates") or [])),
+        "literalTitleRecovered": bool(str(literal_summary.get("title") or literal_text_recovery.get("title") or "").strip()),
+        "literalDescriptionRecovered": bool(str(literal_summary.get("description") or literal_text_recovery.get("description") or "").strip()),
+        "nativePromotedOwner": str(row_recovery.get("nativePromotedOwner") or "").strip() or None,
+    }
+
+
+def _derive_token_shop_row_missing_seams(
+    row_local_graph: dict[str, Any],
+    row_recovery: dict[str, Any],
+) -> list[dict[str, Any]]:
+    seams: list[dict[str, Any]] = []
+    if not list(row_local_graph.get("actionMethods") or []):
+        seams.append({"id": "exact-shell-to-action-hook", "status": "missing"})
+    if not list(row_local_graph.get("prefabCandidates") or []):
+        seams.append({"id": "exact-shell-to-prefab", "status": "missing"})
+    if not bool(row_local_graph.get("literalTitleRecovered")):
+        seams.append({"id": "exact-shell-to-title", "status": "missing"})
+    if not list(row_local_graph.get("updateHooks") or []):
+        seams.append({"id": "exact-display-update-path", "status": "missing"})
+    formula_reconstruction = dict(row_recovery.get("formulaReconstruction") or {})
+    fast_buy_recovery = dict(row_recovery.get("fastBuyRecovery") or {})
+    runtime_cost_model = dict(formula_reconstruction.get("runtimeCostModel") or {})
+    unresolved_runtime_targets: list[str] = []
+    if str(runtime_cost_model.get("status") or "") == "unresolved-runtime-modifiers":
+        if str(fast_buy_recovery.get("status") or "") == "fast-buy-candidates-recovered":
+            unresolved_runtime_targets.append("displayed-cost-fast-buy-or-runtime-modifiers")
+        else:
+            unresolved_runtime_targets.append("displayed-cost-runtime-modifiers")
+    if not unresolved_runtime_targets:
+        unresolved_runtime_targets = list(
+            ((row_recovery.get("closureStatus") or {}).get("unresolvedRuntimeTargets") or [])
+        )
+    if unresolved_runtime_targets:
+        seams.append(
+            {
+                "id": "runtime-model-gap",
+                "status": "missing",
+                "targets": unresolved_runtime_targets,
+            }
+        )
+    return seams
+
+
+def _derive_token_shop_row_compatibility_status(
+    row_local_graph: dict[str, Any],
+    missing_seams: list[dict[str, Any]],
+    row_recovery: dict[str, Any],
+) -> dict[str, Any]:
+    legacy_closure_status = dict(row_recovery.get("closureStatus") or {})
+    missing_ids = [str(seam.get("id") or "") for seam in missing_seams if str(seam.get("id") or "").strip()]
+    unresolved_runtime_targets = []
+    for seam in missing_seams:
+        if str(seam.get("id") or "") == "runtime-model-gap":
+            unresolved_runtime_targets.extend(list(seam.get("targets") or []))
+    unresolved_runtime_targets = _unique_strings([str(value) for value in unresolved_runtime_targets])
+    semantic_status = "open" if missing_ids else "closed"
+    literal_status = (
+        "closed"
+        if bool(row_local_graph.get("literalTitleRecovered")) or int(row_local_graph.get("textCandidateCount") or 0) > 0
+        else "open"
+    )
+    runtime_status = "open" if unresolved_runtime_targets else "closed"
+    status = f"semantic-{semantic_status}"
+    summary = str(legacy_closure_status.get("summary") or "").strip()
+    if not summary:
+        if missing_ids:
+            summary = "Row-local graph remains open at: {}.".format(", ".join(missing_ids))
+        else:
+            summary = "Row-local graph is closed for the currently recovered token-shop evidence."
+    return {
+        "status": status,
+        "semanticStatus": semantic_status,
+        "literalStatus": literal_status,
+        "runtimeStatus": runtime_status,
+        "summary": summary,
+        "missingSeamIds": missing_ids,
+        "unresolvedRuntimeTargets": unresolved_runtime_targets,
+    }
+
+
 def _derive_token_shop_updater_display_semantic_scope(
     conn: sqlite3.Connection,
     trace_scope: str,
@@ -933,13 +1513,14 @@ def _derive_token_shop_updater_display_semantic_scope(
     target = dict(payload.get("target") or {})
     if str(target.get("familyId") or "") != "token-shop":
         return None
-    row_recovery = dict(payload.get("rowRecovery") or {})
+    row_recovery = _sanitize_row_recovery_for_persistence(dict(payload.get("rowRecovery") or {}))
     semantic_scope_id = "token-shop-updater-display:ATU4"
     row_scope_id = str(row_recovery.get("semanticScopeId") or "").strip() or "row:ATU4Button"
     trace_payload = dict(payload.get("tracePayload") or {})
     trace_graph = dict((trace_payload.get("traceGraph") or {}))
     decision_summary = dict(assessment_summary or {})
-    strategy_config = dict(target.get("strategyConfig") or {})
+    target_id = str(target.get("id") or trace_scope).strip()
+    strategy_config = dict(BOOTSTRAP_SUPPORT_CONTEXTS.get(target_id) or {})
 
     shell_field = str(strategy_config.get("shellField") or "") or "ATU4Button"
     purchase_action = "BuyModBoost"
@@ -1088,6 +1669,664 @@ def _derive_token_shop_updater_display_semantic_scope(
     }
 
 
+def _derive_token_shop_reconstruction_fragment(
+    conn: sqlite3.Connection,
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+    token_shop_scope: dict[str, Any] | None = None,
+    assessment_summary: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    target = dict(payload.get("target") or {})
+    if str(target.get("familyId") or "") != "token-shop":
+        return None
+
+    formula_fragment = dict(payload.get("formula_fragment") or {})
+    runtime_table_fragment = dict(payload.get("runtime_table_fragment") or {})
+    target_id = str(target.get("id") or trace_scope).strip()
+    row_recovery = _sanitize_row_recovery_for_persistence(dict(payload.get("rowRecovery") or {}))
+    row_scope_id = str(row_recovery.get("semanticScopeId") or "").strip()
+    row_scope = dict(token_shop_scope or {})
+    if not row_scope and row_scope_id:
+        row_scope = _load_canonical_semantic_fragment_payload(conn, "semantic_scope_fragment", row_scope_id)
+    ui_binding_fragments = _load_canonical_semantic_fragment_payloads(
+        conn,
+        "ui_binding_fragment",
+        f"ui-binding:token-shop:{target_id}:%",
+    )
+    owner_controller_fragments = [
+        fragment
+        for fragment in _load_canonical_semantic_fragment_payloads(conn, "owner_controller_fragment")
+        if target_id in list(fragment.get("targetIds") or [])
+    ]
+    presentation_paths = [
+        path
+        for fragment in ui_binding_fragments
+        for path in (fragment.get("presentationUpdatePaths") or [])
+        if isinstance(path, dict)
+    ]
+    presentation_path = dict(presentation_paths[0] or {}) if presentation_paths else {}
+    slots = dict(presentation_path.get("slots") or {})
+    shell_windows = [
+        shell_window
+        for fragment in ui_binding_fragments
+        for shell_window in (fragment.get("shellWindows") or [])
+        if isinstance(shell_window, dict)
+    ]
+    shell_window = dict(shell_windows[0] or {}) if shell_windows else {}
+    owner_blob_rows = [
+        owner_blob_row
+        for fragment in owner_controller_fragments
+        for owner_blob_row in (fragment.get("ownerBlobRows") or [])
+        if isinstance(owner_blob_row, dict)
+    ]
+    owner_blob_row = dict(owner_blob_rows[0] or {}) if owner_blob_rows else {}
+    native_reconstruction = dict(runtime_table_fragment.get("nativeReconstruction") or {})
+    assessment = dict(assessment_summary or {})
+    row_local_graph = dict(row_scope.get("rowLocalGraph") or {})
+    semantic_graph = dict(row_scope.get("semanticGraph") or {})
+    missing_seams = list(row_scope.get("missingSeams") or [])
+    missing_seam_ids = _unique_strings(
+        [str(item.get("id") or "") for item in missing_seams if isinstance(item, dict) and str(item.get("id") or "").strip()]
+    )
+    compatibility_status = dict(row_scope.get("compatibilityStatus") or {})
+    row_shell_field = str(
+        ((row_local_graph.get("rowShell") or {}).get("field"))
+        or row_scope.get("rowShellField")
+        or shell_window.get("shellField")
+        or ""
+    ).strip()
+
+    slot_roles = sorted(
+        {
+            *(str(fragment.get("role") or "") for fragment in ui_binding_fragments if str(fragment.get("role") or "").strip()),
+            *(str(role) for role, slot_payload in slots.items() if slot_payload),
+        }
+    )
+    interaction_paths = list(presentation_path.get("interactionToRenderPaths") or [])
+    interaction_labels = _unique_strings(
+        [
+            str(item.get("interaction") or "")
+            for item in interaction_paths
+            if isinstance(item, dict) and str(item.get("interaction") or "").strip()
+        ]
+    )
+    owner_field_blocks = [
+        block
+        for fragment in owner_controller_fragments
+        for block in (fragment.get("ownerFieldBlocks") or [])
+        if block
+    ]
+    controller_blocks = [
+        block
+        for fragment in owner_controller_fragments
+        for block in (fragment.get("controllerBlocks") or [])
+        if block
+    ]
+    owner_field_block = list(
+        (owner_field_blocks[0] if owner_field_blocks else None)
+        or owner_blob_row.get("ownerFieldBlock")
+        or shell_window.get("ownerFieldBlock")
+        or []
+    )
+    controller_block = list(
+        (controller_blocks[0] if controller_blocks else None)
+        or owner_blob_row.get("controllerBlock")
+        or []
+    )
+    interaction_nodes = list(presentation_path.get("interactionNodes") or [])
+    shell_path_id = (
+        shell_window.get("shellPathId")
+        or ((interaction_nodes[0] or {}).get("pathId") if interaction_nodes else None)
+        or owner_blob_row.get("shellPathId")
+    )
+    formula_fields = _unique_strings(
+        list(row_local_graph.get("formulaFields") or [])
+        or [
+            str(edge.get("to") or "").replace("field:", "")
+            for edge in (semantic_graph.get("edges") or [])
+            if isinstance(edge, dict) and str(edge.get("type") or "") == "has-formula-field"
+        ]
+    )
+    blocked_edge_types = list(assessment.get("blockedEdgeTypes") or [])
+    runtime_cost_model = dict(formula_fragment.get("runtimeCostModel") or {})
+    runtime_model_status = str(runtime_cost_model.get("status") or "").strip()
+    text_candidate_count = int(row_local_graph.get("textCandidateCount") or 0)
+    detached_text_candidate_count = int(row_local_graph.get("detachedTextCandidateCount") or 0)
+    literal_title_recovered = bool(row_local_graph.get("literalTitleRecovered"))
+    literal_status = str(
+        compatibility_status.get("literalStatus")
+        or ("open" if "exact-shell-to-title" in missing_seam_ids and not literal_title_recovered and text_candidate_count <= 0 else "closed")
+    )
+    runtime_status = str(
+        compatibility_status.get("runtimeStatus")
+        or (
+            "open"
+            if ("runtime-model-gap" in missing_seam_ids or runtime_model_status.startswith("unresolved"))
+            else (runtime_model_status or None) or ""
+        )
+    ) or None
+    semantic_status = str(compatibility_status.get("semanticStatus") or ("open" if missing_seam_ids else "closed"))
+    overall_status = str(compatibility_status.get("status") or ("semantic-open" if semantic_status == "open" else "semantic-closed"))
+
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        target_id,
+        [
+            dict(provenance.get("formula_fragment") or {}),
+            dict(provenance.get("runtime_table_fragment") or {}),
+            dict(provenance.get("rowRecovery") or {}),
+        ],
+    )
+    support["uiBindingSemanticKeys"] = _unique_strings(
+        [str(fragment.get("semanticKey") or "") for fragment in ui_binding_fragments]
+    )
+    support["ownerControllerSemanticKeys"] = _unique_strings(
+        [str(fragment.get("semanticKey") or "") for fragment in owner_controller_fragments]
+    )
+    if row_scope_id:
+        support["rowScopeId"] = row_scope_id
+
+    return {
+        "semanticKey": f"token-shop-reconstruction:{trace_scope}",
+        "scopeType": (
+            "token-shop-family-reconstruction"
+            if trace_scope == "token-shop-family-structure"
+            else "token-shop-row-reconstruction"
+        ),
+        "traceScope": trace_scope,
+        "targetId": target_id,
+        "familyId": "token-shop",
+        "rowShell": {
+            "field": row_shell_field,
+            "pathId": shell_path_id,
+            "ownerFieldBlock": owner_field_block,
+            "controllerBlock": controller_block,
+        },
+        "presentation": {
+            "slotRoles": slot_roles,
+            "interactionPaths": interaction_labels,
+            "slotCount": len(slot_roles),
+        },
+        "formula": {
+            "recoveredFormulaFields": list(formula_fragment.get("recoveredFormulaFields") or formula_fields),
+            "groundedConstants": dict(formula_fragment.get("groundedConstants") or {}),
+            "runtimeCostModel": runtime_cost_model or None,
+        },
+        "rowLocalGraph": row_local_graph or None,
+        "missingSeams": missing_seams,
+        "runtime": {
+            "promotedOwner": str(native_reconstruction.get("promotedOwner") or "").strip() or None,
+            "promotedMethods": list(native_reconstruction.get("promotedMethods") or []),
+            "promotedFields": list(native_reconstruction.get("promotedFields") or []),
+        },
+        "status": {
+            "status": overall_status,
+            "semanticStatus": semantic_status,
+            "literalStatus": literal_status,
+            "runtimeStatus": runtime_status,
+            "schemaOwnerStatus": None,
+            "requiredGapKinds": missing_seam_ids or blocked_edge_types,
+            "unresolvedLiteralTargets": (["final-title-string"] if literal_status == "open" else []),
+            "unresolvedRuntimeTargets": (
+                ["displayed-cost-fast-buy-or-runtime-modifiers"]
+                if runtime_status == "open"
+                else []
+            ),
+            "directTextCandidateCount": text_candidate_count,
+            "detachedTextCandidateCount": detached_text_candidate_count,
+        },
+        "assessment": {
+            "verdict": assessment.get("verdict"),
+            "blockedEdgeTypes": list(assessment.get("blockedEdgeTypes") or []),
+            "baselineGap": list(assessment.get("baselineGap") or []),
+        },
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_token_shop_family_graph_fragment(
+    trace_scope: str,
+    token_shop_reconstruction_fragment: dict[str, Any] | None,
+    assessment_summary: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    reconstruction = dict(token_shop_reconstruction_fragment or {})
+    if str(reconstruction.get("scopeType") or "") != "token-shop-family-reconstruction":
+        return None
+    if str(reconstruction.get("familyId") or "") != "token-shop":
+        return None
+    row_shells = [dict(reconstruction.get("rowShell") or {})]
+    presentation = dict(reconstruction.get("presentation") or {})
+    assessment = dict(assessment_summary or reconstruction.get("assessment") or {})
+    return {
+        "semanticKey": "family-graph:token-shop",
+        "scopeType": "family-graph",
+        "familyId": "token-shop",
+        "familyLabel": "Token Shop",
+        "traceScope": trace_scope,
+        "targetId": str(reconstruction.get("targetId") or trace_scope),
+        "rowShells": row_shells,
+        "slotRoles": list(presentation.get("slotRoles") or []),
+        "interactionPaths": list(presentation.get("interactionPaths") or []),
+        "coreTerms": _unique_strings(
+            [
+                str(reconstruction.get("targetId") or ""),
+                str(((reconstruction.get("rowShell") or {}).get("field") or "")),
+                *[str(role) for role in (presentation.get("slotRoles") or [])],
+            ]
+        ),
+        "supportingEdgeTypes": list(assessment.get("supportingEdgeTypes") or []),
+        "assessment": {
+            "verdict": assessment.get("verdict"),
+            "blockedEdgeTypes": list(assessment.get("blockedEdgeTypes") or []),
+        },
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": dict(reconstruction.get("support") or {}),
+    }
+
+
+FAMILY_GRAPH_LABELS = {
+    "token-shop": "Token Shop",
+    "shard-cost": "Shard cost",
+    "shard-owned-state": "Shard owned state",
+    "multiverse-market-save-owner": "Multiverse market/save-owner",
+}
+
+BOOTSTRAP_OUTPUT_SUMMARY_RULES = {
+    "token-shop-atu4-mod": {
+        "wire": {"minPresentEdges": 5, "maxNegativeEdges": 0},
+        "quarantine": {"minPresentEdges": 5, "allowedNegativeEdgeTypes": ["exact-display-update-path"]},
+        "messages": {
+            "wire": "One exact shell-side owner, prefab, and presentation chain cleared cleanly enough to wire the traced boundary.",
+            "quarantine": "The trace now preserves the ATU4 row-local bridge, but the runtime display-update path stays bounded negative so this row remains quarantined to remap evidence.",
+            "research": "The trace is still too incomplete to preserve one bounded ATU4 updater/display verdict.",
+        },
+    },
+    "token-shop-atu5-mk1-title": {
+        "wire": {"minPresentEdges": 5, "maxNegativeEdges": 0},
+        "quarantine": {"minPresentEdges": 5, "allowedNegativeEdgeTypes": ["exact-shell-to-title"]},
+        "messages": {
+            "wire": "One exact shell-to-prefab and title chain cleared cleanly enough to wire the traced boundary.",
+            "quarantine": "The trace now preserves the ATU5 shell-to-prefab bridge, but the title-side pass stays bounded negative so this row remains quarantined to remap evidence.",
+            "research": "The trace is still too incomplete to preserve one bounded ATU5 title-side verdict.",
+        },
+    },
+    "token-shop-family-structure": {
+        "wire": {"minPresentEdges": 6, "maxNegativeEdges": 0},
+        "quarantine": {
+            "minPresentEdges": 6,
+            "allowedNegativeEdgeTypes": [
+                "repeated-shell-to-title-localization-gap",
+                "repeated-unresolved-shell-identity-gap",
+            ],
+        },
+        "messages": {
+            "wire": "The family audit found a fully localized repeated row-identity pattern, but this target should still remain descriptive only.",
+            "quarantine": "The family audit preserves a repeated shell-to-proxy-to-prefab pattern and one standout ATU6 title-chain exemplar, but repeated title-localization gaps still quarantine the broader family.",
+            "research": "The family audit is still too incomplete to summarize a stable cross-row TokenShop structure pattern.",
+        },
+    },
+    "token-shop-atu7-mk3-bridge": {
+        "wire": {"minPresentEdges": 5, "maxNegativeEdges": 0},
+        "quarantine": {"minPresentEdges": 5, "allowedNegativeEdgeTypes": ["exact-display-update-path"]},
+        "messages": {
+            "wire": "One exact shell-to-prefab bridge cleared cleanly enough to wire the traced boundary.",
+            "quarantine": "The trace now preserves the ATU7 shell-to-prefab bridge, but broader title-side identity remains bounded so this row stays quarantined to remap evidence.",
+            "research": "The trace is still too incomplete to preserve one bounded ATU7 bridge verdict.",
+        },
+    },
+    "token-shop-atu3-cells-effect": {
+        "wire": {"minPresentEdges": 5, "maxNegativeEdges": 0},
+        "quarantine": {"minPresentEdges": 5, "allowedNegativeEdgeTypes": ["typed-effect-owner-recovery"]},
+        "messages": {
+            "wire": "The ATU3 effect lane is recovered cleanly enough to wire the traced gameplay boundary.",
+            "quarantine": "The ATU3 effect lane is grounded enough to preserve as quarantined effect-driven remap evidence, but the typed gameplay owner remains unresolved.",
+            "research": "The ATU3 effect trace still lacks enough checked structure to preserve a bounded gameplay verdict.",
+        },
+    },
+    "token-shop-atu3-chest-consumer": {
+        "wire": {"minPresentEdges": 6, "maxNegativeEdges": 0},
+        "quarantine": {"minPresentEdges": 5, "allowedNegativeEdgeTypes": ["exact-cellboost-to-booster-bonus-handoff"]},
+        "messages": {
+            "wire": "The ATU3 chest-consumer handoff is recovered cleanly enough to wire the traced gameplay boundary.",
+            "quarantine": "The ATU3 chest-consumer handoff is grounded enough to preserve as quarantined cross-system remap evidence, but the exact CellBoostBonus handoff remains unresolved.",
+            "research": "The ATU3 chest-consumer trace still lacks enough checked structure to preserve a bounded consumer verdict.",
+        },
+    },
+    "token-shop-atu3-chest-consumer-read": {
+        "wire": {"minPresentEdges": 7, "maxNegativeEdges": 0},
+        "quarantine": {"minPresentEdges": 6, "allowedNegativeEdgeTypes": ["exact-cellboost-to-booster-bonus-handoff"]},
+        "messages": {
+            "wire": "The ATU3 consumer-read chain is recovered cleanly enough to wire the traced gameplay boundary.",
+            "quarantine": "The ATU3 consumer-read chain is grounded enough to preserve as quarantined bonus-shell evidence, but the exact CellBoostBonus read site remains unresolved.",
+            "research": "The ATU3 consumer-read trace still lacks enough checked structure to preserve a bounded read-side verdict.",
+        },
+    },
+    "shard-cost-su0-structure": {
+        "wire": {"minPresentEdges": 5, "maxNegativeEdges": 0},
+        "quarantine": {
+            "minPresentEdges": 4,
+            "allowedNegativeEdgeTypes": [
+                "automated-calibration-closure",
+                "planner-safe-cost-output",
+                "save-owner-recovery",
+            ],
+        },
+        "messages": {
+            "wire": "The shard-cost trace is complete enough to wire direct app behavior.",
+            "quarantine": "The shard-cost structure is grounded enough to preserve in quarantined descriptive tooling, but not to wire planner-safe cost outputs.",
+            "research": "The shard-cost trace is still too incomplete to preserve even a quarantined structural verdict.",
+        },
+    },
+    "shard-owned-state-upgradeinfolist-population": {
+        "wire": {"minPresentEdges": 6, "maxNegativeEdges": 0},
+        "quarantine": {
+            "minPresentEdges": 5,
+            "allowedNegativeEdgeTypes": [
+                "local-runtime-population-bridge",
+                "deeper-wrapper-handoff-recovery",
+            ],
+        },
+        "messages": {
+            "wire": "The shard owned-state path is recovered cleanly enough to wire player-owned shard import behavior.",
+            "quarantine": "The shard owned-state trace is grounded enough to preserve one exact boundary verdict, but the result must stay quarantined to blocker evidence until a local bridge or deeper wrapper handoff is recovered.",
+            "research": "The shard owned-state trace still lacks enough checked structure to preserve one bounded population verdict.",
+        },
+    },
+    "multiverse-market-save-owner-boundary": {
+        "wire": {"minPresentEdges": 5, "maxNegativeEdges": 0},
+        "quarantine": {
+            "minPresentEdges": 4,
+            "allowedNegativeEdgeTypes": [
+                "typed-market-field-recovery",
+                "canonical-import-admissibility",
+                "broad-row-identity-remap",
+            ],
+        },
+        "messages": {
+            "wire": "The save-owner trace is complete enough to wire canonical import behavior.",
+            "quarantine": "The save-owner boundary is grounded enough to preserve as quarantined compatibility truth, but not to wire canonical import or planner behavior.",
+            "research": "The save-owner trace still lacks enough checked owner-boundary recovery to preserve even a quarantined verdict.",
+        },
+    },
+}
+
+BOOTSTRAP_SUPPORT_CONTEXTS = {
+    "token-shop-atu4-mod": {
+        "shellField": "ATU4Button",
+        "shellPathId": 15796,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 4,
+        "surfaces": [
+            {"id": "metadata-neighborhood", "label": "Metadata neighborhood", "sourceIds": ["metadata"], "terms": ["ATU4Button", "ModBoost", "BuyModBoost"]},
+            {"id": "action-lane", "label": "Action hook lane", "sourceIds": ["level0"], "terms": ["BuyModBoost"]},
+            {"id": "prefab-lane", "label": "Prefab identity lane", "sourceIds": ["level0", "sharedassets0"], "terms": ["NewTokenUPGPrefab.T1.ModPointsBooster"]},
+            {"id": "title-lane", "label": "Mod title lane", "sourceIds": ["level0", "sharedassets0", "metadata"], "terms": ["Token Ultima: MP", ":Diamond Upgrade 11 - ModBoost"]},
+            {"id": "text-hooks", "label": "Generic TokenShop text-hook lane", "sourceIds": ["level0", "sharedassets0"], "terms": ["SetAllTokenShopTexts", "SetTokenTexts"]},
+        ],
+        "lostStructure": [
+            "The shell-side owner window survives directly in the TokenShop owner blob, where ATU4Button path id 15796 stays adjacent to the ModBoost base-value block.",
+            "The exact BuyModBoost action hook, NewTokenUPGPrefab.T1.ModPointsBooster prefab, and direct UI slot graph now converge on the same traced row family.",
+            "The remaining unresolved lane is not row identity or text localization; it is the live BUY-cost runtime path feeding CostText.",
+        ],
+    },
+    "token-shop-atu5-mk1-title": {
+        "shellField": "ATU5Button",
+        "shellPathId": 15831,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 4,
+        "surfaces": [
+            {"id": "metadata-neighborhood", "label": "Metadata neighborhood", "sourceIds": ["metadata"], "terms": ["ATU5Button", "MK1TokenBoost", "BuyMK1TokenBoost"]},
+            {"id": "action-lane", "label": "Action hook lane", "sourceIds": ["level0"], "terms": ["BuyMK1TokenBoost"]},
+            {"id": "prefab-lane", "label": "Prefab identity lane", "sourceIds": ["level0", "sharedassets0"], "terms": ["NewTokenUPGPrefab.T1.MK1Booster"]},
+            {"id": "support-text-lane", "label": "MK1 generator support-text lane", "sourceIds": ["level0", "sharedassets0"], "terms": ["1. MK1 Generator Output,", "This upgrade divides the cost of MK1 Generators by 1500.", "This upgrade provides a 1% increase to MK1 Generator Output for each Loop Reset you've done (multiplicative)"]},
+            {"id": "title-roster-gap", "label": "Neighboring generator title roster", "sourceIds": ["level0", "sharedassets0"], "terms": ["Mk2 Generator Booster", "Mk3 Generator Booster", "Mk5 Generator Booster"]},
+            {"id": "text-hooks", "label": "Generic TokenShop text-hook lane", "sourceIds": ["level0", "sharedassets0"], "terms": ["SetAllTokenShopTexts", "SetTokenTexts"]},
+        ],
+        "lostStructure": [
+            "The shell-side owner window survives only in the TokenShop extract, where ATU5Button path id 15831 stays adjacent to the MK1TokenBoost owner block.",
+            "The exact BuyMK1TokenBoost action hook and NewTokenUPGPrefab.T1.MK1Booster prefab now converge on the same traced row family, but the final player-facing title still survives only as detached MK1 generator support text and neighboring generator-booster title-roster surfaces.",
+            "Because the title-side join is still missing, the recovered ATU5 bridge is safe for row-remap evidence only and should not widen into canonical or planner behavior.",
+        ],
+    },
+    "token-shop-family-structure": {
+        "shellField": "ATU1Button through ATU28Button",
+        "shellPathId": "family-range",
+        "shellWindowSource": "tokenShopExtract",
+        "surfaces": [
+            {"id": "family-shells", "label": "Family shell range", "sourceIds": ["tokenShopExtract", "metadata"], "terms": ["ATU1Button", "ATU2Button", "ATU3Button", "ATU4Button", "ATU5Button", "ATU6Button", "ATU7Button", "ATU24Button", "ATU28Button"]},
+            {"id": "bridge-proxies", "label": "Bridge-proxy lane", "sourceIds": ["level0"], "terms": ["BuyTokenBoost", "ATU2DiamondsBonus", "BuyModBoost", "BuyMK1TokenBoost", "BuyMK2TokenBoost", "BuyMK3TokenBoost", "BuyCellBoost", "BuyATU24"]},
+            {"id": "prefab-roster", "label": "Prefab identity roster", "sourceIds": ["level0", "sharedassets0"], "terms": ["NewTokenUPGPrefab.T1.TokensBoost", "NewTokenUPGPrefab.T1.DiamondBoost", "NewTokenUPGPrefab.T1.ModPointsBooster", "NewTokenUPGPrefab.T1.MK1Booster", "NewTokenUPGPrefab.T1.MK2Booster", "NewTokenUPGPrefab.T1.MK3Booster", "NewTokenUPGPrefab.T1.CellsPerChestBooster", "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"]},
+            {"id": "title-text-surfaces", "label": "Title and text surfaces", "sourceIds": ["level0", "sharedassets0"], "terms": ["SetAllTokenShopTexts", "SetTokenTexts", "Mk2 Generator Booster", "Token Ultima: MP", "1. MK1 Generator Output,", "Token Ultima: Cells", "Academy Booster"]},
+            {"id": "negative-neighborhoods", "label": "Bounded unresolved neighborhoods", "sourceIds": ["level0"], "terms": ["ATU3Button", "BuyCellBoost", "ATU24Button", "BuyATU24", "StartCellBostHold"]},
+        ],
+        "lostStructure": [
+            "The family audit confirms that shell-side ATU serialization survives much more often than row-local title localization does.",
+            "The strongest repeated solved pattern is shell adjacency plus one row-family proxy hook and one exact prefab identity, but the title-side surfaces usually remain detached into generic text hooks, support text, or loose title rosters.",
+            "ATU6 remains the standout strongest neighborhood because it is still the only row that carries one checked shell-to-prefab-to-title chain; ATU4, ATU5, and ATU7 stay structurally stronger than ATU3 and the late ATU24-ATU28 block, but still stop short of final title localization.",
+        ],
+    },
+    "token-shop-atu7-mk3-bridge": {
+        "shellField": "ATU7Button",
+        "shellPathId": 15792,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 4,
+        "surfaces": [
+            {"id": "metadata-neighborhood", "label": "Metadata neighborhood", "sourceIds": ["metadata"], "terms": ["ATU7Button", "MK3TokenBoost", "BuyMK3TokenBoost"]},
+            {"id": "action-lane", "label": "Action hook lane", "sourceIds": ["level0"], "terms": ["BuyMK3TokenBoost"]},
+            {"id": "prefab-lane", "label": "Prefab identity lane", "sourceIds": ["level0", "sharedassets0"], "terms": ["NewTokenUPGPrefab.T1.MK3Booster"]},
+        ],
+        "lostStructure": [
+            "The shell-side owner window still survives only in the TokenShop extract, where ATU7Button path id 15792 stays adjacent to the MK3TokenBoost owner block.",
+            "This pass checks only the shell-to-action-hook-to-prefab bridge and does not promote any final player-facing title join for ATU7.",
+            "Because the rest of the MK-family shells still lack their own checked joins, keep ATU7 as one bounded remap bridge and leave the neighboring unresolved rows quarantined.",
+        ],
+    },
+    "token-shop-atu3-cells-effect": {
+        "shellField": "ATU3Button",
+        "shellPathId": 15810,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 3,
+        "surfaces": [
+            {"id": "metadata-neighborhood", "label": "Metadata neighborhood", "sourceIds": ["metadata"], "terms": ["ATU3Button", "CellBoost", "BuyCellBoost"]},
+            {"id": "action-lane", "label": "Action hook lane", "sourceIds": ["level0"], "terms": ["StartCellBostHold", "StopCellBostHold", "BuyCellBoost"]},
+            {"id": "shared-effect-title", "label": "Shared effect title lane", "sourceIds": ["level0"], "terms": ["Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"]},
+            {"id": "shared-effect-text", "label": "Shared effect text lane", "sourceIds": ["level0"], "terms": ["<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."]},
+            {"id": "detached-identity-surfaces", "label": "Detached cells identity surfaces", "sourceIds": ["level0", "sharedassets0"], "terms": ["CellsBoost", "CellsPerChestBooster", "Token Ultima: Cells"]},
+        ],
+        "lostStructure": [
+            "The shell-side owner window survives only in the TokenShop extract, where ATU3Button path id 15810 stays adjacent to the CellBoost owner block.",
+            "The shared effect chain now reaches the Cells Booster (Chests) title and the +1 Seconds timeskip to Cells Gained from Token & Diamond Chests text, but no committed source yet names the exact typed gameplay owner that consumes CellBoostBonus inside that chest-effect system.",
+            "The older diamond-side CellsBoost and token-side CellsPerChestBooster or Token Ultima: Cells surfaces still survive as detached identity clues, so this pass must stay effect-driven rather than pretending the row is a standard shell-to-prefab-to-title remap.",
+        ],
+    },
+    "token-shop-atu3-chest-consumer": {
+        "shellField": "ATU3Button",
+        "shellPathId": 15810,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 3,
+        "surfaces": [
+            {"id": "metadata-neighborhood", "label": "Metadata neighborhood", "sourceIds": ["metadata"], "terms": ["ATU3Button", "CellBoost", "BuyCellBoost"]},
+            {"id": "shared-effect-title", "label": "Shared effect title lane", "sourceIds": ["level0"], "terms": ["Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"]},
+            {"id": "shared-effect-text", "label": "Shared effect text lane", "sourceIds": ["level0"], "terms": ["<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."]},
+            {"id": "consumer-family", "label": "Chest consumer family", "sourceIds": ["level0"], "terms": ["AdManager, Assembly-CSharp", "SetAdChestTexts", "OfflineManager, Assembly-CSharp", "DailyAndAdCounterChecker"]},
+            {"id": "consumer-routines", "label": "Chest routine and bonus shell", "sourceIds": ["metadata"], "terms": ["StartTokenRoutine", "<TokenChestRoutine>d__149", "GoToClosedTokenChest", "StartDiamondRoutine", "<DiamondChestRoutine>d__155", "GoToClosedDiamondChest", "get_SmallAdCellGains", "get_BigAdCellGains", "<FinalAdTokenChestBonus>k__BackingField", "<FinalDiamondChestBonus>k__BackingField"]},
+            {"id": "chest-objects", "label": "Concrete chest objects", "sourceIds": ["level0"], "terms": ["TokenChest", "DiamondChest"]},
+        ],
+        "lostStructure": [
+            "The shell-side owner window still survives only in the TokenShop extract, where ATU3Button path id 15810 stays adjacent to the CellBoost owner block.",
+            "The upgraded cross-system trace now reaches the concrete AdManager chest routine family through StartTokenRoutine, TokenChestRoutine, StartDiamondRoutine, DiamondChestRoutine, the closed-chest route methods, and the final chest-bonus shell, but no committed source yet shows the exact CellBoostBonus read or typed field handoff inside that family.",
+            "Because the exact CellBoostBonus consumer seam is still missing, keep ATU3 quarantined as an effect-driven row and do not convert this target into a standard prefab-or-title TokenShop remap claim.",
+        ],
+    },
+    "token-shop-atu3-chest-consumer-read": {
+        "shellField": "ATU3Button",
+        "shellPathId": 15810,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 3,
+        "surfaces": [
+            {"id": "metadata-neighborhood", "label": "Metadata neighborhood", "sourceIds": ["metadata"], "terms": ["ATU3Button", "CellBoost", "BuyCellBoost"]},
+            {"id": "consumer-family", "label": "Chest consumer family", "sourceIds": ["level0"], "terms": ["AdManager, Assembly-CSharp", "SetAdChestTexts", "OfflineManager, Assembly-CSharp", "DailyAndAdCounterChecker"]},
+            {"id": "consumer-routines", "label": "Chest consumer routines", "sourceIds": ["metadata"], "terms": ["StartTokenRoutine", "<TokenChestRoutine>d__149", "GoToClosedTokenChest", "StartDiamondRoutine", "<DiamondChestRoutine>d__155", "GoToClosedDiamondChest"]},
+            {"id": "cell-gain-getters", "label": "Chest cell-gain getter shell", "sourceIds": ["metadata"], "terms": ["get_SmallAdCellGains", "get_BigAdCellGains"]},
+            {"id": "booster-bonus-shell", "label": "Booster bonus aggregation shell", "sourceIds": ["metadata"], "terms": ["SetBoosterAdBonus", "get_FinalBoosterAdBonus", "SmallAdCellGains", "BigAdCellGains", "FinalBoosterAdBonus", "<BoosterAdRoutine>d__158"]},
+            {"id": "final-chest-bonus-shell", "label": "Final chest bonus shell", "sourceIds": ["metadata"], "terms": ["<FinalAdTokenChestBonus>k__BackingField", "<FinalDiamondChestBonus>k__BackingField"]},
+        ],
+        "lostStructure": [
+            "The checked ATU3 chain now reaches the concrete AdManager consumer family and one tighter internal bonus-aggregation shell, but no committed source yet shows the exact CellBoostBonus read-site or typed-field handoff into that shell.",
+            "The getter family and the booster bonus aggregation shell survive together in committed metadata, while the final token and diamond chest bonus backing fields survive in committed probe output, so the remaining runtime seam is narrow enough to stay quarantined to one exact internal handoff break.",
+            "Because the exact CellBoostBonus runtime read is still missing, this trace should stay as effect-chain completion evidence only and should not widen into prefab, title, or planner promotion.",
+        ],
+    },
+    "shard-cost-su0-structure": {
+        "accessor": "get_SU0Cost",
+        "ownerType": "ShardUpgradeInfo",
+        "parameterShell": [
+            "SU0StartCost",
+            "SU0CostExponent",
+            "SU0GrowthExponent",
+            "SU0GrowthExponent2",
+            "SU0GrowthExponent3",
+        ],
+    },
+    "shard-owned-state-upgradeinfolist-population": {
+        "sceneOwner": "ShardMining",
+        "runtimeShell": "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo",
+        "genericLead": "ConstructionMilestones, Assembly-CSharp",
+        "saveCandidate": "PlayerProfile-side shard member shell",
+    },
+    "multiverse-market-save-owner-boundary": {
+        "accessorBridge": "PlayerProfileHandler.get_Market -> MultiverseMarket",
+        "saveOwner": "SaveData",
+        "typedSpan": "IS1Level through IS110Level",
+        "compatibilityImportTargetPath": "compatibility.unmappedSystemState.multiverseMarket",
+        "canonicalImportSafeSubsetLabel": "none",
+        "broaderRowRemapStatus": "Broader row identity or remap stays blocked outside the checked 71-74 ordered overlap.",
+        "blockedStructure": [
+            "The wider inscription ordering outside rows 71-74 is not yet grounded enough from checked repo-local evidence to promote broader IS*Level row mappings.",
+            "The checked repo-local evidence still does not recover player-facing row labels for rows 71-74, only their ordered row positions inside the larger inscription set.",
+            "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap",
+        ],
+        "orderedOverlap": [71, 72, 73, 74],
+    },
+}
+
+BOOTSTRAP_DEFAULT_ANCHORS = {
+    "token-shop-atu4-mod": ["ATU4Button", "15796"],
+    "token-shop-atu5-mk1-title": ["ATU5Button", "15831"],
+    "token-shop-family-structure": ["ATU1Button", "ATU2Button", "ATU4Button", "ATU5Button", "ATU6Button", "ATU7Button", "ATU3Button", "ATU24Button", "SetAllTokenShopTexts"],
+    "token-shop-atu7-mk3-bridge": ["ATU7Button", "15792"],
+    "token-shop-atu3-cells-effect": ["ATU3Button", "15810"],
+    "token-shop-atu3-chest-consumer": ["ATU3Button", "15810", "BuyCellBoost", "AdManager, Assembly-CSharp"],
+    "token-shop-atu3-chest-consumer-read": ["ATU3Button", "15810", "get_SmallAdCellGains", "SetBoosterAdBonus", "get_FinalBoosterAdBonus"],
+    "shard-cost-su0-structure": ["ShardUpgradeInfo", "get_SU0Cost", "SU0StartCost"],
+    "shard-owned-state-upgradeinfolist-population": [
+        "upgradeInfoList",
+        "ShardMining+ShardUpgradeInfo",
+        "IsUnlocked",
+        "MaxLevel",
+    ],
+    "multiverse-market-save-owner-boundary": ["get_Market", "SaveData", "IS71Level"],
+}
+
+
+def _derive_family_graph_fragment(
+    conn: sqlite3.Connection,
+    trace_scope: str,
+    payload: dict[str, Any],
+    assessment_summary: dict[str, Any] | None = None,
+    target_narrative_fragment: dict[str, Any] | None = None,
+    token_shop_reconstruction_fragment: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    target = dict(payload.get("target") or {})
+    family_id = str(target.get("familyId") or "").strip()
+    if not family_id:
+        return None
+    if family_id == "token-shop":
+        return _derive_token_shop_family_graph_fragment(
+            trace_scope,
+            token_shop_reconstruction_fragment,
+            assessment_summary,
+        )
+
+    family_label = FAMILY_GRAPH_LABELS.get(family_id, family_id.replace("-", " "))
+    assessment = dict(assessment_summary or {})
+    narrative = dict(target_narrative_fragment or {})
+    dependency_payloads = [
+        fragment
+        for fragment in _load_canonical_semantic_fragment_payloads(conn, "dependency_fragment")
+        if trace_scope in list(((fragment.get("support") or {}).get("contributingTraceScopes") or []))
+    ]
+    support_scope = _load_canonical_semantic_fragment_payload(
+        conn,
+        "semantic_scope_fragment",
+        "shard-owned-state:upgradeinfolist-population",
+    ) if family_id == "shard-owned-state" else {}
+    row_shells: list[dict[str, Any]] = []
+    if support_scope:
+        runtime_shell = dict(support_scope.get("runtimeShell") or {})
+        declaring_field = dict(runtime_shell.get("declaringField") or {})
+        row_shells.append(
+            {
+                "field": str(declaring_field.get("name") or runtime_shell.get("label") or ""),
+                "pathId": None,
+            }
+        )
+    core_terms: list[str] = []
+    for fragment in dependency_payloads:
+        edge = dict(fragment.get("edge") or {})
+        core_terms.extend(
+            [
+                str(edge.get("from") or ""),
+                str(edge.get("to") or ""),
+                *[
+                    str(item.get("term") or "")
+                    for item in (edge.get("provedBy") or [])
+                    if isinstance(item, dict)
+                ],
+            ]
+        )
+    if support_scope:
+        runtime_shell = dict(support_scope.get("runtimeShell") or {})
+        core_terms.extend(
+            [
+                str(runtime_shell.get("label") or ""),
+                str(((runtime_shell.get("rowModelType") or {}).get("fullName") or "")),
+                str((((support_scope.get("sceneOwner") or {}).get("name")) or "")),
+            ]
+        )
+    return {
+        "semanticKey": f"family-graph:{family_id}",
+        "scopeType": "family-graph",
+        "familyId": family_id,
+        "familyLabel": family_label,
+        "traceScope": trace_scope,
+        "targetId": str(target.get("id") or trace_scope),
+        "rowShells": [item for item in row_shells if item.get("field") or item.get("pathId") is not None],
+        "coreTerms": _unique_strings([term for term in core_terms if term]),
+        "supportingEdgeTypes": list(assessment.get("supportingEdgeTypes") or []),
+        "assessment": {
+            "verdict": assessment.get("verdict"),
+            "blockedEdgeTypes": list(assessment.get("blockedEdgeTypes") or []),
+            "summary": str(assessment.get("summary") or ""),
+        },
+        "groundedConclusion": str(narrative.get("groundedConclusion") or ""),
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": _collect_trace_support_metadata(
+            trace_scope,
+            str(target.get("id") or trace_scope),
+            [
+                dict((fragment.get("support") or {}))
+                for fragment in dependency_payloads
+            ] + [
+                dict((support_scope.get("support") or {})) if support_scope else {},
+                dict((assessment.get("support") or {})) if isinstance(assessment.get("support"), dict) else {},
+            ],
+        ),
+    }
+
+
 def _derive_target_assessment_fragment(
     trace_scope: str,
     payload: dict[str, Any],
@@ -1110,12 +2349,28 @@ def _derive_target_assessment_fragment(
     baseline_gap = list(diff.get("blockedMissingEdgeTypes") or negative_types)
     native_summary = dict(payload.get("nativeReconstruction") or {})
     rules = dict(target.get("outputSummaryRules") or {})
-    if not rules and target_id:
-        rules = dict((_load_trace_registry_target(target_id) or {}).get("outputSummaryRules") or {})
+    if not rules:
+        rules = dict(
+            BOOTSTRAP_OUTPUT_SUMMARY_RULES.get(trace_scope)
+            or BOOTSTRAP_OUTPUT_SUMMARY_RULES.get(target_id)
+            or {}
+        )
+    legacy_decision_summary = dict(payload.get("decisionSummary") or {})
 
     if not rules:
-        verdict = "explore"
-        summary = "This run is exploratory only. Use the surviving source hits to choose or define a bounded family trace."
+        if legacy_decision_summary:
+            verdict = str(legacy_decision_summary.get("verdict") or "missing-output-summary-rules")
+            summary = str(legacy_decision_summary.get("summary") or "").strip() or (
+                "Canonical assessment policy is missing for this target payload. "
+                "This reducer is preserving the last embedded legacy verdict until the trace is rerun."
+            )
+            baseline_gap = list(legacy_decision_summary.get("baselineGap") or baseline_gap)
+        else:
+            verdict = "missing-output-summary-rules"
+            summary = (
+                "Canonical assessment policy is missing for this target payload. "
+                "Re-run the trace bundle and rebuild trace views before trusting verdict state."
+            )
     else:
         wire = dict(rules.get("wire") or {})
         quarantine = dict(rules.get("quarantine") or {})
@@ -1167,13 +2422,536 @@ def _derive_target_assessment_fragment(
             "provedEdgeCount": len(proved_edges),
             "negativeEdgeCount": len(negative_edges),
             "baselineGap": baseline_gap,
-            "supportingEdgeTypes": [
-                str(edge.get("type"))
-                for edge in proved_edges
-                if isinstance(edge, dict) and str(edge.get("type") or "")
-            ],
-            "blockedEdgeTypes": negative_types,
+            "supportingEdgeTypes": (
+                list(legacy_decision_summary.get("supportingEdgeTypes") or [])
+                if not rules and legacy_decision_summary.get("supportingEdgeTypes")
+                else [
+                    str(edge.get("type"))
+                    for edge in proved_edges
+                    if isinstance(edge, dict) and str(edge.get("type") or "")
+                ]
+            ),
+            "blockedEdgeTypes": (
+                list(legacy_decision_summary.get("blockedEdgeTypes") or [])
+                if not rules and legacy_decision_summary.get("blockedEdgeTypes")
+                else negative_types
+            ),
         },
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_execution_context_fragment(
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+) -> dict[str, Any] | None:
+    target = dict(payload.get("target") or {})
+    planner_resolution = dict(payload.get("plannerResolution") or {})
+    trace_registry = dict(payload.get("traceRegistry") or {})
+    trace_workflow = dict(payload.get("traceWorkflow") or {})
+    target_id = str(target.get("id") or trace_scope or "").strip()
+    family_id = str(target.get("familyId") or trace_registry.get("selectedFamilyId") or "").strip()
+    label = str(target.get("label") or "").strip()
+    accepted_anchors = [str(value) for value in (trace_workflow.get("acceptedAnchors") or []) if str(value).strip()]
+    join_goal = str(target.get("joinGoal") or "").strip()
+    solved_baseline_target_id = str(target.get("solvedBaselineTargetId") or trace_registry.get("solvedBaselineTargetId") or "").strip()
+    blocked_target_id = str(target.get("blockedTargetId") or trace_registry.get("blockedTargetId") or "").strip()
+    output_summary_rules = dict(target.get("outputSummaryRules") or {})
+    if not output_summary_rules:
+        output_summary_rules = dict(
+            BOOTSTRAP_OUTPUT_SUMMARY_RULES.get(trace_scope)
+            or BOOTSTRAP_OUTPUT_SUMMARY_RULES.get(target_id)
+            or {}
+        )
+    selected_subject_kind = str(planner_resolution.get("selectedSubjectKind") or trace_registry.get("selectedSubjectKind") or "").strip()
+    selected_subject_key = str(planner_resolution.get("selectedSubjectKey") or trace_registry.get("selectedSubjectKey") or "").strip()
+    execution_target_id = str(trace_registry.get("executionTargetId") or target_id).strip()
+    execution_trace_scope = str(trace_registry.get("executionTraceScope") or trace_scope).strip()
+    if not any(
+        [
+            target_id,
+            family_id,
+            label,
+            accepted_anchors,
+            join_goal,
+            solved_baseline_target_id,
+            blocked_target_id,
+            output_summary_rules,
+            selected_subject_kind,
+            selected_subject_key,
+            execution_target_id,
+            execution_trace_scope,
+        ]
+    ):
+        return None
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        target_id or trace_scope,
+        [
+            dict(provenance.get("target") or {}),
+            dict(provenance.get("plannerResolution") or {}),
+            dict(provenance.get("traceRegistry") or {}),
+            dict(provenance.get("traceWorkflow") or {}),
+        ],
+    )
+    return {
+        "semanticKey": f"target-execution-context:{trace_scope}",
+        "scopeType": "target-execution-context",
+        "traceScope": trace_scope,
+        "targetId": target_id or trace_scope,
+        "executionTargetId": execution_target_id or target_id or trace_scope,
+        "executionTraceScope": execution_trace_scope or trace_scope,
+        "familyId": family_id,
+        "label": label,
+        "acceptedAnchors": accepted_anchors,
+        "joinGoal": join_goal,
+        "solvedBaselineTargetId": solved_baseline_target_id or None,
+        "blockedTargetId": blocked_target_id or None,
+        "outputSummaryRules": output_summary_rules or None,
+        "selectedSubjectKind": selected_subject_kind or None,
+        "selectedSubjectKey": selected_subject_key or None,
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_token_shop_execution_plan_fragment(
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+    token_shop_scope: dict[str, Any] | None = None,
+    token_shop_reconstruction_fragment: dict[str, Any] | None = None,
+    family_graph_fragment: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    target = dict(payload.get("target") or {})
+    if str(target.get("familyId") or "") != "token-shop":
+        return None
+    native_trace = dict(payload.get("nativeTrace") or {})
+    native_summary = dict(payload.get("nativeReconstruction") or native_trace.get("summary") or {})
+    source_ids = _unique_strings([str(entry.get("sourceId") or "") for entry in (payload.get("sourceRoles") or []) if str(entry.get("sourceId") or "").strip()])
+    if not source_ids:
+        source_ids = ["metadata", "level0", "assets", "native"]
+
+    follow_up_terms: list[str] = []
+    join_goal = str(target.get("joinGoal") or "").strip()
+    claim_stages: list[dict[str, Any]] = []
+    depth_plan: list[dict[str, Any]] = []
+
+    if token_shop_scope:
+        row_scope = dict(token_shop_scope)
+        row_local_graph = dict(row_scope.get("rowLocalGraph") or {})
+        row_shell = dict(row_local_graph.get("rowShell") or {})
+        missing_seams = list(row_scope.get("missingSeams") or [])
+        seam_ids = _unique_strings([str(item.get("id") or "") for item in missing_seams if str(item.get("id") or "").strip()])
+        follow_up_terms = _unique_strings(
+            [
+                str(row_shell.get("field") or ""),
+                str(row_local_graph.get("nativePromotedOwner") or ""),
+                *[str(value) for value in (row_local_graph.get("actionMethods") or [])],
+                *[str(value) for value in (row_local_graph.get("prefabCandidates") or [])],
+                *[str(value) for value in (row_local_graph.get("updateHooks") or [])],
+                *[str(value) for value in (row_local_graph.get("formulaFields") or [])],
+                *[str(value) for value in (native_trace.get("searchTerms") or [])],
+            ]
+        )
+        if seam_ids:
+            join_goal = (
+                f"Reconstruct the Token Shop {row_shell.get('field') or trace_scope} row from current canonical fragments "
+                f"and close the remaining adjacent seams: {', '.join(seam_ids)}."
+            )
+        elif row_shell.get("field"):
+            join_goal = f"Recheck the recovered Token Shop {row_shell.get('field')} row and verify that no adjacent seam has reopened."
+        claim_stages = [
+            {
+                "id": "row-local-graph",
+                "label": f"{row_shell.get('field') or trace_scope} row-local graph",
+                "status": str((row_scope.get("compatibilityStatus") or {}).get("semanticStatus") or "open"),
+                "missingSeamIds": seam_ids,
+            },
+            {
+                "id": "runtime-model",
+                "label": f"{row_shell.get('field') or trace_scope} runtime model",
+                "status": str((row_scope.get("compatibilityStatus") or {}).get("runtimeStatus") or "open"),
+                "missingSeamIds": ["runtime-model-gap"] if "runtime-model-gap" in seam_ids else [],
+            },
+        ]
+        depth_plan = [
+            {
+                "hop": 1,
+                "goal": (
+                    f"Close adjacent row seams for {row_shell.get('field') or trace_scope}: {', '.join(seam_ids)}."
+                    if seam_ids
+                    else f"Recheck adjacent row-local graph for {row_shell.get('field') or trace_scope}."
+                ),
+                "terms": follow_up_terms[:12],
+                "sourceIds": source_ids,
+            }
+        ]
+        if "runtime-model-gap" in seam_ids:
+            runtime_value_terms = []
+            for value in (row_local_graph.get("formulaValues") or []):
+                if isinstance(value, dict):
+                    runtime_value_terms.append(str(value.get("field") or value.get("label") or ""))
+                else:
+                    runtime_value_terms.append(str(value))
+            runtime_terms = _unique_strings(
+                [
+                    *[str(value) for value in (row_local_graph.get("formulaFields") or [])],
+                    *runtime_value_terms,
+                    *[str(value) for value in (native_summary.get("searchTerms") or [])],
+                ]
+            )
+            if runtime_terms:
+                depth_plan.append(
+                    {
+                        "hop": 2,
+                        "goal": f"Resolve the runtime-model-gap for {row_shell.get('field') or trace_scope}.",
+                        "terms": runtime_terms[:12],
+                        "sourceIds": _unique_strings([source_id for source_id in source_ids if source_id in {"metadata", "level0", "native", "assets"}]),
+                    }
+                )
+    elif token_shop_reconstruction_fragment:
+        reconstruction = dict(token_shop_reconstruction_fragment)
+        row_shell = dict(reconstruction.get("rowShell") or {})
+        presentation = dict(reconstruction.get("presentation") or {})
+        assessment = dict(reconstruction.get("assessment") or {})
+        blocked_edge_types = _unique_strings([str(value) for value in (assessment.get("blockedEdgeTypes") or [])])
+        follow_up_terms = _unique_strings(
+            [
+                str(row_shell.get("field") or ""),
+                *[str(value) for value in (presentation.get("slotRoles") or [])],
+                *[str(value) for value in (native_trace.get("searchTerms") or [])],
+            ]
+        )
+        join_goal = (
+            f"Reconstruct the Token Shop family shell from current canonical fragments and audit the remaining family seams: {', '.join(blocked_edge_types)}."
+            if blocked_edge_types
+            else "Recheck the Token Shop family shell from current canonical fragments and verify no family seam reopened."
+        )
+        claim_stages = [
+            {
+                "id": "family-shell",
+                "label": "Token Shop family shell",
+                "status": "open" if blocked_edge_types else "closed",
+                "missingSeamIds": blocked_edge_types,
+            }
+        ]
+        depth_plan = [
+            {
+                "hop": 1,
+                "goal": join_goal,
+                "terms": follow_up_terms[:12],
+                "sourceIds": source_ids,
+            }
+        ]
+
+    if not join_goal:
+        return None
+
+    support_payloads = [dict(provenance.get("traceGraph") or {}), dict(provenance.get("nativeReconstruction") or {})]
+    if token_shop_scope:
+        support_payloads.append(dict(token_shop_scope.get("support") or {}))
+    if token_shop_reconstruction_fragment:
+        support_payloads.append(dict(token_shop_reconstruction_fragment.get("support") or {}))
+    if family_graph_fragment:
+        support_payloads.append(dict(family_graph_fragment.get("support") or {}))
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        str(target.get("id") or trace_scope),
+        support_payloads,
+    )
+    return {
+        "semanticKey": f"target-execution-plan:{trace_scope}",
+        "traceScope": trace_scope,
+        "targetId": str(target.get("id") or trace_scope),
+        "familyId": "token-shop",
+        "subjectKind": "family-graph" if family_graph_fragment else "semantic-scope",
+        "joinGoal": join_goal,
+        "followUpTerms": follow_up_terms,
+        "claimStages": claim_stages,
+        "depthPlan": depth_plan,
+        "sourceIds": source_ids,
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_generic_execution_plan_fragment(
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+    assessment_summary: dict[str, Any] | None = None,
+    family_graph_fragment: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    target = dict(payload.get("target") or {})
+    family_id = str(target.get("familyId") or "").strip()
+    if not family_id or family_id == "token-shop":
+        return None
+    native_trace = dict(payload.get("nativeTrace") or {})
+    assessment = dict(assessment_summary or {})
+    family_graph = dict(family_graph_fragment or {})
+    blocked_edge_types = _unique_strings([str(value) for value in (assessment.get("blockedEdgeTypes") or [])])
+    core_terms = _unique_strings([str(value) for value in (family_graph.get("coreTerms") or [])])
+    row_shell_terms = []
+    for item in (family_graph.get("rowShells") or []):
+        if isinstance(item, dict):
+            row_shell_terms.extend([str(item.get("field") or ""), str(item.get("pathId") or "")])
+    follow_up_terms = _unique_strings([*core_terms, *row_shell_terms, *[str(value) for value in (native_trace.get("searchTerms") or [])]])
+    source_ids = _unique_strings([str(entry.get("sourceId") or "") for entry in (payload.get("sourceRoles") or []) if str(entry.get("sourceId") or "").strip()])
+    if not source_ids:
+        source_ids = ["metadata", "level0", "assets", "native"]
+    family_label = str(family_graph.get("familyLabel") or target.get("label") or family_id)
+    join_goal = (
+        f"Reconstruct the {family_label} subject from current canonical fragments and close the remaining adjacent seams: {', '.join(blocked_edge_types)}."
+        if blocked_edge_types
+        else f"Recheck the recovered {family_label} subject from current canonical fragments and verify no adjacent seam reopened."
+    )
+    claim_stages = [
+        {
+            "id": "family-subject",
+            "label": family_label,
+            "status": "open" if blocked_edge_types else "closed",
+            "missingSeamIds": blocked_edge_types,
+        }
+    ]
+    depth_plan = [
+        {
+            "hop": 1,
+            "goal": join_goal,
+            "terms": follow_up_terms[:12],
+            "sourceIds": source_ids,
+        }
+    ]
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        str(target.get("id") or trace_scope),
+        [
+            dict(provenance.get("traceGraph") or {}),
+            dict(provenance.get("nativeReconstruction") or {}),
+            dict((family_graph_fragment or {}).get("support") or {}),
+        ],
+    )
+    return {
+        "semanticKey": f"target-execution-plan:{trace_scope}",
+        "traceScope": trace_scope,
+        "targetId": str(target.get("id") or trace_scope),
+        "familyId": family_id,
+        "subjectKind": "family-graph",
+        "joinGoal": join_goal,
+        "followUpTerms": follow_up_terms,
+        "claimStages": claim_stages,
+        "depthPlan": depth_plan,
+        "sourceIds": source_ids,
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_surface_plan_fragment(
+    conn: sqlite3.Connection,
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+) -> dict[str, Any] | None:
+    target = dict(payload.get("target") or {})
+    family_id = str(target.get("familyId") or "").strip()
+    if family_id != "token-shop":
+        return None
+    shell_window = dict(_load_latest_trace_fragment_payload(conn, trace_scope, "shellWindow") or {})
+    surfaces = list(_load_latest_trace_fragment_payload(conn, trace_scope, "surfaces") or [])
+    if not shell_window or not surfaces:
+        return None
+    surface_plans: list[dict[str, Any]] = []
+    for surface in surfaces:
+        if not isinstance(surface, dict):
+            continue
+        source_ids = _unique_strings(
+            [
+                str(source.get("sourceId") or "")
+                for source in (surface.get("sources") or [])
+                if isinstance(source, dict) and str(source.get("sourceId") or "").strip()
+            ]
+        )
+        surface_plans.append(
+            {
+                "id": str(surface.get("id") or ""),
+                "label": str(surface.get("label") or ""),
+                "terms": _unique_strings([str(value) for value in (surface.get("terms") or [])]),
+                "sourceIds": source_ids,
+            }
+        )
+    if not surface_plans:
+        return None
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        str(target.get("id") or trace_scope),
+        [
+            dict(provenance.get("shellWindow") or {}),
+            dict(provenance.get("surfaces") or {}),
+        ],
+    )
+    return {
+        "semanticKey": f"target-surface-plan:{trace_scope}",
+        "traceScope": trace_scope,
+        "targetId": str(target.get("id") or trace_scope),
+        "familyId": family_id,
+        "shellWindow": shell_window,
+        "surfacePlans": surface_plans,
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_graph_plan_fragment(
+    conn: sqlite3.Connection,
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+) -> dict[str, Any] | None:
+    target = dict(payload.get("target") or {})
+    family_id = str(target.get("familyId") or "").strip()
+    if not family_id or family_id == "exploration":
+        return None
+    trace_graph = dict(_load_latest_trace_fragment_payload(conn, trace_scope, "traceGraph") or {})
+    if not trace_graph:
+        return None
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        str(target.get("id") or trace_scope),
+        [
+            dict(provenance.get("traceGraph") or {}),
+        ],
+    )
+    return {
+        "semanticKey": f"target-graph-plan:{trace_scope}",
+        "traceScope": trace_scope,
+        "targetId": str(target.get("id") or trace_scope),
+        "familyId": family_id,
+        "traceGraph": trace_graph,
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_bridge_policy_fragment(
+    conn: sqlite3.Connection,
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+) -> dict[str, Any] | None:
+    target = dict(payload.get("target") or {})
+    family_id = str(target.get("familyId") or "").strip()
+    if not family_id or family_id == "exploration":
+        return None
+    bridge_rule = str(_load_latest_trace_fragment_payload(conn, trace_scope, "bridgePromotionRule") or payload.get("bridgePromotionRule") or "").strip()
+    lost_structure = list(_load_latest_trace_fragment_payload(conn, trace_scope, "lostStructure") or payload.get("lostStructure") or [])
+    if not bridge_rule and not lost_structure:
+        return None
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        str(target.get("id") or trace_scope),
+        [
+            dict(provenance.get("traceGraph") or {}),
+            dict(provenance.get("bridgeCheck") or {}),
+        ],
+    )
+    return {
+        "semanticKey": f"target-bridge-policy:{trace_scope}",
+        "traceScope": trace_scope,
+        "targetId": str(target.get("id") or trace_scope),
+        "familyId": family_id,
+        "bridgePromotionRule": bridge_rule,
+        "lostStructure": [str(item) for item in lost_structure if str(item).strip()],
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_target_narrative_fragment(
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+) -> dict[str, Any] | None:
+    target = dict(payload.get("target") or {})
+    target_id = str(target.get("id") or trace_scope or "").strip()
+    family_id = str(target.get("familyId") or "").strip()
+    narrative_seed = dict(payload.get("narrative_seed_fragment") or {})
+    if not narrative_seed:
+        narrative_seed = dict((provenance.get("narrative_seed_fragment") or {}).get("rawPayload") or {})
+    if not narrative_seed:
+        narrative_seed = dict((provenance.get("reconstruction_note_fragment") or {}).get("rawPayload") or {})
+    if not narrative_seed:
+        narrative_seed = dict(payload.get("reconstruction_note_fragment") or {})
+    grounded_conclusion = str(narrative_seed.get("groundedConclusion") or "").strip()
+    current_boundary = [
+        str(line).strip()
+        for line in (narrative_seed.get("currentBoundary") or [])
+        if str(line).strip()
+    ]
+    if not grounded_conclusion and not current_boundary:
+        return None
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        target_id,
+        [
+            dict(provenance.get("narrative_seed_fragment") or {}),
+            dict(provenance.get("reconstruction_note_fragment") or {}),
+        ],
+    )
+    return {
+        "semanticKey": f"target-narrative:{trace_scope}",
+        "scopeType": "target-narrative",
+        "traceScope": trace_scope,
+        "targetId": target_id,
+        "familyId": family_id,
+        "groundedConclusion": grounded_conclusion,
+        "currentBoundary": current_boundary,
+        "updatedAt": datetime.now().isoformat(timespec="seconds"),
+        "support": support,
+    }
+
+
+def _derive_target_bridge_comparison_fragment(
+    trace_scope: str,
+    payload: dict[str, Any],
+    provenance: dict[str, Any],
+) -> dict[str, Any] | None:
+    if trace_scope not in {
+        "shard-owned-state-upgradeinfolist-population",
+        "multiverse-market-save-owner-boundary",
+    }:
+        return None
+    target = dict(payload.get("target") or {})
+    target_id = str(target.get("id") or trace_scope or "").strip()
+    family_id = str(target.get("familyId") or "").strip()
+    seed = dict(payload.get("bridge_comparison_seed_fragment") or {})
+    if not seed:
+        seed = dict((provenance.get("bridge_comparison_seed_fragment") or {}).get("rawPayload") or {})
+    if not seed:
+        return None
+    bridge_check = dict(seed.get("bridgeCheck") or {})
+    solved_vs_blocked = dict(seed.get("solvedVsBlockedDiff") or {})
+    if not bridge_check and not solved_vs_blocked:
+        return None
+    support = _collect_trace_support_metadata(
+        trace_scope,
+        target_id,
+        [
+            dict(provenance.get("bridge_comparison_seed_fragment") or {}),
+            dict(provenance.get("traceGraph") or {}),
+            dict(provenance.get("outcome") or {}),
+        ],
+    )
+    return {
+        "semanticKey": f"target-bridge-comparison:{trace_scope}",
+        "scopeType": "target-bridge-comparison",
+        "traceScope": trace_scope,
+        "targetId": target_id,
+        "familyId": family_id,
+        "bridgeCheck": bridge_check,
+        "solvedVsBlockedDiff": solved_vs_blocked,
         "updatedAt": datetime.now().isoformat(timespec="seconds"),
         "support": support,
     }
@@ -1187,6 +2965,22 @@ def _derive_reducer_semantic_fragments(
     for (project_name, project_file, trace_scope, _request_signature), value in trace_groups.items():
         payload = dict(value.get("payload") or {})
         provenance = dict(value.get("provenance") or {})
+        execution_context_fragment = _derive_execution_context_fragment(trace_scope, payload, provenance)
+        if execution_context_fragment is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "execution_context_fragment",
+                    "fragment_key": str(execution_context_fragment.get("semanticKey") or ""),
+                    "payload": execution_context_fragment,
+                    "provenance": {
+                        **dict(execution_context_fragment.get("support") or {}),
+                        "reducer": "derived-execution-context-fragment-v1",
+                    },
+                    "reducer_version": "derived-execution-context-fragment-v1",
+                }
+            )
         assessment_fragment = _derive_target_assessment_fragment(trace_scope, payload, provenance)
         assessment_summary = dict((assessment_fragment or {}).get("decisionSummary") or {})
         if assessment_fragment is not None:
@@ -1202,6 +2996,38 @@ def _derive_reducer_semantic_fragments(
                         "reducer": "derived-target-assessment-fragment-v1",
                     },
                     "reducer_version": "derived-target-assessment-fragment-v1",
+                }
+            )
+        target_narrative_fragment = _derive_target_narrative_fragment(trace_scope, payload, provenance)
+        if target_narrative_fragment is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "target_narrative_fragment",
+                    "fragment_key": str(target_narrative_fragment.get("semanticKey") or ""),
+                    "payload": target_narrative_fragment,
+                    "provenance": {
+                        **dict(target_narrative_fragment.get("support") or {}),
+                        "reducer": "derived-target-narrative-fragment-v1",
+                    },
+                    "reducer_version": "derived-target-narrative-fragment-v1",
+                }
+            )
+        bridge_comparison_fragment = _derive_target_bridge_comparison_fragment(trace_scope, payload, provenance)
+        if bridge_comparison_fragment is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "bridge_comparison_fragment",
+                    "fragment_key": str(bridge_comparison_fragment.get("semanticKey") or ""),
+                    "payload": bridge_comparison_fragment,
+                    "provenance": {
+                        **dict(bridge_comparison_fragment.get("support") or {}),
+                        "reducer": "derived-target-bridge-comparison-fragment-v1",
+                    },
+                    "reducer_version": "derived-target-bridge-comparison-fragment-v1",
                 }
             )
         shard_scope = _derive_shard_owned_state_semantic_scope(trace_scope, payload, provenance)
@@ -1260,6 +3086,146 @@ def _derive_reducer_semantic_fragments(
                     "reducer_version": "derived-token-shop-updater-display-semantic-scope-v1",
                 }
             )
+        token_shop_reconstruction_fragment = _derive_token_shop_reconstruction_fragment(
+            conn,
+            trace_scope,
+            payload,
+            provenance,
+            token_shop_scope,
+            assessment_summary,
+        )
+        if token_shop_reconstruction_fragment is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "token_shop_reconstruction_fragment",
+                    "fragment_key": str(token_shop_reconstruction_fragment.get("semanticKey") or ""),
+                    "payload": token_shop_reconstruction_fragment,
+                    "provenance": {
+                        **dict(token_shop_reconstruction_fragment.get("support") or {}),
+                        "reducer": "derived-token-shop-reconstruction-fragment-v1",
+                    },
+                    "reducer_version": "derived-token-shop-reconstruction-fragment-v1",
+                }
+            )
+        family_graph_fragment = _derive_family_graph_fragment(
+            conn,
+            trace_scope,
+            payload,
+            assessment_summary,
+            target_narrative_fragment,
+            token_shop_reconstruction_fragment,
+        )
+        if family_graph_fragment is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "family_graph_fragment",
+                    "fragment_key": str(family_graph_fragment.get("semanticKey") or ""),
+                    "payload": family_graph_fragment,
+                    "provenance": {
+                        **dict(family_graph_fragment.get("support") or {}),
+                        "reducer": "derived-family-graph-fragment-v1",
+                    },
+                    "reducer_version": "derived-family-graph-fragment-v1",
+                }
+            )
+        execution_plan_fragment = _derive_token_shop_execution_plan_fragment(
+            trace_scope,
+            payload,
+            provenance,
+            token_shop_scope,
+            token_shop_reconstruction_fragment,
+            family_graph_fragment,
+        )
+        if execution_plan_fragment is None:
+            execution_plan_fragment = _derive_generic_execution_plan_fragment(
+                trace_scope,
+                payload,
+                provenance,
+                assessment_summary,
+                family_graph_fragment,
+            )
+        if execution_plan_fragment is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "execution_plan_fragment",
+                    "fragment_key": str(execution_plan_fragment.get("semanticKey") or ""),
+                    "payload": execution_plan_fragment,
+                    "provenance": {
+                        **dict(execution_plan_fragment.get("support") or {}),
+                        "reducer": "derived-token-shop-execution-plan-fragment-v1",
+                    },
+                    "reducer_version": "derived-token-shop-execution-plan-fragment-v1",
+                }
+            )
+        surface_plan_fragment = _derive_surface_plan_fragment(
+            conn,
+            trace_scope,
+            payload,
+            provenance,
+        )
+        if surface_plan_fragment is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "surface_plan_fragment",
+                    "fragment_key": str(surface_plan_fragment.get("semanticKey") or ""),
+                    "payload": surface_plan_fragment,
+                    "provenance": {
+                        **dict(surface_plan_fragment.get("support") or {}),
+                        "reducer": "derived-surface-plan-fragment-v1",
+                    },
+                    "reducer_version": "derived-surface-plan-fragment-v1",
+                }
+            )
+        graph_plan_fragment = _derive_graph_plan_fragment(
+            conn,
+            trace_scope,
+            payload,
+            provenance,
+        )
+        if graph_plan_fragment is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "graph_plan_fragment",
+                    "fragment_key": str(graph_plan_fragment.get("semanticKey") or ""),
+                    "payload": graph_plan_fragment,
+                    "provenance": {
+                        **dict(graph_plan_fragment.get("support") or {}),
+                        "reducer": "derived-graph-plan-fragment-v1",
+                    },
+                    "reducer_version": "derived-graph-plan-fragment-v1",
+                }
+            )
+        bridge_policy_fragment = _derive_bridge_policy_fragment(
+            conn,
+            trace_scope,
+            payload,
+            provenance,
+        )
+        if bridge_policy_fragment is not None:
+            entries.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "fragment_kind": "bridge_policy_fragment",
+                    "fragment_key": str(bridge_policy_fragment.get("semanticKey") or ""),
+                    "payload": bridge_policy_fragment,
+                    "provenance": {
+                        **dict(bridge_policy_fragment.get("support") or {}),
+                        "reducer": "derived-bridge-policy-fragment-v1",
+                    },
+                    "reducer_version": "derived-bridge-policy-fragment-v1",
+                }
+            )
     return entries
 
 
@@ -1268,6 +3234,8 @@ def _is_ignored_legacy_trace_fragment(row: sqlite3.Row) -> bool:
     fragment_key = str(row["fragment_key"])
     trace_scope = str(row["trace_scope"])
     script_name = str(row["script_name"] or "")
+    if fragment_kind == "closureStatus":
+        return True
     if (
         fragment_kind == "semantic_scope_fragment"
         and fragment_key == "shard-owned-state:upgradeinfolist-population"
@@ -1379,6 +3347,84 @@ def _build_native_view_projection(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _sanitize_semantic_scope_projection(scope_payload: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(scope_payload, dict) or not scope_payload:
+        return {}
+    scope_id = str(scope_payload.get("scopeId") or "")
+    scope_type = str(scope_payload.get("scopeType") or "")
+    family_id = str(scope_payload.get("familyId") or "")
+    is_token_shop_row_scope = (
+        (family_id == "token-shop" and scope_type == "row")
+        or scope_id.startswith("row:")
+        or "rowLocalGraph" in scope_payload
+        or "missingSeams" in scope_payload
+        or "closureStatus" in scope_payload
+        or "literalSchemaRecovery" in scope_payload
+        or "literalTextRecovery" in scope_payload
+    )
+    if not is_token_shop_row_scope:
+        return dict(scope_payload)
+    return {
+        "scopeId": scope_payload.get("scopeId"),
+        "scopeType": scope_payload.get("scopeType"),
+        "familyId": scope_payload.get("familyId"),
+        "targetId": scope_payload.get("targetId"),
+        "traceScope": scope_payload.get("traceScope"),
+        "rowShellField": scope_payload.get("rowShellField"),
+        "rowLocalGraph": dict(scope_payload.get("rowLocalGraph") or {}),
+        "missingSeams": list(scope_payload.get("missingSeams") or []),
+        "semanticGraph": dict(scope_payload.get("semanticGraph") or {}),
+        "semanticSearchPlan": dict(scope_payload.get("semanticSearchPlan") or {}),
+        "compatibilityStatus": dict(scope_payload.get("compatibilityStatus") or {}),
+        "updatedAt": scope_payload.get("updatedAt"),
+        "support": dict(scope_payload.get("support") or {}),
+    }
+
+
+def _sanitize_dependency_projection(payload: dict[str, Any]) -> dict[str, Any]:
+    sanitized = dict(payload or {})
+    semantic_scope = dict(sanitized.get("semanticScope") or {})
+    if semantic_scope:
+        sanitized["semanticScope"] = _sanitize_semantic_scope_projection(semantic_scope)
+    return sanitized
+
+
+def _sanitize_semantic_views_projection(semantic_views: dict[str, Any]) -> dict[str, Any]:
+    sanitized_views: dict[str, Any] = {}
+    for fragment_kind, fragment_group in dict(semantic_views or {}).items():
+        if not isinstance(fragment_group, dict):
+            sanitized_views[fragment_kind] = fragment_group
+            continue
+        sanitized_group: dict[str, Any] = {}
+        for fragment_key, fragment_payload in fragment_group.items():
+            if not isinstance(fragment_payload, dict):
+                sanitized_group[fragment_key] = fragment_payload
+                continue
+            if fragment_kind == "semantic_scope_fragment":
+                sanitized_group[fragment_key] = _sanitize_semantic_scope_projection(fragment_payload)
+            elif fragment_kind == "dependency_fragment":
+                sanitized_group[fragment_key] = _sanitize_dependency_projection(fragment_payload)
+            else:
+                sanitized_group[fragment_key] = dict(fragment_payload)
+        sanitized_views[fragment_kind] = sanitized_group
+    return sanitized_views
+
+
+def _sanitize_system_views_projection(system_views: dict[str, Any]) -> dict[str, Any]:
+    sanitized_views: dict[str, Any] = {}
+    for fragment_kind, fragment_payload in dict(system_views or {}).items():
+        if not isinstance(fragment_payload, dict):
+            sanitized_views[fragment_kind] = fragment_payload
+            continue
+        if fragment_kind == "semantic_scope_fragment":
+            sanitized_views[fragment_kind] = _sanitize_semantic_scope_projection(fragment_payload)
+        elif fragment_kind == "dependency_fragment":
+            sanitized_views[fragment_kind] = _sanitize_dependency_projection(fragment_payload)
+        else:
+            sanitized_views[fragment_kind] = dict(fragment_payload)
+    return sanitized_views
+
+
 def _build_target_bundle_projection(
     payload: dict[str, Any],
     system_payload: dict[str, Any],
@@ -1387,7 +3433,16 @@ def _build_target_bundle_projection(
     trace_scope: str,
     request_signature: str,
 ) -> dict[str, Any]:
+    execution_context_fragment = dict((semantic_views.get("execution_context_fragment") or {}).get(f"target-execution-context:{trace_scope}") or {})
     assessment_fragment = dict((semantic_views.get("assessment_fragment") or {}).get(f"target-assessment:{trace_scope}") or {})
+    target_narrative_fragment = dict((semantic_views.get("target_narrative_fragment") or {}).get(f"target-narrative:{trace_scope}") or {})
+    bridge_comparison_fragment = dict((semantic_views.get("bridge_comparison_fragment") or {}).get(f"target-bridge-comparison:{trace_scope}") or {})
+    token_shop_reconstruction_fragment = dict((semantic_views.get("token_shop_reconstruction_fragment") or {}).get(f"token-shop-reconstruction:{trace_scope}") or {})
+    execution_plan_fragment = dict((semantic_views.get("execution_plan_fragment") or {}).get(f"target-execution-plan:{trace_scope}") or {})
+    graph_plan_fragment = dict((semantic_views.get("graph_plan_fragment") or {}).get(f"target-graph-plan:{trace_scope}") or {})
+    bridge_policy_fragment = dict((semantic_views.get("bridge_policy_fragment") or {}).get(f"target-bridge-policy:{trace_scope}") or {})
+    closure_status = dict(((payload.get("rowRecovery") or {}).get("closureStatus") or {}))
+    canonical_status = dict(token_shop_reconstruction_fragment.get("status") or {})
     decision_summary = dict(assessment_fragment.get("decisionSummary") or {})
     if not decision_summary:
         decision_summary = {
@@ -1399,28 +3454,116 @@ def _build_target_bundle_projection(
             "supportingEdgeTypes": [],
             "blockedEdgeTypes": [],
         }
-    return {
-        "dataset": payload.get("dataset", "unity-trace-bundle"),
+    grounded_conclusion = str(target_narrative_fragment.get("groundedConclusion") or "").strip()
+    current_boundary = [
+        str(line).strip()
+        for line in (target_narrative_fragment.get("currentBoundary") or [])
+        if str(line).strip()
+    ]
+    if not grounded_conclusion and not current_boundary:
+        grounded_conclusion = "Canonical target narrative fragment is missing for this target bundle. Rebuild trace views before trusting narrative state."
+        current_boundary = [
+            "Canonical target narrative fragment is missing for this target bundle.",
+            "Rebuild trace views before trusting groundedConclusion or currentBoundary surfaces.",
+        ]
+    bridge_check = dict(bridge_comparison_fragment.get("bridgeCheck") or {})
+    solved_vs_blocked = dict(bridge_comparison_fragment.get("solvedVsBlockedDiff") or {})
+    bridge_comparison_key = str(bridge_comparison_fragment.get("semanticKey") or f"target-bridge-comparison:{trace_scope}")
+    if not bridge_check:
+        bridge_check = {
+            "semanticKey": bridge_comparison_key,
+            "bridgeCleared": None,
+            "bridgeHits": [],
+            "result": "Canonical bridge/comparison fragment is missing for this target bundle. Rebuild trace views before trusting bridge state.",
+        }
+    if not solved_vs_blocked:
+        solved_vs_blocked = {
+            "semanticKey": bridge_comparison_key,
+            "baseline": {
+                "id": trace_scope,
+                "label": "Canonical bridge/comparison missing",
+                "status": "missing-canonical-bridge-comparison",
+                "sourcePath": "db:canonical-bridge-comparison-fragment",
+                "shellField": None,
+                "shellPathId": None,
+                "comparisonShape": [],
+                "groundedConclusion": "Canonical bridge/comparison fragment is missing for this target bundle.",
+            },
+            "blockedTarget": {
+                "id": f"{trace_scope}-blocked",
+                "label": "Canonical blocked comparison missing",
+                "status": "missing-canonical-bridge-comparison",
+                "sourcePath": "db:canonical-bridge-comparison-fragment",
+                "shellField": None,
+                "shellPathId": None,
+                "comparisonShape": [],
+                "groundedConclusion": "Canonical bridge/comparison fragment is missing for this target bundle.",
+            },
+            "delta": {
+                "sharedPresentEdgeTypes": [],
+                "baselineOnlyPresentEdgeTypes": [],
+                "blockedMissingEdgeTypes": [],
+                "solvedVsBlockedSummary": [
+                    "Canonical bridge/comparison fragment is missing for this target bundle.",
+                ],
+            },
+        }
+    projected_system_payload = _sanitize_system_views_projection(system_payload)
+    target = dict(payload.get("target") or {})
+    if str(target.get("familyId") or "") in {
+        "token-shop",
+        "shard-cost",
+        "shard-owned-state",
+        "multiverse-market-save-owner",
+    }:
+        projected_system_payload.pop("system_scope_fragment", None)
+
+    projected_semantic_views = _sanitize_semantic_views_projection(semantic_views)
+
+    projected = {
+        "dataset": payload.get("dataset") or "unity-trace-bundle",
         "generatedAt": payload.get("generatedAt"),
-        "target": payload.get("target"),
+        "target": execution_context_fragment or payload.get("target"),
         "plannerResolution": payload.get("plannerResolution"),
         "traceRegistry": {
-            "selectedTargetId": (payload.get("traceRegistry") or {}).get("selectedTargetId"),
+            "selectedSubjectKind": (payload.get("traceRegistry") or {}).get("selectedSubjectKind"),
+            "selectedSubjectKey": (payload.get("traceRegistry") or {}).get("selectedSubjectKey"),
+            "executionTargetId": (payload.get("traceRegistry") or {}).get("executionTargetId"),
+            "executionTraceScope": (payload.get("traceRegistry") or {}).get("executionTraceScope"),
             "selectedFamilyId": (payload.get("traceRegistry") or {}).get("selectedFamilyId"),
             "requiredSourceFamilies": (payload.get("traceRegistry") or {}).get("requiredSourceFamilies"),
         },
         "traceParams": payload.get("traceParams"),
         "assetSet": payload.get("assetSet"),
-        "status": payload.get("status"),
-        "semanticStatus": payload.get("semanticStatus"),
-        "literalStatus": payload.get("literalStatus"),
-        "runtimeStatus": payload.get("runtimeStatus"),
-        "closureStatus": payload.get("closureStatus"),
+        "status": payload.get("status") or canonical_status.get("status") or closure_status.get("status"),
+        "semanticStatus": payload.get("semanticStatus") or canonical_status.get("semanticStatus") or closure_status.get("semanticStatus"),
+        "literalStatus": payload.get("literalStatus") or canonical_status.get("literalStatus") or closure_status.get("literalStatus"),
+        "runtimeStatus": payload.get("runtimeStatus") or canonical_status.get("runtimeStatus") or closure_status.get("runtimeStatus"),
         "decisionSummary": decision_summary,
+        "bridgeComparisonSemanticKey": bridge_comparison_key,
+        "bridgeCheck": bridge_check,
+        "solvedVsBlockedDiff": solved_vs_blocked,
+        "executionContextSemanticKey": str(execution_context_fragment.get("semanticKey") or f"target-execution-context:{trace_scope}"),
+        "executionContext": execution_context_fragment or None,
+        "executionPlanSemanticKey": str(execution_plan_fragment.get("semanticKey") or f"target-execution-plan:{trace_scope}"),
+        "executionPlan": execution_plan_fragment or None,
+        "narrativeSemanticKey": str(target_narrative_fragment.get("semanticKey") or f"target-narrative:{trace_scope}"),
+        "groundedConclusion": grounded_conclusion,
+        "currentBoundary": current_boundary,
+        "tokenShopReconstructionSemanticKey": (
+            str(token_shop_reconstruction_fragment.get("semanticKey") or "")
+            if token_shop_reconstruction_fragment
+            else None
+        ),
+        "tokenShopReconstruction": token_shop_reconstruction_fragment or None,
+        "graphPlanSemanticKey": str(graph_plan_fragment.get("semanticKey") or f"target-graph-plan:{trace_scope}"),
+        "graphPlan": graph_plan_fragment or None,
+        "bridgePolicySemanticKey": str(bridge_policy_fragment.get("semanticKey") or f"target-bridge-policy:{trace_scope}"),
+        "bridgePolicy": bridge_policy_fragment or None,
         "sourceFamilies": _build_canonical_source_projection(payload),
         "nativeView": _build_native_view_projection(payload),
-        "systemViews": system_payload,
-        "canonicalSemanticViews": semantic_views,
+        "systemViews": projected_system_payload,
+        "canonicalSemanticViews": projected_semantic_views,
         "semanticCoverage": semantic_coverage,
         "materialization": {
             "traceScope": trace_scope,
@@ -1432,6 +3575,57 @@ def _build_target_bundle_projection(
             "dbBacked": True,
         },
     }
+    return projected
+
+
+def _normalize_live_trace_fragment_payloads(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        UPDATE trace_fragments
+        SET is_valid = 0, invalidated_at = COALESCE(invalidated_at, ?)
+        WHERE is_valid = 1
+          AND invalidated_at IS NULL
+          AND fragment_kind = 'closureStatus'
+        """,
+        (datetime.now().isoformat(),),
+    )
+
+    rows = conn.execute(
+        """
+        SELECT fragment_id, fragment_kind, payload_json
+        FROM trace_fragments
+        WHERE is_valid = 1
+          AND invalidated_at IS NULL
+          AND fragment_kind IN ('rowRecovery', 'traceRegistry', 'traceWorkflow')
+        """
+    ).fetchall()
+    for row in rows:
+        payload = _json_loads(row["payload_json"], None)
+        if not isinstance(payload, dict):
+            continue
+        fragment_kind = str(row["fragment_kind"] or "")
+        if fragment_kind == "rowRecovery":
+            normalized = _sanitize_row_recovery_for_persistence(payload)
+        elif fragment_kind == "traceRegistry":
+            normalized = _normalize_reference_owned_payload("traceRegistry", payload, "") or {}
+        elif fragment_kind == "traceWorkflow":
+            normalized = _normalize_reference_owned_payload("traceWorkflow", payload, "") or {}
+        else:
+            continue
+        if _json_dumps(normalized) == _json_dumps(payload):
+            continue
+        conn.execute(
+            """
+            UPDATE trace_fragments
+            SET payload_json = ?, updated_at = ?
+            WHERE fragment_id = ?
+            """,
+            (
+                _json_dumps(normalized),
+                datetime.now().isoformat(),
+                int(row["fragment_id"]),
+            ),
+        )
 
 
 class GhidraCacheDB:
@@ -2019,6 +4213,64 @@ class GhidraCacheDB:
         now = datetime.now().isoformat()
         with self.connect() as conn:
             for evidence in evidence_rows:
+                aspect_kind = str(evidence["aspect_kind"] or "")
+                payload_json = _json_dumps(evidence["payload"])
+                if aspect_kind in SINGLETON_ASPECTS:
+                    conn.execute(
+                        """
+                        UPDATE evidence
+                        SET is_valid = 0,
+                            invalidated_at = ?,
+                            invalidation_reason = ?,
+                            superseded_by = ?,
+                            updated_at = ?
+                        WHERE project_name = ? AND project_file = ? AND normalized_term = ?
+                          AND aspect_kind = ? AND aspect_key = ?
+                          AND is_valid = 1 AND invalidated_at IS NULL
+                          AND source_job_id <> ?
+                        """,
+                        (
+                            now,
+                            "superseded-by-new-evidence",
+                            str(evidence["source_job_id"] or ""),
+                            now,
+                            evidence["project_name"],
+                            evidence["project_file"],
+                            evidence["normalized_term"],
+                            aspect_kind,
+                            evidence["aspect_key"],
+                            evidence["source_job_id"],
+                        ),
+                    )
+                else:
+                    conn.execute(
+                        """
+                        UPDATE evidence
+                        SET is_valid = 0,
+                            invalidated_at = ?,
+                            invalidation_reason = ?,
+                            superseded_by = ?,
+                            updated_at = ?
+                        WHERE project_name = ? AND project_file = ? AND normalized_term = ?
+                          AND aspect_kind = ? AND aspect_key = ?
+                          AND is_valid = 1 AND invalidated_at IS NULL
+                          AND source_job_id <> ?
+                          AND payload_json = ?
+                        """,
+                        (
+                            now,
+                            "superseded-by-equivalent-evidence",
+                            str(evidence["source_job_id"] or ""),
+                            now,
+                            evidence["project_name"],
+                            evidence["project_file"],
+                            evidence["normalized_term"],
+                            aspect_kind,
+                            evidence["aspect_key"],
+                            evidence["source_job_id"],
+                            payload_json,
+                        ),
+                    )
                 existing = conn.execute(
                     """
                     SELECT is_valid, invalidated_at, invalidation_reason, superseded_by
@@ -2030,7 +4282,7 @@ class GhidraCacheDB:
                         evidence["project_name"],
                         evidence["project_file"],
                         evidence["normalized_term"],
-                        evidence["aspect_kind"],
+                        aspect_kind,
                         evidence["aspect_key"],
                         evidence["source_job_id"],
                     ),
@@ -2063,10 +4315,10 @@ class GhidraCacheDB:
                         evidence["project_file"],
                         evidence["normalized_term"],
                         evidence["term"],
-                        evidence["aspect_kind"],
+                        aspect_kind,
                         evidence["aspect_key"],
                         evidence["source_job_id"],
-                        _json_dumps(evidence["payload"]),
+                        payload_json,
                         evidence["confidence"],
                         evidence["reducer_priority"],
                         evidence["schema_version"],
@@ -2636,7 +4888,26 @@ class GhidraCacheDB:
                 graphs.append(term_payload["managedGraph"])
             combined_result["schemaVersion"] = max(int(combined_result["schemaVersion"]), int(term_payload.get("schemaVersion", 0) or 0))
         combined_result["managedReconstruction"] = _merge_managed_reconstructions(reconstructions)
-        combined_result["managedGraph"] = _merge_managed_graphs(graphs)
+        effective_family_hint = (
+            str(combined_result["managedReconstruction"].get("familyHint") or "").strip()
+            or str(family_hint or "").strip()
+            or str(bridge_plan.get("familyHint") or "").strip()
+        )
+        if effective_family_hint:
+            combined_result["managedReconstruction"]["familyHint"] = effective_family_hint
+        combined_result["managedReconstruction"] = _prune_managed_reconstruction(
+            combined_result["managedReconstruction"]
+        )
+        allowed_owners = {
+            str(entry.get("owner") or "")
+            for entry in (combined_result["managedReconstruction"].get("scoredOwners") or [])
+            if str(entry.get("owner") or "")
+        }
+        combined_result["managedGraph"] = _prune_managed_graph(
+            _merge_managed_graphs(graphs),
+            effective_family_hint or None,
+            allowed_owners,
+        )
 
         latest_attempt = _json_loads(latest_attempt_row["payload_json"], {}) if latest_attempt_row is not None else {
             "requestedTerms": requested_terms,
@@ -3041,10 +5312,20 @@ class GhidraCacheDB:
         runtime_evaluator = row_recovery.get("runtimeEvaluatorRecovery") or {}
         presentation_update = row_recovery.get("presentationUpdatePath") or {}
         trace_graph = dataset.get("traceGraph") or {}
-        closure_status = dataset.get("closureStatus") or {}
+        sanitized_row_recovery = _sanitize_row_recovery_for_persistence(dict(row_recovery or {}))
+        row_local_graph = _derive_token_shop_row_local_graph(row_recovery)
+        missing_seams = _derive_token_shop_row_missing_seams(row_local_graph, row_recovery)
+        compatibility_status = _derive_token_shop_row_compatibility_status(
+            row_local_graph,
+            missing_seams,
+            row_recovery,
+        )
         for key, value in dataset.items():
             if key == "traceRun":
                 continue
+            if key not in TRACE_FRAGMENT_TOP_LEVEL_KEYS:
+                continue
+            fragment_payload = sanitized_row_recovery if key == "rowRecovery" else value
             fragment_rows.append(
                 {
                     "project_name": project_name,
@@ -3053,7 +5334,7 @@ class GhidraCacheDB:
                     "request_signature": request_signature,
                     "fragment_kind": key,
                     "fragment_key": "__self__",
-                    "payload": value,
+                    "payload": fragment_payload,
                     "source_job_id": source_job_id if key in {"nativeTrace", "nativeReconstruction"} else "",
                     "source_term": ",".join(source_terms) if key in {"nativeTrace", "nativeReconstruction"} else "",
                     "confidence": 1.0 if key in {"nativeTrace", "nativeReconstruction", "traceGraph"} else 0.9,
@@ -3066,11 +5347,6 @@ class GhidraCacheDB:
             )
 
         system_fragments = {
-            "system_scope_fragment": {
-                "target": dataset.get("target"),
-                "traceRegistry": dataset.get("traceRegistry"),
-                "closureStatus": closure_status,
-            },
             "formula_fragment": {
                 "formulaReconstruction": formula_reconstruction,
                 "recoveredFormulaFields": row_recovery.get("recoveredFormulaFields"),
@@ -3078,7 +5354,7 @@ class GhidraCacheDB:
             },
             "threshold_fragment": {
                 "runtimeCostModel": formula_reconstruction.get("runtimeCostModel"),
-                "unresolvedRuntimeTargets": closure_status.get("unresolvedRuntimeTargets"),
+                "unresolvedRuntimeTargets": compatibility_status.get("unresolvedRuntimeTargets"),
                 "lostStructure": dataset.get("lostStructure"),
             },
             "dependency_fragment": {
@@ -3097,6 +5373,16 @@ class GhidraCacheDB:
                 "runtimeEvaluatorRecovery": runtime_evaluator,
                 "runtimeStatus": dataset.get("runtimeStatus"),
             },
+            "narrative_seed_fragment": {
+                "groundedConclusion": ((dataset.get("narrativeSeed") or {}).get("groundedConclusion")),
+                "currentBoundary": ((dataset.get("narrativeSeed") or {}).get("currentBoundary")),
+                "narrativeSemanticKey": f"target-narrative:{trace_scope}",
+            },
+            "bridge_comparison_seed_fragment": {
+                "bridgeComparisonSemanticKey": dataset.get("bridgeComparisonSemanticKey"),
+                "bridgeCheck": ((dataset.get("bridgeComparisonSeed") or {}).get("bridgeCheck")),
+                "solvedVsBlockedDiff": ((dataset.get("bridgeComparisonSeed") or {}).get("solvedVsBlockedDiff")),
+            },
             "owner_controller_fragment": {
                 "ownerFieldBlock": row_recovery.get("ownerFieldBlock"),
                 "controllerBlock": row_recovery.get("controllerBlock"),
@@ -3110,9 +5396,9 @@ class GhidraCacheDB:
             },
             "reconstruction_note_fragment": {
                 "assessmentSemanticKey": f"target-assessment:{trace_scope}",
-                "bridgeCheck": dataset.get("bridgeCheck"),
-                "groundedConclusion": dataset.get("groundedConclusion"),
-                "currentBoundary": dataset.get("currentBoundary"),
+                "narrativeSemanticKey": f"target-narrative:{trace_scope}",
+                "bridgeComparisonSemanticKey": dataset.get("bridgeComparisonSemanticKey"),
+                "bridgeCheck": None if dataset.get("bridgeComparisonSeed") else dataset.get("bridgeCheck"),
             },
         }
         for kind, value in system_fragments.items():
@@ -3166,6 +5452,36 @@ class GhidraCacheDB:
             )
         with self.connect() as conn:
             for row in fragment_rows:
+                conn.execute(
+                    """
+                    UPDATE trace_fragments
+                    SET is_valid = 0,
+                        invalidated_at = ?,
+                        invalidation_reason = ?,
+                        superseded_by = ?,
+                        updated_at = ?
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                      AND fragment_kind = ? AND fragment_key = ?
+                      AND is_valid = 1 AND invalidated_at IS NULL
+                      AND NOT (
+                        request_signature = ? AND source_job_id = ? AND source_term = ?
+                      )
+                    """,
+                    (
+                        now,
+                        "superseded-by-new-trace-run",
+                        row["request_signature"],
+                        now,
+                        row["project_name"],
+                        row["project_file"],
+                        row["trace_scope"],
+                        row["fragment_kind"],
+                        row["fragment_key"],
+                        row["request_signature"],
+                        row["source_job_id"],
+                        row["source_term"],
+                    ),
+                )
                 existing = conn.execute(
                     """
                     SELECT is_valid, invalidated_at, invalidation_reason, superseded_by
@@ -3239,6 +5555,7 @@ class GhidraCacheDB:
 
     def rebuild_trace_views(self) -> None:
         with self.connect() as conn:
+            _normalize_live_trace_fragment_payloads(conn)
             conn.execute("DELETE FROM canonical_trace_fragments")
             conn.execute("DELETE FROM materialized_trace_views")
             conn.execute("DELETE FROM canonical_system_trace_views")
@@ -3271,10 +5588,10 @@ class GhidraCacheDB:
                 ordered = sorted(fragment_rows, key=_rank_row, reverse=True)
                 selected = ordered[0]
                 selected_ids = [int(row["fragment_id"]) for row in ordered]
-                canonical_payload = _json_loads(selected["payload_json"], None)
-                canonical_payload = _normalize_assessment_owned_payload(
+                raw_payload = _json_loads(selected["payload_json"], None)
+                canonical_payload = _normalize_reference_owned_payload(
                     fragment_kind,
-                    canonical_payload if isinstance(canonical_payload, dict) else None,
+                    raw_payload if isinstance(raw_payload, dict) else None,
                     trace_scope,
                 )
                 provenance = {
@@ -3283,6 +5600,8 @@ class GhidraCacheDB:
                     "sourceTerms": [str(row["source_term"]) for row in ordered if str(row["source_term"])],
                     "reducer": "best-rank",
                 }
+                if fragment_kind in {"reconstruction_note_fragment", "narrative_seed_fragment", "bridge_comparison_seed_fragment"} and isinstance(raw_payload, dict):
+                    provenance["rawPayload"] = raw_payload
                 provenance["payloadSignals"] = _collect_payload_provenance_signals(canonical_payload)
                 alternates = [
                     {
@@ -3504,7 +5823,23 @@ class GhidraCacheDB:
                     semantic_keys.append(("semantic_scope_fragment", "shard-owned-state:upgradeinfolist-population"))
                 if trace_scope == "token-shop-atu4-mod":
                     semantic_keys.append(("semantic_scope_fragment", "token-shop-updater-display:ATU4"))
+                if str((payload.get("target") or {}).get("familyId") or "") == "token-shop":
+                    semantic_keys.append(("token_shop_reconstruction_fragment", f"token-shop-reconstruction:{trace_scope}"))
+                    semantic_keys.append(("execution_plan_fragment", f"target-execution-plan:{trace_scope}"))
+                    semantic_keys.append(("surface_plan_fragment", f"target-surface-plan:{trace_scope}"))
+                    semantic_keys.append(("graph_plan_fragment", f"target-graph-plan:{trace_scope}"))
+                    semantic_keys.append(("bridge_policy_fragment", f"target-bridge-policy:{trace_scope}"))
+                family_id = str((payload.get("target") or {}).get("familyId") or "")
+                if family_id:
+                    semantic_keys.append(("family_graph_fragment", f"family-graph:{family_id}"))
+                semantic_keys.append(("execution_context_fragment", f"target-execution-context:{trace_scope}"))
                 semantic_keys.append(("assessment_fragment", f"target-assessment:{trace_scope}"))
+                semantic_keys.append(("target_narrative_fragment", f"target-narrative:{trace_scope}"))
+                if trace_scope in {
+                    "shard-owned-state-upgradeinfolist-population",
+                    "multiverse-market-save-owner-boundary",
+                }:
+                    semantic_keys.append(("bridge_comparison_fragment", f"target-bridge-comparison:{trace_scope}"))
                 semantic_views = {}
                 semantic_alternates = {}
                 semantic_provenance = {}
@@ -3681,6 +6016,427 @@ class GhidraCacheDB:
             "reducerVersion": str(row["reducer_version"]),
             "builtAt": str(row["built_at"]),
         }
+
+    def find_or_synthesize_execution_context(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        *,
+        subject_kind: str = "",
+        subject_key: str = "",
+        family_id: str = "",
+        compatibility_target_id: str = "",
+    ) -> dict[str, Any]:
+        canonical = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "execution_context_fragment",
+            f"target-execution-context:{trace_scope}",
+        )
+        if canonical:
+            return dict(canonical.get("payload") or {})
+
+        execution_plan = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "execution_plan_fragment",
+            f"target-execution-plan:{trace_scope}",
+        )
+        plan_payload = dict((execution_plan or {}).get("payload") or {})
+
+        subject_kind = str(subject_kind or "").strip()
+        subject_key = str(subject_key or "").strip()
+        family_id = str(family_id or "").strip()
+        compatibility_target_id = str(compatibility_target_id or trace_scope or "").strip()
+        label = compatibility_target_id or trace_scope
+
+        if subject_kind == "family-graph" and subject_key:
+            family_graph = self.find_canonical_semantic_fragment(
+                project_name,
+                project_file,
+                "family_graph_fragment",
+                subject_key,
+            )
+            family_graph_payload = dict((family_graph or {}).get("payload") or {})
+            family_id = family_id or str(family_graph_payload.get("familyId") or "").strip()
+            label = str(family_graph_payload.get("familyLabel") or label)
+        elif subject_kind == "semantic-scope" and subject_key:
+            scope = self.find_canonical_semantic_fragment(
+                project_name,
+                project_file,
+                "semantic_scope_fragment",
+                subject_key,
+            )
+            scope_payload = dict((scope or {}).get("payload") or {})
+            family_id = family_id or str(scope_payload.get("familyId") or "").strip()
+            row_shell = dict(scope_payload.get("rowShell") or {})
+            label = str(row_shell.get("field") or scope_payload.get("scopeId") or label)
+
+        if not family_id and compatibility_target_id:
+            if compatibility_target_id.startswith("token-shop"):
+                family_id = "token-shop"
+            elif compatibility_target_id.startswith("shard-cost"):
+                family_id = "shard-cost"
+            elif compatibility_target_id.startswith("shard-owned-state"):
+                family_id = "shard-owned-state"
+            elif compatibility_target_id.startswith("multiverse-market"):
+                family_id = "multiverse-market-save-owner"
+
+        join_goal = str(plan_payload.get("joinGoal") or "").strip()
+        if not join_goal:
+            if subject_kind == "family-graph":
+                join_goal = f"Reconstruct the {label} subject from current canonical fragments and close directly adjacent gaps only."
+            elif subject_kind == "semantic-scope":
+                join_goal = f"Reconstruct the {label} subject from current canonical fragments and close directly adjacent gaps only."
+            else:
+                join_goal = f"Reconstruct the {compatibility_target_id or trace_scope} subject from current canonical fragments and close directly adjacent gaps only."
+
+        return {
+            "semanticKey": f"target-execution-context:{trace_scope}",
+            "scopeType": "target-execution-context",
+            "traceScope": trace_scope,
+            "targetId": compatibility_target_id or trace_scope,
+            "executionTargetId": compatibility_target_id or trace_scope,
+            "executionTraceScope": trace_scope,
+            "familyId": family_id or None,
+            "label": label,
+            "joinGoal": join_goal,
+            "outputSummaryRules": BOOTSTRAP_OUTPUT_SUMMARY_RULES.get(trace_scope),
+            "selectedSubjectKind": subject_kind or None,
+            "selectedSubjectKey": subject_key or None,
+            "synthesized": True,
+        }
+
+    def find_or_synthesize_surface_plan(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        *,
+        family_id: str = "",
+        compatibility_target_id: str = "",
+    ) -> dict[str, Any]:
+        canonical = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "surface_plan_fragment",
+            f"target-surface-plan:{trace_scope}",
+        )
+        if canonical:
+            return dict(canonical.get("payload") or {})
+        return _synthesize_surface_plan_from_registry(
+            str(trace_scope or "").strip(),
+            str(compatibility_target_id or trace_scope or "").strip(),
+            str(family_id or "").strip(),
+        )
+
+    def find_or_synthesize_support_context(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        *,
+        family_id: str = "",
+        compatibility_target_id: str = "",
+    ) -> dict[str, Any]:
+        target_id = compatibility_target_id or trace_scope
+        strategy_config = dict(BOOTSTRAP_SUPPORT_CONTEXTS.get(target_id) or {})
+        if not strategy_config:
+            return {}
+        return {
+            "semanticKey": f"target-support-context:{trace_scope}",
+            "traceScope": trace_scope,
+            "targetId": target_id,
+            "familyId": family_id or None,
+            "supportContext": strategy_config,
+            "synthesized": True,
+        }
+
+    def find_or_synthesize_target_narrative(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        *,
+        subject_kind: str = "",
+        subject_key: str = "",
+        family_id: str = "",
+        compatibility_target_id: str = "",
+    ) -> dict[str, Any]:
+        canonical = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "target_narrative_fragment",
+            f"target-narrative:{trace_scope}",
+        )
+        canonical_payload = dict((canonical or {}).get("payload") or {})
+        if canonical_payload:
+            return canonical_payload
+
+        execution_context = self.find_or_synthesize_execution_context(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_kind=subject_kind,
+            subject_key=subject_key,
+            family_id=family_id,
+            compatibility_target_id=compatibility_target_id,
+        )
+        with self.connect() as conn:
+            assessment = _load_canonical_semantic_fragment_payload(
+                conn,
+                "assessment_fragment",
+                f"target-assessment:{trace_scope}",
+            )
+            execution_plan = _load_canonical_semantic_fragment_payload(
+                conn,
+                "execution_plan_fragment",
+                f"target-execution-plan:{trace_scope}",
+            )
+            scope_payload = (
+                _load_canonical_semantic_fragment_payload(conn, "semantic_scope_fragment", subject_key)
+                if subject_kind == "semantic-scope" and subject_key
+                else {}
+            )
+
+        family_id = (
+            str(execution_context.get("familyId") or "").strip()
+            or str(scope_payload.get("familyId") or "").strip()
+            or str(family_id or "").strip()
+        )
+        target_id = (
+            str(execution_context.get("targetId") or "").strip()
+            or str(scope_payload.get("targetId") or "").strip()
+            or str(compatibility_target_id or "").strip()
+            or trace_scope
+        )
+        label = (
+            str(execution_context.get("label") or "").strip()
+            or str((scope_payload.get("rowShell") or {}).get("field") or "").strip()
+            or trace_scope
+        )
+        decision_summary = dict(assessment.get("decisionSummary") or {})
+        blocked_edges = [
+            str(edge).strip()
+            for edge in (decision_summary.get("blockedEdgeTypes") or [])
+            if str(edge).strip()
+        ]
+        claim_stages = [
+            str(stage).strip()
+            for stage in (execution_plan.get("claimStages") or [])
+            if str(stage).strip()
+        ]
+        join_goal = str(execution_context.get("joinGoal") or execution_plan.get("joinGoal") or "").strip()
+        grounded_conclusion = str(decision_summary.get("summary") or "").strip()
+        if not grounded_conclusion:
+            if join_goal:
+                grounded_conclusion = (
+                    f"Canonical target narrative is not materialized yet. Current DB-owned execution goal for {label} is: "
+                    f"{join_goal}"
+                )
+            else:
+                grounded_conclusion = (
+                    f"Canonical target narrative is not materialized yet. Current DB-owned subject context for {label} "
+                    "remains bounded to directly adjacent gaps only."
+                )
+        current_boundary = [
+            "This narrative is synthesized from DB execution context and assessment state until a canonical target-narrative fragment is rebuilt."
+        ]
+        if claim_stages:
+            current_boundary.append(
+                "Current claim stages: " + ", ".join(claim_stages) + "."
+            )
+        if blocked_edges:
+            current_boundary.append(
+                "Current blocked edges: " + ", ".join(blocked_edges) + "."
+            )
+        elif join_goal:
+            current_boundary.append(join_goal)
+
+        return {
+            "semanticKey": f"target-narrative:{trace_scope}",
+            "scopeType": "target-narrative",
+            "traceScope": trace_scope,
+            "targetId": target_id,
+            "familyId": family_id or None,
+            "groundedConclusion": grounded_conclusion,
+            "currentBoundary": current_boundary,
+            "synthesized": True,
+        }
+
+    def find_canonical_resolution_subject_candidates(
+        self,
+        project_name: str,
+        project_file: str,
+        include_legacy_targets: bool = False,
+    ) -> list[dict[str, Any]]:
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT fragment_kind, fragment_key, canonical_payload_json, built_at
+                FROM canonical_semantic_fragments
+                WHERE project_name = ? AND project_file = ?
+                  AND fragment_kind IN (
+                    'assessment_fragment',
+                    'target_narrative_fragment',
+                    'family_graph_fragment',
+                    'bridge_comparison_fragment',
+                    'token_shop_reconstruction_fragment',
+                    'semantic_scope_fragment',
+                    'runtime_table_fragment',
+                    'formula_fragment',
+                    'threshold_fragment'
+                  )
+                ORDER BY built_at DESC, fragment_kind ASC, fragment_key ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+        candidates: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in rows:
+            fragment_kind = str(row["fragment_kind"] or "")
+            payload = _json_loads(row["canonical_payload_json"], {})
+            trace_scope = str(payload.get("traceScope") or "").strip()
+            target_id = str(payload.get("targetId") or "").strip()
+            if fragment_kind == "semantic_scope_fragment" and not trace_scope:
+                trace_scope = target_id
+            if not trace_scope or not target_id:
+                continue
+            key = (trace_scope, target_id)
+            candidate = candidates.setdefault(
+                key,
+                {
+                    "traceScope": trace_scope,
+                    "target": {
+                        "id": target_id,
+                        "traceScope": trace_scope,
+                        "familyId": str(payload.get("familyId") or "").strip(),
+                    },
+                    "builtAt": str(row["built_at"] or ""),
+                    "decisionSummary": {},
+                    "nativeView": {},
+                    "semanticScopePayloads": [],
+                    "semanticScopeSubjects": [],
+                    "familyGraphSubjects": [],
+                    "reconstructionSubjects": [],
+                    "label": "",
+                },
+            )
+            if str(row["built_at"] or "") > str(candidate.get("builtAt") or ""):
+                candidate["builtAt"] = str(row["built_at"] or "")
+            if not candidate["target"].get("familyId") and payload.get("familyId"):
+                candidate["target"]["familyId"] = str(payload.get("familyId") or "").strip()
+            if fragment_kind == "assessment_fragment":
+                candidate["decisionSummary"] = dict(payload.get("decisionSummary") or {})
+            elif fragment_kind == "target_narrative_fragment":
+                grounded_conclusion = str(payload.get("groundedConclusion") or "").strip()
+                if grounded_conclusion and not candidate.get("label"):
+                    candidate["label"] = grounded_conclusion[:120]
+            elif fragment_kind == "semantic_scope_fragment":
+                scope_payload = dict(payload)
+                candidate["semanticScopePayloads"].append(scope_payload)
+                candidate["semanticScopeSubjects"].append(
+                    {
+                        "scopeId": str(scope_payload.get("scopeId") or ""),
+                        "scopeType": str(scope_payload.get("scopeType") or ""),
+                        "traceScope": str(scope_payload.get("traceScope") or trace_scope),
+                        "targetId": str(scope_payload.get("targetId") or target_id),
+                        "label": str(((scope_payload.get("rowShell") or {}).get("field") or "") or scope_payload.get("scopeId") or ""),
+                        "subjectTerms": _collect_semantic_scope_subject_terms(scope_payload),
+                    }
+                )
+            elif fragment_kind == "runtime_table_fragment":
+                candidate["nativeView"] = {
+                    "summary": dict(payload.get("nativeReconstruction") or {}),
+                    "searchTerms": list(payload.get("bridgedTerms") or []),
+                }
+            elif fragment_kind == "family_graph_fragment":
+                family_graph_payload = dict(payload)
+                candidate["familyGraphSubjects"].append(
+                    {
+                        "semanticKey": str(family_graph_payload.get("semanticKey") or row["fragment_key"] or ""),
+                        "scopeType": str(family_graph_payload.get("scopeType") or ""),
+                        "traceScope": str(family_graph_payload.get("traceScope") or trace_scope),
+                        "targetId": str(family_graph_payload.get("targetId") or target_id),
+                        "label": str(family_graph_payload.get("familyLabel") or candidate.get("label") or target_id),
+                        "subjectTerms": _collect_family_graph_subject_terms(family_graph_payload),
+                    }
+                )
+                candidate[fragment_kind] = family_graph_payload
+            elif fragment_kind == "token_shop_reconstruction_fragment":
+                reconstruction_payload = dict(payload)
+                candidate["reconstructionSubjects"].append(
+                    {
+                        "semanticKey": str(reconstruction_payload.get("semanticKey") or row["fragment_key"] or ""),
+                        "scopeType": str(reconstruction_payload.get("scopeType") or ""),
+                        "traceScope": str(reconstruction_payload.get("traceScope") or trace_scope),
+                        "targetId": str(reconstruction_payload.get("targetId") or target_id),
+                        "label": str(((reconstruction_payload.get("rowShell") or {}).get("field") or "") or candidate.get("label") or target_id),
+                        "subjectTerms": _collect_reconstruction_subject_terms(reconstruction_payload),
+                    }
+                )
+                candidate[fragment_kind] = reconstruction_payload
+            else:
+                candidate[fragment_kind] = payload
+        candidate_rows: list[dict[str, Any]] = []
+        for candidate in candidates.values():
+            candidate["resolutionTerms"] = _collect_resolution_terms_for_candidate(
+                dict(candidate.get("target") or {}),
+                list(candidate.get("semanticScopePayloads") or []),
+                include_legacy_targets=include_legacy_targets,
+            )
+            candidate_rows.append(candidate)
+        return candidate_rows
+
+    def find_canonical_family_subject_candidate(
+        self,
+        project_name: str,
+        project_file: str,
+        family_id: str,
+    ) -> dict[str, Any] | None:
+        family_id = str(family_id or "").strip()
+        if not family_id:
+            return None
+        candidates = self.find_canonical_resolution_subject_candidates(
+            project_name,
+            project_file,
+            include_legacy_targets=False,
+        )
+        best: dict[str, Any] | None = None
+        for candidate in candidates:
+            target = dict(candidate.get("target") or {})
+            if str(target.get("familyId") or "") != family_id:
+                continue
+            for subject in list(candidate.get("familyGraphSubjects") or []):
+                if str(subject.get("scopeType") or "") != "family-graph":
+                    continue
+                best = {
+                    "subjectKind": "family-graph",
+                    "subjectKey": str(subject.get("semanticKey") or ""),
+                    "subjectLabel": str(subject.get("label") or subject.get("semanticKey") or ""),
+                    "targetId": str(subject.get("targetId") or target.get("id") or ""),
+                    "traceScope": str(subject.get("traceScope") or candidate.get("traceScope") or ""),
+                    "familyId": family_id,
+                }
+                break
+            if best is not None:
+                break
+            for subject in list(candidate.get("reconstructionSubjects") or []):
+                scope_type = str(subject.get("scopeType") or "")
+                if "family-reconstruction" not in scope_type:
+                    continue
+                best = {
+                    "subjectKind": "reconstruction-fragment",
+                    "subjectKey": str(subject.get("semanticKey") or ""),
+                    "subjectLabel": str(subject.get("label") or subject.get("semanticKey") or ""),
+                    "targetId": str(subject.get("targetId") or target.get("id") or ""),
+                    "traceScope": str(subject.get("traceScope") or candidate.get("traceScope") or ""),
+                    "familyId": family_id,
+                }
+                break
+            if best is not None:
+                break
+        return best
 
     def upsert_materialized_system_unit_view(
         self,
@@ -3946,4 +6702,135 @@ class GhidraCacheDB:
             "materializedTargetBundleViews": materialized_target_bundle_views,
             "canonicalSemanticFragments": canonical_semantic_fragments,
             "materializedSystemUnitViews": materialized_system_unit_views,
+        }
+
+    def get_lifecycle_audit(self) -> dict[str, Any]:
+        with self.connect() as conn:
+            invalidated_evidence_rows = int(
+                conn.execute("SELECT COUNT(*) FROM evidence WHERE is_valid = 0 OR invalidated_at IS NOT NULL").fetchone()[0]
+            )
+            invalidated_trace_rows = int(
+                conn.execute("SELECT COUNT(*) FROM trace_fragments WHERE is_valid = 0 OR invalidated_at IS NOT NULL").fetchone()[0]
+            )
+            invalidated_jobs = int(
+                conn.execute("SELECT COUNT(*) FROM jobs WHERE invalidated_at IS NOT NULL").fetchone()[0]
+            )
+            singleton_duplicate_groups = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(*) FROM (
+                      SELECT normalized_term, aspect_kind, aspect_key,
+                             SUM(CASE WHEN is_valid = 1 AND invalidated_at IS NULL THEN 1 ELSE 0 END) AS live
+                      FROM evidence
+                      WHERE aspect_kind NOT IN ({})
+                      GROUP BY normalized_term, aspect_kind, aspect_key
+                      HAVING live > 1
+                    )
+                    """.format(",".join("?" for _ in SINGLETON_ASPECTS.union(UNION_ASPECTS))),
+                    tuple(SINGLETON_ASPECTS.union(UNION_ASPECTS)),
+                ).fetchone()[0]
+            )
+            union_exact_duplicate_groups = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(*) FROM (
+                      SELECT project_name, project_file, normalized_term, aspect_kind, aspect_key, payload_json,
+                             SUM(CASE WHEN is_valid = 1 AND invalidated_at IS NULL THEN 1 ELSE 0 END) AS live
+                      FROM evidence
+                      WHERE aspect_kind IN ({})
+                      GROUP BY project_name, project_file, normalized_term, aspect_kind, aspect_key, payload_json
+                      HAVING live > 1
+                    )
+                    """.format(",".join("?" for _ in UNION_ASPECTS)),
+                    tuple(UNION_ASPECTS),
+                ).fetchone()[0]
+            )
+            trace_duplicate_groups = int(
+                conn.execute(
+                    """
+                    SELECT COUNT(*) FROM (
+                      SELECT trace_scope, fragment_kind, fragment_key,
+                             SUM(CASE WHEN is_valid = 1 AND invalidated_at IS NULL THEN 1 ELSE 0 END) AS live
+                      FROM trace_fragments
+                      GROUP BY trace_scope, fragment_kind, fragment_key
+                      HAVING live > 1
+                    )
+                    """
+                ).fetchone()[0]
+            )
+        stats = self.get_stats()
+        return {
+            **stats,
+            "invalidatedEvidenceRows": invalidated_evidence_rows,
+            "invalidatedTraceFragments": invalidated_trace_rows,
+            "invalidatedJobs": invalidated_jobs,
+            "singletonLiveDuplicateEvidenceGroups": singleton_duplicate_groups,
+            "unionExactPayloadDuplicateEvidenceGroups": union_exact_duplicate_groups,
+            "liveDuplicateTraceFragmentGroups": trace_duplicate_groups,
+        }
+
+    def purge_invalidated_rows(
+        self,
+        older_than_days: int = 30,
+        purge_jobs: bool = False,
+    ) -> dict[str, int]:
+        cutoff = (datetime.now() - timedelta(days=max(0, int(older_than_days)))).isoformat()
+        with self.connect() as conn:
+            evidence_rows = conn.execute(
+                """
+                SELECT COUNT(*) FROM evidence
+                WHERE (is_valid = 0 OR invalidated_at IS NOT NULL)
+                  AND COALESCE(invalidated_at, updated_at, created_at) < ?
+                """,
+                (cutoff,),
+            ).fetchone()[0]
+            conn.execute(
+                """
+                DELETE FROM evidence
+                WHERE (is_valid = 0 OR invalidated_at IS NOT NULL)
+                  AND COALESCE(invalidated_at, updated_at, created_at) < ?
+                """,
+                (cutoff,),
+            )
+            trace_rows = conn.execute(
+                """
+                SELECT COUNT(*) FROM trace_fragments
+                WHERE (is_valid = 0 OR invalidated_at IS NOT NULL)
+                  AND COALESCE(invalidated_at, updated_at, created_at) < ?
+                """,
+                (cutoff,),
+            ).fetchone()[0]
+            conn.execute(
+                """
+                DELETE FROM trace_fragments
+                WHERE (is_valid = 0 OR invalidated_at IS NOT NULL)
+                  AND COALESCE(invalidated_at, updated_at, created_at) < ?
+                """,
+                (cutoff,),
+            )
+            job_rows = 0
+            if purge_jobs:
+                job_rows = conn.execute(
+                    """
+                    SELECT COUNT(*) FROM jobs
+                    WHERE invalidated_at IS NOT NULL
+                      AND COALESCE(invalidated_at, updated_at, created_at) < ?
+                    """,
+                    (cutoff,),
+                ).fetchone()[0]
+                conn.execute(
+                    """
+                    DELETE FROM jobs
+                    WHERE invalidated_at IS NOT NULL
+                      AND COALESCE(invalidated_at, updated_at, created_at) < ?
+                    """,
+                    (cutoff,),
+                )
+        self._rebuild_canonical_and_materialized()
+        self.rebuild_trace_views()
+        return {
+            "purgedEvidenceRows": int(evidence_rows),
+            "purgedTraceFragments": int(trace_rows),
+            "purgedJobs": int(job_rows),
+            "olderThanDays": int(older_than_days),
         }

@@ -49,9 +49,9 @@ function buildUabeaTypeMetadataSupport(report) {
     dataset: "uabea-type-metadata-support.v1",
     generatedAt: "2026-04-20",
     source: {
-      rawReport: "data/uabea-extract-report.json",
+      rawReport: "data/archive/uabea-extract-report.json",
       extractionCommand:
-        "node scripts/unity/run_extract.mjs asset:run --quick -- --report data/uabea-extract-report.json"
+        "node scripts/unity/run_extract.mjs asset:run --quick -- --report data/archive/uabea-extract-report.json"
     },
     purpose:
       "Compact typed-metadata support core derived from the larger UABEA extract report. This preserves the typed type, field, and method slices still referenced by extractor/debug workflows without keeping the full raw object-hit export on the active support surface.",
@@ -74,14 +74,14 @@ function buildUabeaTypeMetadataSupport(report) {
     directTargetTypeMetadata: retainedTypeMetadata,
     currentBoundary: [
       "Treat this file as the committed typed support core for extractor/debug workflows that still need exact LibCpp2IL field or method tables.",
-      "Treat data/uabea-extract-report.json as the larger raw export and historical derivation source, not as the default active support surface.",
+      "Treat data/archive/uabea-extract-report.json as the larger raw export and historical derivation source, not as the default active support surface.",
       "Do not expand app/runtime consumers back to the full raw report when the reduced boundary/support datasets already preserve the needed semantics."
     ]
   };
 }
 
 async function main() {
-  const uabeaReport = await readJson("data/uabea-extract-report.json");
+  const uabeaReport = await readJson("data/archive/uabea-extract-report.json");
   const uabeaSupport = buildUabeaTypeMetadataSupport(uabeaReport);
   await writeJson("data/uabea-type-metadata-support.v1.json", uabeaSupport);
   console.log("Generated extract-report support datasets:");
@@ -89,3 +89,4 @@ async function main() {
 }
 
 await main();
+

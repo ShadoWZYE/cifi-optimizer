@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import struct
 import subprocess
 import sys
 from collections.abc import Iterator, Mapping
@@ -11,13 +12,6 @@ from pathlib import Path
 from typing import Any
 
 from ghidra_cache_db import ASPECT_PRIORITIES, GhidraCacheDB
-from token_shop_parse import (
-    TOKEN_SHOP_ABSOLUTE_OFFSET,
-    TOKEN_SHOP_FIELD_OFFSET,
-    build_numeric_table,
-    extract_field_names,
-    parse_token_shop,
-)
 
 ROOT = Path(__file__).resolve().parents[2]
 GHIDRA_PROJECT_DIR = ROOT / "workbench" / "ghidra-projects" / "cifi-full.rep"
@@ -34,6 +28,20 @@ MAX_PROCESS_PROJECT_SEARCH_TERMS = 160
 MAX_PROCESS_PROJECT_SEARCH_CHARS = 3500
 
 TOKEN_SHOP_SHELL_PATTERN = "ATU"
+TOKEN_SHOP_ABSOLUTE_OFFSET = 32_801_984
+TOKEN_SHOP_FIELD_OFFSET = 236
+TOKEN_METADATA_START = 661_500
+TOKEN_METADATA_END = 666_400
+TOKEN_POINTER_SUFFIXES = (
+    "Object",
+    "Notification",
+    "Text",
+    "Fill",
+    "Button",
+    "MaxOverlay",
+    "Content",
+    "Overlay",
+)
 
 FIELDISH_SUFFIXES = (
     "StartCost",
@@ -81,6 +89,127 @@ UI_SLOT_MARKERS = (
     "Box",
     "Layout",
 )
+
+
+def extract_field_names(metadata_blob: bytes) -> list[str]:
+    segment = metadata_blob[TOKEN_METADATA_START:TOKEN_METADATA_END]
+    parts = [part.decode("utf-8", errors="ignore") for part in segment.split(b"\x00") if part]
+    start = parts.index("MeltdownActiveObject")
+    end = parts.index("Tier5TokenUnlockReward") + 1
+    return parts[start:end]
+
+
+def _is_token_shop_pointer_field(name: str) -> bool:
+    return any(name.endswith(suffix) for suffix in TOKEN_POINTER_SUFFIXES)
+
+
+def _infer_token_shop_group(name: str) -> str:
+    if (
+        name.startswith("TokenBoost")
+        or name.startswith("DiamondBoost")
+        or name.startswith("CellBoost")
+        or name.startswith("ModBoost")
+        or name.startswith("MK")
+    ):
+        return "tier1"
+    if (
+        name.startswith("TokenBoostT2")
+        or name.startswith("TokenDailiesT2")
+        or name.startswith("T2Duo")
+    ):
+        return "tier2"
+    if (
+        name.startswith("TokenBoostT3")
+        or name.startswith("TokenDailiesT3")
+        or name.startswith("T3Trio")
+    ):
+        return "tier3"
+    if (
+        name.startswith("ATU24")
+        or name.startswith("ATU25")
+        or name.startswith("ATU26")
+        or name.startswith("ATU27")
+        or name.startswith("ATU28")
+        or name.startswith("Tier4")
+    ):
+        return "tier4plus"
+    return "controller"
+
+
+def _infer_token_shop_numeric_value(name: str, raw_u32: int, raw_f32: float) -> object:
+    if "MaxLevel" in name or "UnlockReward" in name or name == "CE":
+        return raw_u32
+    if abs(raw_f32) < 1e-20 and raw_u32 <= 10_000:
+        return raw_u32
+    return raw_f32
+
+
+def parse_token_shop(level_blob: bytes, field_names: list[str]) -> list[dict[str, object]]:
+    entries: list[dict[str, object]] = []
+    offset = TOKEN_SHOP_FIELD_OFFSET
+    for name in field_names:
+        entry: dict[str, object] = {
+            "field": name,
+            "group": _infer_token_shop_group(name),
+            "object_offset": offset,
+        }
+        absolute = TOKEN_SHOP_ABSOLUTE_OFFSET + offset
+        if _is_token_shop_pointer_field(name):
+            file_id = struct.unpack_from("<I", level_blob, absolute)[0]
+            path_id = struct.unpack_from("<Q", level_blob, absolute + 4)[0]
+            entry["kind"] = "pointer"
+            entry["file_id"] = file_id
+            entry["path_id"] = path_id
+            offset += 12
+        else:
+            raw_u32 = struct.unpack_from("<I", level_blob, absolute)[0]
+            raw_f32 = struct.unpack_from("<f", level_blob, absolute)[0]
+            entry["kind"] = "number"
+            entry["raw_u32"] = raw_u32
+            entry["raw_f32"] = raw_f32
+            entry["value"] = _infer_token_shop_numeric_value(name, raw_u32, raw_f32)
+            offset += 4
+        entries.append(entry)
+    return entries
+
+
+def build_numeric_table(entries: list[dict[str, object]]) -> dict[str, dict[str, object]]:
+    table: dict[str, dict[str, object]] = {}
+    for entry in entries:
+        if entry["kind"] != "number":
+            continue
+        field = str(entry["field"])
+        if not any(
+            marker in field
+            for marker in ("StartCost", "AdditiveCost", "Bonus", "MaxLevel", "UnlockReward")
+        ):
+            continue
+
+        prefix = field
+        for suffix in (
+            "StartCost",
+            "AdditiveCost",
+            "Bonus1",
+            "Bonus2",
+            "Bonus3",
+            "Bonus4",
+            "Bonus5",
+            "Bonus",
+            "FillMaxLevel",
+            "MaxLevel",
+            "UnlockReward",
+        ):
+            if field.endswith(suffix):
+                prefix = field[: -len(suffix)]
+                key = suffix
+                break
+        else:
+            key = field
+
+        record = table.setdefault(prefix, {})
+        record[key] = entry["value"]
+        record["group"] = entry["group"]
+    return table
 
 
 def get_trace_cache_db() -> GhidraCacheDB:
@@ -193,6 +322,21 @@ def _classify_bridge_term_kind(value: str) -> str:
     if _is_fieldish_name(value):
         return "field"
     return "term"
+
+
+def _family_owner_matches(owner: str, family_hint: str | None) -> bool:
+    if not family_hint:
+        return True
+    lowered = owner.lower()
+    if family_hint.startswith("shard"):
+        return "shard" in lowered
+    if family_hint == "token-shop":
+        if any(noise in lowered for noise in ("tokenbank", "claimablebanktokens", "callback", "statemachine", "ugs")):
+            return False
+        return "tokenshop" in lowered or "arcade" in lowered or "atu" in lowered
+    if family_hint.startswith("multiverse-market"):
+        return "multiverse" in lowered or "market" in lowered or "save" in lowered or "inscryption" in lowered
+    return True
 
 
 def _is_safe_native_anchor(value: str) -> bool:
@@ -846,16 +990,16 @@ def _summarize_native_result(
         score = int(current.get("score", 0))
         reasons = list(current.get("reasons", []))
         if family_hint:
-            family_match = (
-                (family_hint.startswith("shard") and "shard" in lowered)
-                or (family_hint == "token-shop" and ("token" in lowered or "shop" in lowered or "atu" in lowered))
-                or (family_hint.startswith("multiverse-market") and ("multiverse" in lowered or "market" in lowered or "save" in lowered))
-            )
+            family_match = _family_owner_matches(owner_name, family_hint)
             if family_match:
                 score += 6
                 if "family-hint-match" not in reasons:
                     reasons.append("family-hint-match")
-            elif "|" in owner_name and family_hint.startswith("shard"):
+            else:
+                score -= 8
+                if "family-hint-mismatch" not in reasons:
+                    reasons.append("family-hint-mismatch")
+            if "|" in owner_name and family_hint.startswith("shard") and not family_match:
                 score -= 4
                 if "cross-family-noise" not in reasons:
                     reasons.append("cross-family-noise")
@@ -872,6 +1016,33 @@ def _summarize_native_result(
         scored_owners.append(current)
     scored_owners.sort(key=lambda item: (-int(item.get("score", 0)), str(item.get("owner", "")).lower()))
 
+    if family_hint:
+        scored_owners = [
+            entry for entry in scored_owners
+            if _family_owner_matches(str(entry.get("owner", "")), family_hint)
+        ]
+
+    allowed_owners = {
+        str(entry.get("owner", "")).strip()
+        for entry in scored_owners
+        if str(entry.get("owner", "")).strip()
+    }
+    filtered_owner_to_terms = {
+        owner: bucket
+        for owner, bucket in (managed_reconstruction.get("ownerToTerms", {}) or {}).items()
+        if not allowed_owners or owner in allowed_owners
+    }
+
+    if allowed_owners:
+        reconstructed_owners = [
+            owner for owner in reconstructed_owners
+            if owner in allowed_owners
+        ]
+        owner_family_candidates = [
+            owner for owner in owner_family_candidates
+            if _family_owner_matches(owner, family_hint)
+        ]
+
     return {
         "termSummaries": summaries,
         "ownerCandidates": owner_candidates[:20],
@@ -880,7 +1051,7 @@ def _summarize_native_result(
         "reconstructedMethods": filtered_methods,
         "reconstructedFields": filtered_fields,
         "rawValueTerms": filtered_raw_values,
-        "ownerToTerms": managed_reconstruction.get("ownerToTerms", {}),
+        "ownerToTerms": filtered_owner_to_terms,
         "scoredOwners": scored_owners[:20],
         "bridgedTerms": bridged_terms,
         "metadataOnlyTerms": metadata_only_terms,

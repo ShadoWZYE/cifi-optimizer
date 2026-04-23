@@ -5,9 +5,9 @@
     "shellRowPredictionBoundary": "data/multiverse-market-shell-row-prediction-boundary.json",
     "nearbyIdentityBindingPattern": "data/multiverse-market-nearby-identity-binding-pattern.json",
     "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
-    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-    "uabeaProbeReport": "data/uabea-extract-report.json",
-    "unityProbeReport": "data/unity-apk-extract-report.json",
+    "metadataNeighborhood": "data/archive/multiverse-market-metadata-neighborhood.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
+    "unityProbeReport": "data/archive/unity-apk-extract-report.json",
     "rowSeededAssetProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-seeded-slot-walk",
     "textComponentProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-component-walk",
     "assignmentSiteProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-assignment-site-summary",
@@ -92,11 +92,11 @@
         "claim": "row 78 keeps the same number across IS78Level, IS78ID, BuyIS78, TextHandlerMarkets, and ChrystosEmporiumUpgrade78-ID78 beside the player-facing string anchor Inscryption 78 Ouroboros Orbs"
       },
       {
-        "artifact": "data/multiverse-market-metadata-neighborhood.json",
+        "artifact": "data/archive/multiverse-market-metadata-neighborhood.json",
         "claim": "the same neighborhood preserves TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source-path clue"
       },
       {
-        "artifact": "data/unity-apk-extract-report.json",
+        "artifact": "data/archive/unity-apk-extract-report.json",
         "claim": "the repo preserves a direct Unity string anchor Inscryption 78 Ouroboros Orbs"
       },
       {
@@ -255,3 +255,5 @@
     "This does not widen canonical import, planner behavior, or the shipped compatibility preview. compatibility.unmappedSystemState.multiverseMarket stays compatibility-only, InscryptionsDone stays wrapper-only, and canonical state.playerProfile promotion stays blocked."
   ]
 }
+
+

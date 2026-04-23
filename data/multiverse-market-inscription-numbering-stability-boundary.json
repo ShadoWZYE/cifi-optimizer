@@ -4,9 +4,9 @@
   "sources": {
     "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
     "row7174RemapBand": "data/multiverse-market-row71-74-remap-band.json",
-    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-    "uabeaProbeReport": "data/uabea-extract-report.json",
-    "unityProbeReport": "data/unity-apk-extract-report.json",
+    "metadataNeighborhood": "data/archive/multiverse-market-metadata-neighborhood.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
+    "unityProbeReport": "data/archive/unity-apk-extract-report.json",
     "nearbyIdentityBindingPattern": "data/multiverse-market-nearby-identity-binding-pattern.json",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },
@@ -200,3 +200,5 @@
     "This wider numbering-stability boundary does not ground new row identities for unresolved rows, so the canonical import-safe subset remains empty."
   ]
 }
+
+

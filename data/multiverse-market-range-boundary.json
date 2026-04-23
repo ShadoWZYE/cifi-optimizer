@@ -1,8 +1,8 @@
 {
   "generatedAt": "2026-04-04",
   "sources": {
-    "validatedRows": "data/multiverse-market-values.json",
-    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json"
+    "validatedRows": "data/archive/multiverse-market-values.json",
+    "metadataNeighborhood": "data/archive/multiverse-market-metadata-neighborhood.json"
   },
   "validatedRowIds": [
     50,
@@ -88,3 +88,4 @@
     "This overlap is still partial and does not, by itself, prove the declaring save owner or full owned-state mapping for the validated market rows."
   ]
 }
+

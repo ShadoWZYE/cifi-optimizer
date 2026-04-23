@@ -4110,11 +4110,11 @@ function validateShardCostScreenshotCalibration(probe) {
 function validateShardCostListPathProbe(probe) {
   expectNonEmptyString(probe.dataset, "shard cost list-path probe dataset id must be present");
   expectNonEmptyString(probe.generatedAt, "shard cost list-path probe generatedAt must be present");
-  expectRecord(probe.source, "shard cost list-path probe source must be an object");
-  ["methodProbe", "uabeaProbeReport", "libIl2cpp"].forEach((field) => {
+  expectRecord(probe.sources, "shard cost list-path probe sources must be an object");
+  ["formulaModel", "sourceModel"].forEach((field) => {
     expectNonEmptyString(
-      probe.source[field],
-      `shard cost list-path probe source.${field} must be present`
+      probe.sources[field],
+      `shard cost list-path probe sources.${field} must be present`
     );
   });
   expectRecord(probe.ownerFields, "shard cost list-path probe ownerFields must be an object");
@@ -4124,7 +4124,7 @@ function validateShardCostListPathProbe(probe) {
 
   assert.equal(
     probe.dataset,
-    "shard-cost-list-path-probe.v1",
+    "shard-cost-list-path",
     "shard cost list-path probe dataset drifted"
   );
   assert.equal(
@@ -4153,7 +4153,7 @@ function validateShardCostListPathProbe(probe) {
     "shard cost list-path probe must preserve get_SU29Cost as final appended getter"
   );
   assert.ok(
-    probe.findings.some((line) => String(line).includes("same getter outputs")),
+    probe.findings.some((line) => String(line).includes("caches the results into MilestoneCostList")),
     "shard cost list-path probe must preserve cache-builder finding"
   );
   assert.ok(
@@ -4166,8 +4166,8 @@ function validateShardCostListPathProbe(probe) {
   );
 
   return {
-    id: "shard-cost-list-path-probe",
-    label: "Shard cost list-path probe",
+    id: "shard-cost-list-path",
+    label: "Shard cost list-path support",
     classification: "extracted-mechanics",
     stats: [
       `${probe.callOrder.length - 1} appended row getters`,
@@ -4759,11 +4759,11 @@ function validateShardCostFormulaModel(model) {
 function validateShardBonusSlotProbe(probe) {
   expectNonEmptyString(probe.dataset, "shard bonus slot probe dataset id must be present");
   expectNonEmptyString(probe.generatedAt, "shard bonus slot probe generatedAt must be present");
-  expectRecord(probe.source, "shard bonus slot probe source must be an object");
-  ["metadata", "groundedMilestones"].forEach((field) => {
+  expectRecord(probe.sources, "shard bonus slot probe sources must be an object");
+  ["shardFamilyEvidence", "sourceModel"].forEach((field) => {
     expectNonEmptyString(
-      probe.source[field],
-      `shard bonus slot probe source.${field} must be present`
+      probe.sources[field],
+      `shard bonus slot probe sources.${field} must be present`
     );
   });
   expectArray(probe.rows, "shard bonus slot probe rows must be an array");
@@ -4772,7 +4772,7 @@ function validateShardBonusSlotProbe(probe) {
 
   assert.equal(
     probe.dataset,
-    "shard-bonus-slot-probe.v1",
+    "shard-bonus-slot-support",
     "shard bonus slot probe dataset drifted"
   );
   assert.equal(probe.rows.length, 30, "shard bonus slot probe row count drifted");
@@ -4809,8 +4809,8 @@ function validateShardBonusSlotProbe(probe) {
   );
 
   return {
-    id: "shard-bonus-slot-probe",
-    label: "Shard bonus slot probe",
+    id: "shard-bonus-slot-support",
+    label: "Shard bonus slot support",
     classification: "extracted-mechanics",
     stats: [
       `${probe.rows.length} shard rows`,
@@ -5703,11 +5703,9 @@ function validateShardMilestoneFamilyEvidence(boundary) {
     "effectTextHandlerBoundary",
     "payloadBoundary",
     "saveBoundary",
-    "bonusSlotProbe",
-    "costMethodProbe",
-    "costNativeProbe",
     "handoffBoundary",
-    "typeMetadataProbe"
+    "costFormulaModel",
+    "sourceModel"
   ].forEach((field) => {
     expectNonEmptyString(
       boundary.sources[field],
@@ -6741,7 +6739,7 @@ function validateMultiverseMarketRowTextCoverage(coverage) {
     "multiverse market row text coverage generatedAt must be present"
   );
   expectRecord(coverage.sources, "multiverse market row text coverage sources must be an object");
-  ["metadata", "level0", "probe", "validatedRows"].forEach((field) => {
+  ["validatedRows", "sourceModel"].forEach((field) => {
     expectNonEmptyString(
       coverage.sources[field],
       `multiverse market row text coverage sources.${field} must be present`
@@ -7229,7 +7227,7 @@ function validateMultiverseMarketOwnerFamily(family) {
     "multiverse market owner family generatedAt must be present"
   );
   expectRecord(family.sources, "multiverse market owner family sources must be an object");
-  ["probe", "metadata", "level0", "validatedRows"].forEach((field) => {
+  ["metadata", "level0", "validatedRows", "actionShell", "sourceModel"].forEach((field) => {
     expectNonEmptyString(
       family.sources[field],
       `multiverse market owner family sources.${field} must be present`
@@ -7297,7 +7295,7 @@ function validateMultiverseMarketOwnerFamily(family) {
       `multiverse market owner family missing ${name}`
     );
   });
-  ["BuyIS47", "BuyIS64", "BuyIS73", "BuyIS105"].forEach((name) => {
+  ["BuyIS1", "BuyIS50", "BuyIS74", "BuyIS110"].forEach((name) => {
     assert.ok(
       family.sampleBuyHooks.includes(name),
       `multiverse market owner family missing ${name}`
@@ -9414,8 +9412,8 @@ function validateUnityTraceBundle(bundle) {
     "unity trace bundle planner example drifted"
   );
   assert.equal(
-    bundle.plannerResolution.selectionMode,
-    "explicit-target",
+    ["explicit-target", "archive-explicit-target", "best-gap-db"].includes(bundle.plannerResolution.selectionMode),
+    true,
     "unity trace bundle planner selection mode drifted"
   );
   assert.equal(
@@ -9428,10 +9426,9 @@ function validateUnityTraceBundle(bundle) {
     null,
     "unity trace bundle planner compare preset drifted"
   );
-  assert.equal(
-    bundle.traceRegistry.path,
-    "data/unity-trace-target-registry.json",
-    "unity trace bundle registry path drifted"
+  assert.ok(
+    bundle.traceRegistry.catalogMode === "db-bootstrap" || bundle.traceRegistry.catalogMode == null,
+    "unity trace bundle catalog mode drifted"
   );
   if (bundle.target.id === "shard-owned-state-upgradeinfolist-population") {
     expectRecord(bundle.outcome, "unity trace bundle shard outcome must be present");
@@ -9474,135 +9471,6 @@ function validateUnityTraceBundle(bundle) {
       bundle.target.id === "shard-owned-state-upgradeinfolist-population"
         ? "Shard trace preserves one bounded owned-state injection seam"
         : "Committed trace verdict preserved"
-    ]
-  };
-}
-
-function validateUnityTraceTargetRegistry(registry) {
-  expectNonEmptyString(registry.dataset, "unity trace target registry dataset must be present");
-  expectRecord(
-    registry.sourceFamilies,
-    "unity trace target registry sourceFamilies must be an object"
-  );
-  expectRecord(registry.planner, "unity trace target registry planner must be an object");
-  expectRecord(
-    registry.planner.families,
-    "unity trace target registry planner.families must be an object"
-  );
-  expectRecord(
-    registry.comparisonPresets,
-    "unity trace target registry comparisonPresets must be an object"
-  );
-  expectRecord(registry.targets, "unity trace target registry targets must be an object");
-  assert.equal(
-    registry.dataset,
-    "unity-trace-target-registry",
-    "unity trace target registry dataset id drifted"
-  );
-  ["token-shop", "shard-cost", "shard-owned-state", "multiverse-market-save-owner"].forEach(
-    (familyId) => {
-      assert.ok(
-        registry.sourceFamilies[familyId],
-        `unity trace target registry missing family ${familyId}`
-      );
-      assert.ok(
-        registry.planner.families[familyId],
-        `unity trace target registry planner missing family ${familyId}`
-      );
-    }
-  );
-  [
-    "token-shop-atu3-cells-effect",
-    "token-shop-atu3-chest-consumer",
-    "token-shop-atu3-chest-consumer-read",
-    "token-shop-atu4-mod",
-    "token-shop-atu5-mk1-title",
-    "token-shop-atu7-mk3-bridge",
-    "token-shop-family-structure",
-    "shard-cost-su0-structure",
-    "shard-owned-state-upgradeinfolist-population",
-    "multiverse-market-save-owner-boundary"
-  ].forEach((targetId) => {
-    assert.ok(registry.targets[targetId], `unity trace target registry missing target ${targetId}`);
-  });
-  assert.equal(
-    registry.planner.families["token-shop"].defaultTargetId,
-    "token-shop-atu3-cells-effect",
-    "unity trace target registry token-shop planner target drifted"
-  );
-  assert.equal(
-    registry.planner.families["shard-cost"].defaultRunMode,
-    "trace",
-    "unity trace target registry shard planner mode drifted"
-  );
-  assert.equal(
-    registry.planner.families["shard-owned-state"].defaultTargetId,
-    "shard-owned-state-upgradeinfolist-population",
-    "unity trace target registry shard-owned-state planner target drifted"
-  );
-  assert.equal(
-    registry.planner.families["multiverse-market-save-owner"].defaultRunMode,
-    "compare",
-    "unity trace target registry market planner mode drifted"
-  );
-  assert.equal(
-    registry.targets["token-shop-atu4-mod"].comparisonPresetId,
-    null,
-    "unity trace target registry ATU4 comparison preset drifted"
-  );
-  assert.equal(
-    registry.targets["token-shop-atu5-mk1-title"].comparisonPresetId,
-    "token-shop-atu5-vs-atu3",
-    "unity trace target registry ATU5 comparison preset drifted"
-  );
-  assert.equal(
-    registry.targets["token-shop-atu7-mk3-bridge"].comparisonPresetId,
-    "token-shop-atu7-vs-atu3",
-    "unity trace target registry ATU7 comparison preset drifted"
-  );
-  assert.equal(
-    registry.targets["token-shop-atu3-cells-effect"].comparisonPresetId,
-    "token-shop-atu3-effect-vs-split",
-    "unity trace target registry ATU3 effect comparison preset drifted"
-  );
-  assert.equal(
-    registry.targets["token-shop-atu3-chest-consumer"].comparisonPresetId,
-    "token-shop-atu3-consumer-vs-effect",
-    "unity trace target registry ATU3 consumer comparison preset drifted"
-  );
-  assert.equal(
-    registry.targets["token-shop-atu3-chest-consumer-read"].comparisonPresetId,
-    "token-shop-atu3-consumer-read-vs-consumer",
-    "unity trace target registry ATU3 consumer read comparison preset drifted"
-  );
-  assert.equal(
-    registry.targets["token-shop-family-structure"].comparisonPresetId,
-    "token-shop-family-structure-vs-unresolved",
-    "unity trace target registry family-structure comparison preset drifted"
-  );
-  assert.equal(
-    registry.targets["shard-cost-su0-structure"].comparisonPresetId,
-    "shard-cost-structure-vs-planner",
-    "unity trace target registry shard comparison preset drifted"
-  );
-  assert.equal(
-    registry.targets["shard-owned-state-upgradeinfolist-population"].comparisonPresetId,
-    "shard-owned-state-seam-vs-local-bridge",
-    "unity trace target registry shard owned-state comparison preset drifted"
-  );
-  assert.equal(
-    registry.targets["multiverse-market-save-owner-boundary"].comparisonPresetId,
-    "multiverse-market-save-owner-vs-canonical-import",
-    "unity trace target registry market comparison preset drifted"
-  );
-  return {
-    id: "unity-trace-target-registry",
-    label: "Unity trace target registry",
-    classification: "extracted-mechanics",
-    stats: [
-      `${Object.keys(registry.sourceFamilies).length} trace source families`,
-      `${Object.keys(registry.targets).length} trace targets`,
-      "TokenShop, shard-cost, shard-owned-state, and multiverse-market/save-owner families are registry-seeded"
     ]
   };
 }
@@ -9747,7 +9615,7 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
     boundary.sources,
     "multiverse market market-member boundary sources must be an object"
   );
-  ["probeScript", "metadataNeighborhood", "typedProbeReport", "metadata", "nativeBinary"].forEach(
+  ["metadataNeighborhoodMethod", "metadataNeighborhood", "typedProbeReport", "metadata", "nativeBinary"].forEach(
     (field) => {
       expectNonEmptyString(
         boundary.sources[field],
@@ -13527,12 +13395,14 @@ function validateTokenBankControllerShell(shell) {
     "token-bank controller shell generatedAt must be present"
   );
   expectRecord(shell.sources, "token-bank controller shell sources must be an object");
-  ["probe", "metadata", "level0"].forEach((field) => {
-    expectNonEmptyString(
-      shell.sources[field],
-      `token-bank controller shell sources.${field} must be present`
-    );
-  });
+  ["metadata", "level0", "tokenShopExtract", "tokenBankStateClues", "sourceModel"].forEach(
+    (field) => {
+      expectNonEmptyString(
+        shell.sources[field],
+        `token-bank controller shell sources.${field} must be present`
+      );
+    }
+  );
   expectArray(
     shell.controllerAnchors,
     "token-bank controller shell controllerAnchors must be an array"
@@ -13582,7 +13452,6 @@ function validateTokenBankControllerShell(shell) {
     "TokenShop",
     "ClaimBankedTokens",
     "SetBankFill",
-    "BankFill",
     "TokenBankDescriptionText",
     "CheckTokenClaimNotification",
     "TokenShopButtonNotification",
@@ -13590,12 +13459,12 @@ function validateTokenBankControllerShell(shell) {
     "get_ClaimableBankTokens",
     "IncreaseBankedTokens"
   ].forEach((name) => {
-    assert.equal(
-      shell.sourcePresence.metadata[name],
-      1,
-      `token-bank controller shell metadata presence drifted for ${name}`
-    );
+    assert.ok(shell.sourcePresence.metadata[name] > 0, `token-bank controller shell metadata presence drifted for ${name}`);
   });
+  assert.ok(
+    shell.sourcePresence.metadata.BankFill > 0,
+    "token-bank controller shell metadata presence drifted for BankFill"
+  );
   assert.equal(
     shell.sourcePresence.level0.ClaimBankedTokens,
     1,
@@ -13661,8 +13530,8 @@ async function validateBundledDatasetContract(contract) {
   expectArray(contract.datasets, "bundled dataset contract datasets must be an array");
   assert.equal(
     contract.datasets.length,
-    54,
-    "bundled dataset contract must track the fifty-four shipped dataset groups"
+    37,
+    "bundled dataset contract must track the current shipped dataset groups"
   );
 
   for (const [index, dataset] of contract.datasets.entries()) {
@@ -13726,6 +13595,7 @@ export async function validateBundledDatasets() {
     await readJson("../../data/bundled-dataset-contract.v1.json")
   );
   const dataFramework = await readJson("../../data/data-framework.v1.json");
+  const appMetaUnit = await readJson("../../data/system-units/app-meta.v1.json");
   const playerStateUnit = await readJson("../../data/system-units/player-state.v1.json");
   const shardsUnit = await readJson("../../data/system-units/shards.v1.json");
   const tokenShopUnit = await readJson("../../data/system-units/token-shop.v1.json");
@@ -13769,49 +13639,32 @@ export async function validateBundledDatasets() {
   );
   const shardCostScreenshotCalibration = shardsUnit.models.cost.screenshotCalibration.data;
   const shardCostListPathProbe = shardsUnit.support.cost.listPathProbe.data;
-  const shardCostFormulaModel = await readJson("../../data/shard-cost-formula-model.v1.json");
-  const shardBonusSlotProbe = await readJson("../../data/shard-bonus-slot-probe.v1.json");
-  const shardMilestoneFamilyEvidence = await readJson(
-    "../../data/shard-milestone-family-evidence.v1.json"
-  );
+  const shardCostFormulaModel = shardsUnit.models.cost.formulaModel.data;
+  const shardBonusSlotProbe = shardsUnit.support.cost.bonusSlotProbe.data;
+  const shardMilestoneFamilyEvidence = shardsUnit.support.family.familyEvidence.data;
   const extractionCandidateFamilies = await readJson(
     "../../data/extraction-candidate-families.v1.json"
   );
-  const extractionCandidateRanking = await readJson(
-    "../../data/extraction-candidate-ranking.v1.json"
-  );
-  const tokenShop = await readJson("../../data/token-shop-values.json");
-  const multiverseMarket = await readJson("../../data/multiverse-market-values.json");
-  const multiverseMarketMetadataNeighborhood = await readJson(
-    "../../data/multiverse-market-metadata-neighborhood.json"
-  );
-  const tokeniumNamingClues = await readJson("../../data/tokenium-naming-clues.json");
-  const tokenBankStateClues = await readJson("../../data/token-bank-state-clues.json");
-  const dailyTokeniumLaneClues = await readJson("../../data/daily-tokenium-lane-clues.json");
+  const tokenShop = tokenShopUnit.sections.rows.extract.data;
+  const multiverseMarketMetadataNeighborhood =
+    multiverseMarketUnit.sections.rowIdentity.metadataNeighborhood.data;
   const tokenBankFormulaBoundary = await readJson("../../data/token-bank-formula-boundary.json");
   const multiverseMarketRangeBoundary = await readJson(
     "../../data/multiverse-market-range-boundary.json"
   );
-  const multiverseMarketRowTextCoverage = await readJson(
-    "../../data/multiverse-market-row-text-coverage.json"
-  );
+  const multiverseMarketRowTextCoverage = multiverseMarketUnit.sections.rowIdentity.rowTextCoverage.data;
+  const multiverseMarket = multiverseMarketUnit.sections.saveOwner.extract.data;
   const multiverseMarketPrefabRemapBoundary = await readJson(
     "../../data/multiverse-market-prefab-remap-boundary.json"
   );
-  const tokenShopTraceSupport = await readJson("../../data/token-shop-trace-support.v1.json");
-  const spendActionLaneClues = await readJson("../../data/spend-action-lane-clues.json");
   const multiverseMarketActionShell = await readJson(
     "../../data/multiverse-market-action-shell.json"
   );
-  const multiverseMarketOwnerFamily = await readJson(
-    "../../data/multiverse-market-owner-family.json"
-  );
-  const tokenShopOwnerShell = await readJson("../../data/token-shop-owner-shell.json");
+  const multiverseMarketOwnerFamily = multiverseMarketUnit.sections.uiShell.ownerFamily.data;
   const tokenShopSaveBoundary = await readJson("../../data/token-shop-save-boundary.v2.json");
   const tokenShopRowLevelOwner = tokenShopUnit.boundaries.rows.rowLevelOwner.data;
   const tokenShopRowRemapBoundary = tokenShopUnit.boundaries.rows.remap.data;
   const tokenShopLateAtuBoundary = await readJson("../../data/token-shop-late-atu-boundary.json");
-  const unityTraceTargetRegistry = await readJson("../../data/unity-trace-target-registry.json");
   const multiverseMarketSaveBoundary = await readJson(
     "../../data/multiverse-market-save-boundary.v2.json"
   );
@@ -13845,7 +13698,6 @@ export async function validateBundledDatasets() {
   const multiverseMarketTextProvenancePathBoundary = await readJson(
     "../../data/multiverse-market-text-provenance-path-boundary.json"
   );
-  const tokenBankControllerShell = await readJson("../../data/token-bank-controller-shell.json");
   const multiverseMarketMarketMemberBoundaryDoc = await readText(
     "../../docs/systems/spend/multiverse-market-market-member-boundary.md"
   );
@@ -13870,10 +13722,26 @@ export async function validateBundledDatasets() {
   const activeGroundingBoundariesDoc = await readText(
     "../../docs/roadmap/active-grounding-boundaries.md"
   );
+  validateMultiverseMarket(multiverseMarket);
+  validateMultiverseMarketMetadataNeighborhood(multiverseMarketMetadataNeighborhood);
+  validateTokenShop(tokenShop);
 
   const summaries = [
     validateSnapshot(snapshot),
     validateDataFramework(dataFramework),
+    validateSystemUnit(appMetaUnit, {
+      id: "app-meta-unit",
+      label: "App meta system unit",
+      systemId: "app-meta",
+      requiredSections: ["snapshot", "datasetContract"],
+      requiredAppStatePaths: [
+        "state.systemUnits.appMeta",
+        "state.snapshot",
+        "state.datasetContract",
+        "app.js:bootstrap",
+        "support/system-unit-projections.js:buildAppMetaSystemView"
+      ]
+    }),
     validateSystemUnit(playerStateUnit, {
       id: "player-state-unit",
       label: "Player-state system unit",
@@ -13924,7 +13792,7 @@ export async function validateBundledDatasets() {
       id: "trace-unit",
       label: "Trace system unit",
       systemId: "trace",
-      requiredSections: ["registry", "liveRuns", "promotionTargets"]
+      requiredSections: ["liveRuns", "promotionTargets"]
     }),
     validateShardDatasets(shardMilestones, shardObserved, shardProvenance),
     validateShardAssetGrounding(shardAssetGrounding),
@@ -13940,29 +13808,12 @@ export async function validateBundledDatasets() {
     validateShardMilestoneHandoffBoundary(shardMilestoneHandoffBoundary),
     validateShardSaveBoundary(shardSaveBoundary),
     validateShardMilestoneSaveOwnerCandidates(shardMilestoneSaveOwnerCandidates),
-    validateShardCostFormulaModel(shardCostFormulaModel),
-    validateShardBonusSlotProbe(shardBonusSlotProbe),
-    validateShardMilestoneFamilyEvidence(shardMilestoneFamilyEvidence),
     validateExtractionCandidateFamilies(extractionCandidateFamilies),
-    validateExtractionCandidateRanking(extractionCandidateRanking),
-    validateTokenShop(tokenShop),
-    validateMultiverseMarket(multiverseMarket),
-    validateMultiverseMarketMetadataNeighborhood(multiverseMarketMetadataNeighborhood),
-    validateTokeniumNamingClues(tokeniumNamingClues),
-    validateTokenBankStateClues(tokenBankStateClues),
-    validateDailyTokeniumLaneClues(dailyTokeniumLaneClues),
     validateTokenBankFormulaBoundary(tokenBankFormulaBoundary),
     validateMultiverseMarketRangeBoundary(multiverseMarketRangeBoundary),
-    validateMultiverseMarketRowTextCoverage(multiverseMarketRowTextCoverage),
     validateMultiverseMarketPrefabRemapBoundary(multiverseMarketPrefabRemapBoundary),
-    validateTokenShopTraceSupport(tokenShopTraceSupport),
-    validateSpendActionLaneClues(spendActionLaneClues),
-    validateMultiverseMarketActionShell(multiverseMarketActionShell),
-    validateMultiverseMarketOwnerFamily(multiverseMarketOwnerFamily),
-    validateTokenShopOwnerShell(tokenShopOwnerShell),
     validateTokenShopSaveBoundary(tokenShopSaveBoundary),
     validateTokenShopLateAtuBoundary(tokenShopLateAtuBoundary),
-    validateUnityTraceTargetRegistry(unityTraceTargetRegistry),
     validateMultiverseMarketSaveBoundary(multiverseMarketSaveBoundary),
     validateMultiverseMarketMarketMemberBoundary(multiverseMarketMarketMemberBoundary),
     validateMultiverseMarketSaveDataImportBoundary(
@@ -14001,9 +13852,17 @@ export async function validateBundledDatasets() {
       multiverseMarketStateVerificationDoc,
       multiverseMarketVerificationDoc,
       multiverseMarketTextProvenancePathBoundaryDoc
-    ),
-    validateTokenBankControllerShell(tokenBankControllerShell)
+    )
   ];
+
+  validateShardBonusSlotProbe(shardBonusSlotProbe);
+  validateShardMilestoneFamilyEvidence(shardMilestoneFamilyEvidence);
+  validateShardCostFormulaModel(shardCostFormulaModel);
+  validateShardCostListPathProbe(shardsUnit.support.cost.listPathProbe.data);
+  validateTokenBankControllerShell(tokenShopUnit.sections.tokenBank.controllerShell.data);
+  validateMultiverseMarketActionShell(multiverseMarketActionShell);
+  validateMultiverseMarketOwnerFamily(multiverseMarketOwnerFamily);
+  validateMultiverseMarketRowTextCoverage(multiverseMarketRowTextCoverage);
 
   validateMultiverseMarketMarketShellDocs(
     multiverseMarketMarketMemberBoundaryDoc,
@@ -14039,6 +13898,46 @@ export async function validateBundledDatasets() {
     "multiverse market unit nearby-identity checkedPositiveRows drifted"
   );
   assert.equal(
+    tokenShopUnit.sections.rows.extract.sourcePath,
+    "db:derived:token-shop-values",
+    "token shop unit extract should derive from the DB-backed raw metadata plus level0 extract path, not the old committed values dataset"
+  );
+  assert.equal(
+    tokenShopUnit.sections.rows.canonical.sourcePath,
+    "db:derived:token-shop-canonical-records",
+    "token shop unit canonical records should derive from DB-backed verified TokenShop extract inputs, not the old mixed canonical dataset"
+  );
+  assert.equal(
+    tokenShopUnit.sections.rows.policy.tierUnlocks.sourcePath,
+    "db:policy:token-shop-tier-unlocks",
+    "token shop unit tier unlocks should surface as explicit heuristic policy, not as canonical extract truth"
+  );
+  assert.equal(
+    multiverseMarketUnit.sections.rowIdentity.metadataNeighborhood.sourcePath,
+    "db:derived:multiverse-market-metadata-neighborhood",
+    "multiverse market unit metadataNeighborhood should derive from the DB-backed metadata probe path, not the old committed support dataset"
+  );
+  assert.equal(
+    multiverseMarketUnit.sections.saveOwner.extract.sourcePath,
+    "db:derived:multiverse-market-values",
+    "multiverse market unit extract should derive from the DB-backed raw level0 extract path, not the old committed values dataset"
+  );
+  assert.equal(
+    multiverseMarketUnit.sections.uiShell.actionShell.sourcePath,
+    "db:derived:multiverse-market-action-shell",
+    "multiverse market unit actionShell should derive from values plus row-text coverage, not the old standalone action-shell dataset"
+  );
+  assert.equal(
+    multiverseMarketUnit.sections.uiShell.ownerFamily.sourcePath,
+    "db:derived:multiverse-market-owner-family",
+    "multiverse market unit ownerFamily should derive from metadata plus validated rows, not the old standalone owner-family dataset"
+  );
+  assert.equal(
+    multiverseMarketUnit.sections.rowIdentity.rowTextCoverage.sourcePath,
+    "db:derived:multiverse-market-row-text-coverage",
+    "multiverse market unit rowTextCoverage should derive from current multiverse values, not the old standalone row-text coverage dataset"
+  );
+  assert.equal(
     tokenShopUnit.boundaries.rows.rowLevelOwner.data.dataset,
     "token-shop-row-level-owner",
     "token shop unit rowLevelOwner embedding drifted"
@@ -14049,9 +13948,44 @@ export async function validateBundledDatasets() {
     "token shop unit remap embedding drifted"
   );
   assert.equal(
-    tokenShopUnit.traceEvidence.familyStructure.data.target.id,
+    tokenShopUnit.sections.traceRuns.familyStructure.data.target.targetId,
     "token-shop-family-structure",
     "token shop unit familyStructure trace embedding drifted"
+  );
+  assert.equal(
+    tokenShopUnit.sections.spendLanes.actionLaneClues.sourcePath,
+    "db:derived:token-shop-action-lanes",
+    "token shop unit actionLaneClues should derive from current DB/raw evidence, not the old standalone spend-action dataset"
+  );
+  assert.equal(
+    tokenShopUnit.sections.tokenBank.controllerShell.sourcePath,
+    "db:derived:token-bank-controller-shell",
+    "token shop unit controllerShell should derive from current DB/raw evidence, not the old standalone token-bank controller shell dataset"
+  );
+  assert.equal(
+    tokenShopUnit.sections.tokenBank.ownerShell.sourcePath,
+    "db:derived:token-shop-owner-shell",
+    "token shop unit ownerShell should derive from current DB/raw evidence, not the old standalone token-shop owner shell dataset"
+  );
+  assert.equal(
+    tokenShopUnit.sections.tokenBank.namingClues.sourcePath,
+    "db:derived:tokenium-naming-clues",
+    "token shop unit namingClues should derive from current DB/raw evidence, not the old standalone tokenium naming clues dataset"
+  );
+  assert.equal(
+    tokenShopUnit.sections.tokenBank.stateClues.sourcePath,
+    "db:derived:token-bank-state-clues",
+    "token shop unit stateClues should derive from current DB/raw evidence, not the old standalone token-bank state clues dataset"
+  );
+  assert.equal(
+    tokenShopUnit.sections.dailyTokenium.laneClues.sourcePath,
+    "db:derived:daily-tokenium-lane-clues",
+    "token shop unit dailyTokenium laneClues should derive from current DB/raw evidence, not the old standalone daily-tokenium lane clues dataset"
+  );
+  assert.equal(
+    shardsUnit.models.cost.formulaModel.sourcePath,
+    "db:derived:shard-cost-formula-model",
+    "shards unit formulaModel should derive from the DB-backed shard cost model, not the old standalone dataset"
   );
   assert.equal(
     shardsUnit.models.cost.formulaModel.data.dataset,
@@ -14059,14 +13993,35 @@ export async function validateBundledDatasets() {
     "shards unit formulaModel embedding drifted"
   );
   assert.equal(
+    Object.keys(shardsUnit.models.cost.formulaModel.data.verifiedParameters?.exactRowParameters ?? {})
+      .length,
+    30,
+    "shards unit formulaModel should embed exact row parameters for all 30 shard rows"
+  );
+  assert.equal(
     shardsUnit.models.cost.screenshotCalibration.data.dataset,
     "shard-cost-screenshot-calibration.v1",
     "shards unit screenshotCalibration embedding drifted"
   );
   assert.equal(
-    shardsUnit.support.cost.listPathProbe.data.dataset,
-    "shard-cost-list-path-probe.v1",
-    "shards unit listPathProbe embedding drifted"
+    shardsUnit.models.cost.screenshotCalibration.sourcePath,
+    "db:policy:shard-cost-screenshot-calibration",
+    "shards unit screenshotCalibration should read from the DB-backed policy materialization, not the old committed file"
+  );
+  assert.equal(
+    shardsUnit.support.cost.listPathProbe.sourcePath,
+    "db:derived:shard-cost-list-path",
+    "shards unit listPathProbe should derive from the canonical shard cost formula model, not the old standalone list-path probe dataset"
+  );
+  assert.equal(
+    shardsUnit.support.cost.bonusSlotProbe.sourcePath,
+    "db:derived:shard-bonus-slot-support",
+    "shards unit bonusSlotProbe should derive from reducer-owned shard family evidence, not the old standalone bonus-slot probe dataset"
+  );
+  assert.equal(
+    shardsUnit.support.family.familyEvidence.sourcePath,
+    "db:derived:shard-milestone-family-evidence",
+    "shards unit familyEvidence should derive from grounded shard fragments, not the old standalone shard family evidence dataset"
   );
 
   assertContractMatchesValidation(bundledDatasetContract, summaries);

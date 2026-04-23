@@ -3,7 +3,7 @@
   "generatedAt": "2026-04-06",
   "source": {
     "methodProbe": "data/shard-cost-method-probe.v1.json",
-    "uabeaProbeReport": "data/uabea-extract-report.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
     "libIl2cpp": "workbench/apk/base/libil2cpp.so",
     "vendorManual": ".vendor_manual"
   },
@@ -14420,3 +14420,4 @@
     }
   }
 }
+

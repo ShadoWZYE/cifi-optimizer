@@ -100,5 +100,6 @@ comparison logic, not just byte matches.
 ## References
 
 - Trace unit: `data/system-units/trace.v1.json` (embedded live trace-run metadata offsets)
-- UABEA extract report: `data/uabea-extract-report.json` (SaveData field offsets 1916-1919)
+- UABEA extract report: `data/archive/uabea-extract-report.json` (SaveData field offsets 1916-1919)
 - General workflow: `docs/extraction/ghidra-il2cpp-workflow.md`
+

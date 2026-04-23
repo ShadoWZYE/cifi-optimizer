@@ -4,7 +4,7 @@
   "sources": {
     "row6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
     "marketMemberBoundary": "data/multiverse-market-market-member-boundary.json",
-    "uabeaProbeReport": "data/uabea-extract-report.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
     "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },
@@ -129,3 +129,4 @@
     ]
   }
 }
+

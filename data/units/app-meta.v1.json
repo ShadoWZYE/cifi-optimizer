@@ -1,0 +1,80 @@
+{
+  "dataset": "repo-data-unit.v1",
+  "unitId": "app-meta",
+  "systemId": "app-meta",
+  "version": "v1",
+  "status": "seeded",
+  "kind": "system",
+  "schemaRef": "data/data-unit-format.v1.json",
+  "frameworkRef": "data/data-framework.v1.json",
+  "summary": "Central app-meta system unit for research snapshot and bundled dataset contract metadata still needed by runtime app surfaces outside core player/system truth.",
+  "liveConsumers": {
+    "appStatePaths": [
+      "state.systemUnits.appMeta",
+      "state.snapshot",
+      "state.datasetContract",
+      "app.js:bootstrap",
+      "support/system-unit-projections.js:buildAppMetaSystemView"
+    ],
+    "traceTargets": [],
+    "plannerConsumers": []
+  },
+  "subsystems": {
+    "snapshot": {
+      "summary": "Research snapshot, roadmap lanes, and validation metadata shown by the app shell.",
+      "seedOutputs": [
+        "data/game-data.snapshot.v1.json"
+      ]
+    },
+    "dataset-contract": {
+      "summary": "Bundled dataset contract and dataset inventory metadata used by runtime refresh/audit surfaces.",
+      "seedOutputs": [
+        "data/bundled-dataset-contract.v1.json"
+      ]
+    }
+  },
+  "provenance": {
+    "policy": "Embed app-level research and contract metadata into one runtime unit so app bootstrap no longer depends on direct dataset fetches for those surfaces.",
+    "transientProbePolicy": "This unit should stay metadata-only; extraction candidate ranking and dataset inventory should eventually move to DB-owned projections or be retired, not re-expanded into new committed probe-era support surfaces.",
+    "sourceRecords": [
+      {
+        "id": "snapshot",
+        "kind": "dataset",
+        "path": "data/game-data.snapshot.v1.json",
+        "role": "support",
+        "persistence": "committed"
+      },
+      {
+        "id": "bundled-dataset-contract",
+        "kind": "dataset",
+        "path": "data/bundled-dataset-contract.v1.json",
+        "role": "support",
+        "persistence": "committed"
+      }
+    ]
+  },
+  "views": {
+    "canonical": [],
+    "boundary": [],
+    "model": [],
+    "support": [
+      "data/game-data.snapshot.v1.json",
+      "data/bundled-dataset-contract.v1.json"
+    ],
+    "historicalProbe": []
+  },
+  "replacementPlan": {
+    "seedOutputs": [
+      "data/system-units/app-meta.v1.json"
+    ],
+    "projectionTargets": [
+      "snapshot",
+      "dataset-contract"
+    ],
+    "archiveAfterReplacement": [],
+    "requirementsBeforeArchive": [
+      "App bootstrap must resolve research snapshot and dataset inventory through app-meta instead of direct dataset fetches.",
+      "Dataset-contract and snapshot screens should eventually read DB-owned inventory/provenance views rather than forcing the old committed JSONs to remain active runtime entrypoints."
+    ]
+  }
+}

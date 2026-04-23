@@ -4,7 +4,7 @@
     "probe": "tmp-spend-action-lane-probe.json",
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0",
-    "tokenShopExtract": "data/token-shop-values.json",
+    "tokenShopExtract": "data/archive/token-shop-values.json",
     "iapCatalog": "workbench/extract/assetripper-primary/Assets/Resources/IAPProductCatalog.bytes"
   },
   "tokenDirectBuyHooks": [
@@ -78,3 +78,4 @@
     "This is enough to keep spend action families separated in repo-local grounding, but not enough to recover player-owned levels or planner-ready saved-state inputs."
   ]
 }
+

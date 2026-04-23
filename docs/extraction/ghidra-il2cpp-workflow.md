@@ -56,7 +56,7 @@ metadata.
 
 Use repo probes first:
 
-- `data/uabea-extract-report.json`
+- `data/archive/uabea-extract-report.json`
 - `data/system-units/trace.v1.json`
 - `workbench/apk/base/global-metadata.dat`
 - committed extraction outputs that already map owners, fields, or offsets
@@ -256,3 +256,4 @@ Bad generalizations:
 After cleanup, the repo is ready for a general analyzed-project search layer, but only in the
 native-pattern sense described above. The next useful code should be a reusable search script
 family over the persistent Ghidra project, not a fake object-model recovery layer.
+

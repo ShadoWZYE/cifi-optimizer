@@ -30,7 +30,6 @@
     "row-identity": {
       "summary": "Row identity, anomaly provenance, remap-band, and text-provenance seams.",
       "seedOutputs": [
-        "data/multiverse-market-row-text-coverage.json",
         "data/multiverse-market-prefab-remap-boundary.json",
         "data/multiverse-market-row69-74-identity-source-boundary.json",
         "data/multiverse-market-row71-74-identity-boundary.json",
@@ -46,9 +45,9 @@
     "ui-shell": {
       "summary": "Owner family, action shell, and metadata neighborhood support.",
       "seedOutputs": [
-        "data/multiverse-market-action-shell.json",
-        "data/multiverse-market-owner-family.json",
-        "data/multiverse-market-metadata-neighborhood.json"
+        "db:derived:multiverse-market-action-shell",
+        "db:derived:multiverse-market-owner-family",
+        "db:derived:multiverse-market-metadata-neighborhood"
       ]
     }
   },
@@ -80,15 +79,15 @@
       {
         "id": "multiverse-market-values",
         "kind": "dataset",
-        "path": "data/multiverse-market-values.json",
-        "role": "support",
+        "path": "data/archive/multiverse-market-values.json",
+        "role": "historical-support",
         "persistence": "committed"
       },
       {
         "id": "multiverse-market-metadata-neighborhood",
         "kind": "dataset",
-        "path": "data/multiverse-market-metadata-neighborhood.json",
-        "role": "support",
+        "path": "data/archive/multiverse-market-metadata-neighborhood.json",
+        "role": "historical-support",
         "persistence": "committed"
       },
       {
@@ -102,14 +101,14 @@
         "id": "multiverse-market-action-shell",
         "kind": "dataset",
         "path": "data/multiverse-market-action-shell.json",
-        "role": "support",
+        "role": "historical-support",
         "persistence": "committed"
       },
       {
         "id": "multiverse-market-owner-family",
         "kind": "dataset",
         "path": "data/multiverse-market-owner-family.json",
-        "role": "support",
+        "role": "historical-support",
         "persistence": "committed"
       },
       {
@@ -141,15 +140,10 @@
     ],
     "model": [],
     "support": [
-      "data/multiverse-market-values.json",
-      "data/multiverse-market-metadata-neighborhood.json",
-      "data/multiverse-market-row-text-coverage.json",
-      "data/multiverse-market-action-shell.json",
-      "data/multiverse-market-owner-family.json"
     ],
     "historicalProbe": [
-      "data/uabea-extract-report.json",
-      "data/unity-apk-extract-report.json"
+      "data/archive/uabea-extract-report.json",
+      "data/archive/unity-apk-extract-report.json"
     ]
   },
   "replacementPlan": {
@@ -162,20 +156,50 @@
       "ui-shell"
     ],
     "archiveAfterReplacement": [
-      "data/uabea-extract-report.json",
-      "data/unity-apk-extract-report.json"
+      "data/archive/uabea-extract-report.json",
+      "data/archive/unity-apk-extract-report.json"
     ],
     "archiveReview": [
       {
-        "path": "data/uabea-extract-report.json",
+        "path": "data/archive/multiverse-market-metadata-neighborhood.json",
+        "status": "archive-candidate",
+        "reason": "The multiverse metadata neighborhood now materializes directly from the DB-backed metadata probe path instead of staying a live committed support input.",
+        "replacementSource": "db:derived:multiverse-market-metadata-neighborhood"
+      },
+      {
+        "path": "data/archive/multiverse-market-values.json",
+        "status": "archive-candidate",
+        "reason": "Validated multiverse values now materialize directly from the DB-backed raw level0 extract path, so the committed JSON is no longer a live runtime or export owner.",
+        "replacementSource": "db:derived:multiverse-market-values"
+      },
+      {
+        "path": "data/multiverse-market-row-text-coverage.json",
+        "status": "archive-candidate",
+        "reason": "Validated multiverse row-text coverage now derives inside the shared market unit from current multiverse values instead of shipping the standalone row-text coverage summary as a live support input.",
+        "replacementSource": "data/system-units/multiverse-market.v1.json"
+      },
+      {
+        "path": "data/archive/uabea-extract-report.json",
         "status": "archive-candidate",
         "reason": "The small typed support core now lives in data/uabea-type-metadata-support.v1.json, while the full raw report is no longer an active Multiverse market source.",
         "replacementSource": "data/system-units/multiverse-market.v1.json"
       },
       {
-        "path": "data/unity-apk-extract-report.json",
+        "path": "data/archive/unity-apk-extract-report.json",
         "status": "archive-candidate",
         "reason": "The active market unit now carries the bounded save-owner and row-identity views without depending on the raw keyword/export report.",
+        "replacementSource": "data/system-units/multiverse-market.v1.json"
+      },
+      {
+        "path": "data/multiverse-market-action-shell.json",
+        "status": "archive-candidate",
+        "reason": "The validated BuyIS and SetIS cost-text shell now derives from multiverse values plus row-text coverage inside the shared market unit, so the standalone action-shell dataset can move toward historical-only status.",
+        "replacementSource": "data/system-units/multiverse-market.v1.json"
+      },
+      {
+        "path": "data/multiverse-market-owner-family.json",
+        "status": "archive-candidate",
+        "reason": "The bounded multiverse owner-family shell now derives from metadata presence, validated rows, and the derived action-shell range inside the shared market unit, so the standalone owner-family dataset can move toward historical-only status.",
         "replacementSource": "data/system-units/multiverse-market.v1.json"
       },
       {
@@ -192,3 +216,5 @@
     ]
   }
 }
+
+

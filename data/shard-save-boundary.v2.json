@@ -11,7 +11,7 @@
                     "typeMetadataProbe":  "data/shard-type-metadata-probe.v1.json",
                     "costParameterProbe":  "data/shard-cost-parameter-probe.v1.json",
                     "sceneMonoBehaviourProbe":  "data/shard-scene-monobehaviour-probe.v1.json",
-                    "unityTraceTargetRegistry":  "data/unity-trace-target-registry.json",
+                    "unityTraceTargetRegistry":  "archive:unity-trace-target-registry.json",
                     "traceSystemUnit":  "data/system-units/trace.v1.json",
                     "ownedStateTargetBundle":  "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population",
                     "globalMetadata":  "workbench/apk/base/global-metadata.dat",

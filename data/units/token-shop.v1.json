@@ -25,24 +25,27 @@
   },
   "subsystems": {
     "rows": {
-      "summary": "ATU row identity, shell, and row-remap grounding.",
+      "summary": "ATU row identity, shell, and row-remap grounding plus DB-derived verified row records and explicit heuristic tier-unlock policy.",
       "seedOutputs": [
-        "data/token-shop-values.json",
-        "data/tokenshop-canonical-v1.json"
+        "db:derived:token-shop-values",
+        "db:derived:token-shop-canonical-records",
+        "db:policy:token-shop-tier-unlocks"
       ]
     },
     "token-bank": {
       "summary": "Token-bank ownership, state, controller, and formula boundary surfaces.",
       "seedOutputs": [
-        "data/token-bank-state-clues.json",
-        "data/token-bank-controller-shell.json",
+        "db:derived:token-bank-state-clues",
+        "db:derived:token-bank-controller-shell",
+        "db:derived:token-shop-owner-shell",
         "data/token-bank-formula-boundary.json"
       ]
     },
     "daily-tokenium": {
       "summary": "Daily Tokenium lane naming, action, and ownership clues.",
       "seedOutputs": [
-        "data/daily-tokenium-lane-clues.json"
+        "db:derived:daily-tokenium-lane-clues",
+        "db:derived:token-shop-action-lanes"
       ]
     }
   },
@@ -60,15 +63,15 @@
       {
         "id": "token-shop-values",
         "kind": "dataset",
-        "path": "data/token-shop-values.json",
-        "role": "support",
+        "path": "data/archive/token-shop-values.json",
+        "role": "historical-support",
         "persistence": "committed"
       },
       {
         "id": "tokenshop-canonical",
         "kind": "dataset",
         "path": "data/tokenshop-canonical-v1.json",
-        "role": "support",
+        "role": "policy",
         "persistence": "committed"
       },
       {
@@ -95,13 +98,6 @@
           "db:materialized-target-bundle:token-shop-atu3-cells-effect",
           "db:materialized-target-bundle:token-shop-family-structure"
         ]
-      },
-      {
-        "id": "token-shop-trace-support",
-        "kind": "dataset",
-        "path": "data/token-shop-trace-support.v1.json",
-        "role": "support",
-        "persistence": "committed"
       }
     ]
   },
@@ -115,20 +111,10 @@
       "data/token-bank-formula-boundary.json"
     ],
     "model": [],
-    "support": [
-      "data/token-shop-values.json",
-      "data/tokenshop-canonical-v1.json",
-      "data/tokenium-naming-clues.json",
-      "data/token-bank-state-clues.json",
-      "data/daily-tokenium-lane-clues.json",
-      "data/token-shop-trace-support.v1.json",
-      "data/spend-action-lane-clues.json",
-      "data/token-shop-owner-shell.json",
-      "data/token-bank-controller-shell.json"
-    ],
+    "support": [],
     "historicalProbe": [
-      "data/uabea-extract-report.json",
-      "data/unity-apk-extract-report.json"
+      "data/archive/uabea-extract-report.json",
+      "data/archive/unity-apk-extract-report.json"
     ]
   },
   "replacementPlan": {
@@ -141,15 +127,63 @@
       "daily-tokenium"
     ],
     "archiveAfterReplacement": [
-      "data/unity-apk-extract-report.json",
-      "data/uabea-extract-report.json"
+      "data/archive/unity-apk-extract-report.json",
+      "data/archive/uabea-extract-report.json"
     ],
     "archiveReview": [
       {
+        "path": "data/archive/token-shop-values.json",
+        "status": "archive-candidate",
+        "reason": "Grounded TokenShop row and numeric fields now materialize directly from the DB-backed raw metadata plus level0 extract path instead of staying a live committed support input.",
+        "replacementSource": "db:derived:token-shop-values"
+      },
+      {
+        "path": "data/tokenshop-canonical-v1.json",
+        "status": "keep",
+        "reason": "This file no longer owns live verified TokenShop records. It remains only as the explicit heuristic tier-unlock policy source until the DB/trace layer recovers stronger threshold evidence.",
+        "replacementSource": "db:policy:token-shop-tier-unlocks"
+      },
+      {
         "path": "data/token-shop-cost-lanes.json",
         "status": "archive",
-        "reason": "The old standalone TokenShop cost-lane probe has been replaced by data/token-shop-trace-support.v1.json, generated from the token-shop-family-structure trace bundle plus grounded TokenShop values.",
-        "replacementSource": "data/token-shop-trace-support.v1.json"
+        "reason": "The old standalone TokenShop cost-lane probe has been replaced by the DB-derived cost-lane projection embedded in data/system-units/token-shop.v1.json, generated from token-shop-family-structure trace materialization plus grounded TokenShop values.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
+      },
+      {
+        "path": "data/spend-action-lane-clues.json",
+        "status": "archive",
+        "reason": "The old standalone spend-action probe has been replaced by the derived TokenShop action-lane projection embedded in data/system-units/token-shop.v1.json, regenerated from grounded TokenShop values, Daily Tokenium clues, and direct metadata/level0 checks.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
+      },
+      {
+        "path": "data/token-bank-controller-shell.json",
+        "status": "archive",
+        "reason": "The old token-bank controller-shell probe has been replaced by the derived controller projection embedded in data/system-units/token-shop.v1.json, regenerated from grounded TokenShop controller fields, token-bank state clues, and direct metadata/level0 checks.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
+      },
+      {
+        "path": "data/token-shop-owner-shell.json",
+        "status": "archive",
+        "reason": "The old TokenShop owner-shell probe has been replaced by the derived owner projection embedded in data/system-units/token-shop.v1.json, regenerated from grounded TokenShop controller fields, token-bank state clues, and direct metadata/level0 checks.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
+      },
+      {
+        "path": "data/tokenium-naming-clues.json",
+        "status": "archive",
+        "reason": "The old Tokenium naming support file has been replaced by the derived naming projection embedded in data/system-units/token-shop.v1.json, regenerated from direct asset-name presence plus metadata and level0 checks.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
+      },
+      {
+        "path": "data/token-bank-state-clues.json",
+        "status": "archive",
+        "reason": "The old token-bank state support file has been replaced by the derived token-bank state projection embedded in data/system-units/token-shop.v1.json, regenerated from typed metadata support, direct metadata checks, and the grounded token-bank formula boundary.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
+      },
+      {
+        "path": "data/daily-tokenium-lane-clues.json",
+        "status": "archive",
+        "reason": "The old Daily Tokenium lane support file has been replaced by the derived lane projection embedded in data/system-units/token-shop.v1.json, regenerated from typed metadata support plus current metadata and asset-name checks.",
+        "replacementSource": "data/system-units/token-shop.v1.json"
       },
       {
         "path": "data/token-shop-row-level-owner.json",
@@ -158,13 +192,13 @@
         "replacementSource": "data/system-units/token-shop.v1.json"
       },
       {
-        "path": "data/unity-apk-extract-report.json",
+        "path": "data/archive/unity-apk-extract-report.json",
         "status": "archive-candidate",
         "reason": "This is now a historical raw keyword/export artifact only; active TokenShop semantics already survive in committed boundaries, trace-backed views, and canonical support datasets.",
         "replacementSource": "data/system-units/token-shop.v1.json"
       },
       {
-        "path": "data/uabea-extract-report.json",
+        "path": "data/archive/uabea-extract-report.json",
         "status": "archive-candidate",
         "reason": "The remaining typed extractor/debug need is reduced into data/uabea-type-metadata-support.v1.json, so the full raw report should stay historical-only rather than an active TokenShop surface.",
         "replacementSource": "data/system-units/token-shop.v1.json"
@@ -177,3 +211,5 @@
     ]
   }
 }
+
+

@@ -188,21 +188,11 @@ Prevent:
 - must contain blocked-use framing against claiming a completed deterministic evaluator, exact next-cost output, or planner-safe optimizer behavior
 - useful for converging shard cost evidence into one versioned evaluator-model dataset without loosening any existing grounding gate
 
-### Shard bonus slot probe
+Historical note: shard cost formula model is no longer a shipped dataset group. Its live planner/runtime role now derives from the DB-backed shard system materialization (`db:derived:shard-cost-formula-model`), while the committed file remains a historical snapshot/export artifact.
 
-- file: `data/shard-bonus-slot-probe.v1.json`
-- classification: `extracted-mechanics`
-- must contain exact `SU0-29` `Bonus*` slot-count coverage plus row-0 mismatch framing where grounded descriptive bonuses still undershoot metadata
-- useful for nailing row-local bonus arity without pretending the player-facing effect text or formulas are fully recovered
+Historical note: shard bonus-slot support is no longer a shipped dataset group. Its live export/runtime role now derives from reducer-owned shard family evidence inside `data/system-units/shards.v1.json`, while the former standalone probe remains historical-only.
 
-### Shard milestone family evidence
-
-- file: `data/shard-milestone-family-evidence.v1.json`
-- classification: `extracted-mechanics`
-- must contain the reachable shard family row table for `SU0-29`, plus shared row-model, row-shell, payload-watch, and save-boundary framing
-- must classify rows as `verified`, `partial`, or `blocked`
-- must migrate the checked `SU1` and `SU2` verified packages into that shared table
-- useful for the descriptive Shard Mining family surface, not itself a planner-safe cost model, affordability surface, or save import map
+Historical note: shard milestone family evidence is no longer a shipped dataset group. Its live export/runtime role now derives inside `data/system-units/shards.v1.json` from grounded shard milestones plus the current row, title, effect, cost, and save boundaries, while the former standalone summary remains historical-only.
 
 ### Extraction candidate families
 
@@ -211,23 +201,27 @@ Prevent:
 - must contain the configured family ids, track ids, search terms, anchor terms, and repo-local source-file lists used by the scorer
 - useful for repeatable targeted probes and filtered follow-up, not itself a claim that the ranked families are integrated mechanics
 
-### Extraction candidate ranking
-
-- file: `data/extraction-candidate-ranking.v1.json`
-- classification: `extracted-mechanics`
-- must contain the repo-wide default unknown-target ranking, source-file lists, and per-family heuristic summaries
-- useful for choosing the next extraction target from existing repo-local evidence; roadmap work should still filter it to the active track instead of blindly following the global top result
-
 ### Token shop extract
 
-- file: `data/token-shop-values.json`
+- live owner: `db:derived:token-shop-values`
+- historical snapshot: `data/archive/token-shop-values.json`
 - classification: `extracted-mechanics`
 - must contain extraction source metadata, raw extracted fields, and normalized numeric tables
 - useful for planner foundation work, not itself a recommendation model
 
+### Token shop canonical records
+
+- live owner: `db:derived:token-shop-canonical-records`
+- heuristic policy: `db:policy:token-shop-tier-unlocks`
+- historical snapshot: `data/tokenshop-canonical-v1.json`
+- classification: `extracted-mechanics`
+- must keep verified formulas and `SaveData` ATU ownership separate from unverified tier-threshold policy
+- useful for grounded runtime/export records while leaving unlock-threshold assumptions explicitly labeled
+
 ### Multiverse market extract
 
-- file: `data/multiverse-market-values.json`
+- live owner: `db:derived:multiverse-market-values`
+- historical snapshot: `data/archive/multiverse-market-values.json`
 - classification: `extracted-mechanics`
 - must contain extraction source metadata, validated inscription ids, and extracted records
 - useful for planner foundation work, but partial extraction must stay labeled as partial
@@ -235,28 +229,28 @@ Prevent:
 ### Spend boundary bundles
 
 - files:
-  - `data/multiverse-market-metadata-neighborhood.json`
   - `data/multiverse-market-range-boundary.json`
-  - `data/multiverse-market-row-text-coverage.json`
   - `data/multiverse-market-prefab-remap-boundary.json`
-  - `data/multiverse-market-action-shell.json`
-  - `data/multiverse-market-owner-family.json`
   - canonical: `data/multiverse-market-save-boundary.v2.json`
   - historical/raw predecessor: `data/multiverse-market-save-boundary.json`
   - `data/multiverse-market-market-member-boundary.json`
-  - `data/tokenium-naming-clues.json`
-  - `data/token-bank-state-clues.json`
-  - `data/daily-tokenium-lane-clues.json`
   - `data/token-bank-formula-boundary.json`
-  - `data/token-shop-trace-support.v1.json`
-  - `data/spend-action-lane-clues.json`
-  - `data/token-shop-owner-shell.json`
   - canonical: `data/token-shop-save-boundary.v2.json`
   - historical/raw predecessor: `data/token-shop-save-boundary.json`
-  - `data/token-bank-controller-shell.json`
 - classification: `extracted-mechanics`
 - must contain source paths, explicit grounded boundaries, and unresolved-gap-safe framing
+- db-derived support slices now replace several old committed support owners:
+  - `db:derived:multiverse-market-metadata-neighborhood`
+  - `db:derived:multiverse-market-action-shell`
+  - `db:derived:multiverse-market-owner-family`
 - useful for planner-prep and validation surfaces, not themselves planner-ready owned-state truth
+
+Historical note: validated multiverse row-text coverage is no longer a shipped dataset group. Its live export/runtime role now derives inside `data/system-units/multiverse-market.v1.json` from current multiverse values, while the former standalone summary remains historical-only.
+
+Historical-only token-shop support files such as `tokenium-naming-clues`, `token-bank-state-clues`,
+`daily-tokenium-lane-clues`, `token-shop-trace-support`, `spend-action-lane-clues`,
+`token-shop-owner-shell`, and `token-bank-controller-shell` are no longer shipped dataset groups.
+Their live export/runtime role has moved into DB/raw-derived sections inside `data/system-units/token-shop.v1.json`.
 
 ## Source-priority metadata
 
@@ -281,3 +275,4 @@ Run:
 - `npm run verify:data`
 
 This validates the manifest plus the shipped snapshot, the generated system units, the grounded shard datasets, the remaining standalone shard/model datasets, extraction-candidate datasets, TokenShop and Multiverse extracts, and the standalone spend-boundary datasets that still remain first-class shipped inputs. Run it before promoting new grounded data, changing shipped dataset shapes, or editing `data/bundled-dataset-contract.v1.json`.
+

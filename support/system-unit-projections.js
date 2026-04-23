@@ -1,3 +1,10 @@
+export function buildAppMetaSystemView(appMetaSystemUnit) {
+  return {
+    snapshot: appMetaSystemUnit?.sections?.snapshot?.data ?? null,
+    datasetContract: appMetaSystemUnit?.sections?.datasetContract?.data ?? null
+  };
+}
+
 export function buildPlayerStateSystemView(playerStateSystemUnit, mergeDeep) {
   const canonical = playerStateSystemUnit?.sections?.canonicalSharedTruth?.defaultShape ?? {};
   const planner = playerStateSystemUnit?.sections?.plannerHelpers?.defaultShape ?? {};
@@ -72,6 +79,9 @@ export function buildSpendSystemView({
       rows: {
         extract: tokenShopSystemUnit?.sections?.rows?.extract?.data ?? null,
         canonical: tokenShopSystemUnit?.sections?.rows?.canonical?.data ?? null,
+        policy: {
+          tierUnlocks: tokenShopSystemUnit?.sections?.rows?.policy?.tierUnlocks?.data ?? null
+        },
         boundaries: {
           save: tokenShopSystemUnit?.sections?.rows?.boundaries?.save?.data ?? null,
           remap: tokenShopSystemUnit?.sections?.rows?.boundaries?.remap?.data ?? null,

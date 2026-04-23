@@ -730,7 +730,9 @@ def _owner_matches_family(owner: str, family_hint: str | None) -> bool:
     if family_hint.startswith("shard"):
         return "shard" in lowered
     if family_hint == "token-shop":
-        return "token" in lowered or "shop" in lowered or "atu" in lowered
+        if any(noise in lowered for noise in ("tokenbank", "claimablebanktokens", "callback", "statemachine", "ugs")):
+            return False
+        return "tokenshop" in lowered or "arcade" in lowered or "atu" in lowered
     if family_hint.startswith("multiverse-market"):
         return "multiverse" in lowered or "market" in lowered or "inscryption" in lowered
     return False
@@ -748,6 +750,12 @@ def _build_managed_reconstruction(
     owner_to_terms: dict[str, dict[str, list[str]]] = {}
     owner_scores: dict[str, int] = {}
     owner_reasons: dict[str, list[str]] = {}
+
+    strong_bridge_kinds = {
+        "metadata-neighborhood",
+        "token-bridge",
+        "native-symbol-match",
+    }
 
     for term in search_strings:
         bridge = term_bridges.get(term, {})
@@ -800,12 +808,12 @@ def _build_managed_reconstruction(
                     fields.append(term)
                 if term not in raw_value_terms:
                     raw_value_terms.append(term)
-                if term not in bucket["fields"]:
+                if bridge_kind in strong_bridge_kinds and term not in bucket["fields"]:
                     bucket["fields"].append(term)
                     owner_scores[owner] += 4
                     if "field-ownership" not in reasons:
                         reasons.append("field-ownership")
-                if term not in bucket["rawValues"]:
+                if bridge_kind in strong_bridge_kinds and term not in bucket["rawValues"]:
                     bucket["rawValues"].append(term)
             elif term_kind == "owner":
                 if term not in bucket["relatedTerms"]:
@@ -2330,6 +2338,24 @@ def reclaim_expired_jobs() -> dict[str, Any]:
     return {"database": str(CACHE_DB_FILE), "reclaimedJobIds": synced}
 
 
+def audit_db_lifecycle() -> dict[str, Any]:
+    db = _get_cache_db()
+    return {
+        "database": str(CACHE_DB_FILE),
+        "lifecycle": db.get_lifecycle_audit(),
+    }
+
+
+def purge_invalidated_db_rows(
+    older_than_days: int = 30,
+    purge_jobs: bool = False,
+) -> dict[str, Any]:
+    db = _get_cache_db()
+    summary = db.purge_invalidated_rows(older_than_days=older_than_days, purge_jobs=purge_jobs)
+    summary["database"] = str(CACHE_DB_FILE)
+    return summary
+
+
 def invalidate_cached_jobs(
     job_id: str | None = None,
     term: str | None = None,
@@ -2577,6 +2603,26 @@ def main() -> None:
 
     if command == "reclaim":
         print(json.dumps(reclaim_expired_jobs(), indent=2))
+        return
+
+    if command == "audit-db-lifecycle":
+        print(json.dumps(audit_db_lifecycle(), indent=2))
+        return
+
+    if command == "purge-invalidated":
+        older_than_days = 30
+        purge_jobs = False
+        i = 2
+        while i < len(sys.argv):
+            if sys.argv[i] == "--older-than-days" and i + 1 < len(sys.argv):
+                older_than_days = int(sys.argv[i + 1])
+                i += 2
+            elif sys.argv[i] == "--purge-jobs":
+                purge_jobs = True
+                i += 1
+            else:
+                i += 1
+        print(json.dumps(purge_invalidated_db_rows(older_than_days=older_than_days, purge_jobs=purge_jobs), indent=2))
         return
 
     if command == "invalidate":

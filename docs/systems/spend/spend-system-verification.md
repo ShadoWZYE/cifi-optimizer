@@ -58,7 +58,8 @@ Now that the first checked-row affordability preview has shipped, evaluate the n
   - [`docs/systems/spend/token-shop-row-remap-verification.md`](docs/systems/spend/token-shop-row-remap-verification.md)
   - [`docs/systems/spend/token-bank-state-verification.md`](docs/systems/spend/token-bank-state-verification.md)
   - [`docs/systems/spend/daily-tokenium-mission-lane-verification.md`](docs/systems/spend/daily-tokenium-mission-lane-verification.md)
-  - [`data/token-shop-values.json`](data/token-shop-values.json)
+  - active extract owner: `db:derived:token-shop-values`
+  - archived snapshot: [`data/archive/token-shop-values.json`](data/archive/token-shop-values.json)
   - [`data/token-shop-row-level-owner.json`](data/token-shop-row-level-owner.json)
   - [`data/token-shop-row-remap-boundary.json`](data/token-shop-row-remap-boundary.json)
 - Verified extracted fields include:
@@ -132,7 +133,8 @@ These are not yet planner-ready integrations. They are dependency notes so futur
   - [`docs/systems/spend/multiverse-market-values.md`](docs/systems/spend/multiverse-market-values.md)
   - [`docs/systems/spend/multiverse-market-verification.md`](docs/systems/spend/multiverse-market-verification.md)
   - [`docs/systems/spend/multiverse-market-state-verification.md`](docs/systems/spend/multiverse-market-state-verification.md)
-  - [`data/multiverse-market-values.json`](data/multiverse-market-values.json)
+  - active extract owner: `db:derived:multiverse-market-values`
+  - archived snapshot: [`data/archive/multiverse-market-values.json`](data/archive/multiverse-market-values.json)
 - Verified extracted fields in the validated late block include:
   - `ID`
   - `StartCost`
@@ -181,3 +183,4 @@ Priority order:
 5. only after consumed inputs are grounded, consider broader spend recommendations with explicit assumptions
 
 Continue this lane by default while those priorities still fit the same slice contract. Stop only when human input, human validation, or a real cross-lane choice changes the honest next move.
+

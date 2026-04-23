@@ -1,44 +1,11 @@
 # Extraction Candidate Ranking
 
-This note records the repo-wide default ranking for unresolved extraction targets across the current extracted-data surface.
+This scorer and its generated ranking snapshot were part of the pre-DB research workflow and are no longer part of the supported architecture.
 
-Inputs:
+Current owner boundary:
 
-- [data/extraction-candidate-families.v1.json](data/extraction-candidate-families.v1.json)
-- [data/extraction-candidate-ranking.v1.json](data/extraction-candidate-ranking.v1.json)
-- [scripts/unity/score_extraction_candidates.py](scripts/unity/score_extraction_candidates.py)
+- [data/extraction-candidate-families.v1.json](data/extraction-candidate-families.v1.json) remains as historical extraction-family metadata
+- DB-backed trace resolution, best-gap scoring, and reducer-owned missing-seam state now own active follow-up selection
 
-## Default behavior
-
-Without filters, the scorer looks across:
-
-- committed Unity and metadata artifacts
-- extracted-data verification docs
-- shipped research-track status notes
-
-It ranks candidate families by unresolved mention density plus binary anchor strength.
-
-## Current repo-wide top unknown
-
-The current default top unknown extraction target is:
-
-1. `shards.milestone-owner-family`
-
-Why:
-
-- it still has the strongest remaining mix of unresolved text mentions and binary anchor density across the current extracted-data surface
-- the shard payload-recovery lane remains the repo-wide default unknown even after the spend-side family set was narrowed to unresolved candidates
-
-Current roadmap-first spend follow-up is narrower than the raw scorer result:
-
-- `spend-multiverse-savedata-import-surface`
-  - reason: the save-owner result is now grounded, so the strongest spend-side follow-up is the bounded Emporium import-surface decision rather than more generic owner recovery, even though the repo-wide scorer still sees broader Daily Tokenium uncertainty volume
-
-## Targeted use
-
-For roadmap-scoped follow-up, filter by track or family id instead of blindly taking the repo-wide top result.
-
-Current PR2-local shard follow-up is documented in:
-
-- [shard-extraction-candidates.md](docs/systems/shards/shard-extraction-candidates.md)
+If this capability is ever restored, it should return as a DB-native evidence-gap query rather than as a committed ranking snapshot.
 

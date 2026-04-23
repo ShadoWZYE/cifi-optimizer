@@ -5,8 +5,7 @@ This note records the current repo-local ranking for the next shard-owner extrac
 Inputs:
 
 - [data/extraction-candidate-families.v1.json](data/extraction-candidate-families.v1.json)
-- [data/extraction-candidate-ranking.v1.json](data/extraction-candidate-ranking.v1.json)
-- [scripts/unity/score_extraction_candidates.py](scripts/unity/score_extraction_candidates.py)
+- historical ranking snapshots are retired; this note now stands as archived heuristic context only
 
 ## Method
 

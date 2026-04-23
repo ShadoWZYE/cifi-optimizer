@@ -26,7 +26,7 @@
     "family": {
       "summary": "Definition-side shard family evidence and player-facing descriptive grounding.",
       "seedOutputs": [
-        "data/shard-milestone-family-evidence.v1.json"
+        "data/system-units/shards.v1.json"
       ]
     },
     "owned-state": {
@@ -38,9 +38,9 @@
     "cost": {
       "summary": "Shard cost evaluator model, staged runtime evidence, and remaining bounded uncertainty.",
       "seedOutputs": [
-        "data/shard-cost-formula-model.v1.json",
-        "data/shard-cost-screenshot-calibration.v1.json",
-        "data/shard-cost-list-path-probe.v1.json"
+        "db:derived:shard-cost-formula-model",
+        "db:policy:shard-cost-screenshot-calibration",
+        "data/system-units/shards.v1.json"
       ]
     }
   },
@@ -52,7 +52,7 @@
         "id": "shard-family-evidence",
         "kind": "dataset",
         "path": "data/shard-milestone-family-evidence.v1.json",
-        "role": "support",
+        "role": "historical-support",
         "persistence": "committed"
       },
       {
@@ -66,7 +66,14 @@
         "id": "shard-cost-formula-model",
         "kind": "dataset",
         "path": "data/shard-cost-formula-model.v1.json",
-        "role": "model",
+        "role": "historical-model",
+        "persistence": "committed"
+      },
+      {
+        "id": "shard-cost-screenshot-calibration",
+        "kind": "dataset",
+        "path": "data/shard-cost-screenshot-calibration.v1.json",
+        "role": "historical-policy",
         "persistence": "committed"
       },
       {
@@ -112,14 +119,9 @@
       "data/shard-milestone-save-owner-candidates.v2.json"
     ],
     "model": [
-      "data/shard-cost-formula-model.v1.json",
       "data/shard-cost-screenshot-calibration.v1.json"
     ],
-    "support": [
-      "data/shard-milestone-family-evidence.v1.json",
-      "data/shard-cost-list-path-probe.v1.json",
-      "data/shard-bonus-slot-probe.v1.json"
-    ],
+    "support": [],
     "historicalProbe": [
       "data/shard-scene-monobehaviour-probe.v1.json",
       "data/shard-type-metadata-probe.v1.json",
@@ -147,27 +149,33 @@
     ],
     "archiveReview": [
       {
-        "path": "data/shard-cost-formula-model.v1.json",
-        "status": "keep",
-        "reason": "This is the distinct shard cost model consumed by the planner and should remain first-class rather than being buried as archive material.",
+        "path": "data/shard-milestone-family-evidence.v1.json",
+        "status": "archive-candidate",
+        "reason": "Shard family evidence is now rebuilt inside the shared shards unit from grounded milestones plus row, title, effect, cost, and save boundaries instead of shipping the old standalone summary as a live support input.",
         "replacementSource": "data/system-units/shards.v1.json"
+      },
+      {
+        "path": "data/shard-cost-formula-model.v1.json",
+        "status": "historical-snapshot",
+        "reason": "The live shard cost model now materializes through the DB-backed shard system and the planner consumes that DB-owned projection. Keep this file only as a historical snapshot while the DB-first lane settles.",
+        "replacementSource": "db:derived:shard-cost-formula-model"
       },
       {
         "path": "data/shard-cost-screenshot-calibration.v1.json",
-        "status": "keep",
-        "reason": "Calibration checkpoints remain a unique grounding source for the shard cost model and should stay separate from archived probe history.",
-        "replacementSource": "data/system-units/shards.v1.json"
+        "status": "historical-policy",
+        "reason": "Calibration checkpoints remain a distinct grounding input, but the live shard runtime now reads them through the DB-backed shard policy materialization rather than treating the committed file as the active owner.",
+        "replacementSource": "db:policy:shard-cost-screenshot-calibration"
       },
       {
         "path": "data/shard-cost-list-path-probe.v1.json",
-        "status": "defer",
-        "reason": "This still carries distinct evidence about the getter-list path and should not be archived until that proof is normalized into a clearer boundary or model section.",
+        "status": "archive-candidate",
+        "reason": "Getter-list path semantics are now projected from the canonical shard cost formula model into the shared shard unit, so the standalone probe can move toward historical-only status.",
         "replacementSource": "data/system-units/shards.v1.json"
       },
       {
         "path": "data/shard-bonus-slot-probe.v1.json",
-        "status": "defer",
-        "reason": "Bonus slot-count coverage is still a distinct evidence lane and the row-0 mismatch means archiving it early risks losing contradiction context against the newer unit.",
+        "status": "archive-candidate",
+        "reason": "Shard bonus-slot coverage now derives from reducer-owned shard family evidence inside the shared shard unit, while the row-0 mismatch still survives there as bounded contradiction context.",
         "replacementSource": "data/system-units/shards.v1.json"
       },
       {

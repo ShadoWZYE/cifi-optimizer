@@ -4,11 +4,11 @@
   "sources": {
     "row7174IdentityBoundary": "data/multiverse-market-row71-74-identity-boundary.json",
     "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
-    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
+    "metadataNeighborhood": "data/archive/multiverse-market-metadata-neighborhood.json",
     "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
     "actionShell": "data/multiverse-market-action-shell.json",
-    "uabeaProbeReport": "data/uabea-extract-report.json",
-    "unityProbeReport": "data/unity-apk-extract-report.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
+    "unityProbeReport": "data/archive/unity-apk-extract-report.json",
     "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },
@@ -134,3 +134,5 @@
     "Because this lane only tightens identity evidence and does not change canonical import admissibility, the canonical import-safe subset remains empty."
   ]
 }
+
+

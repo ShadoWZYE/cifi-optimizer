@@ -3,8 +3,8 @@
   "dataset": "multiverse-market-69-74-anomaly-provenance",
   "sources": {
     "rawAppSideAsset": "workbench/unity/joined/level0",
-    "rawUnityProbeReport": "data/unity-apk-extract-report.json",
-    "rawUabeaProbeReport": "data/uabea-extract-report.json",
+    "rawUnityProbeReport": "data/archive/unity-apk-extract-report.json",
+    "rawUabeaProbeReport": "data/archive/uabea-extract-report.json",
     "derivedPrefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
     "derivedRow7174RemapBand": "data/multiverse-market-row71-74-remap-band.json",
     "derivedNumberingStabilityBoundary": "data/multiverse-market-inscription-numbering-stability-boundary.json",
@@ -60,8 +60,8 @@
       "stageId": "raw-app-side-probe-reports",
       "classification": "raw-app-side",
       "artifacts": [
-        "data/unity-apk-extract-report.json",
-        "data/uabea-extract-report.json"
+        "data/archive/unity-apk-extract-report.json",
+        "data/archive/uabea-extract-report.json"
       ],
       "evidence": [
         "unity-apk-extract-report preserves both the earlier direct prefab shells ChrystosEmporiumUpgrade59 through ChrystosEmporiumUpgrade62 and the remapped shell ChrystosEmporiumUpgrade69-ID57.",
@@ -105,3 +105,4 @@
     "The inherited prefab anomaly stays separate from player-facing identity: live UI evidence now grounds rows 69-74 directly while the raw 57-62 shell relation remains provenance-only metadata."
   ]
 }
+

@@ -6,7 +6,7 @@
     "handoffBoundary": "data/shard-milestone-handoff-boundary.v1.json",
     "ownerFamilyBoundary": "data/shard-owner-family-boundary.v1.json",
     "payloadBoundary": "data/shard-milestone-payload-boundary.v1.json",
-    "unityTraceTargetRegistry": "data/unity-trace-target-registry.json",
+    "unityTraceTargetRegistry": "archive:unity-trace-target-registry.json",
     "traceSystemUnit": "data/system-units/trace.v1.json",
     "ownedStateTraceRun": "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
     "typeMetadataProbe": "data/shard-type-metadata-probe.v1.json",

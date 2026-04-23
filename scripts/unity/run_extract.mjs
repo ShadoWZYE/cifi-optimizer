@@ -72,68 +72,20 @@ const commandTemplates = {
     passThrough: true
   },
 
-  // Generic pipeline for multi-step extraction
-  pipeline: {
-    steps: [
-      ["uabea-build", []],
-      ["dotnet", ["run", "--project", "{project}"]],
-      ["python", ["scripts/unity/extract_analysis.py"]]
-    ],
-    requires: ["target", "anchors", "output"]
-  },
-
-  // Specialized commands (kept for backwards compatibility reference)
-  "shards:parameters": {
-    legacy: true,
-    steps: [["python", ["scripts/unity/shard_cost_parameter_probe.py"]]]
-  },
-  "shards:type-metadata": {
-    legacy: true,
-    steps: [
-      ["uabea-build", []],
-      ["dotnet", [probeDll]],
-      ["python", ["scripts/unity/shard_type_metadata_probe.py"]]
-    ]
-  },
-  "shards:method": {
-    legacy: true,
-    steps: [
-      ["uabea-build", []],
-      ["dotnet", [probeDll]],
-      ["python", ["scripts/unity/shard_cost_method_probe.py"]]
-    ]
-  },
-  "shards:cost-native": {
-    legacy: true,
-    steps: [
-      ["uabea-build", []],
-      ["dotnet", [probeDll]],
-      ["python", ["scripts/unity/shard_cost_method_probe.py"]],
-      ["python", ["scripts/unity/shard_cost_parameter_probe.py"]],
-      ["python", ["scripts/unity/shard_cost_native_probe.py"]]
-    ]
-  }
 };
 
 const commandSets = {
   // Legacy commands mapped to templates
   build: commandTemplates.build,
   uabea: { steps: [["dotnet", [probeDll]]] },
-  "shards:parameters": commandTemplates["shards:parameters"],
-  "shards:type-metadata": commandTemplates["shards:type-metadata"],
-  "shards:method": commandTemplates["shards:method"],
-  "shards:cost-native": commandTemplates["shards:cost-native"],
 
   // New generalized commands
   trace: commandTemplates.trace,
   compile: commandTemplates.compile,
-  pipeline: commandTemplates.pipeline,
 
   // C# AssetProbe commands
   asset: commandTemplates.asset,
-  "asset:run": commandTemplates["asset:run"],
-  probe: commandTemplates.asset,
-  "probe:run": commandTemplates["asset:run"]
+  "asset:run": commandTemplates["asset:run"]
 };
 
 function formatRepoPath(targetPath) {
@@ -320,17 +272,11 @@ function printUsage() {
   console.error("  asset:run             - Build and run C# asset extraction in one command");
   console.error("  trace                 - Materialize a DB-backed target bundle");
   console.error("  compile               - Export active system-unit datasets");
-  console.error("  pipeline              - Run multi-step extraction pipeline");
   console.error("");
   console.error("C# asset extraction performance flags (use with asset/asset:run):");
   console.error("  --quick               - Metadata only, no fields/methods (fastest)");
   console.error("  --no-metadata         - Skip Cpp2IL load, use cache if available");
   console.error("  --term <name>          - Only process types matching name");
-  console.error("");
-  console.error("Compatibility aliases:");
-  console.error("  probe                 - Legacy alias for asset");
-  console.error("  probe:run             - Legacy alias for asset:run");
-  console.error("  shards:*              - Historical shard probe aliases retained for archive review");
   console.error("");
   console.error("Options:");
   console.error("  --target <id>         - Target identifier (e.g., token-shop-atu3-cells-effect)");
@@ -338,26 +284,17 @@ function printUsage() {
   console.error("  --anchor <value>      - Anchor to trace (can be specified multiple times)");
   console.error("  --level <level>       - Output level: raw, structured, both (default: both)");
   console.error("  --output <path>       - Output file path");
-  console.error("  --chain <script>      - Additional script to run in chain (can repeat)");
-  console.error("  --max-steps <n>       - Maximum analysis steps (default: 5)");
   console.error("  --force               - Force regeneration even if output exists");
   console.error("  --resume              - Resume from previous output if available");
-  console.error("  --continue-on-error   - Continue pipeline even if a step fails");
   console.error("");
   console.error("Examples:");
   console.error(
     "  node scripts/unity/run_extract.mjs trace --target token-shop-atu3-cells-effect --anchor ATU3Button --family token-shop"
   );
   console.error("  node scripts/unity/run_extract.mjs trace --family token-shop");
-  console.error(
-    "  node scripts/unity/run_extract.mjs trace --target shard-owned-state --anchor upgradeInfoList --family shard-owned-state --level structured"
-  );
   console.error("  node scripts/unity/run_extract.mjs compile");
   console.error(
-    "  node scripts/unity/run_extract.mjs pipeline --target TokenShop --anchors ATU1Button ATU2Button --output data/test.json --force"
-  );
-  console.error(
-    "  node scripts/unity/run_extract.mjs asset:run --quick -- --report data/uabea-extract-report.json"
+    "  node scripts/unity/run_extract.mjs asset:run --quick -- --report data/archive/uabea-extract-report.json"
   );
 }
 
@@ -422,3 +359,4 @@ for (const [index, [command, templateArgs]] of pipeline.entries()) {
 }
 
 console.log(`\nDone. Output: ${outputPath}`);
+

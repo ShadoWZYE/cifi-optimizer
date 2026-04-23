@@ -181,19 +181,19 @@
         ],
         "model": [],
         "support": [
-          "data/token-shop-values.json",
           "data/tokenshop-canonical-v1.json",
           "data/tokenium-naming-clues.json",
           "data/token-bank-state-clues.json",
           "data/daily-tokenium-lane-clues.json",
-          "data/token-shop-trace-support.v1.json",
           "data/spend-action-lane-clues.json",
           "data/token-shop-owner-shell.json",
           "data/token-bank-controller-shell.json"
         ],
         "historicalProbe": [
-          "data/uabea-extract-report.json",
-          "data/unity-apk-extract-report.json"
+          "data/archive/token-shop-values.json",
+          "data/archive/token-shop-trace-support.v1.json",
+          "data/archive/uabea-extract-report.json",
+          "data/archive/unity-apk-extract-report.json"
         ]
       },
       "notes": [
@@ -240,15 +240,15 @@
         ],
         "model": [],
         "support": [
-          "data/multiverse-market-values.json",
-          "data/multiverse-market-metadata-neighborhood.json",
           "data/multiverse-market-row-text-coverage.json",
           "data/multiverse-market-action-shell.json",
           "data/multiverse-market-owner-family.json"
         ],
         "historicalProbe": [
-          "data/uabea-extract-report.json",
-          "data/unity-apk-extract-report.json"
+          "data/archive/multiverse-market-values.json",
+          "data/archive/multiverse-market-metadata-neighborhood.json",
+          "data/archive/uabea-extract-report.json",
+          "data/archive/unity-apk-extract-report.json"
         ]
       },
       "notes": [
@@ -285,7 +285,6 @@
         "boundary": [],
         "model": [],
         "support": [
-          "data/unity-trace-target-registry.json",
           "db:materialized-target-bundle:token-shop-family-structure",
           "db:materialized-target-bundle:token-shop-atu3-cells-effect",
           "db:materialized-target-bundle:shard-cost-su0-structure",
@@ -293,7 +292,9 @@
           "db:materialized-target-bundle:multiverse-market-save-owner-boundary",
           "db:materialized-system-unit:trace:v1"
         ],
-        "historicalProbe": []
+        "historicalProbe": [
+          "archive:unity-trace-target-registry.json"
+        ]
       },
       "notes": [
         "Trace stays the orchestration layer for extraction and bounded follow-up.",
@@ -302,3 +303,5 @@
     }
   ]
 }
+
+

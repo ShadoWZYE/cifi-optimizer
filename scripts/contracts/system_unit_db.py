@@ -15,7 +15,7 @@ if str(UNITY_SCRIPTS) not in sys.path:
 from ghidra_cache_db import GhidraCacheDB  # noqa: E402
 from unity_trace_bundle import (  # noqa: E402
     collect_trace_bundle_components,
-    load_registry,
+    load_request_catalog,
     materialize_trace_bundle_dataset,
     persist_trace_bundle_fragments,
     plan_trace_bundle_request,
@@ -55,7 +55,7 @@ def _build_trace_args(trace_scope: str) -> argparse.Namespace:
 
 def _materialize_target_bundle(trace_scope: str) -> dict[str, object]:
     args = _build_trace_args(trace_scope)
-    registry = load_registry()
+    registry = load_request_catalog()
     request = plan_trace_bundle_request(args, registry)
     dataset = collect_trace_bundle_components(args)
     request_signature = str(request["requestSignature"])

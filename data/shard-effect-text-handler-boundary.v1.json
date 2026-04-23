@@ -2,7 +2,7 @@
   "dataset": "shard-effect-text-handler-boundary.v1",
   "generatedAt": "2026-04-04",
   "sources": {
-    "unityProbeReport": "data/unity-apk-extract-report.json",
+    "unityProbeReport": "data/archive/unity-apk-extract-report.json",
     "targetedStringProbe": "data/shard-effect-text-handler-boundary.v1.json#embedded-targeted-string-summary",
     "ownerComparisonProbe": "data/shard-owner-family-boundary.v1.json#embedded-construction-comparison-summary",
     "titleEffectBoundary": "data/shard-milestone-title-effect-boundary.v1.json",
@@ -69,3 +69,4 @@
     "Do not treat this boundary as a recovered row-complete effect-text table or as proof that every row 0-29 bonus line is already mapped to a final player-facing string."
   ]
 }
+

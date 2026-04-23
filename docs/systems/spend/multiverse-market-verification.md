@@ -12,7 +12,8 @@ It exists because the repo had already proven the `MultiverseMarket` owner and l
   - `MultiverseMarket`
 - Repo-local owner evidence:
   - [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
-  - [`data/multiverse-market-values.json`](data/multiverse-market-values.json)
+  - active extract owner: `db:derived:multiverse-market-values`
+  - archived snapshot: [`data/archive/multiverse-market-values.json`](data/archive/multiverse-market-values.json)
   - [`data/multiverse-market-text-provenance-path-boundary.json`](data/multiverse-market-text-provenance-path-boundary.json)
   - [`docs/systems/spend/multiverse-market-state-verification.md`](docs/multiverse-market-state-verification.md)
   - [`docs/unity/unity-audit-playbook.md`](docs/unity-audit-playbook.md)
@@ -336,5 +337,6 @@ Current grounded conclusion:
 2. keep any player-owned inscription-level preview descriptive and quarantined unless a narrower grounded canonical import slice is checked
 3. keep any future Emporium follow-up focused on the actual missing source class: game-side player-facing effect or label text provenance beyond the recovered same-number row chain
 4. only then revisit whether any canonical Emporium import or spend-planner recommendation is justified
+
 
 

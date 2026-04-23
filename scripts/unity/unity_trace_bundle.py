@@ -12,7 +12,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from ghidra_cache_db import GhidraCacheDB
+from ghidra_cache_db import (
+    BOOTSTRAP_DEFAULT_ANCHORS,
+    BOOTSTRAP_OUTPUT_SUMMARY_RULES,
+    BOOTSTRAP_SUPPORT_CONTEXTS,
+    FAMILY_GRAPH_LABELS,
+    GhidraCacheDB,
+)
 from portable_paths import md_link, repo_relative
 from trace_extractors import (
     TraceDocumentCache,
@@ -27,7 +33,6 @@ ROOT = Path(__file__).resolve().parents[2]
 TRACE_EXPORTS_DIR = ROOT / "workbench" / "trace-exports"
 JSON_OUT = TRACE_EXPORTS_DIR / "unity-trace-bundle.json"
 MD_OUT = TRACE_EXPORTS_DIR / "unity-trace-bundle.md"
-REGISTRY_PATH = ROOT / "data" / "unity-trace-target-registry.json"
 METADATA_PATH = ROOT / "workbench" / "apk" / "base" / "global-metadata.dat"
 UNITY_JOINED_DIR = ROOT / "workbench" / "unity" / "joined"
 TRACE_RUNS_DIR = ROOT / "workbench" / "trace-runs"
@@ -65,6 +70,118 @@ def load_canonical_semantic_scope(scope_id: str) -> dict[str, Any]:
     return dict(view.get("payload") or {})
 
 
+def load_canonical_execution_plan(trace_scope: str) -> dict[str, Any]:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope:
+        return {}
+    view = get_trace_db().find_canonical_semantic_fragment(
+        "cifi-full",
+        "libil2cpp.so",
+        "execution_plan_fragment",
+        f"target-execution-plan:{trace_scope}",
+    )
+    if not view:
+        return {}
+    return dict(view.get("payload") or {})
+
+
+def load_canonical_execution_context(trace_scope: str) -> dict[str, Any]:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope:
+        return {}
+    view = get_trace_db().find_canonical_semantic_fragment(
+        "cifi-full",
+        "libil2cpp.so",
+        "execution_context_fragment",
+        f"target-execution-context:{trace_scope}",
+    )
+    if not view:
+        return {}
+    return dict(view.get("payload") or {})
+
+
+def load_or_synthesize_surface_plan(trace_scope: str, target: dict[str, Any] | None = None) -> dict[str, Any]:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope:
+        return {}
+    target = dict(target or {})
+    return dict(
+        get_trace_db().find_or_synthesize_surface_plan(
+            "cifi-full",
+            "libil2cpp.so",
+            trace_scope,
+            family_id=str(target.get("familyId") or ""),
+            compatibility_target_id=str(target.get("id") or trace_scope),
+        )
+        or {}
+    )
+
+
+def load_or_synthesize_support_context(trace_scope: str, target: dict[str, Any] | None = None) -> dict[str, Any]:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope:
+        return {}
+    target = dict(target or {})
+    return dict(
+        (
+            get_trace_db().find_or_synthesize_support_context(
+                "cifi-full",
+                "libil2cpp.so",
+                trace_scope,
+                family_id=str(target.get("familyId") or ""),
+                compatibility_target_id=str(target.get("id") or trace_scope),
+            )
+            or {}
+        ).get("supportContext")
+        or {}
+    )
+
+
+def load_canonical_graph_plan(trace_scope: str) -> dict[str, Any]:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope:
+        return {}
+    view = get_trace_db().find_canonical_semantic_fragment(
+        "cifi-full",
+        "libil2cpp.so",
+        "graph_plan_fragment",
+        f"target-graph-plan:{trace_scope}",
+    )
+    if not view:
+        return {}
+    return dict(view.get("payload") or {})
+
+
+def load_canonical_bridge_policy(trace_scope: str) -> dict[str, Any]:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope:
+        return {}
+    view = get_trace_db().find_canonical_semantic_fragment(
+        "cifi-full",
+        "libil2cpp.so",
+        "bridge_policy_fragment",
+        f"target-bridge-policy:{trace_scope}",
+    )
+    if not view:
+        return {}
+    return dict(view.get("payload") or {})
+
+
+def load_canonical_target_narrative(trace_scope: str) -> dict[str, Any]:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope:
+        return {}
+    view = get_trace_db().find_canonical_semantic_fragment(
+        "cifi-full",
+        "libil2cpp.so",
+        "target_narrative_fragment",
+        f"target-narrative:{trace_scope}",
+    )
+    if not view:
+        return {}
+    return dict(view.get("payload") or {})
+
+
 def load_latest_materialized_target_bundle(trace_scope: str) -> dict[str, Any]:
     trace_scope = str(trace_scope or "").strip()
     if not trace_scope:
@@ -77,6 +194,36 @@ def load_latest_materialized_target_bundle(trace_scope: str) -> dict[str, Any]:
     if not view:
         return {}
     return dict(view.get("payload") or {})
+
+
+def load_handoff_target_metadata(target_id: str) -> dict[str, Any]:
+    target_id = str(target_id or "").strip()
+    if not target_id:
+        return {}
+    payload = load_latest_materialized_target_bundle(target_id)
+    target_payload = dict(payload.get("target") or {})
+    if target_payload:
+        return target_payload
+    execution_context = get_trace_db().find_or_synthesize_execution_context(
+        "cifi-full",
+        "libil2cpp.so",
+        target_id,
+        compatibility_target_id=target_id,
+    )
+    if not execution_context:
+        return {"id": target_id}
+    return {
+        "id": target_id,
+        "label": execution_context.get("label") or target_id,
+        "familyId": execution_context.get("familyId"),
+        "acceptedAnchors": list(execution_context.get("acceptedAnchors") or []),
+        "joinGoal": execution_context.get("joinGoal"),
+    }
+
+
+def load_latest_source_projection(trace_scope: str) -> dict[str, Any]:
+    payload = load_latest_materialized_target_bundle(trace_scope)
+    return dict(payload.get("sourceFamilies") or {})
 
 
 def _parse_iso_datetime(value: str | None) -> datetime | None:
@@ -215,15 +362,41 @@ def _collect_trace_anchor_terms(value: Any, path: tuple[str, ...] = ()) -> list[
     return results
 
 
+def _active_trace_scope_run_counts() -> dict[str, int]:
+    db = get_trace_db()
+    counts: dict[str, int] = {}
+    with db.connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT trace_scope, COUNT(DISTINCT request_signature) AS run_count
+            FROM trace_fragments
+            WHERE project_name = ?
+              AND project_file = ?
+              AND invalidated_at IS NULL
+            GROUP BY trace_scope
+            """,
+            ("cifi-full", "libil2cpp.so"),
+        ).fetchall()
+    for row in rows:
+        trace_scope = str(row["trace_scope"] or "").strip()
+        if not trace_scope:
+            continue
+        counts[trace_scope] = int(row["run_count"] or 0)
+    return counts
+
+
 def _candidate_gap_plan(
     registry: dict[str, Any],
     target_id: str,
     trace_scope: str,
     payload: dict[str, Any],
     built_at: str,
+    run_count: int = 0,
 ) -> dict[str, Any]:
     target = dict((registry.get("targets") or {}).get(target_id) or {})
     decision_summary = dict(payload.get("decisionSummary") or {})
+    planner_resolution = dict(payload.get("plannerResolution") or {})
+    trace_registry = dict(payload.get("traceRegistry") or {})
     blocked_edge_types = list(decision_summary.get("blockedEdgeTypes") or [])
     baseline_gap = list(decision_summary.get("baselineGap") or [])
     if not blocked_edge_types:
@@ -233,6 +406,15 @@ def _candidate_gap_plan(
     semantic_support_count = sum(
         int(((scope.get("payload") or {}).get("support") or {}).get("supportingEvidenceCount") or 0)
         for scope in scopes
+    )
+    semantic_scope_ids = [
+        str((scope.get("payload") or {}).get("scopeId") or scope.get("fragmentKey") or "")
+        for scope in scopes
+        if str((scope.get("payload") or {}).get("scopeId") or scope.get("fragmentKey") or "").strip()
+    ]
+    preferred_semantic_scope = next(
+        (scope_id for scope_id in semantic_scope_ids if not scope_id.startswith("row:")),
+        semantic_scope_ids[0] if semantic_scope_ids else "",
     )
     native_view = dict(payload.get("nativeView") or {})
     native_available = native_view.get("available") is True
@@ -244,11 +426,6 @@ def _candidate_gap_plan(
         anchor_candidates.extend(_collect_trace_anchor_terms(scope_payload))
     anchor_candidates.extend(_collect_trace_anchor_terms(native_search_terms, ("searchTerms",)))
     anchor_candidates.extend(_collect_trace_anchor_terms(native_summary, ("nativeSummary",)))
-    fallback_terms = (((target.get("strategyConfig") or {}).get("surfaces") or []))
-    for surface in fallback_terms:
-        for term in surface.get("terms") or []:
-            if _looks_like_trace_anchor(str(term)):
-                anchor_candidates.append((50, str(term)))
     ordered_anchor_terms: list[str] = []
     seen_terms: set[str] = set()
     for _, term in sorted(anchor_candidates, key=lambda item: (-item[0], item[1].lower())):
@@ -282,9 +459,34 @@ def _candidate_gap_plan(
         + min(age_hours / 24.0, 2.0)
         + verdict_bonus
     )
+    selected_subject_kind = str(
+        planner_resolution.get("selectedSubjectKind")
+        or trace_registry.get("selectedSubjectKind")
+        or ""
+    )
+    selected_subject_key = str(
+        planner_resolution.get("selectedSubjectKey")
+        or trace_registry.get("selectedSubjectKey")
+        or ""
+    )
+    selected_subject_label = str(
+        planner_resolution.get("selectedSubjectLabel")
+        or trace_registry.get("selectedSubjectLabel")
+        or target.get("label")
+        or trace_scope
+    )
+    if selected_subject_kind in {"", "target"} and preferred_semantic_scope:
+        selected_subject_kind = "semantic-scope"
+        selected_subject_key = preferred_semantic_scope
+        selected_subject_label = preferred_semantic_scope
+
     return {
         "targetId": target_id,
         "traceScope": trace_scope,
+        "executionTraceScope": str(trace_registry.get("executionTraceScope") or trace_scope or target_id),
+        "selectedSubjectKind": selected_subject_kind,
+        "selectedSubjectKey": selected_subject_key,
+        "selectedSubjectLabel": selected_subject_label,
         "label": str(target.get("label") or trace_scope),
         "familyId": str(target.get("familyId") or ""),
         "verdict": verdict,
@@ -292,7 +494,7 @@ def _candidate_gap_plan(
         "baselineGap": baseline_gap,
         "provedEdgeCount": proved_edge_count,
         "negativeEdgeCount": negative_edge_count,
-        "semanticScopeIds": [str((scope.get("payload") or {}).get("scopeId") or scope.get("fragmentKey") or "") for scope in scopes],
+        "semanticScopeIds": semantic_scope_ids,
         "semanticSupportCount": semantic_support_count,
         "nativeAvailable": native_available,
         "nativeSearchTerms": native_search_terms,
@@ -301,10 +503,13 @@ def _candidate_gap_plan(
         "builtAt": built_at,
         "decisionSummary": decision_summary,
         "ageHours": round(age_hours, 2),
+        "runCount": run_count,
     }
 
 
-def choose_best_gap_plan(registry: dict[str, Any]) -> dict[str, Any]:
+def choose_best_gap_plan(registry: dict[str, Any] | None = None) -> dict[str, Any]:
+    registry = registry or load_request_catalog()
+    run_counts = _active_trace_scope_run_counts()
     candidates: list[dict[str, Any]] = []
     for row in _latest_materialized_target_payloads():
         payload = dict(row.get("payload") or {})
@@ -313,7 +518,14 @@ def choose_best_gap_plan(registry: dict[str, Any]) -> dict[str, Any]:
         trace_scope = str(row.get("traceScope") or target_id).strip()
         if not target_id or not trace_scope:
             continue
-        candidate = _candidate_gap_plan(registry, target_id, trace_scope, payload, str(row.get("builtAt") or ""))
+        candidate = _candidate_gap_plan(
+            registry,
+            target_id,
+            trace_scope,
+            payload,
+            str(row.get("builtAt") or ""),
+            int(run_counts.get(trace_scope) or 0),
+        )
         if candidate:
             candidates.append(candidate)
     if not candidates:
@@ -339,12 +551,21 @@ def _print_best_gap_plan(best_gap_plan: dict[str, Any]) -> None:
             best_gap_plan["label"],
         )
     )
+    if best_gap_plan.get("selectedSubjectKind") and best_gap_plan.get("selectedSubjectKey"):
+        print(
+            "  subject={} {} executionScope={}".format(
+                best_gap_plan.get("selectedSubjectKind"),
+                best_gap_plan.get("selectedSubjectKey"),
+                best_gap_plan.get("executionTraceScope") or best_gap_plan.get("traceScope") or "unknown",
+            )
+        )
     print(
-        "  score={} verdict={} blocked={} proved={} semanticScopes={}".format(
+        "  score={} verdict={} blocked={} proved={} runs={} semanticScopes={}".format(
             best_gap_plan["score"],
             best_gap_plan["verdict"],
             ",".join(best_gap_plan["blockedEdgeTypes"]) or "none",
             best_gap_plan["provedEdgeCount"],
+            best_gap_plan.get("runCount") or 0,
             ",".join(best_gap_plan["semanticScopeIds"]) or "none",
         )
     )
@@ -355,9 +576,10 @@ def _print_best_gap_plan(best_gap_plan: dict[str, Any]) -> None:
         print(
             "  next={}".format(
                 " | ".join(
-                    "{}:{} [{}]".format(
+                    "{}:{} (runs={}) [{}]".format(
                         alt["traceScope"],
                         alt["score"],
+                        alt.get("runCount") or 0,
                         ",".join(alt["blockedEdgeTypes"]) or "none",
                     )
                     for alt in alternatives
@@ -373,9 +595,16 @@ def _print_completed_trace_run(dataset: dict[str, Any], iteration: int | None = 
     trace_registry = dict(dataset.get("traceRegistry") or {})
     trace_params = dict(dataset.get("traceParams") or {})
     trace_run = dict(dataset.get("traceRun") or {})
+    planner_resolution = dict(dataset.get("plannerResolution") or {})
     decision_summary = dict(dataset.get("decisionSummary") or {})
     print(prefix + ":")
-    print("  target={}".format(trace_registry.get("selectedTargetId") or trace_params.get("target") or "unknown"))
+    print(
+        "  subject={} {}".format(
+            planner_resolution.get("selectedSubjectKind") or "unknown-subject",
+            planner_resolution.get("selectedSubjectKey") or "unknown",
+        )
+    )
+    print("  executionScope={}".format(trace_registry.get("executionTraceScope") or "unknown"))
     print("  family={}".format(trace_registry.get("selectedFamilyId") or trace_params.get("family") or "unknown"))
     print("  runId={}".format(trace_run.get("id") or "db-only"))
     print("  anchors={}".format(", ".join(trace_params.get("anchors") or []) or "none"))
@@ -402,15 +631,16 @@ def _execute_trace_bundle_run(
 ) -> dict[str, Any]:
     trace_plan = plan_trace_bundle_request(args, registry)
     planner_resolution = trace_plan["plannerResolution"]
-    selected_target_id = str(trace_plan["selectedTargetId"])
+    execution_target_id = str(trace_plan.get("executionTargetId") or trace_plan.get("selectedTargetId") or "")
+    execution_trace_scope = str(trace_plan.get("executionTraceScope") or execution_target_id)
     selected_family_id = str(trace_plan["selectedFamilyId"])
     asset_set = trace_plan["assetSet"]
     request_signature = str(trace_plan["requestSignature"])
 
     if args.resume:
-        existing = get_trace_db().find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", selected_target_id, request_signature)
+        existing = get_trace_db().find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", execution_trace_scope, request_signature)
         if existing is None:
-            existing = get_trace_db().find_materialized_trace_view("cifi-full", "libil2cpp.so", selected_target_id, request_signature)
+            existing = get_trace_db().find_materialized_trace_view("cifi-full", "libil2cpp.so", execution_trace_scope, request_signature)
         if existing and trace_dataset_has_required_fragments(existing["payload"]):
             dataset = dict(existing["payload"])
         else:
@@ -420,7 +650,7 @@ def _execute_trace_bundle_run(
 
     export_requested = args.export or args.json_out != JSON_OUT or args.md_out != MD_OUT
     json_out, md_out, run_id = allocate_trace_run_paths(
-        dataset["traceRegistry"]["selectedTargetId"],
+        dataset["traceRegistry"].get("executionTraceScope") or "generic-explore",
         dataset["traceRegistry"]["selectedFamilyId"],
         args.json_out if args.json_out != JSON_OUT else None,
         args.md_out if args.md_out != MD_OUT else None,
@@ -448,15 +678,23 @@ def _execute_trace_bundle_run(
         "overwritesOnRepeat": export_requested,
     }
 
-    persist_trace_bundle_fragments(dataset, str(dataset["traceRegistry"]["selectedTargetId"]), request_signature)
-    dataset = materialize_trace_bundle_dataset(dataset, str(dataset["traceRegistry"]["selectedTargetId"]), request_signature)
+    persist_trace_bundle_fragments(
+        dataset,
+        str(dataset["traceRegistry"].get("executionTraceScope") or "generic-explore"),
+        request_signature,
+    )
+    dataset = materialize_trace_bundle_dataset(
+        dataset,
+        str(dataset["traceRegistry"].get("executionTraceScope") or "generic-explore"),
+        request_signature,
+    )
 
     if export_requested:
         export_trace_run(dataset, json_out, md_out)
         print(f"Trace bundle exported: {json_out}")
         print(f"Markdown: {md_out}")
     else:
-        print(f"Trace bundle materialized in DB for target: {selected_target_id}")
+        print(f"Trace bundle materialized in DB for subject scope: {execution_trace_scope}")
     return dataset
 
 
@@ -1834,7 +2072,7 @@ def build_presentation_follow_up(
         )
 
     for term in code_path_anchor_terms:
-        cached = find_cached_native_trace([term], family_hint=None)
+        cached = find_cached_native_trace([term], family_hint="token-shop")
         raw_bridge_expansion: dict[str, Any] = {}
         if cached:
             raw_result = cached.get("result") or {}
@@ -1884,7 +2122,7 @@ def build_presentation_follow_up(
                 {
                     "term": normalized,
                     "sourceTerm": seed_term,
-                    "status": "cached" if find_cached_native_trace([normalized], family_hint=None) else "planned",
+                    "status": "cached" if find_cached_native_trace([normalized], family_hint="token-shop") else "planned",
                 }
             )
 
@@ -1950,7 +2188,7 @@ def build_presentation_follow_up(
                     "term": normalized,
                     "kind": literal_kind,
                     "sourceTerm": source_term,
-                    "status": "cached" if find_cached_native_trace([normalized], family_hint=None) else "planned",
+                    "status": "cached" if find_cached_native_trace([normalized], family_hint="token-shop") else "planned",
                 }
             )
 
@@ -2064,7 +2302,7 @@ def build_presentation_follow_up(
             next_live_term = str(next_planned.get("term") or "").strip()
 
     if next_live_term:
-        cached = collect_native_trace([next_live_term], timeout=90, family_hint=None)
+        cached = collect_native_trace([next_live_term], timeout=90, family_hint="token-shop")
         raw_result = cached.get("result") or {}
         term_bridge = (raw_result.get("termBridges") or {}).get(next_live_term, {})
         code_path_results = [
@@ -2236,28 +2474,137 @@ def build_token_shop_literal_schema_recovery(
     }
 
 
-def build_token_shop_literal_schema_follow_up() -> list[dict[str, Any]]:
-    schema_terms = [
-        "CalculationType",
-        "CostExponent",
-        "FinalSetValue",
-        "get_costExponent",
-        "get_finalSetValue",
-        "CalculateAndSetUpgradeCalculations",
-        "SetCostRelatedAttributes",
-        "CreateUpgradeClass",
-        "AdditiveIncrease",
-        "Cost",
-        "Output",
+def build_token_shop_literal_schema_follow_up(
+    row_context: dict[str, Any],
+) -> list[dict[str, Any]]:
+    schema_terms = {
         "UpgradeName",
         "Description",
         "UnlockConditionText",
+        "FinalSetValue",
+        "CalculationType",
+        "Output",
+        "AdditiveIncrease",
+        "Cost",
+        "CostExponent",
+        "MaxLevel",
+        "Destination",
+        "UpgradeType",
+        "CreateUpgradeClass",
+        "CalculateAndSetUpgradeCalculations",
+        "BuyAndApplyUpgrade",
+        "SetGeneralTextsOnUpgrade",
+        "SetCostRelatedAttributes",
+        "SetUnlockRelatedAttributes",
+        "SetAllAttributes",
+        "get_finalSetValue",
+        "set_finalSetValue",
+        "get_unlockConditionText",
+        "set_unlockConditionText",
         "get_cost",
+        "get_costExponent",
+    }
+
+    def split_tokens(value: str) -> list[str]:
+        pieces = re.split(r"[^A-Za-z0-9]+", value)
+        tokens: list[str] = []
+        for piece in pieces:
+            if not piece:
+                continue
+            current = []
+            for index, char in enumerate(piece):
+                if index > 0 and char.isupper() and piece[index - 1].islower():
+                    tokens.append("".join(current).lower())
+                    current = [char]
+                else:
+                    current.append(char)
+            if current:
+                tokens.append("".join(current).lower())
+        return [token for token in tokens if token]
+
+    generic_tokens = {
+        "text",
+        "title",
+        "desc",
+        "description",
+        "cost",
+        "level",
+        "req",
+        "requirement",
+        "bonus",
+        "box",
+        "layout",
+        "fill",
+        "overlay",
+        "content",
+        "button",
+        "buy",
+        "token",
+        "tmp",
+        "tmpro",
+        "upg",
+        "all",
+        "set",
+        "texts",
+        "points",
+    }
+
+    def collect_signature_tokens(values: list[str]) -> set[str]:
+        tokens: set[str] = set()
+        for value in values:
+            for token in split_tokens(value):
+                if token not in generic_tokens:
+                    tokens.add(token)
+        return tokens
+
+    signature_values = [
+        str(row_context.get("shellField") or ""),
+        *(str(value) for value in (row_context.get("ownerFieldBlock") or []) if value),
+        *(str(value) for value in (row_context.get("actionMethods") or []) if value),
+        *(str(value) for value in (row_context.get("prefabCandidates") or []) if value),
     ]
+    signature_tokens = collect_signature_tokens(signature_values)
+
+    presentation_follow_up = row_context.get("presentationFollowUp") or {}
+    code_path_results = list(presentation_follow_up.get("codePathResults", []) or [])
+    candidate_terms: list[dict[str, Any]] = []
+    seen_terms: set[str] = set()
+
+    def overlaps_row_signature(value: str, source_term: str) -> bool:
+        candidate_tokens = collect_signature_tokens([value, source_term])
+        return bool(signature_tokens and signature_tokens & candidate_tokens)
+
+    def add_candidate(term: str, source_term: str) -> None:
+        normalized = str(term or "").strip()
+        if not normalized or normalized not in schema_terms:
+            return
+        lowered = normalized.lower()
+        if lowered in seen_terms:
+            return
+        if not overlaps_row_signature(normalized, source_term):
+            return
+        seen_terms.add(lowered)
+        candidate_terms.append(
+            {
+                "term": normalized,
+                "sourceTerm": source_term,
+                "status": "cached" if find_cached_native_trace([normalized], family_hint="token-shop") else "planned",
+                "followUpKind": "row-local-schema-candidate",
+            }
+        )
+
+    for item in code_path_results:
+        source_term = str(item.get("term") or "").strip()
+        raw_bridge_expansion = item.get("rawBridgeExpansion") or {}
+        for bucket_name in ("ownerCandidates", "methodCandidates", "fieldCandidates", "contextStrings"):
+            for candidate in raw_bridge_expansion.get(bucket_name, []) or []:
+                add_candidate(str(candidate), source_term)
+
     results: list[dict[str, Any]] = []
     next_live_term: str | None = None
-    for term in schema_terms:
-        cached = find_cached_native_trace([term], family_hint=None)
+    for candidate in candidate_terms:
+        term = str(candidate.get("term") or "").strip()
+        cached = find_cached_native_trace([term], family_hint="token-shop")
         if not cached and next_live_term is None:
             next_live_term = term
         results.append(
@@ -2269,11 +2616,12 @@ def build_token_shop_literal_schema_follow_up() -> list[dict[str, Any]]:
                 "jobId": cached.get("jobId") if cached else None,
                 "summary": cached.get("summary") if cached else None,
                 "rawBridgeExpansion": ((cached.get("result") or {}).get("termBridges") or {}).get(term, {}).get("searchExpansion", {}) if cached else {},
-                "followUpKind": "literal-schema-seed",
+                "followUpKind": candidate.get("followUpKind") or "row-local-schema-candidate",
+                "sourceTerm": candidate.get("sourceTerm"),
             }
         )
     if next_live_term:
-        cached = collect_native_trace([next_live_term], timeout=90, family_hint=None)
+        cached = collect_native_trace([next_live_term], timeout=90, family_hint="token-shop")
         term_bridge = ((cached.get("result") or {}).get("termBridges") or {}).get(next_live_term, {}) if cached else {}
         results = [
             item for item in results
@@ -2289,7 +2637,7 @@ def build_token_shop_literal_schema_follow_up() -> list[dict[str, Any]]:
                 "jobId": cached.get("jobId") if cached else None,
                 "summary": cached.get("summary") if cached else None,
                 "rawBridgeExpansion": (term_bridge.get("searchExpansion") or {}),
-                "followUpKind": "literal-schema-seed",
+                "followUpKind": "row-local-schema-candidate",
             }
         )
     return results
@@ -2476,6 +2824,33 @@ def build_token_shop_literal_text_recovery(
         "bonusCandidates": bonus_candidates[:8],
         "bonusMultiplier": formatted_bonus,
         "schemaFields": sorted(schema_fields),
+    }
+
+
+def build_token_shop_literal_recovery_summary(
+    literal_schema_recovery: dict[str, Any],
+    literal_text_recovery: dict[str, Any],
+) -> dict[str, Any]:
+    schema_fields = [
+        str(item)
+        for item in (literal_schema_recovery.get("schemaFields") or literal_text_recovery.get("schemaFields") or [])
+        if str(item).strip()
+    ]
+    return {
+        "status": str(literal_text_recovery.get("status") or literal_schema_recovery.get("status") or "").strip() or None,
+        "schemaFields": schema_fields,
+        "schemaFieldCount": len(schema_fields),
+        "title": str(literal_text_recovery.get("title") or "").strip() or None,
+        "description": str(literal_text_recovery.get("description") or "").strip() or None,
+        "shortEffectLabel": str(literal_text_recovery.get("shortEffectLabel") or "").strip() or None,
+        "outputLabel": str(literal_text_recovery.get("outputLabel") or "").strip() or None,
+        "bonusLabel": str(literal_text_recovery.get("bonusLabel") or "").strip() or None,
+        "titleCandidateCount": len(list(literal_text_recovery.get("titleCandidates") or [])),
+        "descriptionCandidateCount": len(list(literal_text_recovery.get("descriptionCandidates") or [])),
+        "shortEffectCandidateCount": len(list(literal_text_recovery.get("shortEffectCandidates") or [])),
+        "outputCandidateCount": len(list(literal_text_recovery.get("outputCandidates") or [])),
+        "bonusCandidateCount": len(list(literal_text_recovery.get("bonusCandidates") or [])),
+        "bonusMultiplier": str(literal_text_recovery.get("bonusMultiplier") or "").strip() or None,
     }
 
 
@@ -2882,8 +3257,6 @@ def build_row_closure_status(row_recovery: dict[str, Any]) -> dict[str, Any]:
     direct_text_candidates = row_recovery.get("textCandidates", []) or []
     detached_text_candidates = row_recovery.get("detachedTextCandidates", []) or []
     presentation_update = row_recovery.get("presentationUpdatePath", {}) or {}
-    literal_schema = row_recovery.get("literalSchemaRecovery", {}) or {}
-    literal_text = row_recovery.get("literalTextRecovery", {}) or {}
     formula_reconstruction = row_recovery.get("formulaReconstruction", {}) or {}
     fast_buy_recovery = row_recovery.get("fastBuyRecovery", {}) or {}
     title_slots = (presentation_update.get("slots", {}) or {}).get("title", []) or []
@@ -2896,13 +3269,13 @@ def build_row_closure_status(row_recovery: dict[str, Any]) -> dict[str, Any]:
             return True
         return False
 
-    literal_title_resolved = bool(str(literal_text.get("title") or "").strip()) or any(
+    literal_title_resolved = any(
         isinstance(value, str)
         and not looks_like_slot_label(value)
         and (" " in value or ":" in value)
         for value in direct_text_candidates
     )
-    literal_description_resolved = bool(str(literal_text.get("description") or "").strip()) or any(
+    literal_description_resolved = any(
         isinstance(value, str)
         and not looks_like_slot_label(value)
         and (" " in value or ":" in value)
@@ -2936,21 +3309,19 @@ def build_row_closure_status(row_recovery: dict[str, Any]) -> dict[str, Any]:
         "semanticStatus": "closed" if semantic_closed else "open",
         "literalStatus": "open" if unresolved_literals else "closed",
         "runtimeStatus": "open" if unresolved_runtime_targets else "closed",
-        "literalSchemaStatus": str(literal_schema.get("status") or "schema-unchecked"),
+        "literalSchemaStatus": "compatibility-carried",
         "status": closure_status,
         "requiredSemanticGaps": required_gaps,
         "unresolvedLiteralTargets": unresolved_literals,
         "unresolvedRuntimeTargets": unresolved_runtime_targets,
         "directTextCandidates": direct_text_candidates,
         "detachedTextCandidates": detached_text_candidates,
-        "literalSchemaRecovery": literal_schema,
-        "literalTextRecovery": literal_text,
     }
 
 
 def build_token_shop_row_layout_explanation(row_recovery: dict[str, Any]) -> dict[str, Any]:
     presentation_update = row_recovery.get("presentationUpdatePath", {}) or {}
-    literal_text = row_recovery.get("literalTextRecovery", {}) or {}
+    direct_text_candidates = [str(value).strip() for value in (row_recovery.get("textCandidates") or []) if str(value).strip()]
     selected_primary = ((presentation_update.get("structureSummary") or {}).get("selectedPrimaryStructure") or {})
     slots = presentation_update.get("slots", {}) or {}
     formula_reconstruction = row_recovery.get("formulaReconstruction", {}) or {}
@@ -2974,37 +3345,26 @@ def build_token_shop_row_layout_explanation(row_recovery: dict[str, Any]) -> dic
     requirement_slot = summarize_slot("requirement", "ReqText")
     progress_indicator = selected_primary.get("progressIndicators")
     bonus_group = selected_primary.get("bonusGroups")
-    bonus_multiplier = literal_text.get("bonusMultiplier")
-    output_label = str(literal_text.get("outputLabel") or "").strip()
-    derived_short_effect = None
-    if bonus_multiplier and output_label:
-        output_domain = output_label.removeprefix("Output: ").strip()
-        if output_domain.endswith("(MP)"):
-            output_domain = "MP Gained"
-        elif output_domain:
-            output_domain = f"{output_domain} Gained"
-        derived_short_effect = f"{bonus_multiplier} to {output_domain}." if output_domain else None
+    readable_candidates = [value for value in direct_text_candidates if " " in value or ":" in value]
+    title_text = readable_candidates[0] if readable_candidates else None
+    long_description_text = readable_candidates[1] if len(readable_candidates) > 1 else None
+    short_effect_text = next((value for value in readable_candidates if "x" in value or "gained" in value.lower()), None)
+    bonus_label = next((value for value in readable_candidates if "bonus" in value.lower()), None)
 
     return {
         "status": "row-layout-recovered",
         "titleLine": {
-            "text": literal_text.get("title"),
+            "text": title_text,
             "slot": title_slot,
             "explanation": "Top title strip for the upgrade card.",
         },
         "shortEffectLine": {
-            "text": literal_text.get("shortEffectLabel"),
+            "text": short_effect_text,
             "slot": short_effect_slot,
             "explanation": "Compact effect line rendered inside the main button area.",
-            "composition": {
-                "multiplier": bonus_multiplier,
-                "outputLabel": literal_text.get("outputLabel"),
-                "derivedReadableForm": derived_short_effect,
-                "note": "The short in-card label behaves like a compact presentation form derived from the bonus multiplier plus the output domain.",
-            },
         },
         "longDescriptionLine": {
-            "text": literal_text.get("description"),
+            "text": long_description_text,
             "slot": long_description_slot,
             "explanation": "Longer description surface preserved in the description subtree.",
         },
@@ -3025,7 +3385,7 @@ def build_token_shop_row_layout_explanation(row_recovery: dict[str, Any]) -> dic
         },
         "bonusDisplay": {
             "subsystem": bonus_group,
-            "label": literal_text.get("bonusLabel"),
+            "label": bonus_label,
             "explanation": "Bonus-layout subsystem for extra output or bonus labels.",
         },
         "unresolvedDisplayValues": [
@@ -3425,7 +3785,7 @@ ASSET_SOURCE_MEMBER_PATHS = {
 }
 
 SUPPORT_DATASET_PATHS = {
-    "tokenShopExtract": ROOT / "data" / "token-shop-values.json",
+    "tokenShopExtract": ROOT / "data" / "archive" / "token-shop-values.json",
     "tokenShopRowRemapBoundary": ROOT / "data" / "token-shop-row-remap-boundary.json",
     "tokenShopLateAtuBoundary": ROOT / "data" / "token-shop-late-atu-boundary.json",
     "shardCostFormulaModel": ROOT / "data" / "shard-cost-formula-model.v1.json",
@@ -3466,11 +3826,80 @@ def load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def load_registry() -> dict[str, Any]:
-    registry = load_json(REGISTRY_PATH)
-    if registry.get("dataset") != "unity-trace-target-registry":
-        raise ValueError("unity trace target registry dataset id drifted")
-    return registry
+RUNTIME_SOURCE_FAMILIES = {
+    source_id: {
+        "label": source_id,
+        "sourceIds": [source_id],
+    }
+    for source_id in CANONICAL_SOURCE_IDS
+}
+
+
+def build_runtime_trace_catalog() -> dict[str, Any]:
+    targets: dict[str, Any] = {}
+    for row in _latest_materialized_target_payloads():
+        payload = dict(row.get("payload") or {})
+        target = dict(payload.get("target") or {})
+        target_id = str(target.get("id") or row.get("traceScope") or "").strip()
+        if not target_id:
+            continue
+        merged_target = dict(target)
+        merged_target["id"] = target_id
+        merged_target.setdefault("label", target_id)
+        merged_target.setdefault("requiredSourceFamilies", list(CANONICAL_SOURCE_IDS))
+        merged_target.setdefault("defaultAnchors", list(BOOTSTRAP_DEFAULT_ANCHORS.get(target_id) or []))
+        targets[target_id] = merged_target
+
+    for target_id in unique_strings(
+        [
+            *list(BOOTSTRAP_SUPPORT_CONTEXTS.keys()),
+            *list(BOOTSTRAP_DEFAULT_ANCHORS.keys()),
+            *list(BOOTSTRAP_OUTPUT_SUMMARY_RULES.keys()),
+        ]
+    ):
+        if target_id in targets:
+            continue
+        execution_context = get_trace_db().find_or_synthesize_execution_context(
+            "cifi-full",
+            "libil2cpp.so",
+            target_id,
+            compatibility_target_id=target_id,
+        )
+        family_id = str(execution_context.get("familyId") or "").strip()
+        if not family_id:
+            continue
+        targets[target_id] = {
+            "id": target_id,
+            "label": str(execution_context.get("label") or target_id),
+            "familyId": family_id,
+            "acceptedAnchors": list(execution_context.get("acceptedAnchors") or []),
+            "joinGoal": execution_context.get("joinGoal"),
+            "outputSummaryRules": execution_context.get("outputSummaryRules"),
+            "requiredSourceFamilies": list(CANONICAL_SOURCE_IDS),
+            "defaultAnchors": list(BOOTSTRAP_DEFAULT_ANCHORS.get(target_id) or []),
+            "solvedBaselineTargetId": execution_context.get("solvedBaselineTargetId"),
+            "blockedTargetId": execution_context.get("blockedTargetId"),
+        }
+
+    planner_families: dict[str, Any] = {}
+    for family_id, label in FAMILY_GRAPH_LABELS.items():
+        planner_families[family_id] = {
+            "label": label,
+            "anchorExpansionTerms": [],
+            "synonymSets": {},
+        }
+
+    return {
+        "dataset": "unity-trace-runtime-catalog",
+        "targets": targets,
+        "planner": {"families": planner_families},
+        "sourceFamilies": dict(RUNTIME_SOURCE_FAMILIES),
+        "comparisonPresets": {},
+    }
+
+
+def load_request_catalog() -> dict[str, Any]:
+    return build_runtime_trace_catalog()
 
 
 def normalize_planner_term(value: str) -> str:
@@ -3563,192 +3992,317 @@ def format_anchor_specs(anchor_specs: list[dict[str, Any]]) -> str:
     return ", ".join(f"{item['value']} ({item['kind']})" for item in anchor_specs)
 
 
-def flatten_planner_terms(family_plan: dict[str, Any]) -> list[str]:
-    values = list(family_plan.get("queryTerms", [])) + list(family_plan.get("anchorExpansionTerms", []))
-    for term_list in family_plan.get("synonymSets", {}).values():
-        values.extend(term_list)
-    return unique_strings(values)
-
-
-def score_planner_family(family_id: str, family_plan: dict[str, Any], inputs: list[str]) -> dict[str, Any]:
-    matched_terms: list[str] = []
-    matched_inputs: list[str] = []
-    score = 0
-    for term in flatten_planner_terms(family_plan):
-        normalized_term = normalize_planner_term(term)
-        if not normalized_term:
+def _split_resolution_tokens(value: str) -> list[str]:
+    pieces = re.split(r"[^A-Za-z0-9]+", value)
+    tokens: list[str] = []
+    for piece in pieces:
+        if not piece:
             continue
-        best_input: str | None = None
-        best_score = 0
+        parts = re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?![a-z])|\d+", piece)
+        for part in parts:
+            lowered = part.lower()
+            if lowered:
+                tokens.append(lowered)
+    return tokens
+
+
+GENERIC_RESOLUTION_TOKENS = {
+    "token",
+    "shop",
+    "buy",
+    "button",
+    "text",
+    "title",
+    "description",
+    "desc",
+    "cost",
+    "level",
+    "bonus",
+    "fill",
+    "value",
+    "output",
+    "upgrade",
+    "trace",
+    "pass",
+    "runtime",
+    "boost",
+    "family",
+    "structure",
+    "audit",
+    "boundary",
+    "owner",
+    "state",
+    "save",
+    "market",
+}
+
+
+def _score_db_reconstruction_candidate(
+    candidate: dict[str, Any],
+    inputs: list[str],
+) -> dict[str, Any]:
+    payload = {
+        "target": dict(candidate.get("target") or {}),
+        "decisionSummary": dict(candidate.get("decisionSummary") or {}),
+        "nativeView": dict(candidate.get("nativeView") or {}),
+    }
+    trace_scope = str(candidate.get("traceScope") or "")
+    built_at = str(candidate.get("builtAt") or "")
+    semantic_scope_payloads = list(candidate.get("semanticScopePayloads") or [])
+    target = dict(payload.get("target") or {})
+    family_id = str(target.get("familyId") or "").strip()
+    label = str(target.get("label") or trace_scope).strip()
+    candidate_terms = list(candidate.get("resolutionTerms") or [])
+    normalized_candidate_terms = {
+        normalize_planner_term(term): term
+        for term in candidate_terms
+        if normalize_planner_term(term)
+    }
+    matched_inputs: list[str] = []
+    matched_terms: list[str] = []
+    score = 0
+    for input_value in inputs:
+        normalized_input = normalize_planner_term(input_value)
+        if not normalized_input:
+            continue
+        best_term = None
+        best_term_score = 0
+        for normalized_term, original_term in normalized_candidate_terms.items():
+            if normalized_input == normalized_term:
+                term_score = 120
+            elif normalized_input in normalized_term or normalized_term in normalized_input:
+                term_score = 45
+            else:
+                input_tokens = {
+                    token for token in _split_resolution_tokens(input_value)
+                    if token and token not in GENERIC_RESOLUTION_TOKENS
+                }
+                term_tokens = {
+                    token for token in _split_resolution_tokens(original_term)
+                    if token and token not in GENERIC_RESOLUTION_TOKENS
+                }
+                overlap = input_tokens & term_tokens
+                term_score = len(overlap) * 12
+            if term_score > best_term_score:
+                best_term = original_term
+                best_term_score = term_score
+        if best_term is None or best_term_score <= 0:
+            continue
+        score += best_term_score
+        if input_value not in matched_inputs:
+            matched_inputs.append(input_value)
+        if best_term not in matched_terms:
+            matched_terms.append(best_term)
+
+    if matched_terms:
+        score += len(matched_terms) * 4
+    if family_id:
+        family_normalized = normalize_planner_term(family_id)
         for input_value in inputs:
             normalized_input = normalize_planner_term(input_value)
             if not normalized_input:
                 continue
-            if normalized_input == normalized_term:
-                best_input = input_value
-                best_score = 6
+            if normalized_input == family_normalized or normalized_input in family_normalized or family_normalized in normalized_input:
+                score += 30
+                if "family" in trace_scope or "family" in label.lower():
+                    score += 25
                 break
-            if normalized_input in normalized_term or normalized_term in normalized_input:
-                if best_score < 3:
-                    best_input = input_value
-                    best_score = 3
-        if best_input is None:
+    if semantic_scope_payloads:
+        score += min(len(semantic_scope_payloads), 4) * 5
+    decision_summary = dict(payload.get("decisionSummary") or {})
+    blocked_edge_types = list(decision_summary.get("blockedEdgeTypes") or [])
+    score += min(int(decision_summary.get("provedEdgeCount") or 0), 12) * 2
+    score -= min(len(blocked_edge_types), 6)
+    if "family" in trace_scope or "family" in label.lower():
+        score += 8
+    built_dt = _parse_iso_datetime(built_at)
+    if built_dt is not None:
+        age_hours = max((datetime.now(built_dt.tzinfo) - built_dt).total_seconds() / 3600.0, 0.0)
+        if age_hours <= 24:
+            score += 4
+
+    anchor_candidates: list[tuple[int, str]] = []
+    for scope_payload in semantic_scope_payloads:
+        anchor_candidates.extend(_collect_trace_anchor_terms(scope_payload))
+    anchor_candidates.extend(_collect_trace_anchor_terms((payload.get("nativeView") or {}).get("searchTerms") or [], ("searchTerms",)))
+    anchor_candidates.extend(_collect_trace_anchor_terms((payload.get("nativeView") or {}).get("summary") or {}, ("nativeSummary",)))
+    ordered_anchor_terms: list[str] = []
+    seen_terms: set[str] = set()
+    for _, term in sorted(anchor_candidates, key=lambda item: (-item[0], item[1].lower())):
+        normalized = normalize_planner_term(term)
+        if not normalized or normalized in seen_terms:
             continue
-        score += best_score
-        matched_terms.append(term)
-        if best_input not in matched_inputs:
-            matched_inputs.append(best_input)
+        seen_terms.add(normalized)
+        ordered_anchor_terms.append(term)
+        if len(ordered_anchor_terms) >= 12:
+            break
+
     return {
+        "targetId": str(target.get("id") or trace_scope),
+        "traceScope": trace_scope,
         "familyId": family_id,
-        "score": score,
-        "matchedTerms": matched_terms,
+        "label": label,
         "matchedInputs": matched_inputs,
+        "matchedTerms": matched_terms,
+        "semanticScopePayloads": semantic_scope_payloads,
+        "semanticScopeSubjects": list(candidate.get("semanticScopeSubjects") or []),
+        "familyGraphSubjects": list(candidate.get("familyGraphSubjects") or []),
+        "anchors": ordered_anchor_terms,
+        "score": score,
+        "blockedEdgeTypes": blocked_edge_types,
     }
 
 
-def choose_best_family(registry: dict[str, Any], inputs: list[str]) -> dict[str, Any]:
-    planner = registry["planner"]
-    scored = [
-        score_planner_family(family_id, planner["families"][family_id], inputs)
-        for family_id in planner["familyOrder"]
-    ]
-    scored.sort(key=lambda item: (-int(item["score"]), -len(item["matchedTerms"]), planner["familyOrder"].index(item["familyId"])))
-    best = scored[0]
-    if int(best["score"]) <= 0:
-        available = ", ".join(planner["familyOrder"])
-        raise ValueError(f"Could not resolve a trace family from query inputs {inputs}. Checked planner families: {available}.")
-    return best
-
-
-def _detect_exact_target_override(
+def _detect_db_reconstruction_override(
     registry: dict[str, Any],
     requested_queries: list[str],
     requested_anchors: list[str],
+    include_legacy_targets: bool = False,
 ) -> dict[str, Any] | None:
     combined_inputs = unique_strings([*requested_queries, *requested_anchors])
     if not combined_inputs:
         return None
-    normalized_inputs = {normalize_planner_term(value): value for value in combined_inputs if normalize_planner_term(value)}
-    token_shop_shell_terms = {
-        normalized: original
-        for normalized, original in normalized_inputs.items()
-        if re.fullmatch(r"atu\d+button", normalized)
-    }
-    if not token_shop_shell_terms:
+    candidates: list[dict[str, Any]] = []
+    for row in get_trace_db().find_canonical_resolution_subject_candidates(
+        "cifi-full",
+        "libil2cpp.so",
+        include_legacy_targets=include_legacy_targets,
+    ):
+        trace_scope = str(row.get("traceScope") or "").strip()
+        target = dict(row.get("target") or {})
+        target_id = str(target.get("id") or trace_scope).strip()
+        if not trace_scope or not target_id:
+            continue
+        if target_id not in (registry.get("targets") or {}):
+            continue
+        registry_target = dict((registry.get("targets") or {}).get(target_id) or {})
+        row["target"] = {
+            **registry_target,
+            **target,
+            "id": target_id,
+        }
+        if not row["target"].get("label") and row.get("label"):
+            row["target"]["label"] = str(row.get("label") or "")
+        candidates.append(_score_db_reconstruction_candidate(row, combined_inputs))
+    candidates = [candidate for candidate in candidates if float(candidate.get("score") or 0) >= 20.0 and candidate.get("matchedTerms")]
+    if not candidates:
         return None
-    token_shop_effect_terms = {
-        normalize_planner_term(value)
-        for value in (
-            "ATU3Button",
-            "CellBoost",
-            "BuyCellBoost",
-            "15810",
-            "Cells Booster",
+    candidates.sort(
+        key=lambda item: (
+            -float(item.get("score") or 0.0),
+            -len(item.get("matchedTerms") or []),
+            len(item.get("blockedEdgeTypes") or []),
+            str(item.get("traceScope") or ""),
         )
-    }
-    if any(term in normalized_inputs for term in token_shop_effect_terms):
-        return None
-    target_id = "token-shop-family-structure"
+    )
+    best = candidates[0]
+    target_id = str(best["targetId"])
     target = registry["targets"][target_id]
-    family_plan = registry["planner"]["families"][target["familyId"]]
-    synonym_sets_used = pick_synonym_sets(family_plan, combined_inputs, list(token_shop_shell_terms.values()))
-    expanded_anchors = expand_anchor_terms(
-        target,
-        family_plan,
-        requested_queries,
-        requested_anchors,
-        synonym_sets_used,
-    )
-    return {
-        "selectionMode": "exact-anchor-override",
-        "requestedQueries": requested_queries,
-        "requestedAnchors": requested_anchors,
-        "matchedInputs": combined_inputs,
-        "matchedTerms": list(token_shop_shell_terms.values()),
-        "matchedFamilyId": target["familyId"],
-        "matchedFamilyLabel": family_plan["label"],
-        "selectedTargetId": target_id,
-        "selectedRunMode": "trace",
-        "selectedComparePresetId": None,
-        "synonymSetsUsed": synonym_sets_used,
-        "expandedAnchors": expanded_anchors,
-        "decisionNote": (
-            "Exact TokenShop shell anchors were provided without ATU3 effect terms, so the trace used the "
-            "family-structure target instead of the TokenShop family default compare lane."
-        ),
-    }
+    family_id = str(target["familyId"])
+    family_plan = registry["planner"]["families"][family_id]
+    semantic_scope_payloads = list(best.get("semanticScopePayloads") or [])
+    matched_terms = list(best.get("matchedTerms") or [])
+    selected_subject_kind = "target-reconstruction"
+    selected_subject_key = f"target:{target_id}"
+    selected_subject_label = str(best.get("label") or target.get("label") or target_id)
 
+    normalized_matched_terms = {normalize_planner_term(term) for term in matched_terms if normalize_planner_term(term)}
+    best_family_graph_subject: dict[str, Any] | None = None
+    best_family_graph_score = -1
+    for family_graph_subject in list(best.get("familyGraphSubjects") or []):
+        normalized_family_terms = {
+            normalize_planner_term(term)
+            for term in list(family_graph_subject.get("subjectTerms") or [])
+            if normalize_planner_term(term)
+        }
+        matched_family_terms = normalized_family_terms & normalized_matched_terms
+        if not matched_family_terms:
+            continue
+        family_graph_score = len(matched_family_terms) * 12 + 60
+        if family_id and normalize_planner_term(family_id) in matched_family_terms:
+            family_graph_score += 30
+        if family_graph_score <= best_family_graph_score:
+            continue
+        best_family_graph_score = family_graph_score
+        best_family_graph_subject = family_graph_subject
 
-def _detect_token_shop_updater_display_override(
-    registry: dict[str, Any],
-    requested_queries: list[str],
-    requested_anchors: list[str],
-) -> dict[str, Any] | None:
-    combined_inputs = unique_strings([*requested_queries, *requested_anchors])
-    if not combined_inputs:
-        return None
+    best_scope_subject: dict[str, Any] | None = None
+    best_scope_score = -1
+    for scope_subject in list(best.get("semanticScopeSubjects") or []):
+        normalized_scope_terms = {
+            normalize_planner_term(term)
+            for term in list(scope_subject.get("subjectTerms") or [])
+            if normalize_planner_term(term)
+        }
+        matched_scope_terms = normalized_scope_terms & normalized_matched_terms
+        if not matched_scope_terms:
+            continue
+        scope_id = str(scope_subject.get("scopeId") or "").strip()
+        scope_type = str(scope_subject.get("scopeType") or "").strip()
+        scope_score = len(matched_scope_terms) * 10
+        if scope_id.startswith("row:"):
+            scope_score += 100
+        elif scope_type:
+            scope_score += 40
+        if scope_score <= best_scope_score:
+            continue
+        best_scope_score = scope_score
+        best_scope_subject = scope_subject
 
-    semantic_scope = load_canonical_semantic_scope("token-shop-updater-display:ATU4")
-    if not semantic_scope:
-        return None
+    if best_scope_subject is not None:
+        selected_subject_kind = "semantic-scope"
+        selected_subject_key = str(best_scope_subject.get("scopeId") or "")
+        selected_subject_label = str(best_scope_subject.get("label") or selected_subject_key)
+    elif best_family_graph_subject is not None:
+        selected_subject_kind = "family-graph"
+        selected_subject_key = str(best_family_graph_subject.get("semanticKey") or "")
+        selected_subject_label = str(best_family_graph_subject.get("label") or selected_subject_key)
 
-    scope_terms = unique_strings(
-        [
-            str(((semantic_scope.get("rowShell") or {}).get("field") or "")),
-            str((((semantic_scope.get("rowShell") or {}).get("pathId")) or "")),
-            str(((semantic_scope.get("purchaseAction") or {}).get("term") or "")),
-            *[str(term) for term in (((semantic_scope.get("purchaseAction") or {}).get("relatedTerms") or []))],
-            *[str(term) for term in (((semantic_scope.get("displayUpdaters") or {}).get("primaryTerms") or []))],
-            *[str(term) for term in (((semantic_scope.get("displayUpdaters") or {}).get("relatedTerms") or []))],
-            *[str(item.get("term") or "") for item in ((semantic_scope.get("parameterShell") or [])) if isinstance(item, dict)],
-        ]
-    )
-    normalized_scope_terms = {
-        normalize_planner_term(term): term
-        for term in scope_terms
-        if normalize_planner_term(term)
-    }
-    matched_inputs = [
-        value
-        for value in combined_inputs
-        if normalize_planner_term(value) in normalized_scope_terms
-    ]
-    if not matched_inputs:
-        return None
+    if selected_subject_kind == "target-reconstruction":
+        token_shop_reconstruction_key = ""
+        if family_id == "token-shop":
+            token_shop_reconstruction_key = f"token-shop-reconstruction:{target_id}"
+        if token_shop_reconstruction_key:
+            selected_subject_kind = "reconstruction-fragment"
+            selected_subject_key = token_shop_reconstruction_key
+            selected_subject_label = str(target.get("label") or target_id)
 
-    matched_terms = unique_strings(
-        [normalized_scope_terms[normalize_planner_term(value)] for value in matched_inputs]
-    )
-    target_id = "token-shop-atu4-mod"
-    target = registry["targets"][target_id]
-    family_plan = registry["planner"]["families"][target["familyId"]]
-    synonym_sets_used = pick_synonym_sets(family_plan, combined_inputs, matched_terms)
     expanded_anchors = unique_strings(
         [
-            *target["defaultAnchors"],
             *requested_queries,
             *requested_anchors,
-            *matched_terms,
-            *[str(term) for term in (((semantic_scope.get("displayUpdaters") or {}).get("primaryTerms") or []))],
-            str(((semantic_scope.get("purchaseAction") or {}).get("term") or "")),
+            *list(best.get("anchors") or []),
+            *[
+                str(((scope_payload.get("rowShell") or {}).get("field") or ""))
+                for scope_payload in semantic_scope_payloads
+            ],
+            *[
+                str(((scope_payload.get("purchaseAction") or {}).get("term") or ""))
+                for scope_payload in semantic_scope_payloads
+            ],
         ]
     )
     return {
-        "selectionMode": "semantic-scope-override",
+        "selectionMode": "db-reconstruction",
         "requestedQueries": requested_queries,
         "requestedAnchors": requested_anchors,
-        "matchedInputs": matched_inputs,
-        "matchedTerms": matched_terms,
-        "matchedFamilyId": target["familyId"],
+        "matchedInputs": list(best.get("matchedInputs") or []),
+        "matchedTerms": list(best.get("matchedTerms") or []),
+        "matchedFamilyId": family_id,
         "matchedFamilyLabel": family_plan["label"],
+        "selectedSubjectKind": selected_subject_kind,
+        "selectedSubjectKey": selected_subject_key,
+        "selectedSubjectLabel": selected_subject_label,
         "selectedTargetId": target_id,
         "selectedRunMode": "trace",
         "selectedComparePresetId": None,
-        "synonymSetsUsed": synonym_sets_used,
+        "synonymSetsUsed": [],
         "expandedAnchors": expanded_anchors,
         "decisionNote": (
-            "Matched updater/display terms to DB-owned semantic scope token-shop-updater-display:ATU4 "
-            "and chose the bounded token-shop-atu4-mod trace instead of relying only on token-shop registry routing hints."
+            "Resolved the trace from DB-backed canonical semantic fragments first, "
+            f"selecting {target_id} as the strongest current reconstruction scope for {', '.join(list(best.get('matchedInputs') or combined_inputs))}. "
+            f"DB subject: {selected_subject_kind} {selected_subject_key}. "
+            "Materialized target bundles were not required for resolution."
         ),
     }
 
@@ -3764,16 +4318,122 @@ def make_generic_explore_resolution(registry: dict[str, Any], queries: list[str]
         "matchedTerms": combined_inputs,
         "matchedFamilyId": "exploration",
         "matchedFamilyLabel": "Exploration",
+        "selectedSubjectKind": "flat-explore",
+        "selectedSubjectKey": "generic-explore",
+        "selectedSubjectLabel": "Flat cross-source exploration",
         "selectedTargetId": "generic-explore",
         "selectedRunMode": "trace",
         "selectedComparePresetId": None,
         "synonymSetsUsed": [],
         "expandedAnchors": expanded_anchors,
         "decisionNote": (
-            "No planner family matched the provided inputs strongly enough, so the trace fell back to a generic "
-            "cross-source exploration run across committed metadata, Unity assets, and bounded extraction documents."
+            "No DB-backed reconstruction scope matched the provided inputs strongly enough, so the trace fell back to "
+            "flat cross-source exploration over committed metadata, Unity assets, and native extraction without using registry family routing."
         ),
     }
+
+
+def _resolve_execution_subject(
+    registry: dict[str, Any],
+    planner_resolution: dict[str, Any],
+) -> tuple[str, str]:
+    selected_target_id = str(planner_resolution.get("selectedTargetId") or "")
+    subject_kind = str(planner_resolution.get("selectedSubjectKind") or "")
+    subject_key = str(planner_resolution.get("selectedSubjectKey") or "")
+    execution_target_id = selected_target_id
+    execution_trace_scope = selected_target_id
+
+    if subject_kind == "reconstruction-fragment" and subject_key.startswith("token-shop-reconstruction:"):
+        execution_trace_scope = subject_key.removeprefix("token-shop-reconstruction:")
+        if execution_trace_scope in (registry.get("targets") or {}):
+            execution_target_id = execution_trace_scope
+    elif subject_kind == "family-graph" and subject_key:
+        family_graph_payload = get_trace_db().find_canonical_semantic_fragment(
+            "cifi-full",
+            "libil2cpp.so",
+            "family_graph_fragment",
+            subject_key,
+        )
+        if family_graph_payload:
+            payload = dict(family_graph_payload.get("payload") or {})
+            execution_trace_scope = str(
+                payload.get("traceScope")
+                or payload.get("targetId")
+                or selected_target_id
+            ).strip()
+            execution_target_id = str(
+                payload.get("targetId")
+                or execution_trace_scope
+                or selected_target_id
+            ).strip()
+    elif subject_kind == "semantic-scope" and subject_key:
+        scope_payload = load_canonical_semantic_scope(subject_key)
+        if scope_payload:
+            execution_trace_scope = str(
+                scope_payload.get("traceScope")
+                or scope_payload.get("targetId")
+                or selected_target_id
+            ).strip()
+            execution_target_id = str(
+                scope_payload.get("targetId")
+                or execution_trace_scope
+                or selected_target_id
+            ).strip()
+    elif subject_kind == "flat-explore":
+        execution_target_id = "generic-explore"
+        execution_trace_scope = "generic-explore"
+
+    if not execution_target_id:
+        execution_target_id = selected_target_id
+    if not execution_trace_scope:
+        execution_trace_scope = execution_target_id
+    return execution_target_id, execution_trace_scope
+
+
+def _apply_db_execution_plan(target: dict[str, Any], execution_trace_scope: str) -> tuple[dict[str, Any], dict[str, Any]]:
+    execution_plan = load_canonical_execution_plan(execution_trace_scope)
+    if not execution_plan:
+        return target, {}
+    patched_target = dict(target)
+    patched_target["executionPlan"] = execution_plan
+    if execution_plan.get("joinGoal"):
+        patched_target["joinGoal"] = str(execution_plan.get("joinGoal") or patched_target.get("joinGoal") or "")
+    return patched_target, execution_plan
+
+
+def _apply_db_execution_context(
+    target: dict[str, Any],
+    execution_trace_scope: str,
+    planner_resolution: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    planner_resolution = dict(planner_resolution or {})
+    execution_context = get_trace_db().find_or_synthesize_execution_context(
+        "cifi-full",
+        "libil2cpp.so",
+        execution_trace_scope,
+        subject_kind=str(planner_resolution.get("selectedSubjectKind") or ""),
+        subject_key=str(planner_resolution.get("selectedSubjectKey") or ""),
+        family_id=str(target.get("familyId") or ""),
+        compatibility_target_id=str(target.get("id") or ""),
+    )
+    if not execution_context:
+        return target, {}
+    patched_target = dict(target)
+    for key in (
+        "label",
+        "familyId",
+        "joinGoal",
+        "solvedBaselineTargetId",
+        "blockedTargetId",
+        "outputSummaryRules",
+    ):
+        value = execution_context.get(key)
+        if value not in (None, "", []):
+            patched_target[key] = value
+    accepted_anchors = [str(value) for value in (execution_context.get("acceptedAnchors") or []) if str(value).strip()]
+    if accepted_anchors:
+        patched_target["acceptedAnchors"] = accepted_anchors
+    return patched_target, execution_context
 
 
 def pick_synonym_sets(family_plan: dict[str, Any], inputs: list[str], matched_terms: list[str]) -> list[dict[str, Any]]:
@@ -3795,16 +4455,11 @@ def pick_synonym_sets(family_plan: dict[str, Any], inputs: list[str], matched_te
 
 
 def choose_run_mode(family_plan: dict[str, Any], inputs: list[str], explicit_target: bool) -> str:
-    if explicit_target:
-        return "trace"
-    normalized_inputs = [normalize_planner_term(value) for value in inputs if normalize_planner_term(value)]
-    direct_terms = [normalize_planner_term(term) for term in family_plan.get("directTraceTerms", [])]
-    compare_terms = [normalize_planner_term(term) for term in family_plan.get("compareTerms", [])]
-    if any(term and term in normalized_inputs for term in direct_terms):
-        return "trace"
-    if any(term and term in normalized_inputs for term in compare_terms):
-        return "compare"
-    return str(family_plan["defaultRunMode"])
+    return "trace"
+
+
+def normalize_run_mode_for_target(target: dict[str, Any], run_mode: str) -> str:
+    return run_mode
 
 
 def expand_anchor_terms(
@@ -3838,11 +4493,6 @@ def build_planner_decision_note(
         )
     matched_inputs = ", ".join(resolution["matchedInputs"]) if resolution["matchedInputs"] else family_label
     synonym_labels = ", ".join(item["id"] for item in resolution["synonymSetsUsed"]) or "family defaults"
-    if resolution["runMode"] == "compare":
-        return (
-            f"Matched {matched_inputs} to {family_label} through {synonym_labels} and chose the bounded "
-            f"{target['comparisonPresetId']} compare run because this query is better grounded as one checked solved-vs-blocked family trace."
-        )
     return (
         f"Matched {matched_inputs} to {family_label} through {synonym_labels} and chose the single "
         f"{selected_target_id} trace because the query already points at one checked family target."
@@ -3855,6 +4505,7 @@ def resolve_planner_selection(
     queries: list[str],
     anchors: list[str],
     explicit_family_id: str | None = None,
+    include_legacy_targets: bool = False,
 ) -> dict[str, Any]:
     requested_queries = unique_strings(queries)
     requested_anchors = unique_strings(anchors)
@@ -3880,6 +4531,9 @@ def resolve_planner_selection(
             "matchedTerms": combined_inputs,
             "matchedFamilyId": family_id,
             "matchedFamilyLabel": family_plan["label"],
+            "selectedSubjectKind": "target",
+            "selectedSubjectKey": explicit_target_id,
+            "selectedSubjectLabel": str(target.get("label") or explicit_target_id),
             "selectedTargetId": explicit_target_id,
             "selectedRunMode": choose_run_mode(family_plan, combined_inputs, explicit_target=True),
             "selectedComparePresetId": None,
@@ -3897,12 +4551,43 @@ def resolve_planner_selection(
     if explicit_family_id:
         family_id = explicit_family_id
         family_plan = registry["planner"]["families"][family_id]
-        target_id = family_plan["defaultTargetId"]
+        family_subject = get_trace_db().find_canonical_family_subject_candidate(
+            "cifi-full",
+            "libil2cpp.so",
+            family_id,
+        )
+        if not family_subject:
+            combined_inputs = unique_strings([family_plan["label"], *requested_queries, *requested_anchors])
+            return {
+                "selectionMode": "family-db-miss",
+                "requestedQueries": requested_queries,
+                "requestedAnchors": requested_anchors,
+                "matchedInputs": combined_inputs,
+                "matchedTerms": combined_inputs,
+                "matchedFamilyId": family_id,
+                "matchedFamilyLabel": family_plan["label"],
+                "selectedSubjectKind": "flat-explore",
+                "selectedSubjectKey": "generic-explore",
+                "selectedSubjectLabel": f"{family_plan['label']} unresolved DB family subject",
+                "selectedTargetId": "generic-explore",
+                "selectedRunMode": "trace",
+                "selectedComparePresetId": None,
+                "synonymSetsUsed": [],
+                "expandedAnchors": unique_strings([*combined_inputs, *list(family_plan.get("anchorExpansionTerms", []))]),
+                "decisionNote": (
+                    f"Used explicit family {family_plan['label']} but did not find a DB-owned family subject, "
+                    "so the trace degrades to flat exploration instead of falling back to a registry default target."
+                ),
+            }
+        target_id = str((family_subject or {}).get("targetId") or "")
         target = registry["targets"][target_id]
         combined_inputs = unique_strings([family_plan["label"], *requested_queries, *requested_anchors])
         synonym_sets_used = pick_synonym_sets(family_plan, combined_inputs, combined_inputs)
         expanded_anchors = expand_anchor_terms(target, family_plan, requested_queries, requested_anchors, synonym_sets_used)
-        run_mode = choose_run_mode(family_plan, combined_inputs, explicit_target=False)
+        run_mode = normalize_run_mode_for_target(
+            target,
+            choose_run_mode(family_plan, combined_inputs, explicit_target=False),
+        )
         resolution = {
             "selectionMode": "explicit-family",
             "requestedQueries": requested_queries,
@@ -3911,59 +4596,33 @@ def resolve_planner_selection(
             "matchedTerms": combined_inputs,
             "matchedFamilyId": family_id,
             "matchedFamilyLabel": family_plan["label"],
+            "selectedSubjectKind": str((family_subject or {}).get("subjectKind") or "family"),
+            "selectedSubjectKey": str((family_subject or {}).get("subjectKey") or family_id),
+            "selectedSubjectLabel": str((family_subject or {}).get("subjectLabel") or family_plan["label"]),
             "selectedTargetId": target_id,
             "selectedRunMode": run_mode,
-            "selectedComparePresetId": target["comparisonPresetId"] if run_mode == "compare" else None,
+            "selectedComparePresetId": None,
             "synonymSetsUsed": synonym_sets_used,
             "expandedAnchors": expanded_anchors,
         }
         resolution["decisionNote"] = (
-            f"Used explicit family {family_plan['label']} and resolved to default target {target_id} while keeping "
-            f"family-aware anchor expansion for the run."
+            f"Used explicit family {family_plan['label']} and resolved to DB-owned family subject "
+            f"{resolution['selectedSubjectKey']} with compatibility scope {target_id}."
         )
         return resolution
 
     combined_inputs = unique_strings([*requested_queries, *requested_anchors])
     if not combined_inputs:
         raise ValueError("Pass --target or at least one --query/--anchor to resolve a unity trace.")
-    exact_override = _detect_exact_target_override(registry, requested_queries, requested_anchors)
-    if exact_override is not None:
-        return exact_override
-    semantic_override = _detect_token_shop_updater_display_override(registry, requested_queries, requested_anchors)
-    if semantic_override is not None:
-        return semantic_override
-    try:
-        best_family = choose_best_family(registry, combined_inputs)
-    except ValueError:
-        return make_generic_explore_resolution(registry, requested_queries, requested_anchors)
-    family_id = best_family["familyId"]
-    family_plan = registry["planner"]["families"][family_id]
-    target_id = family_plan["defaultTargetId"]
-    target = registry["targets"][target_id]
-    synonym_sets_used = pick_synonym_sets(family_plan, combined_inputs, best_family["matchedTerms"])
-    run_mode = choose_run_mode(family_plan, combined_inputs, explicit_target=False)
-    expanded_anchors = expand_anchor_terms(target, family_plan, requested_queries, requested_anchors, synonym_sets_used)
-    resolution = {
-        "selectionMode": "query-planner",
-        "requestedQueries": requested_queries,
-        "requestedAnchors": requested_anchors,
-        "matchedInputs": best_family["matchedInputs"],
-        "matchedTerms": best_family["matchedTerms"],
-        "matchedFamilyId": family_id,
-        "matchedFamilyLabel": family_plan["label"],
-        "selectedTargetId": target_id,
-        "selectedRunMode": run_mode,
-        "selectedComparePresetId": target["comparisonPresetId"] if run_mode == "compare" else None,
-        "synonymSetsUsed": synonym_sets_used,
-        "expandedAnchors": expanded_anchors,
-    }
-    resolution["decisionNote"] = build_planner_decision_note("query-planner", family_plan, {
-        "selectedTargetId": resolution["selectedTargetId"],
-        "matchedInputs": resolution["matchedInputs"],
-        "synonymSetsUsed": resolution["synonymSetsUsed"],
-        "runMode": resolution["selectedRunMode"],
-    }, target)
-    return resolution
+    db_override = _detect_db_reconstruction_override(
+        registry,
+        requested_queries,
+        requested_anchors,
+        include_legacy_targets,
+    )
+    if db_override is not None:
+        return db_override
+    return make_generic_explore_resolution(registry, requested_queries, requested_anchors)
 
 
 def resolve_source_catalog(registry: dict[str, Any], family_ids: list[str]) -> tuple[dict[str, Path], list[dict[str, Any]]]:
@@ -3992,6 +4651,36 @@ def resolve_source_catalog(registry: dict[str, Any], family_ids: list[str]) -> t
     return source_paths, source_roles
 
 
+def resolve_source_catalog_from_projection(source_projection: dict[str, Any]) -> tuple[dict[str, Path], list[dict[str, Any]]]:
+    source_paths: dict[str, Path] = {}
+    source_roles: list[dict[str, Any]] = []
+    families = dict(source_projection.get("families") or {})
+    order = list(source_projection.get("order") or families.keys())
+    seen: set[str] = set()
+    for source_id in order:
+        source_id = canonicalize_source_family_id(source_id)
+        if not source_id or source_id in seen:
+            continue
+        seen.add(source_id)
+        entry = dict(families.get(source_id) or {})
+        if source_id == "assets":
+            source_paths[source_id] = UNITY_JOINED_DIR
+        elif source_id in CANONICAL_SOURCE_PATHS:
+            source_paths[source_id] = CANONICAL_SOURCE_PATHS[source_id]
+        else:
+            continue
+        source_roles.append(
+            {
+                "sourceId": source_id,
+                "path": entry.get("reference") or get_source_reference(source_id),
+                "familyId": entry.get("familyId"),
+                "familyLabel": entry.get("familyLabel"),
+                "role": entry.get("role") or CANONICAL_SOURCE_ROLE_TEXT.get(source_id),
+            }
+        )
+    return source_paths, source_roles
+
+
 def get_active_source_ids_for_target(target: dict[str, Any]) -> list[str]:
     active_ids: list[str] = []
     seen: set[str] = set()
@@ -4002,9 +4691,8 @@ def get_active_source_ids_for_target(target: dict[str, Any]) -> list[str]:
             seen.add(source_id)
             active_ids.append(source_id)
 
-    for surface in target.get("strategyConfig", {}).get("surfaces", []):
-        for source_id in surface.get("sourceIds", []):
-            add(source_id)
+    for source_id in collect_primary_source_ids_for_target(target):
+        add(source_id)
 
     add("native")
 
@@ -4050,6 +4738,20 @@ def narrow_source_catalog(
     narrowed_paths = {source_id: path for source_id, path in source_paths.items() if source_id in active_set}
     narrowed_roles = [entry for entry in source_roles if entry["sourceId"] in active_set]
     return narrowed_paths, narrowed_roles
+
+
+def get_extended_source_ids_for_projection(source_projection: dict[str, Any], extended_search: int) -> list[str]:
+    ordered_ids = [
+        canonicalize_source_family_id(source_id)
+        for source_id in list(source_projection.get("order") or [])
+        if canonicalize_source_family_id(source_id)
+    ]
+    active_ids = unique_strings(ordered_ids) or list(CANONICAL_SOURCE_IDS)
+    if extended_search >= 2:
+        for source_id in CANONICAL_SOURCE_IDS:
+            if source_id not in active_ids:
+                active_ids.append(source_id)
+    return active_ids
 
 
 def extract_strings(blob: bytes) -> list[dict[str, Any]]:
@@ -4821,6 +5523,59 @@ def cite_db_semantic_scope(
     return citation
 
 
+def _token_shop_row_scope_status(row_scope: dict[str, Any]) -> dict[str, Any]:
+    compatibility_status = dict(row_scope.get("compatibilityStatus") or {})
+    if compatibility_status:
+        return compatibility_status
+    missing_seam_ids = _token_shop_row_scope_missing_seam_ids(row_scope)
+    row_local_graph = dict(row_scope.get("rowLocalGraph") or {})
+    semantic_status = "open" if missing_seam_ids else "closed"
+    literal_status = "open" if "exact-shell-to-title" in missing_seam_ids else "closed"
+    runtime_status = "open" if "runtime-model-gap" in missing_seam_ids else "closed"
+    summary = (
+        "Row-local graph remains open at: {}.".format(", ".join(missing_seam_ids))
+        if missing_seam_ids
+        else "Row-local graph is closed for the currently recovered token-shop evidence."
+    )
+    return {
+        "status": f"semantic-{semantic_status}",
+        "semanticStatus": semantic_status,
+        "literalStatus": literal_status,
+        "runtimeStatus": runtime_status,
+        "summary": summary,
+        "missingSeamIds": missing_seam_ids,
+        "unresolvedRuntimeTargets": (
+            ["displayed-cost-fast-buy-or-runtime-modifiers"]
+            if "runtime-model-gap" in missing_seam_ids
+            else []
+        ),
+        "directTextCandidateCount": int(row_local_graph.get("textCandidateCount") or 0),
+        "detachedTextCandidateCount": int(row_local_graph.get("detachedTextCandidateCount") or 0),
+    }
+
+
+def _token_shop_row_scope_missing_seam_ids(row_scope: dict[str, Any]) -> list[str]:
+    return [
+        str(seam.get("id") or "")
+        for seam in (row_scope.get("missingSeams") or [])
+        if isinstance(seam, dict) and str(seam.get("id") or "").strip()
+    ]
+
+
+def _token_shop_title_recovered(
+    row_recovery: dict[str, Any] | None = None,
+    row_scope: dict[str, Any] | None = None,
+) -> bool:
+    row_recovery = dict(row_recovery or {})
+    literal_summary = dict(row_recovery.get("literalRecoverySummary") or {})
+    if str(literal_summary.get("title") or "").strip():
+        return True
+    row_scope = dict(row_scope or {})
+    if row_scope:
+        return "exact-shell-to-title" not in set(_token_shop_row_scope_missing_seam_ids(row_scope))
+    return False
+
+
 def cite_db_materialized_target(
     trace_scope: str,
     locator: str,
@@ -5103,7 +5858,15 @@ def _build_token_shop_row_recovery(
         detached_text_candidates,
         row_anchor_terms,
     )
-    literal_schema_follow_up = build_token_shop_literal_schema_follow_up()
+    literal_schema_follow_up = build_token_shop_literal_schema_follow_up(
+        {
+            "shellField": match.get("shellField"),
+            "ownerFieldBlock": owner_field_block,
+            "actionMethods": unique_strings([*action_candidates, *action_methods]),
+            "prefabCandidates": prefab_candidates,
+            "presentationFollowUp": presentation_follow_up,
+        }
+    )
     literal_schema_recovery = build_token_shop_literal_schema_recovery(
         {
             "presentationFollowUp": presentation_follow_up,
@@ -5117,6 +5880,10 @@ def _build_token_shop_row_recovery(
             "recoveredFormulaValues": recovered_formula_values,
             "literalSchemaRecovery": literal_schema_recovery,
         }
+    )
+    literal_recovery_summary = build_token_shop_literal_recovery_summary(
+        literal_schema_recovery,
+        literal_text_recovery,
     )
     owner_blob_row = build_token_shop_owner_blob_row(match.get("shellPathId"))
     owner_modifier_scan = build_token_shop_owner_modifier_scan(owner_blob_row)
@@ -5209,6 +5976,7 @@ def _build_token_shop_row_recovery(
         "literalSchemaFollowUp": literal_schema_follow_up,
         "literalSchemaRecovery": literal_schema_recovery,
         "literalTextRecovery": literal_text_recovery,
+        "literalRecoverySummary": literal_recovery_summary,
         "rowLayoutExplanation": row_layout_explanation,
         "runtimeEvaluatorRecovery": runtime_evaluator_recovery,
         "runtimeInstanceRecovery": runtime_instance_recovery,
@@ -5413,6 +6181,7 @@ def build_mod_trace_graph(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
     row_recovery: dict[str, Any] | None = None,
+    row_scope: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     metadata_surface = find_surface(surfaces, "metadata-neighborhood")
     action_surface = find_surface(surfaces, "action-lane")
@@ -5442,6 +6211,7 @@ def build_mod_trace_graph(
     cost_slots = list((presentation_update.get("slots") or {}).get("cost", []))
     update_hooks = list(presentation_update.get("updateHookCandidates", []))
     recovered_formula_values = list(row_recovery.get("recoveredFormulaValues", []))
+    title_recovered = _token_shop_title_recovered(row_recovery, row_scope)
 
     def make_level0_citation(term: str, locator: str, note: str) -> dict[str, Any]:
         return {
@@ -5590,27 +6360,33 @@ def build_mod_trace_graph(
     ]
 
     negative_edges = [
-        make_edge(
-            "missing-shell-to-title",
-            shell_node,
-            title_node,
-            "exact-shell-to-title",
-            "missing",
-            "negative",
-            "No direct asset or native-backed source proves one exact rendered ATU4 title string; the row-local title slots exist, but the detached title candidates and generic text updater still do not close the final title join.",
-            [
-                *[
-                    make_level0_citation(
-                        str(slot.get("name")),
-                        "$.rowRecovery.presentationUpdatePath.slots.title",
-                        "Recovered title slot without direct rendered string payload.",
-                    )
-                    for slot in title_slots
-                ],
-                *([cite_hit(level0_title_source, title_hit)] if level0_title_source and title_hit else []),
-                *([cite_hit(metadata_title_source, diamond_title_hit)] if metadata_title_source and diamond_title_hit else []),
-                *([cite_hit(level0_text_source, text_hook_hit)] if level0_text_source and text_hook_hit else []),
-            ],
+        *(
+            []
+            if title_recovered
+            else [
+                make_edge(
+                    "missing-shell-to-title",
+                    shell_node,
+                    title_node,
+                    "exact-shell-to-title",
+                    "missing",
+                    "negative",
+                    "No direct asset or native-backed source proves one exact rendered ATU4 title string; the row-local title slots exist, but the detached title candidates and generic text updater still do not close the final title join.",
+                    [
+                        *[
+                            make_level0_citation(
+                                str(slot.get("name")),
+                                "$.rowRecovery.presentationUpdatePath.slots.title",
+                                "Recovered title slot without direct rendered string payload.",
+                            )
+                            for slot in title_slots
+                        ],
+                        *([cite_hit(level0_title_source, title_hit)] if level0_title_source and title_hit else []),
+                        *([cite_hit(metadata_title_source, diamond_title_hit)] if metadata_title_source and diamond_title_hit else []),
+                        *([cite_hit(level0_text_source, text_hook_hit)] if level0_text_source and text_hook_hit else []),
+                    ],
+                )
+            ]
         ),
         make_edge(
             "missing-runtime-cost-update",
@@ -5664,10 +6440,24 @@ def build_mod_trace_graph(
             },
             {
                 "id": "claim-missing-title-join",
-                "status": "missing",
-                "statement": "The exact shell-to-final-title join for ATU4 is still missing even though the direct title slot graph is recovered.",
-                "edgeIds": [edge["id"] for edge in negative_edges],
-                "provedBy": [citation for edge in negative_edges for citation in edge["provedBy"]],
+                "status": "missing" if not title_recovered else "proved",
+                "statement": (
+                    "The exact shell-to-final-title join for ATU4 is still missing even though the direct title slot graph is recovered."
+                    if not title_recovered
+                    else "The canonical ATU4 row scope no longer carries an exact shell-to-final-title seam."
+                ),
+                "edgeIds": [edge["id"] for edge in negative_edges] if not title_recovered else [],
+                "provedBy": (
+                    [citation for edge in negative_edges for citation in edge["provedBy"]]
+                    if not title_recovered
+                    else compact_citations(
+                        cite_db_semantic_scope(
+                            str((row_scope or {}).get("scopeId") or "row:ATU4Button"),
+                            str(_token_shop_row_scope_status(row_scope or {}).get("status") or "semantic-closed"),
+                            "Canonical row-local graph no longer carries an exact-shell-to-title seam for ATU4Button.",
+                        )
+                    )
+                ),
             },
         ],
     }
@@ -5676,6 +6466,7 @@ def build_mod_trace_graph(
 def build_mk1_trace_graph(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
+    row_recovery: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     metadata_surface = find_surface(surfaces, "metadata-neighborhood")
     action_surface = find_surface(surfaces, "action-lane")
@@ -5690,6 +6481,9 @@ def build_mk1_trace_graph(
     level0_support_source = find_source_entry(support_surface, "level0")
     level0_roster_source = find_source_entry(roster_surface, "level0")
     level0_text_source = find_source_entry(text_surface, "level0")
+    row_recovery = row_recovery or {}
+    literal_summary = dict(row_recovery.get("literalRecoverySummary") or {})
+    title_recovered = bool(str(literal_summary.get("title") or "").strip())
 
     metadata_shell_hit = find_hit(metadata_source, "ATU5Button")
     metadata_owner_hit = find_hit(metadata_source, "MK1TokenBoostStartCost")
@@ -5804,20 +6598,26 @@ def build_mk1_trace_graph(
     ]
 
     negative_edges = [
-        make_edge(
-            "missing-shell-to-title",
-            shell_node,
-            support_node,
-            "exact-shell-to-title",
-            "missing",
-            "negative",
-            "No committed source proves one exact ATU5 shell-to-final-title join; the surviving generic text hooks, detached MK1 generator support text, and neighboring generator-booster title roster all remain detached from the shell-side row neighborhood.",
-            compact_citations(
-                cite_hit(level0_support_source, support_hit),
-                maybe_cite_hit(level0_support_source, alt_support_hit),
-                maybe_cite_hit(level0_roster_source, roster_hit),
-                maybe_cite_hit(level0_text_source, text_hook_hit),
-            ),
+        *(
+            []
+            if title_recovered
+            else [
+                make_edge(
+                    "missing-shell-to-title",
+                    shell_node,
+                    support_node,
+                    "exact-shell-to-title",
+                    "missing",
+                    "negative",
+                    "No committed source proves one exact ATU5 shell-to-final-title join; the surviving generic text hooks, detached MK1 generator support text, and neighboring generator-booster title roster all remain detached from the shell-side row neighborhood.",
+                    compact_citations(
+                        cite_hit(level0_support_source, support_hit),
+                        maybe_cite_hit(level0_support_source, alt_support_hit),
+                        maybe_cite_hit(level0_roster_source, roster_hit),
+                        maybe_cite_hit(level0_text_source, text_hook_hit),
+                    ),
+                )
+            ]
         ),
     ]
 
@@ -5844,8 +6644,12 @@ def build_mk1_trace_graph(
             },
             {
                 "id": "claim-missing-title-join",
-                "status": "missing",
-                "statement": "The exact shell-to-final-title join for ATU5 is still missing across the detached support-text, neighboring title-roster, and generic text-hook surfaces.",
+                "status": "missing" if negative_edges else "proved",
+                "statement": (
+                    "The exact shell-to-final-title join for ATU5 is still missing across the detached support-text, neighboring title-roster, and generic text-hook surfaces."
+                    if negative_edges
+                    else "The ATU5 row now preserves one exact shell-to-final-title join."
+                ),
                 "edgeIds": [edge["id"] for edge in negative_edges],
                 "provedBy": [citation for edge in negative_edges for citation in edge["provedBy"]],
             },
@@ -5978,11 +6782,11 @@ def build_atu3_effect_trace_graph(
         level0_detached_source, _ = find_term_in_source_entries(depth_sources, "NewTokenUPGPrefab.T1.CellsPerChestBooster", ["level0"])
         metadata_detached_source, _ = find_term_in_source_entries(depth_sources, "NewDiamondUPGPrefab.Specials.CellsBoost", ["metadata", "level0"])
 
-    metadata_shell_hit = find_hit(metadata_source, "ATU3Button")
-    metadata_owner_hit = find_hit(metadata_source, "CellBoostStartCost")
+    metadata_shell_hit = maybe_find_hit(metadata_source, "ATU3Button")
+    metadata_owner_hit = maybe_find_hit(metadata_source, "CellBoostStartCost")
     action_buy_hit = maybe_find_hit(action_source, "BuyCellBoost")
-    title_hit = find_hit(owner_title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")
-    lane_text_hit = find_hit(lane_text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.")
+    title_hit = maybe_find_hit(owner_title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")
+    lane_text_hit = maybe_find_hit(lane_text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.")
     diamond_prefab_hit = maybe_find_hit(metadata_detached_source, "NewDiamondUPGPrefab.Specials.CellsBoost")
     diamond_title_hit = maybe_find_hit(metadata_detached_source, ">Diamond Upgrade 10 - CellsBoost")
     token_prefab_hit = maybe_find_hit(level0_detached_source, "NewTokenUPGPrefab.T1.CellsPerChestBooster")
@@ -6041,11 +6845,11 @@ def build_atu3_effect_trace_graph(
             "present",
             "supporting",
             "The metadata neighborhood and checked lane support datasets preserve BuyCellBoost as the exact named action hook for the same CellBoost family.",
-            [
-                cite_hit(metadata_source, metadata_shell_hit),
-                cite_hit(metadata_source, metadata_owner_hit),
-                *compact_citations(maybe_cite_hit(action_source, action_buy_hit)),
-            ],
+            compact_citations(
+                maybe_cite_hit(metadata_source, metadata_shell_hit),
+                maybe_cite_hit(metadata_source, metadata_owner_hit),
+                maybe_cite_hit(action_source, action_buy_hit),
+            ),
         ),
         make_edge(
             "action-hook-to-shared-effect-system",
@@ -6055,9 +6859,9 @@ def build_atu3_effect_trace_graph(
             "present",
             "direct",
             "The checked cross-system effect surface preserves the shared Cells Booster (Chests) title for the same cells-from-chests gameplay lane.",
-            [
-                cite_hit(owner_title_source, title_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(owner_title_source, title_hit),
+            ),
         ),
         make_edge(
             "shared-effect-system-to-player-effect-text",
@@ -6067,9 +6871,9 @@ def build_atu3_effect_trace_graph(
             "present",
             "direct",
             "The same shared effect lane preserves one exact player-facing effect string for cells gained from Token and Diamond chests.",
-            [
-                cite_hit(lane_text_source, lane_text_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(lane_text_source, lane_text_hit),
+            ),
         ),
         make_edge(
             "owner-block-to-parameter-surface",
@@ -6173,6 +6977,7 @@ def build_mod_vs_blocked_diff(
     shell_window: dict[str, Any],
     surfaces: list[dict[str, Any]],
     row_recovery: dict[str, Any] | None = None,
+    row_scope: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     action_source = find_source_entry(find_surface(surfaces, "action-lane"), "level0")
     prefab_source = find_source_entry(find_surface(surfaces, "prefab-lane"), "level0")
@@ -6180,6 +6985,7 @@ def build_mod_vs_blocked_diff(
     presentation_update = row_recovery.get("presentationUpdatePath", {}) or {}
     title_slots = list((presentation_update.get("slots") or {}).get("title", []))
     detached_text = list(row_recovery.get("detachedTextCandidates", []))
+    title_recovered = _token_shop_title_recovered(row_recovery, row_scope)
     baseline_edges = [
         {
             "type": "serialized-adjacency",
@@ -6216,9 +7022,13 @@ def build_mod_vs_blocked_diff(
         },
         {
             "type": "exact-shell-to-title",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "ATU4 still lacks one exact shell-to-final-title join.",
+            "status": "present" if title_recovered else "missing",
+            "provenanceStrength": "direct" if title_recovered else "negative",
+            "statement": (
+                "ATU4 now preserves one exact shell-to-final-title join."
+                if title_recovered
+                else "ATU4 still lacks one exact shell-to-final-title join."
+            ),
             "provedBy": [
                 *[
                     {
@@ -6244,13 +7054,19 @@ def build_mod_vs_blocked_diff(
         },
     ]
     blocked_edges = [
-        {
-            "type": "exact-shell-to-title",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "The direct title slot graph exists, but the exact rendered title string is still unresolved.",
-            "provedBy": baseline_edges[3]["provedBy"],
-        },
+        *(
+            []
+            if title_recovered
+            else [
+                {
+                    "type": "exact-shell-to-title",
+                    "status": "missing",
+                    "provenanceStrength": "negative",
+                    "statement": "The direct title slot graph exists, but the exact rendered title string is still unresolved.",
+                    "provedBy": baseline_edges[3]["provedBy"],
+                }
+            ]
+        ),
         {
             "type": "exact-display-update-path",
             "status": "missing",
@@ -6309,7 +7125,11 @@ def build_mod_vs_blocked_diff(
             "solvedVsBlockedSummary": [
                 "The live ATU4 trace preserves the direct serialized shell-to-owner-block adjacency.",
                 "ATU4 now preserves one direct buy hook, one exact prefab identity, and one recovered title/description slot graph from Unity assets.",
-                "The remaining blocker is no longer a detached comparison artifact; it is the unresolved rendered title string and exact row-specific display update path.",
+                (
+                    "The remaining blocker is no longer a detached comparison artifact; it is the unresolved rendered title string and exact row-specific display update path."
+                    if not title_recovered
+                    else "The remaining blocker is the exact row-specific display update path."
+                ),
             ],
         },
     }
@@ -6330,7 +7150,8 @@ def build_mk1_vs_blocked_diff(
     text_source = find_source_entry(find_surface(surfaces, "text-hooks"), "level0")
     row_scope = dict(mk1_context.get("rowScope") or {})
     effect_target = dict(mk1_context.get("effectTarget") or {})
-    closure_status = dict(row_scope.get("closureStatus") or {})
+    row_scope_status = _token_shop_row_scope_status(row_scope)
+    missing_seam_ids = set(_token_shop_row_scope_missing_seam_ids(row_scope))
     baseline_edges = [
         {
             "type": "serialized-adjacency",
@@ -6366,14 +7187,22 @@ def build_mk1_vs_blocked_diff(
         },
         {
             "type": "exact-shell-to-title",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "ATU5 still lacks one exact shell-to-final-title join.",
+            "status": "missing" if "exact-shell-to-title" in missing_seam_ids else "present",
+            "provenanceStrength": "negative" if "exact-shell-to-title" in missing_seam_ids else "direct",
+            "statement": (
+                "ATU5 still lacks one exact shell-to-final-title join."
+                if "exact-shell-to-title" in missing_seam_ids
+                else "ATU5 now preserves a recovered title-side join through the current row-local graph and literal recovery."
+            ),
             "provedBy": [
-                cite_hit(support_source, find_hit(support_source, "1. MK1 Generator Output,")),
-                cite_hit(support_source, find_hit(support_source, "This upgrade divides the cost of MK1 Generators by 1500.")),
-                cite_hit(roster_source, find_hit(roster_source, "Mk2 Generator Booster")),
-                cite_hit(text_source, find_hit(text_source, "SetAllTokenShopTexts")),
+                cite_hit(source_entry, hit)
+                for source_entry, hit in [
+                    (support_source, maybe_find_hit(support_source, "1. MK1 Generator Output,")),
+                    (support_source, maybe_find_hit(support_source, "This upgrade divides the cost of MK1 Generators by 1500.")),
+                    (roster_source, maybe_find_hit(roster_source, "Mk2 Generator Booster")),
+                    (text_source, maybe_find_hit(text_source, "SetAllTokenShopTexts")),
+                ]
+                if hit is not None
             ],
         },
     ]
@@ -6419,7 +7248,7 @@ def build_mk1_vs_blocked_diff(
             "shellField": "ATU3Button",
             "shellPathId": find_token_shop_extract_field(token_shop_extract, "ATU3Button").get("path_id"),
             "comparisonShape": blocked_edges,
-            "groundedConclusion": str(closure_status.get("summary") or (effect_target.get("decisionSummary") or {}).get("summary") or "ATU3 remains narrower and still lacks one exact shell join."),
+            "groundedConclusion": str(row_scope_status.get("summary") or (effect_target.get("decisionSummary") or {}).get("summary") or "ATU3 remains narrower and still lacks one exact shell join."),
         },
         "delta": {
             "sharedPresentEdgeTypes": shared_present,
@@ -6439,8 +7268,10 @@ def build_token_shop_atu3_blocked_edges(
     row_scope: dict[str, Any],
     effect_target: dict[str, Any],
 ) -> list[dict[str, Any]]:
-    closure_status = dict(row_scope.get("closureStatus") or {})
+    row_scope_status = _token_shop_row_scope_status(row_scope)
+    missing_seam_ids = _token_shop_row_scope_missing_seam_ids(row_scope)
     effect_summary = dict(effect_target.get("decisionSummary") or {})
+    missing_seam_set = set(missing_seam_ids)
     return [
         {
             "type": "serialized-adjacency",
@@ -6454,9 +7285,13 @@ def build_token_shop_atu3_blocked_edges(
         },
         {
             "type": "exact-shell-to-action-hook",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "ATU3 still lacks one exact shell-specific effect or buy hook.",
+            "status": "missing" if "exact-shell-to-action-hook" in missing_seam_set else "present",
+            "provenanceStrength": "negative" if "exact-shell-to-action-hook" in missing_seam_set else "supporting",
+            "statement": (
+                "ATU3 still lacks one exact shell-specific effect or buy hook."
+                if "exact-shell-to-action-hook" in missing_seam_set
+                else "ATU3 now preserves one exact shell-specific effect or buy hook in the current row-local graph."
+            ),
             "provedBy": [
                 cite_db_materialized_target(
                     "token-shop-atu3-cells-effect",
@@ -6467,27 +7302,39 @@ def build_token_shop_atu3_blocked_edges(
         },
         {
             "type": "exact-shell-to-prefab",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "ATU3 still lacks one exact shell-to-prefab identity join.",
+            "status": "missing" if "exact-shell-to-prefab" in missing_seam_set else "present",
+            "provenanceStrength": "negative" if "exact-shell-to-prefab" in missing_seam_set else "direct",
+            "statement": (
+                "ATU3 still lacks one exact shell-to-prefab identity join."
+                if "exact-shell-to-prefab" in missing_seam_set
+                else "ATU3 now preserves one exact shell-to-prefab identity join in the current row-local graph."
+            ),
             "provedBy": [
                 cite_db_semantic_scope(
                     "row:ATU3Button",
-                    str(closure_status.get("status") or "semantic-open"),
-                    "ATU3 remains open in the DB-derived row scope and still does not clear one exact prefab identity join.",
+                    str(row_scope_status.get("status") or "semantic-open"),
+                    "ATU3 row-local graph still carries {} and does not clear one exact prefab identity join.".format(
+                        ", ".join(missing_seam_ids or ["open row-local seams"])
+                    ),
                 ),
             ],
         },
         {
             "type": "exact-shell-to-title",
-            "status": "missing",
-            "provenanceStrength": "negative",
-            "statement": "ATU3 still lacks one exact shell-to-final-title join.",
+            "status": "missing" if "exact-shell-to-title" in missing_seam_set else "present",
+            "provenanceStrength": "negative" if "exact-shell-to-title" in missing_seam_set else "direct",
+            "statement": (
+                "ATU3 still lacks one exact shell-to-final-title join."
+                if "exact-shell-to-title" in missing_seam_set
+                else "ATU3 now preserves one exact shell-to-final-title join in the current row-local graph."
+            ),
             "provedBy": [
                 cite_db_semantic_scope(
                     "row:ATU3Button",
-                    str(closure_status.get("summary") or closure_status.get("status") or "semantic-open"),
-                    "ATU3 still lacks one exact shell-to-final-title join in the current DB-derived row scope.",
+                    str(row_scope_status.get("summary") or row_scope_status.get("status") or "semantic-open"),
+                    "ATU3 row-local graph still carries {} and does not clear one exact shell-to-final-title join.".format(
+                        ", ".join(missing_seam_ids or ["open row-local seams"])
+                    ),
                 ),
             ],
         },
@@ -6506,7 +7353,7 @@ def build_mk3_vs_blocked_diff(
     prefab_source = find_source_entry(find_surface(surfaces, "prefab-lane"), "level0")
     row_scope = dict(mk3_context.get("rowScope") or {})
     effect_target = dict(mk3_context.get("effectTarget") or {})
-    closure_status = dict((dict(row_scope.get("closureStatus") or {})))
+    row_scope_status = _token_shop_row_scope_status(row_scope)
     baseline_edges = [
         {
             "type": "serialized-adjacency",
@@ -6550,7 +7397,7 @@ def build_mk3_vs_blocked_diff(
                 cite_hit(prefab_source, find_hit(prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")),
                 cite_db_semantic_scope(
                     "row:ATU7Button",
-                    str(closure_status.get("status") or "semantic-open"),
+                    str(row_scope_status.get("status") or "semantic-open"),
                     "ATU7 remains DB-derived and corroborated by the current canonical row scope.",
                 ),
             ],
@@ -6708,8 +7555,10 @@ def build_atu3_effect_vs_split_diff(
             "provedBy": [
                 cite_db_semantic_scope(
                     "row:ATU3Button",
-                    str((row_scope.get("closureStatus") or {}).get("status") or "semantic-open"),
-                    "ATU3 row scope still does not clear one exact shell-to-action effect verdict by itself.",
+                    str(_token_shop_row_scope_status(row_scope).get("status") or "semantic-open"),
+                    "ATU3 row-local graph still carries {} and does not clear one exact shell-to-action effect verdict by itself.".format(
+                        ", ".join(_token_shop_row_scope_missing_seam_ids(row_scope) or ["open row-local seams"])
+                    ),
                 )
             ],
         },
@@ -6721,8 +7570,10 @@ def build_atu3_effect_vs_split_diff(
             "provedBy": [
                 cite_db_semantic_scope(
                     "row:ATU3Button",
-                    str((row_scope.get("closureStatus") or {}).get("status") or "semantic-open"),
-                    "ATU3 row scope remains structurally open and does not by itself prove the shared chest-effect lane.",
+                    str(_token_shop_row_scope_status(row_scope).get("status") or "semantic-open"),
+                    "ATU3 row-local graph still carries {} and does not by itself prove the shared chest-effect lane.".format(
+                        ", ".join(_token_shop_row_scope_missing_seam_ids(row_scope) or ["open row-local seams"])
+                    ),
                 )
             ],
         },
@@ -6734,8 +7585,10 @@ def build_atu3_effect_vs_split_diff(
             "provedBy": [
                 cite_db_semantic_scope(
                     "row:ATU3Button",
-                    str((row_scope.get("closureStatus") or {}).get("status") or "semantic-open"),
-                    "ATU3 row scope still leaves the effect-text lane detached from one exact row-local identity verdict.",
+                    str(_token_shop_row_scope_status(row_scope).get("status") or "semantic-open"),
+                    "ATU3 row-local graph still carries {} and leaves the effect-text lane detached from one exact row-local identity verdict.".format(
+                        ", ".join(_token_shop_row_scope_missing_seam_ids(row_scope) or ["open row-local seams"])
+                    ),
                 )
             ],
         },
@@ -6815,26 +7668,26 @@ def build_atu3_chest_consumer_trace_graph(
     metadata_routine_source = find_source_entry(routine_surface, "metadata")
     chest_source = find_source_entry(chest_surface, "level0")
 
-    metadata_shell_hit = find_hit(metadata_source, "ATU3Button")
-    metadata_owner_hit = find_hit(metadata_source, "CellBoostStartCost")
-    title_hit = find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")
-    lane_text_hit = find_hit(lane_text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.")
-    ad_manager_hit = find_hit(lane_consumer_source, "AdManager, Assembly-CSharp")
-    set_texts_hit = find_hit(lane_consumer_source, "SetAdChestTexts")
-    offline_hit = find_hit(lane_consumer_source, "OfflineManager, Assembly-CSharp")
-    checker_hit = find_hit(lane_consumer_source, "DailyAndAdCounterChecker")
-    start_token_hit = find_hit(metadata_routine_source, "StartTokenRoutine")
-    token_routine_hit = find_hit(metadata_routine_source, "<TokenChestRoutine>d__149")
-    closed_token_hit = find_hit(metadata_routine_source, "GoToClosedTokenChest")
-    start_diamond_hit = find_hit(metadata_routine_source, "StartDiamondRoutine")
-    diamond_routine_hit = find_hit(metadata_routine_source, "<DiamondChestRoutine>d__155")
-    closed_diamond_hit = find_hit(metadata_routine_source, "GoToClosedDiamondChest")
-    small_cells_hit = find_hit(metadata_routine_source, "get_SmallAdCellGains")
-    big_cells_hit = find_hit(metadata_routine_source, "get_BigAdCellGains")
-    final_token_bonus_hit = find_hit(metadata_routine_source, "<FinalAdTokenChestBonus>k__BackingField")
-    final_diamond_bonus_hit = find_hit(metadata_routine_source, "<FinalDiamondChestBonus>k__BackingField")
-    token_chest_hit = find_hit(chest_source, "TokenChest")
-    diamond_chest_hit = find_hit(chest_source, "DiamondChest")
+    metadata_shell_hit = maybe_find_hit(metadata_source, "ATU3Button")
+    metadata_owner_hit = maybe_find_hit(metadata_source, "CellBoostStartCost")
+    title_hit = maybe_find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")
+    lane_text_hit = maybe_find_hit(lane_text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.")
+    ad_manager_hit = maybe_find_hit(lane_consumer_source, "AdManager, Assembly-CSharp")
+    set_texts_hit = maybe_find_hit(lane_consumer_source, "SetAdChestTexts")
+    offline_hit = maybe_find_hit(lane_consumer_source, "OfflineManager, Assembly-CSharp")
+    checker_hit = maybe_find_hit(lane_consumer_source, "DailyAndAdCounterChecker")
+    start_token_hit = maybe_find_hit(metadata_routine_source, "StartTokenRoutine")
+    token_routine_hit = maybe_find_hit(metadata_routine_source, "<TokenChestRoutine>d__149")
+    closed_token_hit = maybe_find_hit(metadata_routine_source, "GoToClosedTokenChest")
+    start_diamond_hit = maybe_find_hit(metadata_routine_source, "StartDiamondRoutine")
+    diamond_routine_hit = maybe_find_hit(metadata_routine_source, "<DiamondChestRoutine>d__155")
+    closed_diamond_hit = maybe_find_hit(metadata_routine_source, "GoToClosedDiamondChest")
+    small_cells_hit = maybe_find_hit(metadata_routine_source, "get_SmallAdCellGains")
+    big_cells_hit = maybe_find_hit(metadata_routine_source, "get_BigAdCellGains")
+    final_token_bonus_hit = maybe_find_hit(metadata_routine_source, "<FinalAdTokenChestBonus>k__BackingField")
+    final_diamond_bonus_hit = maybe_find_hit(metadata_routine_source, "<FinalDiamondChestBonus>k__BackingField")
+    token_chest_hit = maybe_find_hit(chest_source, "TokenChest")
+    diamond_chest_hit = maybe_find_hit(chest_source, "DiamondChest")
 
     consumer_read_target = dict(consumer_context.get("consumerReadTarget") or {})
     consumer_read_summary = dict(consumer_read_target.get("decisionSummary") or {})
@@ -6873,12 +7726,12 @@ def build_atu3_chest_consumer_trace_graph(
             "present",
             "direct",
             "The already-grounded ATU3 effect lane preserves the shared Cells Booster (Chests) title and player-facing chest-effect text.",
-            [
-                cite_hit(metadata_source, metadata_shell_hit),
-                cite_hit(metadata_source, metadata_owner_hit),
-                cite_hit(title_source, title_hit),
-                cite_hit(lane_text_source, lane_text_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(metadata_source, metadata_shell_hit),
+                maybe_cite_hit(metadata_source, metadata_owner_hit),
+                maybe_cite_hit(title_source, title_hit),
+                maybe_cite_hit(lane_text_source, lane_text_hit),
+            ),
         ),
         make_edge(
             "shared-effect-to-consumer-family",
@@ -6888,12 +7741,12 @@ def build_atu3_chest_consumer_trace_graph(
             "present",
             "direct",
             "The ATU3 shared chest-effect lane now hands off into the concrete AdManager chest consumer family.",
-            [
-                cite_hit(lane_consumer_source, ad_manager_hit),
-                cite_hit(lane_consumer_source, set_texts_hit),
-                cite_hit(lane_consumer_source, offline_hit),
-                cite_hit(lane_consumer_source, checker_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(lane_consumer_source, ad_manager_hit),
+                maybe_cite_hit(lane_consumer_source, set_texts_hit),
+                maybe_cite_hit(lane_consumer_source, offline_hit),
+                maybe_cite_hit(lane_consumer_source, checker_hit),
+            ),
         ),
         make_edge(
             "consumer-family-to-routines",
@@ -6903,14 +7756,14 @@ def build_atu3_chest_consumer_trace_graph(
             "present",
             "direct",
             "The same consumer family preserves the token and diamond chest routine neighborhood.",
-            [
-                cite_hit(metadata_routine_source, start_token_hit),
-                cite_hit(metadata_routine_source, token_routine_hit),
-                cite_hit(metadata_routine_source, closed_token_hit),
-                cite_hit(metadata_routine_source, start_diamond_hit),
-                cite_hit(metadata_routine_source, diamond_routine_hit),
-                cite_hit(metadata_routine_source, closed_diamond_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(metadata_routine_source, start_token_hit),
+                maybe_cite_hit(metadata_routine_source, token_routine_hit),
+                maybe_cite_hit(metadata_routine_source, closed_token_hit),
+                maybe_cite_hit(metadata_routine_source, start_diamond_hit),
+                maybe_cite_hit(metadata_routine_source, diamond_routine_hit),
+                maybe_cite_hit(metadata_routine_source, closed_diamond_hit),
+            ),
         ),
         make_edge(
             "consumer-family-to-bonus-shell",
@@ -6920,12 +7773,12 @@ def build_atu3_chest_consumer_trace_graph(
             "present",
             "direct",
             "The same runtime shell preserves the chest-reward bonus and cell-gain shell adjacent to the ATU3 consumer family.",
-            [
-                cite_hit(metadata_routine_source, small_cells_hit),
-                cite_hit(metadata_routine_source, big_cells_hit),
-                cite_hit(metadata_routine_source, final_token_bonus_hit),
-                cite_hit(metadata_routine_source, final_diamond_bonus_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(metadata_routine_source, small_cells_hit),
+                maybe_cite_hit(metadata_routine_source, big_cells_hit),
+                maybe_cite_hit(metadata_routine_source, final_token_bonus_hit),
+                maybe_cite_hit(metadata_routine_source, final_diamond_bonus_hit),
+            ),
         ),
         make_edge(
             "consumer-family-to-chest-objects",
@@ -6935,10 +7788,10 @@ def build_atu3_chest_consumer_trace_graph(
             "present",
             "supporting",
             "Direct Unity extraction preserves the concrete token and diamond chest objects used by the same consumer family.",
-            [
-                cite_hit(chest_source, token_chest_hit),
-                cite_hit(chest_source, diamond_chest_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(chest_source, token_chest_hit),
+                maybe_cite_hit(chest_source, diamond_chest_hit),
+            ),
         ),
         make_edge(
             "shared-effect-to-routine-family",
@@ -6948,11 +7801,11 @@ def build_atu3_chest_consumer_trace_graph(
             "present",
             "supporting",
             "The preserved +1 seconds cells-from-chests effect surface now narrows onto the same token and diamond chest routine family rather than floating as detached text.",
-            [
-                cite_hit(title_source, title_hit),
-                cite_hit(metadata_routine_source, token_routine_hit),
-                cite_hit(metadata_routine_source, diamond_routine_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(title_source, title_hit),
+                maybe_cite_hit(metadata_routine_source, token_routine_hit),
+                maybe_cite_hit(metadata_routine_source, diamond_routine_hit),
+            ),
         ),
     ]
 
@@ -7024,28 +7877,28 @@ def build_atu3_chest_consumer_read_trace_graph(
     booster_source = find_source_entry(booster_surface, "metadata")
     final_source = find_source_entry(final_surface, "metadata")
 
-    metadata_shell_hit = find_hit(metadata_source, "ATU3Button")
-    metadata_owner_hit = find_hit(metadata_source, "CellBoostStartCost")
-    ad_manager_hit = find_hit(lane_consumer_source, "AdManager, Assembly-CSharp")
-    set_texts_hit = find_hit(lane_consumer_source, "SetAdChestTexts")
-    offline_hit = find_hit(lane_consumer_source, "OfflineManager, Assembly-CSharp")
-    checker_hit = find_hit(lane_consumer_source, "DailyAndAdCounterChecker")
-    start_token_hit = find_hit(metadata_routine_source, "StartTokenRoutine")
-    token_routine_hit = find_hit(metadata_routine_source, "<TokenChestRoutine>d__149")
-    start_diamond_hit = find_hit(metadata_routine_source, "StartDiamondRoutine")
-    diamond_routine_hit = find_hit(metadata_routine_source, "<DiamondChestRoutine>d__155")
-    small_getter_hit = find_hit(getter_source, "get_SmallAdCellGains")
-    big_getter_hit = find_hit(getter_source, "get_BigAdCellGains")
-    set_booster_hit = find_hit(booster_source, "SetBoosterAdBonus")
-    final_booster_getter_hit = find_hit(booster_source, "get_FinalBoosterAdBonus")
-    small_cells_hit = find_hit(booster_source, "SmallAdCellGains")
-    big_cells_hit = find_hit(booster_source, "BigAdCellGains")
-    final_booster_hit = find_hit(booster_source, "FinalBoosterAdBonus")
-    set_final_booster_hit = find_hit(booster_source, "set_FinalBoosterAdBonus")
-    final_booster_field_hit = find_hit(booster_source, "<FinalBoosterAdBonus>k__BackingField")
-    booster_routine_hit = find_hit(booster_source, "<BoosterAdRoutine>d__158")
-    final_token_bonus_hit = find_hit(final_source, "<FinalAdTokenChestBonus>k__BackingField")
-    final_diamond_bonus_hit = find_hit(final_source, "<FinalDiamondChestBonus>k__BackingField")
+    metadata_shell_hit = maybe_find_hit(metadata_source, "ATU3Button")
+    metadata_owner_hit = maybe_find_hit(metadata_source, "CellBoostStartCost")
+    ad_manager_hit = maybe_find_hit(lane_consumer_source, "AdManager, Assembly-CSharp")
+    set_texts_hit = maybe_find_hit(lane_consumer_source, "SetAdChestTexts")
+    offline_hit = maybe_find_hit(lane_consumer_source, "OfflineManager, Assembly-CSharp")
+    checker_hit = maybe_find_hit(lane_consumer_source, "DailyAndAdCounterChecker")
+    start_token_hit = maybe_find_hit(metadata_routine_source, "StartTokenRoutine")
+    token_routine_hit = maybe_find_hit(metadata_routine_source, "<TokenChestRoutine>d__149")
+    start_diamond_hit = maybe_find_hit(metadata_routine_source, "StartDiamondRoutine")
+    diamond_routine_hit = maybe_find_hit(metadata_routine_source, "<DiamondChestRoutine>d__155")
+    small_getter_hit = maybe_find_hit(getter_source, "get_SmallAdCellGains")
+    big_getter_hit = maybe_find_hit(getter_source, "get_BigAdCellGains")
+    set_booster_hit = maybe_find_hit(booster_source, "SetBoosterAdBonus")
+    final_booster_getter_hit = maybe_find_hit(booster_source, "get_FinalBoosterAdBonus")
+    small_cells_hit = maybe_find_hit(booster_source, "SmallAdCellGains")
+    big_cells_hit = maybe_find_hit(booster_source, "BigAdCellGains")
+    final_booster_hit = maybe_find_hit(booster_source, "FinalBoosterAdBonus")
+    set_final_booster_hit = maybe_find_hit(booster_source, "set_FinalBoosterAdBonus")
+    final_booster_field_hit = maybe_find_hit(booster_source, "<FinalBoosterAdBonus>k__BackingField")
+    booster_routine_hit = maybe_find_hit(booster_source, "<BoosterAdRoutine>d__158")
+    final_token_bonus_hit = maybe_find_hit(final_source, "<FinalAdTokenChestBonus>k__BackingField")
+    final_diamond_bonus_hit = maybe_find_hit(final_source, "<FinalDiamondChestBonus>k__BackingField")
 
     consumer_target = dict(read_context.get("consumerTarget") or {})
     consumer_summary = dict(consumer_target.get("decisionSummary") or {})
@@ -7084,14 +7937,14 @@ def build_atu3_chest_consumer_read_trace_graph(
             "present",
             "derived",
             "The already checked ATU3 effect-driven lane remains grounded inside the AdManager chest consumer family.",
-            [
-                cite_hit(metadata_source, metadata_shell_hit),
-                cite_hit(metadata_source, metadata_owner_hit),
-                cite_hit(lane_consumer_source, ad_manager_hit),
-                cite_hit(lane_consumer_source, set_texts_hit),
-                cite_hit(lane_consumer_source, offline_hit),
-                cite_hit(lane_consumer_source, checker_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(metadata_source, metadata_shell_hit),
+                maybe_cite_hit(metadata_source, metadata_owner_hit),
+                maybe_cite_hit(lane_consumer_source, ad_manager_hit),
+                maybe_cite_hit(lane_consumer_source, set_texts_hit),
+                maybe_cite_hit(lane_consumer_source, offline_hit),
+                maybe_cite_hit(lane_consumer_source, checker_hit),
+            ),
         ),
         make_edge(
             "consumer-family-to-routines",
@@ -7101,12 +7954,12 @@ def build_atu3_chest_consumer_read_trace_graph(
             "present",
             "direct",
             "The consumer family still preserves the token and diamond chest routine neighborhood.",
-            [
-                cite_hit(metadata_routine_source, start_token_hit),
-                cite_hit(metadata_routine_source, token_routine_hit),
-                cite_hit(metadata_routine_source, start_diamond_hit),
-                cite_hit(metadata_routine_source, diamond_routine_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(metadata_routine_source, start_token_hit),
+                maybe_cite_hit(metadata_routine_source, token_routine_hit),
+                maybe_cite_hit(metadata_routine_source, start_diamond_hit),
+                maybe_cite_hit(metadata_routine_source, diamond_routine_hit),
+            ),
         ),
         make_edge(
             "consumer-family-to-getters",
@@ -7116,10 +7969,10 @@ def build_atu3_chest_consumer_read_trace_graph(
             "present",
             "direct",
             "The same internal runtime neighborhood preserves both chest cell-gain getters.",
-            [
-                cite_hit(getter_source, small_getter_hit),
-                cite_hit(getter_source, big_getter_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(getter_source, small_getter_hit),
+                maybe_cite_hit(getter_source, big_getter_hit),
+            ),
         ),
         make_edge(
             "getters-to-booster-shell",
@@ -7129,14 +7982,14 @@ def build_atu3_chest_consumer_read_trace_graph(
             "present",
             "direct",
             "Committed metadata preserves the cell-gain getters beside the booster bonus aggregation shell.",
-            [
-                cite_hit(booster_source, set_booster_hit),
-                cite_hit(booster_source, final_booster_getter_hit),
-                cite_hit(booster_source, small_cells_hit),
-                cite_hit(booster_source, big_cells_hit),
-                cite_hit(booster_source, final_booster_hit),
-                cite_hit(booster_source, booster_routine_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(booster_source, set_booster_hit),
+                maybe_cite_hit(booster_source, final_booster_getter_hit),
+                maybe_cite_hit(booster_source, small_cells_hit),
+                maybe_cite_hit(booster_source, big_cells_hit),
+                maybe_cite_hit(booster_source, final_booster_hit),
+                maybe_cite_hit(booster_source, booster_routine_hit),
+            ),
         ),
         make_edge(
             "booster-shell-to-final-shell",
@@ -7146,10 +7999,10 @@ def build_atu3_chest_consumer_read_trace_graph(
             "present",
             "derived",
             "The booster bonus aggregation shell remains adjacent to the final token and diamond chest bonus backing-field shell preserved in metadata.",
-            [
-                cite_hit(final_source, final_token_bonus_hit),
-                cite_hit(final_source, final_diamond_bonus_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(final_source, final_token_bonus_hit),
+                maybe_cite_hit(final_source, final_diamond_bonus_hit),
+            ),
         ),
     ]
 
@@ -7168,13 +8021,15 @@ def build_atu3_chest_consumer_read_trace_graph(
                     "$.decisionSummary.summary",
                     str(consumer_summary.get("summary") or "The exact CellBoostBonus field handoff still stays bounded negative."),
                 ),
-                cite_hit(getter_source, small_getter_hit),
-                cite_hit(getter_source, big_getter_hit),
-                cite_hit(booster_source, set_booster_hit),
-                cite_hit(booster_source, final_booster_getter_hit),
-                cite_hit(booster_source, set_final_booster_hit),
-                cite_hit(booster_source, final_booster_hit),
-                cite_hit(booster_source, final_booster_field_hit),
+                *compact_citations(
+                    maybe_cite_hit(getter_source, small_getter_hit),
+                    maybe_cite_hit(getter_source, big_getter_hit),
+                    maybe_cite_hit(booster_source, set_booster_hit),
+                    maybe_cite_hit(booster_source, final_booster_getter_hit),
+                    maybe_cite_hit(booster_source, set_final_booster_hit),
+                    maybe_cite_hit(booster_source, final_booster_hit),
+                    maybe_cite_hit(booster_source, final_booster_field_hit),
+                ),
             ],
         ),
     ]
@@ -7226,6 +8081,14 @@ def build_atu3_consumer_vs_effect_diff(
     effect_summary = dict(effect_target.get("decisionSummary") or {})
     consumer_read_target = dict(consumer_context.get("consumerReadTarget") or {})
     consumer_read_summary = dict(consumer_read_target.get("decisionSummary") or {})
+    shared_effect_title_hit = maybe_find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")
+    ad_manager_hit = maybe_find_hit(consumer_source, "AdManager, Assembly-CSharp")
+    token_chest_routine_hit = maybe_find_hit(routine_source, "<TokenChestRoutine>d__149")
+    diamond_chest_routine_hit = maybe_find_hit(routine_source, "<DiamondChestRoutine>d__155")
+    final_ad_bonus_hit = maybe_find_hit(routine_source, "<FinalAdTokenChestBonus>k__BackingField")
+    final_diamond_bonus_hit = maybe_find_hit(routine_source, "<FinalDiamondChestBonus>k__BackingField")
+    token_chest_hit = maybe_find_hit(chest_source, "TokenChest")
+    diamond_chest_hit = maybe_find_hit(chest_source, "DiamondChest")
     baseline_edges = [
         {
             "type": "serialized-adjacency",
@@ -7242,48 +8105,48 @@ def build_atu3_consumer_vs_effect_diff(
             "status": "present",
             "provenanceStrength": "direct",
             "statement": "The shared Cells Booster (Chests) effect lane remains preserved.",
-            "provedBy": [
-                cite_hit(title_source, find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")),
-            ],
+            "provedBy": compact_citations(
+                maybe_cite_hit(title_source, shared_effect_title_hit),
+            ),
         },
         {
             "type": "shared-effect-to-consumer-family",
             "status": "present",
             "provenanceStrength": "direct",
             "statement": "The new trace now preserves one handoff into the AdManager chest consumer family.",
-            "provedBy": [
-                cite_hit(consumer_source, find_hit(consumer_source, "AdManager, Assembly-CSharp")),
-            ],
+            "provedBy": compact_citations(
+                maybe_cite_hit(consumer_source, ad_manager_hit),
+            ),
         },
         {
             "type": "consumer-family-to-chest-routines",
             "status": "present",
             "provenanceStrength": "direct",
             "statement": "The new trace now preserves the token and diamond chest routine family.",
-            "provedBy": [
-                cite_hit(routine_source, find_hit(routine_source, "<TokenChestRoutine>d__149")),
-                cite_hit(routine_source, find_hit(routine_source, "<DiamondChestRoutine>d__155")),
-            ],
+            "provedBy": compact_citations(
+                maybe_cite_hit(routine_source, token_chest_routine_hit),
+                maybe_cite_hit(routine_source, diamond_chest_routine_hit),
+            ),
         },
         {
             "type": "consumer-family-to-bonus-shell",
             "status": "present",
             "provenanceStrength": "direct",
             "statement": "The new trace now preserves the final chest-bonus shell.",
-            "provedBy": [
-                cite_hit(routine_source, find_hit(routine_source, "<FinalAdTokenChestBonus>k__BackingField")),
-                cite_hit(routine_source, find_hit(routine_source, "<FinalDiamondChestBonus>k__BackingField")),
-            ],
+            "provedBy": compact_citations(
+                maybe_cite_hit(routine_source, final_ad_bonus_hit),
+                maybe_cite_hit(routine_source, final_diamond_bonus_hit),
+            ),
         },
         {
             "type": "consumer-family-to-chest-objects",
             "status": "present",
             "provenanceStrength": "supporting",
             "statement": "The new trace now preserves the concrete token and diamond chest objects.",
-            "provedBy": [
-                cite_hit(chest_source, find_hit(chest_source, "TokenChest")),
-                cite_hit(chest_source, find_hit(chest_source, "DiamondChest")),
-            ],
+            "provedBy": compact_citations(
+                maybe_cite_hit(chest_source, token_chest_hit),
+                maybe_cite_hit(chest_source, diamond_chest_hit),
+            ),
         },
         {
             "type": "exact-cellboost-consumer-method",
@@ -7315,9 +8178,9 @@ def build_atu3_consumer_vs_effect_diff(
             "status": "present",
             "provenanceStrength": "direct",
             "statement": "The older effect-driven trace already preserved the shared Cells Booster (Chests) effect lane.",
-            "provedBy": [
-                cite_hit(title_source, find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")),
-            ],
+            "provedBy": compact_citations(
+                maybe_cite_hit(title_source, shared_effect_title_hit),
+            ),
         },
         {
             "type": "shared-effect-to-consumer-family",
@@ -7580,10 +8443,10 @@ def build_family_structure_graph(
             "negative",
             "Outside ATU6, the solved shell subset still does not repeatedly localize final player-facing row titles: ATU1, ATU2, ATU4, ATU5, and ATU7 all stop short of one exact shell-to-title join.",
             [
-                cite_db_semantic_scope("row:ATU1Button", str(((row_scopes.get("row:ATU1Button") or {}).get("closureStatus") or {}).get("status") or "semantic-open"), "ATU1 remains DB-derived but not title-localized as a repeated family proof."),
-                cite_db_semantic_scope("row:ATU4Button", str(((row_scopes.get("row:ATU4Button") or {}).get("closureStatus") or {}).get("status") or "semantic-open"), "ATU4 remains DB-derived but does not add a second exact title exemplar here."),
-                cite_db_semantic_scope("row:ATU5Button", str(((row_scopes.get("row:ATU5Button") or {}).get("closureStatus") or {}).get("status") or "semantic-open"), "ATU5 remains DB-derived but does not add a second exact title exemplar here."),
-                cite_db_semantic_scope("row:ATU7Button", str(((row_scopes.get("row:ATU7Button") or {}).get("closureStatus") or {}).get("status") or "semantic-open"), "ATU7 remains DB-derived but does not add a second exact title exemplar here."),
+                cite_db_semantic_scope("row:ATU1Button", str(_token_shop_row_scope_status(row_scopes.get("row:ATU1Button") or {}).get("status") or "semantic-open"), "ATU1 row-local graph still carries {} and does not add a second exact title exemplar here.".format(", ".join(_token_shop_row_scope_missing_seam_ids(row_scopes.get("row:ATU1Button") or {}) or ["open row-local seams"]))),
+                cite_db_semantic_scope("row:ATU4Button", str(_token_shop_row_scope_status(row_scopes.get("row:ATU4Button") or {}).get("status") or "semantic-open"), "ATU4 row-local graph still carries {} and does not add a second exact title exemplar here.".format(", ".join(_token_shop_row_scope_missing_seam_ids(row_scopes.get("row:ATU4Button") or {}) or ["open row-local seams"]))),
+                cite_db_semantic_scope("row:ATU5Button", str(_token_shop_row_scope_status(row_scopes.get("row:ATU5Button") or {}).get("status") or "semantic-open"), "ATU5 row-local graph still carries {} and does not add a second exact title exemplar here.".format(", ".join(_token_shop_row_scope_missing_seam_ids(row_scopes.get("row:ATU5Button") or {}) or ["open row-local seams"]))),
+                cite_db_semantic_scope("row:ATU7Button", str(_token_shop_row_scope_status(row_scopes.get("row:ATU7Button") or {}).get("status") or "semantic-open"), "ATU7 row-local graph still carries {} and does not add a second exact title exemplar here.".format(", ".join(_token_shop_row_scope_missing_seam_ids(row_scopes.get("row:ATU7Button") or {}) or ["open row-local seams"]))),
             ],
         ),
         make_edge(
@@ -7751,7 +8614,7 @@ def build_family_structure_diff(
             "provenanceStrength": "negative",
             "statement": "The unresolved neighborhoods still do not preserve one exact shell-to-final-title chain.",
             "provedBy": [
-                cite_db_semantic_scope("row:ATU3Button", str(((row_scopes.get("row:ATU3Button") or {}).get("closureStatus") or {}).get("status") or "semantic-open"), "ATU3 still lacks one exact shell-to-final-title exemplar in the current DB-derived row scope."),
+                cite_db_semantic_scope("row:ATU3Button", str(_token_shop_row_scope_status(row_scopes.get("row:ATU3Button") or {}).get("status") or "semantic-open"), "ATU3 row-local graph still carries {} and does not clear one exact shell-to-final-title exemplar.".format(", ".join(_token_shop_row_scope_missing_seam_ids(row_scopes.get("row:ATU3Button") or {}) or ["open row-local seams"]))),
                 cite_token_shop_extract_field("ATU24Button", token_shop_extract),
                 cite_hit(title_source, late_title_hit),
             ],
@@ -7886,6 +8749,144 @@ def build_surface_bundle(
     }
 
 
+def resolve_surface_plan(
+    trace_scope: str,
+    fallback_shell_window: dict[str, Any],
+    fallback_surfaces: list[dict[str, Any]],
+    target: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    surface_plan = load_or_synthesize_surface_plan(trace_scope, target)
+    if not surface_plan:
+        return fallback_shell_window, fallback_surfaces
+    planned_shell_window = dict(surface_plan.get("shellWindow") or {})
+    planned_surfaces = []
+    for surface in list(surface_plan.get("surfacePlans") or []):
+        if not isinstance(surface, dict):
+            continue
+        planned_surfaces.append(
+            {
+                "id": str(surface.get("id") or ""),
+                "label": str(surface.get("label") or ""),
+                "terms": list(surface.get("terms") or []),
+                "sourceIds": list(surface.get("sourceIds") or []),
+            }
+        )
+    if not planned_surfaces:
+        return fallback_shell_window, fallback_surfaces
+    return planned_shell_window or fallback_shell_window, planned_surfaces
+
+
+def resolve_token_shop_surface_plan(
+    trace_scope: str,
+    fallback_shell_window: dict[str, Any],
+    fallback_surfaces: list[dict[str, Any]],
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    target = {"id": trace_scope, "familyId": "token-shop"}
+    return resolve_surface_plan(trace_scope, fallback_shell_window, fallback_surfaces, target)
+
+
+def build_token_shop_fallback_shell_window(
+    trace_scope: str,
+    target: dict[str, Any],
+    token_shop_extract: dict[str, Any],
+) -> dict[str, Any]:
+    surface_plan = load_or_synthesize_surface_plan(trace_scope, target)
+    shell_seed = dict(surface_plan.get("shellWindow") or {})
+    shell_field = str(shell_seed.get("shellField") or "").strip()
+    shell_radius = shell_seed.get("shellWindowRadius")
+    try:
+        radius = int(shell_radius)
+    except (TypeError, ValueError):
+        radius = None
+    if shell_field and radius is not None:
+        return get_shell_window(token_shop_extract, shell_field, radius)
+    strategy_config = load_or_synthesize_support_context(trace_scope, target) or get_target_strategy_config(target)
+    return get_shell_window(
+        token_shop_extract,
+        str(strategy_config.get("shellField") or shell_field),
+        int(strategy_config.get("shellWindowRadius") or radius or 0),
+    )
+
+
+def resolve_graph_plan(trace_scope: str) -> dict[str, Any]:
+    graph_plan = load_canonical_graph_plan(trace_scope)
+    return dict(graph_plan.get("traceGraph") or {})
+
+
+def resolve_token_shop_graph_plan(trace_scope: str) -> dict[str, Any]:
+    return resolve_graph_plan(trace_scope)
+
+
+def resolve_token_shop_bridge_policy(trace_scope: str, fallback_rule: str) -> str:
+    return resolve_bridge_policy(trace_scope, fallback_rule)
+
+
+def resolve_bridge_policy(trace_scope: str, fallback_rule: str) -> str:
+    bridge_policy = load_canonical_bridge_policy(trace_scope)
+    rule = str(bridge_policy.get("bridgePromotionRule") or "").strip()
+    return rule or fallback_rule
+
+
+def resolve_token_shop_lost_structure(trace_scope: str, fallback_values: list[str]) -> list[str]:
+    return resolve_lost_structure(trace_scope, fallback_values)
+
+
+def resolve_lost_structure(trace_scope: str, fallback_values: list[str]) -> list[str]:
+    bridge_policy = load_canonical_bridge_policy(trace_scope)
+    values = [str(item) for item in (bridge_policy.get("lostStructure") or []) if str(item).strip()]
+    return values or list(fallback_values)
+
+
+def resolve_target_narrative(
+    trace_scope: str,
+    fallback_grounded_conclusion: str,
+    fallback_current_boundary: list[str],
+    *,
+    subject_kind: str = "",
+    subject_key: str = "",
+    family_id: str = "",
+    compatibility_target_id: str = "",
+    allow_fallback: bool = False,
+) -> dict[str, Any]:
+    narrative = get_trace_db().find_or_synthesize_target_narrative(
+        "cifi-full",
+        "libil2cpp.so",
+        trace_scope,
+        subject_kind=subject_kind,
+        subject_key=subject_key,
+        family_id=family_id,
+        compatibility_target_id=compatibility_target_id,
+    )
+    semantic_key = str(narrative.get("semanticKey") or f"target-narrative:{trace_scope}")
+    grounded_conclusion = str(narrative.get("groundedConclusion") or "").strip()
+    current_boundary = [
+        str(line).strip()
+        for line in (narrative.get("currentBoundary") or [])
+        if str(line).strip()
+    ]
+    if grounded_conclusion or current_boundary:
+        return {
+            "narrativeSemanticKey": semantic_key,
+            "groundedConclusion": grounded_conclusion,
+            "currentBoundary": current_boundary,
+            "narrativeOwner": "canonical-target-narrative-fragment",
+        }
+    if allow_fallback:
+        return {
+            "narrativeSemanticKey": semantic_key,
+            "groundedConclusion": str(fallback_grounded_conclusion or "").strip(),
+            "currentBoundary": [str(line).strip() for line in fallback_current_boundary if str(line).strip()],
+            "narrativeOwner": "bundle-fallback-narrative-seed",
+        }
+    missing_note = "Canonical target narrative fragment pending rebuild for this target."
+    return {
+        "narrativeSemanticKey": semantic_key,
+        "groundedConclusion": missing_note,
+        "currentBoundary": [missing_note],
+        "narrativeOwner": "missing-canonical-target-narrative-fragment",
+    }
+
+
 def collect_depth_followup_terms(surfaces: list[dict[str, Any]], seed_terms: list[str], limit: int = 12) -> list[str]:
     output: list[str] = []
     seen = set(seed_terms)
@@ -7920,6 +8921,20 @@ def get_follow_up_surface_ids(config: dict[str, Any]) -> set[str]:
     return {str(surface["id"]) for surface in config.get("followUpSurfaces", [])}
 
 
+def get_target_strategy_config(target: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(target, dict):
+        return {}
+    trace_scope = str(target.get("id") or target.get("traceScope") or "").strip()
+    support_context = load_or_synthesize_support_context(trace_scope, target) if trace_scope else {}
+    return support_context
+
+
+def get_target_execution_plan(target: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(target, dict):
+        return {}
+    return dict(target.get("executionPlan") or {})
+
+
 def get_primary_surfaces_for_depth(config: dict[str, Any], depth_search: int) -> list[dict[str, Any]]:
     surfaces = list(config.get("surfaces", []))
     if depth_search <= 0:
@@ -7931,16 +8946,18 @@ def get_primary_surfaces_for_depth(config: dict[str, Any], depth_search: int) ->
 
 
 def collect_depth_seed_terms_for_target(
-    config: dict[str, Any],
+    target: dict[str, Any],
     base_seed_terms: list[str],
     depth_search: int,
 ) -> list[str]:
     if depth_search <= 0:
         return unique_strings(base_seed_terms)
 
+    config = get_target_strategy_config(target)
+    execution_plan = get_target_execution_plan(target)
     lookup = get_strategy_surface_lookup(config)
     seed_terms = list(base_seed_terms)
-    for step in config.get("depthPlan", []):
+    for step in execution_plan.get("depthPlan", []):
         hop = int(step.get("hop", 0))
         if hop <= 0 or hop > depth_search:
             continue
@@ -7949,7 +8966,10 @@ def collect_depth_seed_terms_for_target(
             if surface:
                 seed_terms.extend(surface.get("terms", []))
 
-    if len(seed_terms) == len(base_seed_terms):
+    follow_up_terms = list(execution_plan.get("followUpTerms", []))
+    if follow_up_terms:
+        seed_terms.extend(follow_up_terms)
+    elif len(seed_terms) == len(base_seed_terms):
         for surface in config.get("followUpSurfaces", []):
             seed_terms.extend(surface.get("terms", []))
 
@@ -7957,7 +8977,14 @@ def collect_depth_seed_terms_for_target(
 
 
 def collect_primary_terms_for_target(target: dict[str, Any]) -> list[str]:
-    config = target.get("strategyConfig", {})
+    surface_plan = load_or_synthesize_surface_plan(str(target.get("id") or ""), target)
+    planned_terms: list[str] = []
+    for surface in list(surface_plan.get("surfacePlans") or []):
+        if isinstance(surface, dict):
+            planned_terms.extend(str(item) for item in (surface.get("terms") or []) if str(item).strip())
+    if planned_terms:
+        return unique_strings(planned_terms)
+    config = get_target_strategy_config(target)
     terms: list[str] = []
     for surface in get_primary_surfaces_for_depth(config, 0):
         terms.extend(surface.get("terms", []))
@@ -7965,7 +8992,14 @@ def collect_primary_terms_for_target(target: dict[str, Any]) -> list[str]:
 
 
 def collect_primary_source_ids_for_target(target: dict[str, Any]) -> list[str]:
-    config = target.get("strategyConfig", {})
+    surface_plan = load_or_synthesize_surface_plan(str(target.get("id") or ""), target)
+    planned_source_ids: list[str] = []
+    for surface in list(surface_plan.get("surfacePlans") or []):
+        if isinstance(surface, dict):
+            planned_source_ids.extend(str(item) for item in (surface.get("sourceIds") or []) if str(item).strip())
+    if planned_source_ids:
+        return unique_strings(planned_source_ids)
+    config = get_target_strategy_config(target)
     source_ids: list[str] = []
     for surface in get_primary_surfaces_for_depth(config, 0):
         source_ids.extend(str(item) for item in surface.get("sourceIds", []))
@@ -7973,20 +9007,19 @@ def collect_primary_source_ids_for_target(target: dict[str, Any]) -> list[str]:
 
 
 def collect_depth_plan_terms(
-    config: dict[str, Any],
+    target: dict[str, Any],
     hop_index: int,
-    registry_targets: dict[str, Any] | None = None,
 ) -> tuple[list[str], dict[str, Any]]:
-    if registry_targets is None:
-        registry_targets = load_registry().get("targets", {})
-
+    config = get_target_strategy_config(target)
+    execution_plan = get_target_execution_plan(target)
     lookup = get_strategy_surface_lookup(config)
-    step = next((item for item in config.get("depthPlan", []) if int(item.get("hop", -1)) == hop_index), None)
+    step = next((item for item in execution_plan.get("depthPlan", []) if int(item.get("hop", -1)) == hop_index), None)
     if not step:
         return [], {"goal": None, "surfaceIds": [], "targetIds": [], "targetLabels": [], "sourceIds": []}
 
     planned_terms: list[str] = []
-    planned_source_ids: list[str] = []
+    planned_source_ids: list[str] = [str(item) for item in step.get("sourceIds", [])]
+    planned_terms.extend(str(item) for item in step.get("terms", []) if str(item).strip())
     for surface_id in step.get("surfaceIds", []):
         surface = lookup.get(str(surface_id))
         if surface:
@@ -7995,7 +9028,7 @@ def collect_depth_plan_terms(
 
     target_labels: list[str] = []
     for target_id in step.get("targetIds", []):
-        handoff_target = registry_targets.get(str(target_id))
+        handoff_target = load_handoff_target_metadata(str(target_id))
         if not handoff_target:
             continue
         planned_terms.extend(collect_primary_terms_for_target(handoff_target))
@@ -8018,7 +9051,7 @@ def build_depth_expansion(
     available_source_ids: list[str],
     depth_search: int,
     seed_terms: list[str],
-    config: dict[str, Any] | None = None,
+    target: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     if depth_search <= 0:
         return []
@@ -8026,12 +9059,11 @@ def build_depth_expansion(
     hops: list[dict[str, Any]] = []
     current_terms = unique_strings([*seed_terms, *collect_depth_followup_terms(base_surfaces, [])])
     seen_terms: set[str] = set()
-    registry_targets = load_registry().get("targets", {}) if config and config.get("depthPlan") else None
 
     for hop_index in range(1, depth_search + 1):
         if not current_terms:
             break
-        planned_terms, planned_step = collect_depth_plan_terms(config, hop_index, registry_targets) if config else ([], {"goal": None, "surfaceIds": [], "targetIds": [], "targetLabels": [], "sourceIds": []})
+        planned_terms, planned_step = collect_depth_plan_terms(target or {}, hop_index) if target else ([], {"goal": None, "surfaceIds": [], "targetIds": [], "targetLabels": [], "sourceIds": []})
         hop_terms = unique_strings([*current_terms, *planned_terms])
         if not hop_terms:
             break
@@ -8173,9 +9205,11 @@ def build_generic_explore_trace(anchors: list[str], source_ids: list[str], docum
 
 
 def build_token_shop_mod_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
-    config = target["strategyConfig"]
-    shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
-    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in config["surfaces"]]
+    config = get_target_strategy_config(target)
+    fallback_shell_window = build_token_shop_fallback_shell_window(target_id, target, documents["tokenShopExtract"])
+    fallback_surface_specs = []
+    shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
     provisional_payload = {
         "shellWindow": shell_window,
         "surfaces": surfaces,
@@ -8183,14 +9217,15 @@ def build_token_shop_mod_trace(target_id: str, target: dict[str, Any], anchors: 
         "traceGraph": {"nodes": [], "edges": [], "negativeEdges": [], "claimLedger": []},
     }
     row_recovery = _build_token_shop_row_recovery(target, provisional_payload, {"summary": {}}) or {}
+    row_scope = load_canonical_semantic_scope("row:ATU4Button")
     action_method = next(iter(row_recovery.get("recoveredActionMethods", [])), "BuyModBoost")
     prefab_identity = next(iter(row_recovery.get("prefabCandidates", [])), "NewTokenUPGPrefab.T1.ModPointsBooster")
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
-        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, config),
-        "traceGraph": build_mod_trace_graph(shell_window, surfaces, row_recovery),
-        "bridgePromotionRule": "Only promote a TokenShop row from live assets and native evidence when one checked shell-side owner block, one row-specific action hook, one exact prefab identity, and one recovered presentation slot graph converge on the same row family.",
+        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, target),
+        "traceGraph": build_mod_trace_graph(shell_window, surfaces, row_recovery, row_scope),
+        "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "Only promote a TokenShop row from live assets and native evidence when one checked shell-side owner block, one row-specific action hook, one exact prefab identity, and one recovered presentation slot graph converge on the same row family."),
         "bridgeCheck": {
             "candidateTerms": [action_method, prefab_identity],
             "bridgeCleared": True,
@@ -8200,32 +9235,31 @@ def build_token_shop_mod_trace(target_id: str, target: dict[str, Any], anchors: 
             ],
             "result": "direct asset/native row bridge recovered",
         },
-        "solvedVsBlockedDiff": build_mod_vs_blocked_diff(target_id, target, shell_window, surfaces, row_recovery),
-        "lostStructure": config["lostStructure"],
-        "groundedConclusion": config["groundedConclusion"],
-        "currentBoundary": [
-            "This is a target-driven trace workflow, not a full-lane TokenShop remap promotion by itself.",
-            "It now preserves one exact ATU4 shell-to-action-hook-to-prefab bridge plus one direct recovered presentation slot graph from Unity assets.",
-            "Keep the recovered ATU4 row grounded as live asset/native evidence; the remaining unresolved lane is the live displayed BUY cost and its runtime multiplier path.",
-        ],
+        "solvedVsBlockedDiff": build_mod_vs_blocked_diff(target_id, target, shell_window, surfaces, row_recovery, row_scope),
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "groundedConclusion": "",
+        "currentBoundary": [],
     }
 
 
 def build_token_shop_mk1_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
-    config = target["strategyConfig"]
+    config = get_target_strategy_config(target)
     token_shop_extract = documents["tokenShopExtract"]
-    shell_window = get_shell_window(token_shop_extract, config["shellField"], config["shellWindowRadius"])
+    fallback_shell_window = build_token_shop_fallback_shell_window(target_id, target, token_shop_extract)
     mk1_context = {
         "rowScope": load_canonical_semantic_scope("row:ATU3Button"),
         "effectTarget": load_latest_materialized_target_bundle("token-shop-atu3-cells-effect"),
     }
-    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in config["surfaces"]]
+    fallback_surface_specs = []
+    shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
+    comparison_seed = build_mk1_vs_blocked_diff(target_id, target, shell_window, surfaces, token_shop_extract, mk1_context)
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
-        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, config),
-        "traceGraph": build_mk1_trace_graph(shell_window, surfaces),
-        "bridgePromotionRule": "Only promote the traced ATU5 row past quarantine when one exact shell-to-final-title join is recovered; prefab-only and support-text-only evidence remains remap-only.",
+        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, target),
+        "traceGraph": resolve_token_shop_graph_plan(target_id) or build_mk1_trace_graph(shell_window, surfaces, row_recovery),
+        "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "Only promote the traced ATU5 row past quarantine when one exact shell-to-final-title join is recovered; prefab-only and support-text-only evidence remains remap-only."),
         "bridgeCheck": {
             "candidateTerms": [config["shellField"], "BuyMK1TokenBoost", "NewTokenUPGPrefab.T1.MK1Booster"],
             "bridgeCleared": True,
@@ -8233,34 +9267,33 @@ def build_token_shop_mk1_trace(target_id: str, target: dict[str, Any], anchors: 
                 {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyMK1TokenBoost"},
                 {"surfaceId": "prefab-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T1.MK1Booster"},
             ],
-            "result": "checked object bridge recovered",
+"result": "checked object bridge recovered",
         },
-        "solvedVsBlockedDiff": build_mk1_vs_blocked_diff(target_id, target, shell_window, surfaces, token_shop_extract, mk1_context),
-        "lostStructure": list(config["lostStructure"]),
-        "groundedConclusion": config["groundedConclusion"],
-        "currentBoundary": [
-            "This is a target-driven trace workflow, not a full-lane TokenShop remap promotion by itself.",
-            "It now preserves one exact ATU5 shell-to-action-hook-to-prefab bridge in the same checked trace bundle while keeping the MK1 support-text, neighboring generator title-roster, and generic text-hook surfaces explicit.",
-            "Keep the recovered ATU5 bridge quarantined to row-remap evidence until a separate final player-facing title join clears.",
-        ],
+        "solvedVsBlockedDiff": comparison_seed["delta"],
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "groundedConclusion": "",
+        "currentBoundary": [],
     }
 
 
 def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
-    config = target["strategyConfig"]
+    config = get_target_strategy_config(target)
     token_shop_extract = documents["tokenShopExtract"]
-    shell_window = get_shell_window(token_shop_extract, config["shellField"], config["shellWindowRadius"])
+    fallback_shell_window = build_token_shop_fallback_shell_window(target_id, target, token_shop_extract)
     mk3_context = {
         "rowScope": load_canonical_semantic_scope("row:ATU7Button"),
         "effectTarget": load_latest_materialized_target_bundle("token-shop-atu3-cells-effect"),
     }
-    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in config["surfaces"]]
+    fallback_surface_specs = []
+    shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
+    comparison_seed = build_mk3_vs_blocked_diff(target_id, target, shell_window, surfaces, token_shop_extract, mk3_context)
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
-        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, config),
-        "traceGraph": build_mk3_bridge_trace_graph(shell_window, surfaces),
-        "bridgePromotionRule": "Only promote the traced ATU7 row as one bounded remap bridge when one checked shell-side owner block, one row-specific action hook, and one exact prefab identity converge on the same row family; do not infer any final title from this pass.",
+        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, target),
+        "traceGraph": resolve_token_shop_graph_plan(target_id) or build_mk3_bridge_trace_graph(shell_window, surfaces),
+        "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "Only promote the traced ATU7 row as one bounded remap bridge when one checked shell-side owner block, one row-specific action hook, and one exact prefab identity converge on the same row family; do not infer any final title from this pass."),
         "bridgeCheck": {
             "candidateTerms": [config["shellField"], "BuyMK3TokenBoost", "NewTokenUPGPrefab.T1.MK3Booster"],
             "bridgeCleared": True,
@@ -8268,29 +9301,26 @@ def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], an
                 {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyMK3TokenBoost"},
                 {"surfaceId": "prefab-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T1.MK3Booster"},
             ],
-            "result": "checked object bridge recovered",
+"result": "checked object bridge recovered",
         },
-        "solvedVsBlockedDiff": build_mk3_vs_blocked_diff(target_id, target, shell_window, surfaces, token_shop_extract, mk3_context),
-        "lostStructure": list(config["lostStructure"]),
-        "groundedConclusion": config["groundedConclusion"],
-        "currentBoundary": [
-            "This is a target-driven trace workflow, not a full-lane TokenShop remap promotion by itself.",
-            "It now preserves one exact ATU7 shell-to-action-hook-to-prefab bridge in the same checked trace bundle without reopening title-side localization first.",
-            "Keep the recovered ATU7 bridge bounded to row-remap evidence and leave the rest of the unresolved MK-family shells quarantined until their own exact joins clear.",
-        ],
+        "solvedVsBlockedDiff": comparison_seed["delta"],
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "groundedConclusion": "",
+        "currentBoundary": [],
     }
 
 
 def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
-    config = target["strategyConfig"]
+    config = get_target_strategy_config(target)
     token_shop_extract = documents["tokenShopExtract"]
-    shell_window = get_shell_window(token_shop_extract, config["shellField"], config["shellWindowRadius"])
+    fallback_shell_window = build_token_shop_fallback_shell_window(target_id, target, token_shop_extract)
     effect_context = {
         "rowScope": load_canonical_semantic_scope("row:ATU3Button"),
         "chestConsumerTarget": load_latest_materialized_target_bundle("token-shop-atu3-chest-consumer"),
         "consumerReadTarget": load_latest_materialized_target_bundle("token-shop-atu3-chest-consumer-read"),
     }
-    effect_surfaces = get_primary_surfaces_for_depth(config, depth_search)
+    fallback_surface_specs = []
+    shell_window, effect_surfaces = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in effect_surfaces]
     depth_expansion = build_depth_expansion(
         surfaces,
@@ -8298,15 +9328,15 @@ def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], a
         shell_window,
         available_source_ids,
         depth_search,
-        collect_depth_seed_terms_for_target(config, anchors, depth_search),
-        config,
+        collect_depth_seed_terms_for_target(target, anchors, depth_search),
+        target,
     )
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
         "depthExpansion": depth_expansion,
-        "traceGraph": build_atu3_effect_trace_graph(shell_window, surfaces, token_shop_extract, effect_context, depth_expansion),
-        "bridgePromotionRule": "Only preserve ATU3 as an effect-driven row when one checked shell-side owner block, one exact row-family action hook, and one shared chest-effect title or text surface converge on the same cells-from-chests lane; keep typed gameplay owner claims blocked unless the applier is recovered explicitly.",
+        "traceGraph": resolve_token_shop_graph_plan(target_id) or build_atu3_effect_trace_graph(shell_window, surfaces, token_shop_extract, effect_context, depth_expansion),
+        "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "Only preserve ATU3 as an effect-driven row when one checked shell-side owner block, one exact row-family action hook, and one shared chest-effect title or text surface converge on the same cells-from-chests lane; keep typed gameplay owner claims blocked unless the applier is recovered explicitly."),
         "bridgeCheck": {
             "candidateTerms": [config["shellField"], "BuyCellBoost", "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."],
             "bridgeCleared": True,
@@ -8318,31 +9348,29 @@ def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], a
             "result": "checked action-to-shared-effect chain recovered",
         },
         "solvedVsBlockedDiff": build_atu3_effect_vs_split_diff(target_id, target, shell_window, surfaces, token_shop_extract, effect_context),
-        "lostStructure": list(config["lostStructure"]),
-        "groundedConclusion": config["groundedConclusion"],
-        "currentBoundary": [
-            "This is a target-driven trace workflow, not a standard prefab-or-title TokenShop remap promotion by itself.",
-            "It now preserves one exact ATU3 shell-to-action-hook-to-shared-effect chain for the cells-from-chests gameplay lane while keeping the detached diamond-side and token-side identity surfaces explicit as contrast evidence.",
-            "Keep the ATU3 result quarantined to effect-driven remap evidence until the exact typed gameplay owner or chest-effect applier is recovered.",
-        ],
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "groundedConclusion": "",
+        "currentBoundary": [],
     }
 
 
 def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
-    config = target["strategyConfig"]
+    config = get_target_strategy_config(target)
     token_shop_extract = documents["tokenShopExtract"]
-    shell_window = get_shell_window(token_shop_extract, config["shellField"], config["shellWindowRadius"])
+    fallback_shell_window = build_token_shop_fallback_shell_window(target_id, target, token_shop_extract)
     consumer_context = {
         "effectTarget": load_latest_materialized_target_bundle("token-shop-atu3-cells-effect"),
         "consumerReadTarget": load_latest_materialized_target_bundle("token-shop-atu3-chest-consumer-read"),
     }
-    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in config["surfaces"]]
+    fallback_surface_specs = []
+    shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
-        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, config),
-        "traceGraph": build_atu3_chest_consumer_trace_graph(shell_window, surfaces, consumer_context),
-        "bridgePromotionRule": "Only preserve ATU3 as a consumer-seam row when one checked shared chest-effect lane, one concrete chest consumer family, one chest-routine neighborhood, and one chest-bonus shell converge on the same cells-from-chests lane; keep exact CellBoostBonus consumer-method claims blocked unless that handoff is recovered explicitly.",
+        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, target),
+        "traceGraph": resolve_token_shop_graph_plan(target_id) or build_atu3_chest_consumer_trace_graph(shell_window, surfaces, consumer_context),
+        "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "Only preserve ATU3 as a consumer-seam row when one checked shared chest-effect lane, one concrete chest consumer family, one chest-routine neighborhood, and one chest-bonus shell converge on the same cells-from-chests lane; keep exact CellBoostBonus consumer-method claims blocked unless that handoff is recovered explicitly."),
         "bridgeCheck": {
             "candidateTerms": [config["shellField"], "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "AdManager, Assembly-CSharp", "<TokenChestRoutine>d__149", "<FinalDiamondChestBonus>k__BackingField"],
             "bridgeCleared": True,
@@ -8355,13 +9383,9 @@ def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str,
             "result": "checked shared-effect-to-consumer-family handoff recovered",
         },
         "solvedVsBlockedDiff": build_atu3_consumer_vs_effect_diff(target_id, target, shell_window, surfaces, token_shop_extract, consumer_context),
-        "lostStructure": list(config["lostStructure"]),
-        "groundedConclusion": config["groundedConclusion"],
-        "currentBoundary": [
-            "This is a target-driven cross-system trace workflow, not a standard prefab-or-title TokenShop remap promotion by itself.",
-            "It now preserves one exact ATU3 shared-effect-to-consumer-family handoff into the AdManager chest routine neighborhood while keeping the exact CellBoostBonus read or typed field handoff explicit as the only remaining break.",
-            "Keep the ATU3 result quarantined to effect-driven remap evidence until one committed source recovers the exact CellBoostBonus consumer method or typed field handoff.",
-        ],
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "groundedConclusion": "",
+        "currentBoundary": [],
     }
 
 
@@ -8424,18 +9448,20 @@ def build_atu3_consumer_read_vs_consumer_diff(
 
 
 def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
-    config = target["strategyConfig"]
-    shell_window = get_shell_window(documents["tokenShopExtract"], config["shellField"], config["shellWindowRadius"])
+    config = get_target_strategy_config(target)
+    fallback_shell_window = build_token_shop_fallback_shell_window(target_id, target, documents["tokenShopExtract"])
     read_context = {
         "consumerTarget": load_latest_materialized_target_bundle("token-shop-atu3-chest-consumer"),
     }
-    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in config["surfaces"]]
+    fallback_surface_specs = []
+    shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
-        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, config),
-        "traceGraph": build_atu3_chest_consumer_read_trace_graph(shell_window, surfaces, read_context),
-        "bridgePromotionRule": "Only preserve ATU3 as a consumer-internal read trace when one checked chest consumer family, one chest routine neighborhood, one cell-gain getter shell, and one booster bonus aggregation shell converge on the same cells-from-chests lane; keep the exact CellBoostBonus runtime read blocked unless that handoff is recovered explicitly.",
+        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, target),
+        "traceGraph": resolve_token_shop_graph_plan(target_id) or build_atu3_chest_consumer_read_trace_graph(shell_window, surfaces, read_context),
+        "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "Only preserve ATU3 as a consumer-internal read trace when one checked chest consumer family, one chest routine neighborhood, one cell-gain getter shell, and one booster bonus aggregation shell converge on the same cells-from-chests lane; keep the exact CellBoostBonus runtime read blocked unless that handoff is recovered explicitly."),
         "bridgeCheck": {
             "candidateTerms": [config["shellField"], "AdManager, Assembly-CSharp", "get_SmallAdCellGains", "SetBoosterAdBonus", "get_FinalBoosterAdBonus"],
             "bridgeCleared": True,
@@ -8448,18 +9474,14 @@ def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict
             "result": "checked consumer-internal bonus shell recovered",
         },
         "solvedVsBlockedDiff": build_atu3_consumer_read_vs_consumer_diff(target_id, target, shell_window, read_context),
-        "lostStructure": list(config["lostStructure"]),
-        "groundedConclusion": config["groundedConclusion"],
-        "currentBoundary": [
-            "This is a target-driven cross-system trace workflow, not a standard prefab-or-title TokenShop remap promotion by itself.",
-            "It now preserves one exact ATU3 consumer-internal bonus shell inside the AdManager chest consumer family while also closing the checked outer chest routines, final token-or-diamond chest bonus backing fields, remaining getter-or-booster aggregation family, and FinalBoosterAdBonus setter-or-backing-field surfaces as a bounded negative result for one exact CellBoostBonus handoff.",
-            "Keep the ATU3 result quarantined to effect-chain completion evidence and do not reopen this closed AdManager bonus-aggregation cluster unless a new committed artifact lands.",
-        ],
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "groundedConclusion": "",
+        "currentBoundary": [],
     }
 
 
 def build_token_shop_family_structure_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
-    config = target["strategyConfig"]
+    config = get_target_strategy_config(target)
     token_shop_extract = documents["tokenShopExtract"]
     family_context = {
         "rowScopes": {
@@ -8474,8 +9496,8 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
         },
         "atu3Target": load_latest_materialized_target_bundle("token-shop-atu3-cells-effect"),
     }
-    surfaces = []
-    shell_window = {
+    fallback_surface_specs = []
+    fallback_shell_window = {
         "source": get_source_reference("tokenShopExtract"),
         "shellField": config["shellField"],
         "shellPathId": config["shellPathId"],
@@ -8495,23 +9517,16 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
             {"field": "ATU24Button through ATU28Button", "group": "blocked-shell", "kind": "range", "pathId": "ATU24Button path_id 15797 through ATU28Button path_id 15813"},
         ],
     }
-    for surface in config["surfaces"]:
-        surface_config = dict(surface)
-        source_ids = [
-            source_id
-            for source_id in (surface_config.get("sourceIds") or [])
-            if source_id != "tokenShopRowRemapBoundary"
-        ]
-        if source_ids:
-            surface_config["sourceIds"] = source_ids
-        surfaces.append(build_surface_bundle(surface_config, anchors, documents, shell_window, available_source_ids, extended_search))
+    fallback_surface_specs = []
+    shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    surfaces = [build_surface_bundle(surface_config, anchors, documents, shell_window, available_source_ids, extended_search) for surface_config in surface_specs]
 
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
-        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, config),
-        "traceGraph": build_family_structure_graph(shell_window, surfaces, token_shop_extract, family_context),
-        "bridgePromotionRule": "This target is a bounded family audit only. Do not promote any new TokenShop row remaps, planner behavior, or player-facing labels from it.",
+        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, target),
+        "traceGraph": resolve_token_shop_graph_plan(target_id) or build_family_structure_graph(shell_window, surfaces, token_shop_extract, family_context),
+        "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "This target is a bounded family audit only. Do not promote any new TokenShop row remaps, planner behavior, or player-facing labels from it."),
         "bridgeCheck": {
             "candidateTerms": [
                 "ATU1Button",
@@ -8532,24 +9547,20 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
             "result": "checked family structure audit recovered",
         },
         "solvedVsBlockedDiff": build_family_structure_diff(target_id, target, token_shop_extract, shell_window, surfaces, family_context),
-        "lostStructure": list(config["lostStructure"]),
-        "groundedConclusion": config["groundedConclusion"],
-        "currentBoundary": [
-            "This is a bounded TokenShop family structure audit, not a remap promotion pass.",
-            "The audit groups the solved ATU1, ATU2, ATU4, ATU5, ATU6, and ATU7 shells alongside the bounded ATU3 and late ATU24-ATU28 negatives so repeated joins and repeated gaps can be compared in one checked bundle.",
-            "Do not infer new row identity from row order, loose title-roster similarity, generic text hooks, or this audit alone.",
-        ],
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "groundedConclusion": "",
+        "currentBoundary": [],
     }
 
 
 def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
-    config = target["strategyConfig"]
+    config = get_target_strategy_config(target)
     metadata_source = collect_source_hits(
         documents,
         "metadata",
         build_anchor_specs([config["ownerType"], config["accessor"], *config["parameterShell"], "GetShardCostList", "UpdateShardCostList", "MilestoneCostList", *anchors], "surface-search"),
     )
-    shell_window = {
+    fallback_shell_window = {
         "source": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
         "shellField": config["accessor"],
         "shellPathId": "runtime-getter",
@@ -8557,36 +9568,22 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
         "ownerFieldBlock": config["parameterShell"],
         "window": [{"field": field, "group": "row0-parameter-shell", "kind": "field"} for field in config["parameterShell"]],
     }
+    fallback_surface_specs = []
+    shell_window, surface_specs = resolve_surface_plan(
+        str(target.get("id") or "shard-cost-su0-structure"),
+        fallback_shell_window,
+        fallback_surface_specs,
+        target,
+    )
     surfaces = [
-        {
-            "id": "cost-model-boundary",
-            "label": "Shard cost-model boundary",
-            "terms": anchors,
-            "sources": [
-                metadata_source
-            ],
-        },
-        {
-            "id": "metadata-row0-structure",
-            "label": "Shard metadata row0 structure",
-            "terms": [config["accessor"], *config["parameterShell"][:3]],
-            "sources": [
-                metadata_source
-            ],
-        },
-        {
-            "id": "runtime-cache-lifecycle",
-            "label": "Shard runtime cache lifecycle",
-            "terms": ["GetShardCostList", "UpdateShardCostList", "MilestoneCostList"],
-            "sources": [
-                metadata_source
-            ],
-        },
+        build_surface_bundle(surface, anchors, documents, shell_window, ["metadata"], 0)
+        for surface in surface_specs
     ]
+
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
-        "traceGraph": {
+        "traceGraph": resolve_graph_plan(str(target.get("id") or "shard-cost-su0-structure")) or {
             "nodes": [
                 make_node("shard-owner", "owner-type", config["ownerType"], "present", "ShardUpgradeInfo remains the checked shard-local data carrier."),
                 make_node("shard-getter", "getter", config["accessor"], "present", "The row0 shard cost accessor is preserved in committed structure datasets."),
@@ -8657,7 +9654,7 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
             ],
             "claimLedger": [],
         },
-        "bridgePromotionRule": "Only promote shard cost output past descriptive quarantine when calibration closure, planner-safe approval, and save-owner boundaries are all checked explicitly.",
+        "bridgePromotionRule": resolve_bridge_policy(str(target.get("id") or "shard-cost-su0-structure"), "Only promote shard cost output past descriptive quarantine when calibration closure, planner-safe approval, and save-owner boundaries are all checked explicitly."),
         "bridgeCheck": {
             "candidateTerms": config["parameterShell"],
             "bridgeCleared": True,
@@ -8678,17 +9675,13 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
                 ],
             },
         },
-        "lostStructure": [
+        "lostStructure": resolve_lost_structure(str(target.get("id") or "shard-cost-su0-structure"), [
             "Exact per-level shard costs remain unresolved.",
             "Planner-safe shard ranking, ROI, and affordability output remains blocked.",
             "Save-owner recovery for shard milestone state remains unresolved in this cost-only trace target.",
-        ],
-        "groundedConclusion": "The shard SU0 cost trace is structurally grounded. The repo preserves one checked getter-to-parameter-shell chain and one deterministic evaluator structure, but calibration closure, planner-safe cost output, and save-owner recovery all remain blocked.",
-        "currentBoundary": [
-            "This target preserves shard-cost structure only.",
-            "It is appropriate for descriptive or quarantined structural reads, not planner-safe cost output or save-owner promotion.",
-            "Keep shard cost structure separated from shard save-owner recovery until direct save-side evidence appears.",
-        ],
+        ]),
+        "groundedConclusion": "",
+        "currentBoundary": [],
     }
 
 
@@ -8780,7 +9773,7 @@ def _build_shard_owned_state_semantic_scope(
 
 
 def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str]) -> dict[str, Any]:
-    config = target["strategyConfig"]
+    config = get_target_strategy_config(target)
     row_state_candidates = ["<Cost>k__BackingField", "<MaxLevel>k__BackingField", "<IsUnlocked>k__BackingField"]
     owner_list_candidates = ["upgradeInfoList", "MaxedMilestonesList", "UnlockedMilestonesList", "MilestoneCostList"]
     local_hook_candidates = [
@@ -8860,7 +9853,7 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
         "non-local-injection-seam": "checked non-local injection seam preserved",
     }.get(outcome_kind, "checked shard owned-state gap remains unclassified")
 
-    shell_window = {
+    fallback_shell_window = {
         "source": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
         "shellField": recovered_runtime_shell.get("declaringField", {}).get("name"),
         "shellPathId": recovered_runtime_shell.get("declaringField", {}).get("fieldOffset"),
@@ -8880,48 +9873,46 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
         ],
     }
 
-    surfaces = [
+    fallback_surface_specs = [
         {
             "id": "scene-owner",
             "label": "Direct scene owner",
             "terms": [config["sceneOwner"], recovered_runtime_shell.get("label") or config["runtimeShell"], *anchors],
-            "sources": [
-                level0_scene_source,
-                metadata_runtime_source,
-            ],
+            "sourceIds": ["level0", "metadata"],
         },
         {
             "id": "runtime-shell",
             "label": "upgradeInfoList runtime shell",
             "terms": [recovered_runtime_shell.get("label") or config["runtimeShell"], *row_state_fields, *anchors],
-            "sources": [
-                metadata_runtime_source,
-            ],
+            "sourceIds": ["metadata"],
         },
         {
             "id": "owner-list-watchers",
             "label": "Shard-local watcher and list shells",
             "terms": [*local_hooks_checked, *owner_list_fields, *anchors],
-            "sources": [
-                metadata_watcher_source,
-            ],
+            "sourceIds": ["metadata"],
         },
         {
             "id": "handoff-boundary",
             "label": "Controller versus wrapper handoff boundary",
             "terms": [config["genericLead"], "ConstructionMilestones", *anchors],
-            "sources": [
-                metadata_handoff_source
-            ],
+            "sourceIds": ["metadata"],
         },
         {
             "id": "save-gap",
             "label": "Save-side blocker",
             "terms": [config["saveCandidate"], "PlayerProfileData", "CloudSavePlayerProfile", *anchors],
-            "sources": [
-                metadata_save_source,
-            ],
+            "sourceIds": ["metadata"],
         },
+    ]
+    shell_window, surface_specs = resolve_surface_plan(
+        str(target.get("id") or "shard-owned-state-upgradeinfolist-population"),
+        fallback_shell_window,
+        fallback_surface_specs,
+    )
+    surfaces = [
+        build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, 0)
+        for surface in surface_specs
     ]
     for surface in surfaces:
         surface["anchorSpecs"] = build_anchor_specs(surface["terms"], "surface-search")
@@ -9070,16 +10061,7 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
     if not wrapper_handoff_recovered:
         blocked_shape.append({"type": "deeper-wrapper-handoff-recovery", "status": "missing"})
 
-    return {
-        "shellWindow": shell_window,
-        "surfaces": surfaces,
-        "traceGraph": trace_graph,
-        "outcome": {
-            "kind": outcome_kind,
-            "label": outcome_label,
-            "summary": outcome_summary,
-        },
-        "bridgePromotionRule": "Only promote player-owned shard state past descriptive quarantine when one exact local population bridge or deeper save-side wrapper handoff is recovered explicitly.",
+    bridge_comparison_seed = {
         "bridgeCheck": {
             "candidateTerms": [recovered_runtime_shell.get("label") or config["runtimeShell"], *row_state_fields, *local_hooks_checked[:4]],
             "bridgeCleared": True,
@@ -9127,22 +10109,31 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
                 ],
             },
         },
-        "lostStructure": [
+    }
+
+    return {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "traceGraph": resolve_graph_plan(str(target.get("id") or "shard-owned-state-upgradeinfolist-population")) or trace_graph,
+        "outcome": {
+            "kind": outcome_kind,
+            "label": outcome_label,
+            "summary": outcome_summary,
+        },
+        "bridgePromotionRule": resolve_bridge_policy(str(target.get("id") or "shard-owned-state-upgradeinfolist-population"), "Only promote player-owned shard state past descriptive quarantine when one exact local population bridge or deeper save-side wrapper handoff is recovered explicitly."),
+        "bridgeComparisonSeed": bridge_comparison_seed,
+        "lostStructure": resolve_lost_structure(str(target.get("id") or "shard-owned-state-upgradeinfolist-population"), [
             "Shard-local watcher hooks still sit beside upgradeInfoList, UnlockedMilestonesList, MaxedMilestonesList, and MilestoneCostList without one committed write path into IsUnlocked, MaxLevel, or current milestone progress.",
             "PlayerProfile-side save-family terms remain only a search area rather than a recovered declaring wrapper or serialized payload owner.",
             "Keep the owned-state result quarantined to blocker evidence only; it does not reopen planner math, affordability, ROI, ETA, or canonical state.playerProfile promotion.",
-        ],
-        "groundedConclusion": outcome_summary,
-        "currentBoundary": [
-            "This target preserves the shard owned-state population boundary only.",
-            "It keeps direct ShardMining row definitions, the recovered upgradeInfoList runtime shell, and local watcher/list clusters visible in one trace bundle without promoting them into a recovered import path.",
-            "Treat the result as blocker evidence for player-owned shard state, not as planner-safe state, canonical import, or row-package verification.",
-        ],
+        ]),
+        "groundedConclusion": "",
+        "currentBoundary": [],
     }
 
 
 def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
-    config = target["strategyConfig"]
+    config = get_target_strategy_config(target)
     metadata_accessor_source = collect_source_hits(
         documents,
         "metadata",
@@ -9181,7 +10172,7 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
         "level0",
         build_anchor_specs(["BuyIS71", "BuyIS72", "BuyIS73", "BuyIS74", "MultiverseMarket", config["saveOwner"], *anchors], "surface-search"),
     )
-    shell_window = {
+    fallback_shell_window = {
         "source": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
         "shellField": "get_Market",
         "shellPathId": "typed-accessor",
@@ -9195,38 +10186,45 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
             {"field": "typedSpan", "group": "typed-boundary", "kind": "field-range", "value": config["typedSpan"]},
         ],
     }
+    fallback_surface_specs = []
+    shell_window, surface_specs = resolve_surface_plan(
+        str(target.get("id") or "multiverse-market-save-owner-boundary"),
+        fallback_shell_window,
+        fallback_surface_specs,
+        target,
+    )
     surfaces = [
-        {
-            "id": "accessor-bridge",
-            "label": "Accessor bridge",
-            "terms": anchors,
-            "sources": [
-                metadata_accessor_source,
-                level0_accessor_source,
-            ],
-        },
-        {
-            "id": "save-owner-span",
-            "label": "SaveData owner span",
-            "terms": [config["saveOwner"], "IS1Level", "IS110Level", "InscryptionsDone", config["compatibilityImportTargetPath"]],
-            "sources": [
-                metadata_owner_source,
-            ],
-        },
-        {
-            "id": "ordered-overlap",
-            "label": "Ordered overlap",
-            "terms": [str(item) for item in config["orderedOverlap"]],
-            "sources": [
-                metadata_ordered_source,
-                level0_action_source,
-            ],
-        },
+        build_surface_bundle(surface, anchors, documents, shell_window, ["metadata", "level0"], 0)
+        for surface in surface_specs
     ]
+    bridge_check = {
+        "candidateTerms": [config["accessorBridge"], config["saveOwner"], config["typedSpan"]],
+        "bridgeCleared": True,
+        "bridgeHits": [{"surfaceId": "accessor-bridge", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "get_Market"}],
+        "result": "checked accessor-to-save-owner boundary recovered",
+    }
+    solved_vs_blocked = {
+        "baseline": {"id": "multiverse-market-save-owner-boundary", "label": "Emporium save-owner boundary", "status": "cleared", "sourcePath": "semantic:target-bridge-policy:multiverse-market-save-owner-boundary", "shellField": config["accessorBridge"], "shellPathId": "typed-accessor", "comparisonShape": [{"type": "accessor-bridge", "status": "present"}, {"type": "typed-save-owner", "status": "present"}, {"type": "compatibility-import-span", "status": "present"}], "groundedConclusion": "The Emporium accessor-to-SaveData owner boundary is grounded enough to preserve as compatibility-only truth."},
+        "blockedTarget": {"id": "multiverse-market-canonical-import", "label": "Emporium canonical import", "status": "blocked", "sourcePath": "semantic:target-bridge-comparison:multiverse-market-save-owner-boundary", "shellField": config["saveOwner"], "shellPathId": "canonical-import", "comparisonShape": [{"type": "typed-market-field-recovery", "status": "missing"}, {"type": "canonical-import-admissibility", "status": "missing"}, {"type": "broad-row-identity-remap", "status": "missing"}], "groundedConclusion": "Canonical import remains blocked even though the wider save-owner boundary is grounded."},
+        "delta": {
+            "sharedPresentEdgeTypes": ["accessor-bridge", "typed-save-owner"],
+            "baselineOnlyPresentEdgeTypes": ["compatibility-import-span"],
+            "blockedMissingEdgeTypes": ["typed-market-field-recovery", "canonical-import-admissibility", "broad-row-identity-remap"],
+            "solvedVsBlockedSummary": [
+                "The solved save-owner baseline preserves the typed accessor bridge and exact SaveData-owned IS span.",
+                "The same target also preserves one compatibility-only import span for quarantined state.",
+                "Canonical import stays blocked because typed Market field recovery, canonical admissibility, and broader row identity are still negative.",
+            ],
+        },
+    }
+    bridge_comparison_seed = {
+        "bridgeCheck": bridge_check,
+        "solvedVsBlockedDiff": solved_vs_blocked,
+    }
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
-        "traceGraph": {
+        "traceGraph": resolve_graph_plan(str(target.get("id") or "multiverse-market-save-owner-boundary")) or {
             "nodes": [
                 make_node("market-accessor", "accessor-bridge", config["accessorBridge"], "present", "The checked PlayerProfileHandler.get_Market accessor bridge is preserved."),
                 make_node("market-owner", "declaring-owner", config["saveOwner"], "present", "SaveData remains the exact checked wider owner."),
@@ -9316,60 +10314,218 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
             ],
             "claimLedger": [],
         },
-        "bridgePromotionRule": "Only promote the Emporium save-owner boundary past compatibility quarantine when canonical import admissibility and broader row identity are both checked explicitly.",
-        "bridgeCheck": {
-            "candidateTerms": [config["accessorBridge"], config["saveOwner"], config["typedSpan"]],
-            "bridgeCleared": True,
-            "bridgeHits": [{"surfaceId": "accessor-bridge", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "get_Market"}],
-            "result": "checked accessor-to-save-owner boundary recovered",
-        },
-        "solvedVsBlockedDiff": {
-            "baseline": {"id": "multiverse-market-save-owner-boundary", "label": "Emporium save-owner boundary", "status": "cleared", "sourcePath": repo_relative(REGISTRY_PATH), "shellField": config["accessorBridge"], "shellPathId": "typed-accessor", "comparisonShape": [{"type": "accessor-bridge", "status": "present"}, {"type": "typed-save-owner", "status": "present"}, {"type": "compatibility-import-span", "status": "present"}], "groundedConclusion": "The Emporium accessor-to-SaveData owner boundary is grounded enough to preserve as compatibility-only truth."},
-            "blockedTarget": {"id": "multiverse-market-canonical-import", "label": "Emporium canonical import", "status": "blocked", "sourcePath": repo_relative(REGISTRY_PATH), "shellField": config["saveOwner"], "shellPathId": "canonical-import", "comparisonShape": [{"type": "typed-market-field-recovery", "status": "missing"}, {"type": "canonical-import-admissibility", "status": "missing"}, {"type": "broad-row-identity-remap", "status": "missing"}], "groundedConclusion": "Canonical import remains blocked even though the wider save-owner boundary is grounded."},
-            "delta": {
-                "sharedPresentEdgeTypes": ["accessor-bridge", "typed-save-owner"],
-                "baselineOnlyPresentEdgeTypes": ["compatibility-import-span"],
-                "blockedMissingEdgeTypes": ["typed-market-field-recovery", "canonical-import-admissibility", "broad-row-identity-remap"],
-                "solvedVsBlockedSummary": [
-                    "The solved save-owner baseline preserves the typed accessor bridge and exact SaveData-owned IS span.",
-                    "The same target also preserves one compatibility-only import span for quarantined state.",
-                    "Canonical import stays blocked because typed Market field recovery, canonical admissibility, and broader row identity are still negative.",
-                ],
-            },
-        },
-        "lostStructure": list(config["blockedStructure"]),
-        "groundedConclusion": "The multiverse-market save-owner trace is grounded enough to preserve a checked accessor-to-SaveData owner boundary and a compatibility-only IS1Level through IS110Level span, but canonical import and broader row identity remain blocked.",
-        "currentBoundary": [
-            "This target preserves save-owner and compatibility-import truth only.",
-            "Do not promote canonical PlayerProfile import, planner behavior, or row remap claims from this target alone.",
-            "Keep the checked accessor bridge, exact SaveData owner, and bounded compatibility-only import span separate from downstream row identity or planner work.",
-        ],
+        "bridgePromotionRule": resolve_bridge_policy(str(target.get("id") or "multiverse-market-save-owner-boundary"), "Only promote the Emporium save-owner boundary past compatibility quarantine when canonical import admissibility and broader row identity are both checked explicitly."),
+        "bridgeComparisonSeed": bridge_comparison_seed,
+        "lostStructure": resolve_lost_structure(str(target.get("id") or "multiverse-market-save-owner-boundary"), list(config["blockedStructure"])),
+        "groundedConclusion": "",
+        "currentBoundary": [],
     }
 
 
-def build_trace_payload(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
-    strategy = target["strategy"]
-    if strategy == "token-shop-atu4-mod":
+def build_bridge_comparison_reference_payload(target_id: str) -> dict[str, Any]:
+    semantic_key = f"target-bridge-comparison:{target_id}"
+    return {
+        "bridgeComparisonSemanticKey": semantic_key,
+        "bridgeCheck": {
+            "semanticKey": semantic_key,
+            "bridgeCleared": None,
+            "bridgeHits": [],
+            "result": "Canonical bridge/comparison fragment pending rebuild for this target.",
+        },
+        "solvedVsBlockedDiff": {
+            "semanticKey": semantic_key,
+            "baseline": {
+                "id": target_id,
+                "label": "Canonical bridge/comparison pending",
+                "status": "pending-canonical-bridge-comparison",
+                "sourcePath": "db:canonical-bridge-comparison-fragment",
+                "shellField": None,
+                "shellPathId": None,
+                "comparisonShape": [],
+                "groundedConclusion": "Canonical bridge/comparison fragment pending rebuild for this target.",
+            },
+            "blockedTarget": {
+                "id": f"{target_id}-blocked",
+                "label": "Canonical blocked comparison pending",
+                "status": "pending-canonical-bridge-comparison",
+                "sourcePath": "db:canonical-bridge-comparison-fragment",
+                "shellField": None,
+                "shellPathId": None,
+                "comparisonShape": [],
+                "groundedConclusion": "Canonical bridge/comparison fragment pending rebuild for this target.",
+            },
+            "delta": {
+                "sharedPresentEdgeTypes": [],
+                "baselineOnlyPresentEdgeTypes": [],
+                "blockedMissingEdgeTypes": [],
+                "solvedVsBlockedSummary": [
+                    "Canonical bridge/comparison fragment pending rebuild for this target.",
+                ],
+            },
+        },
+    }
+
+
+def _resolve_token_shop_routine_from_scope(scope_payload: dict[str, Any]) -> str:
+    row_shell = dict(scope_payload.get("rowShell") or {})
+    row_field = str(row_shell.get("field") or "").strip()
+    scope_id = str(scope_payload.get("scopeId") or "").strip()
+    semantic_key = str(scope_payload.get("semanticKey") or "").strip()
+    semantic_key_lower = semantic_key.lower()
+    scope_id_lower = scope_id.lower()
+    row_field_lower = row_field.lower()
+    if row_field_lower == "atu4button" or "updater-display:atu4" in scope_id_lower:
+        return "token-shop-mod-trace"
+    if row_field_lower == "atu5button":
+        return "token-shop-mk1-title-trace"
+    if row_field_lower == "atu7button":
+        return "token-shop-mk3-bridge-trace"
+    if row_field_lower == "atu3button":
+        if "consumer-read" in semantic_key_lower or "consumer-read" in scope_id_lower:
+            return "token-shop-atu3-consumer-read-trace"
+        if "consumer" in semantic_key_lower or "consumer" in scope_id_lower:
+            return "token-shop-atu3-consumer-trace"
+        return "token-shop-atu3-effect-trace"
+    if scope_id_lower.startswith("row:atu"):
+        return "token-shop-family-trace"
+    if "token-shop-updater-display" in scope_id_lower:
+        return "token-shop-mod-trace"
+    return "token-shop-family-trace"
+
+
+def _resolve_execution_routine_from_trace_scope(trace_scope: str, family_id: str) -> str:
+    trace_scope = str(trace_scope or "").strip()
+    family_id = str(family_id or "").strip()
+    if trace_scope == "token-shop-atu4-mod":
+        return "token-shop-mod-trace"
+    if trace_scope == "token-shop-atu5-mk1-title":
+        return "token-shop-mk1-title-trace"
+    if trace_scope == "token-shop-atu7-mk3-bridge":
+        return "token-shop-mk3-bridge-trace"
+    if trace_scope == "token-shop-atu3-cells-effect":
+        return "token-shop-atu3-effect-trace"
+    if trace_scope == "token-shop-atu3-chest-consumer":
+        return "token-shop-atu3-consumer-trace"
+    if trace_scope == "token-shop-atu3-chest-consumer-read":
+        return "token-shop-atu3-consumer-read-trace"
+    if trace_scope == "token-shop-family-structure":
+        return "token-shop-family-trace"
+    if trace_scope == "shard-cost-su0-structure" or family_id == "shard-cost":
+        return "shard-cost-trace"
+    if trace_scope == "shard-owned-state-upgradeinfolist-population" or family_id == "shard-owned-state":
+        return "shard-owned-state-trace"
+    if trace_scope == "multiverse-market-save-owner-boundary" or family_id == "multiverse-market-save-owner":
+        return "multiverse-market-save-owner-trace"
+    return trace_scope
+
+
+def _resolve_execution_routine_from_subject(
+    planner_resolution: dict[str, Any],
+    compatibility_target: dict[str, Any],
+) -> tuple[str, dict[str, Any]]:
+    subject_kind = str(planner_resolution.get("selectedSubjectKind") or "")
+    subject_key = str(planner_resolution.get("selectedSubjectKey") or "")
+    compatibility_target_id = str(compatibility_target.get("id") or planner_resolution.get("selectedTargetId") or "")
+    compatibility_family_id = str(compatibility_target.get("familyId") or "").strip()
+    compatibility_routine = _resolve_execution_routine_from_trace_scope(
+        compatibility_target_id,
+        compatibility_family_id,
+    )
+
+    if subject_kind == "family-graph" and subject_key:
+        family_graph_view = get_trace_db().find_canonical_semantic_fragment(
+            "cifi-full",
+            "libil2cpp.so",
+            "family_graph_fragment",
+            subject_key,
+        )
+        family_graph_payload = dict((family_graph_view or {}).get("payload") or {})
+        family_id = str(family_graph_payload.get("familyId") or compatibility_target.get("familyId") or "").strip()
+        if family_id == "token-shop":
+            return "token-shop-family-trace", family_graph_payload
+        if family_id == "shard-cost":
+            return "shard-cost-trace", family_graph_payload
+        if family_id == "shard-owned-state":
+            return "shard-owned-state-trace", family_graph_payload
+        if family_id == "multiverse-market-save-owner":
+            return "multiverse-market-save-owner-trace", family_graph_payload
+
+    if subject_kind == "semantic-scope" and subject_key:
+        scope_payload = load_canonical_semantic_scope(subject_key)
+        family_id = str(scope_payload.get("familyId") or compatibility_target.get("familyId") or "").strip()
+        if family_id == "token-shop":
+            return _resolve_token_shop_routine_from_scope(scope_payload), scope_payload
+        if family_id == "shard-owned-state":
+            return "shard-owned-state-trace", scope_payload
+        if family_id == "shard-cost":
+            return "shard-cost-trace", scope_payload
+        if family_id == "multiverse-market-save-owner":
+            return "multiverse-market-save-owner-trace", scope_payload
+
+    if subject_kind == "reconstruction-fragment" and subject_key.startswith("token-shop-reconstruction:"):
+        trace_scope = subject_key.removeprefix("token-shop-reconstruction:")
+        if trace_scope == "token-shop-family-structure":
+            return "token-shop-family-trace", {"traceScope": trace_scope, "familyId": "token-shop"}
+        return _resolve_execution_routine_from_trace_scope(trace_scope, "token-shop"), {
+            "traceScope": trace_scope,
+            "targetId": trace_scope,
+            "familyId": "token-shop",
+        }
+
+    return compatibility_routine, {
+        "targetId": compatibility_target_id,
+        "traceScope": str(compatibility_target.get("traceScope") or compatibility_target_id),
+        "familyId": compatibility_family_id,
+    }
+
+
+def build_trace_payload_for_subject(
+    planner_resolution: dict[str, Any],
+    compatibility_target: dict[str, Any],
+    anchors: list[str],
+    documents: dict[str, Any],
+    available_source_ids: list[str],
+    extended_search: int,
+    depth_search: int,
+) -> dict[str, Any]:
+    execution_routine, subject_payload = _resolve_execution_routine_from_subject(
+        planner_resolution,
+        compatibility_target,
+    )
+    target_id = str(
+        subject_payload.get("traceScope")
+        or subject_payload.get("targetId")
+        or compatibility_target.get("id")
+        or planner_resolution.get("selectedTargetId")
+        or ""
+    )
+    target = compatibility_target
+    if not execution_routine:
+        raise ValueError(
+            "Could not derive an execution routine from DB subject "
+            f"{planner_resolution.get('selectedSubjectKind')} {planner_resolution.get('selectedSubjectKey')}."
+        )
+    if execution_routine == "token-shop-mod-trace":
         return build_token_shop_mod_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
-    if strategy == "token-shop-atu5-mk1-title":
+    if execution_routine == "token-shop-mk1-title-trace":
         return build_token_shop_mk1_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
-    if strategy == "token-shop-atu7-mk3-bridge":
+    if execution_routine == "token-shop-mk3-bridge-trace":
         return build_token_shop_mk3_bridge_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
-    if strategy == "token-shop-atu3-cells-effect":
+    if execution_routine == "token-shop-atu3-effect-trace":
         return build_token_shop_atu3_effect_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
-    if strategy == "token-shop-atu3-chest-consumer":
+    if execution_routine == "token-shop-atu3-consumer-trace":
         return build_token_shop_atu3_chest_consumer_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
-    if strategy == "token-shop-atu3-chest-consumer-read":
+    if execution_routine == "token-shop-atu3-consumer-read-trace":
         return build_token_shop_atu3_chest_consumer_read_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
-    if strategy == "token-shop-family-structure":
+    if execution_routine == "token-shop-family-trace":
         return build_token_shop_family_structure_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
-    if strategy == "shard-cost-su0-structure":
+    if execution_routine == "shard-cost-trace":
         return build_shard_cost_trace(target, anchors, documents)
-    if strategy == "shard-owned-state-upgradeinfolist-population":
+    if execution_routine == "shard-owned-state-trace":
         return build_shard_owned_state_trace(target, anchors, documents, available_source_ids)
-    if strategy == "multiverse-market-save-owner-boundary":
+    if execution_routine == "multiverse-market-save-owner-trace":
         return build_multiverse_market_save_owner_trace(target, anchors, documents)
-    raise ValueError(f"Unsupported unity trace strategy: {strategy}")
+    raise ValueError(f"Unsupported subject-derived unity trace routine: {execution_routine}")
 
 
 def get_priority_support_documents(target: dict[str, Any]) -> list[str]:
@@ -9396,9 +10552,16 @@ def build_dataset(
     depth_search: int | None = 0,
     native_timeout: int = 1800,
 ) -> dict[str, Any]:
-    registry = load_registry()
-    planner_resolution = resolve_planner_selection(registry, target_id, queries, extra_anchors, family_id)
+    registry = load_request_catalog()
+    planner_resolution = resolve_planner_selection(registry, target_id, queries, extra_anchors, family_id, False)
     selected_target_id = str(planner_resolution["selectedTargetId"])
+    execution_target_id, execution_trace_scope = _resolve_execution_subject(registry, planner_resolution)
+    db_source_projection = (
+        load_latest_source_projection(execution_trace_scope)
+        if execution_trace_scope and execution_trace_scope != "generic-explore"
+        else {}
+    )
+    execution_plan: dict[str, Any] = {}
     is_generic_explore = planner_resolution["selectionMode"] == "generic-explore"
     if is_generic_explore:
         target = {
@@ -9414,14 +10577,37 @@ def build_dataset(
         family_plan = {"label": "Exploration", "anchorExpansionTerms": []}
         anchors = unique_strings([*planner_resolution["expandedAnchors"], *extra_anchors])
         source_paths, source_roles = resolve_source_catalog(registry, target["requiredSourceFamilies"])
+        required_source_families = list(target["requiredSourceFamilies"])
+        source_projection_owner = "registry-fallback"
         resolved_depth_search = 0 if depth_search is None else depth_search
+        execution_context = {}
     else:
-        target = registry["targets"][selected_target_id]
+        target = dict(registry["targets"][selected_target_id])
         family_plan = registry["planner"]["families"][target["familyId"]]
+        target, execution_context = _apply_db_execution_context(target, execution_trace_scope, planner_resolution)
+        target, execution_plan = _apply_db_execution_plan(target, execution_trace_scope)
         anchors = unique_strings(planner_resolution["expandedAnchors"])
-        source_family_ids = list(registry["sourceFamilies"].keys()) if extended_search >= 2 else target["requiredSourceFamilies"]
-        source_paths, source_roles = resolve_source_catalog(registry, source_family_ids)
-        source_paths, source_roles = narrow_source_catalog(source_paths, source_roles, get_extended_source_ids_for_target(registry, target, extended_search))
+        if db_source_projection:
+            source_paths, source_roles = resolve_source_catalog_from_projection(db_source_projection)
+            source_paths, source_roles = narrow_source_catalog(
+                source_paths,
+                source_roles,
+                get_extended_source_ids_for_projection(db_source_projection, extended_search),
+            )
+            required_source_families = unique_strings(
+                [
+                    str(entry.get("familyId") or "")
+                    for entry in list((db_source_projection.get("families") or {}).values())
+                    if str(entry.get("familyId") or "").strip()
+                ]
+            ) or list(target["requiredSourceFamilies"])
+            source_projection_owner = "db-source-projection"
+        else:
+            source_family_ids = list(registry["sourceFamilies"].keys()) if extended_search >= 2 else target["requiredSourceFamilies"]
+            source_paths, source_roles = resolve_source_catalog(registry, source_family_ids)
+            source_paths, source_roles = narrow_source_catalog(source_paths, source_roles, get_extended_source_ids_for_target(registry, target, extended_search))
+            required_source_families = list(target["requiredSourceFamilies"])
+            source_projection_owner = "registry-fallback"
         resolved_depth_search = target.get("defaultDepth", 0) if depth_search is None else depth_search
     execution_anchor_specs = build_anchor_specs(anchors, "execution-anchor")
     expanded_anchor_specs = build_anchor_specs(planner_resolution["expandedAnchors"], "planner-expanded-anchor")
@@ -9430,7 +10616,15 @@ def build_dataset(
     trace_payload = (
         build_generic_explore_trace(anchors, list(source_paths.keys()), support_documents)
         if is_generic_explore
-        else build_trace_payload(selected_target_id, target, anchors, support_documents, list(source_paths.keys()), extended_search, resolved_depth_search)
+        else build_trace_payload_for_subject(
+            planner_resolution,
+            target,
+            anchors,
+            support_documents,
+            list(source_paths.keys()),
+            extended_search,
+            resolved_depth_search,
+        )
     )
     native_anchor_values = _collect_native_trace_terms(target, planner_resolution, trace_payload)
     native_trace = collect_native_trace(
@@ -9453,6 +10647,21 @@ def build_dataset(
     )
     row_recovery = _build_token_shop_row_recovery(target, trace_payload, native_trace)
     closure_status = (row_recovery or {}).get("closureStatus") or {}
+    bridge_comparison_reference = (
+        build_bridge_comparison_reference_payload(execution_trace_scope)
+        if trace_payload.get("bridgeComparisonSeed")
+        else {}
+    )
+    narrative_reference = resolve_target_narrative(
+        execution_trace_scope,
+        str(trace_payload.get("groundedConclusion") or ""),
+        list(trace_payload.get("currentBoundary") or []),
+        subject_kind=str(planner_resolution.get("selectedSubjectKind") or ""),
+        subject_key=str(planner_resolution.get("selectedSubjectKey") or ""),
+        family_id=str(target.get("familyId") or ""),
+        compatibility_target_id=selected_target_id,
+        allow_fallback=is_generic_explore,
+    )
     return {
         "dataset": "unity-trace-bundle",
         "generatedAt": datetime.now().isoformat(timespec="seconds"),
@@ -9461,7 +10670,7 @@ def build_dataset(
             "directExample": "node scripts/unity/run_extract.mjs trace --target <target-id> --anchor <anchor>",
             "plannerExample": "node scripts/unity/run_extract.mjs trace --family <family-id> --query <query> --anchor <anchor> --extended-search <0|1|2>",
             "acceptedAnchors": target["acceptedAnchors"],
-            "targetResolution": "explicit target, explicit family, or checked query planner plus family-aware anchor expansion",
+            "targetResolution": "explicit legacy target, explicit family, or checked DB-first query planner plus family-aware anchor expansion",
             "readsCommittedSourcesOnly": True,
         },
         "plannerResolution": {
@@ -9472,8 +10681,11 @@ def build_dataset(
             "matchedTerms": planner_resolution["matchedTerms"],
             "matchedFamilyId": planner_resolution["matchedFamilyId"],
             "matchedFamilyLabel": planner_resolution["matchedFamilyLabel"],
+            "selectedSubjectKind": planner_resolution.get("selectedSubjectKind"),
+            "selectedSubjectKey": planner_resolution.get("selectedSubjectKey"),
+            "selectedSubjectLabel": planner_resolution.get("selectedSubjectLabel"),
             "runMode": planner_resolution["selectedRunMode"],
-            "comparePresetId": planner_resolution["selectedComparePresetId"],
+            "comparePresetId": None,
             "synonymSetsUsed": planner_resolution["synonymSetsUsed"],
             "expandedAnchors": planner_resolution["expandedAnchors"],
             "expandedAnchorSpecs": expanded_anchor_specs,
@@ -9490,19 +10702,20 @@ def build_dataset(
             "hops": trace_payload.get("depthExpansion", []),
         },
         "traceRegistry": {
-            "path": repo_relative(REGISTRY_PATH),
-            "selectedTargetId": selected_target_id,
+            "catalogMode": "db-bootstrap",
+            "selectedSubjectKind": planner_resolution.get("selectedSubjectKind"),
+            "selectedSubjectKey": planner_resolution.get("selectedSubjectKey"),
+            "executionTargetId": execution_target_id,
+            "executionTraceScope": execution_trace_scope,
             "selectedFamilyId": target["familyId"],
-            "requiredSourceFamilies": target["requiredSourceFamilies"],
-            "solvedBaselineTargetId": target["solvedBaselineTargetId"],
-            "blockedTargetId": target["blockedTargetId"],
-            "comparisonPreset": None
-            if is_generic_explore or not target.get("comparisonPresetId")
-            else registry["comparisonPresets"][target["comparisonPresetId"]],
+            "requiredSourceFamilies": required_source_families,
             "defaultDepth": target.get("defaultDepth", 0),
-            "followUpSurfaces": target.get("strategyConfig", {}).get("followUpSurfaces", []),
-            "depthPlan": target.get("strategyConfig", {}).get("depthPlan", []),
-            "claimStages": target.get("strategyConfig", {}).get("claimStages", []),
+            "followUpTerms": list(execution_plan.get("followUpTerms") or []),
+            "depthPlan": list(execution_plan.get("depthPlan") or []),
+            "claimStages": list(execution_plan.get("claimStages") or []),
+            "sourceProjectionOwner": source_projection_owner,
+            "executionContextSemanticKey": execution_context.get("semanticKey"),
+            "executionPlanSemanticKey": execution_plan.get("semanticKey"),
         },
         "sources": {source_id: get_source_reference(source_id) for source_id in source_paths},
         "sourceRoles": source_roles,
@@ -9510,20 +10723,19 @@ def build_dataset(
         "nativeReconstruction": native_trace.get("summary", {}),
         "rowRecovery": row_recovery,
         "status": closure_status.get("status"),
-        "closureStatus": closure_status,
         "semanticStatus": closure_status.get("semanticStatus"),
         "literalStatus": closure_status.get("literalStatus"),
         "runtimeStatus": closure_status.get("runtimeStatus"),
         "target": {
             "id": selected_target_id,
-            "label": target["label"],
-            "familyId": target["familyId"],
+            "label": execution_context.get("label") or target["label"],
+            "familyId": execution_context.get("familyId") or target["familyId"],
             "anchors": anchors,
-            "joinGoal": target["joinGoal"],
-            "requiredSourceFamilies": target["requiredSourceFamilies"],
-            "solvedBaselineTargetId": target["solvedBaselineTargetId"],
-            "blockedTargetId": target["blockedTargetId"],
-            "outputSummaryRules": target.get("outputSummaryRules"),
+            "joinGoal": execution_context.get("joinGoal") or target["joinGoal"],
+            "requiredSourceFamilies": required_source_families,
+            "solvedBaselineTargetId": execution_context.get("solvedBaselineTargetId") or target["solvedBaselineTargetId"],
+            "blockedTargetId": execution_context.get("blockedTargetId") or target["blockedTargetId"],
+            "outputSummaryRules": execution_context.get("outputSummaryRules") or target.get("outputSummaryRules"),
         },
         "shellWindow": trace_payload["shellWindow"],
         "surfaces": trace_payload["surfaces"],
@@ -9531,11 +10743,32 @@ def build_dataset(
         "traceGraph": trace_payload["traceGraph"],
         "outcome": trace_payload.get("outcome"),
         "bridgePromotionRule": trace_payload["bridgePromotionRule"],
-        "bridgeCheck": trace_payload["bridgeCheck"],
-        "solvedVsBlockedDiff": trace_payload["solvedVsBlockedDiff"],
+        "bridgeCheck": (
+            bridge_comparison_reference["bridgeCheck"]
+            if bridge_comparison_reference
+            else trace_payload["bridgeCheck"]
+        ),
+        "solvedVsBlockedDiff": (
+            bridge_comparison_reference["solvedVsBlockedDiff"]
+            if bridge_comparison_reference
+            else trace_payload["solvedVsBlockedDiff"]
+        ),
+        "bridgeComparisonSeed": trace_payload.get("bridgeComparisonSeed"),
+        "bridgeComparisonSemanticKey": bridge_comparison_reference.get(
+            "bridgeComparisonSemanticKey",
+            f"target-bridge-comparison:{execution_trace_scope}" if trace_payload.get("bridgeComparisonSeed") else None,
+        ),
         "lostStructure": trace_payload["lostStructure"],
-        "groundedConclusion": trace_payload["groundedConclusion"],
-        "currentBoundary": trace_payload["currentBoundary"],
+        "executionContextSemanticKey": execution_context.get("semanticKey") or f"target-execution-context:{execution_trace_scope}",
+        "executionContext": execution_context or None,
+        "groundedConclusion": narrative_reference["groundedConclusion"],
+        "currentBoundary": narrative_reference["currentBoundary"],
+        "narrativeSeed": {
+            "groundedConclusion": str(trace_payload.get("groundedConclusion") or ""),
+            "currentBoundary": list(trace_payload.get("currentBoundary") or []),
+        },
+        "narrativeSemanticKey": narrative_reference["narrativeSemanticKey"],
+        "narrativeOwner": narrative_reference["narrativeOwner"],
     }
 
 
@@ -9626,10 +10859,19 @@ def write_markdown(dataset: dict[str, Any]) -> None:
         f"- Planner example: `{dataset['traceWorkflow']['plannerExample']}`",
         f"- Accepted anchor kinds: `{', '.join(dataset['traceWorkflow']['acceptedAnchors'])}`",
         "- Purpose: preserve cross-surface joins across metadata neighborhoods, UABEA/CifiAssetProbe output, targeted string hits, and nearby prefab or title surfaces in one checked bundle.",
-        f"- Registry target: `{dataset['traceRegistry']['selectedTargetId']}` from `{dataset['traceRegistry']['selectedFamilyId']}` via {md_link(ROOT / dataset['traceRegistry']['path'])}",
-        f"- Registry default depth: `{dataset['traceRegistry']['defaultDepth']}`",
+        f"- Subject: `{dataset['plannerResolution']['selectedSubjectKind']}` `{dataset['plannerResolution']['selectedSubjectKey']}`",
+        f"- Execution scope: `{dataset['traceRegistry']['executionTraceScope']}`",
+        f"- Family: `{dataset['traceRegistry']['selectedFamilyId']}`",
+        f"- Catalog mode: `{dataset['traceRegistry'].get('catalogMode') or 'unknown'}`",
+        f"- Default depth: `{dataset['traceRegistry']['defaultDepth']}`",
         "",
     ]
+    trace_registry_path = dataset["traceRegistry"].get("path")
+    if isinstance(trace_registry_path, str) and trace_registry_path.strip():
+        lines.insert(
+            len(lines) - 2,
+            f"- Compatibility catalog path: {md_link(ROOT / trace_registry_path)}",
+        )
     lines.extend(
         [
             "## Native Trace",
@@ -10054,7 +11296,7 @@ def write_markdown(dataset: dict[str, Any]) -> None:
         "",
         "## Conclusion",
         "",
-        f"- {dataset['groundedConclusion']}",
+        f"- {dataset.get('groundedConclusion') or 'Canonical target narrative fragment is missing; rebuild trace views before trusting narrative state.'}",
         "",
     ])
     output_path = Path(dataset["traceRun"]["mdOut"])
@@ -10105,8 +11347,21 @@ def allocate_trace_run_paths(target_id: str, family_id: str, explicit_json_out: 
 
 def export_trace_run(dataset: dict[str, Any], json_out: Path, md_out: Path) -> None:
     TRACE_RUNS_DIR.mkdir(parents=True, exist_ok=True)
-    json_out.write_text(json.dumps(dataset, indent=2) + "\n", encoding="utf-8")
-    write_markdown(dataset)
+    export_dataset = dict(dataset or {})
+    row_recovery = dict(export_dataset.get("rowRecovery") or {})
+    if row_recovery:
+        sanitized_row_recovery = dict(row_recovery)
+        if sanitized_row_recovery.get("literalRecoverySummary") is None:
+            sanitized_row_recovery["literalRecoverySummary"] = build_token_shop_literal_recovery_summary(
+                dict(row_recovery.get("literalSchemaRecovery") or {}),
+                dict(row_recovery.get("literalTextRecovery") or {}),
+            )
+        sanitized_row_recovery.pop("closureStatus", None)
+        sanitized_row_recovery.pop("literalSchemaRecovery", None)
+        sanitized_row_recovery.pop("literalTextRecovery", None)
+        export_dataset["rowRecovery"] = sanitized_row_recovery
+    json_out.write_text(json.dumps(export_dataset, indent=2) + "\n", encoding="utf-8")
+    write_markdown(export_dataset)
 
 
 def build_trace_request_signature(
@@ -10158,6 +11413,23 @@ def _load_canonical_semantic_scope_payload(dataset: dict[str, Any]) -> dict[str,
     return load_canonical_semantic_scope(semantic_scope_id)
 
 
+def _build_dependency_scope_summary(scope_payload: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(scope_payload, dict) or not scope_payload:
+        return {}
+    row_local_graph = dict(scope_payload.get("rowLocalGraph") or {})
+    return {
+        "scopeId": scope_payload.get("scopeId"),
+        "scopeType": scope_payload.get("scopeType"),
+        "familyId": scope_payload.get("familyId"),
+        "targetId": scope_payload.get("targetId"),
+        "traceScope": scope_payload.get("traceScope"),
+        "rowShell": dict(row_local_graph.get("rowShell") or {}),
+        "rowLocalGraph": row_local_graph,
+        "missingSeams": list(scope_payload.get("missingSeams") or []),
+        "compatibilityStatus": dict(scope_payload.get("compatibilityStatus") or {}),
+    }
+
+
 def _load_target_ui_binding_views(target: dict[str, Any]) -> dict[str, dict[str, Any]]:
     family_id = str(target.get("familyId") or "").strip()
     target_id = str(target.get("id") or "").strip()
@@ -10190,12 +11462,24 @@ def extract_owner_controller_semantic_fragments(dataset: dict[str, Any]) -> list
     row_recovery = dataset.get("rowRecovery") or {}
     target = dataset.get("target") or {}
     native_reconstruction = dataset.get("nativeReconstruction") or {}
+    trace_payload = dataset.get("tracePayload") or {}
+    trace_shell = trace_payload.get("shellWindow") or {}
     fragments: list[dict[str, Any]] = []
     owner_blob_row = row_recovery.get("ownerBlobRow") or {}
     runtime_instance = row_recovery.get("runtimeInstanceRecovery") or {}
     runtime_evaluator = row_recovery.get("runtimeEvaluatorRecovery") or {}
+    owner_field_block = list(
+        row_recovery.get("ownerFieldBlock")
+        or owner_blob_row.get("ownerFieldBlock")
+        or trace_shell.get("ownerFieldBlock")
+        or []
+    )
+    controller_block = list(
+        row_recovery.get("controllerBlock")
+        or owner_blob_row.get("controllerBlock")
+        or []
+    )
     owner_names = unique_strings([
-        str((row_recovery.get("literalSchemaRecovery") or {}).get("owner") or ""),
         str(runtime_instance.get("instanceOwner") or ""),
         str(runtime_evaluator.get("owner") or ""),
         *(str(owner) for owner in (native_reconstruction.get("owners") or [])),
@@ -10211,6 +11495,8 @@ def extract_owner_controller_semantic_fragments(dataset: dict[str, Any]) -> list
                     "owner": owner,
                     "familyId": target.get("familyId"),
                     "targetId": target.get("id"),
+                    "ownerFieldBlock": owner_field_block,
+                    "controllerBlock": controller_block,
                     "ownerBlobRow": owner_blob_row,
                     "runtimeEvaluatorRecovery": runtime_evaluator,
                     "runtimeInstanceRecovery": runtime_instance,
@@ -10275,6 +11561,16 @@ def extract_threshold_semantic_fragments(dataset: dict[str, Any]) -> list[dict[s
     if not runtime_cost_model:
         return []
     target = dataset.get("target") or {}
+    semantic_scope_payload = _load_canonical_semantic_scope_payload(dataset)
+    missing_seams = list((semantic_scope_payload.get("missingSeams") or []))
+    unresolved_runtime_targets = []
+    for seam in missing_seams:
+        if str((seam or {}).get("id") or "") == "runtime-model-gap":
+            unresolved_runtime_targets.extend(list((seam or {}).get("targets") or []))
+    if not unresolved_runtime_targets:
+        runtime_cost_model = dict((dataset.get("rowRecovery") or {}).get("formulaReconstruction", {}).get("runtimeCostModel") or {})
+        if str(runtime_cost_model.get("status") or "") == "unresolved-runtime-modifiers":
+            unresolved_runtime_targets = ["displayed-cost-runtime-modifiers"]
     threshold_key = _semantic_key("threshold", target.get("familyId"), target.get("id"), "runtime-cost")
     return [
         {
@@ -10285,7 +11581,7 @@ def extract_threshold_semantic_fragments(dataset: dict[str, Any]) -> list[dict[s
                 "targetId": target.get("id"),
                 "familyId": target.get("familyId"),
                 "runtimeCostModel": runtime_cost_model,
-                "unresolvedRuntimeTargets": (dataset.get("closureStatus") or {}).get("unresolvedRuntimeTargets"),
+                "unresolvedRuntimeTargets": unresolved_runtime_targets,
             },
         }
     ]
@@ -10294,7 +11590,7 @@ def extract_threshold_semantic_fragments(dataset: dict[str, Any]) -> list[dict[s
 def extract_dependency_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
     target = dataset.get("target") or {}
     fragments: list[dict[str, Any]] = []
-    semantic_scope_payload = _load_canonical_semantic_scope_payload(dataset)
+    semantic_scope_payload = _build_dependency_scope_summary(_load_canonical_semantic_scope_payload(dataset))
     for edge in _collect_dependency_edges(dataset):
         if not isinstance(edge, dict):
             continue
@@ -10325,6 +11621,8 @@ def extract_ui_binding_semantic_fragments(dataset: dict[str, Any]) -> list[dict[
     row_recovery = dataset.get("rowRecovery") or {}
     presentation_update = row_recovery.get("presentationUpdatePath") or {}
     target = dataset.get("target") or {}
+    trace_payload = dataset.get("tracePayload") or {}
+    trace_shell = trace_payload.get("shellWindow") or {}
     canonical_bindings = _load_target_ui_binding_views(target)
     slot_roles = sorted(
         {
@@ -10345,6 +11643,17 @@ def extract_ui_binding_semantic_fragments(dataset: dict[str, Any]) -> list[dict[
                 effective_presentation_path = presentation_paths[0]
         if not values:
             continue
+        shell_window = {
+            "shellField": row_recovery.get("shellField") or trace_shell.get("shellField"),
+            "shellPathId": row_recovery.get("shellPathId") or trace_shell.get("shellPathId"),
+            "ownerFieldBlock": list(
+                row_recovery.get("ownerFieldBlock")
+                or trace_shell.get("ownerFieldBlock")
+                or []
+            ),
+        }
+        if not any(shell_window.get(key) for key in ("shellField", "shellPathId", "ownerFieldBlock")):
+            shell_window = {}
         role_key = _semantic_key("ui-binding", target.get("familyId"), target.get("id"), role)
         fragments.append(
             {
@@ -10358,6 +11667,7 @@ def extract_ui_binding_semantic_fragments(dataset: dict[str, Any]) -> list[dict[
                     "values": values,
                     "presentationUpdatePath": effective_presentation_path,
                     "shellField": row_recovery.get("shellField"),
+                    "shellWindow": shell_window,
                     "dbCorroboration": canonical_binding,
                 },
             }
@@ -10439,6 +11749,7 @@ def extract_reconstruction_note_semantic_fragments(dataset: dict[str, Any]) -> l
     target = dataset.get("target") or {}
     note_key = _semantic_key("reconstruction-note", target.get("familyId"), target.get("id"))
     assessment_key = f"target-assessment:{target.get('id')}"
+    narrative_key = f"target-narrative:{target.get('id')}"
     return [
         {
             "fragment_kind": "reconstruction_note_fragment",
@@ -10448,8 +11759,8 @@ def extract_reconstruction_note_semantic_fragments(dataset: dict[str, Any]) -> l
                 "targetId": target.get("id"),
                 "familyId": target.get("familyId"),
                 "assessmentSemanticKey": assessment_key,
+                "narrativeSemanticKey": narrative_key,
                 "bridgeCheck": dataset.get("bridgeCheck"),
-                "groundedConclusion": dataset.get("groundedConclusion"),
             },
         }
     ]
@@ -10472,12 +11783,84 @@ def collect_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
     return fragments
 
 
+def _planner_resolution_from_best_gap_plan(
+    best_gap_plan: dict[str, Any],
+    queries: list[str],
+    anchors: list[str],
+) -> dict[str, Any]:
+    requested_queries = unique_strings(queries)
+    requested_anchors = unique_strings(anchors)
+    expanded_anchors = unique_strings(
+        [
+            *list(best_gap_plan.get("anchors") or []),
+            *requested_queries,
+            *requested_anchors,
+        ]
+    )
+    matched_inputs = unique_strings(
+        [
+            *requested_queries,
+            *requested_anchors,
+            *list(best_gap_plan.get("semanticScopeIds") or []),
+        ]
+    )
+    subject_kind = str(best_gap_plan.get("selectedSubjectKind") or "").strip() or "semantic-scope"
+    subject_key = str(best_gap_plan.get("selectedSubjectKey") or "").strip()
+    if not subject_key:
+        scope_ids = list(best_gap_plan.get("semanticScopeIds") or [])
+        subject_key = str(scope_ids[0] if scope_ids else best_gap_plan.get("traceScope") or "").strip()
+    subject_label = str(best_gap_plan.get("selectedSubjectLabel") or subject_key or best_gap_plan.get("label") or "").strip()
+    return {
+        "selectionMode": "best-gap-db",
+        "requestedQueries": requested_queries,
+        "requestedAnchors": requested_anchors,
+        "matchedInputs": matched_inputs,
+        "matchedTerms": unique_strings(
+            [
+                *matched_inputs,
+                *list(best_gap_plan.get("anchors") or []),
+            ]
+        ),
+        "matchedFamilyId": str(best_gap_plan.get("familyId") or "exploration"),
+        "matchedFamilyLabel": str(best_gap_plan.get("label") or best_gap_plan.get("traceScope") or "Exploration"),
+        "selectedSubjectKind": subject_kind,
+        "selectedSubjectKey": subject_key,
+        "selectedSubjectLabel": subject_label,
+        "selectedTargetId": str(best_gap_plan.get("targetId") or best_gap_plan.get("traceScope") or "generic-explore"),
+        "selectedRunMode": "trace",
+        "selectedComparePresetId": None,
+        "synonymSetsUsed": [],
+        "expandedAnchors": expanded_anchors,
+        "decisionNote": (
+            "Selected the highest-value unresolved DB-backed gap directly from canonical trace state, "
+            f"using {subject_kind} {subject_key or 'unknown'} as the execution subject."
+        ),
+    }
+
+
 def plan_trace_bundle_request(
     args: argparse.Namespace,
-    registry: dict[str, Any],
+    registry: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    planner_resolution = resolve_planner_selection(registry, args.target, args.query, args.anchor, args.family)
+    registry = registry or load_request_catalog()
+    best_gap_plan = dict(getattr(args, "best_gap_plan", {}) or {})
+    if best_gap_plan:
+        planner_resolution = _planner_resolution_from_best_gap_plan(
+            best_gap_plan,
+            args.query,
+            args.anchor,
+        )
+    else:
+        planner_resolution = resolve_planner_selection(
+            registry,
+            args.target,
+            args.query,
+            args.anchor,
+            args.family,
+            False,
+        )
     selected_target_id = str(planner_resolution["selectedTargetId"])
+    execution_target_id, execution_trace_scope = _resolve_execution_subject(registry, planner_resolution)
     selected_family_id = (
         str(registry["targets"][selected_target_id]["familyId"])
         if selected_target_id in registry.get("targets", {})
@@ -10485,7 +11868,7 @@ def plan_trace_bundle_request(
     )
     asset_set = build_trace_asset_set()
     request_signature = build_trace_request_signature(
-        selected_target_id,
+        execution_trace_scope,
         selected_family_id,
         args.query,
         args.anchor,
@@ -10496,7 +11879,11 @@ def plan_trace_bundle_request(
     )
     return {
         "plannerResolution": planner_resolution,
+        "selectedSubjectKind": str(planner_resolution.get("selectedSubjectKind") or ""),
+        "selectedSubjectKey": str(planner_resolution.get("selectedSubjectKey") or ""),
         "selectedTargetId": selected_target_id,
+        "executionTargetId": execution_target_id,
+        "executionTraceScope": execution_trace_scope,
         "selectedFamilyId": selected_family_id,
         "assetSet": asset_set,
         "requestSignature": request_signature,
@@ -10572,15 +11959,13 @@ def trace_dataset_has_required_fragments(dataset: dict[str, Any]) -> bool:
 
 
 def main() -> None:
-    registry = load_registry()
     parser = argparse.ArgumentParser(
         description="Unity Trace Bundle Generator - Extract and analyze Unity objects"
     )
     
     # Target specification (from registry or custom)
     parser.add_argument("--target", 
-                        choices=sorted(registry["targets"].keys()),
-                        help="Target ID from trace registry (e.g., token-shop-atu3-cells-effect)")
+                        help="Explicit DB trace scope / target scope (e.g., token-shop-atu3-cells-effect)")
     parser.add_argument("--query", action="append", default=[],
                         help="Query term to search for (can specify multiple)")
     parser.add_argument("--anchor", action="append", default=[],
@@ -10590,7 +11975,6 @@ def main() -> None:
     
     # Family specification for custom targets
     parser.add_argument("--family",
-                        choices=sorted(registry["planner"]["families"].keys()),
                         help="Trace family shortcut when you want the family default target or family-scoped query resolution")
     parser.add_argument("--extended-search",
                         type=int,
@@ -10643,6 +12027,7 @@ def main() -> None:
                         help="When used with --best-gap and no explicit target/query/family, rerank and run again this many times")
 
     args = parser.parse_args()
+    registry = load_request_catalog()
 
     auto_best_gap_mode = bool(args.best_gap and not args.target and not args.family and not args.query and not args.anchor)
 
@@ -10651,19 +12036,24 @@ def main() -> None:
         parser.error("pass --target, --family, or at least one --query/--anchor")
     if args.repeat < 1:
         parser.error("--repeat must be at least 1")
-
     if args.dry_run:
         dry_run_args = argparse.Namespace(**vars(args))
         best_gap_plan: dict[str, Any] | None = None
         if auto_best_gap_mode:
             best_gap_plan = choose_best_gap_plan(registry)
-            dry_run_args.target = str(best_gap_plan["targetId"])
             dry_run_args.anchor = list(best_gap_plan.get("anchors") or [])
+            dry_run_args.best_gap_plan = best_gap_plan
             _print_best_gap_plan(best_gap_plan)
         trace_plan = plan_trace_bundle_request(dry_run_args, registry)
         planner_resolution = trace_plan["plannerResolution"]
         print("Dry run only.")
-        print("  target={}".format(trace_plan["selectedTargetId"]))
+        print(
+            "  subject={} {}".format(
+                planner_resolution.get("selectedSubjectKind") or "unknown-subject",
+                planner_resolution.get("selectedSubjectKey") or "unknown",
+            )
+        )
+        print("  executionScope={}".format(trace_plan["executionTraceScope"]))
         print("  family={}".format(trace_plan["selectedFamilyId"]))
         print("  selectionMode={}".format(planner_resolution["selectionMode"]))
         print("  anchors={}".format(", ".join(planner_resolution["expandedAnchors"]) or "none"))
@@ -10684,8 +12074,8 @@ def main() -> None:
         run_args = argparse.Namespace(**vars(args))
         if auto_best_gap_mode:
             best_gap_plan = choose_best_gap_plan(registry)
-            run_args.target = str(best_gap_plan["targetId"])
             run_args.anchor = list(best_gap_plan.get("anchors") or [])
+            run_args.best_gap_plan = best_gap_plan
             _print_best_gap_plan(best_gap_plan)
         dataset = _execute_trace_bundle_run(run_args, registry, output_mode)
         _print_completed_trace_run(dataset, iteration, total_iterations)

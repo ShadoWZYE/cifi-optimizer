@@ -241,7 +241,7 @@ function handleSystemUnits(response, requestUrl) {
     .filter(Boolean);
   const systemIds = requestedIds.length
     ? requestedIds
-    : ["player-state", "shards", "token-shop", "multiverse-market"];
+    : ["app-meta", "player-state", "shards", "token-shop", "multiverse-market"];
   try {
     const result = withCacheDb((db) => {
       const statement = db.prepare(`

@@ -7,7 +7,7 @@
   "kind": "tooling",
   "schemaRef": "data/data-unit-format.v1.json",
   "frameworkRef": "data/data-framework.v1.json",
-  "summary": "Central trace orchestration unit for the registry, DB-backed target/system materializations, and promotion-target definitions.",
+  "summary": "Central trace orchestration unit for DB/bootstrap subject resolution, DB-backed target/system materializations, and promotion-target definitions.",
   "liveConsumers": {
     "appStatePaths": [],
     "traceTargets": [
@@ -23,12 +23,6 @@
     ]
   },
   "subsystems": {
-    "registry": {
-      "summary": "Target registry and family-resolution definitions for trace runs.",
-      "seedOutputs": [
-        "data/unity-trace-target-registry.json"
-      ]
-    },
     "live-runs": {
       "summary": "DB-backed target-bundle materializations that reflect the current live trace surface.",
       "seedOutputs": [
@@ -40,21 +34,16 @@
       ]
     },
     "promotion-targets": {
-      "summary": "Trace-facing lane that should eventually promote into centralized system units instead of raw probe files.",
-      "seedOutputs": []
+      "summary": "DB-derived live trace subjects that can promote into centralized system units instead of raw probe files.",
+      "seedOutputs": [
+        "db:derived:trace-promotion-targets"
+      ]
     }
   },
   "provenance": {
-    "policy": "Trace remains orchestration, so provenance here should preserve the registry contract plus the commands that regenerate the DB-backed target/system materializations exposed through exported units.",
+    "policy": "Trace remains orchestration, so provenance here should preserve the commands that regenerate the DB-backed target/system materializations exposed through exported units.",
     "transientProbePolicy": "Optional trace-run files are disposable debug exports; preserve the command that regenerates the DB-backed views instead of treating exported files as shipped dependencies.",
     "sourceRecords": [
-      {
-        "id": "trace-registry",
-        "kind": "dataset",
-        "path": "data/unity-trace-target-registry.json",
-        "role": "support",
-        "persistence": "committed"
-      },
       {
         "id": "token-shop-family-trace-command",
         "kind": "command",
@@ -71,7 +60,7 @@
         "kind": "command",
         "role": "transient-regeneration",
         "persistence": "transient",
-        "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-cost-su0-structure --level structured",
+        "command": "python scripts\\unity\\unity_trace_bundle.py --family shard-cost --level structured",
         "expectedOutputs": [
           "db:materialized-target-bundle:shard-cost-su0-structure"
         ]
@@ -81,7 +70,7 @@
         "kind": "command",
         "role": "transient-regeneration",
         "persistence": "transient",
-        "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-owned-state-upgradeinfolist-population --level structured",
+        "command": "python scripts\\unity\\unity_trace_bundle.py --family shard-owned-state --level structured",
         "expectedOutputs": [
           "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population"
         ]
@@ -91,7 +80,7 @@
         "kind": "command",
         "role": "transient-regeneration",
         "persistence": "transient",
-        "command": "python scripts\\unity\\unity_trace_bundle.py --target multiverse-market-save-owner-boundary --level structured",
+        "command": "python scripts\\unity\\unity_trace_bundle.py --family multiverse-market-save-owner --level structured",
         "expectedOutputs": [
           "db:materialized-target-bundle:multiverse-market-save-owner-boundary"
         ]
@@ -103,7 +92,7 @@
     "boundary": [],
     "model": [],
     "support": [
-      "data/unity-trace-target-registry.json",
+      "db:derived:trace-promotion-targets",
       "db:materialized-target-bundle:token-shop-family-structure",
       "db:materialized-target-bundle:token-shop-atu3-cells-effect",
       "db:materialized-target-bundle:shard-cost-su0-structure",

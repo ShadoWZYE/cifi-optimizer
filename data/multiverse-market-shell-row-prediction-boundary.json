@@ -4,8 +4,8 @@
   "sources": {
     "marketMemberBoundary": "data/multiverse-market-market-member-boundary.json",
     "saveDataImportBoundary": "data/multiverse-market-savedata-import-boundary.json",
-    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-    "values": "data/multiverse-market-values.json",
+    "metadataNeighborhood": "data/archive/multiverse-market-metadata-neighborhood.json",
+    "values": "data/archive/multiverse-market-values.json",
     "actionShell": "data/multiverse-market-action-shell.json",
     "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
     "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
@@ -363,3 +363,4 @@
     "This boundary does not widen canonical import or planner behavior: compatibility-only MultiverseMarket import stays quarantined under compatibility.unmappedSystemState.multiverseMarket, InscryptionsDone stays wrapper-only, and planner-safe use remains blocked."
   ]
 }
+

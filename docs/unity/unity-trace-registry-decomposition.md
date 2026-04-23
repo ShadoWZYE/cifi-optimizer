@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This audit breaks `data/unity-trace-target-registry.json` into responsibility buckets now that DB-backed canonical/materialized trace state owns most live reconstruction work.
+This audit breaks the archived `data/archive/unity-trace-target-registry.json` file into responsibility buckets now that DB-backed canonical/materialized trace state owns the live reconstruction work.
 
 The strict rule is:
 
@@ -37,10 +37,13 @@ The strict rule is:
   - `targets.*.acceptedAnchors`
   - `targets.*.defaultAnchors`
 - Classification:
-  - `THIN DECLARATIVE METADATA`
+  - mixed:
+    - labels / accepted anchors / default anchors: `THIN DECLARATIVE METADATA`
+    - `planner.families.*.defaultTargetId`: `LEGACY-COMPAT`
 - Why kept:
   - These define stable target ids, labels, and accepted request shapes.
   - DB state is keyed by trace scope and request signature, but it does not define the externally callable trace catalog.
+  - `defaultTargetId` is no longer used by normal DB-first family resolution for active lanes and is now `null` for the active families; the old target catalog survives only as explicit compatibility/debug metadata.
 
 ### 3. Planner matching and anchor expansion
 
@@ -68,10 +71,16 @@ The strict rule is:
   - `targets.*.comparisonPresetId`
   - `comparisonPresets.*`
 - Classification:
-  - `OPTIONAL UI/PRESET LAYER`
+  - `LEGACY-COMPAT`
 - Why kept:
   - These do not decide truth reconstruction.
-  - They shape compare-mode summaries and bounded solved-vs-blocked framing for human review.
+  - They survive only as compatibility/presentation framing for older compare-era inspection surfaces.
+- Current recalibration:
+  - Token-shop compare presets are now explicitly legacy framing only.
+  - The planner no longer emits active `runMode=compare` or active compare-preset shaping for token-shop targets.
+  - The active family registry no longer carries compare-era planner steering: `token-shop`, `shard-cost`, `shard-owned-state`, and `multiverse-market-save-owner` now all use `defaultRunMode = trace` and empty `compareTerms`.
+  - `targets.*.comparisonPresetId` and `comparisonPresets.*` are now fully inert compatibility metadata: target ids are `null`, `comparisonPresets` is empty, and the live trace payload no longer emits them as active planner or execution shaping.
+  - Those registry fields remain only as optional review/UI metadata until a broader decision is made about whether token-shop comparison presentation should survive at all.
 - Constraint:
   - They should not be used to choose canonical structure or to backfill missing evidence.
 
@@ -89,6 +98,7 @@ The strict rule is:
   - Recent cleanup moved old boundary-authored compatibility labels into this bucket for the multiverse lane. That is better than keeping stale support JSONs live, but it is still pre-DB scaffolding.
 - Migration direction:
   - move target-local verdicts, blocked structures, and “what remains missing” narration into reducer-owned semantic/materialized state
+  - move active execution planning into reducer-owned `execution_plan_fragment` state and leave registry `depthPlan` / `claimStages` as compatibility fallback only
   - keep only the minimum target-local invocation/config shell here
 
 ### 6. Join goals and output summary rules
@@ -131,7 +141,7 @@ It should no longer be treated as a place to store live structural truth.
 The main remaining work to reduce registry burden further is:
 
 1. DB-backed family/target routing
-   - replace free-text family scoring from `queryTerms`/`synonymSets` with DB-backed target suggestion and evidence coverage ranking
+   - free-text trace routing now resolves from DB-backed materialized target bundles and canonical semantic scopes first; registry `queryTerms`/`synonymSets` are no longer the fallback path for free-text runs
 
 2. DB-backed compare selection
    - derive solved-vs-blocked relationships from materialized target bundle coverage rather than only registry pairing

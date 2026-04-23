@@ -3,8 +3,8 @@
   "generated": "2026-04-16",
   "description": "Grounded TokenShop dataset - all fields verified from APK analysis",
   "source_priority": [
-    "data/uabea-extract-report.json (field offsets, method RVAs)",
-    "data/token-shop-values.json (grounded TokenShop row and cost fields)",
+    "data/archive/uabea-extract-report.json (field offsets, method RVAs)",
+    "data/archive/token-shop-values.json (grounded TokenShop row and cost fields)",
     "data/token-shop-row-remap-boundary.json (checked shell-to-prefab and title-side joins)"
   ],
   "formulas": {
@@ -1168,3 +1168,5 @@
     }
   }
 }
+
+

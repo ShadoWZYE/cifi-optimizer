@@ -1,13 +1,58 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { DatabaseSync } from "node:sqlite";
 import { evaluateShardCost, getShardCostFormulaModel } from "./cost-evaluator.mjs";
 
-const screenshotCalibration = JSON.parse(
-  await readFile(
-    new URL("../../data/shard-cost-screenshot-calibration.v1.json", import.meta.url),
-    "utf8"
-  )
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const dbPath = path.join(repoRoot, "workbench", "ghidra-cache", "ghidra_cache.sqlite3");
+
+function loadShardCostScreenshotCalibration() {
+  const db = new DatabaseSync(dbPath);
+  db.exec("PRAGMA busy_timeout=30000");
+  try {
+    const materializedRow = db
+      .prepare(
+        `
+          SELECT payload_json
+          FROM materialized_system_unit_views
+          WHERE system_id = ? AND version = ?
+        `
+      )
+      .get("shard-cost-screenshot-calibration", "v1");
+    if (materializedRow?.payload_json) {
+      const payload = JSON.parse(materializedRow.payload_json);
+      if (payload?.dataset === "shard-cost-screenshot-calibration.v1") {
+        return payload;
+      }
+    }
+
+    const shardUnitRow = db
+      .prepare(
+        `
+          SELECT payload_json
+          FROM materialized_system_unit_views
+          WHERE system_id = ? AND version = ?
+        `
+      )
+      .get("shards", "v1");
+    if (shardUnitRow?.payload_json) {
+      const shardUnit = JSON.parse(shardUnitRow.payload_json);
+      const payload = shardUnit?.sections?.cost?.screenshotCalibration?.data ?? null;
+      if (payload?.dataset === "shard-cost-screenshot-calibration.v1") {
+        return payload;
+      }
+    }
+  } finally {
+    db.close();
+  }
+
+  throw new Error(
+    'Missing DB-backed shard screenshot calibration. Run "node scripts/contracts/generate-system-units.mjs" first.'
+  );
+}
+
+const screenshotCalibration = loadShardCostScreenshotCalibration();
 
 export function getShardCostScreenshotCalibration() {
   return screenshotCalibration;

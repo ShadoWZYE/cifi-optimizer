@@ -6,9 +6,9 @@
     "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
     "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
     "actionShell": "data/multiverse-market-action-shell.json",
-    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-    "unityProbeReport": "data/unity-apk-extract-report.json",
-    "uabeaProbeReport": "data/uabea-extract-report.json",
+    "metadataNeighborhood": "data/archive/multiverse-market-metadata-neighborhood.json",
+    "unityProbeReport": "data/archive/unity-apk-extract-report.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
     "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },
@@ -297,3 +297,5 @@
     ]
   }
 }
+
+

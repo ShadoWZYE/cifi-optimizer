@@ -4,7 +4,7 @@
   "source": {
     "traceScope": "token-shop-family-structure",
     "traceBundle": "data/system-units/trace.v1.json",
-    "tokenShopValues": "data/token-shop-values.json",
+    "tokenShopValues": "data/archive/token-shop-values.json",
     "regenerationCommand": "python scripts\\unity\\unity_trace_bundle.py --family token-shop --level structured"
   },
   "purpose": "Trace-produced support core for TokenShop lane semantics that are now reproducible from the DB-first semantic materialization path. This replaces the old standalone cost-lane probe dataset while leaving save-owner and action-shell evidence on their narrower canonical support paths until trace coverage closes those gaps.",

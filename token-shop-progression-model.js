@@ -4,22 +4,6 @@ export function getTokenShopNumericFieldValue(tokenShop, fieldName) {
   return typeof entry?.value === "number" ? entry.value : null;
 }
 
-export function getTokenShopCanonicalValue(canonical, atuNum, fieldName) {
-  if (!canonical || !atuNum) return null;
-  const row = canonical[atuNum];
-  if (!row) return null;
-
-  const fieldMap = {
-    startCost: "start_cost",
-    additiveCost: "additive_cost",
-    bonusValue: "bonus_value",
-    maxLevel: "max_level"
-  };
-
-  const canonicalField = fieldMap[fieldName];
-  return typeof row[canonicalField] === "number" ? row[canonicalField] : null;
-}
-
 export function resolveTokenShopProgressionLevelSource(
   fieldName,
   progressionState,
@@ -61,7 +45,6 @@ export function buildTokenShopProgressionModel({
   compatibilityLevels,
   boundary,
   tokenShop,
-  canonical,
   currentTokens,
   getGroundedSubsetDefinitions,
   getKnownMaxStatus,
@@ -75,18 +58,10 @@ export function buildTokenShopProgressionModel({
     );
     const currentLevel = levelSource.value;
 
-    const startCost =
-      getTokenShopNumericFieldValue(tokenShop, row.startCostField) ??
-      getTokenShopCanonicalValue(canonical, row.slot, "startCost");
-    const additiveCost =
-      getTokenShopNumericFieldValue(tokenShop, row.additiveCostField) ??
-      getTokenShopCanonicalValue(canonical, row.slot, "additiveCost");
-    const bonusValue =
-      getTokenShopNumericFieldValue(tokenShop, row.bonusField) ??
-      getTokenShopCanonicalValue(canonical, row.slot, "bonusValue");
-    const maxLevel =
-      getTokenShopNumericFieldValue(tokenShop, row.maxLevelField) ??
-      getTokenShopCanonicalValue(canonical, row.slot, "maxLevel");
+    const startCost = getTokenShopNumericFieldValue(tokenShop, row.startCostField);
+    const additiveCost = getTokenShopNumericFieldValue(tokenShop, row.additiveCostField);
+    const bonusValue = getTokenShopNumericFieldValue(tokenShop, row.bonusField);
+    const maxLevel = getTokenShopNumericFieldValue(tokenShop, row.maxLevelField);
     const hasLevel = typeof currentLevel === "number" && Number.isFinite(currentLevel);
     const isMaxed = hasLevel && typeof maxLevel === "number" && currentLevel >= maxLevel;
     const nextKnownCost =

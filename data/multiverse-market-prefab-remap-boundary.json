@@ -2,7 +2,7 @@
   "generatedAt": "2026-04-03",
   "sources": {
     "level0": "workbench/unity/joined/level0",
-    "validatedRows": "data/multiverse-market-values.json"
+    "validatedRows": "data/archive/multiverse-market-values.json"
   },
   "validatedSerializedIds": [
     50,
@@ -101,3 +101,4 @@
     "This is enough to block any assumption that validated rows 69 through 74 already have final grounded upgrade-number labels just because adjacent ChrystosEmporiumUpgrade prefab names exist."
   ]
 }
+

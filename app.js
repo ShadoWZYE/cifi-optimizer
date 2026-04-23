@@ -50,6 +50,7 @@ import {
   getRecommendationFeedSupportNoticeLines
 } from "./support/recommendation-feed-support.js";
 import {
+  buildAppMetaSystemView,
   buildPlayerStateSystemView,
   buildShardSystemView,
   buildSpendSystemView
@@ -579,7 +580,6 @@ const state = {
   shipTemplates: null,
   systemUnits: null,
   systemUnitSource: null,
-  extractionCandidateRanking: null,
   playerProfile: null,
   shipConfig: null,
   launchCoordinator: null,
@@ -606,25 +606,18 @@ async function bootstrap() {
     return;
   }
 
-  const [
-    snapshot,
-    datasetContract,
-    shipBaseline,
-    extractionCandidateRanking,
-    loadedSystemUnits
-  ] = await Promise.all([
-    fetchJson("./data/game-data.snapshot.v1.json"),
-    fetchJson("./data/bundled-dataset-contract.v1.json"),
+  const [shipBaseline, loadedSystemUnits] = await Promise.all([
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
-    fetchJson("./data/extraction-candidate-ranking.v1.json"),
     loadSystemUnits({
       fetchJson,
       origin: window.location.origin,
-      serverCapabilities: SERVER_CAPABILITIES
+      serverCapabilities: SERVER_CAPABILITIES,
+      allowStaticFallback: false
     })
   ]);
   const {
     units: {
+      appMeta: appMetaSystemUnit,
       playerState: playerStateSystemUnit,
       shards: shardsSystemUnit,
       tokenShop: tokenShopSystemUnit,
@@ -632,6 +625,7 @@ async function bootstrap() {
     },
     mode: systemUnitSource
   } = loadedSystemUnits;
+  const appMetaView = buildAppMetaSystemView(appMetaSystemUnit);
 
   const baselineShipPlayerState = createDefaultShipPlayerState(shipBaseline);
   const playerStateView = buildPlayerStateSystemView(playerStateSystemUnit, mergeDeep);
@@ -640,18 +634,21 @@ async function bootstrap() {
   const storedPlayerProfile = loadStoredJson(STORAGE_KEYS.playerProfile, null);
   const legacyProfile = loadStoredJson(LEGACY_STORAGE_KEYS.profile, null);
 
-  state.snapshot = mergeDeep(snapshot, loadStoredJson(STORAGE_KEYS.snapshot, snapshot));
-  state.datasetContract = datasetContract;
+  state.snapshot = mergeDeep(
+    appMetaView.snapshot,
+    loadStoredJson(STORAGE_KEYS.snapshot, appMetaView.snapshot)
+  );
+  state.datasetContract = appMetaView.datasetContract;
   state.shipBaseline = shipBaseline;
   state.shipTemplates = buildShipTemplates(shipBaseline);
   state.systemUnits = {
+    appMeta: appMetaSystemUnit,
     playerState: playerStateSystemUnit,
     shards: shardsSystemUnit,
     tokenShop: tokenShopSystemUnit,
     multiverseMarket: multiverseMarketSystemUnit
   };
   state.systemUnitSource = systemUnitSource;
-  state.extractionCandidateRanking = extractionCandidateRanking;
   state.playerProfile = normalizePlayerProfile(
     storedPlayerProfile ?? legacyProfile ?? playerProfileDefaults,
     mergeDeep(
@@ -811,7 +808,7 @@ function initTokenShopTierTabs() {
     const tierConfig = TOKEN_SHOP_TIER_CONFIG[tier];
     if (!tierConfig) return;
 
-    const tierUnlocks = getCurrentSpendSystemView()?.tokenShop?.rows?.canonical?.tier_unlocks;
+    const tierUnlocks = getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
     const thresholds = tierUnlocks?.tier_thresholds || {};
     const tierUnlockStates = calculateTierUnlockStates(thresholds);
 
@@ -2830,16 +2827,6 @@ function renderResearchTrackSupport(track) {
   }
 
   return renderResearchTrackContract(track);
-}
-
-function getTopExtractionCandidate(trackId = null) {
-  const candidates = Array.isArray(state.extractionCandidateRanking?.candidates)
-    ? state.extractionCandidateRanking.candidates
-    : [];
-  if (!trackId) {
-    return candidates[0] || null;
-  }
-  return candidates.find((candidate) => candidate.track === trackId) || null;
 }
 
 function collectProfileForm() {
@@ -4990,91 +4977,91 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       field: "ATU14Level",
       slot: "ATU14",
       identity: "NewTokenUPGPrefab.T2.DuoBoosterTwo",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T2Duo2StartCost",
-      additiveCostField: "T2Duo2AdditiveCost",
-      bonusField: "T2Duo2Bonus",
-      maxLevelField: "T2Duo2MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "TokenDailiesT2StartCost",
+      additiveCostField: "TokenDailiesT2AdditiveCost",
+      bonusField: "TokenDailiesT2Bonus",
+      maxLevelField: "TokenDailiesT2MaxLevel",
       bonusStepLabel: "T2 Duo 2 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU14 (Duo 2)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU15Level",
       slot: "ATU15",
       identity: "NewTokenUPGPrefab.T2.DuoBoosterThree",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T2Duo3StartCost",
-      additiveCostField: "T2Duo3AdditiveCost",
-      bonusField: "T2Duo3Bonus",
-      maxLevelField: "T2Duo3MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T2Duo1StartCost",
+      additiveCostField: "T2Duo1AdditiveCost",
+      bonusField: "T2Duo1Bonus",
+      maxLevelField: "T2Duo1MaxLevel",
       bonusStepLabel: "T2 Duo 3 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU15 (Duo 3)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU16Level",
       slot: "ATU16",
       identity: "NewTokenUPGPrefab.T2.DuoBoosterFour",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T2Duo4StartCost",
-      additiveCostField: "T2Duo4AdditiveCost",
-      bonusField: "T2Duo4Bonus",
-      maxLevelField: "T2Duo4MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T2Duo2StartCost",
+      additiveCostField: "T2Duo2AdditiveCost",
+      bonusField: "T2Duo2Bonus",
+      maxLevelField: "T2Duo2MaxLevel",
       bonusStepLabel: "T2 Duo 4 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU16 (Duo 4)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU17Level",
       slot: "ATU17",
       identity: "NewTokenUPGPrefab.T2.DuoBoosterFive",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T2Duo5StartCost",
-      additiveCostField: "T2Duo5AdditiveCost",
-      bonusField: "T2Duo5Bonus",
-      maxLevelField: "T2Duo5MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T2Duo3StartCost",
+      additiveCostField: "T2Duo3AdditiveCost",
+      bonusField: "T2Duo3Bonus",
+      maxLevelField: "T2Duo3MaxLevel",
       bonusStepLabel: "T2 Duo 5 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU17 (Duo 5)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU18Level",
       slot: "ATU18",
       identity: "NewTokenUPGPrefab.T2.DuoBoosterSix",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T2Duo6StartCost",
-      additiveCostField: "T2Duo6AdditiveCost",
-      bonusField: "T2Duo6Bonus",
-      maxLevelField: "T2Duo6MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T2Duo4StartCost",
+      additiveCostField: "T2Duo4AdditiveCost",
+      bonusField: "T2Duo4Bonus",
+      maxLevelField: "T2Duo4MaxLevel",
       bonusStepLabel: "T2 Duo 6 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU18 (Duo 6)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU19Level",
       slot: "ATU19",
       identity: "NewTokenUPGPrefab.T3.TrinityBoosterOne",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T3Trinity1StartCost",
-      additiveCostField: "T3Trinity1AdditiveCost",
-      bonusField: "T3Trinity1Bonus",
-      maxLevelField: "T3Trinity1MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T2Duo5StartCost",
+      additiveCostField: "T2Duo5AdditiveCost",
+      bonusField: "T2Duo5Bonus",
+      maxLevelField: "T2Duo5MaxLevel",
       bonusStepLabel: "T3 Trinity 1 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU19 (Trinity 1)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; identity labeling still reflects legacy UI grouping rather than verified canonical row truth."
     },
     {
       field: "ATU20Level",
@@ -5097,121 +5084,121 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       field: "ATU21Level",
       slot: "ATU21",
       identity: "NewTokenUPGPrefab.T3.TrinityBoosterOne",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T3Trinity1DailiesStartCost",
-      additiveCostField: "T3Trinity1DailiesAdditiveCost",
-      bonusField: "T3Trinity1DailiesBonus",
-      maxLevelField: "T3Trinity1DailiesMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "TokenDailiesT3StartCost",
+      additiveCostField: "TokenDailiesT3AdditiveCost",
+      bonusField: "TokenDailiesT3Bonus",
+      maxLevelField: "TokenDailiesT3MaxLevel",
       bonusStepLabel: "T3 Trinity 1 Dailies Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU21 (Trinity 1 Dailies)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU22Level",
       slot: "ATU22",
       identity: "NewTokenUPGPrefab.T3.TrinityBoosterTwo",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T3Trinity2StartCost",
-      additiveCostField: "T3Trinity2AdditiveCost",
-      bonusField: "T3Trinity2Bonus",
-      maxLevelField: "T3Trinity2MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T3Trio1StartCost",
+      additiveCostField: "T3Trio1AdditiveCost",
+      bonusField: "T3Trio1Bonus",
+      maxLevelField: "T3Trio1MaxLevel",
       bonusStepLabel: "T3 Trinity 2 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU22 (Trinity 2)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU23Level",
       slot: "ATU23",
       identity: "NewTokenUPGPrefab.T3.DailyTokens",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T3DailyTokensStartCost",
-      additiveCostField: "T3DailyTokensAdditiveCost",
-      bonusField: "T3DailyTokensBonus",
-      maxLevelField: "T3DailyTokensMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T3Trio2StartCost",
+      additiveCostField: "T3Trio2AdditiveCost",
+      bonusField: "T3Trio2Bonus",
+      maxLevelField: "T3Trio2MaxLevel",
       bonusStepLabel: "T3 Daily Tokens Bonus",
       bonusStepMode: "additive",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU23 (Trinity 3)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU24Level",
       slot: "ATU24",
       identity: "NewTokenUPGPrefab.T4.Ultima",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T4UltimaShardsStartCost",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "ATU24StartCost",
       additiveCostField: "T4UltimaShardsAdditiveCost",
-      bonusField: "T4UltimaShardsBonus",
+      bonusField: "ATU24Bonus3",
       maxLevelField: "T4UltimaShardsMaxLevel",
       bonusStepLabel: "T4 Ultima Shards Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU24 (Ultima Shards)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
     },
     {
       field: "ATU25Level",
       slot: "ATU25",
       identity: "NewTokenUPGPrefab.T4.Ultima",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T4UltimaStartCost",
-      additiveCostField: "T4UltimaAdditiveCost",
-      bonusField: "T4UltimaBonus",
-      maxLevelField: "T4UltimaMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "ATU25StartCost",
+      additiveCostField: "ATU25AdditiveCost",
+      bonusField: "ATU25Bonus",
+      maxLevelField: "ATU25MaxLevel",
       bonusStepLabel: "T4 Ultima Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU25 (Ultima)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
     },
     {
       field: "ATU26Level",
       slot: "ATU26",
       identity: "NewTokenUPGPrefab.T5.CampaignFragments",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T5CampaignFragmentsStartCost",
-      additiveCostField: "T5CampaignFragmentsAdditiveCost",
-      bonusField: "T5CampaignFragmentsBonus",
-      maxLevelField: "T5CampaignFragmentsMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "ATU26StartCost",
+      additiveCostField: "ATU26AdditiveCost",
+      bonusField: "ATU26Bonus",
+      maxLevelField: "ATU26MaxLevel",
       bonusStepLabel: "T5 Campaign Fragments Bonus",
       bonusStepMode: "additive",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU26 (Campaign Fragments)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
     },
     {
       field: "ATU27Level",
       slot: "ATU27",
       identity: "NewTokenUPGPrefab.T5.UltimaRP",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T5UltimaRPStartCost",
-      additiveCostField: "T5UltimaRPAdditiveCost",
-      bonusField: "T5UltimaRPBonus",
-      maxLevelField: "T5UltimaRPMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "ATU27StartCost",
+      additiveCostField: "ATU27AdditiveCost",
+      bonusField: "ATU27Bonus",
+      maxLevelField: "ATU27MaxLevel",
       bonusStepLabel: "T5 Ultima RP Bonus",
       bonusStepMode: "additive",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU27 (Ultima RP)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
     },
     {
       field: "ATU28Level",
       slot: "ATU28",
       identity: "NewTokenUPGPrefab.T5.UltimaMP",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T5UltimaMPStartCost",
-      additiveCostField: "T5UltimaMPAdditiveCost",
-      bonusField: "T5UltimaMPBonus",
-      maxLevelField: "T5UltimaMPMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "ATU28StartCost",
+      additiveCostField: "ATU28AdditiveCost",
+      bonusField: "ATU28Bonus",
+      maxLevelField: "ATU28MaxLevel",
       bonusStepLabel: "T5 Ultima MP Bonus",
       bonusStepMode: "additive",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU28 (Ultima MP)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
     }
   ];
 }
@@ -5237,14 +5224,11 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
 function getTokenShopProgressionModel() {
   const spendSystem = getCurrentSpendSystemView();
   const tokenShop = spendSystem?.tokenShop;
-  const canonical = tokenShop?.rows?.canonical?.atu_rows ?? {};
-
   return buildTokenShopProgressionModel({
     progressionState: getTokenShopProgressionProfileState(),
     compatibilityLevels: getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {},
     boundary: tokenShop?.rows?.boundaries?.remap,
     tokenShop: tokenShop?.rows?.extract,
-    canonical,
     currentTokens: state.playerProfile.player.resources.tokens,
     getGroundedSubsetDefinitions: getTokenShopGroundedSubsetDefinitions,
     getKnownMaxStatus: tokenShopUi.getTokenShopKnownMaxStatus,
@@ -5258,7 +5242,7 @@ function renderTokenShopOverviewAffordabilityModule() {
     ? `${summary.playerStateCount}/${summary.rows.length} checked player-state row${summary.playerStateCount === 1 ? "" : "s"} active before compatibility fallback.`
     : "No checked player-state rows are active yet; compatibility import and default level 0 stay available.";
 
-  const tierUnlocks = getCurrentSpendSystemView()?.tokenShop?.rows?.canonical?.tier_unlocks;
+  const tierUnlocks = getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
   const thresholds = tierUnlocks?.tier_thresholds || {};
   const tierUnlockStates = calculateTierUnlockStatesForOverview(thresholds);
 
@@ -5494,7 +5478,7 @@ function renderTokenShopProgressionEditor() {
       <strong>Grounded TokenShop checked-row editor</strong>
       <p class="meta">Checked subset only. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool.</p>
       <p class="meta">This module is explicitly non-optimizer and stays fixed to the grounded ATU subset: all 28 rows grouped by tier (T1: ATU1-12, T2: ATU13-18, T3: ATU19-23, T4: ATU24-25, T5: ATU26-28).</p>
-      <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown inside the tier-grouped subset. T1 has prefab-driven rows (ATU1, ATU2, ATU4-ATU12), one effect-driven row (ATU3), plus canonical additions (ATU5-ATU12). T2-T5 rows are canonical prefab-driven from tokenshop-canonical-v1.json. Tier unlock thresholds are based on total levels in prior tiers.</p>
+      <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown inside the tier-grouped subset. T1 has prefab-driven checked rows plus one effect-driven row (ATU3). The remaining higher-tier rows use DB-derived TokenShop extract numerics with compatibility-mapped identities until stronger row-local grounding clears. Tier unlock thresholds remain an explicitly heuristic policy based on total levels in prior tiers.</p>
       <div class="profile-actions">
         <button class="button" type="button" data-token-shop-prefill>Prefill local rows from compatibility import</button>
         <button class="button button-ghost" type="button" data-token-shop-clear-local>Clear local row levels</button>

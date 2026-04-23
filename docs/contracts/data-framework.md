@@ -283,7 +283,6 @@ The remaining shared non-system inputs still load directly from committed JSON:
 - `data/game-data.snapshot.v1.json`
 - `data/bundled-dataset-contract.v1.json`
 - `data/ship-optimizer.desmos-baseline.v1.json`
-- `data/extraction-candidate-ranking.v1.json`
 
 ### Runtime-backed through projections
 

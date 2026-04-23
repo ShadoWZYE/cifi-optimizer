@@ -58,7 +58,7 @@ It exists because TokenShop upgrade constants alone are not enough to integrate 
 This pass did not close the full save boundary, but it did recover one exact current-state owner and narrow the remaining save-side search.
 
 - `SaveData.BankedTokens`
-  - Exact typed recovery in `data/uabea-extract-report.json` now shows `BankedTokens` as a direct `SaveData` field with type `System.Single`.
+  - Exact typed recovery in `data/archive/uabea-extract-report.json` now shows `BankedTokens` as a direct `SaveData` field with type `System.Single`.
   - Why it matters: this is the first exact save-side owner recovered for the token-bank lane itself, and it grounds the current stored token-bank amount without promoting any wider planner behavior.
 - `ClaimableBankTokens` and `TokenBankCap`
   - The same checked typed save tables do not currently expose `ClaimableBankTokens` or `TokenBankCap` on `SaveData` or `PlayerProfileData`.
@@ -206,5 +206,6 @@ This lane already points to several future owner families that matter beyond the
 - It is now safe to treat the TokenShop controller shell, the `BigStatisticPrefab.TokenBankCap` display shell, and the `FinalTokenBank*` derived-output cluster as non-owner surfaces for save-state recovery.
 - It is now safe to keep token-bank cap and claimable or ready-state recovery beyond the checked `PlayerProfileHandler.saveInfoCache` / `ConvertSaveDataToProfileData(...) -> PlayerProfileData` export bridge instead of treating `TokenShop` methods, direct `PlayerProfileData.Tokens` or `Tokenium` wrapper strings, the broader generic `SaveData.ClaimableTokenium` field, the metadata-only `CloudSavePlayerProfile` save/load shell, or `FinalTokenBank*` symbols as recovered saved-state owners.
 - Any future planner or import work should treat token-bank state as `available but unmapped` until those owned fields are proven from assets.
+
 
 

@@ -1,13 +1,57 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { DatabaseSync } from "node:sqlite";
 
-const formulaModel = JSON.parse(
-  await readFile(new URL("../../data/shard-cost-formula-model.v1.json", import.meta.url), "utf8")
-);
-const parameterProbe = JSON.parse(
-  await readFile(new URL(`../../${formulaModel.sources.parameterProbe}`, import.meta.url), "utf8")
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const dbPath = path.join(repoRoot, "workbench", "ghidra-cache", "ghidra_cache.sqlite3");
 
+function loadShardCostFormulaModel() {
+  const db = new DatabaseSync(dbPath);
+  db.exec("PRAGMA busy_timeout=30000");
+  try {
+    const materializedRow = db
+      .prepare(
+        `
+          SELECT payload_json
+          FROM materialized_system_unit_views
+          WHERE system_id = ? AND version = ?
+        `
+      )
+      .get("shard-cost-formula-model", "v1");
+    if (materializedRow?.payload_json) {
+      const payload = JSON.parse(materializedRow.payload_json);
+      if (payload?.dataset === "shard-cost-formula-model.v1") {
+        return payload;
+      }
+    }
+
+    const shardUnitRow = db
+      .prepare(
+        `
+          SELECT payload_json
+          FROM materialized_system_unit_views
+          WHERE system_id = ? AND version = ?
+        `
+      )
+      .get("shards", "v1");
+    if (shardUnitRow?.payload_json) {
+      const shardUnit = JSON.parse(shardUnitRow.payload_json);
+      const payload = shardUnit?.sections?.cost?.formulaModel?.data ?? null;
+      if (payload?.dataset === "shard-cost-formula-model.v1") {
+        return payload;
+      }
+    }
+  } finally {
+    db.close();
+  }
+
+  throw new Error(
+    'Missing DB-backed shard cost formula model. Run "node scripts/contracts/generate-system-units.mjs" first.'
+  );
+}
+
+const formulaModel = loadShardCostFormulaModel();
 const rowClassByRow = new Map();
 for (const rowClass of formulaModel.rowClasses) {
   for (const row of rowClass.rows) {
@@ -31,8 +75,8 @@ const derivedOverLevelBaseModels = Array.isArray(overLevelBaseRecoveryPath.deriv
   : [];
 
 const exactParametersByRow = new Map();
-for (const entry of parameterProbe.rowAlignedTupleCandidates || []) {
-  const row = Number(entry.row);
+for (const [rowKey, entry] of Object.entries(formulaModel?.verifiedParameters?.exactRowParameters ?? {})) {
+  const row = Number(rowKey);
   exactParametersByRow.set(row, readExactFields(entry, row === 0));
 }
 
@@ -252,15 +296,19 @@ function getRequiredRowParameters(row) {
 }
 
 function readExactFields(entry, isRowZero) {
-  const exact = entry?.strongestFieldOrderMapping?.exactBigDoubleValues || {};
+  const exact = entry?.exactBigDoubleValues || {};
   return {
-    StartCost: parseBigDoubleLabel(exact.StartCost?.label),
-    CostExponent: parseBigDoubleLabel(exact.CostExponent?.label),
-    GrowthExponent: parseBigDoubleLabel(exact.GrowthExponent?.label),
+    StartCost: parseBigDoubleLabel(extractBigDoubleLabel(exact.StartCost)),
+    CostExponent: parseBigDoubleLabel(extractBigDoubleLabel(exact.CostExponent)),
+    GrowthExponent: parseBigDoubleLabel(extractBigDoubleLabel(exact.GrowthExponent)),
     GrowthExponent2:
-      isRowZero && exact.GrowthExponent2 ? parseBigDoubleLabel(exact.GrowthExponent2.label) : null,
+      isRowZero && exact.GrowthExponent2
+        ? parseBigDoubleLabel(extractBigDoubleLabel(exact.GrowthExponent2))
+        : null,
     GrowthExponent3:
-      isRowZero && exact.GrowthExponent3 ? parseBigDoubleLabel(exact.GrowthExponent3.label) : null
+      isRowZero && exact.GrowthExponent3
+        ? parseBigDoubleLabel(extractBigDoubleLabel(exact.GrowthExponent3))
+        : null
   };
 }
 
@@ -268,6 +316,13 @@ function parseBigDoubleLabel(label) {
   const match = String(label || "").match(/^([+-]?\d+(?:\.\d+)?)e([+-]?\d+)$/u);
   assert.ok(match, `invalid BigDouble label: ${label}`);
   return normalizeBigDouble(Number(match[1]), Number(match[2]));
+}
+
+function extractBigDoubleLabel(value) {
+  if (value && typeof value === "object" && typeof value.label === "string") {
+    return value.label;
+  }
+  return value;
 }
 
 function scalar(value) {
