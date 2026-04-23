@@ -1,6 +1,6 @@
 {
   "contractVersion": "v1",
-  "updatedAt": "2026-04-07",
+  "updatedAt": "2026-04-22",
   "validationCommand": "npm run verify:data",
   "sourcePriority": [
     {
@@ -29,6 +29,62 @@
       "classification": "canonical-app-snapshot",
       "files": [
         "data/game-data.snapshot.v1.json"
+      ]
+    },
+    {
+      "id": "data-framework",
+      "label": "Data framework manifest",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/data-framework.v1.json"
+      ]
+    },
+    {
+      "id": "app-meta-unit",
+      "label": "App meta system unit",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/system-units/app-meta.v1.json"
+      ]
+    },
+    {
+      "id": "player-state-unit",
+      "label": "Player-state system unit",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/system-units/player-state.v1.json"
+      ]
+    },
+    {
+      "id": "shards-unit",
+      "label": "Shards system unit",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/system-units/shards.v1.json"
+      ]
+    },
+    {
+      "id": "token-shop-unit",
+      "label": "Token shop system unit",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/system-units/token-shop.v1.json"
+      ]
+    },
+    {
+      "id": "multiverse-market-unit",
+      "label": "Multiverse market system unit",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/system-units/multiverse-market.v1.json"
+      ]
+    },
+    {
+      "id": "trace-unit",
+      "label": "Trace system unit",
+      "classification": "extracted-mechanics",
+      "files": [
+        "data/system-units/trace.v1.json"
       ]
     },
     {
@@ -126,7 +182,7 @@
       "label": "Shard milestone handoff boundary",
       "classification": "extracted-mechanics",
       "files": [
-        "data/shard-milestone-handoff-boundary.v1.json"
+        "data/shard-milestone-handoff-boundary.v2.json"
       ]
     },
     {
@@ -134,7 +190,7 @@
       "label": "Shard save boundary",
       "classification": "extracted-mechanics",
       "files": [
-        "data/shard-save-boundary.v1.json"
+        "data/shard-save-boundary.v2.json"
       ]
     },
     {
@@ -142,87 +198,7 @@
       "label": "Shard milestone save-owner candidates",
       "classification": "extracted-mechanics",
       "files": [
-        "data/shard-milestone-save-owner-candidates.v1.json"
-      ]
-    },
-    {
-      "id": "shard-scene-monobehaviour-probe",
-      "label": "Shard scene MonoBehaviour probe",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/shard-scene-monobehaviour-probe.v1.json"
-      ]
-    },
-    {
-      "id": "shard-cost-parameter-probe",
-      "label": "Shard cost parameter probe",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/shard-cost-parameter-probe.v1.json"
-      ]
-    },
-    {
-      "id": "shard-cost-method-probe",
-      "label": "Shard cost method probe",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/shard-cost-method-probe.v1.json"
-      ]
-    },
-    {
-      "id": "shard-cost-native-probe",
-      "label": "Shard cost native probe",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/shard-cost-native-probe.v1.json"
-      ]
-    },
-    {
-      "id": "shard-cost-screenshot-calibration",
-      "label": "Shard cost screenshot calibration",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/shard-cost-screenshot-calibration.v1.json"
-      ]
-    },
-    {
-      "id": "shard-cost-list-path-probe",
-      "label": "Shard cost list-path probe",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/shard-cost-list-path-probe.v1.json"
-      ]
-    },
-    {
-      "id": "shard-cost-formula-model",
-      "label": "Shard cost formula model",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/shard-cost-formula-model.v1.json"
-      ]
-    },
-    {
-      "id": "shard-bonus-slot-probe",
-      "label": "Shard bonus slot probe",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/shard-bonus-slot-probe.v1.json"
-      ]
-    },
-    {
-      "id": "shard-milestone-family-evidence",
-      "label": "Shard milestone family evidence",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/shard-milestone-family-evidence.v1.json"
-      ]
-    },
-    {
-      "id": "shard-type-metadata-probe",
-      "label": "Shard type metadata probe",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/shard-type-metadata-probe.v1.json"
+        "data/shard-milestone-save-owner-candidates.v2.json"
       ]
     },
     {
@@ -231,62 +207,6 @@
       "classification": "extracted-mechanics",
       "files": [
         "data/extraction-candidate-families.v1.json"
-      ]
-    },
-    {
-      "id": "extraction-candidate-ranking",
-      "label": "Extraction candidate ranking",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/extraction-candidate-ranking.v1.json"
-      ]
-    },
-    {
-      "id": "token-shop",
-      "label": "Token shop extract",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/token-shop-values.json"
-      ]
-    },
-    {
-      "id": "multiverse-market",
-      "label": "Multiverse market extract",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/multiverse-market-values.json"
-      ]
-    },
-    {
-      "id": "multiverse-market-metadata-neighborhood",
-      "label": "Multiverse market metadata neighborhood",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/multiverse-market-metadata-neighborhood.json"
-      ]
-    },
-    {
-      "id": "tokenium-naming-clues",
-      "label": "Tokenium naming clues",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/tokenium-naming-clues.json"
-      ]
-    },
-    {
-      "id": "token-bank-state-clues",
-      "label": "Token-bank state clues",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/token-bank-state-clues.json"
-      ]
-    },
-    {
-      "id": "daily-tokenium-lane-clues",
-      "label": "Daily Tokenium lane clues",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/daily-tokenium-lane-clues.json"
       ]
     },
     {
@@ -306,14 +226,6 @@
       ]
     },
     {
-      "id": "multiverse-market-row-text-coverage",
-      "label": "Multiverse market row text coverage",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/multiverse-market-row-text-coverage.json"
-      ]
-    },
-    {
       "id": "multiverse-market-prefab-remap-boundary",
       "label": "Multiverse market prefab remap boundary",
       "classification": "extracted-mechanics",
@@ -322,67 +234,11 @@
       ]
     },
     {
-      "id": "token-shop-cost-lanes",
-      "label": "Token shop cost lanes",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/token-shop-cost-lanes.json"
-      ]
-    },
-    {
-      "id": "spend-action-lane-clues",
-      "label": "Spend action lane clues",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/spend-action-lane-clues.json"
-      ]
-    },
-    {
-      "id": "multiverse-market-action-shell",
-      "label": "Multiverse market action shell",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/multiverse-market-action-shell.json"
-      ]
-    },
-    {
-      "id": "multiverse-market-owner-family",
-      "label": "Multiverse market owner family",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/multiverse-market-owner-family.json"
-      ]
-    },
-    {
-      "id": "token-shop-owner-shell",
-      "label": "Token shop owner shell",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/token-shop-owner-shell.json"
-      ]
-    },
-    {
       "id": "token-shop-save-boundary",
       "label": "Token shop save boundary",
       "classification": "extracted-mechanics",
       "files": [
-        "data/token-shop-save-boundary.json"
-      ]
-    },
-    {
-      "id": "token-shop-row-level-owner",
-      "label": "Token shop row-level owner",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/token-shop-row-level-owner.json"
-      ]
-    },
-    {
-      "id": "token-shop-row-remap-boundary",
-      "label": "Token shop row remap boundary",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/token-shop-row-remap-boundary.json"
+        "data/token-shop-save-boundary.v2.json"
       ]
     },
     {
@@ -394,27 +250,11 @@
       ]
     },
     {
-      "id": "unity-trace-target-registry",
-      "label": "Unity trace target registry",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/unity-trace-target-registry.json"
-      ]
-    },
-    {
-      "id": "unity-trace-bundle",
-      "label": "Unity trace bundle",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/unity-trace-bundle.json"
-      ]
-    },
-    {
       "id": "multiverse-market-save-boundary",
       "label": "Multiverse market save boundary",
       "classification": "extracted-mechanics",
       "files": [
-        "data/multiverse-market-save-boundary.json"
+        "data/multiverse-market-save-boundary.v2.json"
       ]
     },
     {
@@ -458,35 +298,11 @@
       ]
     },
     {
-      "id": "multiverse-market-row71-74-remap-band",
-      "label": "Multiverse market row 71-74 remap band",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/multiverse-market-row71-74-remap-band.json"
-      ]
-    },
-    {
-      "id": "multiverse-market-nearby-identity-binding-pattern",
-      "label": "Multiverse market nearby text-adjacent controls",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/multiverse-market-nearby-identity-binding-pattern.json"
-      ]
-    },
-    {
       "id": "multiverse-market-inscription-numbering-stability-boundary",
       "label": "Multiverse market inscription numbering-stability boundary",
       "classification": "extracted-mechanics",
       "files": [
         "data/multiverse-market-inscription-numbering-stability-boundary.json"
-      ]
-    },
-    {
-      "id": "multiverse-market-69-74-anomaly-provenance",
-      "label": "Multiverse market 69-74 anomaly provenance",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/multiverse-market-69-74-anomaly-provenance.json"
       ]
     },
     {
@@ -503,14 +319,6 @@
       "classification": "extracted-mechanics",
       "files": [
         "data/multiverse-market-text-provenance-path-boundary.json"
-      ]
-    },
-    {
-      "id": "token-bank-controller-shell",
-      "label": "Token-bank controller shell",
-      "classification": "extracted-mechanics",
-      "files": [
-        "data/token-bank-controller-shell.json"
       ]
     }
   ]

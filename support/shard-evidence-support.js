@@ -2,11 +2,70 @@ export function createShardEvidenceSupport({
   formatShardNumber,
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
-  getShardGrounding,
+  getShardSystemView,
   getShardMilestoneRowModelBoundarySummary,
   getShardMilestoneTitleEffectBoundarySummary,
   getShardPlannerState
 }) {
+  function getShardGroundingCompatibilityView() {
+    const shardSystem = getShardSystemView?.() ?? {};
+    return {
+      milestones: shardSystem?.family?.grounded?.milestones ?? null,
+      observedBehaviors: shardSystem?.family?.grounded?.observedBehaviors ?? null,
+      provenance: shardSystem?.family?.grounded?.provenance ?? null,
+      milestoneFamilyEvidence: shardSystem?.family?.familyEvidence ?? null,
+      bonusSlotProbe: shardSystem?.cost?.bonusSlotProbe ?? null,
+      formulaModel: shardSystem?.cost?.formulaModel ?? null,
+      saveBoundary: shardSystem?.ownedState?.saveBoundary ?? null,
+      saveOwnerCandidates: shardSystem?.ownedState?.saveOwnerCandidates ?? null
+    };
+  }
+
+  function getShardFormulaModel() {
+    return getShardGroundingCompatibilityView()?.formulaModel ?? {};
+  }
+
+  function getShardFormulaProfiles() {
+    const profiles =
+      getShardFormulaModel()?.runtimeGetterRules?.sharedStageLogic?.formulaApplicationProfiles;
+    return Array.isArray(profiles) ? profiles : [];
+  }
+
+  function getShardFormulaVerifiedParameters() {
+    const verified = getShardFormulaModel()?.verifiedParameters;
+    return verified && typeof verified === "object" ? verified : {};
+  }
+
+  function getShardRowClassForRow(row) {
+    const rowNumber = Number(row);
+    const rowClasses = Array.isArray(getShardFormulaModel()?.rowClasses)
+      ? getShardFormulaModel().rowClasses
+      : [];
+    return (
+      rowClasses.find((entry) => Array.isArray(entry?.rows) && entry.rows.includes(rowNumber)) ||
+      null
+    );
+  }
+
+  function buildDerivedThresholdStages(row) {
+    const rowClass = getShardRowClassForRow(row);
+    const stageCoverage = Array.isArray(rowClass?.stageCoverage) ? rowClass.stageCoverage : [];
+    const overLevelSeedModels = Array.isArray(
+      getShardFormulaModel()?.derivedParameters?.overLevelSeedModels
+    )
+      ? getShardFormulaModel().derivedParameters.overLevelSeedModels
+      : [];
+    return stageCoverage.map((minimumLevel) => {
+      const getterName = `get_OverLevel${minimumLevel}Exponent`;
+      const seed = overLevelSeedModels.find((entry) => entry?.getterName === getterName) || {};
+      return {
+        minimumLevel,
+        getterName,
+        baseFieldName: seed.baseFieldName || `OverLevel${minimumLevel}Base`
+      };
+    });
+  }
+
   function formatThresholdScheduleSummary(thresholds = {}) {
     return Object.entries(thresholds)
       .filter(([rarity]) => rarity !== "source_ids")
@@ -15,16 +74,19 @@ export function createShardEvidenceSupport({
   }
 
   function getGroundedShardMilestones() {
-    return getShardGrounding()?.milestones?.milestones ?? [];
+    return getShardGroundingCompatibilityView()?.milestones?.milestones ?? [];
   }
 
   function getGroundedShardMechanics() {
-    return getShardGrounding()?.milestones?.canonicalMechanics?.shardMilestoneSystem ?? {};
+    return (
+      getShardGroundingCompatibilityView()?.milestones?.canonicalMechanics?.shardMilestoneSystem ??
+      {}
+    );
   }
 
   function getShardMilestoneFamilyEvidence() {
-    const rows = Array.isArray(getShardGrounding()?.milestoneFamilyEvidence?.rows)
-      ? getShardGrounding().milestoneFamilyEvidence.rows
+    const rows = Array.isArray(getShardGroundingCompatibilityView()?.milestoneFamilyEvidence?.rows)
+      ? getShardGroundingCompatibilityView().milestoneFamilyEvidence.rows
       : [];
     return [...rows].sort((left, right) => Number(left?.row ?? 0) - Number(right?.row ?? 0));
   }
@@ -88,32 +150,34 @@ export function createShardEvidenceSupport({
   }
 
   function getShardBonusSlotRowSummary(row) {
-    const rows = Array.isArray(getShardGrounding()?.bonusSlotProbe?.rows)
-      ? getShardGrounding().bonusSlotProbe.rows
+    const rows = Array.isArray(getShardGroundingCompatibilityView()?.bonusSlotProbe?.rows)
+      ? getShardGroundingCompatibilityView().bonusSlotProbe.rows
       : [];
     return rows.find((entry) => Number(entry.row) === Number(row)) || null;
   }
 
   function getShardRowAlignedCostTuple(row) {
-    const tuples = Array.isArray(getShardGrounding()?.costParameterProbe?.rowAlignedTupleCandidates)
-      ? getShardGrounding().costParameterProbe.rowAlignedTupleCandidates
+    const representativeRows = Array.isArray(
+      getShardFormulaVerifiedParameters()?.representativeNormalRows
+    )
+      ? getShardFormulaVerifiedParameters().representativeNormalRows
       : [];
-    return tuples.find((entry) => Number(entry.row) === Number(row)) || null;
+    return representativeRows.find((entry) => Number(entry.row) === Number(row)) || null;
   }
 
   function getShardRowDirectValues(row) {
     if (Number(row) === 0) {
-      const row0 = getShardGrounding()?.costParameterProbe?.row0PreludeCandidate;
-      return Number(row0?.row) === 0 ? row0 : null;
+      const row0 = getShardFormulaVerifiedParameters()?.row0FieldShell;
+      return row0 && typeof row0 === "object" ? { row: 0, ...row0 } : null;
     }
     return getShardRowAlignedCostTuple(row);
   }
 
   function getShardExtractedUnlockRequirement(row) {
     const values = Array.isArray(
-      getShardGrounding()?.costParameterProbe?.unlockRequirementBlock?.values
+      getShardFormulaVerifiedParameters()?.unlockRequirementBlock?.values
     )
-      ? getShardGrounding().costParameterProbe.unlockRequirementBlock.values
+      ? getShardFormulaVerifiedParameters().unlockRequirementBlock.values
       : [];
     const value = values[Number(row)];
     return Number.isFinite(Number(value)) ? Number(value) : null;
@@ -130,14 +194,39 @@ export function createShardEvidenceSupport({
 
   function getShardExtractedCostFieldMapping(row) {
     const directValues = getShardRowDirectValues(row);
-    return directValues?.strongestFieldOrderMapping || null;
+    if (directValues?.strongestFieldOrderMapping) {
+      return directValues.strongestFieldOrderMapping;
+    }
+    const exactValues = directValues?.exactBigDoubleValues;
+    if (!exactValues || typeof exactValues !== "object") {
+      return null;
+    }
+    const fieldNames = Object.keys(exactValues);
+    if (!fieldNames.length) {
+      return null;
+    }
+    return {
+      fieldNames,
+      values: Object.fromEntries(
+        fieldNames.map((fieldName) => [
+          fieldName,
+          exactValues[fieldName]?.label ?? exactValues[fieldName]
+        ])
+      )
+    };
   }
 
   function getShardNativeCostRowSummary(row) {
-    const rows = Array.isArray(getShardGrounding()?.costNativeProbe?.rows)
-      ? getShardGrounding().costNativeProbe.rows
-      : [];
-    return rows.find((entry) => Number(entry.row) === Number(row)) || null;
+    const rowNumber = Number(row);
+    const rowClass = getShardRowClassForRow(rowNumber);
+    if (!rowClass) {
+      return null;
+    }
+    return {
+      row: rowNumber,
+      thresholdStages: buildDerivedThresholdStages(rowNumber),
+      nativeFormulaClass: rowClass.nativeFormulaClass || rowClass.id || null
+    };
   }
 
   function formatShardNativeThresholdStage(stage) {
@@ -180,17 +269,10 @@ export function createShardEvidenceSupport({
   }
 
   function getShardFormulaApplicationProfile(row) {
-    const profiles = getShardGrounding()?.costNativeProbe?.formulaApplicationProfiles;
-    if (!profiles) {
-      return null;
-    }
-    if (Number(row) === 0) {
-      return profiles.rowZero || null;
-    }
-    const normalRows = Array.isArray(profiles.normalRows) ? profiles.normalRows : [];
     return (
-      normalRows.find((entry) => Array.isArray(entry?.rows) && entry.rows.includes(Number(row))) ||
-      null
+      getShardFormulaProfiles().find(
+        (entry) => Array.isArray(entry?.rows) && entry.rows.includes(Number(row))
+      ) || null
     );
   }
 
@@ -374,20 +456,17 @@ export function createShardEvidenceSupport({
   }
 
   function getShardOwnedStateBlockerSummary() {
-    const saveBoundary = getShardGrounding()?.saveBoundary ?? {};
-    const probeResults =
-      typeof saveBoundary?.probeResults === "object" && saveBoundary.probeResults
-        ? saveBoundary.probeResults
-        : {};
+    const saveBoundary = getShardGroundingCompatibilityView()?.saveBoundary ?? {};
+    const boundaryEvidence = saveBoundary.boundaryEvidence || {};
     const recoveredDeclaringRowModel =
       typeof saveBoundary?.recoveredDeclaringRowModel === "object" &&
       saveBoundary.recoveredDeclaringRowModel
         ? saveBoundary.recoveredDeclaringRowModel
         : {};
     const remainingCandidates = Array.isArray(
-      getShardGrounding()?.saveOwnerCandidates?.remainingSaveOwnerCandidates
+      getShardGroundingCompatibilityView()?.saveOwnerCandidates?.remainingSaveOwnerCandidates
     )
-      ? getShardGrounding().saveOwnerCandidates.remainingSaveOwnerCandidates
+      ? getShardGroundingCompatibilityView().saveOwnerCandidates.remainingSaveOwnerCandidates
       : [];
     const leadingCandidate = remainingCandidates[0] ?? null;
     const runtimeShellAnchor = recoveredDeclaringRowModel?.ownerType
@@ -396,11 +475,11 @@ export function createShardEvidenceSupport({
     return {
       statusLabel: "Blocked",
       ownerLine:
-        probeResults.saveSideOwnerRecovered === false
+        boundaryEvidence.saveSideOwnerRecovered === false
           ? `No checked save-side owner is recovered for player-owned shard rows; the trail still stops at ${runtimeShellAnchor}.`
           : "A checked save-side owner is recovered.",
       traceLine:
-        probeResults.traceOwnedStateOutcomeKind === "deeper-wrapper-handoff"
+        boundaryEvidence.ownedStateOutcomeKind === "deeper-wrapper-handoff"
           ? "The trace does not recover a local ShardMining producer, but it does preserve a deeper wrapper handoff for owned-state values."
           : "The trace rules out a local upgradeInfoList population bridge and still cannot name a deeper wrapper handoff, so owned-state values stay bounded as a non-local injection seam.",
       importLine:
@@ -659,7 +738,7 @@ export function createShardEvidenceSupport({
   }
 
   function getSourceTitlesForIds(sourceIds = []) {
-    const sourceMap = getShardGrounding()?.provenance?.sources ?? {};
+    const sourceMap = getShardGroundingCompatibilityView()?.provenance?.sources ?? {};
     return sourceIds.map((sourceId) => sourceMap[sourceId]?.title).filter(Boolean);
   }
 
@@ -670,7 +749,7 @@ export function createShardEvidenceSupport({
 
   function getProvenanceConflictNote() {
     return (
-      (getShardGrounding()?.provenance?.uncertaintyLog ?? []).find(
+      (getShardGroundingCompatibilityView()?.provenance?.uncertaintyLog ?? []).find(
         (entry) => entry.status === "conflict_detected"
       )?.what_is_missing || ""
     );

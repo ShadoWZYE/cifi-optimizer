@@ -4,7 +4,7 @@
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0",
     "probe": "tmp-multiverse-row-text-probe.json",
-    "validatedRows": "data/multiverse-market-values.json"
+    "validatedRows": "data/archive/multiverse-market-values.json"
   },
   "textHandlerAnchors": [
     "TextHandlerMarkets",
@@ -45,3 +45,4 @@
     "It is enough to separate validated row-label coverage from the unrelated IS99-110 save-side metadata run."
   ]
 }
+

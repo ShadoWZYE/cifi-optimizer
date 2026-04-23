@@ -1,5 +1,9 @@
 # TokenShop ROI Blocker Assessment
 
+Historical note:
+- This is a session-bound blocker assessment from `2026-04-15`.
+- The current active extract owner is `db:derived:token-shop-values`; `data/archive/token-shop-values.json`, `data/archive/uabea-extract-report.json`, and `data/archive/unity-apk-extract-report.json` are archived provenance snapshots, not live runtime owners.
+
 ## Session: 2026-04-15
 
 ### Honest Assessment: What Can We Actually Recommend?
@@ -14,9 +18,9 @@ This document assesses whether ROI recommendations are grounded in game-truth or
 
 | Field        | Source                 | Grounding                  |
 | ------------ | ---------------------- | -------------------------- |
-| StartCost    | token-shop-values.json | Direct extraction from APK |
-| AdditiveCost | token-shop-values.json | Direct extraction from APK |
-| MaxLevel     | token-shop-values.json | Direct extraction from APK |
+| StartCost    | `db:derived:token-shop-values` | Direct extraction from APK (archived snapshot: `data/archive/token-shop-values.json`) |
+| AdditiveCost | `db:derived:token-shop-values` | Direct extraction from APK (archived snapshot: `data/archive/token-shop-values.json`) |
+| MaxLevel     | `db:derived:token-shop-values` | Direct extraction from APK (archived snapshot: `data/archive/token-shop-values.json`) |
 
 ### ✅ Bonus Labels - VERIFIED
 
@@ -131,12 +135,12 @@ compatibility = {
 ### ✅ RESOLVED: Cost Formulas are Game-Extracted
 
 - **Finding**: All cost fields (StartCost, AdditiveCost, MaxLevel) extracted from APK
-- **Formula**: `nextCost = startCost + (additiveCost × currentLevel)` verified in token-shop-values.json
+- **Formula**: `nextCost = startCost + (additiveCost × currentLevel)` verified in the active `db:derived:token-shop-values` extract (archived snapshot: `data/archive/token-shop-values.json`)
 - **Status**: GROUNDED - verified from game assets
 
 ### ✅ RESOLVED: Bonus Values are Game-Extracted
 
-- **Finding**: All bonus values extracted from token-shop-values.json
+- **Finding**: All bonus values extracted from the active `db:derived:token-shop-values` extract (archived snapshot: `data/archive/token-shop-values.json`)
 - **Labels**: Player-facing text verified from Unity text assets
 - **Status**: GROUNDED - verified from game assets
 
@@ -246,7 +250,7 @@ compatibility = {
 ### What IS Verified
 
 - ✅ Cost formulas: `cost = startCost + additiveCost × currentLevel`
-- ✅ Bonus values: extracted from game assets (token-shop-values.json)
+- ✅ Bonus values: extracted from game assets via `db:derived:token-shop-values` (archived snapshot: `data/archive/token-shop-values.json`)
 - ✅ Bonus modes: additive vs multiplier identified per row
 - ✅ Bonus labels: "Tokens Gained from Token Chests", "Diamonds Gained from Diamond Chests", "Mod Points Gained" - these are confirmed effect text
 - ✅ Player-facing titles for ATU6-10, ATU12: "Mk2-8 Generator Booster" confirmed
@@ -259,7 +263,7 @@ compatibility = {
 
 ### Extended Probe Results (2026-04-15)
 
-Ran `token_shop_title_discovery_probe.py` targeting specific path_ids:
+Historical note: this analysis originally used the now-removed `token_shop_title_discovery_probe.py` targeted by path ids:
 
 - **Path ID references found**: 0 (no method or text table references to path_ids 15839, 15804, etc.)
 - **Title methods found**: 0 (no `Set*TokenBoostTitle` style methods in metadata)
@@ -278,7 +282,7 @@ Analyzed raw level0 binary to trace shell-to-title connections:
 
 ### Complete Title Remap (VERIFIED 2026-04-15)
 
-All 28 ATU rows verified via binary trace + UABEA probe:
+All 28 ATU rows verified via binary trace + UABEA extract report:
 
 | ATU   | Path ID | Tier | Player-Facing Title               |
 | ----- | ------- | ---- | --------------------------------- |
@@ -329,7 +333,7 @@ All 28 ATU rows verified via binary trace + UABEA probe:
 
 - ✅ **ALL 28 ATU row mappings verified** via binary trace (2026-04-15)
 - ✅ Cost formulas: `cost = startCost + additiveCost × currentLevel`
-- ✅ Bonus values: extracted from game assets (token-shop-values.json)
+- ✅ Bonus values: extracted from game assets via `db:derived:token-shop-values` (archived snapshot: `data/archive/token-shop-values.json`)
 - ✅ Bonus modes: additive vs multiplier identified per row
 - ✅ Bonus labels: confirmed effect text
 - ✅ Cap calculations: formulas implemented in spend-boundary-summary.js
@@ -365,4 +369,4 @@ All 28 ATU rows verified via binary trace + UABEA probe:
 - token-shop-row-level-owner.json - ATU family save location
 - token-shop-row-remap-boundary.json - Current remap blockers
 - game-data.snapshot.v1.json - Research track status
-- unity-probe-report.json - Prefab and text asset extraction
+- data/archive/unity-apk-extract-report.json - archived prefab and text-asset extraction provenance

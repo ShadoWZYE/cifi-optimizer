@@ -41,24 +41,28 @@ export function getTokenShopCostLaneSummary(clues) {
     ? clues.dailyTokeniumModifierGroups
     : [];
   const diamondGroups = Array.isArray(clues?.diamondGroups) ? clues.diamondGroups : [];
-  const playerFacingClues = Array.isArray(clues?.playerFacingClues) ? clues.playerFacingClues : [];
+  const tracePresentation =
+    typeof clues?.tracePresentation === "object" && clues.tracePresentation
+      ? clues.tracePresentation
+      : {};
 
   return {
     hasLaneSplit:
       tokenSpendGroups.includes("TokenBoost") &&
       diamondGroups.includes("DiamondBoost") &&
       dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
-      playerFacingClues.includes("CostBox-Tokens") &&
-      playerFacingClues.includes("CostBox-Tokenium"),
+      tracePresentation.costShell === "CostBox" &&
+      tracePresentation.descriptionRenderNode === "DescText",
     keepsDailyTokeniumSeparate:
       dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
       dailyTokeniumModifierGroups.includes("TokenDailiesT3") &&
-      playerFacingClues.includes("Mission Materials Booster"),
+      tracePresentation.costRenderNode === "CostText",
     tokenLaneLabel: "TokenBoost",
     diamondLaneLabel: "DiamondBoost",
     dailyLaneLabel: "TokenDailiesT2",
-    tokensShellLabel: "CostBox-Tokens",
-    tokeniumShellLabel: "CostBox-Tokenium"
+    costShellLabel: tracePresentation.costShell ?? "CostBox",
+    costRenderLabel: tracePresentation.costRenderNode ?? "CostText",
+    descriptionRenderLabel: tracePresentation.descriptionRenderNode ?? "DescText"
   };
 }
 
@@ -419,19 +423,19 @@ export function getTokenShopSaveBoundarySummary(boundary) {
   const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked)
     ? boundary.saveFamilyTermsChecked
     : [];
-  const probeResults =
-    typeof boundary?.probeResults === "object" && boundary.probeResults
-      ? boundary.probeResults
+  const boundaryEvidence =
+    typeof boundary?.boundaryEvidence === "object" && boundary.boundaryEvidence
+      ? boundary.boundaryEvidence
       : {};
 
   return {
     hasSeparationBoundary:
       ownerShellTermsChecked.includes("TokenShop") &&
       saveFamilyTermsChecked.includes("PlayerProfileData") &&
-      probeResults.metadataHasSaveTerms === true &&
-      probeResults.level0HasSaveTerms === false &&
-      probeResults.ownerShellWithSaveOverlapCount === 0 &&
-      probeResults.directTokenShopPlayerProfileContext === false,
+      boundaryEvidence.metadataHasSaveTerms === true &&
+      boundaryEvidence.level0HasSaveTerms === false &&
+      boundaryEvidence.ownerShellWithSaveOverlapCount === 0 &&
+      boundaryEvidence.directTokenShopPlayerProfileContext === false,
     ownerAnchor: "TokenShop",
     saveAnchor: "PlayerProfileData",
     overlapLabel: "zero overlap"
@@ -470,20 +474,20 @@ export function getMultiverseMarketSaveBoundarySummary(boundary) {
   const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked)
     ? boundary.saveFamilyTermsChecked
     : [];
-  const probeResults =
-    typeof boundary?.probeResults === "object" && boundary.probeResults
-      ? boundary.probeResults
+  const boundaryEvidence =
+    typeof boundary?.boundaryEvidence === "object" && boundary.boundaryEvidence
+      ? boundary.boundaryEvidence
       : {};
 
   return {
     hasSeparationBoundary:
       actionShellTermsChecked.includes("TextHandlerMarkets") &&
       saveFamilyTermsChecked.includes("PlayerProfileData") &&
-      probeResults.actionShellWithSaveOverlapCount === 0 &&
-      probeResults.metadataNeighborhoodHasActionTerms === true &&
-      probeResults.metadataNeighborhoodHasSaveTerms === true &&
-      probeResults.metadataProbeHasSaveTerms === false &&
-      probeResults.level0ProbeHasSaveTerms === false,
+      boundaryEvidence.actionShellWithSaveOverlapCount === 0 &&
+      boundaryEvidence.metadataNeighborhoodHasActionTerms === true &&
+      boundaryEvidence.metadataNeighborhoodHasSaveTerms === true &&
+      boundaryEvidence.metadataDirectCheckHasSaveTerms === false &&
+      boundaryEvidence.level0DirectCheckHasSaveTerms === false,
     actionAnchor: "TextHandlerMarkets",
     saveAnchor: "PlayerProfileData",
     overlapLabel: "zero overlap"

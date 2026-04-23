@@ -1,57 +1,145 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { DatabaseSync } from "node:sqlite";
 
-const formulaModel = JSON.parse(
-  await readFile(new URL("../../data/shard-cost-formula-model.v1.json", import.meta.url), "utf8")
-);
-const parameterProbe = JSON.parse(
-  await readFile(new URL(`../../${formulaModel.sources.parameterProbe}`, import.meta.url), "utf8")
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const dbPath = path.join(repoRoot, "workbench", "ghidra-cache", "ghidra_cache.sqlite3");
+const shardSystemUnitPath = path.join(repoRoot, "data", "system-units", "shards.v1.json");
 
-const rowClassByRow = new Map();
-for (const rowClass of formulaModel.rowClasses) {
-  for (const row of rowClass.rows) {
-    rowClassByRow.set(row, rowClass);
+function loadShardSystemUnitSnapshot() {
+  return JSON.parse(readFileSync(shardSystemUnitPath, "utf8"));
+}
+
+function loadShardCostFormulaModel() {
+  if (existsSync(dbPath)) {
+    try {
+      const db = new DatabaseSync(dbPath);
+      db.exec("PRAGMA busy_timeout=30000");
+      try {
+        const materializedRow = db
+          .prepare(
+            `
+          SELECT payload_json
+          FROM materialized_system_unit_views
+          WHERE system_id = ? AND version = ?
+        `
+          )
+          .get("shard-cost-formula-model", "v1");
+        if (materializedRow?.payload_json) {
+          const payload = JSON.parse(materializedRow.payload_json);
+          if (payload?.dataset === "shard-cost-formula-model.v1") {
+            return payload;
+          }
+        }
+
+        const shardUnitRow = db
+          .prepare(
+            `
+          SELECT payload_json
+          FROM materialized_system_unit_views
+          WHERE system_id = ? AND version = ?
+        `
+          )
+          .get("shards", "v1");
+        if (shardUnitRow?.payload_json) {
+          const shardUnit = JSON.parse(shardUnitRow.payload_json);
+          const payload = shardUnit?.sections?.cost?.formulaModel?.data ?? null;
+          if (payload?.dataset === "shard-cost-formula-model.v1") {
+            return payload;
+          }
+        }
+      } finally {
+        db.close();
+      }
+    } catch {
+      // Fall through to the committed system-unit snapshot on clean CI checkouts.
+    }
   }
+
+  const shardUnit = loadShardSystemUnitSnapshot();
+  const payload = shardUnit?.sections?.cost?.formulaModel?.data ?? null;
+  if (payload?.dataset === "shard-cost-formula-model.v1") {
+    return payload;
+  }
+
+  throw new Error(
+    "Missing shard cost formula model in both DB and committed system-unit snapshot."
+  );
 }
 
-const runtimeGetterRules = formulaModel.runtimeGetterRules || {};
-const getterFamily = runtimeGetterRules.getterFamily || {};
-const cacheLifecycle = runtimeGetterRules.cacheLifecycle || {};
-const sharedStageLogic = runtimeGetterRules.sharedStageLogic || {};
-const stableGetterCallOrder = Array.isArray(getterFamily.stableCallOrder)
-  ? getterFamily.stableCallOrder
-  : [];
-const thresholdCoverageClasses = Array.isArray(sharedStageLogic.thresholdCoverageClasses)
-  ? sharedStageLogic.thresholdCoverageClasses
-  : [];
-const overLevelBaseRecoveryPath = formulaModel.derivedParameters?.overLevelBaseRecoveryPath || {};
-const derivedOverLevelBaseModels = Array.isArray(overLevelBaseRecoveryPath.derivedRuntimeSeedModels)
-  ? overLevelBaseRecoveryPath.derivedRuntimeSeedModels
-  : [];
+let shardCostContext = null;
 
-const exactParametersByRow = new Map();
-for (const entry of parameterProbe.rowAlignedTupleCandidates || []) {
-  const row = Number(entry.row);
-  exactParametersByRow.set(row, readExactFields(entry, row === 0));
+function getShardCostContext() {
+  if (shardCostContext) {
+    return shardCostContext;
+  }
+
+  const formulaModel = loadShardCostFormulaModel();
+  const rowClassByRow = new Map();
+  for (const rowClass of formulaModel.rowClasses) {
+    for (const row of rowClass.rows) {
+      rowClassByRow.set(row, rowClass);
+    }
+  }
+
+  const runtimeGetterRules = formulaModel.runtimeGetterRules || {};
+  const getterFamily = runtimeGetterRules.getterFamily || {};
+  const cacheLifecycle = runtimeGetterRules.cacheLifecycle || {};
+  const sharedStageLogic = runtimeGetterRules.sharedStageLogic || {};
+  const stableGetterCallOrder = Array.isArray(getterFamily.stableCallOrder)
+    ? getterFamily.stableCallOrder
+    : [];
+  const thresholdCoverageClasses = Array.isArray(sharedStageLogic.thresholdCoverageClasses)
+    ? sharedStageLogic.thresholdCoverageClasses
+    : [];
+  const overLevelBaseRecoveryPath = formulaModel.derivedParameters?.overLevelBaseRecoveryPath || {};
+  const derivedOverLevelBaseModels = Array.isArray(
+    overLevelBaseRecoveryPath.derivedRuntimeSeedModels
+  )
+    ? overLevelBaseRecoveryPath.derivedRuntimeSeedModels
+    : [];
+
+  const exactParametersByRow = new Map();
+  for (const [rowKey, entry] of Object.entries(
+    formulaModel?.verifiedParameters?.exactRowParameters ?? {}
+  )) {
+    const row = Number(rowKey);
+    exactParametersByRow.set(row, readExactFields(entry, row === 0));
+  }
+
+  shardCostContext = {
+    formulaModel,
+    rowClassByRow,
+    getterFamily,
+    cacheLifecycle,
+    sharedStageLogic,
+    stableGetterCallOrder,
+    thresholdCoverageClasses,
+    derivedOverLevelBaseModels,
+    exactParametersByRow,
+    hundredPlusFamilies: formulaModel.stageRules?.hundredPlus?.sharedWindowFamilies || [],
+    sampledOffsetFeeders: formulaModel.stageRules?.hundredPlus?.sampledOffsetFeeders || [],
+    twoHundredFamilies: formulaModel.stageRules?.twoHundredPlus?.sharedFamilies || [],
+    threeHundredFamilies: formulaModel.stageRules?.threeHundredPlus?.sharedFamilies || []
+  };
+  return shardCostContext;
 }
-
-const hundredPlusFamilies = formulaModel.stageRules?.hundredPlus?.sharedWindowFamilies || [];
-const sampledOffsetFeeders = formulaModel.stageRules?.hundredPlus?.sampledOffsetFeeders || [];
-const twoHundredFamilies = formulaModel.stageRules?.twoHundredPlus?.sharedFamilies || [];
-const threeHundredFamilies = formulaModel.stageRules?.threeHundredPlus?.sharedFamilies || [];
 
 export function getShardCostFormulaModel() {
-  return formulaModel;
+  return getShardCostContext().formulaModel;
 }
 
 export function getShardCostRowClass(row) {
   assertRow(row);
-  return rowClassByRow.get(row) || null;
+  return getShardCostContext().rowClassByRow.get(row) || null;
 }
 
 export function getShardCostRuntimeRule(row) {
   assertRow(row);
+  const { getterFamily, cacheLifecycle, sharedStageLogic, stableGetterCallOrder } =
+    getShardCostContext();
   const getterName =
     stableGetterCallOrder.find((name) => name === `get_SU${row}Cost`) || `get_SU${row}Cost`;
   const coverageClass = findThresholdCoverageClass(row);
@@ -77,6 +165,7 @@ export function getShardCostRuntimeRule(row) {
 }
 
 export function isShardCostPlannerSafeFromCalibration(calibrationChecks) {
+  const { formulaModel } = getShardCostContext();
   return (
     formulaModel.completionFlags.automatedCalibrationImplemented === true &&
     calibrationChecks?.allPassed === true &&
@@ -90,6 +179,8 @@ export async function isShardCostPlannerSafe() {
 }
 
 export function evaluateShardCost({ row, level }) {
+  const { formulaModel, hundredPlusFamilies, threeHundredFamilies, twoHundredFamilies } =
+    getShardCostContext();
   assertRow(row);
   const normalizedLevel = normalizeLevel(level);
   const rowClass = getRequiredRowClass(row);
@@ -240,27 +331,31 @@ function normalizeLevel(level) {
 }
 
 function getRequiredRowClass(row) {
-  const rowClass = rowClassByRow.get(row);
+  const rowClass = getShardCostContext().rowClassByRow.get(row);
   assert.ok(rowClass, `missing row class for row ${row}`);
   return rowClass;
 }
 
 function getRequiredRowParameters(row) {
-  const params = exactParametersByRow.get(row);
+  const params = getShardCostContext().exactParametersByRow.get(row);
   assert.ok(params, `missing exact parameters for row ${row}`);
   return params;
 }
 
 function readExactFields(entry, isRowZero) {
-  const exact = entry?.strongestFieldOrderMapping?.exactBigDoubleValues || {};
+  const exact = entry?.exactBigDoubleValues || {};
   return {
-    StartCost: parseBigDoubleLabel(exact.StartCost?.label),
-    CostExponent: parseBigDoubleLabel(exact.CostExponent?.label),
-    GrowthExponent: parseBigDoubleLabel(exact.GrowthExponent?.label),
+    StartCost: parseBigDoubleLabel(extractBigDoubleLabel(exact.StartCost)),
+    CostExponent: parseBigDoubleLabel(extractBigDoubleLabel(exact.CostExponent)),
+    GrowthExponent: parseBigDoubleLabel(extractBigDoubleLabel(exact.GrowthExponent)),
     GrowthExponent2:
-      isRowZero && exact.GrowthExponent2 ? parseBigDoubleLabel(exact.GrowthExponent2.label) : null,
+      isRowZero && exact.GrowthExponent2
+        ? parseBigDoubleLabel(extractBigDoubleLabel(exact.GrowthExponent2))
+        : null,
     GrowthExponent3:
-      isRowZero && exact.GrowthExponent3 ? parseBigDoubleLabel(exact.GrowthExponent3.label) : null
+      isRowZero && exact.GrowthExponent3
+        ? parseBigDoubleLabel(extractBigDoubleLabel(exact.GrowthExponent3))
+        : null
   };
 }
 
@@ -268,6 +363,13 @@ function parseBigDoubleLabel(label) {
   const match = String(label || "").match(/^([+-]?\d+(?:\.\d+)?)e([+-]?\d+)$/u);
   assert.ok(match, `invalid BigDouble label: ${label}`);
   return normalizeBigDouble(Number(match[1]), Number(match[2]));
+}
+
+function extractBigDoubleLabel(value) {
+  if (value && typeof value === "object" && typeof value.label === "string") {
+    return value.label;
+  }
+  return value;
 }
 
 function scalar(value) {
@@ -285,7 +387,7 @@ function findStageFamily(families, row) {
 
 function findThresholdCoverageClass(row) {
   return (
-    thresholdCoverageClasses.find(
+    getShardCostContext().thresholdCoverageClasses.find(
       (entry) => Array.isArray(entry.rows) && entry.rows.includes(row)
     ) || null
   );
@@ -293,8 +395,8 @@ function findThresholdCoverageClass(row) {
 
 function findOverLevelBaseModelsForRow(coverageClass) {
   const getterNames = Array.isArray(coverageClass?.getterNames) ? coverageClass.getterNames : [];
-  return derivedOverLevelBaseModels
-    .filter((entry) => getterNames.includes(String(entry.getterName)))
+  return getShardCostContext()
+    .derivedOverLevelBaseModels.filter((entry) => getterNames.includes(String(entry.getterName)))
     .map((entry) => ({
       fieldName: String(entry.fieldName),
       getterName: String(entry.getterName),
@@ -307,7 +409,9 @@ function findOverLevelBaseModelsForRow(coverageClass) {
 }
 
 function findSampledOffsetFeeder(row, family) {
-  const direct = sampledOffsetFeeders.find((entry) => Number(entry.row) === row);
+  const direct = getShardCostContext().sampledOffsetFeeders.find(
+    (entry) => Number(entry.row) === row
+  );
   if (direct) {
     return direct;
   }
@@ -315,7 +419,7 @@ function findSampledOffsetFeeder(row, family) {
     return null;
   }
   return (
-    sampledOffsetFeeders.find(
+    getShardCostContext().sampledOffsetFeeders.find(
       (entry) =>
         String(entry.model) === String(family.model) &&
         Number(entry.levelOffset) === Number(family.levelOffset)

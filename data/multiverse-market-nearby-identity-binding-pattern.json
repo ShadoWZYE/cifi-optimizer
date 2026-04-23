@@ -3,9 +3,9 @@
   "dataset": "multiverse-market-nearby-identity-binding-pattern",
   "sources": {
     "row6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
-    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-    "uabeaProbeReport": "data/uabea-probe-report.json",
-    "unityProbeReport": "data/unity-probe-report.json",
+    "metadataNeighborhood": "data/archive/multiverse-market-metadata-neighborhood.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
+    "unityProbeReport": "data/archive/unity-apk-extract-report.json",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },
   "checkedPositiveBindings": [
@@ -22,15 +22,15 @@
       "liveEffectTextStatus": "mismatch-against-row78-screenshot",
       "evidence": [
         {
-          "artifact": "data/multiverse-market-metadata-neighborhood.json",
+          "artifact": "data/archive/multiverse-market-metadata-neighborhood.json",
           "claim": "metadata neighborhood preserves IS78Level, BuyIS78, TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source path in one nearby UI shell"
         },
         {
-          "artifact": "data/uabea-probe-report.json",
-          "claim": "UABEA probe preserves IS78Level, IS78ID, BuyIS78, MultiverseMarket.BuyIS78(), TextHandlerMarkets, and ChrystosEmporiumUpgrade78-ID78"
+          "artifact": "data/archive/uabea-extract-report.json",
+          "claim": "UABEA extract report preserves IS78Level, IS78ID, BuyIS78, MultiverseMarket.BuyIS78(), TextHandlerMarkets, and ChrystosEmporiumUpgrade78-ID78"
         },
         {
-          "artifact": "data/unity-probe-report.json",
+          "artifact": "data/archive/unity-apk-extract-report.json",
           "claim": "Unity probe preserves the player-facing string anchor Inscryption 78 Ouroboros Orbs beside the same TextHandlerMarkets.cs source path, but that sparse anchor is not the recovered live effect-text binding"
         }
       ]
@@ -48,15 +48,15 @@
       "liveEffectTextStatus": "unvalidated-no-live-control-screenshot",
       "evidence": [
         {
-          "artifact": "data/multiverse-market-metadata-neighborhood.json",
+          "artifact": "data/archive/multiverse-market-metadata-neighborhood.json",
           "claim": "metadata neighborhood preserves IS83Level, BuyIS83, TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source path in one nearby UI shell"
         },
         {
-          "artifact": "data/uabea-probe-report.json",
-          "claim": "UABEA probe preserves IS83Level, IS83ID, BuyIS83, MultiverseMarket.BuyIS83(), TextHandlerMarkets, and ChrystosEmporiumUpgrade83-ID83"
+          "artifact": "data/archive/uabea-extract-report.json",
+          "claim": "UABEA extract report preserves IS83Level, IS83ID, BuyIS83, MultiverseMarket.BuyIS83(), TextHandlerMarkets, and ChrystosEmporiumUpgrade83-ID83"
         },
         {
-          "artifact": "data/unity-probe-report.json",
+          "artifact": "data/archive/unity-apk-extract-report.json",
           "claim": "Unity probe preserves the player-facing string anchor Inscryption 83 Fast-Loop ML beside the same TextHandlerMarkets.cs source path, but no checked repo-local binding from that anchor to live effect text is recovered"
         }
       ]
@@ -87,3 +87,5 @@
     "Because the unresolved lane is now text provenance rather than row identity, the canonical import-safe subset remains empty."
   ]
 }
+
+

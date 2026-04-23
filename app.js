@@ -50,6 +50,13 @@ import {
   getRecommendationFeedSupportNoticeLines
 } from "./support/recommendation-feed-support.js";
 import {
+  buildAppMetaSystemView,
+  buildPlayerStateSystemView,
+  buildShardSystemView,
+  buildSpendSystemView
+} from "./support/system-unit-projections.js";
+import { loadSystemUnits } from "./support/system-unit-provider.js";
+import {
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
   getShardFinalSuBonusBoundarySummary,
@@ -111,7 +118,8 @@ const APP_LAUNCH_HEARTBEAT_MS = 4000;
 const APP_LAUNCH_STALE_MS = 60000;
 const DEFAULT_SERVER_CAPABILITIES = Object.freeze({
   sessionApi: false,
-  launcherMode: false
+  launcherMode: false,
+  systemUnitApi: false
 });
 const SERVER_SESSION_ENDPOINTS = {
   open: "/api/client/open",
@@ -139,7 +147,7 @@ const shardEvidence = createShardEvidenceSupport({
   formatShardNumber,
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
-  getShardGrounding: () => state.shardGrounding,
+  getShardSystemView: () => getCurrentShardSystemView(),
   getShardMilestoneRowModelBoundarySummary,
   getShardMilestoneTitleEffectBoundarySummary,
   getShardPlannerState
@@ -570,9 +578,8 @@ const state = {
   datasetContract: null,
   shipBaseline: null,
   shipTemplates: null,
-  shardGrounding: null,
-  extractionCandidateRanking: null,
-  extractedMechanics: null,
+  systemUnits: null,
+  systemUnitSource: null,
   playerProfile: null,
   shipConfig: null,
   launchCoordinator: null,
@@ -599,160 +606,51 @@ async function bootstrap() {
     return;
   }
 
-  const [
-    snapshot,
-    datasetContract,
-    shipBaseline,
-    groundedShardMilestones,
-    groundedShardObservedBehaviors,
-    groundedShardProvenance,
-    shardAssetGrounding,
-    shardOwnerFamilyBoundary,
-    shardFinalSuBonusBoundary,
-    shardMilestonePayloadBoundary,
-    shardCostModelBoundary,
-    shardMilestoneRowModelBoundary,
-    shardMilestoneTitleEffectBoundary,
-    shardEffectTextHandlerBoundary,
-    shardMilestoneRowShellBoundary,
-    shardMilestoneRowAlignmentBoundary,
-    shardSaveBoundary,
-    shardSceneMonoBehaviourProbe,
-    shardCostParameterProbe,
-    shardCostNativeProbe,
-    shardBonusSlotProbe,
-    shardMilestoneFamilyEvidence,
-    shardMilestoneHandoffBoundary,
-    shardMilestoneSaveOwnerCandidates,
-    extractionCandidateRanking,
-    tokenShopValues,
-    tokenshopCanonical,
-    multiverseMarketValues,
-    multiverseMarketMetadataNeighborhood,
-    tokeniumNamingClues,
-    tokenBankStateClues,
-    dailyTokeniumLaneClues,
-    tokenBankFormulaBoundary,
-    multiverseMarketRangeBoundary,
-    multiverseMarketRowTextCoverage,
-    multiverseMarketPrefabRemapBoundary,
-    tokenShopCostLanes,
-    spendActionLaneClues,
-    multiverseMarketActionShell,
-    multiverseMarketOwnerFamily,
-    tokenShopOwnerShell,
-    tokenShopSaveBoundary,
-    multiverseMarketSaveBoundary,
-    multiverseMarketMarketMemberBoundary,
-    tokenBankControllerShell,
-    tokenShopRowRemapBoundary
-  ] = await Promise.all([
-    fetchJson("./data/game-data.snapshot.v1.json"),
-    fetchJson("./data/bundled-dataset-contract.v1.json"),
+  const [shipBaseline, loadedSystemUnits] = await Promise.all([
     fetchJson("./data/ship-optimizer.desmos-baseline.v1.json"),
-    fetchJson("./data/shard-milestones.grounded.v1.json"),
-    fetchJson("./data/shard-observed-behaviors.grounded.v1.json"),
-    fetchJson("./data/shard-milestones-provenance.grounded.v1.json"),
-    fetchJson("./data/shard-asset-grounding.v1.json"),
-    fetchJson("./data/shard-owner-family-boundary.v1.json"),
-    fetchJson("./data/shard-finalsu-bonus-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-payload-boundary.v1.json"),
-    fetchJson("./data/shard-cost-model-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-row-model-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-title-effect-boundary.v1.json"),
-    fetchJson("./data/shard-effect-text-handler-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-row-shell-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-row-alignment-boundary.v1.json"),
-    fetchJson("./data/shard-save-boundary.v1.json"),
-    fetchJson("./data/shard-scene-monobehaviour-probe.v1.json"),
-    fetchJson("./data/shard-cost-parameter-probe.v1.json"),
-    fetchJson("./data/shard-cost-native-probe.v1.json"),
-    fetchJson("./data/shard-bonus-slot-probe.v1.json"),
-    fetchJson("./data/shard-milestone-family-evidence.v1.json"),
-    fetchJson("./data/shard-milestone-handoff-boundary.v1.json"),
-    fetchJson("./data/shard-milestone-save-owner-candidates.v1.json"),
-    fetchJson("./data/extraction-candidate-ranking.v1.json"),
-    fetchJson("./data/token-shop-values.json"),
-    fetchJson("./data/tokenshop-canonical-v1.json"),
-    fetchJson("./data/multiverse-market-values.json"),
-    fetchJson("./data/multiverse-market-metadata-neighborhood.json"),
-    fetchJson("./data/tokenium-naming-clues.json"),
-    fetchJson("./data/token-bank-state-clues.json"),
-    fetchJson("./data/daily-tokenium-lane-clues.json"),
-    fetchJson("./data/token-bank-formula-boundary.json"),
-    fetchJson("./data/multiverse-market-range-boundary.json"),
-    fetchJson("./data/multiverse-market-row-text-coverage.json"),
-    fetchJson("./data/multiverse-market-prefab-remap-boundary.json"),
-    fetchJson("./data/token-shop-cost-lanes.json"),
-    fetchJson("./data/spend-action-lane-clues.json"),
-    fetchJson("./data/multiverse-market-action-shell.json"),
-    fetchJson("./data/multiverse-market-owner-family.json"),
-    fetchJson("./data/token-shop-owner-shell.json"),
-    fetchJson("./data/token-shop-save-boundary.json"),
-    fetchJson("./data/multiverse-market-save-boundary.json"),
-    fetchJson("./data/multiverse-market-market-member-boundary.json"),
-    fetchJson("./data/token-bank-controller-shell.json"),
-    fetchJson("./data/token-shop-row-remap-boundary.json")
+    loadSystemUnits({
+      fetchJson,
+      origin: window.location.origin,
+      serverCapabilities: SERVER_CAPABILITIES,
+      allowStaticFallback: false
+    })
   ]);
+  const {
+    units: {
+      appMeta: appMetaSystemUnit,
+      playerState: playerStateSystemUnit,
+      shards: shardsSystemUnit,
+      tokenShop: tokenShopSystemUnit,
+      multiverseMarket: multiverseMarketSystemUnit
+    },
+    mode: systemUnitSource
+  } = loadedSystemUnits;
+  const appMetaView = buildAppMetaSystemView(appMetaSystemUnit);
 
   const baselineShipPlayerState = createDefaultShipPlayerState(shipBaseline);
+  const playerStateView = buildPlayerStateSystemView(playerStateSystemUnit, mergeDeep);
+  const playerProfileDefaults = playerStateView.defaults;
   const legacyShipConfig = loadStoredJson(STORAGE_KEYS.shipConfig, null);
   const storedPlayerProfile = loadStoredJson(STORAGE_KEYS.playerProfile, null);
   const legacyProfile = loadStoredJson(LEGACY_STORAGE_KEYS.profile, null);
 
-  state.snapshot = mergeDeep(snapshot, loadStoredJson(STORAGE_KEYS.snapshot, snapshot));
-  state.datasetContract = datasetContract;
+  state.snapshot = mergeDeep(
+    appMetaView.snapshot,
+    loadStoredJson(STORAGE_KEYS.snapshot, appMetaView.snapshot)
+  );
+  state.datasetContract = appMetaView.datasetContract;
   state.shipBaseline = shipBaseline;
   state.shipTemplates = buildShipTemplates(shipBaseline);
-  state.shardGrounding = {
-    milestones: groundedShardMilestones,
-    observedBehaviors: groundedShardObservedBehaviors,
-    provenance: groundedShardProvenance,
-    assetGrounding: shardAssetGrounding,
-    ownerFamilyBoundary: shardOwnerFamilyBoundary,
-    finalSuBonusBoundary: shardFinalSuBonusBoundary,
-    milestonePayloadBoundary: shardMilestonePayloadBoundary,
-    costModelBoundary: shardCostModelBoundary,
-    rowModelBoundary: shardMilestoneRowModelBoundary,
-    titleEffectBoundary: shardMilestoneTitleEffectBoundary,
-    effectTextHandlerBoundary: shardEffectTextHandlerBoundary,
-    milestoneRowShellBoundary: shardMilestoneRowShellBoundary,
-    milestoneRowAlignmentBoundary: shardMilestoneRowAlignmentBoundary,
-    saveBoundary: shardSaveBoundary,
-    sceneMonoBehaviourProbe: shardSceneMonoBehaviourProbe,
-    costParameterProbe: shardCostParameterProbe,
-    costNativeProbe: shardCostNativeProbe,
-    bonusSlotProbe: shardBonusSlotProbe,
-    milestoneFamilyEvidence: shardMilestoneFamilyEvidence,
-    milestoneHandoffBoundary: shardMilestoneHandoffBoundary,
-    saveOwnerCandidates: shardMilestoneSaveOwnerCandidates
+  state.systemUnits = {
+    appMeta: appMetaSystemUnit,
+    playerState: playerStateSystemUnit,
+    shards: shardsSystemUnit,
+    tokenShop: tokenShopSystemUnit,
+    multiverseMarket: multiverseMarketSystemUnit
   };
-  state.extractionCandidateRanking = extractionCandidateRanking;
-  state.extractedMechanics = {
-    tokenShop: tokenShopValues,
-    tokenshopCanonical,
-    multiverseMarket: multiverseMarketValues,
-    multiverseMarketMetadataNeighborhood,
-    tokeniumNamingClues,
-    tokenBankStateClues,
-    dailyTokeniumLaneClues,
-    tokenBankFormulaBoundary,
-    multiverseMarketRangeBoundary,
-    multiverseMarketRowTextCoverage,
-    multiverseMarketPrefabRemapBoundary,
-    tokenShopCostLanes,
-    spendActionLaneClues,
-    multiverseMarketActionShell,
-    multiverseMarketOwnerFamily,
-    tokenShopOwnerShell,
-    tokenShopSaveBoundary,
-    multiverseMarketSaveBoundary,
-    multiverseMarketMarketMemberBoundary,
-    tokenBankControllerShell,
-    tokenShopRowRemapBoundary
-  };
+  state.systemUnitSource = systemUnitSource;
   state.playerProfile = normalizePlayerProfile(
-    storedPlayerProfile ?? legacyProfile,
+    storedPlayerProfile ?? legacyProfile ?? playerProfileDefaults,
     mergeDeep(
       mergeDeep(baselineShipPlayerState, legacyShipConfig?.playerState ?? {}),
       typeof legacyShipConfig?.softCap === "boolean"
@@ -785,6 +683,25 @@ function fetchJson(url) {
     }
     return response.json();
   });
+}
+
+function getCurrentPlayerStateView() {
+  return buildPlayerStateSystemView(state.systemUnits?.playerState, mergeDeep);
+}
+
+function getCurrentPlayerProfileDefaults() {
+  return getCurrentPlayerStateView().defaults;
+}
+
+function getCurrentSpendSystemView() {
+  return buildSpendSystemView({
+    tokenShopSystemUnit: state.systemUnits?.tokenShop,
+    multiverseMarketSystemUnit: state.systemUnits?.multiverseMarket
+  });
+}
+
+function getCurrentShardSystemView() {
+  return buildShardSystemView(state.systemUnits?.shards);
 }
 
 function loadStoredJson(key, fallback) {
@@ -891,7 +808,8 @@ function initTokenShopTierTabs() {
     const tierConfig = TOKEN_SHOP_TIER_CONFIG[tier];
     if (!tierConfig) return;
 
-    const tierUnlocks = state.extractedMechanics?.tokenshopCanonical?.tier_unlocks;
+    const tierUnlocks =
+      getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
     const thresholds = tierUnlocks?.tier_thresholds || {};
     const tierUnlockStates = calculateTierUnlockStates(thresholds);
 
@@ -1134,7 +1052,8 @@ function getServerCapabilities() {
 
   return {
     sessionApi: raw.sessionApi === true,
-    launcherMode: raw.launcherMode === true
+    launcherMode: raw.launcherMode === true,
+    systemUnitApi: raw.systemUnitApi === true
   };
 }
 
@@ -1467,7 +1386,7 @@ function bindProfileActions() {
 
   $("#restoreDefaultsBtn").addEventListener("click", () => {
     state.playerProfile = normalizePlayerProfile(
-      createDefaultPlayerProfile(),
+      getCurrentPlayerProfileDefaults() ?? createDefaultPlayerProfile(),
       createDefaultShipPlayerState(state.shipBaseline)
     );
     persistPlayerProfile();
@@ -2185,15 +2104,16 @@ function renderValidationResults() {
 }
 
 function renderSpendSaveSideBoundary() {
-  const multiverseMarket = state.extractedMechanics?.multiverseMarket;
-  const multiverseMarketMetadataNeighborhood =
-    state.extractedMechanics?.multiverseMarketMetadataNeighborhood;
-  const dailyTokeniumLaneClues = state.extractedMechanics?.dailyTokeniumLaneClues;
-  const tokenBankFormulaBoundary = state.extractedMechanics?.tokenBankFormulaBoundary;
-  const multiverseMarketRangeBoundary = state.extractedMechanics?.multiverseMarketRangeBoundary;
-  const multiverseMarketRowTextCoverage = state.extractedMechanics?.multiverseMarketRowTextCoverage;
-  const multiverseMarketPrefabRemapBoundary =
-    state.extractedMechanics?.multiverseMarketPrefabRemapBoundary;
+  const spendSystem = getCurrentSpendSystemView();
+  const tokenShop = spendSystem?.tokenShop;
+  const market = spendSystem?.multiverseMarket;
+  const multiverseMarket = market?.saveOwner?.extract;
+  const multiverseMarketMetadataNeighborhood = market?.rowIdentity?.metadataNeighborhood;
+  const dailyTokeniumLaneClues = tokenShop?.dailyTokenium?.laneClues;
+  const tokenBankFormulaBoundary = tokenShop?.tokenBank?.formulaBoundary;
+  const multiverseMarketRangeBoundary = market?.rowIdentity?.rangeBoundary;
+  const multiverseMarketRowTextCoverage = market?.rowIdentity?.rowTextCoverage;
+  const multiverseMarketPrefabRemapBoundary = market?.rowIdentity?.prefabRemapBoundary;
   if (!multiverseMarket && !multiverseMarketMetadataNeighborhood) {
     return "";
   }
@@ -2212,10 +2132,10 @@ function renderSpendSaveSideBoundary() {
     multiverseMarketPrefabRemapBoundary
   );
   const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(
-    state.extractedMechanics?.multiverseMarketOwnerFamily
+    market?.uiShell?.ownerFamily
   );
   const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
-    state.extractedMechanics?.multiverseMarketMarketMemberBoundary
+    market?.saveOwner?.marketMemberBoundary
   );
   return `
     <section class="meta-stack">
@@ -2281,7 +2201,7 @@ function renderSpendSaveSideBoundary() {
         </article>
         <article class="validation-card warn">
           <strong>Still blocked for planner wiring</strong>
-          <p class="meta">Do not promote FinalIS or achievement symbols into canonical player state yet. Current evidence only narrows the search; it does not identify the declaring save model or which recovered IS*Level subset actually maps to the validated MultiverseMarket rows.</p>
+        <p class="meta">Do not promote FinalIS or achievement symbols into canonical player state yet. Current evidence now identifies the declaring save model, but it still does not prove which recovered IS*Level subset should be promoted as planner-safe validated MultiverseMarket rows.</p>
         </article>
       </div>
     </section>
@@ -2720,34 +2640,35 @@ function renderResearchTrackSupport(track) {
     track.id === "shards-and-loop-guardrails" ||
     track.id === "shard-milestone-payload-recovery"
   ) {
+    const shardSystem = getCurrentShardSystemView();
     const ownerBoundary = getShardOwnerFamilyBoundarySummary(
-      state.shardGrounding?.ownerFamilyBoundary
+      shardSystem?.family?.boundaries?.ownerFamily
     );
     const finalSuBoundary = getShardFinalSuBonusBoundarySummary(
-      state.shardGrounding?.finalSuBonusBoundary
+      shardSystem?.family?.boundaries?.finalSuBonus
     );
     const payloadBoundary = getShardMilestonePayloadBoundarySummary(
-      state.shardGrounding?.milestonePayloadBoundary
+      shardSystem?.family?.boundaries?.milestonePayload
     );
     const costModelBoundary = getShardCostModelBoundarySummary(
-      state.shardGrounding?.costModelBoundary
+      shardSystem?.cost?.costModelBoundary
     );
     const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
-      state.shardGrounding?.rowModelBoundary
+      shardSystem?.family?.boundaries?.rowModel
     );
     const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(
-      state.shardGrounding?.titleEffectBoundary
+      shardSystem?.family?.boundaries?.titleEffect
     );
     const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
-      state.shardGrounding?.effectTextHandlerBoundary
+      shardSystem?.family?.boundaries?.effectTextHandler
     );
     const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(
-      state.shardGrounding?.milestoneRowShellBoundary
+      shardSystem?.family?.boundaries?.rowShell
     );
     const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(
-      state.shardGrounding?.milestoneRowAlignmentBoundary
+      shardSystem?.family?.boundaries?.rowAlignment
     );
-    const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
+    const saveBoundary = getShardSaveBoundarySummary(shardSystem?.ownedState?.saveBoundary);
     return `
       <div class="meta-stack">
         <p class="snapshot-title">Repo-local owner-family narrowing</p>
@@ -2782,57 +2703,50 @@ function renderResearchTrackSupport(track) {
   }
 
   if (track.id === "spend-multiverse-savedata-import-surface") {
-    const tokenShopCoverage = getTokenShopCoverageSummary(state.extractedMechanics?.tokenShop);
-    const validatedCoverage = getMultiverseMarketValidatedCoverage(
-      state.extractedMechanics?.multiverseMarket
-    );
+    const spendSystem = getCurrentSpendSystemView();
+    const tokenShop = spendSystem?.tokenShop;
+    const market = spendSystem?.multiverseMarket;
+    const tokenShopCoverage = getTokenShopCoverageSummary(tokenShop?.rows?.extract);
+    const validatedCoverage = getMultiverseMarketValidatedCoverage(market?.saveOwner?.extract);
     const metadataSummary = getMultiverseMarketMetadataSummary(
-      state.extractedMechanics?.multiverseMarketMetadataNeighborhood
+      market?.rowIdentity?.metadataNeighborhood
     );
     const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
-      state.extractedMechanics?.multiverseMarketMarketMemberBoundary
+      market?.saveOwner?.marketMemberBoundary
     );
-    const tokeniumNamingSummary = getTokeniumNamingSummary(
-      state.extractedMechanics?.tokeniumNamingClues
-    );
-    const tokenBankStateSummary = getTokenBankStateSummary(
-      state.extractedMechanics?.tokenBankStateClues
-    );
-    const dailyTokeniumSummary = getDailyTokeniumLaneSummary(
-      state.extractedMechanics?.dailyTokeniumLaneClues
-    );
+    const tokeniumNamingSummary = getTokeniumNamingSummary(tokenShop?.tokenBank?.namingClues);
+    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop?.tokenBank?.stateClues);
+    const dailyTokeniumSummary = getDailyTokeniumLaneSummary(tokenShop?.dailyTokenium?.laneClues);
     const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(
-      state.extractedMechanics?.tokenBankFormulaBoundary
+      tokenShop?.tokenBank?.formulaBoundary
     );
     const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(
-      state.extractedMechanics?.multiverseMarketRangeBoundary
+      market?.rowIdentity?.rangeBoundary
     );
     const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(
-      state.extractedMechanics?.multiverseMarketRowTextCoverage
+      market?.rowIdentity?.rowTextCoverage
     );
-    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(
-      state.extractedMechanics?.tokenShopCostLanes
-    );
+    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShop?.spendLanes?.costLanes);
     const spendActionLaneSummary = getSpendActionLaneSummary(
-      state.extractedMechanics?.spendActionLaneClues
+      tokenShop?.spendLanes?.actionLaneClues
     );
     const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(
-      state.extractedMechanics?.multiverseMarketActionShell
+      market?.uiShell?.actionShell
     );
     const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(
-      state.extractedMechanics?.multiverseMarketOwnerFamily
+      market?.uiShell?.ownerFamily
     );
     const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(
-      state.extractedMechanics?.tokenShopOwnerShell
+      tokenShop?.tokenBank?.ownerShell
     );
     const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(
-      state.extractedMechanics?.tokenShopSaveBoundary
+      tokenShop?.rows?.boundaries?.save
     );
     const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(
-      state.extractedMechanics?.multiverseMarketSaveBoundary
+      market?.saveOwner?.saveBoundary
     );
     const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(
-      state.extractedMechanics?.tokenBankControllerShell
+      tokenShop?.tokenBank?.controllerShell
     );
     return `
       <div class="meta-stack">
@@ -2840,8 +2754,8 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${tokenShopCoverage.hasCoverage ? `TokenShop currently exposes ${tokenShopCoverage.numericGroupCount} extracted numeric families across ${tokenShopCoverage.tierLabel}, including ${tokenShopCoverage.namedLaneLabel}.` : "TokenShop extracted family coverage is not available in this build."}</p>
         <p class="meta">${tokenShopCoverage.hasControllerAnchors ? "The checked-in TokenShop payload also preserves direct controller anchors such as BankFill and TokenBankDescriptionText for the token-bank lane." : "The checked-in TokenShop payload does not yet preserve the expected token-bank controller anchors."}</p>
         <p class="meta">${tokeniumNamingSummary.hasNamingClues ? `Shipped assets now preserve ${tokeniumNamingSummary.resourceLabel} plus ${tokeniumNamingSummary.academyLabel}, and level0 keeps both ${tokeniumNamingSummary.tokenShellLabel} and ${tokeniumNamingSummary.tokeniumShellLabel}.` : "Token or tokenium naming clues are not available in this build."}</p>
-        <p class="meta">${tokenShopCostLaneSummary.hasLaneSplit ? `TokenShop cost-lane clues now preserve ${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.tokensShellLabel}, and ${tokenShopCostLaneSummary.tokeniumShellLabel}.` : "TokenShop cost-lane clues are not available in this build."}</p>
-        <p class="meta">${tokenShopCostLaneSummary.keepsDailyTokeniumSeparate ? "This keeps TokenDailies on the Daily Tokenium modifier lane instead of mixing it into generic token spend rows." : "The current build does not yet preserve a grounded split between TokenDailies and generic token spend rows."}</p>
+        <p class="meta">${tokenShopCostLaneSummary.hasLaneSplit ? `TokenShop trace support now preserves ${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel}.` : "TokenShop trace-produced cost-lane support is not available in this build."}</p>
+        <p class="meta">${tokenShopCostLaneSummary.keepsDailyTokeniumSeparate ? `This keeps TokenDailies on the Daily Tokenium modifier lane while the shared ${tokenShopCostLaneSummary.costRenderLabel} or ${tokenShopCostLaneSummary.descriptionRenderLabel} path stays grounded in the trace materialization.` : "The current build does not yet preserve a grounded split between TokenDailies and generic token spend rows."}</p>
         <p class="meta">${spendActionLaneSummary.hasActionSplit ? `Spend action-lane clues now preserve ${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, and ${spendActionLaneSummary.premiumModifierHook}.` : "Spend action-lane clues are not available in this build."}</p>
         <p class="meta">${spendActionLaneSummary.keepsDailyDirectHooksUnrecovered ? `The checked APK and Unity probe still returns zero ${spendActionLaneSummary.dailyHookT2} or ${spendActionLaneSummary.dailyHookT3} matches, so Daily Tokenium remains a modifier-side action lane rather than a recovered direct TokenShop purchase action.` : "The current build does not yet preserve the direct-hook gap between TokenDailies and other spend lanes."}</p>
         <p class="meta">${tokenShopOwnerShellSummary.hasOwnerShell ? `TokenShop owner-shell clues now preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook}.` : "TokenShop owner-shell clues are not available in this build."}</p>
@@ -2877,26 +2791,25 @@ function renderResearchTrackSupport(track) {
         <p class="meta">${marketMemberSummary.hasCloudBridge ? `That combined neighborhood still bridges through ${marketMemberSummary.cloudSaveLabel} and ${marketMemberSummary.profileInfoLabel}, which keeps the ${marketMemberSummary.canonicalHostLabel} checked even while the metadata-only ${marketMemberSummary.memberLabel} shell stays unresolved as an exact typed field and ${marketMemberSummary.negativeTypedSaveDataMarketLabel}.` : "The current build does not yet preserve the nearby cloud-save bridge clues for the market-member boundary."}</p>
         <p class="meta">${marketMemberSummary.hasTypedSiblingContrast ? `Typed sibling contrast still exists through ${marketMemberSummary.typedSiblingContrastLabel}, but no equivalent typed Market or Inscryption owner has been recovered yet.` : "The current build does not yet preserve the expected typed sibling contrast clues for the market-member boundary."}</p>
         <p class="meta">${marketMemberSummary.hasMissingDirectTypeMap ? `The repo still lacks ${marketMemberSummary.missingTypeMapLabel}, so this track stays out of planner implementation and row remap even though the exact save owner is recovered.` : "The current build no longer preserves the expected direct-type-map gap for the market-member boundary and needs review."}</p>
-        <p class="meta">${marketMemberSummary.favorsDirectMemberBoundary && marketMemberSummary.hasExactSaveDataProgressionOwner ? `This is enough to narrow the save-side handoff to a checked ${marketMemberSummary.canonicalHostLabel}, confirm ${marketMemberSummary.negativeMultiverseFieldLabel}, rule out flat direct PlayerProfileData progression ownership, and recover ${marketMemberSummary.exactSaveOwnerLabel} as the declaring save model while the metadata-only Market shell remains unresolved.` : "This is enough to narrow future mapping work, but not enough to identify the declaring save model or planner-ready owned-state inputs."}</p>
+        <p class="meta">${marketMemberSummary.favorsDirectMemberBoundary && marketMemberSummary.hasExactSaveDataProgressionOwner ? `This is enough to narrow the save-side handoff to a checked ${marketMemberSummary.canonicalHostLabel}, confirm ${marketMemberSummary.negativeMultiverseFieldLabel}, rule out flat direct PlayerProfileData progression ownership, and recover ${marketMemberSummary.exactSaveOwnerLabel} as the declaring save model while the metadata-only Market shell remains unresolved.` : "This is enough to narrow future mapping work, but not enough to promote planner-ready owned-state inputs or canonical row-level imports yet."}</p>
       </div>
     `;
   }
 
   if (track.id === "spend-token-bank-state-owner") {
+    const tokenShop = getCurrentSpendSystemView()?.tokenShop;
     const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(
-      state.extractedMechanics?.tokenShopOwnerShell
+      tokenShop?.tokenBank?.ownerShell
     );
     const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(
-      state.extractedMechanics?.tokenShopSaveBoundary
+      tokenShop?.rows?.boundaries?.save
     );
     const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(
-      state.extractedMechanics?.tokenBankControllerShell
+      tokenShop?.tokenBank?.controllerShell
     );
-    const tokenBankStateSummary = getTokenBankStateSummary(
-      state.extractedMechanics?.tokenBankStateClues
-    );
+    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop?.tokenBank?.stateClues);
     const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(
-      state.extractedMechanics?.tokenBankFormulaBoundary
+      tokenShop?.tokenBank?.formulaBoundary
     );
     return `
       <div class="meta-stack">
@@ -2915,16 +2828,6 @@ function renderResearchTrackSupport(track) {
   }
 
   return renderResearchTrackContract(track);
-}
-
-function getTopExtractionCandidate(trackId = null) {
-  const candidates = Array.isArray(state.extractionCandidateRanking?.candidates)
-    ? state.extractionCandidateRanking.candidates
-    : [];
-  if (!trackId) {
-    return candidates[0] || null;
-  }
-  return candidates.find((candidate) => candidate.track === trackId) || null;
 }
 
 function collectProfileForm() {
@@ -2998,6 +2901,7 @@ function exportPlayerProfileJson() {
 }
 
 function renderPlayerProfileBoundarySummary() {
+  const market = getCurrentSpendSystemView()?.multiverseMarket;
   const canonical = getCanonicalProfileState();
   const shardPlanner = getShardPlannerState();
   const shipPlanner = getShipPlannerState();
@@ -3020,8 +2924,8 @@ function renderPlayerProfileBoundarySummary() {
   );
   const importedMultiverseMarketPreview = getImportedMultiverseMarketPreview(
     compatibility.unmappedSystems?.multiverseMarket,
-    state.extractedMechanics?.multiverseMarket,
-    state.extractedMechanics?.multiverseMarketRangeBoundary,
+    market?.saveOwner?.extract,
+    market?.rowIdentity?.rangeBoundary,
     { formatBoundaryValue, formatShardNumber, isBoundaryValuePresent }
   );
 
@@ -3636,7 +3540,8 @@ function renderShardPlannerControls() {
 }
 
 function renderShardWorkflowSnapshot() {
-  const mechanicsBundle = state.shardGrounding?.milestones?.canonicalMechanics ?? {};
+  const mechanicsBundle =
+    getCurrentShardSystemView()?.family?.grounded?.milestones?.canonicalMechanics ?? {};
   const milestones = getGroundedShardMilestones();
   const shardPlanner = getShardPlannerState();
   const totalLevels = Number(shardPlanner.totalMilestoneLevels || 0);
@@ -3670,27 +3575,26 @@ function renderShardWorkflowSnapshot() {
 }
 
 function renderShardGroundingBoundary() {
-  const provenance = state.shardGrounding?.provenance;
+  const shardSystem = getCurrentShardSystemView();
+  const provenance = shardSystem?.family?.grounded?.provenance;
   const uncertaintyLog = provenance?.uncertaintyLog ?? [];
   const conflictCount = uncertaintyLog.filter((item) => item.status === "conflict_detected").length;
   const missingCount = uncertaintyLog.filter((item) => item.status !== "conflict_detected").length;
-  const assetGrounding = state.shardGrounding?.assetGrounding;
+  const assetGrounding = shardSystem?.family?.grounded?.assetGrounding;
   const ownerBoundary = getShardOwnerFamilyBoundarySummary(
-    state.shardGrounding?.ownerFamilyBoundary
+    shardSystem?.family?.boundaries?.ownerFamily
   );
-  const costModelBoundary = getShardCostModelBoundarySummary(
-    state.shardGrounding?.costModelBoundary
-  );
+  const costModelBoundary = getShardCostModelBoundarySummary(shardSystem?.cost?.costModelBoundary);
   const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
-    state.shardGrounding?.rowModelBoundary
+    shardSystem?.family?.boundaries?.rowModel
   );
   const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(
-    state.shardGrounding?.titleEffectBoundary
+    shardSystem?.family?.boundaries?.titleEffect
   );
   const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
-    state.shardGrounding?.effectTextHandlerBoundary
+    shardSystem?.family?.boundaries?.effectTextHandler
   );
-  const saveBoundary = getShardSaveBoundarySummary(state.shardGrounding?.saveBoundary);
+  const saveBoundary = getShardSaveBoundarySummary(shardSystem?.ownedState?.saveBoundary);
   const identifiers = Array.isArray(assetGrounding?.groundedShellIdentifiers)
     ? assetGrounding.groundedShellIdentifiers.slice(0, 5)
     : [];
@@ -3787,7 +3691,7 @@ function renderShardGroundingBoundary() {
         <div class="meta-stack">
           <p class="meta">${saveBoundary.hasSeparationBoundary ? "Recovered shard-local evidence still separates direct row definitions from unresolved PlayerProfile save ownership." : "The current build does not yet preserve a clean shard-to-save separation result."}</p>
           <p class="meta">${saveBoundary.hasSeparationBoundary && saveBoundary.hasDirectRowDefinitionPayload && saveBoundary.hasRuntimeOwnedStateShell ? "Direct ShardMining payload names the reachable row family, but player-owned row state still stops at the upgradeInfoList runtime shell." : "The current split between shard row definitions and owned-state recovery is not yet preserved in this build."}</p>
-          <p class="meta">${saveBoundary.hasSeparationBoundary ? escapeHtml(saveBoundary.traceOwnedStateLabel) : "The current trace workflow does not yet preserve a shard owned-state population boundary."}</p>
+          <p class="meta">${saveBoundary.hasSeparationBoundary ? escapeHtml(saveBoundary.ownedStateStatusLabel) : "The current build does not yet preserve a shard owned-state population boundary."}</p>
           <p class="meta">${saveBoundary.hasSeparationBoundary ? "That is useful because it blocks the UI from implying imported shard milestone ownership that the contract does not support." : "Until separation is verified, shard evidence should be treated as even more provisional."}</p>
           <p class="meta">Manual inputs can guide descriptive watch cards, but they do not turn this flow into recovered save-state truth or a grounded import path.</p>
           <p class="meta">If a player imports external-model or compatibility data, it is treated as an interim reference path only and not as canonical shard state.</p>
@@ -3816,8 +3720,8 @@ function renderShardGroundingBoundary() {
           <div class="shard-doc-link-list">
             ${renderShardDocLink("./docs/systems/shards/shard-player-facing-evidence.md", "Shard evidence summary")}
             ${renderShardDocLink("./docs/systems/shards/shard-grounding-boundary.md", "Grounding boundary")}
-            ${renderShardDocLink("./docs/systems/shards/shard-cost-parameter-probe.md", "Cost parameter probe")}
-            ${renderShardDocLink("./docs/systems/shards/shard-cost-native-probe.md", "Cost native probe")}
+            ${renderShardDocLink("./docs/systems/shards/shard-cost-pr23-audit.md", "Cost model audit")}
+            ${renderShardDocLink("./docs/systems/shards/shard-cost-screenshot-calibration.md", "Cost calibration")}
           </div>
         </div>
       </article>
@@ -3826,8 +3730,9 @@ function renderShardGroundingBoundary() {
 }
 
 function renderShardWorkflowReference() {
+  const shardSystem = getCurrentShardSystemView();
   const mechanics = getGroundedShardMechanics();
-  const provenance = state.shardGrounding?.provenance;
+  const provenance = shardSystem?.family?.grounded?.provenance;
   const thresholds = mechanics.rarity_bonus_thresholds ?? {};
   const levelCaps = mechanics.max_level_rules_and_modifiers ?? {};
   const uncertaintyLog = provenance?.uncertaintyLog ?? [];
@@ -3874,8 +3779,9 @@ function renderShardWorkflowReference() {
 }
 
 function renderObservedShardBehaviors() {
-  const observations = state.shardGrounding?.observedBehaviors?.observations ?? [];
-  const provenance = state.shardGrounding?.provenance;
+  const shardSystem = getCurrentShardSystemView();
+  const observations = shardSystem?.family?.grounded?.observedBehaviors?.observations ?? [];
+  const provenance = shardSystem?.family?.grounded?.provenance;
   return `
     <div class="page-grid">
       <article class="snapshot-card">
@@ -3946,7 +3852,7 @@ function renderShardMilestoneDirectory() {
   const mechanics = getGroundedShardMechanics();
   const milestones = getMilestonesForDisplay();
   const evidenceCounts = getShardMilestoneEvidenceCounts();
-  const familyEvidence = state.shardGrounding?.milestoneFamilyEvidence;
+  const familyEvidence = getCurrentShardSystemView()?.family?.familyEvidence;
   const sharedEvidence = familyEvidence?.sharedEvidence ?? {};
   const ownedStateBlocker = getShardOwnedStateBlockerSummary();
   return `
@@ -4110,38 +4016,40 @@ function runValidationCases() {
 }
 
 function buildApkGroundingValidationCases() {
-  const tokenShop = state.extractedMechanics?.tokenShop;
-  const multiverseMarket = state.extractedMechanics?.multiverseMarket;
-  const multiverseMarketMetadataNeighborhood =
-    state.extractedMechanics?.multiverseMarketMetadataNeighborhood;
-  const tokeniumNamingClues = state.extractedMechanics?.tokeniumNamingClues;
-  const tokenBankStateClues = state.extractedMechanics?.tokenBankStateClues;
-  const dailyTokeniumLaneClues = state.extractedMechanics?.dailyTokeniumLaneClues;
-  const tokenBankFormulaBoundary = state.extractedMechanics?.tokenBankFormulaBoundary;
-  const multiverseMarketRangeBoundary = state.extractedMechanics?.multiverseMarketRangeBoundary;
-  const multiverseMarketRowTextCoverage = state.extractedMechanics?.multiverseMarketRowTextCoverage;
-  const tokenShopCostLanes = state.extractedMechanics?.tokenShopCostLanes;
-  const spendActionLaneClues = state.extractedMechanics?.spendActionLaneClues;
-  const multiverseMarketActionShell = state.extractedMechanics?.multiverseMarketActionShell;
-  const multiverseMarketOwnerFamily = state.extractedMechanics?.multiverseMarketOwnerFamily;
-  const tokenShopOwnerShell = state.extractedMechanics?.tokenShopOwnerShell;
-  const tokenShopSaveBoundary = state.extractedMechanics?.tokenShopSaveBoundary;
-  const multiverseMarketSaveBoundary = state.extractedMechanics?.multiverseMarketSaveBoundary;
-  const multiverseMarketMarketMemberBoundary =
-    state.extractedMechanics?.multiverseMarketMarketMemberBoundary;
-  const tokenBankControllerShell = state.extractedMechanics?.tokenBankControllerShell;
-  const shardMilestones = state.shardGrounding?.milestones;
-  const shardAssetGrounding = state.shardGrounding?.assetGrounding;
-  const shardOwnerFamilyBoundary = state.shardGrounding?.ownerFamilyBoundary;
-  const shardFinalSuBonusBoundary = state.shardGrounding?.finalSuBonusBoundary;
-  const shardMilestonePayloadBoundary = state.shardGrounding?.milestonePayloadBoundary;
-  const shardCostModelBoundary = state.shardGrounding?.costModelBoundary;
-  const shardMilestoneRowModelBoundary = state.shardGrounding?.rowModelBoundary;
-  const shardMilestoneTitleEffectBoundary = state.shardGrounding?.titleEffectBoundary;
-  const shardEffectTextHandlerBoundary = state.shardGrounding?.effectTextHandlerBoundary;
-  const shardMilestoneRowShellBoundary = state.shardGrounding?.milestoneRowShellBoundary;
-  const shardMilestoneRowAlignmentBoundary = state.shardGrounding?.milestoneRowAlignmentBoundary;
-  const shardSaveBoundary = state.shardGrounding?.saveBoundary;
+  const spendSystem = getCurrentSpendSystemView();
+  const shardSystem = getCurrentShardSystemView();
+  const tokenShop = spendSystem?.tokenShop;
+  const market = spendSystem?.multiverseMarket;
+  const multiverseMarket = market?.saveOwner?.extract;
+  const multiverseMarketMetadataNeighborhood = market?.rowIdentity?.metadataNeighborhood;
+  const tokeniumNamingClues = tokenShop?.tokenBank?.namingClues;
+  const tokenBankStateClues = tokenShop?.tokenBank?.stateClues;
+  const dailyTokeniumLaneClues = tokenShop?.dailyTokenium?.laneClues;
+  const tokenBankFormulaBoundary = tokenShop?.tokenBank?.formulaBoundary;
+  const multiverseMarketRangeBoundary = market?.rowIdentity?.rangeBoundary;
+  const multiverseMarketRowTextCoverage = market?.rowIdentity?.rowTextCoverage;
+  const multiverseMarketPrefabRemapBoundary = market?.rowIdentity?.prefabRemapBoundary;
+  const tokenShopCostLanes = tokenShop?.spendLanes?.costLanes;
+  const spendActionLaneClues = tokenShop?.spendLanes?.actionLaneClues;
+  const multiverseMarketActionShell = market?.uiShell?.actionShell;
+  const multiverseMarketOwnerFamily = market?.uiShell?.ownerFamily;
+  const tokenShopOwnerShell = tokenShop?.tokenBank?.ownerShell;
+  const tokenShopSaveBoundary = tokenShop?.rows?.boundaries?.save;
+  const multiverseMarketSaveBoundary = market?.saveOwner?.saveBoundary;
+  const multiverseMarketMarketMemberBoundary = market?.saveOwner?.marketMemberBoundary;
+  const tokenBankControllerShell = tokenShop?.tokenBank?.controllerShell;
+  const shardMilestones = shardSystem?.family?.grounded?.milestones;
+  const shardAssetGrounding = shardSystem?.family?.grounded?.assetGrounding;
+  const shardOwnerFamilyBoundary = shardSystem?.family?.boundaries?.ownerFamily;
+  const shardFinalSuBonusBoundary = shardSystem?.family?.boundaries?.finalSuBonus;
+  const shardMilestonePayloadBoundary = shardSystem?.family?.boundaries?.milestonePayload;
+  const shardCostModelBoundary = shardSystem?.cost?.costModelBoundary;
+  const shardMilestoneRowModelBoundary = shardSystem?.family?.boundaries?.rowModel;
+  const shardMilestoneTitleEffectBoundary = shardSystem?.family?.boundaries?.titleEffect;
+  const shardEffectTextHandlerBoundary = shardSystem?.family?.boundaries?.effectTextHandler;
+  const shardMilestoneRowShellBoundary = shardSystem?.family?.boundaries?.rowShell;
+  const shardMilestoneRowAlignmentBoundary = shardSystem?.family?.boundaries?.rowAlignment;
+  const shardSaveBoundary = shardSystem?.ownedState?.saveBoundary;
   const cases = [];
 
   if (shardAssetGrounding) {
@@ -4347,7 +4255,7 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
-  const shardFamilyEvidence = state.shardGrounding?.milestoneFamilyEvidence;
+  const shardFamilyEvidence = getCurrentShardSystemView()?.family?.familyEvidence;
   const shardFamilyRows = Array.isArray(shardFamilyEvidence?.rows) ? shardFamilyEvidence.rows : [];
   if (shardFamilyRows.length) {
     const statusCounts = getShardMilestoneEvidenceCounts();
@@ -4531,11 +4439,10 @@ function buildApkGroundingValidationCases() {
     const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShopCostLanes);
     cases.push({
       title: "TokenShop cost-lane split",
-      expected:
-        "TokenBoost, DiamondBoost, TokenDailiesT2, CostBox-Tokens, and CostBox-Tokenium available",
+      expected: "TokenBoost, DiamondBoost, TokenDailiesT2, CostBox, and DescText available",
       actual: tokenShopCostLaneSummary.hasLaneSplit
-        ? `${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.tokensShellLabel}, and ${tokenShopCostLaneSummary.tokeniumShellLabel} available`
-        : "Missing TokenShop cost-lane split clues",
+        ? `${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel} available`
+        : "Missing TokenShop trace-produced cost-lane support",
       pass:
         tokenShopCostLaneSummary.hasLaneSplit &&
         tokenShopCostLaneSummary.keepsDailyTokeniumSeparate,
@@ -4680,9 +4587,9 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (state.extractedMechanics?.multiverseMarketPrefabRemapBoundary) {
+  if (multiverseMarketPrefabRemapBoundary) {
     const multiverseMarketPrefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(
-      state.extractedMechanics.multiverseMarketPrefabRemapBoundary
+      multiverseMarketPrefabRemapBoundary
     );
     cases.push({
       title: "MultiverseMarket prefab remap boundary",
@@ -5068,91 +4975,91 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       field: "ATU14Level",
       slot: "ATU14",
       identity: "NewTokenUPGPrefab.T2.DuoBoosterTwo",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T2Duo2StartCost",
-      additiveCostField: "T2Duo2AdditiveCost",
-      bonusField: "T2Duo2Bonus",
-      maxLevelField: "T2Duo2MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "TokenDailiesT2StartCost",
+      additiveCostField: "TokenDailiesT2AdditiveCost",
+      bonusField: "TokenDailiesT2Bonus",
+      maxLevelField: "TokenDailiesT2MaxLevel",
       bonusStepLabel: "T2 Duo 2 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU14 (Duo 2)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU15Level",
       slot: "ATU15",
       identity: "NewTokenUPGPrefab.T2.DuoBoosterThree",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T2Duo3StartCost",
-      additiveCostField: "T2Duo3AdditiveCost",
-      bonusField: "T2Duo3Bonus",
-      maxLevelField: "T2Duo3MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T2Duo1StartCost",
+      additiveCostField: "T2Duo1AdditiveCost",
+      bonusField: "T2Duo1Bonus",
+      maxLevelField: "T2Duo1MaxLevel",
       bonusStepLabel: "T2 Duo 3 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU15 (Duo 3)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU16Level",
       slot: "ATU16",
       identity: "NewTokenUPGPrefab.T2.DuoBoosterFour",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T2Duo4StartCost",
-      additiveCostField: "T2Duo4AdditiveCost",
-      bonusField: "T2Duo4Bonus",
-      maxLevelField: "T2Duo4MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T2Duo2StartCost",
+      additiveCostField: "T2Duo2AdditiveCost",
+      bonusField: "T2Duo2Bonus",
+      maxLevelField: "T2Duo2MaxLevel",
       bonusStepLabel: "T2 Duo 4 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU16 (Duo 4)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU17Level",
       slot: "ATU17",
       identity: "NewTokenUPGPrefab.T2.DuoBoosterFive",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T2Duo5StartCost",
-      additiveCostField: "T2Duo5AdditiveCost",
-      bonusField: "T2Duo5Bonus",
-      maxLevelField: "T2Duo5MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T2Duo3StartCost",
+      additiveCostField: "T2Duo3AdditiveCost",
+      bonusField: "T2Duo3Bonus",
+      maxLevelField: "T2Duo3MaxLevel",
       bonusStepLabel: "T2 Duo 5 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU17 (Duo 5)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU18Level",
       slot: "ATU18",
       identity: "NewTokenUPGPrefab.T2.DuoBoosterSix",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T2Duo6StartCost",
-      additiveCostField: "T2Duo6AdditiveCost",
-      bonusField: "T2Duo6Bonus",
-      maxLevelField: "T2Duo6MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T2Duo4StartCost",
+      additiveCostField: "T2Duo4AdditiveCost",
+      bonusField: "T2Duo4Bonus",
+      maxLevelField: "T2Duo4MaxLevel",
       bonusStepLabel: "T2 Duo 6 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU18 (Duo 6)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU19Level",
       slot: "ATU19",
       identity: "NewTokenUPGPrefab.T3.TrinityBoosterOne",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T3Trinity1StartCost",
-      additiveCostField: "T3Trinity1AdditiveCost",
-      bonusField: "T3Trinity1Bonus",
-      maxLevelField: "T3Trinity1MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T2Duo5StartCost",
+      additiveCostField: "T2Duo5AdditiveCost",
+      bonusField: "T2Duo5Bonus",
+      maxLevelField: "T2Duo5MaxLevel",
       bonusStepLabel: "T3 Trinity 1 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU19 (Trinity 1)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; identity labeling still reflects legacy UI grouping rather than verified canonical row truth."
     },
     {
       field: "ATU20Level",
@@ -5175,121 +5082,121 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       field: "ATU21Level",
       slot: "ATU21",
       identity: "NewTokenUPGPrefab.T3.TrinityBoosterOne",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T3Trinity1DailiesStartCost",
-      additiveCostField: "T3Trinity1DailiesAdditiveCost",
-      bonusField: "T3Trinity1DailiesBonus",
-      maxLevelField: "T3Trinity1DailiesMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "TokenDailiesT3StartCost",
+      additiveCostField: "TokenDailiesT3AdditiveCost",
+      bonusField: "TokenDailiesT3Bonus",
+      maxLevelField: "TokenDailiesT3MaxLevel",
       bonusStepLabel: "T3 Trinity 1 Dailies Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU21 (Trinity 1 Dailies)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU22Level",
       slot: "ATU22",
       identity: "NewTokenUPGPrefab.T3.TrinityBoosterTwo",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T3Trinity2StartCost",
-      additiveCostField: "T3Trinity2AdditiveCost",
-      bonusField: "T3Trinity2Bonus",
-      maxLevelField: "T3Trinity2MaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T3Trio1StartCost",
+      additiveCostField: "T3Trio1AdditiveCost",
+      bonusField: "T3Trio1Bonus",
+      maxLevelField: "T3Trio1MaxLevel",
       bonusStepLabel: "T3 Trinity 2 Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU22 (Trinity 2)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU23Level",
       slot: "ATU23",
       identity: "NewTokenUPGPrefab.T3.DailyTokens",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T3DailyTokensStartCost",
-      additiveCostField: "T3DailyTokensAdditiveCost",
-      bonusField: "T3DailyTokensBonus",
-      maxLevelField: "T3DailyTokensMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "T3Trio2StartCost",
+      additiveCostField: "T3Trio2AdditiveCost",
+      bonusField: "T3Trio2Bonus",
+      maxLevelField: "T3Trio2MaxLevel",
       bonusStepLabel: "T3 Daily Tokens Bonus",
       bonusStepMode: "additive",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU23 (Trinity 3)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
     },
     {
       field: "ATU24Level",
       slot: "ATU24",
       identity: "NewTokenUPGPrefab.T4.Ultima",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T4UltimaShardsStartCost",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "ATU24StartCost",
       additiveCostField: "T4UltimaShardsAdditiveCost",
-      bonusField: "T4UltimaShardsBonus",
+      bonusField: "ATU24Bonus3",
       maxLevelField: "T4UltimaShardsMaxLevel",
       bonusStepLabel: "T4 Ultima Shards Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU24 (Ultima Shards)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
     },
     {
       field: "ATU25Level",
       slot: "ATU25",
       identity: "NewTokenUPGPrefab.T4.Ultima",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T4UltimaStartCost",
-      additiveCostField: "T4UltimaAdditiveCost",
-      bonusField: "T4UltimaBonus",
-      maxLevelField: "T4UltimaMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "ATU25StartCost",
+      additiveCostField: "ATU25AdditiveCost",
+      bonusField: "ATU25Bonus",
+      maxLevelField: "ATU25MaxLevel",
       bonusStepLabel: "T4 Ultima Bonus",
       bonusStepMode: "multiplier",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU25 (Ultima)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
     },
     {
       field: "ATU26Level",
       slot: "ATU26",
       identity: "NewTokenUPGPrefab.T5.CampaignFragments",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T5CampaignFragmentsStartCost",
-      additiveCostField: "T5CampaignFragmentsAdditiveCost",
-      bonusField: "T5CampaignFragmentsBonus",
-      maxLevelField: "T5CampaignFragmentsMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "ATU26StartCost",
+      additiveCostField: "ATU26AdditiveCost",
+      bonusField: "ATU26Bonus",
+      maxLevelField: "ATU26MaxLevel",
       bonusStepLabel: "T5 Campaign Fragments Bonus",
       bonusStepMode: "additive",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU26 (Campaign Fragments)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
     },
     {
       field: "ATU27Level",
       slot: "ATU27",
       identity: "NewTokenUPGPrefab.T5.UltimaRP",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T5UltimaRPStartCost",
-      additiveCostField: "T5UltimaRPAdditiveCost",
-      bonusField: "T5UltimaRPBonus",
-      maxLevelField: "T5UltimaRPMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "ATU27StartCost",
+      additiveCostField: "ATU27AdditiveCost",
+      bonusField: "ATU27Bonus",
+      maxLevelField: "ATU27MaxLevel",
       bonusStepLabel: "T5 Ultima RP Bonus",
       bonusStepMode: "additive",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU27 (Ultima RP)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
     },
     {
       field: "ATU28Level",
       slot: "ATU28",
       identity: "NewTokenUPGPrefab.T5.UltimaMP",
-      identitySource: "Canonical prefab identity",
+      identitySource: "Compatibility-mapped prefab identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven canonical row",
-      startCostField: "T5UltimaMPStartCost",
-      additiveCostField: "T5UltimaMPAdditiveCost",
-      bonusField: "T5UltimaMPBonus",
-      maxLevelField: "T5UltimaMPMaxLevel",
+      rowTypeLabel: "Prefab-driven compatibility row",
+      startCostField: "ATU28StartCost",
+      additiveCostField: "ATU28AdditiveCost",
+      bonusField: "ATU28Bonus",
+      maxLevelField: "ATU28MaxLevel",
       bonusStepLabel: "T5 Ultima MP Bonus",
       bonusStepMode: "additive",
-      note: "Canonical row from tokenshop-canonical-v1.json ATU28 (Ultima MP)"
+      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
     }
   ];
 }
@@ -5313,14 +5220,13 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
 }
 
 function getTokenShopProgressionModel() {
-  const canonical = state.extractedMechanics?.tokenshopCanonical?.atu_rows ?? {};
-
+  const spendSystem = getCurrentSpendSystemView();
+  const tokenShop = spendSystem?.tokenShop;
   return buildTokenShopProgressionModel({
     progressionState: getTokenShopProgressionProfileState(),
     compatibilityLevels: getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {},
-    boundary: state.extractedMechanics?.tokenShopRowRemapBoundary,
-    tokenShop: state.extractedMechanics?.tokenShop,
-    canonical,
+    boundary: tokenShop?.rows?.boundaries?.remap,
+    tokenShop: tokenShop?.rows?.extract,
     currentTokens: state.playerProfile.player.resources.tokens,
     getGroundedSubsetDefinitions: getTokenShopGroundedSubsetDefinitions,
     getKnownMaxStatus: tokenShopUi.getTokenShopKnownMaxStatus,
@@ -5334,7 +5240,8 @@ function renderTokenShopOverviewAffordabilityModule() {
     ? `${summary.playerStateCount}/${summary.rows.length} checked player-state row${summary.playerStateCount === 1 ? "" : "s"} active before compatibility fallback.`
     : "No checked player-state rows are active yet; compatibility import and default level 0 stay available.";
 
-  const tierUnlocks = state.extractedMechanics?.tokenshopCanonical?.tier_unlocks;
+  const tierUnlocks =
+    getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
   const thresholds = tierUnlocks?.tier_thresholds || {};
   const tierUnlockStates = calculateTierUnlockStatesForOverview(thresholds);
 
@@ -5515,9 +5422,10 @@ function saveTokenShopProgressionLevel(fieldName, value) {
 
 function prefillTokenShopProgressionEditorFromCompatibility() {
   const compatibilityLevels = getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {};
-  const subsetFields = getTokenShopGroundedSubsetDefinitions(
-    state.extractedMechanics?.tokenShopRowRemapBoundary
-  ).map((row) => row.field);
+  const tokenShopBoundary = getCurrentSpendSystemView()?.tokenShop?.rows?.boundaries?.remap;
+  const subsetFields = getTokenShopGroundedSubsetDefinitions(tokenShopBoundary).map(
+    (row) => row.field
+  );
   let importedCount = 0;
   subsetFields.forEach((fieldName) => {
     const importedValue = compatibilityLevels?.[fieldName];
@@ -5542,9 +5450,8 @@ function prefillTokenShopProgressionEditorFromCompatibility() {
 }
 
 function clearTokenShopProgressionEditorLevels() {
-  getTokenShopGroundedSubsetDefinitions(
-    state.extractedMechanics?.tokenShopRowRemapBoundary
-  ).forEach((row) => {
+  const tokenShopBoundary = getCurrentSpendSystemView()?.tokenShop?.rows?.boundaries?.remap;
+  getTokenShopGroundedSubsetDefinitions(tokenShopBoundary).forEach((row) => {
     setProfileValue(
       ["planning", "tokenShop", "checkedSubsetLevels", row.field],
       null,
@@ -5568,7 +5475,7 @@ function renderTokenShopProgressionEditor() {
       <strong>Grounded TokenShop checked-row editor</strong>
       <p class="meta">Checked subset only. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool.</p>
       <p class="meta">This module is explicitly non-optimizer and stays fixed to the grounded ATU subset: all 28 rows grouped by tier (T1: ATU1-12, T2: ATU13-18, T3: ATU19-23, T4: ATU24-25, T5: ATU26-28).</p>
-      <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown inside the tier-grouped subset. T1 has prefab-driven rows (ATU1, ATU2, ATU4-ATU12), one effect-driven row (ATU3), plus canonical additions (ATU5-ATU12). T2-T5 rows are canonical prefab-driven from tokenshop-canonical-v1.json. Tier unlock thresholds are based on total levels in prior tiers.</p>
+      <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown inside the tier-grouped subset. T1 has prefab-driven checked rows plus one effect-driven row (ATU3). The remaining higher-tier rows use DB-derived TokenShop extract numerics with compatibility-mapped identities until stronger row-local grounding clears. Tier unlock thresholds remain an explicitly heuristic policy based on total levels in prior tiers.</p>
       <div class="profile-actions">
         <button class="button" type="button" data-token-shop-prefill>Prefill local rows from compatibility import</button>
         <button class="button button-ghost" type="button" data-token-shop-clear-local>Clear local row levels</button>
@@ -5809,7 +5716,7 @@ function getProgressionSubsystemPartition(items) {
     shards: shardItems,
     loop: loopItems,
     tokenShop: getTokenShopGroundedSubsetDefinitions(
-      state.extractedMechanics?.tokenShopRowRemapBoundary
+      getCurrentSpendSystemView()?.tokenShop?.rows?.boundaries?.remap
     )
   };
 }
@@ -6261,11 +6168,14 @@ function getImportedRecordCount() {
 }
 
 function getGroundedShardMilestones() {
-  return state.shardGrounding?.milestones?.milestones ?? [];
+  return getCurrentShardSystemView()?.family?.grounded?.milestones?.milestones ?? [];
 }
 
 function getGroundedShardMechanics() {
-  return state.shardGrounding?.milestones?.canonicalMechanics?.shardMilestoneSystem ?? {};
+  return (
+    getCurrentShardSystemView()?.family?.grounded?.milestones?.canonicalMechanics
+      ?.shardMilestoneSystem ?? {}
+  );
 }
 
 function getSelectedShardMilestoneId() {
@@ -6379,16 +6289,18 @@ function getShardCostParameterProbeSummary(probe) {
 
 function getPrimaryShardObservation() {
   return (
-    (state.shardGrounding?.observedBehaviors?.observations ?? []).map((observation) => ({
-      ...observation,
-      title: getObservationTitle(observation)
-    }))[0] ?? null
+    (getCurrentShardSystemView()?.family?.grounded?.observedBehaviors?.observations ?? []).map(
+      (observation) => ({
+        ...observation,
+        title: getObservationTitle(observation)
+      })
+    )[0] ?? null
   );
 }
 
 function getObservedBehaviorById(id) {
   return (
-    (state.shardGrounding?.observedBehaviors?.observations ?? []).find(
+    (getCurrentShardSystemView()?.family?.grounded?.observedBehaviors?.observations ?? []).find(
       (observation) => observation.id === id
     ) || null
   );

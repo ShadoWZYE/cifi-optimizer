@@ -3,7 +3,7 @@
   "sources": {
     "probe": "tmp-multiverse-row-text-probe.json",
     "metadata": "workbench/apk/base/global-metadata.dat",
-    "validatedRows": "data/multiverse-market-values.json"
+    "validatedRows": "data/archive/multiverse-market-values.json"
   },
   "textHandlerAnchors": [
     "TextHandlerMarkets",
@@ -77,3 +77,4 @@
     "This is enough to preserve a grounded action-shell boundary for future mapping work, but not enough to treat the entire 1-110 action shell as numerically validated or saved-state mapped."
   ]
 }
+

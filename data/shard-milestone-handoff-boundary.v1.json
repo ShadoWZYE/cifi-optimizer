@@ -9,8 +9,9 @@
     "rowAlignmentBoundary": "data/shard-milestone-row-alignment-boundary.v1.json",
     "typeMetadataProbe": "data/shard-type-metadata-probe.v1.json",
     "sceneMonoBehaviourProbe": "data/shard-scene-monobehaviour-probe.v1.json",
-    "unityTraceTargetRegistry": "data/unity-trace-target-registry.json",
-    "unityTraceBundle": "data/unity-trace-bundle.json",
+    "unityTraceTargetRegistry": "archive:unity-trace-target-registry.json",
+    "traceSystemUnit": "data/system-units/trace.v1.json",
+    "ownedStateTraceRun": "workbench/trace-runs/shard-owned-state-upgradeinfolist-population.json",
     "globalMetadata": "workbench/apk/base/global-metadata.dat"
   },
   "shardControllerFamily": "ShardMining, Assembly-CSharp",

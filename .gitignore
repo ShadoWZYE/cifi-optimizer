@@ -27,6 +27,9 @@ env/
 obj/
 .tmp_probe_*
 tmp*/
+tmp-*.json
+tmp-*.md
+tmp-*.py
 _worktrees/
 
 # OS / editor
@@ -51,5 +54,13 @@ tools/**/obj/
 workbench/extract/
 workbench/unity/raw/
 workbench/emulator/
+workbench/ghidra-cache/
+workbench/ghidra-jobs/
+workbench/ghidra-projects/
+workbench/ghidra-runtime/
+workbench/test-ghidra/
+workbench/trace-exports/
+workbench/trace-runs/*
+!workbench/trace-runs/.gitkeep
 tools/unity/AssetRipper/temp/
 data/unity-textassets/

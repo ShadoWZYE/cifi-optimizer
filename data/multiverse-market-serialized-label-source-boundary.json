@@ -4,7 +4,7 @@
   "sources": {
     "row6974IdentitySourceBoundary": "data/multiverse-market-row69-74-identity-source-boundary.json",
     "marketMemberBoundary": "data/multiverse-market-market-member-boundary.json",
-    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
     "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },
@@ -87,12 +87,12 @@
         "SetAllChrystosEmporiumTexts"
       ],
       "repoLocalConsumerSearchSourcesWithoutCandidateHits": [
-        "data/unity-probe-report.json",
-        "data/lm244-targeted-probe.json",
-        "data/multiverse-market-metadata-neighborhood.json"
+        "data/system-units/multiverse-market.v1.json",
+        "data/system-units/trace.v1.json",
+        "db:materialized-target-bundle:multiverse-market-save-owner-boundary"
       ],
       "adjacentConsumerOrViewSymbolsRecovered": [],
-      "conclusion": "The checked candidate catalog or relation field names are only recovered in the alternate UABEA field-table export; the separate repo-local UI-shell evidence does not recover a consumer path that reads those carriers back into player-facing inscription labels."
+      "conclusion": "The checked candidate catalog or relation field names are only recovered in the alternate UABEA field-table export; the current centralized market unit and bounded trace surfaces still do not recover a consumer path that reads those carriers back into player-facing inscription labels."
     }
   },
   "joinBackAssessment": {
@@ -116,8 +116,8 @@
     "blockedBy": [
       "The alternate serialized export does not recover any string, label, title, description, or localization-key field on the checked MultiverseMarket row payloads.",
       "The recovered nested payloads stop at ID, Cost, Level, MaxLevel, ISObject, and transform carriers, which cannot by themselves recover the player-facing effect or label text for rows 69-74.",
-      "No checked repo-local adjacent consumer, controller, or view symbol references InscryptionCostList, InscryptionAndCostRelations, IDChecks, inscryptions, or InscryptionTupleList outside the alternate UABEA field-table export.",
-      "The separate UI-shell clues THMarkets, InscryptionsList, TextHandlerMarkets, and SetAllChrystosEmporiumTexts do not expose a row-to-text catalog join for rows 69-74."
+      "No checked centralized market-unit or bounded trace consumer surface references InscryptionCostList, InscryptionAndCostRelations, IDChecks, inscryptions, or InscryptionTupleList outside the alternate UABEA field-table export.",
+      "The surviving UI-shell clues THMarkets, InscryptionsList, TextHandlerMarkets, and SetAllChrystosEmporiumTexts still do not expose a row-to-text catalog join for rows 69-74."
     ],
     "currentBoundary": [
       "A new repo-local evidence class is checked: the alternate serialized UABEA field-table export for MultiverseMarket.",
@@ -129,3 +129,4 @@
     ]
   }
 }
+

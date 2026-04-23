@@ -2,11 +2,24 @@
   "dataset": "shard-effect-text-handler-boundary.v1",
   "generatedAt": "2026-04-04",
   "sources": {
-    "unityProbeReport": "data/unity-probe-report.json",
-    "targetedStringProbe": "data/unity-targeted-string-probe.json",
-    "ownerComparisonProbe": "data/shard-vs-construction-owner-probe.v1.json",
+    "unityProbeReport": "data/archive/unity-apk-extract-report.json",
+    "targetedStringProbe": "data/shard-effect-text-handler-boundary.v1.json#embedded-targeted-string-summary",
+    "ownerComparisonProbe": "data/shard-owner-family-boundary.v1.json#embedded-construction-comparison-summary",
     "titleEffectBoundary": "data/shard-milestone-title-effect-boundary.v1.json",
     "rowModelBoundary": "data/shard-milestone-row-model-boundary.v1.json"
+  },
+  "embeddedTargetedStringSummary": {
+    "sourceFile": "workbench/unity/joined/level0",
+    "strongestTextHandler": "TextHandlerShardMilestoneBonusesPerLevel/N",
+    "uiContextAnchors": [
+      "LevelText",
+      "DescText",
+      "ValueText",
+      "DescriptionText",
+      "InfoPanel-new",
+      "PopUp1"
+    ],
+    "role": "folded-summary-of-removed-targeted-string-report"
   },
   "probableTextHandler": "TextHandlerShardMilestoneBonusesPerLevel/N",
   "presentationFamily": [
@@ -56,3 +69,4 @@
     "Do not treat this boundary as a recovered row-complete effect-text table or as proof that every row 0-29 bonus line is already mapped to a final player-facing string."
   ]
 }
+

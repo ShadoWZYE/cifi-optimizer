@@ -1,9 +1,9 @@
 {
   "generatedAt": "2026-04-09",
   "sources": {
-    "probeScript": "scripts/unity/metadata_neighborhood_probe.py",
-    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-    "typedProbeReport": "data/uabea-probe-report.json",
+    "metadataNeighborhoodMethod": "historical probe removed; current DB/export path reconstructs this neighborhood directly",
+    "metadataNeighborhood": "data/archive/multiverse-market-metadata-neighborhood.json",
+    "typedProbeReport": "data/archive/uabea-extract-report.json",
     "metadata": "workbench/apk/base/global-metadata.dat",
     "nativeBinary": "workbench/apk/base/libil2cpp.so"
   },
@@ -225,3 +225,5 @@
     "This is enough to keep the checked direct-wrapper-versus-deeper-owner boundary canonical without widening support: PlayerProfileHandler.get_Market reaches MultiverseMarket, PlayerProfileHandler.ConvertSaveDataToProfileData gives SaveData a checked typed conversion bridge back into PlayerProfileData, the metadata-only Market shell still is not recovered as a typed save-path field, MultiverseMarket itself and its first nested row-local payloads are ruled out for the broader progression run, PlayerProfileData separately carries flat string wrappers such as InscryptionsDone or MechsOwned or GadgetLevels, SaveData exactly declares the checked IS*Level and trade-counter and mech progression cluster, and the remaining unresolved seam is only whether any typed Market-wrapper exists beyond that checked bridge rather than who declares the checked cluster."
   ]
 }
+
+

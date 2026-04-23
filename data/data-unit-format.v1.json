@@ -1,0 +1,79 @@
+{
+  "dataset": "repo-data-unit-format.v1",
+  "updatedAt": "2026-04-18",
+  "purpose": "Defines the common shape for centralized system units and their exported read models in the DB-first architecture.",
+  "requiredFields": [
+    "dataset",
+    "unitId",
+    "systemId",
+    "version",
+    "status",
+    "kind",
+    "schemaRef",
+    "frameworkRef",
+    "summary",
+    "liveConsumers",
+    "subsystems",
+    "provenance",
+    "views",
+    "targetShapeKeys",
+    "replacementPlan"
+  ],
+  "statusValues": [
+    "seeded",
+    "active",
+    "deprecated",
+    "archived"
+  ],
+  "kindValues": [
+    "system",
+    "tooling"
+  ],
+  "viewKeys": [
+    "canonical",
+    "boundary",
+    "model",
+    "support",
+    "historicalProbe"
+  ],
+  "targetShapeKeys": [
+    "canonical",
+    "boundaries",
+    "models",
+    "support",
+    "traceEvidence"
+  ],
+  "provenanceRecordKinds": [
+    "dataset",
+    "code-contract",
+    "doc-contract",
+    "command"
+  ],
+  "fieldGuide": {
+    "dataset": "Format id for the system-unit instance file.",
+    "unitId": "Matches one migration unit id from data-framework.v1.json.",
+    "systemId": "Stable system identifier used by app, trace, and planner rewiring work.",
+    "version": "Unit-local schema version.",
+    "status": "Lifecycle status for the centralized system unit.",
+    "kind": "Whether the unit describes an in-game system or a tooling/orchestration surface.",
+    "schemaRef": "Path to this shared format file.",
+    "frameworkRef": "Path to the framework manifest that owns the unit id.",
+    "summary": "Short human-readable statement of what the unit is for.",
+    "liveConsumers": "Known app, trace, or planner consumers that should eventually read the unit instead of individual files.",
+    "subsystems": "Named internal slices of the system that previously lived as separate datasets or migration units.",
+    "provenance": "Describes how embedded or future centralized data should trace back to committed sources or transient regeneration commands.",
+    "views": "Role-partitioned aggregated inputs grouped by intended use. Runtime truth lives in DB-backed materialized system-unit views; JSON files are exported read models.",
+    "targetShapeKeys": "The final generated-unit shape. Units should collapse embedded data into canonical, boundaries, models, support, and traceEvidence instead of only listing source files or narrow sections.",
+    "replacementPlan": "Declares current seed outputs, expected projections, source material, archive review decisions, and what must happen before old files can be archived or demoted to debug/reference use."
+  },
+  "archiveReviewStatuses": [
+    "keep",
+    "defer",
+    "archive-candidate"
+  ],
+  "archiveReviewGuide": {
+    "keep": "The source still carries distinct model, calibration, boundary, or export value and should remain first-class.",
+    "defer": "The source is not a live runtime input anymore, but archiving it now risks losing provenance or contradicting newer centralized views.",
+    "archive-candidate": "The source is no longer needed as a normal runtime/export input once the listed replacement conditions hold."
+  }
+}

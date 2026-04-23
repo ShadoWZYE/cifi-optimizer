@@ -1,15 +1,81 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { DatabaseSync } from "node:sqlite";
 import { evaluateShardCost, getShardCostFormulaModel } from "./cost-evaluator.mjs";
 
-const screenshotCalibration = JSON.parse(
-  await readFile(
-    new URL("../../data/shard-cost-screenshot-calibration.v1.json", import.meta.url),
-    "utf8"
-  )
-);
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const dbPath = path.join(repoRoot, "workbench", "ghidra-cache", "ghidra_cache.sqlite3");
+const shardSystemUnitPath = path.join(repoRoot, "data", "system-units", "shards.v1.json");
+
+function loadShardSystemUnitSnapshot() {
+  return JSON.parse(readFileSync(shardSystemUnitPath, "utf8"));
+}
+
+function loadShardCostScreenshotCalibration() {
+  if (existsSync(dbPath)) {
+    try {
+      const db = new DatabaseSync(dbPath);
+      db.exec("PRAGMA busy_timeout=30000");
+      try {
+        const materializedRow = db
+          .prepare(
+            `
+          SELECT payload_json
+          FROM materialized_system_unit_views
+          WHERE system_id = ? AND version = ?
+        `
+          )
+          .get("shard-cost-screenshot-calibration", "v1");
+        if (materializedRow?.payload_json) {
+          const payload = JSON.parse(materializedRow.payload_json);
+          if (payload?.dataset === "shard-cost-screenshot-calibration.v1") {
+            return payload;
+          }
+        }
+
+        const shardUnitRow = db
+          .prepare(
+            `
+          SELECT payload_json
+          FROM materialized_system_unit_views
+          WHERE system_id = ? AND version = ?
+        `
+          )
+          .get("shards", "v1");
+        if (shardUnitRow?.payload_json) {
+          const shardUnit = JSON.parse(shardUnitRow.payload_json);
+          const payload = shardUnit?.sections?.cost?.screenshotCalibration?.data ?? null;
+          if (payload?.dataset === "shard-cost-screenshot-calibration.v1") {
+            return payload;
+          }
+        }
+      } finally {
+        db.close();
+      }
+    } catch {
+      // Fall through to the committed system-unit snapshot on clean CI checkouts.
+    }
+  }
+
+  const shardUnit = loadShardSystemUnitSnapshot();
+  const payload = shardUnit?.sections?.cost?.screenshotCalibration?.data ?? null;
+  if (payload?.dataset === "shard-cost-screenshot-calibration.v1") {
+    return payload;
+  }
+
+  throw new Error(
+    "Missing shard screenshot calibration in both DB and committed system-unit snapshot."
+  );
+}
+
+let screenshotCalibration = null;
 
 export function getShardCostScreenshotCalibration() {
+  if (!screenshotCalibration) {
+    screenshotCalibration = loadShardCostScreenshotCalibration();
+  }
   return screenshotCalibration;
 }
 
@@ -69,7 +135,8 @@ export function compareScientificLabels(
 export function runShardCostCalibrationChecks() {
   const formulaModel = getShardCostFormulaModel();
   const config = formulaModel.calibrationCheckConfig;
-  const entries = Array.isArray(screenshotCalibration.entries) ? screenshotCalibration.entries : [];
+  const calibration = getShardCostScreenshotCalibration();
+  const entries = Array.isArray(calibration.entries) ? calibration.entries : [];
   const results = entries.map((entry) => {
     const evaluation = evaluateShardCost({
       row: Number(entry.row),

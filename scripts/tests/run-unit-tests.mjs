@@ -1,3 +1,4 @@
+import "../../tests/boundary-contract-normalizers.test.mjs";
 import "../../tests/generator-ocr-support.test.mjs";
 import "../../tests/import-normalization-support.test.mjs";
 import "../../tests/player-profile.test.mjs";

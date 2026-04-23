@@ -6,8 +6,8 @@ This note records where the settled `69-74` inscription anomaly first appears in
 
 - Raw app-side evidence preserved repo-locally already contains the anomaly:
   - [`workbench/unity/joined/level0`](workbench/unity/joined/level0)
-  - [`data/unity-probe-report.json`](data/unity-probe-report.json)
-  - [`data/uabea-probe-report.json`](data/uabea-probe-report.json)
+  - [`data/archive/unity-apk-extract-report.json`](data/archive/unity-apk-extract-report.json)
+  - [`data/archive/uabea-extract-report.json`](data/archive/uabea-extract-report.json)
 - Repo-local derived summaries preserve that same split without changing its meaning:
   - [`data/multiverse-market-prefab-remap-boundary.json`](data/multiverse-market-prefab-remap-boundary.json)
   - [`data/multiverse-market-row71-74-remap-band.json`](data/multiverse-market-row71-74-remap-band.json)
@@ -40,3 +40,4 @@ Current grounded conclusion:
 - the `69-74` anomaly is app-side inherited
 - live UI evidence now grounds rows `69-74` as player-facing rows `69-74`, but that does not change the inherited prefab anomaly provenance
 - drift checks must therefore enforce alignment between raw app-side evidence, derived datasets, and verification docs without rewriting the inherited shape
+

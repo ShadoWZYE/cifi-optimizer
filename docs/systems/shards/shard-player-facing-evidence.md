@@ -77,11 +77,11 @@ Grounding and contract:
 
 Cost recovery and probes:
 
-- [shard-cost-parameter-probe.md](docs/systems/shards/shard-cost-parameter-probe.md)
-- [shard-cost-native-probe.md](docs/systems/shards/shard-cost-native-probe.md)
+- [shard-cost-pr23-audit.md](docs/systems/shards/shard-cost-pr23-audit.md)
+- [shard-cost-screenshot-calibration.md](docs/systems/shards/shard-cost-screenshot-calibration.md)
 - [shard-cost-method-probe.md](docs/systems/shards/shard-cost-method-probe.md)
 - [shard-cost-list-path-probe.md](docs/systems/shards/shard-cost-list-path-probe.md)
-- [shard-scene-monobehaviour-probe.md](docs/systems/shards/shard-scene-monobehaviour-probe.md)
+- [shard-system-verification.md](docs/systems/shards/shard-system-verification.md)
 
 Follow-up work:
 

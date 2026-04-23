@@ -127,9 +127,9 @@ Repo-local metadata probing now recovers exact Emporium-adjacent field strings a
   - `SetInscryptionsDoneText`
   - `SetAllChrystosEmporiumTexts`
 - generated outputs from this pass:
-  - [`scripts/unity/metadata_neighborhood_probe.py`](scripts/unity/metadata_neighborhood_probe.py)
+  - historical metadata-neighborhood probing is archived; current regeneration goes through DB-backed multiverse export/materialization
   - [`docs/systems/spend/multiverse-market-metadata-neighborhood.md`](docs/multiverse-market-metadata-neighborhood.md)
-  - [`data/multiverse-market-metadata-neighborhood.json`](data/multiverse-market-metadata-neighborhood.json)
+  - [`data/archive/multiverse-market-metadata-neighborhood.json`](data/archive/multiverse-market-metadata-neighborhood.json)
 
 Current grounded conclusion:
 

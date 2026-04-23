@@ -1,0 +1,1369 @@
+{
+  "dataset": "unity-trace-target-registry",
+  "generatedAt": "2026-04-11",
+  "sourceFamilies": {
+    "token-shop": {
+      "label": "TokenShop",
+      "sourceIds": [
+        "metadata",
+        "level0",
+        "assets",
+        "native"
+      ]
+    },
+    "shard-cost": {
+      "label": "Shard cost",
+      "sourceIds": [
+        "metadata",
+        "level0",
+        "assets",
+        "native"
+      ]
+    },
+    "shard-owned-state": {
+      "label": "Shard owned state",
+      "sourceIds": [
+        "metadata",
+        "level0",
+        "assets",
+        "native"
+      ]
+    },
+    "multiverse-market-save-owner": {
+      "label": "Multiverse market/save-owner",
+      "sourceIds": [
+        "metadata",
+        "level0",
+        "assets",
+        "native"
+      ]
+    }
+  },
+  "planner": {
+    "familyOrder": [
+      "token-shop",
+      "shard-cost",
+      "shard-owned-state",
+      "multiverse-market-save-owner"
+    ],
+    "families": {
+      "token-shop": {
+        "label": "TokenShop",
+        "defaultTargetId": null,
+        "defaultRunMode": "trace",
+        "queryTerms": [
+          "TokenShop",
+          "Token Shop",
+          "ATU",
+          "ATU3Button",
+          "BuyCellBoost",
+          "Cells",
+          "Currency"
+        ],
+        "anchorExpansionTerms": [
+          "ATU3Button",
+          "15810",
+          "CellBoost",
+          "BuyCellBoost",
+          "SetAllTokenShopTexts"
+        ],
+        "directTraceTerms": [
+          "BuyCellBoost",
+          "ATU3Button",
+          "15810"
+        ],
+        "compareTerms": [],
+        "synonymSets": {
+          "cells-domain": [
+            "Cells",
+            "CellBoost",
+            "BuyCellBoost",
+            "CellsBoost",
+            "CellsPerChestBooster",
+            "UltimaCells"
+          ],
+          "token-shop-shell": [
+            "TokenShop",
+            "ATU",
+            "ATU1Button",
+            "ATU3Button",
+            "15810"
+          ],
+          "currency-lane": [
+            "Currency",
+            "Tokens",
+            "Tokenium",
+            "Diamond Upgrade"
+          ]
+        }
+      },
+      "shard-cost": {
+        "label": "Shard cost",
+        "defaultTargetId": null,
+        "defaultRunMode": "trace",
+        "queryTerms": [
+          "Shard",
+          "Shard Cost",
+          "ShardUpgradeInfo",
+          "SU0",
+          "get_SU0Cost",
+          "SU0StartCost"
+        ],
+        "anchorExpansionTerms": [
+          "ShardUpgradeInfo",
+          "get_SU0Cost",
+          "SU0StartCost",
+          "SU0CostExponent"
+        ],
+        "directTraceTerms": [
+          "ShardUpgradeInfo",
+          "get_SU0Cost",
+          "SU0",
+          "SU0StartCost"
+        ],
+        "compareTerms": [],
+        "synonymSets": {
+          "su0-structure": [
+            "SU0",
+            "get_SU0Cost",
+            "SU0StartCost",
+            "SU0CostExponent"
+          ],
+          "shard-owner-shell": [
+            "Shard",
+            "ShardUpgradeInfo",
+            "ShardMining"
+          ],
+          "planner-safe-gap": [
+            "planner-safe",
+            "planner safe",
+            "planner output",
+            "cost output"
+          ]
+        }
+      },
+      "shard-owned-state": {
+        "label": "Shard owned state",
+        "defaultTargetId": null,
+        "defaultRunMode": "trace",
+        "queryTerms": [
+          "Shard owned state",
+          "upgradeInfoList",
+          "ShardUpgradeInfo",
+          "IsUnlocked",
+          "MaxLevel",
+          "milestone progress"
+        ],
+        "anchorExpansionTerms": [
+          "upgradeInfoList",
+          "ShardMining+ShardUpgradeInfo",
+          "IsUnlocked",
+          "MaxLevel",
+          "InitializeShards",
+          "UpdateUnlockedMilestonesList",
+          "UpdateMaxedMilestonesList"
+        ],
+        "directTraceTerms": [
+          "upgradeInfoList",
+          "ShardMining+ShardUpgradeInfo",
+          "IsUnlocked",
+          "MaxLevel"
+        ],
+        "compareTerms": [],
+        "synonymSets": {
+          "runtime-shell": [
+            "upgradeInfoList",
+            "ShardMining+ShardUpgradeInfo",
+            "IsUnlocked",
+            "MaxLevel"
+          ],
+          "local-watchers": [
+            "InitializeShards",
+            "InitializeMaxLevelBools",
+            "UpdateUnlockedMilestonesList",
+            "UpdateMaxedMilestonesList",
+            "CheckAllMilestoneLevelFills"
+          ],
+          "owned-state-gap": [
+            "save owner",
+            "PlayerProfileData",
+            "CloudSavePlayerProfile",
+            "player-owned shard"
+          ]
+        }
+      },
+      "multiverse-market-save-owner": {
+        "label": "Multiverse market/save-owner",
+        "defaultTargetId": null,
+        "defaultRunMode": "trace",
+        "queryTerms": [
+          "Multiverse",
+          "MultiverseMarket",
+          "Emporium",
+          "SaveData",
+          "get_Market",
+          "IS71Level"
+        ],
+        "anchorExpansionTerms": [
+          "get_Market",
+          "SaveData",
+          "IS71Level",
+          "IS72Level",
+          "InscryptionsDone"
+        ],
+        "directTraceTerms": [
+          "get_Market",
+          "SaveData"
+        ],
+        "compareTerms": [],
+        "synonymSets": {
+          "save-owner-span": [
+            "SaveData",
+            "IS1Level",
+            "IS71Level",
+            "IS110Level"
+          ],
+          "market-accessor": [
+            "get_Market",
+            "PlayerProfileHandler",
+            "MultiverseMarket"
+          ],
+          "emporium-shell": [
+            "Emporium",
+            "InscryptionsDone",
+            "BuyIS71"
+          ]
+        }
+      }
+    }
+  },
+  "comparisonPresets": {},
+  "targets": {
+    "token-shop-atu4-mod": {
+      "label": "TokenShop ATU4 runtime cost pass",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu4-mod",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU4Button",
+        "15796"
+      ],
+      "joinGoal": "Recover the grounded ATU4Button or path id 15796 row through direct assets plus native evidence, then close the remaining live BUY-cost runtime path without comparing against unrelated TokenShop rows.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "solvedBaselineTargetId": null,
+      "blockedTargetId": null,
+      "comparisonPresetId": null,
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 5,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 5,
+          "allowedNegativeEdgeTypes": [
+            "exact-shell-to-title"
+          ]
+        },
+        "messages": {
+          "wire": "The trace now preserves the ATU4 shell, prefab, literals, and runtime evaluator lane cleanly enough to keep the row as a bounded direct-asset/native recovery.",
+          "quarantine": "The trace preserves the ATU4 row structure and literals, but the live BUY-cost runtime path is still bounded open.",
+          "research": "The trace is still too incomplete to preserve one bounded ATU4 runtime-cost verdict."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU4Button",
+        "shellPathId": 15796,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 4,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU4Button",
+              "ModBoost",
+              "BuyModBoost"
+            ]
+          },
+          {
+            "id": "action-lane",
+            "label": "Action hook lane",
+            "sourceIds": [
+              "level0"
+            ],
+            "terms": [
+              "BuyModBoost"
+            ]
+          },
+          {
+            "id": "prefab-lane",
+            "label": "Prefab identity lane",
+            "sourceIds": [
+              "level0",
+              "sharedassets0"
+            ],
+            "terms": [
+              "NewTokenUPGPrefab.T1.ModPointsBooster"
+            ]
+          },
+          {
+            "id": "title-lane",
+            "label": "Mod title lane",
+            "sourceIds": [
+              "level0",
+              "sharedassets0",
+              "metadata"
+            ],
+            "terms": [
+              "Token Ultima: MP",
+              ":Diamond Upgrade 11 - ModBoost"
+            ]
+          },
+          {
+            "id": "text-hooks",
+            "label": "Generic TokenShop text-hook lane",
+            "sourceIds": [
+              "level0",
+              "sharedassets0"
+            ],
+            "terms": [
+              "SetAllTokenShopTexts",
+              "SetTokenTexts"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The shell-side owner window survives directly in the TokenShop owner blob, where ATU4Button path id 15796 stays adjacent to the ModBoost base-value block.",
+          "The exact BuyModBoost action hook, NewTokenUPGPrefab.T1.ModPointsBooster prefab, and direct UI slot graph now converge on the same traced row family.",
+          "The remaining unresolved lane is not row identity or text localization; it is the live BUY-cost runtime path feeding CostText."
+        ]
+      }
+    },
+    "token-shop-atu5-mk1-title": {
+      "label": "TokenShop ATU5 MK1 title pass",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu5-mk1-title",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU5Button",
+        "15831"
+      ],
+      "joinGoal": "Recover one checked final player-facing title join for the already grounded ATU5Button or path id 15831 row, and keep the title-side result bounded if it still stays detached.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "solvedBaselineTargetId": "token-shop-atu5-mk1-title",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
+      "comparisonPresetId": null,
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 5,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 5,
+          "allowedNegativeEdgeTypes": [
+            "exact-shell-to-title"
+          ]
+        },
+        "messages": {
+          "wire": "One exact shell-to-prefab and title chain cleared cleanly enough to wire the traced boundary.",
+          "quarantine": "The trace now preserves the ATU5 shell-to-prefab bridge, but the title-side pass stays bounded negative so this row remains quarantined to remap evidence.",
+          "research": "The trace is still too incomplete to preserve one bounded ATU5 title-side verdict."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU5Button",
+        "shellPathId": 15831,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 4,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU5Button",
+              "MK1TokenBoost",
+              "BuyMK1TokenBoost"
+            ]
+          },
+          {
+            "id": "action-lane",
+            "label": "Action hook lane",
+            "sourceIds": [
+              "level0"
+            ],
+            "terms": [
+              "BuyMK1TokenBoost"
+            ]
+          },
+          {
+            "id": "prefab-lane",
+            "label": "Prefab identity lane",
+            "sourceIds": [
+              "level0",
+              "sharedassets0"
+            ],
+            "terms": [
+              "NewTokenUPGPrefab.T1.MK1Booster"
+            ]
+          },
+          {
+            "id": "support-text-lane",
+            "label": "MK1 generator support-text lane",
+            "sourceIds": [
+              "level0",
+              "sharedassets0"
+            ],
+            "terms": [
+              "1. MK1 Generator Output,",
+              "This upgrade divides the cost of MK1 Generators by 1500.",
+              "This upgrade provides a 1% increase to MK1 Generator Output for each Loop Reset you've done (multiplicative)"
+            ]
+          },
+          {
+            "id": "title-roster-gap",
+            "label": "Neighboring generator title roster",
+            "sourceIds": [
+              "level0",
+              "sharedassets0"
+            ],
+            "terms": [
+              "Mk2 Generator Booster",
+              "Mk3 Generator Booster",
+              "Mk5 Generator Booster"
+            ]
+          },
+          {
+            "id": "text-hooks",
+            "label": "Generic TokenShop text-hook lane",
+            "sourceIds": [
+              "level0",
+              "sharedassets0"
+            ],
+            "terms": [
+              "SetAllTokenShopTexts",
+              "SetTokenTexts"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The shell-side owner window survives only in the TokenShop extract, where ATU5Button path id 15831 stays adjacent to the MK1TokenBoost owner block.",
+          "The exact BuyMK1TokenBoost action hook and NewTokenUPGPrefab.T1.MK1Booster prefab now converge on the same traced row family, but the final player-facing title still survives only as detached MK1 generator support text and neighboring generator-booster title-roster surfaces.",
+          "Because the title-side join is still missing, the recovered ATU5 bridge is safe for row-remap evidence only and should not widen into canonical or planner behavior."
+        ]
+      }
+    },
+    "token-shop-family-structure": {
+      "label": "TokenShop family structure audit",
+      "familyId": "token-shop",
+      "strategy": "token-shop-family-structure",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU1Button",
+        "ATU2Button",
+        "ATU4Button",
+        "ATU5Button",
+        "ATU6Button",
+        "ATU7Button",
+        "ATU3Button",
+        "ATU24Button",
+        "SetAllTokenShopTexts"
+      ],
+      "joinGoal": "Audit the whole TokenShop ATU shell family for repeated proved joins and repeated missing joins across shell ids, bridge-proxy hooks, prefab identities, and title or text surfaces without promoting any new remaps.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "solvedBaselineTargetId": "token-shop-family-structure",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
+      "comparisonPresetId": null,
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 6,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 6,
+          "allowedNegativeEdgeTypes": [
+            "repeated-shell-to-title-localization-gap",
+            "repeated-unresolved-shell-identity-gap"
+          ]
+        },
+        "messages": {
+          "wire": "The family audit found a fully localized repeated row-identity pattern, but this target should still remain descriptive only.",
+          "quarantine": "The family audit preserves a repeated shell-to-proxy-to-prefab pattern and one standout ATU6 title-chain exemplar, but repeated title-localization gaps still quarantine the broader family.",
+          "research": "The family audit is still too incomplete to summarize a stable cross-row TokenShop structure pattern."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU1Button through ATU28Button",
+        "shellPathId": "family-range",
+        "shellWindowSource": "tokenShopExtract",
+        "surfaces": [
+          {
+            "id": "family-shells",
+            "label": "Family shell range",
+            "sourceIds": [
+              "tokenShopExtract",
+              "metadata"
+            ],
+            "terms": [
+              "ATU1Button",
+              "ATU2Button",
+              "ATU3Button",
+              "ATU4Button",
+              "ATU5Button",
+              "ATU6Button",
+              "ATU7Button",
+              "ATU24Button",
+              "ATU28Button"
+            ]
+          },
+          {
+            "id": "bridge-proxies",
+            "label": "Bridge-proxy lane",
+            "sourceIds": [
+              "tokenShopRowRemapBoundary",
+              "level0"
+            ],
+            "terms": [
+              "BuyTokenBoost",
+              "ATU2DiamondsBonus",
+              "BuyModBoost",
+              "BuyMK1TokenBoost",
+              "BuyMK2TokenBoost",
+              "BuyMK3TokenBoost",
+              "BuyCellBoost",
+              "BuyATU24"
+            ]
+          },
+          {
+            "id": "prefab-roster",
+            "label": "Prefab identity roster",
+            "sourceIds": [
+              "tokenShopRowRemapBoundary",
+              "level0",
+              "sharedassets0"
+            ],
+            "terms": [
+              "NewTokenUPGPrefab.T1.TokensBoost",
+              "NewTokenUPGPrefab.T1.DiamondBoost",
+              "NewTokenUPGPrefab.T1.ModPointsBooster",
+              "NewTokenUPGPrefab.T1.MK1Booster",
+              "NewTokenUPGPrefab.T1.MK2Booster",
+              "NewTokenUPGPrefab.T1.MK3Booster",
+              "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+              "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"
+            ]
+          },
+          {
+            "id": "title-text-surfaces",
+            "label": "Title and text surfaces",
+            "sourceIds": [
+              "tokenShopRowRemapBoundary",
+              "level0",
+              "sharedassets0"
+            ],
+            "terms": [
+              "SetAllTokenShopTexts",
+              "SetTokenTexts",
+              "Mk2 Generator Booster",
+              "Token Ultima: MP",
+              "1. MK1 Generator Output,",
+              "Token Ultima: Cells",
+              "Academy Booster"
+            ]
+          },
+          {
+            "id": "negative-neighborhoods",
+            "label": "Bounded unresolved neighborhoods",
+            "sourceIds": [
+              "tokenShopRowRemapBoundary",
+              "level0"
+            ],
+            "terms": [
+              "ATU3Button",
+              "BuyCellBoost",
+              "ATU24Button",
+              "BuyATU24",
+              "StartCellBostHold"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The family audit confirms that shell-side ATU serialization survives much more often than row-local title localization does.",
+          "The strongest repeated solved pattern is shell adjacency plus one row-family proxy hook and one exact prefab identity, but the title-side surfaces usually remain detached into generic text hooks, support text, or loose title rosters.",
+          "ATU6 remains the standout strongest neighborhood because it is still the only row that carries one checked shell-to-prefab-to-title chain; ATU4, ATU5, and ATU7 stay structurally stronger than ATU3 and the late ATU24-ATU28 block, but still stop short of final title localization."
+        ]
+      }
+    },
+    "token-shop-atu7-mk3-bridge": {
+      "label": "TokenShop ATU7 MK3 bridge pass",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu7-mk3-bridge",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU7Button",
+        "15792"
+      ],
+      "joinGoal": "Recover one checked shell-to-prefab bridge for the unresolved ATU7Button or path id 15792 row without widening into title-side promotion or broader family remap claims.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "solvedBaselineTargetId": "token-shop-atu7-mk3-bridge",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
+      "comparisonPresetId": null,
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 4,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 3,
+          "allowedNegativeEdgeTypes": []
+        },
+        "messages": {
+          "wire": "One exact shell-to-prefab bridge cleared cleanly enough to preserve the ATU7 row as checked remap evidence.",
+          "quarantine": "The trace preserves only part of the ATU7 bridge and should remain descriptive until the prefab join clears cleanly.",
+          "research": "The trace is still too incomplete to preserve one bounded ATU7 bridge verdict."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU7Button",
+        "shellPathId": 15792,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 4,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU7Button",
+              "MK3TokenBoost",
+              "BuyMK3TokenBoost"
+            ]
+          },
+          {
+            "id": "action-lane",
+            "label": "Action hook lane",
+            "sourceIds": [
+              "level0"
+            ],
+            "terms": [
+              "BuyMK3TokenBoost"
+            ]
+          },
+          {
+            "id": "prefab-lane",
+            "label": "Prefab identity lane",
+            "sourceIds": [
+              "level0",
+              "sharedassets0"
+            ],
+            "terms": [
+              "NewTokenUPGPrefab.T1.MK3Booster"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The shell-side owner window still survives only in the TokenShop extract, where ATU7Button path id 15792 stays adjacent to the MK3TokenBoost owner block.",
+          "This pass checks only the shell-to-action-hook-to-prefab bridge and does not promote any final player-facing title join for ATU7.",
+          "Because the rest of the MK-family shells still lack their own checked joins, keep ATU7 as one bounded remap bridge and leave the neighboring unresolved rows quarantined."
+        ]
+      }
+    },
+    "token-shop-atu3-cells-effect": {
+      "label": "TokenShop ATU3 cells effect trace",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu3-cells-effect",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU3Button",
+        "15810"
+      ],
+      "joinGoal": "Recover one checked ATU3Button or path id 15810 chain from the TokenShop shell through BuyCellBoost into the shared cells-from-chests effect surface, and keep any remaining typed effect-owner gap bounded if it still does not clear.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "defaultDepth": 1,
+      "solvedBaselineTargetId": "token-shop-atu3-cells-effect",
+      "blockedTargetId": "token-shop-atu1-row-bridge-baseline",
+      "comparisonPresetId": null,
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 5,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 5,
+          "allowedNegativeEdgeTypes": [
+            "typed-shared-effect-owner"
+          ]
+        },
+        "messages": {
+          "wire": "One exact ATU3 shell-to-action-hook-to-shared-effect chain cleared cleanly enough to preserve the effect-driven row behavior.",
+          "quarantine": "The trace preserves one ATU3 shell-to-action-hook-to-shared-effect chain, but the exact typed gameplay owner for the chest-effect applier still stays unresolved so this row remains quarantined to descriptive remap evidence.",
+          "research": "The ATU3 cross-system trace still breaks before one stable shared effect-system verdict can be preserved."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU3Button",
+        "shellPathId": 15810,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 3,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU3Button",
+              "CellBoost",
+              "BuyCellBoost"
+            ]
+          },
+          {
+            "id": "action-lane",
+            "label": "Action hook lane",
+            "sourceIds": [
+              "level0"
+            ],
+            "terms": [
+              "StartCellBostHold",
+              "StopCellBostHold",
+              "BuyCellBoost"
+            ]
+          },
+          {
+            "id": "shared-effect-title",
+            "label": "Shared effect title lane",
+            "sourceIds": [
+              "level0"
+            ],
+            "terms": [
+              "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"
+            ]
+          },
+          {
+            "id": "shared-effect-text",
+            "label": "Shared effect text lane",
+            "sourceIds": [
+              "level0"
+            ],
+            "terms": [
+              "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."
+            ]
+          },
+          {
+            "id": "detached-identity-surfaces",
+            "label": "Detached cells identity surfaces",
+            "sourceIds": [
+              "level0",
+              "metadata"
+            ],
+            "terms": [
+              "BuyCellsBoost",
+              "NewDiamondUPGPrefab.Specials.CellsBoost",
+              ">Diamond Upgrade 10 - CellsBoost",
+              "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+              "NewTokenUPGPrefab.T5.UltimaCells",
+              "Token Ultima: Cells"
+            ]
+          }
+        ],
+        "followUpSurfaces": [
+          {
+            "id": "detached-identity-surfaces",
+            "label": "Detached cells identity surfaces",
+            "sourceIds": [
+              "level0",
+              "metadata"
+            ],
+            "terms": [
+              "BuyCellsBoost",
+              "NewDiamondUPGPrefab.Specials.CellsBoost",
+              ">Diamond Upgrade 10 - CellsBoost",
+              "NewTokenUPGPrefab.T1.CellsPerChestBooster",
+              "NewTokenUPGPrefab.T5.UltimaCells",
+              "Token Ultima: Cells"
+            ]
+          }
+        ],
+        "depthPlan": [
+          {
+            "hop": 0,
+            "goal": "Recover the bounded ATU3 shell-to-action-hook-to-shared-effect chain.",
+            "surfaceIds": [
+              "metadata-neighborhood",
+              "action-lane",
+              "shared-effect-title",
+              "shared-effect-text"
+            ]
+          },
+          {
+            "hop": 1,
+            "goal": "Recover detached cells identity and contrast evidence without making it part of the bounded effect core.",
+            "surfaceIds": [
+              "detached-identity-surfaces"
+            ]
+          },
+          {
+            "hop": 2,
+            "goal": "Hand off from the shared effect lane into the concrete chest consumer family.",
+            "targetIds": [
+              "token-shop-atu3-chest-consumer"
+            ]
+          }
+        ],
+        "claimStages": [
+          {
+            "id": "effect-core",
+            "label": "ATU3 effect core",
+            "requiredEdgeTypes": [
+              "serialized-adjacency",
+              "exact-shell-to-action-hook",
+              "shared-effect-system",
+              "derived-player-effect-surface",
+              "parameter-surface"
+            ]
+          },
+          {
+            "id": "detached-contrast",
+            "label": "ATU3 detached contrast evidence",
+            "requiredEdgeTypes": [
+              "detached-identity-contrast"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The shell-side owner window survives only in the TokenShop extract, where ATU3Button path id 15810 stays adjacent to the CellBoost owner block.",
+          "The shared effect chain now reaches the Cells Booster (Chests) title and the +1 Seconds timeskip to Cells Gained from Token & Diamond Chests text, but no committed source yet names the exact typed gameplay owner that consumes CellBoostBonus inside that chest-effect system.",
+          "The older diamond-side CellsBoost and token-side CellsPerChestBooster or Token Ultima: Cells surfaces still survive as detached identity clues, so this pass must stay effect-driven rather than pretending the row is a standard shell-to-prefab-to-title remap."
+        ]
+      }
+    },
+      "token-shop-atu3-chest-consumer": {
+      "label": "TokenShop ATU3 chest consumer seam",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu3-chest-consumer",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU3Button",
+        "15810",
+        "BuyCellBoost",
+        "AdManager, Assembly-CSharp"
+      ],
+      "joinGoal": "Recover one checked handoff from the ATU3 shared Cells Booster (Chests) effect lane into the concrete chest-reward consumer family, and keep the exact CellBoostBonus read or typed field handoff bounded if it still does not clear.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "defaultDepth": 1,
+      "solvedBaselineTargetId": "token-shop-atu3-chest-consumer",
+      "blockedTargetId": "token-shop-atu3-cells-effect",
+      "comparisonPresetId": null,
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 7,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 7,
+          "allowedNegativeEdgeTypes": [
+            "exact-cellboost-consumer-method"
+          ]
+        },
+        "messages": {
+          "wire": "One exact ATU3 shared-effect-to-consumer-method chain cleared cleanly enough to preserve the concrete cells-from-chests applier.",
+          "quarantine": "The trace now preserves one checked ATU3 shared-effect-to-consumer-family handoff into the AdManager chest routine neighborhood, but the exact CellBoostBonus read or typed field handoff still stays bounded negative.",
+          "research": "The ATU3 chest-consumer trace still breaks before one stable shared-effect-to-consumer-family verdict can be preserved."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU3Button",
+        "shellPathId": 15810,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 3,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU3Button",
+              "CellBoost",
+              "BuyCellBoost"
+            ]
+          },
+          {
+            "id": "shared-effect-title",
+            "label": "Shared effect title lane",
+            "sourceIds": [
+              "level0"
+            ],
+            "terms": [
+              "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"
+            ]
+          },
+          {
+            "id": "shared-effect-text",
+            "label": "Shared effect text lane",
+            "sourceIds": [
+              "level0"
+            ],
+            "terms": [
+              "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."
+            ]
+          },
+          {
+            "id": "consumer-family",
+            "label": "Chest consumer family",
+            "sourceIds": [
+              "level0"
+            ],
+            "terms": [
+              "AdManager, Assembly-CSharp",
+              "SetAdChestTexts",
+              "OfflineManager, Assembly-CSharp",
+              "DailyAndAdCounterChecker"
+            ]
+          },
+          {
+            "id": "consumer-routines",
+            "label": "Chest routine and bonus shell",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "StartTokenRoutine",
+              "<TokenChestRoutine>d__149",
+              "GoToClosedTokenChest",
+              "StartDiamondRoutine",
+              "<DiamondChestRoutine>d__155",
+              "GoToClosedDiamondChest",
+              "get_SmallAdCellGains",
+              "get_BigAdCellGains",
+              "<FinalAdTokenChestBonus>k__BackingField",
+              "<FinalDiamondChestBonus>k__BackingField"
+            ]
+          },
+          {
+            "id": "chest-objects",
+            "label": "Concrete chest objects",
+            "sourceIds": [
+              "level0"
+            ],
+            "terms": [
+              "TokenChest",
+              "DiamondChest"
+            ]
+          }
+        ],
+        "depthPlan": [
+          {
+            "hop": 0,
+            "goal": "Recover the shared effect lane and concrete chest consumer family.",
+            "surfaceIds": [
+              "metadata-neighborhood",
+              "shared-effect-title",
+              "shared-effect-text",
+              "consumer-family",
+              "consumer-routines",
+              "chest-objects"
+            ]
+          },
+          {
+            "hop": 1,
+            "goal": "Follow the consumer family into the internal bonus-aggregation shell.",
+            "targetIds": [
+              "token-shop-atu3-chest-consumer-read"
+            ]
+          }
+        ],
+        "claimStages": [
+          {
+            "id": "consumer-handoff",
+            "label": "ATU3 consumer family handoff",
+            "requiredEdgeTypes": [
+              "shared-effect-system",
+              "shared-effect-to-consumer-family",
+              "consumer-family-to-chest-routines",
+              "consumer-family-to-bonus-shell"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The shell-side owner window still survives only in the TokenShop extract, where ATU3Button path id 15810 stays adjacent to the CellBoost owner block.",
+          "The upgraded cross-system trace now reaches the concrete AdManager chest routine family through StartTokenRoutine, TokenChestRoutine, StartDiamondRoutine, DiamondChestRoutine, the closed-chest route methods, and the final chest-bonus shell, but no committed source yet shows the exact CellBoostBonus read or typed field handoff inside that family.",
+          "Because the exact CellBoostBonus consumer seam is still missing, keep ATU3 quarantined as an effect-driven row and do not convert this target into a standard prefab-or-title TokenShop remap claim."
+        ]
+      }
+    },
+    "token-shop-atu3-chest-consumer-read": {
+      "label": "TokenShop ATU3 chest consumer internal read seam",
+      "familyId": "token-shop",
+      "strategy": "token-shop-atu3-chest-consumer-read",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "string",
+        "path id"
+      ],
+      "defaultAnchors": [
+        "ATU3Button",
+        "15810",
+        "get_SmallAdCellGains",
+        "SetBoosterAdBonus",
+        "get_FinalBoosterAdBonus"
+      ],
+      "joinGoal": "Recover one checked internal handoff from the ATU3 shared Cells Booster (Chests) effect lane into the concrete chest consumer bonus-aggregation shell, and keep the exact CellBoostBonus read site bounded if it still does not clear.",
+      "requiredSourceFamilies": [
+        "token-shop"
+      ],
+      "defaultDepth": 0,
+      "solvedBaselineTargetId": "token-shop-atu3-chest-consumer-read",
+      "blockedTargetId": "token-shop-atu3-chest-consumer",
+      "comparisonPresetId": null,
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 6,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 6,
+          "allowedNegativeEdgeTypes": [
+            "exact-cellboost-to-booster-bonus-handoff"
+          ]
+        },
+        "messages": {
+          "wire": "One exact ATU3 cells-from-chests handoff clears into the concrete chest bonus-aggregation shell cleanly enough to preserve the runtime applier.",
+          "quarantine": "The trace now preserves the internal ATU3 chest bonus-aggregation shell, but the exact CellBoostBonus read site stays bounded negative.",
+          "research": "The ATU3 consumer-internal read trace still breaks before one stable bonus-aggregation handoff verdict can be preserved."
+        }
+      },
+      "strategyConfig": {
+        "shellField": "ATU3Button",
+        "shellPathId": 15810,
+        "shellWindowSource": "tokenShopExtract",
+        "shellWindowRadius": 3,
+        "surfaces": [
+          {
+            "id": "metadata-neighborhood",
+            "label": "Metadata neighborhood",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "ATU3Button",
+              "CellBoost",
+              "BuyCellBoost"
+            ]
+          },
+          {
+            "id": "consumer-family",
+            "label": "Chest consumer family",
+            "sourceIds": [
+              "level0"
+            ],
+            "terms": [
+              "AdManager, Assembly-CSharp",
+              "SetAdChestTexts",
+              "OfflineManager, Assembly-CSharp",
+              "DailyAndAdCounterChecker"
+            ]
+          },
+          {
+            "id": "consumer-routines",
+            "label": "Chest consumer routines",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "StartTokenRoutine",
+              "<TokenChestRoutine>d__149",
+              "GoToClosedTokenChest",
+              "StartDiamondRoutine",
+              "<DiamondChestRoutine>d__155",
+              "GoToClosedDiamondChest"
+            ]
+          },
+          {
+            "id": "cell-gain-getters",
+            "label": "Chest cell-gain getter shell",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "get_SmallAdCellGains",
+              "get_BigAdCellGains"
+            ]
+          },
+          {
+            "id": "booster-bonus-shell",
+            "label": "Booster bonus aggregation shell",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "SetBoosterAdBonus",
+              "get_FinalBoosterAdBonus",
+              "SmallAdCellGains",
+              "BigAdCellGains",
+              "FinalBoosterAdBonus",
+              "<BoosterAdRoutine>d__158"
+            ]
+          },
+          {
+            "id": "final-chest-bonus-shell",
+            "label": "Final chest bonus shell",
+            "sourceIds": [
+              "metadata"
+            ],
+            "terms": [
+              "<FinalAdTokenChestBonus>k__BackingField",
+              "<FinalDiamondChestBonus>k__BackingField"
+            ]
+          }
+        ],
+        "depthPlan": [
+          {
+            "hop": 0,
+            "goal": "Recover the internal bonus-aggregation shell inside the chest consumer family.",
+            "surfaceIds": [
+              "metadata-neighborhood",
+              "consumer-family",
+              "consumer-routines",
+              "cell-gain-getters",
+              "booster-bonus-shell",
+              "final-chest-bonus-shell"
+            ]
+          }
+        ],
+        "claimStages": [
+          {
+            "id": "internal-bonus-shell",
+            "label": "ATU3 internal bonus shell",
+            "requiredEdgeTypes": [
+              "shared-effect-to-consumer-family",
+              "consumer-family-to-chest-routines",
+              "consumer-family-to-cell-gain-getters",
+              "cell-gain-getters-to-booster-bonus-shell",
+              "booster-bonus-shell-to-final-chest-bonus-shell"
+            ]
+          }
+        ],
+        "lostStructure": [
+          "The checked ATU3 chain now reaches the concrete AdManager consumer family and one tighter internal bonus-aggregation shell, but no committed source yet shows the exact CellBoostBonus read-site or typed-field handoff into that shell.",
+          "The getter family and the booster bonus aggregation shell survive together in committed metadata, while the final token and diamond chest bonus backing fields survive in committed probe output, so the remaining runtime seam is narrow enough to stay quarantined to one exact internal handoff break.",
+          "Because the exact CellBoostBonus runtime read is still missing, this trace should stay as effect-chain completion evidence only and should not widen into prefab, title, or planner promotion."
+        ]
+      }
+    },
+    "shard-cost-su0-structure": {
+      "label": "Shard SU0 cost structure",
+      "familyId": "shard-cost",
+      "strategy": "shard-cost-su0-structure",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "field",
+        "dataset"
+      ],
+      "defaultAnchors": [
+        "ShardUpgradeInfo",
+        "get_SU0Cost",
+        "SU0StartCost"
+      ],
+      "joinGoal": "Recover one checked shard-cost getter-to-parameter-shell structure chain that is safe for descriptive quarantine but not planner promotion.",
+      "requiredSourceFamilies": [
+        "shard-cost"
+      ],
+      "solvedBaselineTargetId": "shard-cost-su0-structure",
+      "blockedTargetId": "shard-cost-planner-safe-output",
+      "comparisonPresetId": null,
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 5,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 4,
+          "allowedNegativeEdgeTypes": [
+            "automated-calibration-closure",
+            "planner-safe-cost-output",
+            "save-owner-recovery"
+          ]
+        },
+        "messages": {
+          "wire": "The shard-cost trace is complete enough to wire direct app behavior.",
+          "quarantine": "The shard-cost structure is grounded enough to preserve in quarantined descriptive tooling, but not to wire planner-safe cost outputs.",
+          "research": "The shard-cost trace is still too incomplete to preserve even a quarantined structural verdict."
+        }
+      },
+      "strategyConfig": {
+        "accessor": "get_SU0Cost",
+        "ownerType": "ShardUpgradeInfo",
+        "parameterShell": [
+          "SU0StartCost",
+          "SU0CostExponent",
+          "SU0GrowthExponent",
+          "SU0GrowthExponent2",
+          "SU0GrowthExponent3"
+        ]
+      }
+    },
+    "shard-owned-state-upgradeinfolist-population": {
+      "label": "Shard owned-state population boundary",
+      "familyId": "shard-owned-state",
+      "strategy": "shard-owned-state-upgradeinfolist-population",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "field",
+        "dataset"
+      ],
+      "defaultAnchors": [
+        "upgradeInfoList",
+        "ShardMining+ShardUpgradeInfo",
+        "IsUnlocked",
+        "MaxLevel"
+      ],
+      "joinGoal": "Trace the owned-state population path behind ShardMining.upgradeInfoList end to end and distinguish whether reachable shard row state is filled by a local runtime bridge, a deeper wrapper handoff, or a still-negative non-local injection seam.",
+      "requiredSourceFamilies": [
+        "shard-owned-state"
+      ],
+      "solvedBaselineTargetId": "shard-owned-state-upgradeinfolist-population",
+      "blockedTargetId": "shard-owned-state-local-bridge",
+      "comparisonPresetId": null,
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 6,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 5,
+          "allowedNegativeEdgeTypes": [
+            "local-runtime-population-bridge",
+            "deeper-wrapper-handoff-recovery"
+          ]
+        },
+        "messages": {
+          "wire": "The shard owned-state path is recovered cleanly enough to wire player-owned shard import behavior.",
+          "quarantine": "The shard owned-state trace is grounded enough to preserve one exact boundary verdict, but the result must stay quarantined to blocker evidence until a local bridge or deeper wrapper handoff is recovered.",
+          "research": "The shard owned-state trace still lacks enough checked structure to preserve one bounded population verdict."
+        }
+      },
+      "strategyConfig": {
+        "sceneOwner": "ShardMining",
+        "runtimeShell": "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo",
+        "genericLead": "ConstructionMilestones, Assembly-CSharp",
+        "saveCandidate": "PlayerProfile-side shard member shell"
+      }
+    },
+    "multiverse-market-save-owner-boundary": {
+      "label": "Multiverse market SaveData owner boundary",
+      "familyId": "multiverse-market-save-owner",
+      "strategy": "multiverse-market-save-owner-boundary",
+      "acceptedAnchors": [
+        "class",
+        "method",
+        "field",
+        "dataset"
+      ],
+      "defaultAnchors": [
+        "get_Market",
+        "SaveData",
+        "IS71Level"
+      ],
+      "joinGoal": "Recover one checked accessor-to-save-owner boundary that keeps compatibility-only import truth separate from canonical PlayerProfile promotion.",
+      "requiredSourceFamilies": [
+        "multiverse-market-save-owner"
+      ],
+      "solvedBaselineTargetId": "multiverse-market-save-owner-boundary",
+      "blockedTargetId": "multiverse-market-canonical-import",
+      "comparisonPresetId": null,
+      "outputSummaryRules": {
+        "wire": {
+          "minPresentEdges": 5,
+          "maxNegativeEdges": 0
+        },
+        "quarantine": {
+          "minPresentEdges": 4,
+          "allowedNegativeEdgeTypes": [
+            "typed-market-field-recovery",
+            "canonical-import-admissibility",
+            "broad-row-identity-remap"
+          ]
+        },
+        "messages": {
+          "wire": "The save-owner trace is complete enough to wire canonical import behavior.",
+          "quarantine": "The save-owner boundary is grounded enough to preserve as quarantined compatibility truth, but not to wire canonical import or planner behavior.",
+          "research": "The save-owner trace still lacks enough checked owner-boundary recovery to preserve even a quarantined verdict."
+        }
+      },
+      "strategyConfig": {
+        "accessorBridge": "PlayerProfileHandler.get_Market -> MultiverseMarket",
+        "saveOwner": "SaveData",
+        "typedSpan": "IS1Level through IS110Level",
+        "compatibilityImportTargetPath": "compatibility.unmappedSystemState.multiverseMarket",
+        "canonicalImportSafeSubsetLabel": "none",
+        "broaderRowRemapStatus": "Broader row identity or remap stays blocked outside the checked 71-74 ordered overlap.",
+        "blockedStructure": [
+          "The wider inscription ordering outside rows 71-74 is not yet grounded enough from checked repo-local evidence to promote broader IS*Level row mappings.",
+          "The checked repo-local evidence still does not recover player-facing row labels for rows 71-74, only their ordered row positions inside the larger inscription set.",
+          "do not claim a broader IS*Level to inscription-row remap until repo-local evidence checks more than the ordered 71-74 overlap"
+        ],
+        "orderedOverlap": [
+          71,
+          72,
+          73,
+          74
+        ]
+      }
+    }
+  }
+}

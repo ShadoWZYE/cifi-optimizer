@@ -3,12 +3,12 @@
   "dataset": "multiverse-market-row71-74-identity-boundary",
   "sources": {
     "saveDataImportBoundary": "data/multiverse-market-savedata-import-boundary.json",
-    "validatedRows": "data/multiverse-market-values.json",
+    "validatedRows": "data/archive/multiverse-market-values.json",
     "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
     "actionShell": "data/multiverse-market-action-shell.json",
     "prefabRemapBoundary": "data/multiverse-market-prefab-remap-boundary.json",
-    "unityProbeReport": "data/unity-probe-report.json",
-    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "unityProbeReport": "data/archive/unity-apk-extract-report.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
     "liveUiScreenshotEvidence": "user-supplied in-game screenshots showing rows 68-75",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },
@@ -94,3 +94,5 @@
     ]
   }
 }
+
+

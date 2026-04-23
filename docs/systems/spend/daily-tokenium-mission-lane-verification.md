@@ -8,7 +8,7 @@ It exists because the lane should no longer be treated as an unresolved TokenSho
 
 - `SpaceAcademy` exists as a real navigation surface in `level0`, beside other first-class menu buttons such as `TokenShopButton`, `LoopModifiers`, and `DailyRewards`.
 - `FarmMissions`, `FarmMission1`, `FarmMission2`, `FarmMission3`, `FarmMission4-C12`, and `FarmMissionFill` exist as real scene or prefab labels in `level0`.
-- Exact typed recovery in `data/uabea-probe-report.json` now shows `DailyTokenium` as a direct `SaveData` field with type `System.Double`.
+- Exact typed recovery in `data/archive/uabea-extract-report.json` now shows `DailyTokenium` as a direct `SaveData` field with type `System.Double`.
 - Daily Tokenium is explicitly described as mission-fed:
   - `0 / 2000 Daily Tokenium (from blue farm missions)`
   - `This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)`
@@ -92,3 +92,4 @@ Safe repo conclusion:
 - Daily Tokenium cap and Daily Tokenium-specific ready or claimable state should remain `available but unmapped`.
 - Future spend-planner work should treat it as a cross-system mission lane, not as a simple TokenShop budget field.
 - The next mapping pass should chase the gameplay owner or saved-state family for Academy or Farm Mission reward state, not only more TokenShop strings.
+

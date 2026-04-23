@@ -4,8 +4,7 @@ This note records the strongest repo-local owner-family evidence for the shard m
 
 Inputs:
 
-- [data/shard-owner-family-probe.v1.json](data/shard-owner-family-probe.v1.json)
-- [data/shard-vs-construction-owner-probe.v1.json](data/shard-vs-construction-owner-probe.v1.json)
+- [data/shard-owner-family-boundary.v1.json](data/shard-owner-family-boundary.v1.json)
 - [data/shardmining-metadata-neighborhood.v1.json](data/shardmining-metadata-neighborhood.v1.json)
 - [data/shardupgradeinfo-metadata-neighborhood.v1.json](data/shardupgradeinfo-metadata-neighborhood.v1.json)
 - [data/shard-metadata-neighborhood.v1.json](data/shard-metadata-neighborhood.v1.json)
@@ -27,7 +26,7 @@ This is stronger than the earlier `ConstructionMilestones` lead because it is sh
 
 ### `ShardMining, Assembly-CSharp`
 
-The committed probe output places `ShardMining, Assembly-CSharp` directly beside shard milestone UI and fast-buy control hooks in `level0`.
+The committed boundary summary places `ShardMining, Assembly-CSharp` directly beside shard milestone UI and fast-buy control hooks in `level0`.
 
 Recovered adjacent strings include:
 
@@ -71,7 +70,7 @@ Why it was downgraded:
 
 - the metadata path is explicitly `Assets\Scripts\Upgrades\AcademyData\ConstructionMilestones.cs`
 - the class naming is academy-side rather than shard-specific
-- the side-by-side owner probe places `ConstructionMilestones, Assembly-CSharp` around blueprint hold strings rather than shard-specific owner labels
+- the folded side-by-side owner summary places `ConstructionMilestones, Assembly-CSharp` around blueprint hold strings rather than shard-specific owner labels
 - its milestone buy and bonus fields may describe a broader or different milestone family
 
 It still matters as a cautionary nearby lead because it carries:
@@ -127,8 +126,8 @@ The next shard-local fail-fast bundle is now also preserved as:
 - [data/shard-milestone-payload-boundary.v1.json](data/shard-milestone-payload-boundary.v1.json)
 - [data/shard-milestone-row-shell-boundary.v1.json](data/shard-milestone-row-shell-boundary.v1.json)
 - [data/shard-milestone-row-alignment-boundary.v1.json](data/shard-milestone-row-alignment-boundary.v1.json)
-- [data/shard-milestone-handoff-boundary.v1.json](data/shard-milestone-handoff-boundary.v1.json)
-- [data/shard-save-boundary.v1.json](data/shard-save-boundary.v1.json)
+- [data/shard-milestone-handoff-boundary.v2.json](data/shard-milestone-handoff-boundary.v2.json)
+- [data/shard-save-boundary.v2.json](data/shard-save-boundary.v2.json)
 
 That payload boundary keeps the current milestone-total, cost-list, progress-fill, and phase-tick hooks attached to the shard-specific carrier trail. The row-definition payload is now already recovered on direct `ShardMining` scene data, but it still does not recover player-owned row ownership.
 

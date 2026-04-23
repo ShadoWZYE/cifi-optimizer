@@ -228,6 +228,8 @@
         "docs/unity/unity-audit-playbook.md"
       ],
       "artifacts": [
+        "data/system-units/shards.v1.json",
+        "data/system-units/trace.v1.json",
         "data/shard-owner-family-boundary.v1.json",
         "data/shard-finalsu-bonus-boundary.v1.json",
         "data/shard-milestone-payload-boundary.v1.json",
@@ -237,17 +239,10 @@
         "data/shard-effect-text-handler-boundary.v1.json",
         "data/shard-milestone-row-shell-boundary.v1.json",
         "data/shard-milestone-row-alignment-boundary.v1.json",
-        "data/shard-milestone-handoff-boundary.v1.json",
-        "data/shard-save-boundary.v1.json",
+        "data/shard-milestone-handoff-boundary.v2.json",
+        "data/shard-save-boundary.v2.json",
         "data/shard-milestone-family-evidence.v1.json",
-        "data/shard-scene-monobehaviour-probe.v1.json",
-        "data/shard-cost-parameter-probe.v1.json",
-        "data/shard-cost-method-probe.v1.json",
-        "data/shard-cost-native-probe.v1.json",
-        "data/shard-cost-list-path-probe.v1.json",
-        "data/shard-cost-formula-model.v1.json",
         "data/shard-bonus-slot-probe.v1.json",
-        "data/shard-type-metadata-probe.v1.json",
         "data/shardmining-metadata-neighborhood.v1.json",
         "data/shardupgradeinfo-metadata-neighborhood.v1.json"
       ],
@@ -339,8 +334,8 @@
         "docs/unity/unity-audit-playbook.md"
       ],
       "artifacts": [
-        "data/multiverse-market-metadata-neighborhood.json",
-        "data/multiverse-market-save-boundary.json",
+        "data/archive/multiverse-market-metadata-neighborhood.json",
+        "data/multiverse-market-save-boundary.v2.json",
         "data/multiverse-market-market-member-boundary.json",
         "data/multiverse-market-range-boundary.json",
         "docs/systems/spend/multiverse-market-metadata-neighborhood.md"
@@ -404,6 +399,8 @@
       ],
       "artifacts": [
         "data/game-data.snapshot.v1.json",
+        "data/system-units/token-shop.v1.json",
+        "data/system-units/multiverse-market.v1.json",
         "app.js",
         "tests/smoke.mjs"
       ],
@@ -432,7 +429,7 @@
         "Keep the checked TokenShop subset fixed to `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, `ATU12Level`, `ATU13Level`, and `ATU20Level` instead of widening the consumed-input contract.",
         "Reuse the already shipped checked-row panel as the boundary-safe shell for the next user-facing TokenShop tool slice.",
         "Drop canonical Tokens from the consumed-input contract because this row-detail slice no longer answers an affordability question.",
-        "Read only the checked subset levels plus the same rows' extracted `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields from `data/token-shop-values.json`.",
+        "Read only the checked subset levels plus the same rows' extracted `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields from the active `db:derived:token-shop-values` extract (archived snapshot: `data/archive/token-shop-values.json`).",
         "Show each grounded subset row's identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect bonus-step change in fixed grounded slot order.",
         "Keep the row-detail surface explicitly non-optimizer and outside any best-buy, ROI, ranking, or next-purchase recommendation math.",
         "Keep unresolved TokenShop rows, token-bank state, Daily Tokenium state, Emporium state, and unresolved `ATU*` remap work outside the shipped module."
@@ -449,6 +446,7 @@
       ],
       "artifacts": [
         "data/game-data.snapshot.v1.json",
+        "data/system-units/token-shop.v1.json",
         "app.js",
         "tests/smoke.mjs"
       ],
@@ -493,6 +491,7 @@
       ],
       "artifacts": [
         "data/game-data.snapshot.v1.json",
+        "data/system-units/token-shop.v1.json",
         "app.js",
         "index.html",
         "tests/smoke.mjs"
@@ -540,6 +539,7 @@
         "docs/unity/unity-audit-playbook.md"
       ],
       "artifacts": [
+        "data/system-units/multiverse-market.v1.json",
         "data/multiverse-market-savedata-import-boundary.json",
         "data/multiverse-market-market-member-boundary.json",
         "data/multiverse-market-range-boundary.json",
@@ -581,12 +581,12 @@
       "sources": [
         "docs/systems/spend/spend-system-verification.md",
         "docs/roadmap/active-grounding-boundaries.md",
-        "data/token-shop-values.json",
-        "data/uabea-probe-report.json"
+        "data/archive/token-shop-values.json",
+        "data/archive/uabea-extract-report.json"
       ],
       "artifacts": [
-        "data/token-shop-values.json",
-        "data/token-shop-row-level-owner.json",
+        "data/archive/token-shop-values.json",
+        "data/system-units/token-shop.v1.json",
         "player-profile.js"
       ],
       "verified": [
@@ -637,16 +637,14 @@
       "sources": [
         "docs/systems/spend/spend-system-verification.md",
         "docs/systems/spend/token-shop-row-remap-verification.md",
-        "data/token-shop-values.json",
-        "data/uabea-probe-report.json",
-        "data/unity-probe-report.json",
-        "data/daily-tokenium-lane-probe.json",
-        "data/daily-tokenium-owner-probe.json",
-        "data/lm244-targeted-probe.json"
+        "data/system-units/token-shop.v1.json",
+        "data/system-units/trace.v1.json",
+        "db:materialized-target-bundle:token-shop-family-structure",
+        "db:materialized-target-bundle:token-shop-atu3-cells-effect"
       ],
       "artifacts": [
-        "data/token-shop-row-level-owner.json",
-        "data/token-shop-row-remap-boundary.json",
+        "data/system-units/token-shop.v1.json",
+        "data/system-units/trace.v1.json",
         "data/token-shop-late-atu-boundary.json"
       ],
       "verified": [
@@ -661,7 +659,7 @@
         "One bounded ATU11 shell-to-prefab bridge is now also recovered: `ATU11Button` to `NewTokenUPGPrefab.T1.MK7Booster`, while the row-specific title-side follow-up still preserves only detached `MK7 GEN ENHANCEMENT` text with matching MK7 support text instead of one exact final player-facing row title.",
         "One bounded ATU12 shell-to-prefab-to-title-side-text chain is now also recovered: `ATU12Button` to `NewTokenUPGPrefab.T1.MK8Booster` to `Mk8 Generator Booster` with matching MK8 cost-divider and output text.",
         "The bounded ATU1 title-side pass stays negative, and the last honest ATU1 blocker is still one exact join from the detached `Tokens Booster`, `Tokens Booster T1`, or `>Diamond Upgrade 9 - TokensBoost` title-side clue back to `ATU1Button` path id `15839`.",
-        "The bounded ATU4 title-side pass stays negative, and the last honest ATU4 blocker is still one exact join from the detached `Token Ultima: MP` or `:Diamond Upgrade 11 - ModBoost` title-side clue back to `ATU4Button` path id `15796`, while the remaining ATU5 blocker is now only the absent exact final player-facing row-title string after the checked `ATU5Button` -> `NewTokenUPGPrefab.T1.MK1Booster` -> `1. MK1 Generator Output,` named-identity and support-text chain.",
+        "The bounded ATU4 remap pass now preserves the row-local bridge, and the last honest ATU4 blocker is the exact runtime display-update path for `ATU4Button` path id `15796`, while the remaining ATU5 blocker is now only the absent exact final player-facing row-title string after the checked `ATU5Button` -> `NewTokenUPGPrefab.T1.MK1Booster` -> `1. MK1 Generator Output,` named-identity and support-text chain.",
         "The bounded TokenShop family-structure trace audit now shows one repeated solved shell-to-proxy-to-prefab pattern across `ATU1Button`, `ATU2Button`, `ATU4Button`, `ATU5Button`, `ATU6Button`, `ATU7Button`, `ATU8Button`, and `ATU9Button`, while repeated title-localization gaps still remain outside the one exact `ATU6Button` final-title exemplar and the bounded MK3, MK4, or MK5 title-side text chains.",
         "The bounded ATU3 cells-domain disambiguation pass stays negative for prefab-or-title identity: `BuyCellBoost`, the diamond-special `CellsBoost` lane, and the token-side `CellsPerChestBooster` / `Token Ultima: Cells` lane still do not cross back to `ATU3Button` path id `15810` as one exact row remap.",
         "A separate ATU3 effect-driven trace now does clear: `ATU3Button` -> `BuyCellBoost` -> shared `Cells Booster (Chests)` with `CellBoostBonus = 1` as a bounded parameter surface, the next consumer-seam pass now also reaches the `AdManager` chest routine family, the consumer-internal read pass now also preserves one checked internal bonus-aggregation shell, and the newest explicit `CellBoostBonus`-anchor follow-up still keeps the owner-side parameter neighborhood detached from any exact `AdManager` bonus-shell read site while ruling out the outer chest routines, the final token-or-diamond chest bonus backing fields, and the remaining internal getter-or-booster aggregation family plus the `FinalBoosterAdBonus` setter-or-backing-field surfaces as the direct handoff point.",
@@ -704,7 +702,7 @@
         "docs/unity/unity-owner-map.md"
       ],
       "artifacts": [
-        "data/token-shop-save-boundary.json",
+        "data/token-shop-save-boundary.v2.json",
         "data/token-bank-controller-shell.json",
         "data/token-bank-formula-boundary.json",
         "data/token-bank-state-clues.json"
@@ -841,7 +839,7 @@
       "artifacts": [
         "docs/systems/spend/multiverse-market-state-verification.md",
         "docs/systems/spend/multiverse-market-metadata-neighborhood.md",
-        "data/multiverse-market-metadata-neighborhood.json"
+        "data/archive/multiverse-market-metadata-neighborhood.json"
       ],
       "verified": [
         "Mech-adjacent fields exist in the recovered broader progression-style metadata block.",
@@ -933,3 +931,5 @@
     }
   ]
 }
+
+

@@ -1,0 +1,42 @@
+{
+  "dataset": "multiverse-market-save-boundary.v2",
+  "generatedAt": "2026-04-07",
+  "sources": {
+    "actionShellProbe": "tmp-multiverse-row-text-probe.json",
+    "metadataNeighborhood": "data/archive/multiverse-market-metadata-neighborhood.json",
+    "marketMemberBoundary": "data/multiverse-market-market-member-boundary.json",
+    "metadata": "workbench/apk/base/global-metadata.dat",
+    "level0": "workbench/unity/joined/level0"
+  },
+  "actionShellTermsChecked": [
+    "TextHandlerMarkets",
+    "SetAllChrystosEmporiumTexts",
+    "SetInscryptionsDoneText"
+  ],
+  "saveFamilyTermsChecked": [
+    "PlayerProfileData",
+    "GetPlayerProfileData",
+    "FillPlayerProfileData",
+    "CloudSavePlayerProfile"
+  ],
+  "boundaryEvidence": {
+    "actionShellWithSaveOverlapCount": 0,
+    "metadataNeighborhoodHasActionTerms": true,
+    "metadataNeighborhoodHasSaveTerms": true,
+    "metadataDirectCheckHasSaveTerms": false,
+    "level0DirectCheckHasSaveTerms": false
+  },
+  "crossBoundaryTypedOwnerStatus": {
+    "status": "declaring-owner-closed-market-wrapper-still-unresolved",
+    "exactDeclaringOwner": "SaveData",
+    "scope": "checked InscryptionsDone / IS*Level / trade-counter / early Mech* progression cluster, with the declaring owner closed on SaveData and the remaining seam narrowed to typed Market-wrapper recovery only",
+    "note": "This artifact still records the action-shell versus save-family split only; the checked typed market-member boundary closes the declaring-owner question on SaveData, preserves the exact PlayerProfileData.InscryptionsDone:System.String versus SaveData.InscryptionsDone:System.Int32 split, and still does not recover a typed Market field or import-ready row mapping."
+  },
+  "currentBoundary": [
+    "The checked MultiverseMarket action-shell probe now preserves TextHandlerMarkets, SetAllChrystosEmporiumTexts, and SetInscryptionsDoneText while separately confirming zero direct overlap with the current PlayerProfileData or CloudSavePlayerProfile save-family clues.",
+    "The checked metadata-neighborhood dataset still preserves both the action-side anchors and the save-family anchors, but the narrowed action-shell probe itself does not recover save-family terms in either global-metadata.dat action contexts or level0.",
+    "This is enough to keep the MultiverseMarket action shell and save-family recovery separated in repo-local grounding, while the checked typed market-member boundary now separately closes the declaring-owner question on SaveData for the checked InscryptionsDone and IS*Level and trade-counter and early Mech progression cluster and keeps only the typed Market-wrapper question unresolved.",
+    "This artifact by itself still does not recover a typed Market field, player-owned row levels, or a canonical import-ready Emporium state surface."
+  ]
+}
+

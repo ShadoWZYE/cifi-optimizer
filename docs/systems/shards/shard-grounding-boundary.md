@@ -164,5 +164,3 @@ Current heuristic ranking for that work:
 - second target: loop-reset stage family
 
 Reference:
-
-- [data/extraction-candidate-ranking.v1.json](data/extraction-candidate-ranking.v1.json)

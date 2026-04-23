@@ -1,0 +1,219 @@
+{
+  "dataset": "repo-data-unit.v1",
+  "unitId": "shards",
+  "systemId": "shards",
+  "version": "v1",
+  "status": "seeded",
+  "kind": "system",
+  "schemaRef": "data/data-unit-format.v1.json",
+  "frameworkRef": "data/data-framework.v1.json",
+  "summary": "Central shard system unit for grounded family evidence, owned-state blockers, cost modeling, and permanent shard boundary/support structure.",
+  "liveConsumers": {
+    "appStatePaths": [
+      "state.systemUnits.shards",
+      "app.js:getCurrentShardSystemView",
+      "support/system-unit-projections.js:buildShardSystemView"
+    ],
+    "traceTargets": [
+      "shard-owned-state-upgradeinfolist-population",
+      "shard-cost-su0-structure"
+    ],
+    "plannerConsumers": [
+      "scripts/shards/cost-evaluator.mjs"
+    ]
+  },
+  "subsystems": {
+    "family": {
+      "summary": "Definition-side shard family evidence and player-facing descriptive grounding.",
+      "seedOutputs": [
+        "data/system-units/shards.v1.json"
+      ]
+    },
+    "owned-state": {
+      "summary": "Owned-state blocker and save-owner seam conclusions for shard milestone state.",
+      "seedOutputs": [
+        "data/shard-save-boundary.v2.json"
+      ]
+    },
+    "cost": {
+      "summary": "Shard cost evaluator model, staged runtime evidence, and remaining bounded uncertainty.",
+      "seedOutputs": [
+        "db:derived:shard-cost-formula-model",
+        "db:policy:shard-cost-screenshot-calibration",
+        "data/system-units/shards.v1.json"
+      ]
+    }
+  },
+  "provenance": {
+    "policy": "Copy shard family, owned-state, and cost data into centralized shard views while preserving the committed boundary/model source or the regeneration command for transient extraction evidence.",
+    "transientProbePolicy": "If a shard value is initially copied from a transient extraction report, record the command or DB-backed target-bundle identity that regenerates it before treating the embedded value as current.",
+    "sourceRecords": [
+      {
+        "id": "shard-family-evidence",
+        "kind": "dataset",
+        "path": "data/shard-milestone-family-evidence.v1.json",
+        "role": "historical-support",
+        "persistence": "committed"
+      },
+      {
+        "id": "shard-save-boundary",
+        "kind": "dataset",
+        "path": "data/shard-save-boundary.v2.json",
+        "role": "boundary",
+        "persistence": "committed"
+      },
+      {
+        "id": "shard-cost-formula-model",
+        "kind": "dataset",
+        "path": "data/shard-cost-formula-model.v1.json",
+        "role": "historical-model",
+        "persistence": "committed"
+      },
+      {
+        "id": "shard-cost-screenshot-calibration",
+        "kind": "dataset",
+        "path": "data/shard-cost-screenshot-calibration.v1.json",
+        "role": "historical-policy",
+        "persistence": "committed"
+      },
+      {
+        "id": "shard-owned-state-trace-command",
+        "kind": "command",
+        "role": "transient-regeneration",
+        "persistence": "transient",
+        "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-owned-state-upgradeinfolist-population --level structured",
+        "expectedOutputs": [
+          "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population"
+        ]
+      },
+      {
+        "id": "shard-cost-trace-command",
+        "kind": "command",
+        "role": "transient-regeneration",
+        "persistence": "transient",
+        "command": "python scripts\\unity\\unity_trace_bundle.py --target shard-cost-su0-structure --level structured",
+        "expectedOutputs": [
+          "db:materialized-target-bundle:shard-cost-su0-structure"
+        ]
+      }
+    ]
+  },
+  "views": {
+    "canonical": [
+      "data/shard-milestones.grounded.v1.json",
+      "data/shard-observed-behaviors.grounded.v1.json",
+      "data/shard-milestones-provenance.grounded.v1.json"
+    ],
+    "boundary": [
+      "data/shard-owner-family-boundary.v1.json",
+      "data/shard-finalsu-bonus-boundary.v1.json",
+      "data/shard-milestone-payload-boundary.v1.json",
+      "data/shard-cost-model-boundary.v1.json",
+      "data/shard-milestone-row-model-boundary.v1.json",
+      "data/shard-milestone-title-effect-boundary.v1.json",
+      "data/shard-effect-text-handler-boundary.v1.json",
+      "data/shard-milestone-row-shell-boundary.v1.json",
+      "data/shard-milestone-row-alignment-boundary.v1.json",
+      "data/shard-milestone-handoff-boundary.v2.json",
+      "data/shard-save-boundary.v2.json",
+      "data/shard-milestone-save-owner-candidates.v2.json"
+    ],
+    "model": [
+      "data/shard-cost-screenshot-calibration.v1.json"
+    ],
+    "support": [],
+    "historicalProbe": [
+      "data/shard-scene-monobehaviour-probe.v1.json",
+      "data/shard-type-metadata-probe.v1.json",
+      "data/shard-cost-parameter-probe.v1.json",
+      "data/shard-cost-method-probe.v1.json",
+      "data/shard-cost-native-probe.v1.json"
+    ]
+  },
+  "replacementPlan": {
+    "seedOutputs": [
+      "data/system-units/shards.v1.json"
+    ],
+    "projectionTargets": [
+      "family",
+      "owned-state",
+      "cost"
+    ],
+    "archiveAfterReplacement": [
+      "data/shard-scene-monobehaviour-probe.v1.json",
+      "data/shard-type-metadata-probe.v1.json",
+      "data/shard-bonus-slot-probe.v1.json",
+      "data/shard-cost-parameter-probe.v1.json",
+      "data/shard-cost-method-probe.v1.json",
+      "data/shard-cost-native-probe.v1.json"
+    ],
+    "archiveReview": [
+      {
+        "path": "data/shard-milestone-family-evidence.v1.json",
+        "status": "archive-candidate",
+        "reason": "Shard family evidence is now rebuilt inside the shared shards unit from grounded milestones plus row, title, effect, cost, and save boundaries instead of shipping the old standalone summary as a live support input.",
+        "replacementSource": "data/system-units/shards.v1.json"
+      },
+      {
+        "path": "data/shard-cost-formula-model.v1.json",
+        "status": "historical-snapshot",
+        "reason": "The live shard cost model now materializes through the DB-backed shard system and the planner consumes that DB-owned projection. Keep this file only as a historical snapshot while the DB-first lane settles.",
+        "replacementSource": "db:derived:shard-cost-formula-model"
+      },
+      {
+        "path": "data/shard-cost-screenshot-calibration.v1.json",
+        "status": "historical-policy",
+        "reason": "Calibration checkpoints remain a distinct grounding input, but the live shard runtime now reads them through the DB-backed shard policy materialization rather than treating the committed file as the active owner.",
+        "replacementSource": "db:policy:shard-cost-screenshot-calibration"
+      },
+      {
+        "path": "data/shard-cost-list-path-probe.v1.json",
+        "status": "archive-candidate",
+        "reason": "Getter-list path semantics are now projected from the canonical shard cost formula model into the shared shard unit, so the standalone probe can move toward historical-only status.",
+        "replacementSource": "data/system-units/shards.v1.json"
+      },
+      {
+        "path": "data/shard-bonus-slot-probe.v1.json",
+        "status": "archive-candidate",
+        "reason": "Shard bonus-slot coverage now derives from reducer-owned shard family evidence inside the shared shard unit, while the row-0 mismatch still survives there as bounded contradiction context.",
+        "replacementSource": "data/system-units/shards.v1.json"
+      },
+      {
+        "path": "data/shard-type-metadata-probe.v1.json",
+        "status": "archive-candidate",
+        "reason": "Typed schema clues are now preserved through the surviving shard boundaries and formula model, so the raw type probe should remain historical-only rather than a live shard support surface.",
+        "replacementSource": "data/system-units/shards.v1.json"
+      },
+      {
+        "path": "data/shard-scene-monobehaviour-probe.v1.json",
+        "status": "archive-candidate",
+        "reason": "The active shard lane no longer consumes this probe directly; its narrowing facts are already folded into save-side and handoff boundaries, so it stays historical-only.",
+        "replacementSource": "data/system-units/shards.v1.json"
+      },
+      {
+        "path": "data/shard-cost-parameter-probe.v1.json",
+        "status": "archive-candidate",
+        "reason": "The active shard cost lane now reads verified parameter semantics from the canonical formula model instead of shipping this raw probe as a live support input.",
+        "replacementSource": "data/system-units/shards.v1.json"
+      },
+      {
+        "path": "data/shard-cost-method-probe.v1.json",
+        "status": "archive-candidate",
+        "reason": "Method-level shard cost evidence is preserved through the centralized shard unit and archive references are sufficient once shipped validation no longer depends on it.",
+        "replacementSource": "data/system-units/shards.v1.json"
+      },
+      {
+        "path": "data/shard-cost-native-probe.v1.json",
+        "status": "archive-candidate",
+        "reason": "The active shard-cost trace lane now cites only the canonical formula model and save-owner boundary surfaces, so the raw native probe remains historical-only provenance rather than an active trace dependency.",
+        "replacementSource": "data/system-units/shards.v1.json"
+      }
+    ],
+    "requirementsBeforeArchive": [
+      "App, trace, and planner reads must resolve through the centralized shard unit or explicit projections of it.",
+      "Family, owned-state, and cost conclusions must remain individually explainable inside the shared shard system.",
+      "Historical shard probes can only move out of the live data root after their evidence is reproducible from centralized projections.",
+      "Any transient shard extraction used during consolidation must preserve the regeneration command that produced it."
+    ]
+  }
+}

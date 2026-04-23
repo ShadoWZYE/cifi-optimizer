@@ -2,7 +2,7 @@
   "dataset": "shard-cost-method-probe.v1",
   "generatedAt": "2026-04-05",
   "source": {
-    "uabeaProbeReport": "data/uabea-probe-report.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
     "libIl2cpp": "workbench/apk/base/libil2cpp.so"
   },
   "costGetterFamily": {
@@ -677,3 +677,4 @@
     "Do not promote next-level shard costs as player-facing truth until the repo recovers or verifies the actual BigDouble computation used by the getter family."
   ]
 }
+

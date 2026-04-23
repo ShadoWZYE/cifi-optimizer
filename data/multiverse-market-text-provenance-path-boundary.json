@@ -5,15 +5,15 @@
     "shellRowPredictionBoundary": "data/multiverse-market-shell-row-prediction-boundary.json",
     "nearbyIdentityBindingPattern": "data/multiverse-market-nearby-identity-binding-pattern.json",
     "rowTextCoverage": "data/multiverse-market-row-text-coverage.json",
-    "metadataNeighborhood": "data/multiverse-market-metadata-neighborhood.json",
-    "uabeaProbeReport": "data/uabea-probe-report.json",
-    "unityProbeReport": "data/unity-probe-report.json",
-    "rowSeededAssetProbe": "data/multiverse-market-row78-83-seeded-reference-probe.json",
-    "textComponentProbe": "data/multiverse-market-row78-83-text-components-probe.json",
-    "assignmentSiteProbe": "data/multiverse-market-row78-83-assignment-site-probe.json",
-    "runtimeSurfaceProbe": "data/unity-runtime-surface-probe.json",
-    "runtimeCodeProbe": "data/multiverse-market-text-runtime-probe.json",
-    "tmpRowTextProbe": "tmp-multiverse-row-text-probe.json",
+    "metadataNeighborhood": "data/archive/multiverse-market-metadata-neighborhood.json",
+    "uabeaProbeReport": "data/archive/uabea-extract-report.json",
+    "unityProbeReport": "data/archive/unity-apk-extract-report.json",
+    "rowSeededAssetProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-seeded-slot-walk",
+    "textComponentProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-component-walk",
+    "assignmentSiteProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-assignment-site-summary",
+    "runtimeSurfaceProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
+    "runtimeCodeProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
+    "tmpRowTextProbe": "data/multiverse-market-text-provenance-path-boundary.json#embedded-checked-negative-row-text-continuation",
     "stateVerificationDoc": "docs/systems/spend/multiverse-market-state-verification.md",
     "verificationDoc": "docs/systems/spend/multiverse-market-verification.md"
   },
@@ -64,7 +64,7 @@
     },
     "assignmentSiteRecovery": {
       "status": "serialized-row-local-ownership-only",
-      "artifact": "data/multiverse-market-row78-83-assignment-site-probe.json",
+      "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-assignment-site-summary",
       "candidateProducerScriptsChecked": [
         "TextHandlerMarkets",
         "MultiverseMarket"
@@ -92,31 +92,31 @@
         "claim": "row 78 keeps the same number across IS78Level, IS78ID, BuyIS78, TextHandlerMarkets, and ChrystosEmporiumUpgrade78-ID78 beside the player-facing string anchor Inscryption 78 Ouroboros Orbs"
       },
       {
-        "artifact": "data/multiverse-market-metadata-neighborhood.json",
+        "artifact": "data/archive/multiverse-market-metadata-neighborhood.json",
         "claim": "the same neighborhood preserves TextHandlerMarkets, SetAllChrystosEmporiumTexts, and the TextHandlerMarkets.cs source-path clue"
       },
       {
-        "artifact": "data/unity-probe-report.json",
+        "artifact": "data/archive/unity-apk-extract-report.json",
         "claim": "the repo preserves a direct Unity string anchor Inscryption 78 Ouroboros Orbs"
       },
       {
-        "artifact": "data/multiverse-market-row78-83-seeded-reference-probe.json",
+        "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-seeded-slot-walk",
         "claim": "the live-asset seed walk from ChrystosEmporiumUpgrade78-ID78 and ChrystosEmporiumUpgrade83-ID83 recovers mirrored row-local slot GameObjects named CurrentBonusText, BonusDescriptionText, PerLevelBonusText, DescriptionText, IDText, and IconBox"
       },
       {
-        "artifact": "data/multiverse-market-row78-83-text-components-probe.json",
+        "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-component-walk",
         "claim": "the seeded component walk recovers concrete UnityEngine.UI.Text components on the row-local CurrentBonusText, BonusDescriptionText, PerLevelBonusText, and DescriptionText objects, plus adjacent Image, Outline, and Shadow components"
       },
       {
-        "artifact": "data/multiverse-market-row78-83-assignment-site-probe.json",
+        "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-row78-83-assignment-site-summary",
         "claim": "the assignment-site scan recovers only row-local ownership edges such as GameObject to Text or Outline or Shadow or Image plus RectTransform and CanvasRenderer backlinks, with zero serialized TextHandlerMarkets or MultiverseMarket producer links into those row-local text components"
       },
       {
-        "artifact": "data/unity-runtime-surface-probe.json",
+        "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
         "claim": "the lightweight IL2CPP runtime surface now recovers typed TextHandlerMarkets fields such as IS1BonusText through IS110BonusText, IS1IDText through IS110IDText, IS78BaseBonusText, and IS83BaseBonusText, plus native RVAs for SetAllChrystosEmporiumTexts, SetAllBaseBonusTexts, SetIS1BonusText through SetIS110BonusText, SetIS1IDText through SetIS110IDText, SetIS78BaseBonusText, SetIS83BaseBonusText, and the virtual UnityEngine.UI.Text.set_text surface, while exposing no CurrentBonusText-named field or SetCurrentBonusText writer family and no SetISNDescriptionText family on TextHandlerMarkets"
       },
       {
-        "artifact": "data/multiverse-market-text-runtime-probe.json",
+        "artifact": "data/multiverse-market-text-provenance-path-boundary.json#embedded-runtime-effect-label-lane-summary",
         "claim": "the runtime code probe shows SetAllChrystosEmporiumTexts calling SetAllBaseBonusTexts and SetAllBonusTexts, the row-78 and row-83 SetISNBaseBonusText methods ending in a UnityEngine.UI.Text virtual-dispatch write pattern after composing their base-bonus strings, and the parallel SetIS78BonusText and SetIS83BonusText methods ending in the same write pattern after sourcing payload values from MultiverseMarket.get_FinalIS78Bonus() and MultiverseMarket.get_FinalIS83Bonus() through GeneralFunctionsManager.BigDoubleToText or System.Int32.ToString, the runtime metadata-init helper, the null-reference throw helper, and System.String.Concat"
       }
     ],
@@ -255,3 +255,5 @@
     "This does not widen canonical import, planner behavior, or the shipped compatibility preview. compatibility.unmappedSystemState.multiverseMarket stays compatibility-only, InscryptionsDone stays wrapper-only, and canonical state.playerProfile promotion stays blocked."
   ]
 }
+
+

@@ -1,0 +1,119 @@
+{
+    "dataset":  "shard-save-boundary.v2",
+    "generatedAt":  "2026-04-15",
+    "sources":  {
+                    "shardMiningMetadataNeighborhood":  "data/shardmining-metadata-neighborhood.v1.json",
+                    "shardUpgradeInfoMetadataNeighborhood":  "data/shardupgradeinfo-metadata-neighborhood.v1.json",
+                    "shardMetadataNeighborhood":  "data/shard-metadata-neighborhood.v1.json",
+                    "ownerFamilyBoundary":  "data/shard-owner-family-boundary.v1.json",
+                    "payloadBoundary":  "data/shard-milestone-payload-boundary.v1.json",
+                    "handoffBoundary":  "data/shard-milestone-handoff-boundary.v2.json",
+                    "typeMetadataProbe":  "data/shard-type-metadata-probe.v1.json",
+                    "costParameterProbe":  "data/shard-cost-parameter-probe.v1.json",
+                    "sceneMonoBehaviourProbe":  "data/shard-scene-monobehaviour-probe.v1.json",
+                    "unityTraceTargetRegistry":  "archive:unity-trace-target-registry.json",
+                    "traceSystemUnit":  "data/system-units/trace.v1.json",
+                    "ownedStateTargetBundle":  "db:materialized-target-bundle:shard-owned-state-upgradeinfolist-population",
+                    "globalMetadata":  "workbench/apk/base/global-metadata.dat",
+                    "level0":  "workbench/unity/joined/level0"
+                },
+    "ownerShellTermsChecked":  [
+                                   "ShardMining",
+                                   "ShardUpgradeInfo",
+                                   "TotalMilestoneLevels",
+                                   "get_TotalMilestoneLevels",
+                                   "UpdateShardCostList",
+                                   "GetShardCostList",
+                                   "CheckAllMilestoneLevelFills",
+                                   "CheckMilestone0ProgressFill",
+                                   "CheckMilestone1ProgressFill",
+                                   "CheckMilestone9ProgressFill",
+                                   "get_SU1FinalUnlockReq",
+                                   "FinalSU29Bonus2"
+                               ],
+    "saveFamilyTermsChecked":  [
+                                   "PlayerProfileData",
+                                   "GetPlayerProfileData",
+                                   "FillPlayerProfileData",
+                                   "CloudSavePlayerProfile"
+                               ],
+    "boundaryEvidence":  {
+                             "metadataNeighborhoodHasSaveTerms":  false,
+                             "level0HasSaveTerms":  false,
+                             "ownerShellWithSaveOverlapCount":  0,
+                             "directShardPlayerProfileContext":  false,
+                             "declaringRowModelRecovered":  true,
+                             "directSerializedRowDefinitionRecovered":  true,
+                             "runtimeOwnedStateShellRecovered":  true,
+                             "ownedStateTargetRecovered":  true,
+                             "ownedStatePopulationBridgeRecovered":  false,
+                             "ownedStateOutcomeKind":  "non-local-injection-seam",
+                             "ownedStateOutcomeLabel":  "Non-local injection seam",
+                             "deeperWrapperHandoffRecovered":  false,
+                             "nonLocalInjectionSeamRecovered":  true,
+                             "runtimePopulationLocalProducerRecovered":  false,
+                             "saveSideOwnerRecovered":  false
+                         },
+    "recoveredDirectRowDefinitionPayload":  {
+                                                "ownerType":  "ShardMining",
+                                                "sceneObject":  {
+                                                                    "assetFile":  "level0",
+                                                                    "pathId":  290724
+                                                                },
+                                                "evidence":  [
+                                                                 "Exact serialized SU0-29 unlock requirement fields are recovered on the direct ShardMining payload.",
+                                                                 "Rows 1-29 also preserve exact serialized StartCost, CostExponent, GrowthExponent, and trailing bonus-per-level value lanes on the same shard-local payload.",
+                                                                 "Row 0 preserves a direct five-field special cost shell on ShardMining rather than requiring a separate save-side owner to name the row-definition family."
+                                                             ]
+                                            },
+    "recoveredDeclaringRowModel":  {
+                                       "ownerType":  "ShardMining",
+                                       "declaringField":  {
+                                                              "name":  "upgradeInfoList",
+                                                              "type":  "System.Collections.Generic.List`1\u003cShardMining+ShardUpgradeInfo\u003e",
+                                                              "fieldOffset":  5216
+                                                          },
+                                       "rowModelType":  {
+                                                            "fullName":  "ShardMining+ShardUpgradeInfo",
+                                                            "baseType":  "System.Object"
+                                                        },
+                                       "rowStateFields":  [
+                                                              {
+                                                                  "name":  "\u003cCost\u003ek__BackingField",
+                                                                  "type":  "BreakInfinity.BigDouble",
+                                                                  "fieldOffset":  16
+                                                              },
+                                                              {
+                                                                  "name":  "\u003cMaxLevel\u003ek__BackingField",
+                                                                  "type":  "System.Boolean",
+                                                                  "fieldOffset":  32
+                                                              },
+                                                              {
+                                                                  "name":  "\u003cIsUnlocked\u003ek__BackingField",
+                                                                  "type":  "System.Boolean",
+                                                                  "fieldOffset":  33
+                                                              }
+                                                          ]
+                                   },
+    "runtimeConstructionBoundary":  {
+                                        "definitionSource":  "Direct ShardMining scene payload",
+                                        "runtimeShell":  "ShardMining.upgradeInfoList -\u003e ShardMining+ShardUpgradeInfo",
+                                        "localHooksChecked":  [
+                                                                  "InitializeShards",
+                                                                  "InitializeMaxLevelBools",
+                                                                  "UpdateUnlockedMilestonesList",
+                                                                  "UpdateMaxedMilestonesList",
+                                                                  "CheckAllMilestoneLevelFills"
+                                                              ],
+                                        "traceResult":  [
+                                                            "The checked unity trace workflow now preserves one shard-owned-state population target centered on ShardMining.upgradeInfoList -\u003e ShardMining+ShardUpgradeInfo.",
+                                                            "That target rules out a local runtime population bridge for upgradeInfoList, IsUnlocked, MaxLevel, and adjacent row-owned state because the shard-local watcher hooks still do not recover an exact write, constructor, or setup path.",
+                                                            "It also fails to recover a deeper wrapper handoff behind upgradeInfoList, so the strongest current result is a non-local injection seam whose save-side source the repo still cannot name."
+                                                        ]
+                                    },
+    "currentBoundary":  [
+                            "The checked shard-specific owner trail now preserves a split result: direct ShardMining scene payload already recovers the row-definition family for reachable SU0-29 milestone rows, while ShardMining.upgradeInfoList -\u003e ShardMining+ShardUpgradeInfo remains the strongest recovered runtime row-state shell.",
+                            "The same narrowed shard-local metadata neighborhoods, level0 contexts, and shard-owned-state trace target preserve zero checked overlap cases where the shard owner trail shares context with PlayerProfileData, GetPlayerProfileData, FillPlayerProfileData, or CloudSavePlayerProfile, and they rule out both a local upgradeInfoList population bridge and a recovered deeper wrapper handoff.",
+                            "This is enough to keep direct row-definition payload recovery separate from unresolved player-owned row-state ownership, and it tightens the blocker further: the current repo can now preserve one exact non-local injection seam result for owned-state values whose save-side source it still cannot name."
+                        ]
+}

@@ -6,6 +6,24 @@ import { createShardEvidenceSupport } from "../support/shard-evidence-support.js
 function createTestSupport(overrides = {}) {
   const grounding = overrides.grounding ?? {};
   const plannerState = overrides.plannerState ?? {};
+  const shardSystemView = {
+    family: {
+      grounded: {
+        milestones: grounding.milestones ?? null,
+        observedBehaviors: grounding.observedBehaviors ?? null,
+        provenance: grounding.provenance ?? null
+      },
+      familyEvidence: grounding.milestoneFamilyEvidence ?? null
+    },
+    cost: {
+      bonusSlotProbe: grounding.bonusSlotProbe ?? null,
+      formulaModel: grounding.formulaModel ?? null
+    },
+    ownedState: {
+      saveBoundary: grounding.saveBoundary ?? null,
+      saveOwnerCandidates: grounding.saveOwnerCandidates ?? null
+    }
+  };
   return createShardEvidenceSupport({
     formatShardNumber(value) {
       return String(value);
@@ -16,8 +34,8 @@ function createTestSupport(overrides = {}) {
     getShardEffectTextHandlerBoundarySummary(boundary) {
       return boundary ?? { hasBoundary: false };
     },
-    getShardGrounding() {
-      return grounding;
+    getShardSystemView() {
+      return shardSystemView;
     },
     getShardMilestoneRowModelBoundarySummary(boundary) {
       return (
@@ -107,14 +125,10 @@ test("threshold, unlock, and computed bonus helpers preserve descriptive shard e
           }
         }
       },
-      costParameterProbe: {
-        unlockRequirementBlock: { values: [0, 25] },
-        rowAlignedTupleCandidates: [
-          {
-            row: 1,
-            bonusPerLevelValues: [1.5]
-          }
-        ]
+      formulaModel: {
+        verifiedParameters: {
+          unlockRequirementBlock: { values: [0, 25] }
+        }
       }
     }
   });
@@ -132,8 +146,8 @@ test("threshold, unlock, and computed bonus helpers preserve descriptive shard e
   assert.equal(support.getShardUnlockRequirement(milestone), 25);
   assert.deepEqual(support.getNextShardCostBump(145), { level: 200, severity: "small bump" });
   assert.deepEqual(support.getShardComputedBonusSummary(milestone, milestone.bonuses[0], 2), {
-    currentLabel: "x3 (descriptive model)",
-    nextLabel: "x4.5"
+    currentLabel: "x2.2 (descriptive model)",
+    nextLabel: "x2.42"
   });
 });
 
@@ -164,9 +178,9 @@ test("grounded summary and provenance helpers keep descriptive evidence labels",
         uncertaintyLog: [{ status: "conflict_detected", what_is_missing: "Row owner unresolved." }]
       },
       saveBoundary: {
-        probeResults: {
+        boundaryEvidence: {
           saveSideOwnerRecovered: false,
-          traceOwnedStateOutcomeKind: "non-local-injection-seam"
+          ownedStateOutcomeKind: "non-local-injection-seam"
         },
         recoveredDeclaringRowModel: {
           ownerType: "ShardMining",

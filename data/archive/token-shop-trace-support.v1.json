@@ -1,0 +1,78 @@
+{
+  "dataset": "token-shop-trace-support.v1",
+  "generatedAt": "2026-04-20",
+  "source": {
+    "traceScope": "token-shop-family-structure",
+    "traceBundle": "data/system-units/trace.v1.json",
+    "tokenShopValues": "data/archive/token-shop-values.json",
+    "regenerationCommand": "python scripts\\unity\\unity_trace_bundle.py --family token-shop --level structured"
+  },
+  "purpose": "Trace-produced support core for TokenShop lane semantics that are now reproducible from the DB-first semantic materialization path. This replaces the old standalone cost-lane probe dataset while leaving save-owner and action-shell evidence on their narrower canonical support paths until trace coverage closes those gaps.",
+  "spendLanes": {
+    "costLanes": {
+      "tokenSpendGroups": [
+        "TokenBoost",
+        "MK1TokenBoost",
+        "MK2TokenBoost",
+        "MK3TokenBoost",
+        "MK4TokenBoost",
+        "MK5TokenBoost",
+        "MK6TokenBoost",
+        "MK7TokenBoost",
+        "MK8TokenBoost",
+        "TokenBoostT2",
+        "TokenBoostT3",
+        "Tier2Token",
+        "Tier3Token",
+        "Tier4Token",
+        "Tier5Token"
+      ],
+      "dailyTokeniumModifierGroups": [
+        "TokenDailiesT2",
+        "TokenDailiesT3"
+      ],
+      "diamondGroups": [
+        "DiamondBoost"
+      ],
+      "tracePresentation": {
+        "interactionShell": "UPGButton",
+        "costShell": "CostBox",
+        "costRenderNode": "CostText",
+        "descriptionRenderNode": "DescText"
+      },
+      "materializedSemantics": {
+        "formulaKind": "controller-linear-step",
+        "formulaExpression": "BaseCost(level) = StartCost + AdditiveCost * level",
+        "runtimeCostStatus": "unresolved-runtime-modifiers",
+        "evaluatorStatus": "method-chain-recovered-instance-values-open"
+      },
+      "currentBoundary": [
+        "The token, diamond, and Daily Tokenium spend families are now regenerated from the token-shop-family-structure trace materialization plus the grounded TokenShop numeric table instead of a standalone probe JSON.",
+        "This materialized view keeps TokenBoost, DiamondBoost, and TokenDailies on separate spend lanes while preserving the shared TokenShop UI render path through UPGButton, CostBox, CostText, and DescText.",
+        "The remaining unresolved gap is runtime-side pricing modifiers or evaluator transforms beyond the recovered base controller lane."
+      ]
+    }
+  },
+  "replaceabilityReview": [
+    {
+      "path": "data/token-shop-cost-lanes.json",
+      "status": "replaced-by-trace-support",
+      "reason": "The token, diamond, and Daily Tokenium cost-lane split is reproducible from token-shop-family-structure plus the grounded TokenShop numeric table."
+    },
+    {
+      "path": "data/spend-action-lane-clues.json",
+      "status": "partially-regenerable-gap-open",
+      "reason": "The committed trace bundle still does not preserve the full BuyDiamondBoost, BuyLM244, BuyCollectorDevice, and hold-hook cluster, so this remains separate support data for now."
+    },
+    {
+      "path": "data/token-shop-owner-shell.json",
+      "status": "partially-regenerable-gap-open",
+      "reason": "The committed trace bundle preserves only part of the wider TokenShop owner shell; the broader notification and adjacent-device hook cluster is not fully materialized yet."
+    },
+    {
+      "path": "data/token-bank-controller-shell.json",
+      "status": "partially-regenerable-gap-open",
+      "reason": "The committed trace bundle does not yet preserve the full ClaimBankedTokens and SetBankFill controller shell as one materialized surface."
+    }
+  ]
+}

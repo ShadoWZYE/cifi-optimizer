@@ -2,12 +2,12 @@
   "generatedAt": "2026-04-13",
   "dataset": "token-shop-row-remap-boundary",
   "sources": {
-    "tokenShopExtract": "data/token-shop-values.json",
-    "uabeaProbe": "data/uabea-probe-report.json",
-    "unityProbe": "data/unity-probe-report.json",
-    "dailyTokeniumLaneProbe": "data/daily-tokenium-lane-probe.json",
-    "dailyTokeniumOwnerProbe": "data/daily-tokenium-owner-probe.json",
-    "lm244TargetedProbe": "data/lm244-targeted-probe.json",
+    "tokenShopExtract": "data/archive/token-shop-values.json",
+    "uabeaProbe": "data/archive/uabea-extract-report.json",
+    "unityProbe": "data/archive/unity-apk-extract-report.json",
+    "dailyTokeniumLaneProbe": "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence",
+    "dailyTokeniumOwnerProbe": "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-owner-evidence",
+    "lm244TargetedProbe": "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence",
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0"
   },
@@ -88,9 +88,9 @@
         {
           "surface": "generic TokenShop text hooks",
           "checkedArtifacts": [
-            "data/unity-probe-report.json",
-            "data/daily-tokenium-lane-probe.json",
-            "data/lm244-targeted-probe.json"
+            "data/archive/unity-apk-extract-report.json",
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence",
+            "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence"
           ],
           "preservedNeighbors": [
             "SetAllTokenShopTexts",
@@ -101,7 +101,7 @@
         {
           "surface": "token-side tokens title candidates",
           "checkedArtifacts": [
-            "data/unity-probe-report.json"
+            "data/archive/unity-apk-extract-report.json"
           ],
           "preservedNeighbors": [
             "Tokens Booster",
@@ -112,7 +112,7 @@
         {
           "surface": "diamond-side tokens title candidate",
           "checkedArtifacts": [
-            "data/unity-probe-report.json"
+            "data/archive/unity-apk-extract-report.json"
           ],
           "preservedNeighbors": [
             ">Diamond Upgrade 9 - TokensBoost"
@@ -204,9 +204,9 @@
         {
           "surface": "generic TokenShop text hooks",
           "checkedArtifacts": [
-            "data/unity-probe-report.json",
-            "data/daily-tokenium-lane-probe.json",
-            "data/lm244-targeted-probe.json"
+            "data/archive/unity-apk-extract-report.json",
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence",
+            "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence"
           ],
           "preservedNeighbors": [
             "SetAllTokenShopTexts",
@@ -217,7 +217,7 @@
         {
           "surface": "token-side mod title candidate",
           "checkedArtifacts": [
-            "data/unity-probe-report.json"
+            "data/archive/unity-apk-extract-report.json"
           ],
           "preservedNeighbors": [
             "Token Ultima: MP"
@@ -227,7 +227,7 @@
         {
           "surface": "diamond-side mod title candidate",
           "checkedArtifacts": [
-            "data/unity-probe-report.json"
+            "data/archive/unity-apk-extract-report.json"
           ],
           "preservedNeighbors": [
             ":Diamond Upgrade 11 - ModBoost"
@@ -237,8 +237,8 @@
       ],
       "titleCandidate": "Token Ultima: MP",
       "alternateTitleCandidate": ":Diamond Upgrade 11 - ModBoost",
-      "missingJoin": "No committed source currently ties ATU4Button directly to one final player-facing TokenShop row title; the surviving generic text hooks plus the Token Ultima: MP and :Diamond Upgrade 11 - ModBoost title clues stay detached from the traced ATU4 shell neighborhood.",
-      "lastBlocker": "The last honest blocker for ATU4 is still one exact shell-local join from the already detached Token Ultima: MP or :Diamond Upgrade 11 - ModBoost title-side clue back to ATU4Button path id 15796."
+      "missingJoin": "The ATU4 row-local bridge is now grounded, but no committed source yet closes the exact row-specific runtime display-update path that turns the recovered ModBoost shell, prefab, and updater neighborhood into one planner-safe rendered cost/output lane.",
+      "lastBlocker": "The last honest blocker for ATU4 is now the exact runtime display-update path for ATU4Button path id 15796, not the detached Token Ultima: MP or :Diamond Upgrade 11 - ModBoost title clues."
     },
     "result": "checked object bridge recovered but no concrete title join cleared"
   },
@@ -285,9 +285,9 @@
         {
           "surface": "generic TokenShop text hooks",
           "checkedArtifacts": [
-            "data/unity-probe-report.json",
-            "data/daily-tokenium-lane-probe.json",
-            "data/lm244-targeted-probe.json"
+            "data/archive/unity-apk-extract-report.json",
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence",
+            "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence"
           ],
           "preservedNeighbors": [
             "SetAllTokenShopTexts",
@@ -298,10 +298,10 @@
         {
           "surface": "MK1 generator support-text cluster",
           "checkedArtifacts": [
-            "data/unity-probe-report.json",
-            "data/daily-tokenium-lane-probe.json",
-            "data/daily-tokenium-owner-probe.json",
-            "data/lm244-targeted-probe.json"
+            "data/archive/unity-apk-extract-report.json",
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence",
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-owner-evidence",
+            "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence"
           ],
           "preservedNeighbors": [
             "1. MK1 Generator Output,",
@@ -313,7 +313,7 @@
         {
           "surface": "neighboring generator title roster gap",
           "checkedArtifacts": [
-            "data/daily-tokenium-owner-probe.json"
+            "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-owner-evidence"
           ],
           "preservedNeighbors": [
             "Mk2 Generator Booster",
@@ -559,7 +559,7 @@
       {
         "surface": "BuyCellBoost",
         "checkedArtifacts": [
-          "data/daily-tokenium-lane-probe.json"
+          "data/token-shop-row-remap-boundary.json#embedded-daily-tokenium-lane-evidence"
         ],
         "preservedNeighbors": [
           "StartCellBostHold",
@@ -571,8 +571,8 @@
       {
         "surface": "diamond-special CellsBoost prefab or title",
         "checkedArtifacts": [
-          "data/lm244-targeted-probe.json",
-          "data/unity-probe-report.json"
+          "data/token-shop-row-remap-boundary.json#embedded-prefab-roster-evidence",
+          "data/archive/unity-apk-extract-report.json"
         ],
         "preservedNeighbors": [
           "NewDiamondUPGPrefab.Specials.CellsBoost",
@@ -583,8 +583,8 @@
       {
         "surface": "token-prefab or Token Ultima: Cells title",
         "checkedArtifacts": [
-          "data/uabea-probe-report.json",
-          "data/unity-probe-report.json"
+          "data/archive/uabea-extract-report.json",
+          "data/archive/unity-apk-extract-report.json"
         ],
         "preservedNeighbors": [
           "NewTokenUPGPrefab.T1.CellsPerChestBooster",
@@ -815,9 +815,11 @@
     "Grounded metadata neighborhoods now tighten the late-row shell further: BuyATU24 through BuyATU28 sit beside named tier-buy hooks like BuyTokenT3, BuyTokenDailyT3, BuyTrio1Boost, and BuyTrio2Boost, while getter neighborhoods preserve ATU1TokenBonus, ATU2DiamondsBonus, ATU14TokenDailiesBonus, and ATU24Bonus3Shards through ATU24Bonus5AP in one ATU-numbered family.",
     "Grounded level0 neighborhoods now tighten the text-hook blocker further: SetAllTokenShopTexts and SetTokenTexts sit in a token-menu or token-bank text-handler cluster with CheckFirstTokenMenuTime, ClaimTokenium, token-bank formula strings, TokenClaimRecolor, and TokenShopRecoloring, while most NewTokenUPGPrefab.* names remain one separate prefab roster cluster and player-facing titles such as Trinity Booster One, Academy Booster, Tokens Booster T3, and Campaign Fragments remain a separate title cluster.",
     "The bounded ATU1 title-side pass also stays negative: the generic SetAllTokenShopTexts or SetTokenTexts surface remains a separate text-handler cluster, while Tokens Booster, Tokens Booster T1, and >Diamond Upgrade 9 - TokensBoost remain detached title candidates instead of one exact shell-local final title or named-identity join. The last honest blocker is still one exact join from one of those detached tokens-domain title clues back to ATU1Button path id 15839.",
-    "The bounded ATU4 title-side pass also stays negative: the generic SetAllTokenShopTexts or SetTokenTexts surface remains a separate text-handler cluster, while Token Ultima: MP and :Diamond Upgrade 11 - ModBoost remain detached title candidates instead of one exact shell-local final title join. The last honest blocker is still one exact join from one of those detached mod-domain title clues back to ATU4Button path id 15796.",
+    "The bounded ATU4 title-side pass is no longer the real blocker: the canonical row-local graph now closes the shell-to-title seam, while the remaining honest blocker is the exact row-specific runtime display-update path for ATU4Button path id 15796.",
     "The bounded ATU5 last-title-blocker pass now narrows cleanly: the detached MK1 generator support-text cluster already clears one checked ATU5Button -> NewTokenUPGPrefab.T1.MK1Booster -> 1. MK1 Generator Output named-identity and support-text chain, while the remaining honest blocker is only the absent exact final player-facing row-title string such as one exact Mk1 Generator Booster join.",
     "Because the checked repo evidence still lacks direct object or text joins for the rest of the ATU-numbered row shells, canonical promotion and planner use should remain blocked outside the recovered ATU1, ATU2, ATU4, ATU5, ATU6, ATU7, ATU8, ATU9, ATU10, ATU11, ATU12, ATU13, and ATU20 bridges plus the one checked ATU6 shell-to-prefab-to-title chain, and the unrecovered ATU family should stay compatibility-only instead of entering planner logic or canonical state.playerProfile.",
     "The narrowest honest next slice is still not a general TokenShop row-remap search. The generic text-hook surface is a bounded negative result, the explicit ATU3 prefab-or-title remap pass stays bounded negative, the ATU3 effect-driven trace reaches the AdManager chest consumer family, the explicit CellBoostBonus-anchor follow-up closes the remaining internal AdManager bonus-aggregation cluster as a bounded negative result, ATU11 now closes one row-specific MK7 title-side seam, ATU12 now also closes one bounded MK8 bridge-plus-title-side-text seam, and the new ATU13 plus ATU20 bridge-only token-booster passes still stop short of exact title joins. The next follow-up should move to a different unresolved shell without reopening those closed surfaces."
   ]
 }
+
+

@@ -2,8 +2,8 @@
   "generatedAt": "2026-04-07",
   "dataset": "token-shop-row-level-owner",
   "sources": {
-    "uabeaProbe": "data/uabea-probe-report.json",
-    "tokenShopExtract": "data/token-shop-values.json",
+    "uabeaProbe": "data/archive/uabea-extract-report.json",
+    "tokenShopExtract": "data/archive/token-shop-values.json",
     "metadata": "workbench/apk/base/global-metadata.dat",
     "level0": "workbench/unity/joined/level0"
   },
@@ -57,3 +57,5 @@
     "It is not yet enough to promote those raw ATU fields into canonical playerProfile state or planner recommendations, because the final row-by-row player-facing remap is still unresolved."
   ]
 }
+
+

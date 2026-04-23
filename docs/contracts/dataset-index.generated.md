@@ -3,7 +3,7 @@
 > Generated from `data/bundled-dataset-contract.v1.json`. Do not edit by hand.
 
 Contract version: `v1`
-Updated at: `2026-04-07`
+Updated at: `2026-04-22`
 Validation command: `npm run verify:data`
 
 ## Source priority
@@ -23,6 +23,55 @@ Validation command: `npm run verify:data`
 - Classification: `canonical-app-snapshot`
 - Files:
   - `data/game-data.snapshot.v1.json`
+
+### `data-framework`
+
+- Label: Data framework manifest
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/data-framework.v1.json`
+
+### `app-meta-unit`
+
+- Label: App meta system unit
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/system-units/app-meta.v1.json`
+
+### `player-state-unit`
+
+- Label: Player-state system unit
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/system-units/player-state.v1.json`
+
+### `shards-unit`
+
+- Label: Shards system unit
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/system-units/shards.v1.json`
+
+### `token-shop-unit`
+
+- Label: Token shop system unit
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/system-units/token-shop.v1.json`
+
+### `multiverse-market-unit`
+
+- Label: Multiverse market system unit
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/system-units/multiverse-market.v1.json`
+
+### `trace-unit`
+
+- Label: Trace system unit
+- Classification: `extracted-mechanics`
+- Files:
+  - `data/system-units/trace.v1.json`
 
 ### `shards`
 
@@ -108,91 +157,21 @@ Validation command: `npm run verify:data`
 - Label: Shard milestone handoff boundary
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/shard-milestone-handoff-boundary.v1.json`
+  - `data/shard-milestone-handoff-boundary.v2.json`
 
 ### `shard-save-boundary`
 
 - Label: Shard save boundary
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/shard-save-boundary.v1.json`
+  - `data/shard-save-boundary.v2.json`
 
 ### `shard-milestone-save-owner-candidates`
 
 - Label: Shard milestone save-owner candidates
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/shard-milestone-save-owner-candidates.v1.json`
-
-### `shard-scene-monobehaviour-probe`
-
-- Label: Shard scene MonoBehaviour probe
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/shard-scene-monobehaviour-probe.v1.json`
-
-### `shard-cost-parameter-probe`
-
-- Label: Shard cost parameter probe
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/shard-cost-parameter-probe.v1.json`
-
-### `shard-cost-method-probe`
-
-- Label: Shard cost method probe
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/shard-cost-method-probe.v1.json`
-
-### `shard-cost-native-probe`
-
-- Label: Shard cost native probe
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/shard-cost-native-probe.v1.json`
-
-### `shard-cost-screenshot-calibration`
-
-- Label: Shard cost screenshot calibration
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/shard-cost-screenshot-calibration.v1.json`
-
-### `shard-cost-list-path-probe`
-
-- Label: Shard cost list-path probe
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/shard-cost-list-path-probe.v1.json`
-
-### `shard-cost-formula-model`
-
-- Label: Shard cost formula model
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/shard-cost-formula-model.v1.json`
-
-### `shard-bonus-slot-probe`
-
-- Label: Shard bonus slot probe
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/shard-bonus-slot-probe.v1.json`
-
-### `shard-milestone-family-evidence`
-
-- Label: Shard milestone family evidence
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/shard-milestone-family-evidence.v1.json`
-
-### `shard-type-metadata-probe`
-
-- Label: Shard type metadata probe
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/shard-type-metadata-probe.v1.json`
+  - `data/shard-milestone-save-owner-candidates.v2.json`
 
 ### `extraction-candidate-families`
 
@@ -200,55 +179,6 @@ Validation command: `npm run verify:data`
 - Classification: `extracted-mechanics`
 - Files:
   - `data/extraction-candidate-families.v1.json`
-
-### `extraction-candidate-ranking`
-
-- Label: Extraction candidate ranking
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/extraction-candidate-ranking.v1.json`
-
-### `token-shop`
-
-- Label: Token shop extract
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/token-shop-values.json`
-
-### `multiverse-market`
-
-- Label: Multiverse market extract
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/multiverse-market-values.json`
-
-### `multiverse-market-metadata-neighborhood`
-
-- Label: Multiverse market metadata neighborhood
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/multiverse-market-metadata-neighborhood.json`
-
-### `tokenium-naming-clues`
-
-- Label: Tokenium naming clues
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/tokenium-naming-clues.json`
-
-### `token-bank-state-clues`
-
-- Label: Token-bank state clues
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/token-bank-state-clues.json`
-
-### `daily-tokenium-lane-clues`
-
-- Label: Daily Tokenium lane clues
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/daily-tokenium-lane-clues.json`
 
 ### `token-bank-formula-boundary`
 
@@ -264,13 +194,6 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/multiverse-market-range-boundary.json`
 
-### `multiverse-market-row-text-coverage`
-
-- Label: Multiverse market row text coverage
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/multiverse-market-row-text-coverage.json`
-
 ### `multiverse-market-prefab-remap-boundary`
 
 - Label: Multiverse market prefab remap boundary
@@ -278,61 +201,12 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/multiverse-market-prefab-remap-boundary.json`
 
-### `token-shop-cost-lanes`
-
-- Label: Token shop cost lanes
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/token-shop-cost-lanes.json`
-
-### `spend-action-lane-clues`
-
-- Label: Spend action lane clues
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/spend-action-lane-clues.json`
-
-### `multiverse-market-action-shell`
-
-- Label: Multiverse market action shell
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/multiverse-market-action-shell.json`
-
-### `multiverse-market-owner-family`
-
-- Label: Multiverse market owner family
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/multiverse-market-owner-family.json`
-
-### `token-shop-owner-shell`
-
-- Label: Token shop owner shell
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/token-shop-owner-shell.json`
-
 ### `token-shop-save-boundary`
 
 - Label: Token shop save boundary
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/token-shop-save-boundary.json`
-
-### `token-shop-row-level-owner`
-
-- Label: Token shop row-level owner
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/token-shop-row-level-owner.json`
-
-### `token-shop-row-remap-boundary`
-
-- Label: Token shop row remap boundary
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/token-shop-row-remap-boundary.json`
+  - `data/token-shop-save-boundary.v2.json`
 
 ### `token-shop-late-atu-boundary`
 
@@ -341,26 +215,12 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/token-shop-late-atu-boundary.json`
 
-### `unity-trace-target-registry`
-
-- Label: Unity trace target registry
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/unity-trace-target-registry.json`
-
-### `unity-trace-bundle`
-
-- Label: Unity trace bundle
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/unity-trace-bundle.json`
-
 ### `multiverse-market-save-boundary`
 
 - Label: Multiverse market save boundary
 - Classification: `extracted-mechanics`
 - Files:
-  - `data/multiverse-market-save-boundary.json`
+  - `data/multiverse-market-save-boundary.v2.json`
 
 ### `multiverse-market-market-member-boundary`
 
@@ -397,33 +257,12 @@ Validation command: `npm run verify:data`
 - Files:
   - `data/multiverse-market-row71-74-identity-boundary.json`
 
-### `multiverse-market-row71-74-remap-band`
-
-- Label: Multiverse market row 71-74 remap band
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/multiverse-market-row71-74-remap-band.json`
-
-### `multiverse-market-nearby-identity-binding-pattern`
-
-- Label: Multiverse market nearby text-adjacent controls
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/multiverse-market-nearby-identity-binding-pattern.json`
-
 ### `multiverse-market-inscription-numbering-stability-boundary`
 
 - Label: Multiverse market inscription numbering-stability boundary
 - Classification: `extracted-mechanics`
 - Files:
   - `data/multiverse-market-inscription-numbering-stability-boundary.json`
-
-### `multiverse-market-69-74-anomaly-provenance`
-
-- Label: Multiverse market 69-74 anomaly provenance
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/multiverse-market-69-74-anomaly-provenance.json`
 
 ### `multiverse-market-shell-row-prediction-boundary`
 
@@ -438,10 +277,3 @@ Validation command: `npm run verify:data`
 - Classification: `extracted-mechanics`
 - Files:
   - `data/multiverse-market-text-provenance-path-boundary.json`
-
-### `token-bank-controller-shell`
-
-- Label: Token-bank controller shell
-- Classification: `extracted-mechanics`
-- Files:
-  - `data/token-bank-controller-shell.json`
