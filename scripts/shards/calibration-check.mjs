@@ -52,9 +52,12 @@ function loadShardCostScreenshotCalibration() {
   );
 }
 
-const screenshotCalibration = loadShardCostScreenshotCalibration();
+let screenshotCalibration = null;
 
 export function getShardCostScreenshotCalibration() {
+  if (!screenshotCalibration) {
+    screenshotCalibration = loadShardCostScreenshotCalibration();
+  }
   return screenshotCalibration;
 }
 
@@ -114,7 +117,8 @@ export function compareScientificLabels(
 export function runShardCostCalibrationChecks() {
   const formulaModel = getShardCostFormulaModel();
   const config = formulaModel.calibrationCheckConfig;
-  const entries = Array.isArray(screenshotCalibration.entries) ? screenshotCalibration.entries : [];
+  const calibration = getShardCostScreenshotCalibration();
+  const entries = Array.isArray(calibration.entries) ? calibration.entries : [];
   const results = entries.map((entry) => {
     const evaluation = evaluateShardCost({
       row: Number(entry.row),

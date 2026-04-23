@@ -51,53 +51,77 @@ function loadShardCostFormulaModel() {
   );
 }
 
-const formulaModel = loadShardCostFormulaModel();
-const rowClassByRow = new Map();
-for (const rowClass of formulaModel.rowClasses) {
-  for (const row of rowClass.rows) {
-    rowClassByRow.set(row, rowClass);
+let shardCostContext = null;
+
+function getShardCostContext() {
+  if (shardCostContext) {
+    return shardCostContext;
   }
+
+  const formulaModel = loadShardCostFormulaModel();
+  const rowClassByRow = new Map();
+  for (const rowClass of formulaModel.rowClasses) {
+    for (const row of rowClass.rows) {
+      rowClassByRow.set(row, rowClass);
+    }
+  }
+
+  const runtimeGetterRules = formulaModel.runtimeGetterRules || {};
+  const getterFamily = runtimeGetterRules.getterFamily || {};
+  const cacheLifecycle = runtimeGetterRules.cacheLifecycle || {};
+  const sharedStageLogic = runtimeGetterRules.sharedStageLogic || {};
+  const stableGetterCallOrder = Array.isArray(getterFamily.stableCallOrder)
+    ? getterFamily.stableCallOrder
+    : [];
+  const thresholdCoverageClasses = Array.isArray(sharedStageLogic.thresholdCoverageClasses)
+    ? sharedStageLogic.thresholdCoverageClasses
+    : [];
+  const overLevelBaseRecoveryPath = formulaModel.derivedParameters?.overLevelBaseRecoveryPath || {};
+  const derivedOverLevelBaseModels = Array.isArray(
+    overLevelBaseRecoveryPath.derivedRuntimeSeedModels
+  )
+    ? overLevelBaseRecoveryPath.derivedRuntimeSeedModels
+    : [];
+
+  const exactParametersByRow = new Map();
+  for (const [rowKey, entry] of Object.entries(
+    formulaModel?.verifiedParameters?.exactRowParameters ?? {}
+  )) {
+    const row = Number(rowKey);
+    exactParametersByRow.set(row, readExactFields(entry, row === 0));
+  }
+
+  shardCostContext = {
+    formulaModel,
+    rowClassByRow,
+    getterFamily,
+    cacheLifecycle,
+    sharedStageLogic,
+    stableGetterCallOrder,
+    thresholdCoverageClasses,
+    derivedOverLevelBaseModels,
+    exactParametersByRow,
+    hundredPlusFamilies: formulaModel.stageRules?.hundredPlus?.sharedWindowFamilies || [],
+    sampledOffsetFeeders: formulaModel.stageRules?.hundredPlus?.sampledOffsetFeeders || [],
+    twoHundredFamilies: formulaModel.stageRules?.twoHundredPlus?.sharedFamilies || [],
+    threeHundredFamilies: formulaModel.stageRules?.threeHundredPlus?.sharedFamilies || []
+  };
+  return shardCostContext;
 }
-
-const runtimeGetterRules = formulaModel.runtimeGetterRules || {};
-const getterFamily = runtimeGetterRules.getterFamily || {};
-const cacheLifecycle = runtimeGetterRules.cacheLifecycle || {};
-const sharedStageLogic = runtimeGetterRules.sharedStageLogic || {};
-const stableGetterCallOrder = Array.isArray(getterFamily.stableCallOrder)
-  ? getterFamily.stableCallOrder
-  : [];
-const thresholdCoverageClasses = Array.isArray(sharedStageLogic.thresholdCoverageClasses)
-  ? sharedStageLogic.thresholdCoverageClasses
-  : [];
-const overLevelBaseRecoveryPath = formulaModel.derivedParameters?.overLevelBaseRecoveryPath || {};
-const derivedOverLevelBaseModels = Array.isArray(overLevelBaseRecoveryPath.derivedRuntimeSeedModels)
-  ? overLevelBaseRecoveryPath.derivedRuntimeSeedModels
-  : [];
-
-const exactParametersByRow = new Map();
-for (const [rowKey, entry] of Object.entries(
-  formulaModel?.verifiedParameters?.exactRowParameters ?? {}
-)) {
-  const row = Number(rowKey);
-  exactParametersByRow.set(row, readExactFields(entry, row === 0));
-}
-
-const hundredPlusFamilies = formulaModel.stageRules?.hundredPlus?.sharedWindowFamilies || [];
-const sampledOffsetFeeders = formulaModel.stageRules?.hundredPlus?.sampledOffsetFeeders || [];
-const twoHundredFamilies = formulaModel.stageRules?.twoHundredPlus?.sharedFamilies || [];
-const threeHundredFamilies = formulaModel.stageRules?.threeHundredPlus?.sharedFamilies || [];
 
 export function getShardCostFormulaModel() {
-  return formulaModel;
+  return getShardCostContext().formulaModel;
 }
 
 export function getShardCostRowClass(row) {
   assertRow(row);
-  return rowClassByRow.get(row) || null;
+  return getShardCostContext().rowClassByRow.get(row) || null;
 }
 
 export function getShardCostRuntimeRule(row) {
   assertRow(row);
+  const { getterFamily, cacheLifecycle, sharedStageLogic, stableGetterCallOrder } =
+    getShardCostContext();
   const getterName =
     stableGetterCallOrder.find((name) => name === `get_SU${row}Cost`) || `get_SU${row}Cost`;
   const coverageClass = findThresholdCoverageClass(row);
@@ -123,6 +147,7 @@ export function getShardCostRuntimeRule(row) {
 }
 
 export function isShardCostPlannerSafeFromCalibration(calibrationChecks) {
+  const { formulaModel } = getShardCostContext();
   return (
     formulaModel.completionFlags.automatedCalibrationImplemented === true &&
     calibrationChecks?.allPassed === true &&
@@ -136,6 +161,8 @@ export async function isShardCostPlannerSafe() {
 }
 
 export function evaluateShardCost({ row, level }) {
+  const { formulaModel, hundredPlusFamilies, threeHundredFamilies, twoHundredFamilies } =
+    getShardCostContext();
   assertRow(row);
   const normalizedLevel = normalizeLevel(level);
   const rowClass = getRequiredRowClass(row);
@@ -286,13 +313,13 @@ function normalizeLevel(level) {
 }
 
 function getRequiredRowClass(row) {
-  const rowClass = rowClassByRow.get(row);
+  const rowClass = getShardCostContext().rowClassByRow.get(row);
   assert.ok(rowClass, `missing row class for row ${row}`);
   return rowClass;
 }
 
 function getRequiredRowParameters(row) {
-  const params = exactParametersByRow.get(row);
+  const params = getShardCostContext().exactParametersByRow.get(row);
   assert.ok(params, `missing exact parameters for row ${row}`);
   return params;
 }
@@ -342,7 +369,7 @@ function findStageFamily(families, row) {
 
 function findThresholdCoverageClass(row) {
   return (
-    thresholdCoverageClasses.find(
+    getShardCostContext().thresholdCoverageClasses.find(
       (entry) => Array.isArray(entry.rows) && entry.rows.includes(row)
     ) || null
   );
@@ -350,8 +377,8 @@ function findThresholdCoverageClass(row) {
 
 function findOverLevelBaseModelsForRow(coverageClass) {
   const getterNames = Array.isArray(coverageClass?.getterNames) ? coverageClass.getterNames : [];
-  return derivedOverLevelBaseModels
-    .filter((entry) => getterNames.includes(String(entry.getterName)))
+  return getShardCostContext()
+    .derivedOverLevelBaseModels.filter((entry) => getterNames.includes(String(entry.getterName)))
     .map((entry) => ({
       fieldName: String(entry.fieldName),
       getterName: String(entry.getterName),
@@ -364,7 +391,9 @@ function findOverLevelBaseModelsForRow(coverageClass) {
 }
 
 function findSampledOffsetFeeder(row, family) {
-  const direct = sampledOffsetFeeders.find((entry) => Number(entry.row) === row);
+  const direct = getShardCostContext().sampledOffsetFeeders.find(
+    (entry) => Number(entry.row) === row
+  );
   if (direct) {
     return direct;
   }
@@ -372,7 +401,7 @@ function findSampledOffsetFeeder(row, family) {
     return null;
   }
   return (
-    sampledOffsetFeeders.find(
+    getShardCostContext().sampledOffsetFeeders.find(
       (entry) =>
         String(entry.model) === String(family.model) &&
         Number(entry.levelOffset) === Number(family.levelOffset)
