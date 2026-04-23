@@ -70,8 +70,7 @@ const commandTemplates = {
   compile: {
     steps: [["node", ["scripts/contracts/generate-system-units.mjs"]]],
     passThrough: true
-  },
-
+  }
 };
 
 const commandSets = {
@@ -359,4 +358,3 @@ for (const [index, [command, templateArgs]] of pipeline.entries()) {
 }
 
 console.log(`\nDone. Output: ${outputPath}`);
-

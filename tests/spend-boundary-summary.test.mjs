@@ -21,7 +21,11 @@ test("getTokenShopCostLaneSummary preserves the spend-lane split labels", () => 
       tokenSpendGroups: ["TokenBoost"],
       dailyTokeniumModifierGroups: ["TokenDailiesT2", "TokenDailiesT3"],
       diamondGroups: ["DiamondBoost"],
-      playerFacingClues: ["CostBox-Tokens", "CostBox-Tokenium", "Mission Materials Booster"]
+      tracePresentation: {
+        costShell: "CostBox",
+        costRenderNode: "CostText",
+        descriptionRenderNode: "DescText"
+      }
     }),
     {
       hasLaneSplit: true,
@@ -29,8 +33,9 @@ test("getTokenShopCostLaneSummary preserves the spend-lane split labels", () => 
       tokenLaneLabel: "TokenBoost",
       diamondLaneLabel: "DiamondBoost",
       dailyLaneLabel: "TokenDailiesT2",
-      tokensShellLabel: "CostBox-Tokens",
-      tokeniumShellLabel: "CostBox-Tokenium"
+      costShellLabel: "CostBox",
+      costRenderLabel: "CostText",
+      descriptionRenderLabel: "DescText"
     }
   );
 });

@@ -808,7 +808,8 @@ function initTokenShopTierTabs() {
     const tierConfig = TOKEN_SHOP_TIER_CONFIG[tier];
     if (!tierConfig) return;
 
-    const tierUnlocks = getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
+    const tierUnlocks =
+      getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
     const thresholds = tierUnlocks?.tier_thresholds || {};
     const tierUnlockStates = calculateTierUnlockStates(thresholds);
 
@@ -3583,9 +3584,7 @@ function renderShardGroundingBoundary() {
   const ownerBoundary = getShardOwnerFamilyBoundarySummary(
     shardSystem?.family?.boundaries?.ownerFamily
   );
-  const costModelBoundary = getShardCostModelBoundarySummary(
-    shardSystem?.cost?.costModelBoundary
-  );
+  const costModelBoundary = getShardCostModelBoundarySummary(shardSystem?.cost?.costModelBoundary);
   const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
     shardSystem?.family?.boundaries?.rowModel
   );
@@ -4440,8 +4439,7 @@ function buildApkGroundingValidationCases() {
     const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShopCostLanes);
     cases.push({
       title: "TokenShop cost-lane split",
-      expected:
-        "TokenBoost, DiamondBoost, TokenDailiesT2, CostBox, and DescText available",
+      expected: "TokenBoost, DiamondBoost, TokenDailiesT2, CostBox, and DescText available",
       actual: tokenShopCostLaneSummary.hasLaneSplit
         ? `${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel} available`
         : "Missing TokenShop trace-produced cost-lane support",
@@ -5242,7 +5240,8 @@ function renderTokenShopOverviewAffordabilityModule() {
     ? `${summary.playerStateCount}/${summary.rows.length} checked player-state row${summary.playerStateCount === 1 ? "" : "s"} active before compatibility fallback.`
     : "No checked player-state rows are active yet; compatibility import and default level 0 stay available.";
 
-  const tierUnlocks = getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
+  const tierUnlocks =
+    getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
   const thresholds = tierUnlocks?.tier_thresholds || {};
   const tierUnlockStates = calculateTierUnlockStatesForOverview(thresholds);
 
@@ -5424,9 +5423,9 @@ function saveTokenShopProgressionLevel(fieldName, value) {
 function prefillTokenShopProgressionEditorFromCompatibility() {
   const compatibilityLevels = getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {};
   const tokenShopBoundary = getCurrentSpendSystemView()?.tokenShop?.rows?.boundaries?.remap;
-  const subsetFields = getTokenShopGroundedSubsetDefinitions(
-    tokenShopBoundary
-  ).map((row) => row.field);
+  const subsetFields = getTokenShopGroundedSubsetDefinitions(tokenShopBoundary).map(
+    (row) => row.field
+  );
   let importedCount = 0;
   subsetFields.forEach((fieldName) => {
     const importedValue = compatibilityLevels?.[fieldName];
@@ -5452,9 +5451,7 @@ function prefillTokenShopProgressionEditorFromCompatibility() {
 
 function clearTokenShopProgressionEditorLevels() {
   const tokenShopBoundary = getCurrentSpendSystemView()?.tokenShop?.rows?.boundaries?.remap;
-  getTokenShopGroundedSubsetDefinitions(
-    tokenShopBoundary
-  ).forEach((row) => {
+  getTokenShopGroundedSubsetDefinitions(tokenShopBoundary).forEach((row) => {
     setProfileValue(
       ["planning", "tokenShop", "checkedSubsetLevels", row.field],
       null,

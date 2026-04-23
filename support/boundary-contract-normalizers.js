@@ -21,16 +21,13 @@ export function normalizeShardSaveBoundary(boundary) {
     ...normalized,
     sources: {
       ...sources,
-      ownedStateTargetBundle:
-        sources.ownedStateTargetBundle || sources.ownedStateTraceRun || ""
+      ownedStateTargetBundle: sources.ownedStateTargetBundle || sources.ownedStateTraceRun || ""
     },
     boundaryEvidence: {
-      metadataNeighborhoodHasSaveTerms:
-        boundaryEvidence.metadataNeighborhoodHasSaveTerms === true,
+      metadataNeighborhoodHasSaveTerms: boundaryEvidence.metadataNeighborhoodHasSaveTerms === true,
       level0HasSaveTerms: boundaryEvidence.level0HasSaveTerms === true,
       ownerShellWithSaveOverlapCount: Number(boundaryEvidence.ownerShellWithSaveOverlapCount || 0),
-      directShardPlayerProfileContext:
-        boundaryEvidence.directShardPlayerProfileContext === true,
+      directShardPlayerProfileContext: boundaryEvidence.directShardPlayerProfileContext === true,
       declaringRowModelRecovered: boundaryEvidence.declaringRowModelRecovered === true,
       directSerializedRowDefinitionRecovered:
         boundaryEvidence.directSerializedRowDefinitionRecovered === true,
@@ -46,7 +43,9 @@ export function normalizeShardSaveBoundary(boundary) {
         boundaryEvidence.traceOwnedStateOutcomeKind ||
         "non-local-injection-seam",
       ownedStateOutcomeLabel:
-        boundaryEvidence.ownedStateOutcomeLabel || boundaryEvidence.traceOwnedStateOutcomeLabel || "",
+        boundaryEvidence.ownedStateOutcomeLabel ||
+        boundaryEvidence.traceOwnedStateOutcomeLabel ||
+        "",
       deeperWrapperHandoffRecovered:
         boundaryEvidence.deeperWrapperHandoffRecovered === true ||
         boundaryEvidence.traceHasDeeperWrapperHandoff === true,
@@ -68,8 +67,7 @@ export function normalizeShardMilestoneSaveOwnerCandidates(candidates) {
     ...normalized,
     sources: {
       ...sources,
-      ownedStateTargetBundle:
-        sources.ownedStateTargetBundle || sources.ownedStateTraceRun || ""
+      ownedStateTargetBundle: sources.ownedStateTargetBundle || sources.ownedStateTraceRun || ""
     },
     checkedOverlapStatistics: {
       ...checkedOverlapStatistics,
@@ -91,8 +89,7 @@ export function normalizeShardMilestoneHandoffBoundary(boundary) {
     ...normalized,
     sources: {
       ...sources,
-      ownedStateTargetBundle:
-        sources.ownedStateTargetBundle || sources.ownedStateTraceRun || ""
+      ownedStateTargetBundle: sources.ownedStateTargetBundle || sources.ownedStateTraceRun || ""
     }
   };
 }
@@ -123,8 +120,7 @@ export function normalizeMultiverseMarketSaveBoundary(boundary) {
       ),
       metadataNeighborhoodHasActionTerms:
         boundaryEvidence.metadataNeighborhoodHasActionTerms === true,
-      metadataNeighborhoodHasSaveTerms:
-        boundaryEvidence.metadataNeighborhoodHasSaveTerms === true,
+      metadataNeighborhoodHasSaveTerms: boundaryEvidence.metadataNeighborhoodHasSaveTerms === true,
       metadataDirectCheckHasSaveTerms:
         boundaryEvidence.metadataDirectCheckHasSaveTerms === true ||
         boundaryEvidence.metadataProbeHasSaveTerms === true,

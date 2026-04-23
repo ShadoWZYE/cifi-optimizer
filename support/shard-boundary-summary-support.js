@@ -426,7 +426,8 @@ export function getShardSaveBoundarySummary(boundary) {
       stateRecoveryChecks.directShardPlayerProfileContext === false &&
       saveFamilyTermsChecked.includes("PlayerProfileData") &&
       saveFamilyTermsChecked.includes("CloudSavePlayerProfile"),
-    hasDirectRowDefinitionPayload: stateRecoveryChecks.directSerializedRowDefinitionRecovered === true,
+    hasDirectRowDefinitionPayload:
+      stateRecoveryChecks.directSerializedRowDefinitionRecovered === true,
     hasRuntimeOwnedStateShell: stateRecoveryChecks.runtimeOwnedStateShellRecovered === true,
     hasOwnedStateTarget: stateRecoveryChecks.ownedStateTargetRecovered === true,
     hasOwnedStatePopulationBridge: stateRecoveryChecks.ownedStatePopulationBridgeRecovered === true,

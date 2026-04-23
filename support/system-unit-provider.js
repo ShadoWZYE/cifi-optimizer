@@ -65,7 +65,10 @@ export async function loadSystemUnits({
           { cause: error }
         );
       }
-      console.warn("Falling back to static system-unit exports after DB-backed load failed.", error);
+      console.warn(
+        "Falling back to static system-unit exports after DB-backed load failed.",
+        error
+      );
     }
   }
 

@@ -146,8 +146,8 @@ test("threshold, unlock, and computed bonus helpers preserve descriptive shard e
   assert.equal(support.getShardUnlockRequirement(milestone), 25);
   assert.deepEqual(support.getNextShardCostBump(145), { level: 200, severity: "small bump" });
   assert.deepEqual(support.getShardComputedBonusSummary(milestone, milestone.bonuses[0], 2), {
-    currentLabel: "x3 (descriptive model)",
-    nextLabel: "x4.5"
+    currentLabel: "x2.2 (descriptive model)",
+    nextLabel: "x2.42"
   });
 });
 

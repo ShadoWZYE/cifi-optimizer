@@ -24,10 +24,7 @@ test("normalizeShardSaveBoundary maps legacy probeResults and trace-owned fields
     }
   });
 
-  assert.equal(
-    normalized.sources.ownedStateTargetBundle,
-    "workbench/trace-runs/example.json"
-  );
+  assert.equal(normalized.sources.ownedStateTargetBundle, "workbench/trace-runs/example.json");
   assert.equal(normalized.boundaryEvidence.ownedStateTargetRecovered, true);
   assert.equal(normalized.boundaryEvidence.ownedStatePopulationBridgeRecovered, false);
   assert.equal(normalized.boundaryEvidence.ownedStateOutcomeKind, "non-local-injection-seam");
@@ -70,10 +67,7 @@ test("normalizeShardMilestoneSaveOwnerCandidates maps historical overlap stats t
     }
   });
 
-  assert.equal(
-    normalized.sources.ownedStateTargetBundle,
-    "workbench/trace-runs/example.json"
-  );
+  assert.equal(normalized.sources.ownedStateTargetBundle, "workbench/trace-runs/example.json");
   assert.equal(normalized.checkedOverlapStatistics.ownedStatePopulationBridgeRecovered, false);
   assert.equal(
     normalized.checkedOverlapStatistics.ownedStateOutcomeKind,

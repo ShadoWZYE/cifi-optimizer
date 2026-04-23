@@ -75,7 +75,9 @@ const derivedOverLevelBaseModels = Array.isArray(overLevelBaseRecoveryPath.deriv
   : [];
 
 const exactParametersByRow = new Map();
-for (const [rowKey, entry] of Object.entries(formulaModel?.verifiedParameters?.exactRowParameters ?? {})) {
+for (const [rowKey, entry] of Object.entries(
+  formulaModel?.verifiedParameters?.exactRowParameters ?? {}
+)) {
   const row = Number(rowKey);
   exactParametersByRow.set(row, readExactFields(entry, row === 0));
 }

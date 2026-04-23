@@ -9,8 +9,7 @@ export function buildPlayerStateSystemView(playerStateSystemUnit, mergeDeep) {
   const canonical = playerStateSystemUnit?.sections?.canonicalSharedTruth?.defaultShape ?? {};
   const planner = playerStateSystemUnit?.sections?.plannerHelpers?.defaultShape ?? {};
   const externalModels = playerStateSystemUnit?.sections?.externalModels?.defaultShape ?? {};
-  const compatibility =
-    playerStateSystemUnit?.sections?.compatibilityImports?.defaultShape ?? {};
+  const compatibility = playerStateSystemUnit?.sections?.compatibilityImports?.defaultShape ?? {};
 
   return {
     canonicalSharedTruth: structuredClone(canonical),
@@ -47,33 +46,27 @@ export function buildShardSystemView(shardsSystemUnit) {
         effectTextHandler:
           shardsSystemUnit?.sections?.family?.boundaries?.effectTextHandler?.data ?? null,
         rowShell: shardsSystemUnit?.sections?.family?.boundaries?.rowShell?.data ?? null,
-        rowAlignment:
-          shardsSystemUnit?.sections?.family?.boundaries?.rowAlignment?.data ?? null
+        rowAlignment: shardsSystemUnit?.sections?.family?.boundaries?.rowAlignment?.data ?? null
       },
       familyEvidence: shardsSystemUnit?.sections?.family?.familyEvidence?.data ?? null
     },
     ownedState: {
       saveBoundary: shardsSystemUnit?.sections?.ownedState?.saveBoundary?.data ?? null,
       traceBoundary: shardsSystemUnit?.sections?.ownedState?.traceBoundary?.data ?? null,
-      saveOwnerCandidates:
-        shardsSystemUnit?.sections?.ownedState?.saveOwnerCandidates?.data ?? null
+      saveOwnerCandidates: shardsSystemUnit?.sections?.ownedState?.saveOwnerCandidates?.data ?? null
     },
     cost: {
       costModelBoundary: shardsSystemUnit?.sections?.cost?.costModelBoundary?.data ?? null,
       bonusSlotProbe: shardsSystemUnit?.sections?.cost?.bonusSlotProbe?.data ?? null,
       formulaModel: shardsSystemUnit?.sections?.cost?.formulaModel?.data ?? null,
-      screenshotCalibration:
-        shardsSystemUnit?.sections?.cost?.screenshotCalibration?.data ?? null,
+      screenshotCalibration: shardsSystemUnit?.sections?.cost?.screenshotCalibration?.data ?? null,
       listPathProbe: shardsSystemUnit?.sections?.cost?.listPathProbe?.data ?? null,
       traceBoundary: shardsSystemUnit?.sections?.cost?.traceBoundary?.data ?? null
     }
   };
 }
 
-export function buildSpendSystemView({
-  tokenShopSystemUnit,
-  multiverseMarketSystemUnit
-}) {
+export function buildSpendSystemView({ tokenShopSystemUnit, multiverseMarketSystemUnit }) {
   return {
     tokenShop: {
       rows: {
@@ -101,8 +94,7 @@ export function buildSpendSystemView({
       },
       spendLanes: {
         costLanes: tokenShopSystemUnit?.sections?.spendLanes?.costLanes?.data ?? null,
-        actionLaneClues:
-          tokenShopSystemUnit?.sections?.spendLanes?.actionLaneClues?.data ?? null
+        actionLaneClues: tokenShopSystemUnit?.sections?.spendLanes?.actionLaneClues?.data ?? null
       },
       traceRuns: tokenShopSystemUnit?.sections?.traceRuns ?? {}
     },
@@ -112,8 +104,7 @@ export function buildSpendSystemView({
         marketMemberBoundary:
           multiverseMarketSystemUnit?.sections?.saveOwner?.marketMemberBoundary?.data ?? null,
         saveBoundary: multiverseMarketSystemUnit?.sections?.saveOwner?.saveBoundary?.data ?? null,
-        traceBoundary:
-          multiverseMarketSystemUnit?.sections?.saveOwner?.traceBoundary?.data ?? null
+        traceBoundary: multiverseMarketSystemUnit?.sections?.saveOwner?.traceBoundary?.data ?? null
       },
       rowIdentity: {
         metadataNeighborhood:

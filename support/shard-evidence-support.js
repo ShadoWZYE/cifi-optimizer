@@ -42,16 +42,17 @@ export function createShardEvidenceSupport({
       ? getShardFormulaModel().rowClasses
       : [];
     return (
-      rowClasses.find(
-        (entry) => Array.isArray(entry?.rows) && entry.rows.includes(rowNumber)
-      ) || null
+      rowClasses.find((entry) => Array.isArray(entry?.rows) && entry.rows.includes(rowNumber)) ||
+      null
     );
   }
 
   function buildDerivedThresholdStages(row) {
     const rowClass = getShardRowClassForRow(row);
     const stageCoverage = Array.isArray(rowClass?.stageCoverage) ? rowClass.stageCoverage : [];
-    const overLevelSeedModels = Array.isArray(getShardFormulaModel()?.derivedParameters?.overLevelSeedModels)
+    const overLevelSeedModels = Array.isArray(
+      getShardFormulaModel()?.derivedParameters?.overLevelSeedModels
+    )
       ? getShardFormulaModel().derivedParameters.overLevelSeedModels
       : [];
     return stageCoverage.map((minimumLevel) => {
@@ -173,7 +174,9 @@ export function createShardEvidenceSupport({
   }
 
   function getShardExtractedUnlockRequirement(row) {
-    const values = Array.isArray(getShardFormulaVerifiedParameters()?.unlockRequirementBlock?.values)
+    const values = Array.isArray(
+      getShardFormulaVerifiedParameters()?.unlockRequirementBlock?.values
+    )
       ? getShardFormulaVerifiedParameters().unlockRequirementBlock.values
       : [];
     const value = values[Number(row)];

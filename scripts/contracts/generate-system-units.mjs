@@ -78,13 +78,15 @@ function withDb(fn) {
 function fetchLatestMaterializedTargetBundle(traceScope) {
   return withDb((db) => {
     const row = db
-      .prepare(`
+      .prepare(
+        `
         SELECT trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
         FROM materialized_target_bundle_views
         WHERE project_name = ? AND project_file = ? AND trace_scope = ?
         ORDER BY built_at DESC, request_signature DESC
         LIMIT 1
-      `)
+      `
+      )
       .get("cifi-full", "libil2cpp.so", traceScope);
     if (!row) {
       throw new Error(
@@ -155,7 +157,11 @@ function sanitizeTraceBundleExport(payload) {
       traceRegistry.selectedSubjectKey ??
       target.selectedSubjectKey ??
       null;
-    if (plannerResolution.selectionMode === "explicit-target" && !selectedSubjectKind && !selectedSubjectKey) {
+    if (
+      plannerResolution.selectionMode === "explicit-target" &&
+      !selectedSubjectKind &&
+      !selectedSubjectKey
+    ) {
       plannerResolution.selectionMode = "archive-explicit-target";
       plannerResolution.decisionNote =
         "Archived compatibility trace run preserved from the pre-DB-subject planner path.";
@@ -189,14 +195,26 @@ function sanitizeTraceBundleExport(payload) {
       null;
   }
   const dependencySystemView = clone?.systemViews?.dependency_fragment;
-  if (dependencySystemView && typeof dependencySystemView === "object" && dependencySystemView.semanticScope) {
-    dependencySystemView.semanticScope = sanitizeTraceSemanticScope(dependencySystemView.semanticScope);
+  if (
+    dependencySystemView &&
+    typeof dependencySystemView === "object" &&
+    dependencySystemView.semanticScope
+  ) {
+    dependencySystemView.semanticScope = sanitizeTraceSemanticScope(
+      dependencySystemView.semanticScope
+    );
   }
   const groupedDependencyViews = clone?.canonicalSemanticViews?.dependency_fragment;
   if (groupedDependencyViews && typeof groupedDependencyViews === "object") {
     for (const dependencyPayload of Object.values(groupedDependencyViews)) {
-      if (dependencyPayload && typeof dependencyPayload === "object" && dependencyPayload.semanticScope) {
-        dependencyPayload.semanticScope = sanitizeTraceSemanticScope(dependencyPayload.semanticScope);
+      if (
+        dependencyPayload &&
+        typeof dependencyPayload === "object" &&
+        dependencyPayload.semanticScope
+      ) {
+        dependencyPayload.semanticScope = sanitizeTraceSemanticScope(
+          dependencyPayload.semanticScope
+        );
       }
     }
   }
@@ -277,7 +295,8 @@ function upsertMaterializedSystemUnit(systemId, version, payload, exportedPath) 
     sourceModel: "db-first-system-unit-export"
   };
   withDb((db) => {
-    db.prepare(`
+    db.prepare(
+      `
       INSERT INTO materialized_system_unit_views(
         system_id, version, payload_json, provenance_json, reducer_version, built_at, exported_path
       ) VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -287,7 +306,8 @@ function upsertMaterializedSystemUnit(systemId, version, payload, exportedPath) 
         reducer_version = excluded.reducer_version,
         built_at = excluded.built_at,
         exported_path = excluded.exported_path
-    `).run(
+    `
+    ).run(
       systemId,
       version,
       JSON.stringify(payload),
@@ -393,8 +413,11 @@ async function buildPlayerStateUnit() {
     },
     externalModels: {
       defaultShape: defaultProfile.externalModels,
-      aliasGroups: [aliasGroups.externalModel, aliasGroups.experimental, aliasGroups.shipCalibration]
-        .filter(Boolean),
+      aliasGroups: [
+        aliasGroups.externalModel,
+        aliasGroups.experimental,
+        aliasGroups.shipCalibration
+      ].filter(Boolean),
       provenanceSources: ["player-profile-alias-audit", "player-profile-normalizer"]
     },
     compatibilityImports: {
@@ -413,37 +436,40 @@ async function buildPlayerStateUnit() {
     aliasAudit: aliasAudit
   };
 
-  return withTargetShape({
-    dataset: "repo-system-unit.v1",
-    systemId: "player-state",
-    version: "v1",
-    generatedAt: "2026-04-18",
-    generatedBy: "scripts/contracts/generate-system-units.mjs",
-    unitInventoryRef: "data/units/player-state.v1.json",
-    summary: unitInventory.summary,
-    liveConsumers: unitInventory.liveConsumers,
-    provenance: unitInventory.provenance,
-    views: unitInventory.views,
-    replacementPlan: unitInventory.replacementPlan,
-    transientRegenerationCommands: unitInventory.provenance.sourceRecords.filter(
-      (record) => record.kind === "command"
-    ),
-    sections
-  }, {
-    canonical: {
-      sharedTruth: sections.canonicalSharedTruth
+  return withTargetShape(
+    {
+      dataset: "repo-system-unit.v1",
+      systemId: "player-state",
+      version: "v1",
+      generatedAt: "2026-04-18",
+      generatedBy: "scripts/contracts/generate-system-units.mjs",
+      unitInventoryRef: "data/units/player-state.v1.json",
+      summary: unitInventory.summary,
+      liveConsumers: unitInventory.liveConsumers,
+      provenance: unitInventory.provenance,
+      views: unitInventory.views,
+      replacementPlan: unitInventory.replacementPlan,
+      transientRegenerationCommands: unitInventory.provenance.sourceRecords.filter(
+        (record) => record.kind === "command"
+      ),
+      sections
     },
-    boundaries: {},
-    models: {
-      externalModels: sections.externalModels
-    },
-    support: {
-      plannerHelpers: sections.plannerHelpers,
-      compatibilityImports: sections.compatibilityImports,
-      aliasAudit: sections.aliasAudit
-    },
-    traceEvidence: {}
-  });
+    {
+      canonical: {
+        sharedTruth: sections.canonicalSharedTruth
+      },
+      boundaries: {},
+      models: {
+        externalModels: sections.externalModels
+      },
+      support: {
+        plannerHelpers: sections.plannerHelpers,
+        compatibilityImports: sections.compatibilityImports,
+        aliasAudit: sections.aliasAudit
+      },
+      traceEvidence: {}
+    }
+  );
 }
 
 async function buildAppMetaUnit() {
@@ -786,8 +812,7 @@ async function fetchOrBuildShardCostFormulaModel() {
           fieldNames: Array.isArray(entry?.strongestFieldOrderMapping?.fieldOrder)
             ? entry.strongestFieldOrderMapping.fieldOrder
             : [],
-          exactBigDoubleValues:
-            entry?.strongestFieldOrderMapping?.exactBigDoubleValues ?? {}
+          exactBigDoubleValues: entry?.strongestFieldOrderMapping?.exactBigDoubleValues ?? {}
         }
       ])
   );
@@ -825,8 +850,9 @@ async function fetchOrBuildShardCostScreenshotCalibration() {
 
 function findDirectTypeMetadataEntry(typeMetadataSupport, scriptName) {
   return (
-    typeMetadataSupport?.directTargetTypeMetadata?.find((entry) => entry?.scriptName === scriptName) ??
-    null
+    typeMetadataSupport?.directTargetTypeMetadata?.find(
+      (entry) => entry?.scriptName === scriptName
+    ) ?? null
   );
 }
 
@@ -893,8 +919,9 @@ function buildTokenShopCanonicalRecords(tokenShopValues, typeMetadataSupport) {
     ownerPayload: {
       fieldRange: "ATU1Button through ATU28MaxOverlay",
       fieldCount: Array.isArray(tokenShopValues?.fields)
-        ? tokenShopValues.fields.filter((entry) => /^ATU\d+(Button|MaxOverlay)$/.test(entry?.field ?? ""))
-            .length
+        ? tokenShopValues.fields.filter((entry) =>
+            /^ATU\d+(Button|MaxOverlay)$/.test(entry?.field ?? "")
+          ).length
         : 0,
       numericFamilies: Object.keys(tokenShopValues?.numeric_table ?? {})
     }
@@ -1020,7 +1047,10 @@ function normalizeMetadataNeighborhoodPayload(payload) {
 }
 
 async function fetchOrBuildMultiverseMarketMetadataNeighborhood() {
-  const existing = fetchMaterializedSystemUnitPayload("multiverse-market-metadata-neighborhood", "v1");
+  const existing = fetchMaterializedSystemUnitPayload(
+    "multiverse-market-metadata-neighborhood",
+    "v1"
+  );
   if (existing && Array.isArray(existing.results) && existing.metadata) {
     return normalizeMetadataNeighborhoodPayload(existing);
   }
@@ -1085,9 +1115,7 @@ function buildMultiverseRowTextCoverage(multiverseMarketValues) {
     textHandlerAnchors: ["TextHandlerMarkets", "SetAllChrystosEmporiumTexts"],
     validatedRowCostTexts: validatedRows.map((row) => `SetIS${row}CostText`),
     sampleBuyHooks:
-      validatedRows.length > 0
-        ? [`BuyIS${validatedRows[0]}`, `BuyIS${validatedRows.at(-1)}`]
-        : [],
+      validatedRows.length > 0 ? [`BuyIS${validatedRows[0]}`, `BuyIS${validatedRows.at(-1)}`] : [],
     currentBoundary: [
       "Repo-local multiverse values now preserve a direct validated-row text lane through SetAllChrystosEmporiumTexts and the SetIS*CostText family.",
       "That gives the repo a grounded row-text coverage path for the currently validated MultiverseMarket rows without depending on the older standalone row-text coverage summary.",
@@ -1103,7 +1131,7 @@ function pickTokenShopPresentationBinding(traceData) {
       "ui-binding:token-shop:token-shop-family-structure:description"
     ] ?? {};
   const presentationPath = Array.isArray(binding.presentationUpdatePaths)
-    ? binding.presentationUpdatePaths[0] ?? {}
+    ? (binding.presentationUpdatePaths[0] ?? {})
     : {};
   const renderPaths = Array.isArray(presentationPath.interactionToRenderPaths)
     ? presentationPath.interactionToRenderPaths
@@ -1172,11 +1200,14 @@ async function buildMultiverseOwnerFamilySupport(multiverseMarketValues, actionS
     "AchievementBar-Inscryptions",
     "CostBox-InscryptionsDone"
   ];
-  const metadataPresence = await countAsciiOccurrencesByTerm("workbench/apk/base/global-metadata.dat", [
-    ...ownerAnchors,
-    ...costLaneAnchors
-  ]);
-  const level0Presence = await countAsciiOccurrencesByTerm("workbench/unity/joined/level0", costLaneAnchors);
+  const metadataPresence = await countAsciiOccurrencesByTerm(
+    "workbench/apk/base/global-metadata.dat",
+    [...ownerAnchors, ...costLaneAnchors]
+  );
+  const level0Presence = await countAsciiOccurrencesByTerm(
+    "workbench/unity/joined/level0",
+    costLaneAnchors
+  );
   const validatedRows = Array.isArray(multiverseMarketValues.records)
     ? multiverseMarketValues.records
         .map((record) => Number(record.inscription_id))
@@ -1402,7 +1433,10 @@ function buildShardMilestoneFamilyEvidence(
           rowShellFields: {
             textCheckerField: `Milestone${row}TextChecker`,
             unlockRequirementField: `SU${row}UnlockReq`,
-            bonusTextFields: Array.from({ length: groundedBonusCount }, (_, index) => `SM${row}B${index + 1}Text`)
+            bonusTextFields: Array.from(
+              { length: groundedBonusCount },
+              (_, index) => `SM${row}B${index + 1}Text`
+            )
           },
           calcAccessors: Array.from(
             { length: calcAccessorCount },
@@ -1523,8 +1557,7 @@ function buildTokenShopCostLaneSupport(tokenShopValues, traceData) {
     ["TokenDailiesT2", "TokenDailiesT3"].includes(name)
   );
   const diamondGroups = groups.filter((name) => name === "DiamondBoost");
-  const formula =
-    traceData?.canonicalSemanticViews?.formula_fragment?.["formula:token-shop"] ?? {};
+  const formula = traceData?.canonicalSemanticViews?.formula_fragment?.["formula:token-shop"] ?? {};
   const threshold =
     traceData?.canonicalSemanticViews?.threshold_fragment?.[
       "threshold:token-shop:token-shop-family-structure:runtime-cost"
@@ -1633,7 +1666,10 @@ async function buildTokenShopActionLaneSupport(tokenShopValues, dailyTokeniumLan
   ];
 
   const searchResults = {
-    metadata: await countAsciiOccurrencesByTerm("workbench/apk/base/global-metadata.dat", metadataTerms),
+    metadata: await countAsciiOccurrencesByTerm(
+      "workbench/apk/base/global-metadata.dat",
+      metadataTerms
+    ),
     level0: await countAsciiOccurrencesByTerm("workbench/unity/joined/level0", level0Terms)
   };
 
@@ -1669,9 +1705,7 @@ async function buildTokeniumNamingClues() {
       "workbench/extract/assetripper-primary/Assets/Resources/resourceicons/Resource_Tokenium.json",
       "workbench/extract/assetripper-primary/Assets/Resources/resourceicons/Resource_Tokenium_Cap_0.json"
     ],
-    academySprites: [
-      "workbench/extract/assetripper-primary/Assets/Sprite/Aca.Tokenium553.json"
-    ]
+    academySprites: ["workbench/extract/assetripper-primary/Assets/Sprite/Aca.Tokenium553.json"]
   };
   const assetNames = {
     resourceIcons: [],
@@ -1719,10 +1753,7 @@ async function buildTokeniumNamingClues() {
     sources: {
       metadata: "workbench/apk/base/global-metadata.dat",
       level0: "workbench/unity/joined/level0",
-      assetNames: [
-        ...assetCandidates.resourceIcons,
-        ...assetCandidates.academySprites
-      ],
+      assetNames: [...assetCandidates.resourceIcons, ...assetCandidates.academySprites],
       sourceModel: "db-derived-tokenium-naming-clues"
     },
     assetNames,
@@ -1739,19 +1770,20 @@ async function buildTokeniumNamingClues() {
 
 function findDirectTypeMetadata(typeSupport, scriptName) {
   return Array.isArray(typeSupport?.directTargetTypeMetadata)
-    ? typeSupport.directTargetTypeMetadata.find((entry) => entry?.scriptName === scriptName) ?? null
+    ? (typeSupport.directTargetTypeMetadata.find((entry) => entry?.scriptName === scriptName) ??
+        null)
     : null;
 }
 
 function findField(typeEntry, fieldName) {
   return Array.isArray(typeEntry?.fields)
-    ? typeEntry.fields.find((field) => field?.name === fieldName) ?? null
+    ? (typeEntry.fields.find((field) => field?.name === fieldName) ?? null)
     : null;
 }
 
 function findMethod(typeEntry, methodName) {
   return Array.isArray(typeEntry?.methods)
-    ? typeEntry.methods.find((method) => method?.name === methodName) ?? null
+    ? (typeEntry.methods.find((method) => method?.name === methodName) ?? null)
     : null;
 }
 
@@ -1785,7 +1817,10 @@ async function buildTokenBankControllerShell(tokenShopValues, tokenBankStateClue
   const metadataTerms = [...controllerAnchors, ...adjacentControllerMethods];
   const level0Terms = ["ClaimBankedTokens", "BankedDescriptionTextIncrease"];
   const sourcePresence = {
-    metadata: await countAsciiOccurrencesByTerm("workbench/apk/base/global-metadata.dat", metadataTerms),
+    metadata: await countAsciiOccurrencesByTerm(
+      "workbench/apk/base/global-metadata.dat",
+      metadataTerms
+    ),
     level0: await countAsciiOccurrencesByTerm("workbench/unity/joined/level0", level0Terms)
   };
 
@@ -1828,20 +1863,17 @@ async function buildTokenShopOwnerShell(tokenShopValues, tokenBankStateClues) {
     "IncreaseBankedTokens",
     "ClaimBankedTokens",
     "SetBankFill"
-  ].filter((name) =>
-    Array.isArray(tokenBankStateClues?.tokenShopMethods) &&
-    tokenBankStateClues.tokenShopMethods.includes(name)
+  ].filter(
+    (name) =>
+      Array.isArray(tokenBankStateClues?.tokenShopMethods) &&
+      tokenBankStateClues.tokenShopMethods.includes(name)
   );
   const notificationHooks = [
     "CheckTokenClaimNotification",
     "TokenShopButtonNotification",
     "BankedDescriptionTextIncrease"
   ];
-  const adjacentDeviceHooks = [
-    "BuyAutoTokenClicker",
-    "BuyAutoDiamondClicker",
-    "BuyChestSpeedster"
-  ];
+  const adjacentDeviceHooks = ["BuyAutoTokenClicker", "BuyAutoDiamondClicker", "BuyChestSpeedster"];
   const uiShells = [
     "TokenBankDescriptionText",
     "TokenShopCanvas",
@@ -1857,9 +1889,17 @@ async function buildTokenShopOwnerShell(tokenShopValues, tokenBankStateClues) {
     ...notificationHooks,
     ...adjacentDeviceHooks
   ];
-  const level0Terms = ["TokenShop", "ClaimBankedTokens", "BankedDescriptionTextIncrease", ...adjacentDeviceHooks];
+  const level0Terms = [
+    "TokenShop",
+    "ClaimBankedTokens",
+    "BankedDescriptionTextIncrease",
+    ...adjacentDeviceHooks
+  ];
   const sourcePresence = {
-    metadata: await countAsciiOccurrencesByTerm("workbench/apk/base/global-metadata.dat", metadataTerms),
+    metadata: await countAsciiOccurrencesByTerm(
+      "workbench/apk/base/global-metadata.dat",
+      metadataTerms
+    ),
     level0: await countAsciiOccurrencesByTerm("workbench/unity/joined/level0", level0Terms)
   };
 
@@ -1921,15 +1961,18 @@ async function buildTokenBankStateClues(typeSupport, tokenBankFormulaBoundary) {
     "<GetPlayerProfileInfo>d__29"
   ];
   const transientLocalCandidates = ["<saveData>5__2", "<lastCloudSave>5__3"];
-  const metadataPresence = await countAsciiOccurrencesByTerm("workbench/apk/base/global-metadata.dat", [
-    "BigStatisticPrefab.TokenBankCap",
-    "TextHandlerLoopMods",
-    "SetLM244BonusText",
-    "CloudSavePlayerProfile",
-    ...shellMethodCandidates,
-    ...metadataStateMachineCandidates,
-    ...transientLocalCandidates
-  ]);
+  const metadataPresence = await countAsciiOccurrencesByTerm(
+    "workbench/apk/base/global-metadata.dat",
+    [
+      "BigStatisticPrefab.TokenBankCap",
+      "TextHandlerLoopMods",
+      "SetLM244BonusText",
+      "CloudSavePlayerProfile",
+      ...shellMethodCandidates,
+      ...metadataStateMachineCandidates,
+      ...transientLocalCandidates
+    ]
+  );
 
   return {
     generatedAt: "2026-04-22",
@@ -1998,7 +2041,9 @@ async function buildTokenBankStateClues(typeSupport, tokenBankFormulaBoundary) {
       scriptName: "CloudSavePlayerProfile",
       typedTargetFound: Boolean(cloudSaveType?.found),
       metadataAnchorFound: (metadataPresence.CloudSavePlayerProfile ?? 0) > 0,
-      metadataShellMethods: shellMethodCandidates.filter((name) => (metadataPresence[name] ?? 0) > 0),
+      metadataShellMethods: shellMethodCandidates.filter(
+        (name) => (metadataPresence[name] ?? 0) > 0
+      ),
       metadataStateMachines: metadataStateMachineCandidates.filter(
         (name) => (metadataPresence[name] ?? 0) > 0
       ),
@@ -2036,12 +2081,14 @@ async function buildDailyTokeniumLaneClues(typeSupport) {
   const claimableTokeniumField = findField(saveDataType, "ClaimableTokenium");
   const dailyIndex = typeof dailyTokeniumField?.index === "number" ? dailyTokeniumField.index : -1;
   const surroundingFields = Array.isArray(saveDataType?.fields) ? saveDataType.fields : [];
-  const immediatelyBefore = dailyIndex >= 2
-    ? surroundingFields.slice(dailyIndex - 2, dailyIndex).map((field) => field.name)
-    : [];
-  const immediatelyAfter = dailyIndex >= 0
-    ? surroundingFields.slice(dailyIndex + 1, dailyIndex + 10).map((field) => field.name)
-    : [];
+  const immediatelyBefore =
+    dailyIndex >= 2
+      ? surroundingFields.slice(dailyIndex - 2, dailyIndex).map((field) => field.name)
+      : [];
+  const immediatelyAfter =
+    dailyIndex >= 0
+      ? surroundingFields.slice(dailyIndex + 1, dailyIndex + 10).map((field) => field.name)
+      : [];
   const ownerFamilyCandidates = [
     "SpaceAcademy",
     "SpaceAcademyMain",
@@ -2067,12 +2114,15 @@ async function buildDailyTokeniumLaneClues(typeSupport) {
     "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
     "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
   ];
-  const metadataPresence = await countAsciiOccurrencesByTerm("workbench/apk/base/global-metadata.dat", [
-    ...ownerFamilyCandidates,
-    ...modifierCandidates,
-    ...premiumModifierCandidates,
-    ...playerFacingStringCandidates
-  ]);
+  const metadataPresence = await countAsciiOccurrencesByTerm(
+    "workbench/apk/base/global-metadata.dat",
+    [
+      ...ownerFamilyCandidates,
+      ...modifierCandidates,
+      ...premiumModifierCandidates,
+      ...playerFacingStringCandidates
+    ]
+  );
   const academySpritePath =
     "workbench/extract/assetripper-primary/Assets/Sprite/Aca.Tokenium553.json";
 
@@ -2187,34 +2237,28 @@ async function buildTokenShopUnit() {
     tokenBankFormulaBoundary
   );
   const dailyTokeniumLaneClues = await buildDailyTokeniumLaneClues(typeMetadataSupport);
-  const tokenShopAtu3EffectTrace = await traceRunSection(
-    "token-shop-atu3-cells-effect",
-    ["token-shop-trace-command"]
-  );
-  const tokenShopAtu3ChestConsumerTrace = await traceRunSection(
-    "token-shop-atu3-chest-consumer",
-    ["token-shop-trace-command"]
-  );
+  const tokenShopAtu3EffectTrace = await traceRunSection("token-shop-atu3-cells-effect", [
+    "token-shop-trace-command"
+  ]);
+  const tokenShopAtu3ChestConsumerTrace = await traceRunSection("token-shop-atu3-chest-consumer", [
+    "token-shop-trace-command"
+  ]);
   const tokenShopAtu3ChestConsumerReadTrace = await traceRunSection(
     "token-shop-atu3-chest-consumer-read",
     ["token-shop-trace-command"]
   );
-  const tokenShopAtu4ModTrace = await traceRunSection(
-    "token-shop-atu4-mod",
-    ["token-shop-trace-command"]
-  );
-  const tokenShopAtu5Mk1TitleTrace = await traceRunSection(
-    "token-shop-atu5-mk1-title",
-    ["token-shop-trace-command"]
-  );
-  const tokenShopAtu7Mk3BridgeTrace = await traceRunSection(
-    "token-shop-atu7-mk3-bridge",
-    ["token-shop-trace-command"]
-  );
-  const tokenShopFamilyStructureTrace = await traceRunSection(
-    "token-shop-family-structure",
-    ["token-shop-trace-command"]
-  );
+  const tokenShopAtu4ModTrace = await traceRunSection("token-shop-atu4-mod", [
+    "token-shop-trace-command"
+  ]);
+  const tokenShopAtu5Mk1TitleTrace = await traceRunSection("token-shop-atu5-mk1-title", [
+    "token-shop-trace-command"
+  ]);
+  const tokenShopAtu7Mk3BridgeTrace = await traceRunSection("token-shop-atu7-mk3-bridge", [
+    "token-shop-trace-command"
+  ]);
+  const tokenShopFamilyStructureTrace = await traceRunSection("token-shop-family-structure", [
+    "token-shop-trace-command"
+  ]);
   const tokenShopCostLanes = buildTokenShopCostLaneSupport(
     tokenShopValues,
     tokenShopFamilyStructureTrace?.data ?? {}
@@ -2227,10 +2271,7 @@ async function buildTokenShopUnit() {
     tokenShopValues,
     tokenBankStateClues
   );
-  const tokenShopOwnerShell = await buildTokenShopOwnerShell(
-    tokenShopValues,
-    tokenBankStateClues
-  );
+  const tokenShopOwnerShell = await buildTokenShopOwnerShell(tokenShopValues, tokenBankStateClues);
 
   const sections = {
     rows: {
@@ -2263,9 +2304,11 @@ async function buildTokenShopUnit() {
           tokenShopRowRemapBoundary,
           ["token-shop-row-remap-boundary"]
         ),
-        lateAtu: datasetSection("data/token-shop-late-atu-boundary.json", tokenShopLateAtuBoundary, [
-          "token-shop-row-remap-boundary"
-        ])
+        lateAtu: datasetSection(
+          "data/token-shop-late-atu-boundary.json",
+          tokenShopLateAtuBoundary,
+          ["token-shop-row-remap-boundary"]
+        )
       }
     },
     tokenBank: {
@@ -2325,51 +2368,54 @@ async function buildTokenShopUnit() {
     }
   };
 
-  return withTargetShape({
-    dataset: "repo-system-unit.v1",
-    systemId: "token-shop",
-    version: "v1",
-    generatedAt: "2026-04-18",
-    generatedBy: "scripts/contracts/generate-system-units.mjs",
-    unitInventoryRef: "data/units/token-shop.v1.json",
-    summary: unitInventory.summary,
-    liveConsumers: unitInventory.liveConsumers,
-    provenance: unitInventory.provenance,
-    views: unitInventory.views,
-    replacementPlan: unitInventory.replacementPlan,
-    transientRegenerationCommands: unitInventory.provenance.sourceRecords.filter(
-      (record) => record.kind === "command"
-    ),
-    sections
-  }, {
-    canonical: {
-      rows: {
-        canonical: sections.rows.canonical
-      }
+  return withTargetShape(
+    {
+      dataset: "repo-system-unit.v1",
+      systemId: "token-shop",
+      version: "v1",
+      generatedAt: "2026-04-18",
+      generatedBy: "scripts/contracts/generate-system-units.mjs",
+      unitInventoryRef: "data/units/token-shop.v1.json",
+      summary: unitInventory.summary,
+      liveConsumers: unitInventory.liveConsumers,
+      provenance: unitInventory.provenance,
+      views: unitInventory.views,
+      replacementPlan: unitInventory.replacementPlan,
+      transientRegenerationCommands: unitInventory.provenance.sourceRecords.filter(
+        (record) => record.kind === "command"
+      ),
+      sections
     },
-    boundaries: {
-      rows: sections.rows.boundaries,
-      tokenBank: {
-        formulaBoundary: sections.tokenBank.formulaBoundary
-      }
-    },
-    models: {},
-    support: {
-      rows: {
-        extract: sections.rows.extract,
-        policy: sections.rows.policy
+    {
+      canonical: {
+        rows: {
+          canonical: sections.rows.canonical
+        }
       },
-      tokenBank: {
-        namingClues: sections.tokenBank.namingClues,
-        stateClues: sections.tokenBank.stateClues,
-        ownerShell: sections.tokenBank.ownerShell,
-        controllerShell: sections.tokenBank.controllerShell
+      boundaries: {
+        rows: sections.rows.boundaries,
+        tokenBank: {
+          formulaBoundary: sections.tokenBank.formulaBoundary
+        }
       },
-      dailyTokenium: sections.dailyTokenium,
-      spendLanes: sections.spendLanes
-    },
-    traceEvidence: sections.traceRuns
-  });
+      models: {},
+      support: {
+        rows: {
+          extract: sections.rows.extract,
+          policy: sections.rows.policy
+        },
+        tokenBank: {
+          namingClues: sections.tokenBank.namingClues,
+          stateClues: sections.tokenBank.stateClues,
+          ownerShell: sections.tokenBank.ownerShell,
+          controllerShell: sections.tokenBank.controllerShell
+        },
+        dailyTokenium: sections.dailyTokenium,
+        spendLanes: sections.spendLanes
+      },
+      traceEvidence: sections.traceRuns
+    }
+  );
 }
 
 async function buildMultiverseMarketUnit() {
@@ -2537,65 +2583,68 @@ async function buildMultiverseMarketUnit() {
     }
   };
 
-  return withTargetShape({
-    dataset: "repo-system-unit.v1",
-    systemId: "multiverse-market",
-    version: "v1",
-    generatedAt: "2026-04-18",
-    generatedBy: "scripts/contracts/generate-system-units.mjs",
-    unitInventoryRef: "data/units/multiverse-market.v1.json",
-    summary: unitInventory.summary,
-    liveConsumers: unitInventory.liveConsumers,
-    provenance: unitInventory.provenance,
-    views: unitInventory.views,
-    replacementPlan: unitInventory.replacementPlan,
-    transientRegenerationCommands: unitInventory.provenance.sourceRecords.filter(
-      (record) => record.kind === "command"
-    ),
-    sections
-  }, {
-    canonical: {},
-    boundaries: {
-      saveOwner: {
-        saveBoundary: sections.saveOwner.saveBoundary,
-        marketMemberBoundary: sections.saveOwner.marketMemberBoundary,
-        saveDataImportBoundary: sections.saveOwner.saveDataImportBoundary
-      },
-      rowIdentity: {
-        rangeBoundary: sections.rowIdentity.rangeBoundary,
-        prefabRemapBoundary: sections.rowIdentity.prefabRemapBoundary,
-        identitySourceBoundary: sections.rowIdentity.identitySourceBoundary,
-        serializedLabelSourceBoundary: sections.rowIdentity.serializedLabelSourceBoundary,
-        row7174IdentityBoundary: sections.rowIdentity.row7174IdentityBoundary,
-        row7174RemapBand: sections.rowIdentity.row7174RemapBand,
-        nearbyIdentityBindingPattern: sections.rowIdentity.nearbyIdentityBindingPattern,
-        anomalyProvenance: sections.rowIdentity.anomalyProvenance,
-        numberingStabilityBoundary: sections.rowIdentity.numberingStabilityBoundary,
-        shellRowPredictionBoundary: sections.rowIdentity.shellRowPredictionBoundary,
-        textProvenancePathBoundary: sections.rowIdentity.textProvenancePathBoundary
-      }
+  return withTargetShape(
+    {
+      dataset: "repo-system-unit.v1",
+      systemId: "multiverse-market",
+      version: "v1",
+      generatedAt: "2026-04-18",
+      generatedBy: "scripts/contracts/generate-system-units.mjs",
+      unitInventoryRef: "data/units/multiverse-market.v1.json",
+      summary: unitInventory.summary,
+      liveConsumers: unitInventory.liveConsumers,
+      provenance: unitInventory.provenance,
+      views: unitInventory.views,
+      replacementPlan: unitInventory.replacementPlan,
+      transientRegenerationCommands: unitInventory.provenance.sourceRecords.filter(
+        (record) => record.kind === "command"
+      ),
+      sections
     },
-    models: {},
-    support: {
-      saveOwner: {
-        extract: sections.saveOwner.extract
+    {
+      canonical: {},
+      boundaries: {
+        saveOwner: {
+          saveBoundary: sections.saveOwner.saveBoundary,
+          marketMemberBoundary: sections.saveOwner.marketMemberBoundary,
+          saveDataImportBoundary: sections.saveOwner.saveDataImportBoundary
+        },
+        rowIdentity: {
+          rangeBoundary: sections.rowIdentity.rangeBoundary,
+          prefabRemapBoundary: sections.rowIdentity.prefabRemapBoundary,
+          identitySourceBoundary: sections.rowIdentity.identitySourceBoundary,
+          serializedLabelSourceBoundary: sections.rowIdentity.serializedLabelSourceBoundary,
+          row7174IdentityBoundary: sections.rowIdentity.row7174IdentityBoundary,
+          row7174RemapBand: sections.rowIdentity.row7174RemapBand,
+          nearbyIdentityBindingPattern: sections.rowIdentity.nearbyIdentityBindingPattern,
+          anomalyProvenance: sections.rowIdentity.anomalyProvenance,
+          numberingStabilityBoundary: sections.rowIdentity.numberingStabilityBoundary,
+          shellRowPredictionBoundary: sections.rowIdentity.shellRowPredictionBoundary,
+          textProvenancePathBoundary: sections.rowIdentity.textProvenancePathBoundary
+        }
       },
-      rowIdentity: {
-        metadataNeighborhood: sections.rowIdentity.metadataNeighborhood,
-        rowTextCoverage: sections.rowIdentity.rowTextCoverage
+      models: {},
+      support: {
+        saveOwner: {
+          extract: sections.saveOwner.extract
+        },
+        rowIdentity: {
+          metadataNeighborhood: sections.rowIdentity.metadataNeighborhood,
+          rowTextCoverage: sections.rowIdentity.rowTextCoverage
+        },
+        uiShell: {
+          actionShell: sections.uiShell.actionShell,
+          ownerFamily: sections.uiShell.ownerFamily
+        }
       },
-      uiShell: {
-        actionShell: sections.uiShell.actionShell,
-        ownerFamily: sections.uiShell.ownerFamily
-      }
-    },
-    traceEvidence: {
-      saveOwner: sections.saveOwner.traceBoundary,
-      uiShell: {
-        traceBoundary: sections.uiShell.traceBoundary
+      traceEvidence: {
+        saveOwner: sections.saveOwner.traceBoundary,
+        uiShell: {
+          traceBoundary: sections.uiShell.traceBoundary
+        }
       }
     }
-  });
+  );
 }
 
 async function buildShardsUnit() {
@@ -2650,10 +2699,9 @@ async function buildShardsUnit() {
     "shard-owned-state-upgradeinfolist-population",
     ["shard-owned-state-trace-command"]
   );
-  const shardCostTrace = await traceRunSection(
-    "shard-cost-su0-structure",
-    ["shard-cost-trace-command"]
-  );
+  const shardCostTrace = await traceRunSection("shard-cost-su0-structure", [
+    "shard-cost-trace-command"
+  ]);
 
   const sections = {
     family: {
@@ -2671,15 +2719,15 @@ async function buildShardsUnit() {
           shardProvenance,
           ["shard-family-evidence"]
         ),
-        assetGrounding: datasetSection(
-          "data/shard-asset-grounding.v1.json",
-          shardAssetGrounding,
-          ["shard-family-evidence"]
-        )
+        assetGrounding: datasetSection("data/shard-asset-grounding.v1.json", shardAssetGrounding, [
+          "shard-family-evidence"
+        ])
       },
-      familyEvidence: datasetSection("db:derived:shard-milestone-family-evidence", shardFamilyEvidence, [
-        "shard-family-evidence"
-      ]),
+      familyEvidence: datasetSection(
+        "db:derived:shard-milestone-family-evidence",
+        shardFamilyEvidence,
+        ["shard-family-evidence"]
+      ),
       boundaries: {
         ownerFamily: datasetSection(
           "data/shard-owner-family-boundary.v1.json",
@@ -2750,112 +2798,111 @@ async function buildShardsUnit() {
         shardCostScreenshotCalibration,
         ["shard-cost-formula-model"]
       ),
-      listPathProbe: datasetSection("db:derived:shard-cost-list-path", {
-        dataset: "shard-cost-list-path",
-        generatedAt: "2026-04-22",
-        sources: {
-          formulaModel: "db:derived:shard-cost-formula-model",
-          sourceModel: "db-derived-shard-cost-list-path"
+      listPathProbe: datasetSection(
+        "db:derived:shard-cost-list-path",
+        {
+          dataset: "shard-cost-list-path",
+          generatedAt: "2026-04-22",
+          sources: {
+            formulaModel: "db:derived:shard-cost-formula-model",
+            sourceModel: "db-derived-shard-cost-list-path"
+          },
+          ownerFields: {
+            milestoneCostListField: {
+              name: shardCostFormulaModel.runtimeGetterRules?.cacheLifecycle?.cacheField ?? null,
+              fieldOffset:
+                shardCostFormulaModel.runtimeGetterRules?.cacheLifecycle?.cacheFieldOffset ?? null
+            }
+          },
+          findings: shardCostFormulaModel.runtimeGetterRules?.cacheLifecycle?.notes ?? [],
+          callOrder: shardCostFormulaModel.runtimeGetterRules?.getterFamily?.stableCallOrder ?? [],
+          currentBoundary: [
+            "Treat GetShardCostList as a checked owner-side cache builder for the same per-row getter outputs, not as proof of a different shard cost formula.",
+            "Treat UpdateShardCostList, SortCostAndBools, and CountAffordableShard as downstream consumers of the getter family.",
+            "Do not expose exact shard next-costs until the repo still proves how each get_SU*Cost getter itself assembles the returned BreakInfinity.BigDouble."
+          ]
         },
-        ownerFields: {
-          milestoneCostListField: {
-            name: shardCostFormulaModel.runtimeGetterRules?.cacheLifecycle?.cacheField ?? null,
-            fieldOffset:
-              shardCostFormulaModel.runtimeGetterRules?.cacheLifecycle?.cacheFieldOffset ?? null
-          }
-        },
-        findings: shardCostFormulaModel.runtimeGetterRules?.cacheLifecycle?.notes ?? [],
-        callOrder:
-          shardCostFormulaModel.runtimeGetterRules?.getterFamily?.stableCallOrder ?? [],
-        currentBoundary: [
-          "Treat GetShardCostList as a checked owner-side cache builder for the same per-row getter outputs, not as proof of a different shard cost formula.",
-          "Treat UpdateShardCostList, SortCostAndBools, and CountAffordableShard as downstream consumers of the getter family.",
-          "Do not expose exact shard next-costs until the repo still proves how each get_SU*Cost getter itself assembles the returned BreakInfinity.BigDouble."
-        ]
-      }, ["shard-cost-formula-model"]),
-      bonusSlotProbe: datasetSection(
-        "db:derived:shard-bonus-slot-support",
-        shardBonusSlotProbe,
-        ["shard-family-evidence"]
-      ),
-      formulaModel: datasetSection(
-        "db:derived:shard-cost-formula-model",
-        shardCostFormulaModel,
         ["shard-cost-formula-model"]
       ),
+      bonusSlotProbe: datasetSection("db:derived:shard-bonus-slot-support", shardBonusSlotProbe, [
+        "shard-family-evidence"
+      ]),
+      formulaModel: datasetSection("db:derived:shard-cost-formula-model", shardCostFormulaModel, [
+        "shard-cost-formula-model"
+      ]),
       traceBoundary: shardCostTrace
     }
   };
 
-  return withTargetShape({
-    dataset: "repo-system-unit.v1",
-    systemId: "shards",
-    version: "v1",
-    generatedAt: "2026-04-18",
-    generatedBy: "scripts/contracts/generate-system-units.mjs",
-    unitInventoryRef: "data/units/shards.v1.json",
-    summary: unitInventory.summary,
-    liveConsumers: unitInventory.liveConsumers,
-    provenance: unitInventory.provenance,
-    views: unitInventory.views,
-    replacementPlan: unitInventory.replacementPlan,
-    transientRegenerationCommands: unitInventory.provenance.sourceRecords.filter(
-      (record) => record.kind === "command"
-    ),
-    sections
-  }, {
-    canonical: {
-      family: {
-        grounded: sections.family.grounded
-      }
+  return withTargetShape(
+    {
+      dataset: "repo-system-unit.v1",
+      systemId: "shards",
+      version: "v1",
+      generatedAt: "2026-04-18",
+      generatedBy: "scripts/contracts/generate-system-units.mjs",
+      unitInventoryRef: "data/units/shards.v1.json",
+      summary: unitInventory.summary,
+      liveConsumers: unitInventory.liveConsumers,
+      provenance: unitInventory.provenance,
+      views: unitInventory.views,
+      replacementPlan: unitInventory.replacementPlan,
+      transientRegenerationCommands: unitInventory.provenance.sourceRecords.filter(
+        (record) => record.kind === "command"
+      ),
+      sections
     },
-    boundaries: {
-      family: sections.family.boundaries,
-      ownedState: {
-        saveBoundary: sections.ownedState.saveBoundary,
-        saveOwnerCandidates: sections.ownedState.saveOwnerCandidates
+    {
+      canonical: {
+        family: {
+          grounded: sections.family.grounded
+        }
       },
-      cost: {
-        costModelBoundary: sections.cost.costModelBoundary
-      }
-    },
-    models: {
-      cost: {
-        formulaModel: sections.cost.formulaModel,
-        screenshotCalibration: sections.cost.screenshotCalibration
-      }
-    },
-    support: {
-      family: {
-        familyEvidence: sections.family.familyEvidence
+      boundaries: {
+        family: sections.family.boundaries,
+        ownedState: {
+          saveBoundary: sections.ownedState.saveBoundary,
+          saveOwnerCandidates: sections.ownedState.saveOwnerCandidates
+        },
+        cost: {
+          costModelBoundary: sections.cost.costModelBoundary
+        }
       },
-      cost: {
-        listPathProbe: sections.cost.listPathProbe,
-        bonusSlotProbe: sections.cost.bonusSlotProbe
+      models: {
+        cost: {
+          formulaModel: sections.cost.formulaModel,
+          screenshotCalibration: sections.cost.screenshotCalibration
+        }
+      },
+      support: {
+        family: {
+          familyEvidence: sections.family.familyEvidence
+        },
+        cost: {
+          listPathProbe: sections.cost.listPathProbe,
+          bonusSlotProbe: sections.cost.bonusSlotProbe
+        }
+      },
+      traceEvidence: {
+        ownedState: sections.ownedState.traceBoundary,
+        cost: sections.cost.traceBoundary
       }
-    },
-    traceEvidence: {
-      ownedState: sections.ownedState.traceBoundary,
-      cost: sections.cost.traceBoundary
     }
-  });
+  );
 }
 
 async function buildTraceUnit() {
   const unitInventory = await readJson("data/units/trace.v1.json");
   const tracePromotionTargets = fetchTracePromotionTargetsFromDb();
-  const tokenShopFamilyStructureTrace = await traceRunSection(
-    "token-shop-family-structure",
-    ["token-shop-family-trace-command"]
-  );
-  const tokenShopAtu3EffectTrace = await traceRunSection(
-    "token-shop-atu3-cells-effect",
-    ["token-shop-family-trace-command"]
-  );
-  const shardCostTrace = await traceRunSection(
-    "shard-cost-su0-structure",
-    ["shard-cost-trace-command"]
-  );
+  const tokenShopFamilyStructureTrace = await traceRunSection("token-shop-family-structure", [
+    "token-shop-family-trace-command"
+  ]);
+  const tokenShopAtu3EffectTrace = await traceRunSection("token-shop-atu3-cells-effect", [
+    "token-shop-family-trace-command"
+  ]);
+  const shardCostTrace = await traceRunSection("shard-cost-su0-structure", [
+    "shard-cost-trace-command"
+  ]);
   const shardOwnedStateTrace = await traceRunSection(
     "shard-owned-state-upgradeinfolist-population",
     ["shard-owned-state-trace-command"]
@@ -2876,31 +2923,34 @@ async function buildTraceUnit() {
     promotionTargets: tracePromotionTargets
   };
 
-  return withTargetShape({
-    dataset: "repo-system-unit.v1",
-    systemId: "trace",
-    version: "v1",
-    generatedAt: "2026-04-18",
-    generatedBy: "scripts/contracts/generate-system-units.mjs",
-    unitInventoryRef: "data/units/trace.v1.json",
-    summary: unitInventory.summary,
-    liveConsumers: unitInventory.liveConsumers,
-    provenance: unitInventory.provenance,
-    views: unitInventory.views,
-    replacementPlan: unitInventory.replacementPlan,
-    transientRegenerationCommands: unitInventory.provenance.sourceRecords.filter(
-      (record) => record.kind === "command"
-    ),
-    sections
-  }, {
-    canonical: {},
-    boundaries: {},
-    models: {},
-    support: {
-      promotionTargets: sections.promotionTargets
+  return withTargetShape(
+    {
+      dataset: "repo-system-unit.v1",
+      systemId: "trace",
+      version: "v1",
+      generatedAt: "2026-04-18",
+      generatedBy: "scripts/contracts/generate-system-units.mjs",
+      unitInventoryRef: "data/units/trace.v1.json",
+      summary: unitInventory.summary,
+      liveConsumers: unitInventory.liveConsumers,
+      provenance: unitInventory.provenance,
+      views: unitInventory.views,
+      replacementPlan: unitInventory.replacementPlan,
+      transientRegenerationCommands: unitInventory.provenance.sourceRecords.filter(
+        (record) => record.kind === "command"
+      ),
+      sections
     },
-    traceEvidence: sections.liveRuns
-  });
+    {
+      canonical: {},
+      boundaries: {},
+      models: {},
+      support: {
+        promotionTargets: sections.promotionTargets
+      },
+      traceEvidence: sections.liveRuns
+    }
+  );
 }
 
 async function main() {
@@ -2920,9 +2970,24 @@ async function main() {
   await writeJson("data/system-units/trace.v1.json", traceUnit);
 
   upsertMaterializedSystemUnit("app-meta", "v1", appMetaUnit, "data/system-units/app-meta.v1.json");
-  upsertMaterializedSystemUnit("player-state", "v1", playerStateUnit, "data/system-units/player-state.v1.json");
-  upsertMaterializedSystemUnit("token-shop", "v1", tokenShopUnit, "data/system-units/token-shop.v1.json");
-  upsertMaterializedSystemUnit("multiverse-market", "v1", multiverseMarketUnit, "data/system-units/multiverse-market.v1.json");
+  upsertMaterializedSystemUnit(
+    "player-state",
+    "v1",
+    playerStateUnit,
+    "data/system-units/player-state.v1.json"
+  );
+  upsertMaterializedSystemUnit(
+    "token-shop",
+    "v1",
+    tokenShopUnit,
+    "data/system-units/token-shop.v1.json"
+  );
+  upsertMaterializedSystemUnit(
+    "multiverse-market",
+    "v1",
+    multiverseMarketUnit,
+    "data/system-units/multiverse-market.v1.json"
+  );
   upsertMaterializedSystemUnit("shards", "v1", shardsUnit, "data/system-units/shards.v1.json");
   upsertMaterializedSystemUnit("trace", "v1", traceUnit, "data/system-units/trace.v1.json");
 

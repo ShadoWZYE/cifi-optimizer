@@ -124,13 +124,7 @@ function validateDataFramework(framework) {
     }
     unitIds.add(unit.id);
   });
-  [
-    "shards",
-    "player-state",
-    "token-shop",
-    "multiverse-market",
-    "trace"
-  ].forEach((unitId) => {
+  ["shards", "player-state", "token-shop", "multiverse-market", "trace"].forEach((unitId) => {
     assert.ok(unitIds.has(unitId), `data framework missing migration unit ${unitId}`);
   });
   return {
@@ -1455,10 +1449,7 @@ function validateShardSaveBoundary(boundary) {
     boundary.saveFamilyTermsChecked,
     "shard save boundary saveFamilyTermsChecked must be an array"
   );
-  expectRecord(
-    boundary.boundaryEvidence,
-    "shard save boundary boundaryEvidence must be an object"
-  );
+  expectRecord(boundary.boundaryEvidence, "shard save boundary boundaryEvidence must be an object");
   expectRecord(
     boundary.recoveredDeclaringRowModel,
     "shard save boundary recoveredDeclaringRowModel must be an object"
@@ -4122,11 +4113,7 @@ function validateShardCostListPathProbe(probe) {
   expectArray(probe.callOrder, "shard cost list-path probe callOrder must be an array");
   expectArray(probe.currentBoundary, "shard cost list-path probe currentBoundary must be an array");
 
-  assert.equal(
-    probe.dataset,
-    "shard-cost-list-path",
-    "shard cost list-path probe dataset drifted"
-  );
+  assert.equal(probe.dataset, "shard-cost-list-path", "shard cost list-path probe dataset drifted");
   assert.equal(
     probe.ownerFields.milestoneCostListField?.name,
     "MilestoneCostList",
@@ -4153,7 +4140,9 @@ function validateShardCostListPathProbe(probe) {
     "shard cost list-path probe must preserve get_SU29Cost as final appended getter"
   );
   assert.ok(
-    probe.findings.some((line) => String(line).includes("caches the results into MilestoneCostList")),
+    probe.findings.some((line) =>
+      String(line).includes("caches the results into MilestoneCostList")
+    ),
     "shard cost list-path probe must preserve cache-builder finding"
   );
   assert.ok(
@@ -4770,11 +4759,7 @@ function validateShardBonusSlotProbe(probe) {
   expectArray(probe.findings, "shard bonus slot probe findings must be an array");
   expectArray(probe.currentBoundary, "shard bonus slot probe currentBoundary must be an array");
 
-  assert.equal(
-    probe.dataset,
-    "shard-bonus-slot-support",
-    "shard bonus slot probe dataset drifted"
-  );
+  assert.equal(probe.dataset, "shard-bonus-slot-support", "shard bonus slot probe dataset drifted");
   assert.equal(probe.rows.length, 30, "shard bonus slot probe row count drifted");
   assert.ok(
     probe.rows.some(
@@ -6804,10 +6789,7 @@ function validateTokenShopTraceSupport(support) {
     "token-shop-trace-support.v1",
     "token shop trace support dataset id drifted"
   );
-  expectNonEmptyString(
-    support.generatedAt,
-    "token shop trace support generatedAt must be present"
-  );
+  expectNonEmptyString(support.generatedAt, "token shop trace support generatedAt must be present");
   expectRecord(support.source, "token shop trace support source must be an object");
   ["traceScope", "traceBundle", "tokenShopValues", "regenerationCommand"].forEach((field) => {
     expectNonEmptyString(
@@ -6853,7 +6835,11 @@ function validateTokenShopTraceSupport(support) {
     ["DiamondBoost"],
     "token shop trace support diamondGroups drifted"
   );
-  assert.equal(lanes.tracePresentation.costShell, "CostBox", "token shop trace support costShell drifted");
+  assert.equal(
+    lanes.tracePresentation.costShell,
+    "CostBox",
+    "token shop trace support costShell drifted"
+  );
   assert.equal(
     lanes.tracePresentation.costRenderNode,
     "CostText",
@@ -9412,7 +9398,9 @@ function validateUnityTraceBundle(bundle) {
     "unity trace bundle planner example drifted"
   );
   assert.equal(
-    ["explicit-target", "archive-explicit-target", "best-gap-db"].includes(bundle.plannerResolution.selectionMode),
+    ["explicit-target", "archive-explicit-target", "best-gap-db"].includes(
+      bundle.plannerResolution.selectionMode
+    ),
     true,
     "unity trace bundle planner selection mode drifted"
   );
@@ -9434,10 +9422,10 @@ function validateUnityTraceBundle(bundle) {
     expectRecord(bundle.outcome, "unity trace bundle shard outcome must be present");
     ["shardSaveBoundary", "metadata", "level0", "shardMilestoneSaveOwnerCandidates"].forEach(
       (field) => {
-      expectNonEmptyString(
-        bundle.sources[field],
-        `unity trace bundle sources.${field} must be present`
-      );
+        expectNonEmptyString(
+          bundle.sources[field],
+          `unity trace bundle sources.${field} must be present`
+        );
       }
     );
     assert.equal(
@@ -9615,14 +9603,18 @@ function validateMultiverseMarketMarketMemberBoundary(boundary) {
     boundary.sources,
     "multiverse market market-member boundary sources must be an object"
   );
-  ["metadataNeighborhoodMethod", "metadataNeighborhood", "typedProbeReport", "metadata", "nativeBinary"].forEach(
-    (field) => {
-      expectNonEmptyString(
-        boundary.sources[field],
-        `multiverse market market-member boundary sources.${field} must be present`
-      );
-    }
-  );
+  [
+    "metadataNeighborhoodMethod",
+    "metadataNeighborhood",
+    "typedProbeReport",
+    "metadata",
+    "nativeBinary"
+  ].forEach((field) => {
+    expectNonEmptyString(
+      boundary.sources[field],
+      `multiverse market market-member boundary sources.${field} must be present`
+    );
+  });
   expectArray(
     boundary.playerProfileAccessorClues,
     "multiverse market market-member boundary playerProfileAccessorClues must be an array"
@@ -13459,7 +13451,10 @@ function validateTokenBankControllerShell(shell) {
     "get_ClaimableBankTokens",
     "IncreaseBankedTokens"
   ].forEach((name) => {
-    assert.ok(shell.sourcePresence.metadata[name] > 0, `token-bank controller shell metadata presence drifted for ${name}`);
+    assert.ok(
+      shell.sourcePresence.metadata[name] > 0,
+      `token-bank controller shell metadata presence drifted for ${name}`
+    );
   });
   assert.ok(
     shell.sourcePresence.metadata.BankFill > 0,
@@ -13652,7 +13647,8 @@ export async function validateBundledDatasets() {
   const multiverseMarketRangeBoundary = await readJson(
     "../../data/multiverse-market-range-boundary.json"
   );
-  const multiverseMarketRowTextCoverage = multiverseMarketUnit.sections.rowIdentity.rowTextCoverage.data;
+  const multiverseMarketRowTextCoverage =
+    multiverseMarketUnit.sections.rowIdentity.rowTextCoverage.data;
   const multiverseMarket = multiverseMarketUnit.sections.saveOwner.extract.data;
   const multiverseMarketPrefabRemapBoundary = await readJson(
     "../../data/multiverse-market-prefab-remap-boundary.json"
@@ -13993,8 +13989,9 @@ export async function validateBundledDatasets() {
     "shards unit formulaModel embedding drifted"
   );
   assert.equal(
-    Object.keys(shardsUnit.models.cost.formulaModel.data.verifiedParameters?.exactRowParameters ?? {})
-      .length,
+    Object.keys(
+      shardsUnit.models.cost.formulaModel.data.verifiedParameters?.exactRowParameters ?? {}
+    ).length,
     30,
     "shards unit formulaModel should embed exact row parameters for all 30 shard rows"
   );
