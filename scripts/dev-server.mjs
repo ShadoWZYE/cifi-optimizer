@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { extname, join, normalize } from "node:path";
 import { cwd } from "node:process";
@@ -14,6 +15,7 @@ import {
 const root = cwd();
 const port = Number(process.env.PORT || 4173);
 const cacheDbPath = join(root, "workbench", "ghidra-cache", "ghidra_cache.sqlite3");
+const systemUnitsDir = join(root, "data", "system-units");
 const launcherMode =
   process.env.CIFI_LAUNCH_MODE === "1" || process.argv.includes("--launcher-mode");
 const clientLeaseTtlMs = 60000;
@@ -234,6 +236,28 @@ function withCacheDb(fn) {
   }
 }
 
+function loadSystemUnitSnapshots(systemIds) {
+  const units = {};
+  const missing = [];
+  let latestGeneratedAt = null;
+
+  for (const systemId of systemIds) {
+    const snapshotPath = join(systemUnitsDir, `${systemId}.v1.json`);
+    if (!existsSync(snapshotPath)) {
+      missing.push(systemId);
+      continue;
+    }
+
+    const payload = JSON.parse(readFileSync(snapshotPath, "utf8"));
+    units[systemId] = payload;
+    if (!latestGeneratedAt || String(payload.generatedAt) > latestGeneratedAt) {
+      latestGeneratedAt = String(payload.generatedAt);
+    }
+  }
+
+  return { units, missing, builtAt: latestGeneratedAt };
+}
+
 function handleSystemUnits(response, requestUrl) {
   const requestedIds = String(requestUrl.searchParams.get("ids") || "")
     .split(",")
@@ -242,8 +266,8 @@ function handleSystemUnits(response, requestUrl) {
   const systemIds = requestedIds.length
     ? requestedIds
     : ["app-meta", "player-state", "shards", "token-shop", "multiverse-market"];
-  try {
-    const result = withCacheDb((db) => {
+  const loadFromDb = () =>
+    withCacheDb((db) => {
       const statement = db.prepare(`
         SELECT system_id, version, payload_json, provenance_json, reducer_version, built_at, exported_path
         FROM materialized_system_unit_views
@@ -265,24 +289,44 @@ function handleSystemUnits(response, requestUrl) {
       }
       return { units, missing, builtAt: latestBuiltAt };
     });
-    if (result.missing.length) {
+
+  const loadFromSnapshots = () => loadSystemUnitSnapshots(systemIds);
+
+  try {
+    if (existsSync(cacheDbPath)) {
+      const result = loadFromDb();
+      if (!result.missing.length) {
+        writeJson(response, 200, {
+          source: "materialized_system_unit_views",
+          mode: "db",
+          builtAt: result.builtAt,
+          units: result.units
+        });
+        return;
+      }
+    }
+  } catch {}
+
+  try {
+    const snapshotResult = loadFromSnapshots();
+    if (snapshotResult.missing.length) {
       writeJson(response, 503, {
-        error: "Missing DB-backed system-unit views.",
-        source: "materialized_system_unit_views",
-        missingIds: result.missing
+        error: "Missing served system-unit snapshots.",
+        source: "data/system-units",
+        missingIds: snapshotResult.missing
       });
       return;
     }
     writeJson(response, 200, {
-      source: "materialized_system_unit_views",
-      mode: "db",
-      builtAt: result.builtAt,
-      units: result.units
+      source: "data/system-units",
+      mode: "snapshot",
+      builtAt: snapshotResult.builtAt,
+      units: snapshotResult.units
     });
   } catch (error) {
     writeJson(response, 500, {
       error: error instanceof Error ? error.message : String(error),
-      source: "materialized_system_unit_views"
+      source: "system-unit-server"
     });
   }
 }

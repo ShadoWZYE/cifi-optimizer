@@ -8273,7 +8273,10 @@ async function verifyLauncherModeServerLifecycle() {
   const systemUnits = await fetchJson(
     `http://localhost:${testPort}/api/system-units?ids=player-state,token-shop`
   );
-  hardAssert.equal(systemUnits.mode, "db");
+  hardAssert.ok(
+    systemUnits.mode === "db" || systemUnits.mode === "snapshot",
+    `Expected DB-backed or committed snapshot system-unit mode; received ${systemUnits.mode}`
+  );
   hardAssert.ok(systemUnits.units["player-state"]);
   hardAssert.ok(systemUnits.units["token-shop"]);
 
