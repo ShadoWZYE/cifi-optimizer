@@ -28,7 +28,7 @@
     "test:unit": "node ./scripts/tests/run-unit-tests.mjs"
   },
   "devDependencies": {
-    "eslint": "^10.2.0",
+    "eslint": "^10.2.1",
     "prettier": "^3.8.2"
   }
 }
