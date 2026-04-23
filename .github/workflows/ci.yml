@@ -62,7 +62,7 @@ jobs:
             exit 0
           fi
 
-          forbidden_regex='^(\.appdata/|\.dotnet/|\.nuget/|\.deps/|\.vendor_py/|tools/.*/bin/|tools/.*/obj/|workbench/apk/|workbench/unity/joined/|workbench/unity/raw/|workbench/extract/|workbench/emulator/|tmp-.*|data/unity-textassets/)'
+          forbidden_regex='^(\.appdata/|\.dotnet/|\.nuget/|\.deps/|\.vendor_py/|tools/.*/bin/|tools/.*/obj/|workbench/apk/|workbench/unity/joined/|workbench/unity/raw/|workbench/extract/|workbench/emulator/|workbench/ghidra-runtime/|tmp-.*|data/unity-textassets/)'
           forbidden=()
 
           for path in "${added_paths[@]}"; do
