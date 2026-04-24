@@ -66,9 +66,14 @@ export function buildShardSystemView(shardsSystemUnit) {
   };
 }
 
-export function buildSpendSystemView({ tokenShopSystemUnit, multiverseMarketSystemUnit }) {
+export function buildSpendSystemView({
+  tokenShopSystemUnit,
+  multiverseMarketSystemUnit,
+  tokenShopSubjectContracts
+}) {
   return {
     tokenShop: {
+      subjectContracts: tokenShopSubjectContracts?.contracts ?? null,
       rows: {
         extract: tokenShopSystemUnit?.sections?.rows?.extract?.data ?? null,
         canonical: tokenShopSystemUnit?.sections?.rows?.canonical?.data ?? null,

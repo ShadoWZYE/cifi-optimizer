@@ -57,6 +57,12 @@ import {
 } from "./support/system-unit-projections.js";
 import { loadSystemUnits } from "./support/system-unit-provider.js";
 import {
+  applyTokenShopSubjectContractToRow,
+  buildTokenShopSubjectContractIndex,
+  getTokenShopSubjectContractForField,
+  TOKEN_SHOP_CONTRACT_SCOPE_IDS
+} from "./support/token-shop-subject-contracts.js";
+import {
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
   getShardFinalSuBonusBoundarySummary,
@@ -119,7 +125,8 @@ const APP_LAUNCH_STALE_MS = 60000;
 const DEFAULT_SERVER_CAPABILITIES = Object.freeze({
   sessionApi: false,
   launcherMode: false,
-  systemUnitApi: false
+  systemUnitApi: false,
+  subjectContractApi: false
 });
 const SERVER_SESSION_ENDPOINTS = {
   open: "/api/client/open",
@@ -648,6 +655,7 @@ const state = {
   generatorOcrImages: [],
   generatorOcrParsed: null,
   generatorOcrBusy: false,
+  subjectContracts: null,
   sourceRegistry: [],
   researchView: "active",
   progressionView: "shards",
@@ -673,7 +681,10 @@ async function bootstrap() {
       fetchJson,
       origin: window.location.origin,
       serverCapabilities: SERVER_CAPABILITIES,
-      allowStaticFallback: false
+      allowStaticFallback: false,
+      subjectContractScopes: {
+        tokenShop: TOKEN_SHOP_CONTRACT_SCOPE_IDS
+      }
     })
   ]);
   const {
@@ -684,7 +695,8 @@ async function bootstrap() {
       tokenShop: tokenShopSystemUnit,
       multiverseMarket: multiverseMarketSystemUnit
     },
-    mode: systemUnitSource
+    mode: systemUnitSource,
+    subjectContracts
   } = loadedSystemUnits;
   const appMetaView = buildAppMetaSystemView(appMetaSystemUnit);
 
@@ -709,6 +721,7 @@ async function bootstrap() {
     tokenShop: tokenShopSystemUnit,
     multiverseMarket: multiverseMarketSystemUnit
   };
+  state.subjectContracts = subjectContracts ?? null;
   state.systemUnitSource = systemUnitSource;
   state.playerProfile = normalizePlayerProfile(
     storedPlayerProfile ?? legacyProfile ?? playerProfileDefaults,
@@ -757,7 +770,8 @@ function getCurrentPlayerProfileDefaults() {
 function getCurrentSpendSystemView() {
   return buildSpendSystemView({
     tokenShopSystemUnit: state.systemUnits?.tokenShop,
-    multiverseMarketSystemUnit: state.systemUnits?.multiverseMarket
+    multiverseMarketSystemUnit: state.systemUnits?.multiverseMarket,
+    tokenShopSubjectContracts: state.subjectContracts?.tokenShop
   });
 }
 
@@ -1114,7 +1128,8 @@ function getServerCapabilities() {
   return {
     sessionApi: raw.sessionApi === true,
     launcherMode: raw.launcherMode === true,
-    systemUnitApi: raw.systemUnitApi === true
+    systemUnitApi: raw.systemUnitApi === true,
+    subjectContractApi: raw.subjectContractApi === true
   };
 }
 
@@ -2822,7 +2837,7 @@ function renderResearchTrackSupport(track) {
     const spendSystem = getCurrentSpendSystemView();
     const tokenShop = spendSystem?.tokenShop;
     const market = spendSystem?.multiverseMarket;
-    const tokenShopCoverage = getTokenShopCoverageSummary(tokenShop?.rows?.extract);
+    const tokenShopCoverage = getTokenShopCoverageSummary(tokenShop);
     const validatedCoverage = getMultiverseMarketValidatedCoverage(market?.saveOwner?.extract);
     const metadataSummary = getMultiverseMarketMetadataSummary(
       market?.rowIdentity?.metadataNeighborhood
@@ -2831,7 +2846,7 @@ function renderResearchTrackSupport(track) {
       market?.saveOwner?.marketMemberBoundary
     );
     const tokeniumNamingSummary = getTokeniumNamingSummary(tokenShop?.tokenBank?.namingClues);
-    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop?.tokenBank?.stateClues);
+    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop);
     const dailyTokeniumSummary = getDailyTokeniumLaneSummary(tokenShop?.dailyTokenium?.laneClues);
     const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(
       tokenShop?.tokenBank?.formulaBoundary
@@ -2842,37 +2857,35 @@ function renderResearchTrackSupport(track) {
     const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(
       market?.rowIdentity?.rowTextCoverage
     );
-    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShop?.spendLanes?.costLanes);
-    const spendActionLaneSummary = getSpendActionLaneSummary(
-      tokenShop?.spendLanes?.actionLaneClues
-    );
+    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShop);
+    const spendActionLaneSummary = getSpendActionLaneSummary(tokenShop);
     const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(
       market?.uiShell?.actionShell
     );
     const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(
       market?.uiShell?.ownerFamily
     );
-    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(
-      tokenShop?.tokenBank?.ownerShell
-    );
-    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(
-      tokenShop?.rows?.boundaries?.save
-    );
+    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(tokenShop);
+    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(tokenShop);
     const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(
       market?.saveOwner?.saveBoundary
     );
-    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(
-      tokenShop?.tokenBank?.controllerShell
-    );
+    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(tokenShop);
     const spendInputNotes = [
       tokenShopCoverage.hasCoverage
-        ? `TokenShop currently exposes ${tokenShopCoverage.numericGroupCount} extracted numeric families across ${tokenShopCoverage.tierLabel}, including ${tokenShopCoverage.namedLaneLabel}.`
+        ? tokenShopCoverage.coverageSource === "subject-contracts"
+          ? `TokenShop currently exposes ${tokenShopCoverage.subjectCount} canonical subject contracts across ${tokenShopCoverage.tierLabel}, including ${tokenShopCoverage.namedLaneLabel}.`
+          : `TokenShop currently exposes ${tokenShopCoverage.numericGroupCount} extracted numeric families across ${tokenShopCoverage.tierLabel}, including ${tokenShopCoverage.namedLaneLabel}.`
         : "TokenShop extracted family coverage is not available in this build.",
       tokenShopCostLaneSummary.hasLaneSplit
-        ? `Cost-lane support preserves ${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel}.`
+        ? tokenShopCostLaneSummary.coverageSource === "subject-contracts"
+          ? `Canonical TokenShop subjects now preserve ${tokenShopCostLaneSummary.rowLocalSubjectId} plus ${tokenShopCostLaneSummary.rangeFamilySubjectId}, with blocked input ${tokenShopCostLaneSummary.blockedInputReason || "explicitly recorded"}.`
+          : `Cost-lane support preserves ${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel}.`
         : "TokenShop trace-produced cost-lane support is not available in this build.",
       spendActionLaneSummary.hasActionSplit
-        ? `Action-lane clues preserve ${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, and ${spendActionLaneSummary.premiumModifierHook}.`
+        ? spendActionLaneSummary.coverageSource === "subject-contracts"
+          ? `Canonical TokenShop action coverage now preserves ${spendActionLaneSummary.rowLocalSubjectId} via ${spendActionLaneSummary.loopModifierHook}, while ${spendActionLaneSummary.rangeFamilySubjectId} keeps ${spendActionLaneSummary.dailyHookT2} recorded with blocked input ${spendActionLaneSummary.blockedInputReason || "explicitly de-scoped"}.`
+          : `Action-lane clues preserve ${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, and ${spendActionLaneSummary.premiumModifierHook}.`
         : "Spend action-lane clues are not available in this build.",
       validatedCoverage.hasValidatedRows
         ? `MultiverseMarket currently has ${validatedCoverage.count} validated rows across ids ${validatedCoverage.rangeLabel}.`
@@ -2880,10 +2893,14 @@ function renderResearchTrackSupport(track) {
     ];
     const spendBoundaryNotes = [
       tokenShopOwnerShellSummary.hasOwnerShell
-        ? `TokenShop owner-shell clues preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook}.`
+        ? tokenShopOwnerShellSummary.coverageSource === "subject-contracts"
+          ? `TokenShop canonical subjects now preserve ${tokenShopOwnerShellSummary.rowLocalSubjectId} plus ${tokenShopOwnerShellSummary.rangeFamilySubjectId}, with row-local action hook ${tokenShopOwnerShellSummary.bankMethod}.`
+          : `TokenShop owner-shell clues preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook}.`
         : "TokenShop owner-shell clues are not available in this build.",
       tokenShopSaveBoundarySummary.hasSeparationBoundary
-        ? `TokenShop save boundary keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.`
+        ? tokenShopSaveBoundarySummary.coverageSource === "subject-contracts"
+          ? `TokenShop canonical subject-state keeps ${tokenShopSaveBoundarySummary.rowLocalSubjectId} separate from ${tokenShopSaveBoundarySummary.rangeFamilySubjectId}, with blocked input ${tokenShopSaveBoundarySummary.blockedInputReason}.`
+          : `TokenShop save boundary keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.`
         : "TokenShop save-boundary clues are not available in this build.",
       multiverseMarketOwnerFamilySummary.hasOwnerFamily
         ? `MultiverseMarket owner-family clues preserve ${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, ${multiverseMarketOwnerFamilySummary.textHandler}, ${multiverseMarketOwnerFamilySummary.batcher}, and ${multiverseMarketOwnerFamilySummary.costBox}.`
@@ -2925,28 +2942,28 @@ function renderResearchTrackSupport(track) {
 
   if (track.id === "spend-token-bank-state-owner") {
     const tokenShop = getCurrentSpendSystemView()?.tokenShop;
-    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(
-      tokenShop?.tokenBank?.ownerShell
-    );
-    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(
-      tokenShop?.rows?.boundaries?.save
-    );
-    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(
-      tokenShop?.tokenBank?.controllerShell
-    );
-    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop?.tokenBank?.stateClues);
+    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(tokenShop);
+    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(tokenShop);
+    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(tokenShop);
+    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop);
     const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(
       tokenShop?.tokenBank?.formulaBoundary
     );
     const tokenBankOwnerNotes = [
       tokenShopOwnerShellSummary.hasOwnerShell
-        ? `TokenShop owner-shell clues preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook} as one local controller cluster.`
+        ? tokenShopOwnerShellSummary.coverageSource === "subject-contracts"
+          ? `TokenShop canonical subjects now preserve ${tokenShopOwnerShellSummary.rowLocalSubjectId} plus ${tokenShopOwnerShellSummary.rangeFamilySubjectId}, while the remaining blocked input stays ${tokenShopOwnerShellSummary.blockedInputReason || "explicitly recorded"}.`
+          : `TokenShop owner-shell clues preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook} as one local controller cluster.`
         : "TokenShop owner-shell clues are not available in this build.",
       tokenShopSaveBoundarySummary.hasSeparationBoundary
-        ? `The checked save boundary keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.`
+        ? tokenShopSaveBoundarySummary.coverageSource === "subject-contracts"
+          ? `Canonical subject-state keeps ${tokenShopSaveBoundarySummary.rowLocalSubjectId} separate from ${tokenShopSaveBoundarySummary.rangeFamilySubjectId}, while blocked input stays ${tokenShopSaveBoundarySummary.blockedInputReason}.`
+          : `The checked save boundary keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.`
         : "TokenShop save-boundary clues are not available in this build.",
       tokenBankControllerShellSummary.hasControllerShell
-        ? `The token-bank controller shell preserves ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.`
+        ? tokenBankControllerShellSummary.coverageSource === "subject-contracts"
+          ? `Canonical TokenShop contracts now preserve token-bank controller shell on ${tokenBankControllerShellSummary.rowLocalSubjectId}, with ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.`
+          : `The token-bank controller shell preserves ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.`
         : "Token-bank controller-shell clues are not available in this build.",
       tokenBankStateSummary.hasControllerSplit
         ? `Display clues such as ${tokenBankStateSummary.displayShell} and ${tokenBankStateSummary.loopHook} stay beside controller methods like ${tokenBankStateSummary.capMethod}.`
@@ -4477,9 +4494,9 @@ function buildApkGroundingValidationCases() {
 
   if (tokenShop) {
     const numericTable = tokenShop.numeric_table ?? {};
-    const tokenShopCoverage = getTokenShopCoverageSummary(tokenShop);
+    const tokenShopCoverage = getTokenShopCoverageSummary(getCurrentSpendSystemView()?.tokenShop);
     const tokeniumNamingSummary = getTokeniumNamingSummary(tokeniumNamingClues);
-    const tokenBankStateSummary = getTokenBankStateSummary(tokenBankStateClues);
+    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop);
     const hasTokeniumCurrencyShell = tokeniumNamingSummary.hasNamingClues;
     const hasTokenBankAnchors = tokenBankStateSummary.hasControllerSplit;
     cases.push({
@@ -4497,14 +4514,20 @@ function buildApkGroundingValidationCases() {
     cases.push({
       title: "TokenShop extracted family coverage",
       expected:
-        "32 numeric groups with TokenBoost, DiamondBoost, and TokenDailiesT2 plus token-bank controller anchors",
+        "Canonical TokenShop subject coverage or extracted family coverage remains available with token-bank controller anchors",
       actual: tokenShopCoverage.hasCoverage
-        ? `${tokenShopCoverage.numericGroupCount} numeric groups with ${tokenShopCoverage.namedLaneLabel}${tokenShopCoverage.hasControllerAnchors ? " plus token-bank controller anchors" : " but missing token-bank controller anchors"}`
+        ? tokenShopCoverage.coverageSource === "subject-contracts"
+          ? `${tokenShopCoverage.subjectCount} canonical subjects with ${tokenShopCoverage.rowLocalCount} row-local / ${tokenShopCoverage.rangeFamilyCount} range-family entries${tokenShopCoverage.hasControllerAnchors ? " plus contract-grounded action/controller anchors" : " but missing contract-grounded action/controller anchors"}`
+          : `${tokenShopCoverage.numericGroupCount} numeric groups with ${tokenShopCoverage.namedLaneLabel}${tokenShopCoverage.hasControllerAnchors ? " plus token-bank controller anchors" : " but missing token-bank controller anchors"}`
         : "Missing TokenShop extracted family coverage",
       pass:
-        tokenShopCoverage.numericGroupCount === 32 &&
-        tokenShopCoverage.hasControllerAnchors &&
-        tokenShopCoverage.hasNamedLanes,
+        tokenShopCoverage.coverageSource === "subject-contracts"
+          ? tokenShopCoverage.subjectCount >= 2 &&
+            tokenShopCoverage.rowLocalCount >= 1 &&
+            tokenShopCoverage.rangeFamilyCount >= 1
+          : tokenShopCoverage.numericGroupCount === 32 &&
+            tokenShopCoverage.hasControllerAnchors &&
+            tokenShopCoverage.hasNamedLanes,
       scope: "APK"
     });
     cases.push({
@@ -4616,13 +4639,16 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (tokenShopCostLanes) {
-    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShopCostLanes);
+  if (tokenShopCostLanes || tokenShop?.subjectContracts) {
+    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShop);
     cases.push({
       title: "TokenShop cost-lane split",
-      expected: "TokenBoost, DiamondBoost, TokenDailiesT2, CostBox, and DescText available",
+      expected:
+        "Canonical TokenShop subject display coverage or legacy cost-lane coverage remains available",
       actual: tokenShopCostLaneSummary.hasLaneSplit
-        ? `${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel} available`
+        ? tokenShopCostLaneSummary.coverageSource === "subject-contracts"
+          ? `${tokenShopCostLaneSummary.rowLocalSubjectId} plus ${tokenShopCostLaneSummary.rangeFamilySubjectId} preserve canonical display coverage`
+          : `${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel} available`
         : "Missing TokenShop trace-produced cost-lane support",
       pass:
         tokenShopCostLaneSummary.hasLaneSplit &&
@@ -4631,14 +4657,15 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (spendActionLaneClues) {
-    const spendActionLaneSummary = getSpendActionLaneSummary(spendActionLaneClues);
+  if (spendActionLaneClues || tokenShop?.subjectContracts) {
+    const spendActionLaneSummary = getSpendActionLaneSummary(tokenShop);
     cases.push({
       title: "Spend action-lane split",
-      expected:
-        "BuyTokenBoost, BuyDiamondBoost, BuyLM244, BuyCollectorDevice, and zero BuyTokenDailies hooks preserved",
+      expected: "Canonical TokenShop action coverage or legacy spend action-lane clues preserved",
       actual: spendActionLaneSummary.hasActionSplit
-        ? `${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, ${spendActionLaneSummary.premiumModifierHook}, and zero ${spendActionLaneSummary.dailyHookT2} or ${spendActionLaneSummary.dailyHookT3} hooks preserved`
+        ? spendActionLaneSummary.coverageSource === "subject-contracts"
+          ? `${spendActionLaneSummary.rowLocalSubjectId} preserves ${spendActionLaneSummary.loopModifierHook} while ${spendActionLaneSummary.rangeFamilySubjectId} keeps ${spendActionLaneSummary.dailyHookT2}`
+          : `${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, ${spendActionLaneSummary.premiumModifierHook}, and zero ${spendActionLaneSummary.dailyHookT2} or ${spendActionLaneSummary.dailyHookT3} hooks preserved`
         : "Missing spend action-lane clues",
       pass:
         spendActionLaneSummary.hasActionSplit &&
@@ -4647,51 +4674,55 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (tokenShopOwnerShell) {
-    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(tokenShopOwnerShell);
+  if (tokenShopOwnerShell || tokenShop?.subjectContracts) {
+    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(tokenShop);
     cases.push({
       title: "TokenShop owner shell",
-      expected:
-        "TokenShop, ClaimBankedTokens, CheckTokenClaimNotification, and BuyAutoTokenClicker preserved as one local owner shell",
+      expected: "Canonical TokenShop subject owner shell or legacy local owner shell preserved",
       actual: tokenShopOwnerShellSummary.hasOwnerShell
-        ? `${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook} preserved as one local owner shell`
+        ? tokenShopOwnerShellSummary.coverageSource === "subject-contracts"
+          ? `${tokenShopOwnerShellSummary.rowLocalSubjectId} plus ${tokenShopOwnerShellSummary.rangeFamilySubjectId} preserved as canonical TokenShop subject coverage`
+          : `${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook} preserved as one local owner shell`
         : "Missing TokenShop owner-shell clues",
       pass: tokenShopOwnerShellSummary.hasOwnerShell,
       scope: "APK"
     });
   }
 
-  if (tokenShopSaveBoundary) {
-    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(tokenShopSaveBoundary);
+  if (tokenShopSaveBoundary || tokenShop?.subjectContracts) {
+    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(tokenShop);
     cases.push({
       title: "TokenShop save boundary",
       expected:
-        "TokenShop owner shell and PlayerProfileData save-family clues stay separate with zero overlap",
+        "Canonical TokenShop subject-state separation or legacy save-boundary separation remains available",
       actual: tokenShopSaveBoundarySummary.hasSeparationBoundary
-        ? `${tokenShopSaveBoundarySummary.ownerAnchor} and ${tokenShopSaveBoundarySummary.saveAnchor} stay separate with ${tokenShopSaveBoundarySummary.overlapLabel}`
+        ? tokenShopSaveBoundarySummary.coverageSource === "subject-contracts"
+          ? `${tokenShopSaveBoundarySummary.rowLocalSubjectId} and ${tokenShopSaveBoundarySummary.rangeFamilySubjectId} stay separate with blocked input ${tokenShopSaveBoundarySummary.blockedInputReason}`
+          : `${tokenShopSaveBoundarySummary.ownerAnchor} and ${tokenShopSaveBoundarySummary.saveAnchor} stay separate with ${tokenShopSaveBoundarySummary.overlapLabel}`
         : "Missing TokenShop save-boundary clues",
       pass: tokenShopSaveBoundarySummary.hasSeparationBoundary,
       scope: "APK"
     });
   }
 
-  if (tokenBankControllerShell) {
-    const tokenBankControllerShellSummary =
-      getTokenBankControllerShellSummary(tokenBankControllerShell);
+  if (tokenBankControllerShell || tokenShop?.subjectContracts) {
+    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(tokenShop);
     cases.push({
       title: "Token-bank controller shell",
       expected:
-        "ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, and CheckTokenClaimNotification preserved",
+        "Canonical TokenShop controller shell or legacy token-bank controller shell preserved",
       actual: tokenBankControllerShellSummary.hasControllerShell
-        ? `${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook} preserved`
+        ? tokenBankControllerShellSummary.coverageSource === "subject-contracts"
+          ? `${tokenBankControllerShellSummary.rowLocalSubjectId} preserves ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}`
+          : `${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook} preserved`
         : "Missing token-bank controller-shell clues",
       pass: tokenBankControllerShellSummary.hasControllerShell,
       scope: "APK"
     });
   }
 
-  if (tokenBankStateClues) {
-    const tokenBankStateSummary = getTokenBankStateSummary(tokenBankStateClues);
+  if (tokenBankStateClues || tokenShop?.subjectContracts) {
+    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop);
     cases.push({
       title: "Token-bank controller split clues",
       expected:
@@ -4867,7 +4898,10 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
   const atu3EffectChain = boundary?.atu3CrossSystemEffectTrace?.recoveredActionEffectChain;
   const atu3SupportingConsumerShell =
     boundary?.atu3ChestConsumerReadTrace?.recoveredInternalReadShell;
-  return [
+  const contractIndex = buildTokenShopSubjectContractIndex(
+    getCurrentSpendSystemView()?.tokenShop?.subjectContracts
+  );
+  const rows = [
     {
       field: "ATU1Level",
       slot: "ATU1",
@@ -5392,6 +5426,12 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
     }
   ];
+  return rows.map((row) =>
+    applyTokenShopSubjectContractToRow(
+      row,
+      getTokenShopSubjectContractForField(contractIndex, row.field)
+    )
+  );
 }
 
 function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
@@ -5527,6 +5567,7 @@ function renderTokenShopProgressionEditor() {
             const actionLabel = tokenShopUi.getTokenShopActionLabel(row);
             const bonusStripEntries = tokenShopUi.getTokenShopBonusStripEntries(row);
             const groundingSummary = tokenShopUi.getTokenShopRowGroundingSummary(row);
+            const contractMetaLine = tokenShopUi.getTokenShopContractMetaLine(row);
             const nextKnownCostLabel = row.isMaxed
               ? "No next cost within known cap"
               : typeof row.nextKnownCost === "number"
@@ -5562,8 +5603,10 @@ function renderTokenShopProgressionEditor() {
                         <div class="token-shop-row-tags">
                           <span class="token-shop-row-tag">${escapeHtml(row.rowTypeLabel || "Checked row")}</span>
                           ${row.identitySource ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.identitySource)}</span>` : ""}
+                          ${row.subjectId ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.subjectId)}</span>` : ""}
                         </div>
                         <p class="meta token-shop-effect-line">${escapeHtml(effectLine)}</p>
+                        ${contractMetaLine ? `<p class="meta">${escapeHtml(contractMetaLine)}</p>` : ""}
                         ${playerFacingSupportText ? `<p class="meta">${escapeHtml(tokenShopUi.formatTokenShopSentence(playerFacingSupportText))}</p>` : ""}
                       </div>
                     </div>
@@ -5590,6 +5633,8 @@ function renderTokenShopProgressionEditor() {
                         <summary>Grounding note</summary>
                         <p class="meta">${escapeHtml(row.note)}</p>
                         ${row.supportingEvidenceNote ? `<p class="meta">${escapeHtml(row.supportingEvidenceNote)}</p>` : ""}
+                        ${row.blockedInputReason ? `<p class="meta">Blocked input: ${escapeHtml(row.blockedInputReason)}</p>` : ""}
+                        ${row.contractSupportLabel ? `<p class="meta">Support surfaces: ${escapeHtml(row.contractSupportLabel)}</p>` : ""}
                       </details>
                     </div>
                   </div>

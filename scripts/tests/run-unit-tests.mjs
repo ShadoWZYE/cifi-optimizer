@@ -11,4 +11,5 @@ import "../../tests/shard-evidence-support.test.mjs";
 import "../../tests/ship-planner-support.test.mjs";
 import "../../tests/spend-boundary-summary.test.mjs";
 import "../../tests/token-shop-progression-model.test.mjs";
+import "../../tests/token-shop-subject-contracts.test.mjs";
 import "../../tests/token-shop-ui-support.test.mjs";

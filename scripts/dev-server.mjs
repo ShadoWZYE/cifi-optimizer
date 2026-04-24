@@ -38,7 +38,8 @@ const mimeTypes = {
 const serverCapabilitiesScript = `<script>window.__CIFI_SERVER_CAPABILITIES__ = ${JSON.stringify({
   sessionApi: true,
   launcherMode,
-  systemUnitApi: true
+  systemUnitApi: true,
+  subjectContractApi: true
 })};</script>`;
 
 const server = createServer(async (request, response) => {
@@ -90,6 +91,11 @@ const server = createServer(async (request, response) => {
 
   if (request.method === "GET" && requestUrl.pathname === "/api/system-units") {
     handleSystemUnits(response, requestUrl);
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/subject-contracts") {
+    handleSubjectContracts(response, requestUrl);
     return;
   }
 
@@ -327,6 +333,65 @@ function handleSystemUnits(response, requestUrl) {
     writeJson(response, 500, {
       error: error instanceof Error ? error.message : String(error),
       source: "system-unit-server"
+    });
+  }
+}
+
+function handleSubjectContracts(response, requestUrl) {
+  const systemId = String(requestUrl.searchParams.get("systemId") || "").trim();
+  const requestedScopes = String(requestUrl.searchParams.get("scopes") || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (systemId !== "token-shop") {
+    writeJson(response, 400, { error: "Only token-shop subject contracts are currently exposed." });
+    return;
+  }
+  if (!requestedScopes.length) {
+    writeJson(response, 400, { error: "scopes is required." });
+    return;
+  }
+
+  try {
+    if (!existsSync(cacheDbPath)) {
+      writeJson(response, 503, { error: "Missing cache DB for subject-contract API." });
+      return;
+    }
+    const result = withCacheDb((db) => {
+      const statement = db.prepare(`
+        SELECT trace_scope, payload_json, built_at
+        FROM materialized_subject_contract_views
+        WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+        ORDER BY built_at DESC
+        LIMIT 1
+      `);
+      const contracts = {};
+      const missing = [];
+      let latestBuiltAt = null;
+      for (const traceScope of requestedScopes) {
+        const row = statement.get("cifi-full", "libil2cpp.so", traceScope);
+        if (!row) {
+          missing.push(traceScope);
+          continue;
+        }
+        contracts[traceScope] = JSON.parse(row.payload_json);
+        if (!latestBuiltAt || String(row.built_at) > latestBuiltAt) {
+          latestBuiltAt = String(row.built_at);
+        }
+      }
+      return { contracts, missing, builtAt: latestBuiltAt };
+    });
+    writeJson(response, 200, {
+      source: "materialized_subject_contract_views",
+      mode: "db",
+      builtAt: result.builtAt,
+      missingScopes: result.missing,
+      contracts: result.contracts
+    });
+  } catch (error) {
+    writeJson(response, 500, {
+      error: error instanceof Error ? error.message : String(error),
+      source: "subject-contract-server"
     });
   }
 }

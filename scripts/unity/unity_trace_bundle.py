@@ -844,6 +844,7 @@ def _execute_trace_bundle_run(
         if knowledge_plan:
             profiler.set_metadata("traceDirectiveMode", knowledge_plan.get("mode"))
             profiler.set_metadata("nextSeamId", ((knowledge_plan.get("nextSeam") or {}).get("id")))
+        acquisition_plan = dict(knowledge_plan.get("acquisitionPlan") or {})
         next_seam_id = str((knowledge_plan.get("nextSeam") or {}).get("id") or "").strip()
         cleared_edge_types = {
             str(edge_type)
@@ -860,7 +861,82 @@ def _execute_trace_bundle_run(
         )
 
         short_circuit_existing = False
-        if knowledge_plan.get("mode") == "reuse-materialized" and not args.force:
+        if knowledge_plan.get("mode") == "run-evidence-acquisition" and list(acquisition_plan.get("steps") or []) and not args.resume:
+            acquisition_results: list[dict[str, Any]] = []
+            dataset = {}
+            for step in list(acquisition_plan.get("steps") or []):
+                step_trace_scope = str(step.get("traceScope") or "")
+                step_target_id = str(step.get("targetId") or step_trace_scope)
+                step_family_id = str(step.get("familyId") or selected_family_id or "")
+                step_subject_kind = str(step.get("subjectKind") or planner_resolution.get("selectedSubjectKind") or "")
+                step_subject_key = str(step.get("subjectKey") or planner_resolution.get("selectedSubjectKey") or step_trace_scope)
+                step_subject_label = str(step.get("subjectLabel") or planner_resolution.get("selectedSubjectLabel") or step_trace_scope)
+                step_anchors = list(step.get("anchors") or [])
+                step_queries = list(step.get("expectedTerms") or [])
+                step_request_signature = build_trace_request_signature(
+                    step_trace_scope,
+                    step_family_id,
+                    step_queries,
+                    step_anchors,
+                    args.extended_search,
+                    args.depth_search,
+                    args.level,
+                    asset_set.get("fingerprint", ""),
+                )
+                step_planner_resolution = dict(planner_resolution)
+                step_planner_resolution.update(
+                    {
+                        "selectedSubjectKind": step_subject_kind,
+                        "selectedSubjectKey": step_subject_key,
+                        "selectedSubjectLabel": step_subject_label,
+                        "selectedTargetId": step_target_id,
+                        "matchedFamilyId": step_family_id,
+                        "expandedAnchors": step_anchors,
+                        "matchedTerms": step_queries,
+                    }
+                )
+                step_trace_plan = dict(trace_plan)
+                step_knowledge_plan = dict(step.get("knowledgePlan") or {})
+                step_knowledge_plan["executionRoutineId"] = str(
+                    step.get("executionRoutineId")
+                    or step_knowledge_plan.get("executionRoutineId")
+                    or step_trace_scope
+                )
+                step_trace_plan.update(
+                    {
+                        "plannerResolution": step_planner_resolution,
+                        "selectedSubjectKind": step_subject_kind,
+                        "selectedSubjectKey": step_subject_key,
+                        "selectedTargetId": step_target_id,
+                        "executionTargetId": step_target_id,
+                        "executionTraceScope": step_trace_scope,
+                        "selectedFamilyId": step_family_id,
+                        "knowledgePlan": step_knowledge_plan,
+                        "requestSignature": step_request_signature,
+                    }
+                )
+                step_args = argparse.Namespace(**vars(args))
+                step_args.query = step_queries
+                step_args.anchor = step_anchors
+                step_dataset = collect_trace_bundle_components(step_args, step_trace_plan)
+                persist_trace_bundle_fragments(step_dataset, step_trace_scope, step_request_signature)
+                step_dataset = materialize_trace_bundle_dataset(step_dataset, step_trace_scope, step_request_signature)
+                acquisition_results.append(
+                    {
+                        "traceScope": step_trace_scope,
+                        "targetId": step_target_id,
+                        "expectedTerms": step_queries,
+                        "anchors": step_anchors,
+                        "whyChosen": list(step.get("whyChosen") or []),
+                    }
+                )
+                dataset = step_dataset
+            dataset["traceAcquisitionPlan"] = {
+                "requestedTerms": list(acquisition_plan.get("requestedTerms") or []),
+                "steps": acquisition_results,
+                "remainingTerms": list(acquisition_plan.get("remainingTerms") or []),
+            }
+        elif knowledge_plan.get("mode") == "reuse-materialized" and not args.force:
             with profiler.span("dbReads"):
                 existing = get_trace_db().find_latest_materialized_target_bundle_view("cifi-full", "libil2cpp.so", execution_trace_scope)
             if existing and trace_dataset_has_required_fragments(existing["payload"]):
@@ -915,6 +991,8 @@ def _execute_trace_bundle_run(
                 "executionRoutineId": knowledge_plan.get("executionRoutineId"),
                 "nextSeam": dict(knowledge_plan.get("nextSeam") or {}),
             }
+            if acquisition_plan:
+                dataset["traceDirective"]["acquisitionPlan"] = acquisition_plan
             dataset["traceRun"] = {
                 "id": run_id,
                 "jsonOut": str(json_out) if export_requested else None,
@@ -8223,36 +8301,49 @@ def build_family_structure_graph(
     token_shop_extract: dict[str, Any],
     family_context: dict[str, Any],
 ) -> dict[str, Any]:
-    shell_surface = find_surface(surfaces, "family-shells")
-    proxy_surface = find_surface(surfaces, "bridge-proxies")
-    prefab_surface = find_surface(surfaces, "prefab-roster")
-    title_surface = find_surface(surfaces, "title-text-surfaces")
-    unresolved_surface = find_surface(surfaces, "negative-neighborhoods")
+    def fallback_surface(surface_id: str) -> dict[str, Any]:
+        return maybe_find_surface(surfaces, surface_id) or {"id": surface_id, "sources": []}
 
-    extract_source = find_source_entry(shell_surface, "tokenShopExtract")
-    proxy_lane_source = find_source_entry(proxy_surface, "level0")
-    level0_prefab_source = find_source_entry(prefab_surface, "level0")
-    level0_title_source = find_source_entry(title_surface, "level0")
-    unresolved_lane_source = find_source_entry(unresolved_surface, "level0")
+    def fallback_source(surface: dict[str, Any], source_id: str) -> dict[str, Any]:
+        return maybe_find_source_entry(surface, source_id) or {
+            "sourceId": source_id,
+            "sourcePath": "db:missing-surface-plan",
+            "hits": [],
+        }
 
-    atu1_shell_hit = find_hit(extract_source, "ATU1Button")
-    atu6_shell_hit = find_hit(extract_source, "ATU6Button")
-    atu7_shell_hit = find_hit(extract_source, "ATU7Button")
-    atu24_shell_hit = find_hit(extract_source, "ATU24Button")
-    buy_token_hit = find_hit(proxy_lane_source, "BuyTokenBoost")
-    buy_mk1_hit = find_hit(proxy_lane_source, "BuyMK1TokenBoost")
-    buy_mk2_hit = find_hit(proxy_lane_source, "BuyMK2TokenBoost")
-    buy_mk3_hit = find_hit(proxy_lane_source, "BuyMK3TokenBoost")
-    buy_mod_hit = find_hit(proxy_lane_source, "BuyModBoost")
-    buy_late_hit = find_hit(unresolved_lane_source, "BuyATU24")
-    prefab_token_hit = find_hit(level0_prefab_source, "NewTokenUPGPrefab.T1.TokensBoost")
-    prefab_mk2_hit = find_hit(level0_prefab_source, "NewTokenUPGPrefab.T1.MK2Booster")
-    prefab_mk3_hit = find_hit(level0_prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")
-    title_mk2_hit = find_hit(level0_title_source, "Mk2 Generator Booster")
-    text_hook_hit = find_hit(level0_title_source, "SetAllTokenShopTexts")
-    mod_title_hit = find_hit(level0_title_source, "Token Ultima: MP")
-    mk1_support_hit = find_hit(level0_title_source, "1. MK1 Generator Output,")
-    late_title_hit = find_hit(level0_title_source, "Academy Booster")
+    def fallback_hit(source_entry: dict[str, Any], term: str) -> dict[str, Any]:
+        return maybe_find_hit(source_entry, term) or {"term": term}
+
+    shell_surface = fallback_surface("family-shells")
+    proxy_surface = fallback_surface("bridge-proxies")
+    prefab_surface = fallback_surface("prefab-roster")
+    title_surface = fallback_surface("title-text-surfaces")
+    unresolved_surface = fallback_surface("negative-neighborhoods")
+
+    extract_source = fallback_source(shell_surface, "tokenShopExtract")
+    proxy_lane_source = fallback_source(proxy_surface, "level0")
+    level0_prefab_source = fallback_source(prefab_surface, "level0")
+    level0_title_source = fallback_source(title_surface, "level0")
+    unresolved_lane_source = fallback_source(unresolved_surface, "level0")
+
+    atu1_shell_hit = fallback_hit(extract_source, "ATU1Button")
+    atu6_shell_hit = fallback_hit(extract_source, "ATU6Button")
+    atu7_shell_hit = fallback_hit(extract_source, "ATU7Button")
+    atu24_shell_hit = fallback_hit(extract_source, "ATU24Button")
+    buy_token_hit = fallback_hit(proxy_lane_source, "BuyTokenBoost")
+    buy_mk1_hit = fallback_hit(proxy_lane_source, "BuyMK1TokenBoost")
+    buy_mk2_hit = fallback_hit(proxy_lane_source, "BuyMK2TokenBoost")
+    buy_mk3_hit = fallback_hit(proxy_lane_source, "BuyMK3TokenBoost")
+    buy_mod_hit = fallback_hit(proxy_lane_source, "BuyModBoost")
+    buy_late_hit = fallback_hit(unresolved_lane_source, "BuyATU24")
+    prefab_token_hit = fallback_hit(level0_prefab_source, "NewTokenUPGPrefab.T1.TokensBoost")
+    prefab_mk2_hit = fallback_hit(level0_prefab_source, "NewTokenUPGPrefab.T1.MK2Booster")
+    prefab_mk3_hit = fallback_hit(level0_prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")
+    title_mk2_hit = fallback_hit(level0_title_source, "Mk2 Generator Booster")
+    text_hook_hit = fallback_hit(level0_title_source, "SetAllTokenShopTexts")
+    mod_title_hit = fallback_hit(level0_title_source, "Token Ultima: MP")
+    mk1_support_hit = fallback_hit(level0_title_source, "1. MK1 Generator Output,")
+    late_title_hit = fallback_hit(level0_title_source, "Academy Booster")
     row_scopes = dict(family_context.get("rowScopes") or {})
     atu3_target = dict(family_context.get("atu3Target") or {})
     atu3_decision_summary = dict(atu3_target.get("decisionSummary") or {})
@@ -8443,13 +8534,26 @@ def build_family_structure_diff(
     surfaces: list[dict[str, Any]],
     family_context: dict[str, Any],
 ) -> dict[str, Any]:
-    proxy_source = find_source_entry(find_surface(surfaces, "bridge-proxies"), "level0")
-    prefab_source = find_source_entry(find_surface(surfaces, "prefab-roster"), "level0")
-    title_source = find_source_entry(find_surface(surfaces, "title-text-surfaces"), "level0")
+    def fallback_surface(surface_id: str) -> dict[str, Any]:
+        return maybe_find_surface(surfaces, surface_id) or {"id": surface_id, "sources": []}
+
+    def fallback_source(surface: dict[str, Any], source_id: str) -> dict[str, Any]:
+        return maybe_find_source_entry(surface, source_id) or {
+            "sourceId": source_id,
+            "sourcePath": "db:missing-surface-plan",
+            "hits": [],
+        }
+
+    def fallback_hit(source_entry: dict[str, Any], term: str) -> dict[str, Any]:
+        return maybe_find_hit(source_entry, term) or {"term": term}
+
+    proxy_source = fallback_source(fallback_surface("bridge-proxies"), "level0")
+    prefab_source = fallback_source(fallback_surface("prefab-roster"), "level0")
+    title_source = fallback_source(fallback_surface("title-text-surfaces"), "level0")
     row_scopes = dict(family_context.get("rowScopes") or {})
     atu3_target = dict(family_context.get("atu3Target") or {})
     atu3_decision_summary = dict(atu3_target.get("decisionSummary") or {})
-    late_title_hit = find_hit(title_source, "Academy Booster")
+    late_title_hit = fallback_hit(title_source, "Academy Booster")
     baseline_edges = [
         {
             "type": "repeated-serialized-shell-adjacency",
@@ -8471,10 +8575,10 @@ def build_family_structure_diff(
             "provenanceStrength": "supporting",
             "statement": "The strongest solved subset repeatedly preserves one row-family proxy hook lane.",
             "provedBy": [
-                cite_hit(proxy_source, find_hit(proxy_source, "BuyTokenBoost")),
-                cite_hit(proxy_source, find_hit(proxy_source, "BuyMK1TokenBoost")),
-                cite_hit(proxy_source, find_hit(proxy_source, "BuyMK2TokenBoost")),
-                cite_hit(proxy_source, find_hit(proxy_source, "BuyMK3TokenBoost")),
+                cite_hit(proxy_source, fallback_hit(proxy_source, "BuyTokenBoost")),
+                cite_hit(proxy_source, fallback_hit(proxy_source, "BuyMK1TokenBoost")),
+                cite_hit(proxy_source, fallback_hit(proxy_source, "BuyMK2TokenBoost")),
+                cite_hit(proxy_source, fallback_hit(proxy_source, "BuyMK3TokenBoost")),
             ],
         },
         {
@@ -8483,9 +8587,9 @@ def build_family_structure_diff(
             "provenanceStrength": "direct",
             "statement": "The strongest solved subset repeatedly preserves exact prefab identities.",
             "provedBy": [
-                cite_hit(prefab_source, find_hit(prefab_source, "NewTokenUPGPrefab.T1.TokensBoost")),
-                cite_hit(prefab_source, find_hit(prefab_source, "NewTokenUPGPrefab.T1.MK2Booster")),
-                cite_hit(prefab_source, find_hit(prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")),
+                cite_hit(prefab_source, fallback_hit(prefab_source, "NewTokenUPGPrefab.T1.TokensBoost")),
+                cite_hit(prefab_source, fallback_hit(prefab_source, "NewTokenUPGPrefab.T1.MK2Booster")),
+                cite_hit(prefab_source, fallback_hit(prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")),
             ],
         },
         {
@@ -8494,7 +8598,7 @@ def build_family_structure_diff(
             "provenanceStrength": "direct",
             "statement": "ATU6 contributes one exact shell-to-prefab-to-title exemplar.",
             "provedBy": [
-                cite_hit(title_source, find_hit(title_source, "Mk2 Generator Booster")),
+                cite_hit(title_source, fallback_hit(title_source, "Mk2 Generator Booster")),
             ],
         },
     ]
@@ -8516,8 +8620,8 @@ def build_family_structure_diff(
             "provenanceStrength": "supporting",
             "statement": "Some unresolved neighborhoods still preserve nearby generic or late buy-hook shells.",
             "provedBy": [
-                cite_hit(proxy_source, find_hit(proxy_source, "BuyCellBoost")),
-                cite_hit(proxy_source, find_hit(proxy_source, "BuyATU24")),
+                cite_hit(proxy_source, fallback_hit(proxy_source, "BuyCellBoost")),
+                cite_hit(proxy_source, fallback_hit(proxy_source, "BuyATU24")),
             ],
         },
         {
@@ -8532,7 +8636,7 @@ def build_family_structure_diff(
                     str(atu3_decision_summary.get("summary") or "ATU3 remains quarantined to descriptive remap evidence."),
                 ),
                 cite_token_shop_extract_field("ATU24Button", token_shop_extract),
-                cite_hit(proxy_source, find_hit(proxy_source, "BuyATU24")),
+                cite_hit(proxy_source, fallback_hit(proxy_source, "BuyATU24")),
             ],
         },
         {
@@ -8895,6 +8999,47 @@ def get_target_strategy_config(target: dict[str, Any] | None) -> dict[str, Any]:
     return support_context
 
 
+def get_token_shop_builder_context(
+    target_id: str,
+    target: dict[str, Any] | None,
+    config: dict[str, Any] | None,
+    shell_window: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    target = dict(target or {})
+    config = dict(config or {})
+    shell_window = dict(shell_window or {})
+    shell_candidates = [
+        str(config.get("shellField") or "").strip(),
+        str(shell_window.get("shellField") or "").strip(),
+        *[str(value).strip() for value in (config.get("defaultAnchors") or []) if str(value).strip()],
+        *[str(value).strip() for value in (target.get("anchors") or []) if str(value).strip()],
+    ]
+    inferred_shell_field = next(
+        (
+            value
+            for value in shell_candidates
+            if value and ("ATU" in value or "Button" in value or "Boost" in value)
+        ),
+        "",
+    )
+    shell_field = str(
+        config.get("shellField")
+        or shell_window.get("shellField")
+        or inferred_shell_field
+        or target_id
+    ).strip()
+    shell_path_id = str(
+        config.get("shellPathId")
+        or shell_window.get("shellPathId")
+        or "path id unresolved"
+    ).strip()
+    return {
+        "shellField": shell_field or target_id,
+        "shellPathId": shell_path_id or "path id unresolved",
+        "lostStructure": list(config.get("lostStructure") or []),
+    }
+
+
 def get_target_execution_plan(target: dict[str, Any] | None) -> dict[str, Any]:
     if not isinstance(target, dict):
         return {}
@@ -9175,6 +9320,7 @@ def build_token_shop_mod_trace(target_id: str, target: dict[str, Any], anchors: 
     fallback_shell_window = build_token_shop_fallback_shell_window(target_id, target, documents["tokenShopExtract"])
     fallback_surface_specs = []
     shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
     provisional_payload = {
         "shellWindow": shell_window,
@@ -9203,7 +9349,7 @@ def build_token_shop_mod_trace(target_id: str, target: dict[str, Any], anchors: 
             "result": "direct asset/native row bridge recovered",
         },
         "solvedVsBlockedDiff": build_mod_vs_blocked_diff(target_id, target, shell_window, surfaces, row_recovery, row_scope),
-        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(builder_context["lostStructure"])),
         "groundedConclusion": "",
         "currentBoundary": [],
     }
@@ -9219,6 +9365,7 @@ def build_token_shop_mk1_trace(target_id: str, target: dict[str, Any], anchors: 
     }
     fallback_surface_specs = []
     shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
     comparison_seed = build_mk1_vs_blocked_diff(target_id, target, shell_window, surfaces, token_shop_extract, mk1_context)
     return {
@@ -9228,7 +9375,7 @@ def build_token_shop_mk1_trace(target_id: str, target: dict[str, Any], anchors: 
         "traceGraph": resolve_token_shop_graph_plan(target_id) or build_mk1_trace_graph(shell_window, surfaces, row_recovery),
         "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "Only promote the traced ATU5 row past quarantine when one exact shell-to-final-title join is recovered; prefab-only and support-text-only evidence remains remap-only."),
         "bridgeCheck": {
-            "candidateTerms": [config["shellField"], "BuyMK1TokenBoost", "NewTokenUPGPrefab.T1.MK1Booster"],
+            "candidateTerms": [builder_context["shellField"], "BuyMK1TokenBoost", "NewTokenUPGPrefab.T1.MK1Booster"],
             "bridgeCleared": True,
             "bridgeHits": [
                 {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyMK1TokenBoost"},
@@ -9237,7 +9384,7 @@ def build_token_shop_mk1_trace(target_id: str, target: dict[str, Any], anchors: 
 "result": "checked object bridge recovered",
         },
         "solvedVsBlockedDiff": comparison_seed["delta"],
-        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(builder_context["lostStructure"])),
         "groundedConclusion": "",
         "currentBoundary": [],
     }
@@ -9253,6 +9400,7 @@ def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], an
     }
     fallback_surface_specs = []
     shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
     comparison_seed = build_mk3_vs_blocked_diff(target_id, target, shell_window, surfaces, token_shop_extract, mk3_context)
     return {
@@ -9262,7 +9410,7 @@ def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], an
         "traceGraph": resolve_token_shop_graph_plan(target_id) or build_mk3_bridge_trace_graph(shell_window, surfaces),
         "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "Only promote the traced ATU7 row as one bounded remap bridge when one checked shell-side owner block, one row-specific action hook, and one exact prefab identity converge on the same row family; do not infer any final title from this pass."),
         "bridgeCheck": {
-            "candidateTerms": [config["shellField"], "BuyMK3TokenBoost", "NewTokenUPGPrefab.T1.MK3Booster"],
+            "candidateTerms": [builder_context["shellField"], "BuyMK3TokenBoost", "NewTokenUPGPrefab.T1.MK3Booster"],
             "bridgeCleared": True,
             "bridgeHits": [
                 {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyMK3TokenBoost"},
@@ -9271,7 +9419,7 @@ def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], an
 "result": "checked object bridge recovered",
         },
         "solvedVsBlockedDiff": comparison_seed["delta"],
-        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(builder_context["lostStructure"])),
         "groundedConclusion": "",
         "currentBoundary": [],
     }
@@ -9288,6 +9436,7 @@ def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], a
     }
     fallback_surface_specs = []
     shell_window, effect_surfaces = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in effect_surfaces]
     depth_expansion = build_depth_expansion(
         surfaces,
@@ -9305,7 +9454,7 @@ def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], a
         "traceGraph": resolve_token_shop_graph_plan(target_id) or build_atu3_effect_trace_graph(shell_window, surfaces, token_shop_extract, effect_context, depth_expansion),
         "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "Only preserve ATU3 as an effect-driven row when one checked shell-side owner block, one exact row-family action hook, and one shared chest-effect title or text surface converge on the same cells-from-chests lane; keep typed gameplay owner claims blocked unless the applier is recovered explicitly."),
         "bridgeCheck": {
-            "candidateTerms": [config["shellField"], "BuyCellBoost", "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."],
+            "candidateTerms": [builder_context["shellField"], "BuyCellBoost", "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."],
             "bridgeCleared": True,
             "bridgeHits": [
                 {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyCellBoost"},
@@ -9315,7 +9464,7 @@ def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], a
             "result": "checked action-to-shared-effect chain recovered",
         },
         "solvedVsBlockedDiff": build_atu3_effect_vs_split_diff(target_id, target, shell_window, surfaces, token_shop_extract, effect_context),
-        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(builder_context["lostStructure"])),
         "groundedConclusion": "",
         "currentBoundary": [],
     }
@@ -9331,6 +9480,7 @@ def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str,
     }
     fallback_surface_specs = []
     shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
     return {
         "shellWindow": shell_window,
@@ -9339,7 +9489,7 @@ def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str,
         "traceGraph": resolve_token_shop_graph_plan(target_id) or build_atu3_chest_consumer_trace_graph(shell_window, surfaces, consumer_context),
         "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "Only preserve ATU3 as a consumer-seam row when one checked shared chest-effect lane, one concrete chest consumer family, one chest-routine neighborhood, and one chest-bonus shell converge on the same cells-from-chests lane; keep exact CellBoostBonus consumer-method claims blocked unless that handoff is recovered explicitly."),
         "bridgeCheck": {
-            "candidateTerms": [config["shellField"], "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "AdManager, Assembly-CSharp", "<TokenChestRoutine>d__149", "<FinalDiamondChestBonus>k__BackingField"],
+            "candidateTerms": [builder_context["shellField"], "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>", "AdManager, Assembly-CSharp", "<TokenChestRoutine>d__149", "<FinalDiamondChestBonus>k__BackingField"],
             "bridgeCleared": True,
             "bridgeHits": [
                 {"surfaceId": "shared-effect-title", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"},
@@ -9350,7 +9500,7 @@ def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str,
             "result": "checked shared-effect-to-consumer-family handoff recovered",
         },
         "solvedVsBlockedDiff": build_atu3_consumer_vs_effect_diff(target_id, target, shell_window, surfaces, token_shop_extract, consumer_context),
-        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(builder_context["lostStructure"])),
         "groundedConclusion": "",
         "currentBoundary": [],
     }
@@ -9422,6 +9572,7 @@ def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict
     }
     fallback_surface_specs = []
     shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
     surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
     return {
         "shellWindow": shell_window,
@@ -9430,7 +9581,13 @@ def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict
         "traceGraph": resolve_token_shop_graph_plan(target_id) or build_atu3_chest_consumer_read_trace_graph(shell_window, surfaces, read_context),
         "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "Only preserve ATU3 as a consumer-internal read trace when one checked chest consumer family, one chest routine neighborhood, one cell-gain getter shell, and one booster bonus aggregation shell converge on the same cells-from-chests lane; keep the exact CellBoostBonus runtime read blocked unless that handoff is recovered explicitly."),
         "bridgeCheck": {
-            "candidateTerms": [config["shellField"], "AdManager, Assembly-CSharp", "get_SmallAdCellGains", "SetBoosterAdBonus", "get_FinalBoosterAdBonus"],
+            "candidateTerms": [
+                builder_context["shellField"],
+                "AdManager, Assembly-CSharp",
+                "get_SmallAdCellGains",
+                "SetBoosterAdBonus",
+                "get_FinalBoosterAdBonus",
+            ],
             "bridgeCleared": True,
             "bridgeHits": [
                 {"surfaceId": "consumer-family", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "AdManager, Assembly-CSharp"},
@@ -9441,7 +9598,7 @@ def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict
             "result": "checked consumer-internal bonus shell recovered",
         },
         "solvedVsBlockedDiff": build_atu3_consumer_read_vs_consumer_diff(target_id, target, shell_window, read_context),
-        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(builder_context["lostStructure"])),
         "groundedConclusion": "",
         "currentBoundary": [],
     }
@@ -9461,6 +9618,7 @@ def _build_token_shop_family_profile_payload(
     config: dict[str, Any],
     family_context: dict[str, Any],
 ) -> dict[str, Any] | None:
+    builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
     provisional_payload = {
         "shellWindow": shell_window,
         "surfaces": surfaces,
@@ -9563,7 +9721,7 @@ def _build_token_shop_family_profile_payload(
         "solvedVsBlockedDiff": dict(
             profile["solvedVsBlockedDiff"]() if callable(profile.get("solvedVsBlockedDiff")) else (profile.get("solvedVsBlockedDiff") or {})
         ),
-        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(builder_context["lostStructure"])),
         "groundedConclusion": "",
         "currentBoundary": [],
     }
@@ -9572,6 +9730,7 @@ def _build_token_shop_family_profile_payload(
 def build_token_shop_family_structure_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
     config = get_target_strategy_config(target)
     support_context = load_or_synthesize_support_context(target_id, target)
+    builder_context = get_token_shop_builder_context(target_id, target, config)
     token_shop_extract = documents["tokenShopExtract"]
     family_context = {
         "rowScopes": {
@@ -9589,8 +9748,8 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
     fallback_surface_specs = []
     fallback_shell_window = {
         "source": get_source_reference("tokenShopExtract"),
-        "shellField": config["shellField"],
-        "shellPathId": config["shellPathId"],
+        "shellField": builder_context["shellField"],
+        "shellPathId": builder_context["shellPathId"],
         "shellObjectOffset": None,
         "ownerFieldBlock": [
             "TokenBoost / DiamondBoost / ModBoost / MK1TokenBoost / MK2TokenBoost solved-row windows",
@@ -12776,6 +12935,18 @@ def main() -> None:
             print("  clearedEdges={}".format(", ".join(knowledge.get("clearedEdgeTypes") or []) or "none"))
             print("  blockedEdges={}".format(", ".join(knowledge.get("blockedEdgeTypes") or []) or "none"))
             print("  nextSeam={}".format(next_seam.get("id") or "none"))
+            acquisition_plan = dict(knowledge_plan.get("acquisitionPlan") or knowledge.get("acquisitionPlan") or {})
+            if acquisition_plan:
+                print("  acquisitionTerms={}".format(", ".join(acquisition_plan.get("requestedTerms") or []) or "none"))
+                for index, step in enumerate(list(acquisition_plan.get("steps") or []), start=1):
+                    print(
+                        "  acquisitionStep{}={} terms={} why={}".format(
+                            index,
+                            step.get("traceScope") or "unknown",
+                            ", ".join(step.get("expectedTerms") or []) or "none",
+                            "; ".join(step.get("whyChosen") or []) or "none",
+                        )
+                    )
         if best_gap_plan:
             print("  blocked={}".format(", ".join(best_gap_plan["blockedEdgeTypes"]) or "none"))
         return

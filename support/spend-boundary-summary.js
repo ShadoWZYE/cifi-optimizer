@@ -36,6 +36,60 @@ export function formatNumericRanges(values) {
 }
 
 export function getTokenShopCostLaneSummary(clues) {
+  const contracts = normalizeTokenShopContracts(clues);
+  if (contracts.length) {
+    const rowLocal =
+      contracts.find((contract) => {
+        const knownEdges = Array.isArray(contract?.knownEdges) ? contract.knownEdges : [];
+        const blockedEdges = Array.isArray(contract?.blockedEdges) ? contract.blockedEdges : [];
+        return (
+          contract?.subjectKind === "row-local" &&
+          (knownEdges.includes("exact-display-update-path") ||
+            blockedEdges.includes("exact-display-update-path") ||
+            Array.isArray(contract?.groundedFields?.displayUpdateHooks))
+        );
+      }) ?? null;
+    const rangeFamily =
+      contracts.find((contract) => {
+        const knownEdges = Array.isArray(contract?.knownEdges) ? contract.knownEdges : [];
+        return (
+          contract?.subjectKind === "range-family" &&
+          (knownEdges.includes("exact-display-update-path") ||
+            knownEdges.includes("row-family-effect-hook"))
+        );
+      }) ?? null;
+    const displayHooks = Array.isArray(rowLocal?.groundedFields?.displayUpdateHooks)
+      ? rowLocal.groundedFields.displayUpdateHooks
+      : [];
+    const rangeSupport = rangeFamily?.supportSummary ?? {};
+
+    return {
+      hasLaneSplit: Boolean(rowLocal?.subjectId) && Boolean(rangeFamily?.subjectId),
+      coverageSource: "subject-contracts",
+      keepsDailyTokeniumSeparate: Boolean(rangeFamily?.subjectId),
+      tokenLaneLabel: rowLocal?.subjectId || "row-local display subject",
+      diamondLaneLabel: rowLocal?.subjectKind || "row-local",
+      dailyLaneLabel: rangeFamily?.subjectId || "range-family display subject",
+      costShellLabel: displayHooks[0] || "display-hook-unavailable",
+      costRenderLabel:
+        Array.isArray(rangeSupport.supportSurfaceLabels) && rangeSupport.supportSurfaceLabels[0]
+          ? rangeSupport.supportSurfaceLabels[0]
+          : "support-surface-unavailable",
+      descriptionRenderLabel:
+        rowLocal?.nextSeam?.id || rangeFamily?.nextSeam?.id || "next-seam-unavailable",
+      rowLocalSubjectId: rowLocal?.subjectId || null,
+      rangeFamilySubjectId: rangeFamily?.subjectId || null,
+      rowLocalSubjectKind: rowLocal?.subjectKind || null,
+      rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+      rowLocalBlockedEdges: Array.isArray(rowLocal?.blockedEdges) ? rowLocal.blockedEdges : [],
+      rangeFamilyKnownEdges: Array.isArray(rangeFamily?.knownEdges) ? rangeFamily.knownEdges : [],
+      blockedInputReason:
+        (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
+        (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
+        null
+    };
+  }
+
   const tokenSpendGroups = Array.isArray(clues?.tokenSpendGroups) ? clues.tokenSpendGroups : [];
   const dailyTokeniumModifierGroups = Array.isArray(clues?.dailyTokeniumModifierGroups)
     ? clues.dailyTokeniumModifierGroups
@@ -53,6 +107,7 @@ export function getTokenShopCostLaneSummary(clues) {
       dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
       tracePresentation.costShell === "CostBox" &&
       tracePresentation.descriptionRenderNode === "DescText",
+    coverageSource: "legacy-cost-lanes",
     keepsDailyTokeniumSeparate:
       dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
       dailyTokeniumModifierGroups.includes("TokenDailiesT3") &&
@@ -66,7 +121,70 @@ export function getTokenShopCostLaneSummary(clues) {
   };
 }
 
-export function getSpendActionLaneSummary(clues) {
+export function getSpendActionLaneSummary(tokenShop) {
+  const contracts = normalizeTokenShopContracts(tokenShop);
+  if (contracts.length) {
+    const rowLocal =
+      contracts.find((contract) => {
+        const knownEdges = Array.isArray(contract?.knownEdges) ? contract.knownEdges : [];
+        const actionMethods = Array.isArray(contract?.groundedFields?.actionMethods)
+          ? contract.groundedFields.actionMethods
+          : [];
+        return (
+          contract?.subjectKind === "row-local" &&
+          (knownEdges.includes("exact-shell-to-action-hook") || actionMethods.length > 0)
+        );
+      }) ?? null;
+    const rangeFamily =
+      contracts.find((contract) => {
+        const knownEdges = Array.isArray(contract?.knownEdges) ? contract.knownEdges : [];
+        const nonblockingEdges = Array.isArray(contract?.nonblockingEdges)
+          ? contract.nonblockingEdges
+          : [];
+        return (
+          contract?.subjectKind === "range-family" &&
+          (knownEdges.includes("row-family-action-hook") ||
+            knownEdges.includes("exact-shell-to-action-hook") ||
+            nonblockingEdges.includes("exact-shell-to-action-hook"))
+        );
+      }) ?? null;
+    const rowLocalActionHooks = Array.isArray(rowLocal?.groundedFields?.actionMethods)
+      ? rowLocal.groundedFields.actionMethods
+      : [];
+    const rangeFamilyKnownEdges = Array.isArray(rangeFamily?.knownEdges)
+      ? rangeFamily.knownEdges
+      : [];
+    const rangeFamilyNonblockingEdges = Array.isArray(rangeFamily?.nonblockingEdges)
+      ? rangeFamily.nonblockingEdges
+      : [];
+
+    return {
+      hasActionSplit: Boolean(rowLocal?.subjectId) && Boolean(rangeFamily?.subjectId),
+      coverageSource: "subject-contracts",
+      keepsDailyDirectHooksUnrecovered: rangeFamilyNonblockingEdges.includes(
+        "exact-shell-to-action-hook"
+      ),
+      tokenHook: rowLocal?.subjectId || "row-local action subject",
+      diamondHook: rowLocal?.subjectKind || "row-local",
+      loopModifierHook: rowLocalActionHooks[0] || "action-hook-unavailable",
+      premiumModifierHook: rangeFamily?.subjectId || "range-family action subject",
+      dailyHookT2: rangeFamilyNonblockingEdges[0] || "nonblocking-edge-unavailable",
+      dailyHookT3: rangeFamily?.nextSeam?.id || "next-seam-unavailable",
+      rowLocalSubjectId: rowLocal?.subjectId || null,
+      rangeFamilySubjectId: rangeFamily?.subjectId || null,
+      rowLocalSubjectKind: rowLocal?.subjectKind || null,
+      rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+      rowLocalKnownEdges: Array.isArray(rowLocal?.knownEdges) ? rowLocal.knownEdges : [],
+      rangeFamilyKnownEdges,
+      rangeFamilyNonblockingEdges,
+      blockedInputReason:
+        (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
+        (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
+        null
+    };
+  }
+
+  const clues = tokenShop?.spendLanes?.actionLaneClues ?? tokenShop;
   const tokenDirectBuyHooks = Array.isArray(clues?.tokenDirectBuyHooks)
     ? clues.tokenDirectBuyHooks
     : [];
@@ -106,6 +224,62 @@ export function getSpendActionLaneSummary(clues) {
 }
 
 export function getTokenBankStateSummary(clues) {
+  const contracts = normalizeTokenShopContracts(clues);
+  if (contracts.length) {
+    const rowLocal =
+      contracts.find(
+        (contract) =>
+          contract?.subjectKind === "row-local" &&
+          typeof contract?.groundedFields?.tokenBankState === "object" &&
+          contract.groundedFields.tokenBankState
+      ) ?? null;
+    const rangeFamily =
+      contracts.find(
+        (contract) =>
+          contract?.subjectKind === "range-family" &&
+          typeof contract?.groundedFields?.tokenBankState === "object" &&
+          contract.groundedFields.tokenBankState
+      ) ?? null;
+    const stateFields =
+      rowLocal?.groundedFields?.tokenBankState ?? rangeFamily?.groundedFields?.tokenBankState ?? {};
+    const blockedInputReason =
+      (typeof rowLocal?.blockedInputReasons?.tokenBankState === "string" &&
+        rowLocal.blockedInputReasons.tokenBankState) ||
+      (typeof rangeFamily?.blockedInputReasons?.tokenBankState === "string" &&
+        rangeFamily.blockedInputReasons.tokenBankState) ||
+      (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
+      (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
+      null;
+
+    return {
+      hasControllerSplit:
+        typeof stateFields.claimMethod === "string" &&
+        typeof stateFields.capMethod === "string" &&
+        typeof stateFields.displayShell === "string" &&
+        typeof stateFields.loopHook === "string",
+      hasCloudSaveShellBoundary:
+        typeof stateFields.cloudSaveShell === "string" &&
+        typeof stateFields.cloudSaveInfoRoutine === "string" &&
+        typeof stateFields.cloudSaveProfileRoutine === "string" &&
+        typeof stateFields.cloudSaveStateMachine === "string",
+      coverageSource: "subject-contracts",
+      claimMethod: stateFields.claimMethod || "ClaimBankedTokens",
+      capMethod: stateFields.capMethod || "get_TokenBankCap",
+      displayShell: stateFields.displayShell || "BigStatisticPrefab.TokenBankCap",
+      loopHandler: stateFields.loopHandler || "TextHandlerLoopMods",
+      loopHook: stateFields.loopHook || "SetLM244BonusText",
+      cloudSaveShell: stateFields.cloudSaveShell || "CloudSavePlayerProfile",
+      cloudSaveInfoRoutine: stateFields.cloudSaveInfoRoutine || "GetCurrentSaveFileInfo",
+      cloudSaveProfileRoutine: stateFields.cloudSaveProfileRoutine || "GetPlayerProfileInfo",
+      cloudSaveStateMachine: stateFields.cloudSaveStateMachine || "<CloudSavePlayerProfile>d__24",
+      rowLocalSubjectId: rowLocal?.subjectId || null,
+      rangeFamilySubjectId: rangeFamily?.subjectId || null,
+      rowLocalSubjectKind: rowLocal?.subjectKind || null,
+      rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+      blockedInputReason
+    };
+  }
+
   const tokenShopMethods = Array.isArray(clues?.tokenShopMethods) ? clues.tokenShopMethods : [];
   const displayOrHandlerClues = Array.isArray(clues?.displayOrHandlerClues)
     ? clues.displayOrHandlerClues
@@ -395,6 +569,44 @@ export function getMultiverseMarketOwnerFamilySummary(family) {
 }
 
 export function getTokenShopOwnerShellSummary(shell) {
+  const contracts = normalizeTokenShopContracts(shell);
+  if (contracts.length) {
+    const rowLocal = contracts.find((contract) => contract?.subjectKind === "row-local") ?? null;
+    const rangeFamily =
+      contracts.find((contract) => contract?.subjectKind === "range-family") ?? null;
+    const rowLocalActionMethods = Array.isArray(rowLocal?.groundedFields?.actionMethods)
+      ? rowLocal.groundedFields.actionMethods
+      : [];
+    const rowLocalKnownEdges = Array.isArray(rowLocal?.knownEdges) ? rowLocal.knownEdges : [];
+    const rangeKnownEdges = Array.isArray(rangeFamily?.knownEdges) ? rangeFamily.knownEdges : [];
+    const rangeBlockedEdges = Array.isArray(rangeFamily?.blockedEdges)
+      ? rangeFamily.blockedEdges
+      : [];
+
+    return {
+      hasOwnerShell:
+        Boolean(rowLocal?.subjectId) &&
+        rowLocalKnownEdges.includes("exact-shell-to-action-hook") &&
+        Boolean(rangeFamily?.subjectId),
+      coverageSource: "subject-contracts",
+      ownerAnchor: rowLocal?.subjectId || "row-local subject",
+      bankMethod: rowLocalActionMethods[0] || "action-method-unavailable",
+      notificationHook: rowLocal?.nextSeam?.id || "next-seam-unavailable",
+      deviceHook: rangeFamily?.subjectId || "range-family subject",
+      rowLocalSubjectId: rowLocal?.subjectId || null,
+      rangeFamilySubjectId: rangeFamily?.subjectId || null,
+      rowLocalSubjectKind: rowLocal?.subjectKind || null,
+      rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+      rowLocalKnownEdges,
+      rangeKnownEdges,
+      rangeBlockedEdges,
+      blockedInputReason:
+        (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
+        (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
+        null
+    };
+  }
+
   const ownerAnchors = Array.isArray(shell?.ownerAnchors) ? shell.ownerAnchors : [];
   const tokenBankMethods = Array.isArray(shell?.tokenBankMethods) ? shell.tokenBankMethods : [];
   const notificationHooks = Array.isArray(shell?.notificationHooks) ? shell.notificationHooks : [];
@@ -409,6 +621,7 @@ export function getTokenShopOwnerShellSummary(shell) {
       tokenBankMethods.includes("ClaimBankedTokens") &&
       notificationHooks.includes("CheckTokenClaimNotification") &&
       adjacentDeviceHooks.includes("BuyAutoTokenClicker"),
+    coverageSource: "legacy-owner-shell",
     ownerAnchor: "TokenShop",
     bankMethod: "ClaimBankedTokens",
     notificationHook: "CheckTokenClaimNotification",
@@ -417,6 +630,38 @@ export function getTokenShopOwnerShellSummary(shell) {
 }
 
 export function getTokenShopSaveBoundarySummary(boundary) {
+  const contracts = normalizeTokenShopContracts(boundary);
+  if (contracts.length) {
+    const rowLocal = contracts.find((contract) => contract?.subjectKind === "row-local") ?? null;
+    const rangeFamily =
+      contracts.find((contract) => contract?.subjectKind === "range-family") ?? null;
+    const blockedInputReason =
+      (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
+      (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
+      null;
+
+    return {
+      hasSeparationBoundary:
+        Boolean(rowLocal?.subjectId) &&
+        Boolean(rangeFamily?.subjectId) &&
+        typeof blockedInputReason === "string" &&
+        blockedInputReason.length > 0,
+      coverageSource: "subject-contracts",
+      ownerAnchor: rowLocal?.subjectId || "row-local subject",
+      saveAnchor: rangeFamily?.subjectId || "range-family subject",
+      overlapLabel: "canonical subject-state separation",
+      rowLocalSubjectId: rowLocal?.subjectId || null,
+      rangeFamilySubjectId: rangeFamily?.subjectId || null,
+      rowLocalSubjectKind: rowLocal?.subjectKind || null,
+      rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+      rowLocalBlockedEdges: Array.isArray(rowLocal?.blockedEdges) ? rowLocal.blockedEdges : [],
+      rangeFamilyBlockedEdges: Array.isArray(rangeFamily?.blockedEdges)
+        ? rangeFamily.blockedEdges
+        : [],
+      blockedInputReason
+    };
+  }
+
   const ownerShellTermsChecked = Array.isArray(boundary?.ownerShellTermsChecked)
     ? boundary.ownerShellTermsChecked
     : [];
@@ -436,6 +681,7 @@ export function getTokenShopSaveBoundarySummary(boundary) {
       boundaryEvidence.level0HasSaveTerms === false &&
       boundaryEvidence.ownerShellWithSaveOverlapCount === 0 &&
       boundaryEvidence.directTokenShopPlayerProfileContext === false,
+    coverageSource: "legacy-save-boundary",
     ownerAnchor: "TokenShop",
     saveAnchor: "PlayerProfileData",
     overlapLabel: "zero overlap"
@@ -443,6 +689,63 @@ export function getTokenShopSaveBoundarySummary(boundary) {
 }
 
 export function getTokenBankControllerShellSummary(shell) {
+  const contracts = normalizeTokenShopContracts(shell);
+  if (contracts.length) {
+    const rowLocal =
+      contracts.find(
+        (contract) =>
+          contract?.subjectKind === "row-local" &&
+          typeof contract?.groundedFields?.tokenBankController === "object" &&
+          contract.groundedFields.tokenBankController
+      ) ?? null;
+    const rangeFamily =
+      contracts.find(
+        (contract) =>
+          contract?.subjectKind === "range-family" &&
+          typeof contract?.groundedFields?.tokenBankController === "object" &&
+          contract.groundedFields.tokenBankController
+      ) ?? null;
+    const controllerFields =
+      rowLocal?.groundedFields?.tokenBankController ??
+      rangeFamily?.groundedFields?.tokenBankController ??
+      {};
+    const adjacentTerms = Array.isArray(controllerFields?.adjacentTerms)
+      ? controllerFields.adjacentTerms
+      : [];
+    const blockedInputReason =
+      (typeof rowLocal?.blockedInputReasons?.tokenBankController === "string" &&
+        rowLocal.blockedInputReasons.tokenBankController) ||
+      (typeof rangeFamily?.blockedInputReasons?.tokenBankController === "string" &&
+        rangeFamily.blockedInputReasons.tokenBankController) ||
+      (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
+      (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
+      null;
+
+    return {
+      hasControllerShell:
+        typeof controllerFields.claimMethod === "string" &&
+        typeof controllerFields.fillMethod === "string" &&
+        typeof controllerFields.fillField === "string" &&
+        typeof controllerFields.descriptionShell === "string" &&
+        typeof controllerFields.notificationHook === "string" &&
+        adjacentTerms.includes("get_TokenBankCap") &&
+        adjacentTerms.includes("get_ClaimableBankTokens") &&
+        adjacentTerms.includes("IncreaseBankedTokens"),
+      coverageSource: "subject-contracts",
+      claimMethod: controllerFields.claimMethod || "ClaimBankedTokens",
+      fillMethod: controllerFields.fillMethod || "SetBankFill",
+      fillField: controllerFields.fillField || "BankFill",
+      descriptionShell: controllerFields.descriptionShell || "TokenBankDescriptionText",
+      notificationHook: controllerFields.notificationHook || "CheckTokenClaimNotification",
+      rowLocalSubjectId: rowLocal?.subjectId || null,
+      rangeFamilySubjectId: rangeFamily?.subjectId || null,
+      rowLocalSubjectKind: rowLocal?.subjectKind || null,
+      rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+      adjacentTerms,
+      blockedInputReason
+    };
+  }
+
   const controllerAnchors = Array.isArray(shell?.controllerAnchors) ? shell.controllerAnchors : [];
   const adjacentControllerMethods = Array.isArray(shell?.adjacentControllerMethods)
     ? shell.adjacentControllerMethods
@@ -856,10 +1159,54 @@ export function getTokeniumNamingSummary(clues) {
   };
 }
 
+function normalizeTokenShopContracts(tokenShop) {
+  const contracts = tokenShop?.subjectContracts;
+  if (contracts && typeof contracts === "object" && !Array.isArray(contracts)) {
+    return Object.values(contracts).filter(Boolean);
+  }
+  return [];
+}
+
 export function getTokenShopCoverageSummary(tokenShop) {
-  const numericTable = tokenShop?.numeric_table ?? {};
+  const contracts = normalizeTokenShopContracts(tokenShop);
+  const rowLocalContracts = contracts.filter((contract) => contract?.subjectKind === "row-local");
+  const rangeFamilyContracts = contracts.filter(
+    (contract) => contract?.subjectKind === "range-family"
+  );
+  const blockedContracts = contracts.filter(
+    (contract) => Array.isArray(contract?.blockedEdges) && contract.blockedEdges.length > 0
+  );
+  const namedContracts = contracts.filter(
+    (contract) =>
+      typeof contract?.subjectId === "string" &&
+      contract.subjectId &&
+      (Array.isArray(contract?.knownEdges) || Array.isArray(contract?.blockedEdges))
+  );
+
+  if (contracts.length) {
+    const subjectIds = namedContracts.map((contract) => contract.subjectId);
+    return {
+      hasCoverage: true,
+      coverageSource: "subject-contracts",
+      numericGroupCount: contracts.length,
+      hasNamedLanes: rowLocalContracts.length > 0 && rangeFamilyContracts.length > 0,
+      namedLaneLabel: subjectIds.slice(0, 4).join(", "),
+      tierLabel: `${rowLocalContracts.length} row-local and ${rangeFamilyContracts.length} range-family canonical subjects`,
+      hasControllerAnchors: rowLocalContracts.some((contract) =>
+        Array.isArray(contract?.groundedFields?.actionMethods)
+      ),
+      subjectCount: contracts.length,
+      rowLocalCount: rowLocalContracts.length,
+      rangeFamilyCount: rangeFamilyContracts.length,
+      blockedCount: blockedContracts.length,
+      subjectLabels: subjectIds
+    };
+  }
+
+  const extract = tokenShop?.rows?.extract ?? tokenShop;
+  const numericTable = extract?.numeric_table ?? {};
   const numericKeys = Object.keys(numericTable);
-  const fields = Array.isArray(tokenShop?.fields) ? tokenShop.fields : [];
+  const fields = Array.isArray(extract?.fields) ? extract.fields : [];
   const controllerFieldNames = new Set(
     fields.filter((entry) => entry.group === "controller").map((entry) => entry.field)
   );
@@ -876,6 +1223,7 @@ export function getTokenShopCoverageSummary(tokenShop) {
 
   return {
     hasCoverage: numericKeys.length > 0,
+    coverageSource: "extract",
     numericGroupCount: numericKeys.length,
     hasNamedLanes: namedLanes.length === 3,
     namedLaneLabel: namedLanes.join(", "),

@@ -5,10 +5,14 @@ import {
   formatNumericRanges,
   getImportedMultiverseMarketPreview,
   getMultiverseMarketMarketMemberBoundarySummary,
+  getSpendActionLaneSummary,
+  getTokenBankControllerShellSummary,
   getTokeniumNamingSummary,
   getTokenBankStateSummary,
   getTokenShopCoverageSummary,
-  getTokenShopCostLaneSummary
+  getTokenShopCostLaneSummary,
+  getTokenShopOwnerShellSummary,
+  getTokenShopSaveBoundarySummary
 } from "../support/spend-boundary-summary.js";
 
 test("formatNumericRanges groups sorted unique values into joined ranges", () => {
@@ -29,6 +33,7 @@ test("getTokenShopCostLaneSummary preserves the spend-lane split labels", () => 
     }),
     {
       hasLaneSplit: true,
+      coverageSource: "legacy-cost-lanes",
       keepsDailyTokeniumSeparate: true,
       tokenLaneLabel: "TokenBoost",
       diamondLaneLabel: "DiamondBoost",
@@ -36,6 +41,94 @@ test("getTokenShopCostLaneSummary preserves the spend-lane split labels", () => 
       costShellLabel: "CostBox",
       costRenderLabel: "CostText",
       descriptionRenderLabel: "DescText"
+    }
+  );
+});
+
+test("getTokenShopCostLaneSummary prefers canonical subject contracts when available", () => {
+  assert.deepEqual(
+    getTokenShopCostLaneSummary({
+      subjectContracts: {
+        "token-shop-atu4-mod": {
+          subjectId: "row:ATU4Button",
+          subjectKind: "row-local",
+          groundedFields: {
+            displayUpdateHooks: ["SetCostRelatedAttributes"]
+          },
+          blockedEdges: ["exact-display-update-path"],
+          blockedInputReason: "assessment:baseline-gap",
+          nextSeam: { id: "exact-display-update-path" }
+        },
+        "token-shop-daily-tokenium-family": {
+          subjectId: "range:token-shop:ATU14Button-ATU19Button",
+          subjectKind: "range-family",
+          knownEdges: ["exact-display-update-path", "row-family-effect-hook"],
+          supportSummary: {
+            supportSurfaceLabels: ["Daily Tokenium title and text surfaces"]
+          }
+        }
+      }
+    }),
+    {
+      hasLaneSplit: true,
+      coverageSource: "subject-contracts",
+      keepsDailyTokeniumSeparate: true,
+      tokenLaneLabel: "row:ATU4Button",
+      diamondLaneLabel: "row-local",
+      dailyLaneLabel: "range:token-shop:ATU14Button-ATU19Button",
+      costShellLabel: "SetCostRelatedAttributes",
+      costRenderLabel: "Daily Tokenium title and text surfaces",
+      descriptionRenderLabel: "exact-display-update-path",
+      rowLocalSubjectId: "row:ATU4Button",
+      rangeFamilySubjectId: "range:token-shop:ATU14Button-ATU19Button",
+      rowLocalSubjectKind: "row-local",
+      rangeFamilySubjectKind: "range-family",
+      rowLocalBlockedEdges: ["exact-display-update-path"],
+      rangeFamilyKnownEdges: ["exact-display-update-path", "row-family-effect-hook"],
+      blockedInputReason: "assessment:baseline-gap"
+    }
+  );
+});
+
+test("getSpendActionLaneSummary prefers canonical subject contracts when available", () => {
+  assert.deepEqual(
+    getSpendActionLaneSummary({
+      subjectContracts: {
+        "token-shop-atu7-mk3-bridge": {
+          subjectId: "row:ATU7Button",
+          subjectKind: "row-local",
+          groundedFields: {
+            actionMethods: ["BuyMK3TokenBoost"]
+          },
+          knownEdges: ["exact-shell-to-action-hook"]
+        },
+        "token-shop-daily-tokenium-family": {
+          subjectId: "range:token-shop:ATU14Button-ATU19Button",
+          subjectKind: "range-family",
+          knownEdges: ["row-family-action-hook"],
+          nonblockingEdges: ["exact-shell-to-action-hook"],
+          nextSeam: { id: "none" }
+        }
+      }
+    }),
+    {
+      hasActionSplit: true,
+      coverageSource: "subject-contracts",
+      keepsDailyDirectHooksUnrecovered: true,
+      tokenHook: "row:ATU7Button",
+      diamondHook: "row-local",
+      loopModifierHook: "BuyMK3TokenBoost",
+      premiumModifierHook: "range:token-shop:ATU14Button-ATU19Button",
+      dailyHookT2: "exact-shell-to-action-hook",
+      dailyHookT3: "none",
+      rowLocalSubjectId: "row:ATU7Button",
+      rangeFamilySubjectId: "range:token-shop:ATU14Button-ATU19Button",
+      rowLocalSubjectKind: "row-local",
+      rangeFamilySubjectKind: "range-family",
+      rowLocalKnownEdges: ["exact-shell-to-action-hook"],
+      rangeFamilyKnownEdges: ["row-family-action-hook"],
+      rangeFamilyNonblockingEdges: ["exact-shell-to-action-hook"],
+      blockedInputReason: null
     }
   );
 });
@@ -101,11 +194,244 @@ test("token spend naming and coverage summaries preserve the checked lane anchor
     }),
     {
       hasCoverage: true,
+      coverageSource: "extract",
       numericGroupCount: 3,
       hasNamedLanes: true,
       namedLaneLabel: "TokenBoost, DiamondBoost, TokenDailiesT2",
       tierLabel: "T1, T2",
       hasControllerAnchors: true
+    }
+  );
+});
+
+test("getTokenShopCoverageSummary prefers canonical subject contracts when available", () => {
+  assert.deepEqual(
+    getTokenShopCoverageSummary({
+      subjectContracts: {
+        "token-shop-atu4-mod": {
+          subjectId: "row:ATU4Button",
+          subjectKind: "row-local",
+          groundedFields: {
+            actionMethods: ["BuyModBoost"]
+          },
+          knownEdges: ["exact-shell-to-prefab"],
+          blockedEdges: ["exact-display-update-path"]
+        },
+        "token-shop-late-atu-family": {
+          subjectId: "range:token-shop:ATU24Button-ATU28Button",
+          subjectKind: "range-family",
+          groundedFields: {},
+          knownEdges: ["row-family-action-hook"],
+          blockedEdges: ["exact-shell-to-title"]
+        }
+      }
+    }),
+    {
+      hasCoverage: true,
+      coverageSource: "subject-contracts",
+      numericGroupCount: 2,
+      hasNamedLanes: true,
+      namedLaneLabel: "row:ATU4Button, range:token-shop:ATU24Button-ATU28Button",
+      tierLabel: "1 row-local and 1 range-family canonical subjects",
+      hasControllerAnchors: true,
+      subjectCount: 2,
+      rowLocalCount: 1,
+      rangeFamilyCount: 1,
+      blockedCount: 2,
+      subjectLabels: ["row:ATU4Button", "range:token-shop:ATU24Button-ATU28Button"]
+    }
+  );
+});
+
+test("getTokenShopOwnerShellSummary prefers canonical subject contracts when available", () => {
+  assert.deepEqual(
+    getTokenShopOwnerShellSummary({
+      subjectContracts: {
+        "token-shop-atu7-mk3-bridge": {
+          subjectId: "row:ATU7Button",
+          subjectKind: "row-local",
+          groundedFields: {
+            actionMethods: ["BuyMK3TokenBoost"]
+          },
+          knownEdges: ["exact-shell-to-action-hook"],
+          nextSeam: { id: "exact-display-update-path" }
+        },
+        "token-shop-late-atu-family": {
+          subjectId: "range:token-shop:ATU24Button-ATU28Button",
+          subjectKind: "range-family",
+          knownEdges: ["row-family-action-hook"],
+          blockedEdges: ["exact-shell-to-title"],
+          blockedInputReason: "reconstruction:baseline-gap"
+        }
+      }
+    }),
+    {
+      hasOwnerShell: true,
+      coverageSource: "subject-contracts",
+      ownerAnchor: "row:ATU7Button",
+      bankMethod: "BuyMK3TokenBoost",
+      notificationHook: "exact-display-update-path",
+      deviceHook: "range:token-shop:ATU24Button-ATU28Button",
+      rowLocalSubjectId: "row:ATU7Button",
+      rangeFamilySubjectId: "range:token-shop:ATU24Button-ATU28Button",
+      rowLocalSubjectKind: "row-local",
+      rangeFamilySubjectKind: "range-family",
+      rowLocalKnownEdges: ["exact-shell-to-action-hook"],
+      rangeKnownEdges: ["row-family-action-hook"],
+      rangeBlockedEdges: ["exact-shell-to-title"],
+      blockedInputReason: "reconstruction:baseline-gap"
+    }
+  );
+});
+
+test("getTokenShopSaveBoundarySummary prefers canonical subject contracts when available", () => {
+  assert.deepEqual(
+    getTokenShopSaveBoundarySummary({
+      subjectContracts: {
+        "token-shop-atu4-mod": {
+          subjectId: "row:ATU4Button",
+          subjectKind: "row-local",
+          blockedEdges: ["exact-display-update-path"],
+          blockedInputReason: "assessment:baseline-gap"
+        },
+        "token-shop-late-atu-family": {
+          subjectId: "range:token-shop:ATU24Button-ATU28Button",
+          subjectKind: "range-family",
+          blockedEdges: ["exact-shell-to-title"],
+          blockedInputReason: "reconstruction:baseline-gap"
+        }
+      }
+    }),
+    {
+      hasSeparationBoundary: true,
+      coverageSource: "subject-contracts",
+      ownerAnchor: "row:ATU4Button",
+      saveAnchor: "range:token-shop:ATU24Button-ATU28Button",
+      overlapLabel: "canonical subject-state separation",
+      rowLocalSubjectId: "row:ATU4Button",
+      rangeFamilySubjectId: "range:token-shop:ATU24Button-ATU28Button",
+      rowLocalSubjectKind: "row-local",
+      rangeFamilySubjectKind: "range-family",
+      rowLocalBlockedEdges: ["exact-display-update-path"],
+      rangeFamilyBlockedEdges: ["exact-shell-to-title"],
+      blockedInputReason: "reconstruction:baseline-gap"
+    }
+  );
+});
+
+test("getTokenBankControllerShellSummary prefers canonical subject contracts when available", () => {
+  assert.deepEqual(
+    getTokenBankControllerShellSummary({
+      subjectContracts: {
+        "token-shop-atu7-mk3-bridge": {
+          subjectId: "row:ATU7Button",
+          subjectKind: "row-local",
+          groundedFields: {
+            tokenBankController: {
+              claimMethod: "ClaimBankedTokens",
+              fillMethod: "SetBankFill",
+              fillField: "BankFill",
+              descriptionShell: "TokenBankDescriptionText",
+              notificationHook: "CheckTokenClaimNotification",
+              adjacentTerms: [
+                "get_TokenBankCap",
+                "get_ClaimableBankTokens",
+                "IncreaseBankedTokens",
+                "TokenShopButtonNotification"
+              ]
+            }
+          },
+          blockedInputReasons: {
+            tokenBankController: "reconstruction:missing-seam"
+          }
+        },
+        "token-shop-late-atu-family": {
+          subjectId: "range:token-shop:ATU24Button-ATU28Button",
+          subjectKind: "range-family",
+          groundedFields: {
+            tokenBankController: {
+              claimMethod: "ClaimBankedTokens"
+            }
+          }
+        }
+      }
+    }),
+    {
+      hasControllerShell: true,
+      coverageSource: "subject-contracts",
+      claimMethod: "ClaimBankedTokens",
+      fillMethod: "SetBankFill",
+      fillField: "BankFill",
+      descriptionShell: "TokenBankDescriptionText",
+      notificationHook: "CheckTokenClaimNotification",
+      rowLocalSubjectId: "row:ATU7Button",
+      rangeFamilySubjectId: "range:token-shop:ATU24Button-ATU28Button",
+      rowLocalSubjectKind: "row-local",
+      rangeFamilySubjectKind: "range-family",
+      adjacentTerms: [
+        "get_TokenBankCap",
+        "get_ClaimableBankTokens",
+        "IncreaseBankedTokens",
+        "TokenShopButtonNotification"
+      ],
+      blockedInputReason: "reconstruction:missing-seam"
+    }
+  );
+});
+
+test("getTokenBankStateSummary prefers canonical subject contracts when available", () => {
+  assert.deepEqual(
+    getTokenBankStateSummary({
+      subjectContracts: {
+        "token-shop-atu4-mod": {
+          subjectId: "row:ATU4Button",
+          subjectKind: "row-local",
+          groundedFields: {
+            tokenBankState: {
+              claimMethod: "ClaimBankedTokens",
+              capMethod: "get_TokenBankCap",
+              displayShell: "BigStatisticPrefab.TokenBankCap",
+              loopHandler: "TextHandlerLoopMods",
+              loopHook: "SetLM244BonusText",
+              cloudSaveShell: "CloudSavePlayerProfile",
+              cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
+              cloudSaveProfileRoutine: "GetPlayerProfileInfo",
+              cloudSaveStateMachine: "<CloudSavePlayerProfile>d__24"
+            }
+          }
+        },
+        "token-shop-late-atu-family": {
+          subjectId: "range:token-shop:ATU24Button-ATU28Button",
+          subjectKind: "range-family",
+          groundedFields: {
+            tokenBankState: {
+              claimMethod: "ClaimBankedTokens"
+            }
+          },
+          blockedInputReasons: {
+            tokenBankState: "reconstruction:baseline-gap"
+          }
+        }
+      }
+    }),
+    {
+      hasControllerSplit: true,
+      hasCloudSaveShellBoundary: true,
+      coverageSource: "subject-contracts",
+      claimMethod: "ClaimBankedTokens",
+      capMethod: "get_TokenBankCap",
+      displayShell: "BigStatisticPrefab.TokenBankCap",
+      loopHandler: "TextHandlerLoopMods",
+      loopHook: "SetLM244BonusText",
+      cloudSaveShell: "CloudSavePlayerProfile",
+      cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
+      cloudSaveProfileRoutine: "GetPlayerProfileInfo",
+      cloudSaveStateMachine: "<CloudSavePlayerProfile>d__24",
+      rowLocalSubjectId: "row:ATU4Button",
+      rangeFamilySubjectId: "range:token-shop:ATU24Button-ATU28Button",
+      rowLocalSubjectKind: "row-local",
+      rangeFamilySubjectKind: "range-family",
+      blockedInputReason: "reconstruction:baseline-gap"
     }
   );
 });

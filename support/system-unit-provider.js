@@ -12,6 +12,10 @@ function shouldUseDbSystemUnitApi(origin, serverCapabilities) {
   return String(origin || "").startsWith("http") && serverCapabilities?.systemUnitApi === true;
 }
 
+function shouldUseDbSubjectContractApi(origin, serverCapabilities) {
+  return String(origin || "").startsWith("http") && serverCapabilities?.subjectContractApi === true;
+}
+
 function shouldAllowStaticFallback(origin, serverCapabilities, allowStaticFallback) {
   if (typeof allowStaticFallback === "boolean") {
     return allowStaticFallback;
@@ -36,20 +40,44 @@ async function loadStaticSystemUnits(fetchJson) {
   };
 }
 
+async function loadDbSubjectContracts(fetchJson, systemId, scopes) {
+  if (!scopes.length) {
+    return null;
+  }
+  const query = new URLSearchParams({
+    systemId,
+    scopes: scopes.join(",")
+  });
+  return fetchJson(`/api/subject-contracts?${query.toString()}`);
+}
+
 export async function loadSystemUnits({
   fetchJson,
   origin,
   serverCapabilities,
-  allowStaticFallback
+  allowStaticFallback,
+  subjectContractScopes = {}
 }) {
   if (shouldUseDbSystemUnitApi(origin, serverCapabilities)) {
     try {
       const query = new URLSearchParams({ ids: SYSTEM_UNIT_IDS.join(",") });
-      const payload = await fetchJson(`/api/system-units?${query.toString()}`);
+      const [payload, tokenShopSubjectContracts] = await Promise.all([
+        fetchJson(`/api/system-units?${query.toString()}`),
+        shouldUseDbSubjectContractApi(origin, serverCapabilities)
+          ? loadDbSubjectContracts(
+              fetchJson,
+              "token-shop",
+              Array.isArray(subjectContractScopes?.tokenShop) ? subjectContractScopes.tokenShop : []
+            ).catch(() => null)
+          : Promise.resolve(null)
+      ]);
       return {
         mode: "db",
         source: "materialized_system_unit_views",
         builtAt: payload?.builtAt ?? null,
+        subjectContracts: {
+          tokenShop: tokenShopSubjectContracts
+        },
         units: {
           appMeta: payload?.units?.["app-meta"] ?? null,
           playerState: payload?.units?.["player-state"] ?? null,
@@ -72,5 +100,11 @@ export async function loadSystemUnits({
     }
   }
 
-  return loadStaticSystemUnits(fetchJson);
+  const staticPayload = await loadStaticSystemUnits(fetchJson);
+  return {
+    ...staticPayload,
+    subjectContracts: {
+      tokenShop: null
+    }
+  };
 }

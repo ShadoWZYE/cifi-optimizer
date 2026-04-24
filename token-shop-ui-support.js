@@ -101,6 +101,13 @@ export function createTokenShopUiSupport({ formatValue }) {
   }
 
   function getTokenShopRowGroundingSummary(row) {
+    if (row?.subjectId) {
+      const blockedLine =
+        typeof row?.blockedInputReason === "string" && row.blockedInputReason
+          ? ` Blocked input: ${row.blockedInputReason}.`
+          : "";
+      return `Grounded through canonical ${row.subjectKind || "subject"} ${row.subjectId}.${blockedLine}`.trim();
+    }
     if (row?.rowType === "effect-driven") {
       return "Grounded as an effect-driven row from checked shell, action, and shared-effect evidence.";
     }
@@ -123,6 +130,23 @@ export function createTokenShopUiSupport({ formatValue }) {
 
   function getTokenShopActionLabel(row) {
     return row?.isMaxed ? "MAXED" : "BUY";
+  }
+
+  function getTokenShopContractMetaLine(row) {
+    if (!row?.subjectId) {
+      return "";
+    }
+    const edgeBits = [];
+    if (Array.isArray(row.knownEdges) && row.knownEdges.length) {
+      edgeBits.push(`${row.knownEdges.length} known`);
+    }
+    if (Array.isArray(row.blockedEdges) && row.blockedEdges.length) {
+      edgeBits.push(`${row.blockedEdges.length} blocked`);
+    }
+    if (Array.isArray(row.nonblockingEdges) && row.nonblockingEdges.length) {
+      edgeBits.push(`${row.nonblockingEdges.length} nonblocking`);
+    }
+    return `${row.subjectKind || "subject"} • ${row.subjectId}${edgeBits.length ? ` • ${edgeBits.join(" / ")}` : ""}`;
   }
 
   function formatTokenShopBonusMagnitude(value, mode) {
@@ -173,6 +197,7 @@ export function createTokenShopUiSupport({ formatValue }) {
     formatTokenShopEffectLine,
     getTokenShopPlayerFacingSupportText,
     getTokenShopRowGroundingSummary,
+    getTokenShopContractMetaLine,
     formatTokenShopSentence,
     getTokenShopActionLabel,
     getTokenShopBonusStripEntries

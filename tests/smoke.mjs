@@ -6948,25 +6948,28 @@ assert.match(
 assert.match(systemUnitProviderJs, /\.\/data\/system-units\/token-shop\.v1\.json/);
 assert.match(spendBoundarySummaryJs, /function getTokenShopCostLaneSummary/);
 assert.match(appJs, /TokenShop cost-lane split/);
-assert.match(appJs, /TokenBoost, DiamondBoost, TokenDailiesT2, CostBox, and DescText available/);
 assert.match(
   appJs,
-  /Cost-lane support preserves \${tokenShopCostLaneSummary\.tokenLaneLabel}, \${tokenShopCostLaneSummary\.diamondLaneLabel}, \${tokenShopCostLaneSummary\.dailyLaneLabel}, \${tokenShopCostLaneSummary\.costShellLabel}, and \${tokenShopCostLaneSummary\.descriptionRenderLabel}/
+  /Canonical TokenShop subjects now preserve \$\{tokenShopCostLaneSummary\.rowLocalSubjectId\} plus \$\{tokenShopCostLaneSummary\.rangeFamilySubjectId\}/
+);
+assert.match(
+  appJs,
+  /Cost-lane support preserves \${tokenShopCostLaneSummary\.tokenLaneLabel}, \${tokenShopCostLaneSummary\.diamondLaneLabel}, \${tokenShopCostLaneSummary\.dailyLaneLabel}, \${tokenShopCostLaneSummary\.costShellLabel}, and \${tokenShopCostLaneSummary\.descriptionRenderLabel}|Canonical TokenShop subjects now preserve \${tokenShopCostLaneSummary\.rowLocalSubjectId} plus \${tokenShopCostLaneSummary\.rangeFamilySubjectId}/
 );
 assert.match(appJs, /modifier-side reward lane|budget lane/);
 assert.match(spendBoundarySummaryJs, /function getSpendActionLaneSummary/);
 assert.match(appJs, /Spend action-lane split/);
 assert.match(
   appJs,
-  /BuyTokenBoost, BuyDiamondBoost, BuyLM244, BuyCollectorDevice, and zero BuyTokenDailies hooks preserved/
+  /Canonical TokenShop action coverage or legacy spend action-lane clues preserved/
 );
 assert.match(
   appJs,
-  /Action-lane clues preserve \${spendActionLaneSummary\.tokenHook}, \${spendActionLaneSummary\.diamondHook}, \${spendActionLaneSummary\.loopModifierHook}, and \${spendActionLaneSummary\.premiumModifierHook}/
+  /Canonical TokenShop action coverage now preserves \${spendActionLaneSummary\.rowLocalSubjectId} via \${spendActionLaneSummary\.loopModifierHook}, while \${spendActionLaneSummary\.rangeFamilySubjectId} keeps \${spendActionLaneSummary\.dailyHookT2} recorded with blocked input \${spendActionLaneSummary\.blockedInputReason \|\| "explicitly de-scoped"}|Action-lane clues preserve \${spendActionLaneSummary\.tokenHook}, \${spendActionLaneSummary\.diamondHook}, \${spendActionLaneSummary\.loopModifierHook}, and \${spendActionLaneSummary\.premiumModifierHook}/
 );
 assert.match(
   appJs,
-  /Action-lane clues preserve \${spendActionLaneSummary\.tokenHook}, \${spendActionLaneSummary\.diamondHook}, \${spendActionLaneSummary\.loopModifierHook}, and \${spendActionLaneSummary\.premiumModifierHook}|Spend action-lane clues are not available in this build/
+  /Canonical TokenShop action coverage now preserves \${spendActionLaneSummary\.rowLocalSubjectId} via \${spendActionLaneSummary\.loopModifierHook}, while \${spendActionLaneSummary\.rangeFamilySubjectId} keeps \${spendActionLaneSummary\.dailyHookT2} recorded with blocked input \${spendActionLaneSummary\.blockedInputReason \|\| "explicitly de-scoped"}|Action-lane clues preserve \${spendActionLaneSummary\.tokenHook}, \${spendActionLaneSummary\.diamondHook}, \${spendActionLaneSummary\.loopModifierHook}, and \${spendActionLaneSummary\.premiumModifierHook}|Spend action-lane clues are not available in this build/
 );
 assert.match(spendBoundarySummaryJs, /"BuyTokenBoost"/);
 assert.match(spendBoundarySummaryJs, /"BuyDiamondBoost"/);
@@ -6978,7 +6981,7 @@ assert.match(spendBoundarySummaryJs, /function getTokenShopOwnerShellSummary/);
 assert.match(appJs, /TokenShop owner shell/);
 assert.match(
   appJs,
-  /TokenShop, ClaimBankedTokens, CheckTokenClaimNotification, and BuyAutoTokenClicker preserved as one local owner shell/
+  /TokenShop canonical subjects now preserve \$\{tokenShopOwnerShellSummary\.rowLocalSubjectId\} plus \$\{tokenShopOwnerShellSummary\.rangeFamilySubjectId\}/i
 );
 assert.match(
   appJs,
@@ -6989,7 +6992,7 @@ assert.match(spendBoundarySummaryJs, /function getTokenShopSaveBoundarySummary/)
 assert.match(appJs, /TokenShop save boundary/);
 assert.match(
   appJs,
-  /TokenShop owner shell and PlayerProfileData save-family clues stay separate with zero overlap/
+  /TokenShop canonical subject-state keeps \$\{tokenShopSaveBoundarySummary\.rowLocalSubjectId\} separate from \$\{tokenShopSaveBoundarySummary\.rangeFamilySubjectId\}, with blocked input \$\{tokenShopSaveBoundarySummary\.blockedInputReason\}\./
 );
 assert.match(
   appJs,
@@ -7003,11 +7006,11 @@ assert.match(spendBoundarySummaryJs, /function getTokenBankControllerShellSummar
 assert.match(appJs, /Token-bank controller shell/);
 assert.match(
   appJs,
-  /ClaimBankedTokens, SetBankFill, BankFill, TokenBankDescriptionText, and CheckTokenClaimNotification preserved/
+  /Canonical TokenShop controller shell or legacy token-bank controller shell preserved/
 );
 assert.match(
   appJs,
-  /The token-bank controller shell preserves \${tokenBankControllerShellSummary\.claimMethod}, \${tokenBankControllerShellSummary\.fillMethod}, \${tokenBankControllerShellSummary\.fillField}, \${tokenBankControllerShellSummary\.descriptionShell}, and \${tokenBankControllerShellSummary\.notificationHook}/
+  /Canonical TokenShop contracts now preserve token-bank controller shell on \${tokenBankControllerShellSummary\.rowLocalSubjectId}, with \${tokenBankControllerShellSummary\.claimMethod}, \${tokenBankControllerShellSummary\.fillMethod}, \${tokenBankControllerShellSummary\.fillField}, \${tokenBankControllerShellSummary\.descriptionShell}, and \${tokenBankControllerShellSummary\.notificationHook}|The token-bank controller shell preserves \${tokenBankControllerShellSummary\.claimMethod}, \${tokenBankControllerShellSummary\.fillMethod}, \${tokenBankControllerShellSummary\.fillField}, \${tokenBankControllerShellSummary\.descriptionShell}, and \${tokenBankControllerShellSummary\.notificationHook}/
 );
 assert.match(
   appJs,
