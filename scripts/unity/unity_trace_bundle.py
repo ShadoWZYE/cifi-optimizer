@@ -15,9 +15,6 @@ from time import perf_counter
 from typing import Any
 
 from ghidra_cache_db import (
-    BOOTSTRAP_DEFAULT_ANCHORS,
-    BOOTSTRAP_OUTPUT_SUMMARY_RULES,
-    BOOTSTRAP_SUPPORT_CONTEXTS,
     FAMILY_GRAPH_LABELS,
     GhidraCacheDB,
 )
@@ -4299,34 +4296,29 @@ RUNTIME_SOURCE_FAMILIES = {
 
 def build_runtime_trace_catalog() -> dict[str, Any]:
     targets: dict[str, Any] = {}
+    resolver_targets = {
+        str(row.get("traceScope") or ""): dict(row.get("payload") or {})
+        for row in get_trace_db().list_materialized_resolver_target_views("cifi-full", "libil2cpp.so")
+        if str(row.get("traceScope") or "").strip()
+    }
     for row in _latest_materialized_target_payloads():
         payload = dict(row.get("payload") or {})
         target = dict(payload.get("target") or {})
         target_id = str(target.get("id") or row.get("traceScope") or "").strip()
         if not target_id:
             continue
-        resolver_target = get_trace_db().find_materialized_resolver_target_view(
-            "cifi-full",
-            "libil2cpp.so",
-            target_id,
-        ) or {}
-        resolver_payload = dict(resolver_target.get("payload") or {})
+        resolver_payload = dict(resolver_targets.get(target_id) or {})
         merged_target = dict(target)
         merged_target["id"] = target_id
         merged_target.setdefault("label", target_id)
         merged_target.setdefault("requiredSourceFamilies", list(CANONICAL_SOURCE_IDS))
         merged_target.setdefault("defaultAnchors", list(resolver_payload.get("anchorTerms") or []))
+        merged_target.setdefault("acceptedAnchors", list(resolver_payload.get("acceptedAnchors") or target.get("acceptedAnchors") or []))
         if resolver_payload.get("outputSummaryRules"):
             merged_target["outputSummaryRules"] = dict(resolver_payload.get("outputSummaryRules") or {})
         targets[target_id] = merged_target
 
-    for target_id in unique_strings(
-        [
-            *list(BOOTSTRAP_SUPPORT_CONTEXTS.keys()),
-            *list(BOOTSTRAP_DEFAULT_ANCHORS.keys()),
-            *list(BOOTSTRAP_OUTPUT_SUMMARY_RULES.keys()),
-        ]
-    ):
+    for target_id, resolver_payload in resolver_targets.items():
         if target_id in targets:
             continue
         execution_context = get_trace_db().find_or_synthesize_execution_context(
@@ -4335,12 +4327,6 @@ def build_runtime_trace_catalog() -> dict[str, Any]:
             target_id,
             compatibility_target_id=target_id,
         )
-        resolver_target = get_trace_db().find_materialized_resolver_target_view(
-            "cifi-full",
-            "libil2cpp.so",
-            target_id,
-        ) or {}
-        resolver_payload = dict(resolver_target.get("payload") or {})
         family_id = str(execution_context.get("familyId") or "").strip()
         if not family_id:
             continue
@@ -4348,9 +4334,9 @@ def build_runtime_trace_catalog() -> dict[str, Any]:
             "id": target_id,
             "label": str(execution_context.get("label") or target_id),
             "familyId": family_id,
-            "acceptedAnchors": list(execution_context.get("acceptedAnchors") or []),
+            "acceptedAnchors": list(resolver_payload.get("acceptedAnchors") or execution_context.get("acceptedAnchors") or []),
             "joinGoal": execution_context.get("joinGoal"),
-            "outputSummaryRules": execution_context.get("outputSummaryRules"),
+            "outputSummaryRules": resolver_payload.get("outputSummaryRules") or execution_context.get("outputSummaryRules"),
             "requiredSourceFamilies": list(CANONICAL_SOURCE_IDS),
             "defaultAnchors": list(resolver_payload.get("anchorTerms") or []),
             "solvedBaselineTargetId": execution_context.get("solvedBaselineTargetId"),

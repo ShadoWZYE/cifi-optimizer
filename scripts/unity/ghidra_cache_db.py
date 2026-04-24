@@ -1116,6 +1116,61 @@ def _synthesize_surface_plan_from_registry(
     }
 
 
+def _synthesize_surface_plan_from_db_state(
+    trace_scope: str,
+    compatibility_target_id: str,
+    family_id: str,
+    resolver_target_payload: dict[str, Any],
+    latest_bundle_payload: dict[str, Any],
+) -> dict[str, Any]:
+    resolver_payload = dict(resolver_target_payload or {})
+    support_surfaces = [surface for surface in (resolver_payload.get("supportSurfaces") or []) if isinstance(surface, dict)]
+    if not support_surfaces:
+        return {}
+    support_rows = [row for row in (resolver_payload.get("supportRows") or []) if isinstance(row, dict)]
+    shell_window = dict(resolver_payload.get("shellWindow") or {})
+    if not shell_window and support_rows:
+        first_row = dict(support_rows[0])
+        last_row = dict(support_rows[-1])
+        shell_field = str(first_row.get("shellField") or first_row.get("field") or "").strip()
+        if len(support_rows) > 1:
+            last_field = str(last_row.get("shellField") or last_row.get("field") or "").strip()
+            if shell_field and last_field and last_field != shell_field:
+                shell_field = f"{shell_field} through {last_field}"
+        shell_window = {
+            "shellField": shell_field,
+            "shellPathId": str(first_row.get("shellPathId") or "").strip() or None,
+            "shellWindowSource": "materializedResolverTargetView",
+        }
+    if not shell_window:
+        target_payload = dict(latest_bundle_payload.get("target") or {})
+        shell_window = {
+            key: target_payload.get(key)
+            for key in ("shellField", "shellPathId", "shellWindowSource", "shellWindowRadius")
+            if target_payload.get(key) is not None
+        }
+    if not shell_window:
+        return {}
+    return {
+        "semanticKey": f"target-surface-plan:{trace_scope}",
+        "traceScope": trace_scope,
+        "targetId": compatibility_target_id or trace_scope,
+        "familyId": family_id or resolver_payload.get("familyId") or None,
+        "shellWindow": shell_window,
+        "surfacePlans": [
+            {
+                "id": str(surface.get("id") or ""),
+                "label": str(surface.get("label") or ""),
+                "terms": _unique_strings([str(value) for value in (surface.get("terms") or []) if str(value).strip()]),
+                "sourceIds": _unique_strings([str(value) for value in (surface.get("sourceIds") or []) if str(value).strip()]),
+            }
+            for surface in support_surfaces
+        ],
+        "synthesized": True,
+        "synthesizedFrom": "resolver-target-view",
+    }
+
+
 def _derive_shard_owned_state_semantic_scope(
     trace_scope: str,
     payload: dict[str, Any],
@@ -3850,6 +3905,76 @@ def _derive_output_summary_rules_from_state(
             "research": research_message,
         },
     }
+
+
+def _derive_support_context_from_resolver_state(
+    trace_scope: str,
+    execution_context: dict[str, Any],
+    resolver_target: dict[str, Any],
+    surface_plan: dict[str, Any],
+    latest_bundle_payload: dict[str, Any],
+) -> dict[str, Any]:
+    resolver_payload = dict(resolver_target or {})
+    support_surfaces = list(resolver_payload.get("supportSurfaces") or [])
+    support_rows = list(resolver_payload.get("supportRows") or [])
+    support_surface_ids = {str(surface.get("id") or "").strip() for surface in support_surfaces if str(surface.get("id") or "").strip()}
+    target_class = str(resolver_payload.get("targetClass") or "").strip()
+    blocked_edge_types = {str(value) for value in (resolver_payload.get("blockedEdgeTypes") or []) if str(value).strip()}
+    effective_family_id = (
+        str(execution_context.get("familyId") or "").strip()
+        or str(resolver_payload.get("familyId") or "").strip()
+        or ("token-shop" if trace_scope.startswith("token-shop") else "")
+    )
+    trace_routine_hint = ""
+    family_trace_profile = ""
+    disable_native_trace = False
+    default_presentation_update_hook = ""
+    native_trace_terms: list[str] = []
+
+    if effective_family_id == "token-shop":
+        if len(support_rows) > 1:
+            trace_routine_hint = "token-shop-family-trace"
+            if target_class == "range-family-audit" and {"title-text-surfaces", "prefab-roster", "effect-lane"} <= support_surface_ids:
+                family_trace_profile = "late-atu-family"
+                disable_native_trace = True
+            elif {"title-text-surfaces", "prefab-roster", "action-lane"} <= support_surface_ids:
+                family_trace_profile = "generic-structure"
+        else:
+            if {"support-text-lane", "title-roster-gap", "prefab-lane"} <= support_surface_ids:
+                trace_routine_hint = "token-shop-mk1-title-trace"
+            elif {"title-lane", "prefab-lane", "text-hooks"} <= support_surface_ids:
+                trace_routine_hint = "token-shop-mod-trace"
+            elif {"prefab-lane", "action-lane"} <= support_surface_ids and "metadata-neighborhood" in support_surface_ids:
+                trace_routine_hint = "token-shop-mk3-bridge-trace"
+            elif {"shared-effect-title", "shared-effect-text", "detached-identity-surfaces"} <= support_surface_ids:
+                trace_routine_hint = "token-shop-atu3-effect-trace"
+            elif {"consumer-family", "consumer-routines", "chest-objects"} <= support_surface_ids:
+                trace_routine_hint = "token-shop-atu3-consumer-trace"
+            elif {"consumer-family", "consumer-routines", "booster-bonus-shell"} <= support_surface_ids:
+                trace_routine_hint = "token-shop-atu3-consumer-read-trace"
+            if "exact-display-update-path" in blocked_edge_types:
+                default_presentation_update_hook = "SetCostRelatedAttributes"
+        if not disable_native_trace:
+            native_trace_terms = _unique_strings(list(resolver_payload.get("anchorTerms") or [])[:12])
+
+    support_context = {
+        "traceRoutineHint": trace_routine_hint,
+        "familyTraceProfile": family_trace_profile or None,
+        "disableNativeTrace": disable_native_trace,
+        "defaultPresentationUpdateHook": default_presentation_update_hook or None,
+        "nativeTraceTerms": native_trace_terms,
+        "resolutionAliases": list(resolver_payload.get("resolutionAliases") or []),
+        "surfaces": support_surfaces,
+        "acceptedAnchors": list(resolver_payload.get("acceptedAnchors") or execution_context.get("acceptedAnchors") or []),
+        "defaultAnchors": list(resolver_payload.get("anchorTerms") or []),
+        "outputSummaryRules": dict(resolver_payload.get("outputSummaryRules") or execution_context.get("outputSummaryRules") or {}),
+        "supportRows": support_rows,
+        "shellWindow": dict(surface_plan.get("shellWindow") or {}),
+        "blockedEdgeTypes": list(resolver_payload.get("blockedEdgeTypes") or []),
+        "clearedEdgeTypes": list(resolver_payload.get("clearedEdgeTypes") or []),
+        "nextSeam": str(((latest_bundle_payload.get("knowledgePlan") or {}).get("nextSeam") or "")).strip() or None,
+    }
+    return {key: value for key, value in support_context.items() if value not in (None, "", [], {})}
 
 
 def _stable_proof_value(value: Any) -> Any:
@@ -7891,6 +8016,31 @@ class GhidraCacheDB:
             "builtAt": str(row["built_at"]),
         }
 
+    def list_materialized_resolver_target_views(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> list[dict[str, Any]]:
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT * FROM materialized_resolver_target_views
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+        return [
+            {
+                "traceScope": str(row["trace_scope"]),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"]),
+                "builtAt": str(row["built_at"]),
+            }
+            for row in rows
+        ]
+
     def find_or_materialize_resolver_target_view(
         self,
         project_name: str,
@@ -8007,6 +8157,7 @@ class GhidraCacheDB:
             "whyExists": _resolver_why_exists(trace_scope, execution_context, latest_bundle_payload, support_rows, support_surfaces, target_class),
             "supportRows": support_rows,
             "supportSurfaces": support_surfaces,
+            "shellWindow": dict(surface_plan.get("shellWindow") or {}),
             "anchorTerms": anchor_terms,
             "acceptedAnchors": ["class", "method", "string", "path id"],
             "resolutionAliases": resolution_aliases,
@@ -8223,9 +8374,25 @@ class GhidraCacheDB:
         )
         if canonical:
             return dict(canonical.get("payload") or {})
-        return _synthesize_surface_plan_from_registry(
+        resolver_target = self.find_materialized_resolver_target_view(project_name, project_file, trace_scope) or {}
+        resolver_payload = dict(resolver_target.get("payload") or {})
+        latest_bundle = self.find_latest_materialized_target_bundle_view(project_name, project_file, trace_scope) or {}
+        latest_bundle_payload = dict(latest_bundle.get("payload") or {})
+        db_surface_plan = _synthesize_surface_plan_from_db_state(
             str(trace_scope or "").strip(),
             str(compatibility_target_id or trace_scope or "").strip(),
+            str(family_id or "").strip(),
+            resolver_payload,
+            latest_bundle_payload,
+        )
+        if db_surface_plan:
+            return db_surface_plan
+        target_id = str(compatibility_target_id or trace_scope or "").strip()
+        if target_id.startswith("token-shop") and (resolver_payload or latest_bundle_payload):
+            return {}
+        return _synthesize_surface_plan_from_registry(
+            str(trace_scope or "").strip(),
+            target_id,
             str(family_id or "").strip(),
         )
 
@@ -8239,6 +8406,48 @@ class GhidraCacheDB:
         compatibility_target_id: str = "",
     ) -> dict[str, Any]:
         target_id = compatibility_target_id or trace_scope
+        resolver_target = self.find_or_materialize_resolver_target_view(
+            project_name,
+            project_file,
+            trace_scope,
+            family_id=family_id,
+            compatibility_target_id=target_id,
+        ) or {}
+        resolver_payload = dict(resolver_target or {})
+        execution_context = self.find_or_synthesize_execution_context(
+            project_name,
+            project_file,
+            trace_scope,
+            family_id=family_id,
+            compatibility_target_id=target_id,
+        )
+        surface_plan = self.find_or_synthesize_surface_plan(
+            project_name,
+            project_file,
+            trace_scope,
+            family_id=family_id,
+            compatibility_target_id=target_id,
+        ) or {}
+        latest_bundle = self.find_latest_materialized_target_bundle_view(project_name, project_file, trace_scope) or {}
+        latest_bundle_payload = dict(latest_bundle.get("payload") or {})
+        db_support_context = _derive_support_context_from_resolver_state(
+            trace_scope,
+            execution_context,
+            resolver_payload,
+            surface_plan,
+            latest_bundle_payload,
+        )
+        if db_support_context:
+            return {
+                "semanticKey": f"target-support-context:{trace_scope}",
+                "traceScope": trace_scope,
+                "targetId": target_id,
+                "familyId": family_id or str(execution_context.get("familyId") or "") or None,
+                "supportContext": db_support_context,
+                "synthesized": True,
+            }
+        if str(target_id).startswith("token-shop") and (resolver_payload or surface_plan or latest_bundle_payload):
+            return {}
         strategy_config = dict(BOOTSTRAP_SUPPORT_CONTEXTS.get(target_id) or {})
         if not strategy_config:
             return {}
@@ -8969,7 +9178,7 @@ class GhidraCacheDB:
             )
             expanded_anchors = _unique_strings(
                 [
-                    *combined_inputs,
+                    *requested_anchors,
                     *[
                         str(value)
                         for value in (
@@ -9038,7 +9247,7 @@ class GhidraCacheDB:
                     "synonymSetsUsed": [],
                     "expandedAnchors": _unique_strings(
                         [
-                            family_id,
+                            *requested_anchors,
                             *[
                                 str(value)
                                 for value in (
@@ -9374,7 +9583,7 @@ class GhidraCacheDB:
                 selected_subject_label = target_id
             expanded_anchors = _unique_strings(
                 [
-                    *combined_inputs,
+                    *requested_anchors,
                     *[str(value) for value in (list((resolver_target or {}).get("anchorTerms") or []) or [])],
                 ]
             )
