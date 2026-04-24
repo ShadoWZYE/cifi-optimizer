@@ -1398,7 +1398,7 @@
         ],
         "traceScope": "multiverse-market-save-owner-boundary",
         "requestSignature": "01e596a425c49ecf",
-        "builtAt": "2026-04-23T06:06:58.651091",
+        "builtAt": "2026-04-23T18:37:57.148512",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": {
@@ -1498,7 +1498,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "bridge_comparison_fragment": {
@@ -1608,7 +1608,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "dependency_fragment": {
@@ -1736,7 +1736,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "family_graph_fragment": {
@@ -1794,7 +1794,7 @@
                 ],
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "reconstruction_note_fragment": {
@@ -1905,7 +1905,7 @@
             },
             "targetId": "multiverse-market-save-owner-boundary",
             "traceScope": "multiverse-market-save-owner-boundary",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "executionContextSemanticKey": "target-execution-context:multiverse-market-save-owner-boundary",
           "executionPlan": null,
@@ -7346,7 +7346,7 @@
             },
             "targetId": "multiverse-market-save-owner-boundary",
             "traceScope": "multiverse-market-save-owner-boundary",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "tokenShopReconstruction": null,
           "tokenShopReconstructionSemanticKey": null,
@@ -26617,7 +26617,7 @@
         ],
         "traceScope": "multiverse-market-save-owner-boundary",
         "requestSignature": "01e596a425c49ecf",
-        "builtAt": "2026-04-23T06:06:58.651091",
+        "builtAt": "2026-04-23T18:37:57.148512",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": {
@@ -26717,7 +26717,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "bridge_comparison_fragment": {
@@ -26827,7 +26827,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "dependency_fragment": {
@@ -26955,7 +26955,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "family_graph_fragment": {
@@ -27013,7 +27013,7 @@
                 ],
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "reconstruction_note_fragment": {
@@ -27124,7 +27124,7 @@
             },
             "targetId": "multiverse-market-save-owner-boundary",
             "traceScope": "multiverse-market-save-owner-boundary",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "executionContextSemanticKey": "target-execution-context:multiverse-market-save-owner-boundary",
           "executionPlan": null,
@@ -32565,7 +32565,7 @@
             },
             "targetId": "multiverse-market-save-owner-boundary",
             "traceScope": "multiverse-market-save-owner-boundary",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "tokenShopReconstruction": null,
           "tokenShopReconstructionSemanticKey": null,
@@ -53048,7 +53048,7 @@
       ],
       "traceScope": "multiverse-market-save-owner-boundary",
       "requestSignature": "01e596a425c49ecf",
-      "builtAt": "2026-04-23T06:06:58.651091",
+      "builtAt": "2026-04-23T18:37:57.148512",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": {
@@ -53148,7 +53148,7 @@
               },
               "targetId": "multiverse-market-save-owner-boundary",
               "traceScope": "multiverse-market-save-owner-boundary",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "bridge_comparison_fragment": {
@@ -53258,7 +53258,7 @@
               },
               "targetId": "multiverse-market-save-owner-boundary",
               "traceScope": "multiverse-market-save-owner-boundary",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "dependency_fragment": {
@@ -53386,7 +53386,7 @@
               },
               "targetId": "multiverse-market-save-owner-boundary",
               "traceScope": "multiverse-market-save-owner-boundary",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "family_graph_fragment": {
@@ -53444,7 +53444,7 @@
               ],
               "targetId": "multiverse-market-save-owner-boundary",
               "traceScope": "multiverse-market-save-owner-boundary",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "reconstruction_note_fragment": {
@@ -53555,7 +53555,7 @@
           },
           "targetId": "multiverse-market-save-owner-boundary",
           "traceScope": "multiverse-market-save-owner-boundary",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "executionContextSemanticKey": "target-execution-context:multiverse-market-save-owner-boundary",
         "executionPlan": null,
@@ -58996,7 +58996,7 @@
           },
           "targetId": "multiverse-market-save-owner-boundary",
           "traceScope": "multiverse-market-save-owner-boundary",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "tokenShopReconstruction": null,
         "tokenShopReconstructionSemanticKey": null,
@@ -59036,7 +59036,7 @@
         ],
         "traceScope": "multiverse-market-save-owner-boundary",
         "requestSignature": "01e596a425c49ecf",
-        "builtAt": "2026-04-23T06:06:58.651091",
+        "builtAt": "2026-04-23T18:37:57.148512",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": {
@@ -59136,7 +59136,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "bridge_comparison_fragment": {
@@ -59246,7 +59246,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "dependency_fragment": {
@@ -59374,7 +59374,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "family_graph_fragment": {
@@ -59432,7 +59432,7 @@
                 ],
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "reconstruction_note_fragment": {
@@ -59543,7 +59543,7 @@
             },
             "targetId": "multiverse-market-save-owner-boundary",
             "traceScope": "multiverse-market-save-owner-boundary",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "executionContextSemanticKey": "target-execution-context:multiverse-market-save-owner-boundary",
           "executionPlan": null,
@@ -64984,7 +64984,7 @@
             },
             "targetId": "multiverse-market-save-owner-boundary",
             "traceScope": "multiverse-market-save-owner-boundary",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "tokenShopReconstruction": null,
           "tokenShopReconstructionSemanticKey": null,

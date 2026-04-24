@@ -25,6 +25,35 @@ Help build the grounded MVP core of a local-first CIFI toolkit that can replace 
 - recover whole related families together when they share owner shape, runtime behavior, and validation handling
 - split work only when there is a real boundary: different owner families, different runtime systems, different validation paths, meaningfully different blocker states, or review risk from unrelated changes
 
+## Extraction default
+
+Use this default path for unresolved grounded mechanics:
+
+1. `extract:trace` query or target selection through the planner
+2. DB/cache/evidence recovery
+3. reducer/materializer rebuild into canonical semantic fragments, target bundles, and system views
+4. export files only when a snapshot, distribution artifact, or debug surface is explicitly needed
+
+Do not use committed export files as the primary archaeology path when DB-backed trace, cache, or materialized state is available for the same lane.
+
+Treat archived JSON or export snapshots as:
+
+- debug/distribution outputs
+- historical provenance
+- compatibility fallback only when DB-backed state is missing
+
+## Trace run policy
+
+Long native or Ghidra-backed trace runs are normal while cacheable parsing is still maturing. Runtime length by itself is not evidence of a stall.
+
+If a target does not produce the expected DB/materialized artifact, the default next move is not scope widening. It is:
+
+1. probe/tool/materializer realignment
+2. rerun the same target
+3. continue until the artifact appears or the blocker shrinks to one named instrument seam
+
+Only then consider widening into adjacent families.
+
 ## Workflow
 
 - start every task by checking whether the worktree is clean
@@ -36,7 +65,8 @@ Help build the grounded MVP core of a local-first CIFI toolkit that can replace 
 - do not mix unrelated cleanup, planner integration, UI expansion, or parallel research lanes into the same PR
 - do not discard, reset, clean, or delete tracked work unless the user explicitly asks
 - after a successful run, keep advancing the same lane until the next honest move requires human input, human validation, or a real cross-lane decision
-- when a blocker survives the current instrument, change probes, tools, or evidence paths before declaring the lane stalled
+- when a blocker survives the current instrument, change probes, tools, reducers, materializers, or evidence paths before declaring the lane stalled
+- when a run fails to emit the expected DB/materialized artifact, treat that missing artifact as the current blocker and realign the workflow before widening scope
 
 ## Slice contract
 

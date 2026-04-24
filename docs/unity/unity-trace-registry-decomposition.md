@@ -9,6 +9,12 @@ The strict rule is:
 - if SQLite-backed evidence or materialized target state can derive it, it should not stay as registry calibration
 - if it is only stable identity, display naming, or explicit preset/policy metadata, it may remain
 
+Operator rule:
+
+- the default execution path is planner/query selection -> DB/cache/evidence -> reducer/materializer views
+- exported files and archived registries are debug, distribution, or compatibility surfaces unless a lane explicitly says otherwise
+- if a target does not yield the expected DB/materialized artifact, fix the probe/tool/materializer path before widening into adjacent families
+
 ## Responsibility Buckets
 
 ### 1. Source-family declarations
@@ -135,6 +141,7 @@ After this audit, the justified remaining registry role is:
 - temporary strategy/policy hints that have not yet moved into DB-owned planner or semantic state
 
 It should no longer be treated as a place to store live structural truth.
+It should also no longer be treated as the default archaeology path when a DB-backed target, semantic scope, or materialized view already exists.
 
 ## Remaining DB-Driven Resolution Work
 

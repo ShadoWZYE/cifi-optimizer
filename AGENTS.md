@@ -12,6 +12,25 @@ Evolve this repo toward a grounded MVP core replacing fragmented external CiFi t
 - Choose next highest-value adjacent step automatically
 - Stop only when human input/validation/cross-lane choices are needed
 
+## Default extraction path
+
+When grounded game truth is missing, the default recovery path is:
+
+1. trace/query planner selection
+2. DB/cache/evidence collection
+3. reducer/materializer rebuild into canonical/materialized views
+4. system-unit or JSON export only when a static snapshot is explicitly needed
+
+Do not treat committed export files as the active truth path when the same lane already has DB-backed evidence, semantic fragments, materialized target bundles, or system views.
+
+Export-file archaeology is fallback-only for:
+
+- debug or distribution snapshots
+- historical provenance comparison
+- temporary compatibility review when DB-backed state is missing
+
+It is not the default lane progression model for active extraction or trace work.
+
 ## MVP scope
 
 Prioritize:
@@ -77,6 +96,26 @@ Before wiring systems into app behavior:
 4. Community/external-model labeled support
 
 Agents should prefer APK/Unity extraction/mapping when grounded game truth is missing.
+
+For active extraction lanes, prefer DB-backed trace/materializer outputs over archived export surfaces when both exist.
+
+## Trace and materializer policy
+
+Long native or Ghidra-backed trace runs are expected while cacheable parsing, semantic reduction, or materializer coverage is still converging. Duration alone is not evidence of a stalled lane.
+
+Treat a run as a workflow problem to realign, not a reason to widen scope, when:
+
+- the expected DB or materialized artifact is missing after the run
+- the target resolves but does not emit the expected semantic or materialized view
+- a trace path hangs or times out without producing the artifact the lane depends on
+
+In those cases, the default next move is:
+
+1. inspect the current probe, tool, reducer, and materializer path
+2. fix the narrowest named instrument seam
+3. rerun until the expected DB/materialized artifact appears or the blocker shrinks to one explicit seam
+
+Only after that should the lane widen into adjacent families or neighboring unresolved targets.
 
 ## Test suite rules
 

@@ -176,6 +176,7 @@ export const OPTIMIZER_CATEGORIES = {
       row.field.includes("ATU16") ||
       row.field.includes("ATU17") ||
       row.field.includes("ATU18") ||
+      row.field.includes("ATU19") ||
       row.field.includes("ATU21") ||
       row.field.includes("ATU22") ||
       row.field.includes("ATU24") ||

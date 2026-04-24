@@ -8,8 +8,10 @@ import re
 import struct
 import sys
 import types
+from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
+from time import perf_counter
 from typing import Any
 
 from ghidra_cache_db import (
@@ -37,8 +39,14 @@ METADATA_PATH = ROOT / "workbench" / "apk" / "base" / "global-metadata.dat"
 UNITY_JOINED_DIR = ROOT / "workbench" / "unity" / "joined"
 TRACE_RUNS_DIR = ROOT / "workbench" / "trace-runs"
 TRACE_CACHE_DB = ROOT / "workbench" / "ghidra-cache" / "ghidra_cache.sqlite3"
+UNITY_SEARCH_INDEX_CACHE_PATH = ROOT / "workbench" / "ghidra-cache" / "unity-search-index-cache.json"
+UNITY_RAW_STRING_INDEX_CACHE_PATH = ROOT / "workbench" / "ghidra-cache" / "unity-raw-string-index-cache.json"
+TRACE_TIMING_LIVE_PATH = TRACE_RUNS_DIR / "unity-trace-bundle-timing-live.json"
 
 TRACE_DB: GhidraCacheDB | None = None
+TRACE_BUNDLE_RUN_CACHE: dict[tuple[str, str], Any] = {}
+ACTIVE_TRACE_PROFILER: "TraceRunProfiler | None" = None
+ACTIVE_TRACE_RUNTIME_FLAGS: dict[str, Any] = {}
 
 UNITY_ENV: Any = None
 METADATA_STRING_ENTRIES: list[dict[str, Any]] | None = None
@@ -48,56 +56,166 @@ UNITY_OBJECTS_BY_PATH_ID: dict[int, Any] | None = None
 UNITY_OBJECTS_BY_ASSET_AND_PATH_ID: dict[tuple[str, int], Any] | None = None
 
 
+class TraceRunProfiler:
+    def __init__(self, enabled: bool = False):
+        self.enabled = bool(enabled)
+        self._totals: dict[str, float] = {}
+        self._counts: dict[str, int] = {}
+        self._metadata: dict[str, Any] = {}
+        self._started_at: float | None = perf_counter() if self.enabled else None
+        self._live_path = TRACE_TIMING_LIVE_PATH if self.enabled else None
+        if self.enabled and self._live_path is not None:
+            self._live_path.parent.mkdir(parents=True, exist_ok=True)
+            self._write_live_snapshot()
+
+    @contextmanager
+    def span(self, bucket: str):
+        if not self.enabled:
+            yield
+            return
+        started = perf_counter()
+        try:
+            yield
+        finally:
+            elapsed = perf_counter() - started
+            self._totals[bucket] = self._totals.get(bucket, 0.0) + elapsed
+            self._counts[bucket] = self._counts.get(bucket, 0) + 1
+            self._write_live_snapshot()
+
+    def set_metadata(self, key: str, value: Any) -> None:
+        if self.enabled:
+            self._metadata[key] = value
+            self._write_live_snapshot()
+
+    def _write_live_snapshot(self) -> None:
+        if not self.enabled or self._live_path is None:
+            return
+        self._live_path.write_text(json.dumps(self.report_payload(), indent=2), encoding="utf-8")
+
+    def totals_ms(self) -> dict[str, float]:
+        return {bucket: round(seconds * 1000.0, 3) for bucket, seconds in self._totals.items()}
+
+    def total_run_ms(self) -> float:
+        if not self.enabled or self._started_at is None:
+            return 0.0
+        return round((perf_counter() - self._started_at) * 1000.0, 3)
+
+    def report_payload(self) -> dict[str, Any]:
+        buckets = self.totals_ms()
+        total_measured_ms = round(sum(buckets.values()), 3)
+        dominant_bucket = max(buckets.items(), key=lambda item: item[1])[0] if buckets else None
+        return {
+            "enabled": self.enabled,
+            "totalRunMs": self.total_run_ms(),
+            "totalMeasuredMs": total_measured_ms,
+            "bucketsMs": buckets,
+            "bucketCounts": dict(self._counts),
+            "dominantBucket": dominant_bucket,
+            "metadata": dict(self._metadata),
+        }
+
+
+@contextmanager
+def _trace_profile_span(bucket: str):
+    profiler = ACTIVE_TRACE_PROFILER
+    if profiler is None or not profiler.enabled:
+        yield
+        return
+    with profiler.span(bucket):
+        yield
+
+
 def get_trace_db() -> GhidraCacheDB:
     global TRACE_DB
     if TRACE_DB is None:
         TRACE_DB = GhidraCacheDB(TRACE_CACHE_DB, ROOT / "workbench" / "ghidra-jobs")
+    TRACE_DB.timing_span_factory = _trace_profile_span
     return TRACE_DB
+
+
+def _set_active_trace_runtime_flags(flags: dict[str, Any] | None) -> None:
+    global ACTIVE_TRACE_RUNTIME_FLAGS
+    ACTIVE_TRACE_RUNTIME_FLAGS = dict(flags or {})
+
+
+def _get_active_trace_runtime_flag(key: str, default: Any = None) -> Any:
+    return ACTIVE_TRACE_RUNTIME_FLAGS.get(key, default)
+
+
+def reset_trace_bundle_run_cache() -> None:
+    TRACE_BUNDLE_RUN_CACHE.clear()
+
+
+def _trace_bundle_cache_get(bucket: str, key: str) -> Any | None:
+    return TRACE_BUNDLE_RUN_CACHE.get((bucket, key))
+
+
+def _trace_bundle_cache_put(bucket: str, key: str, value: Any) -> Any:
+    TRACE_BUNDLE_RUN_CACHE[(bucket, key)] = value
+    return value
 
 
 def load_canonical_semantic_scope(scope_id: str) -> dict[str, Any]:
     scope_id = str(scope_id or "").strip()
     if not scope_id:
         return {}
-    view = get_trace_db().find_canonical_semantic_fragment(
-        "cifi-full",
-        "libil2cpp.so",
-        "semantic_scope_fragment",
-        scope_id,
-    )
+    cached = _trace_bundle_cache_get("canonical-semantic-scope", scope_id)
+    if cached is not None:
+        return dict(cached)
+    with _trace_profile_span("dbReads"):
+        view = get_trace_db().find_canonical_semantic_fragment(
+            "cifi-full",
+            "libil2cpp.so",
+            "semantic_scope_fragment",
+            scope_id,
+        )
     if not view:
         return {}
-    return dict(view.get("payload") or {})
+    payload = dict(view.get("payload") or {})
+    _trace_bundle_cache_put("canonical-semantic-scope", scope_id, payload)
+    return dict(payload)
 
 
 def load_canonical_execution_plan(trace_scope: str) -> dict[str, Any]:
     trace_scope = str(trace_scope or "").strip()
     if not trace_scope:
         return {}
-    view = get_trace_db().find_canonical_semantic_fragment(
-        "cifi-full",
-        "libil2cpp.so",
-        "execution_plan_fragment",
-        f"target-execution-plan:{trace_scope}",
-    )
+    cached = _trace_bundle_cache_get("execution-plan", trace_scope)
+    if cached is not None:
+        return dict(cached)
+    with _trace_profile_span("dbReads"):
+        view = get_trace_db().find_canonical_semantic_fragment(
+            "cifi-full",
+            "libil2cpp.so",
+            "execution_plan_fragment",
+            f"target-execution-plan:{trace_scope}",
+        )
     if not view:
         return {}
-    return dict(view.get("payload") or {})
+    payload = dict(view.get("payload") or {})
+    _trace_bundle_cache_put("execution-plan", trace_scope, payload)
+    return dict(payload)
 
 
 def load_canonical_execution_context(trace_scope: str) -> dict[str, Any]:
     trace_scope = str(trace_scope or "").strip()
     if not trace_scope:
         return {}
-    view = get_trace_db().find_canonical_semantic_fragment(
-        "cifi-full",
-        "libil2cpp.so",
-        "execution_context_fragment",
-        f"target-execution-context:{trace_scope}",
-    )
+    cached = _trace_bundle_cache_get("execution-context", trace_scope)
+    if cached is not None:
+        return dict(cached)
+    with _trace_profile_span("dbReads"):
+        view = get_trace_db().find_canonical_semantic_fragment(
+            "cifi-full",
+            "libil2cpp.so",
+            "execution_context_fragment",
+            f"target-execution-context:{trace_scope}",
+        )
     if not view:
         return {}
-    return dict(view.get("payload") or {})
+    payload = dict(view.get("payload") or {})
+    _trace_bundle_cache_put("execution-context", trace_scope, payload)
+    return dict(payload)
 
 
 def load_or_synthesize_surface_plan(trace_scope: str, target: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -105,26 +223,13 @@ def load_or_synthesize_surface_plan(trace_scope: str, target: dict[str, Any] | N
     if not trace_scope:
         return {}
     target = dict(target or {})
-    return dict(
-        get_trace_db().find_or_synthesize_surface_plan(
-            "cifi-full",
-            "libil2cpp.so",
-            trace_scope,
-            family_id=str(target.get("familyId") or ""),
-            compatibility_target_id=str(target.get("id") or trace_scope),
-        )
-        or {}
-    )
-
-
-def load_or_synthesize_support_context(trace_scope: str, target: dict[str, Any] | None = None) -> dict[str, Any]:
-    trace_scope = str(trace_scope or "").strip()
-    if not trace_scope:
-        return {}
-    target = dict(target or {})
-    return dict(
-        (
-            get_trace_db().find_or_synthesize_support_context(
+    cache_key = "{}::{}".format(trace_scope, str(target.get("id") or trace_scope))
+    cached = _trace_bundle_cache_get("surface-plan", cache_key)
+    if cached is not None:
+        return dict(cached)
+    with _trace_profile_span("dbReads"):
+        payload = dict(
+            get_trace_db().find_or_synthesize_surface_plan(
                 "cifi-full",
                 "libil2cpp.so",
                 trace_scope,
@@ -132,68 +237,151 @@ def load_or_synthesize_support_context(trace_scope: str, target: dict[str, Any] 
                 compatibility_target_id=str(target.get("id") or trace_scope),
             )
             or {}
-        ).get("supportContext")
-        or {}
-    )
+        )
+    _trace_bundle_cache_put("surface-plan", cache_key, payload)
+    return dict(payload)
+
+
+def load_or_synthesize_support_context(trace_scope: str, target: dict[str, Any] | None = None) -> dict[str, Any]:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope:
+        return {}
+    target = dict(target or {})
+    cache_key = "{}::{}".format(trace_scope, str(target.get("id") or trace_scope))
+    cached = _trace_bundle_cache_get("support-context", cache_key)
+    if cached is not None:
+        return dict(cached)
+    with _trace_profile_span("dbReads"):
+        payload = dict(
+            (
+                get_trace_db().find_or_synthesize_support_context(
+                    "cifi-full",
+                    "libil2cpp.so",
+                    trace_scope,
+                    family_id=str(target.get("familyId") or ""),
+                    compatibility_target_id=str(target.get("id") or trace_scope),
+                )
+                or {}
+            ).get("supportContext")
+            or {}
+        )
+    _trace_bundle_cache_put("support-context", cache_key, payload)
+    return dict(payload)
 
 
 def load_canonical_graph_plan(trace_scope: str) -> dict[str, Any]:
     trace_scope = str(trace_scope or "").strip()
     if not trace_scope:
         return {}
-    view = get_trace_db().find_canonical_semantic_fragment(
-        "cifi-full",
-        "libil2cpp.so",
-        "graph_plan_fragment",
-        f"target-graph-plan:{trace_scope}",
-    )
+    cached = _trace_bundle_cache_get("graph-plan", trace_scope)
+    if cached is not None:
+        return dict(cached)
+    with _trace_profile_span("dbReads"):
+        view = get_trace_db().find_canonical_semantic_fragment(
+            "cifi-full",
+            "libil2cpp.so",
+            "graph_plan_fragment",
+            f"target-graph-plan:{trace_scope}",
+        )
     if not view:
         return {}
-    return dict(view.get("payload") or {})
+    payload = dict(view.get("payload") or {})
+    _trace_bundle_cache_put("graph-plan", trace_scope, payload)
+    return dict(payload)
 
 
 def load_canonical_bridge_policy(trace_scope: str) -> dict[str, Any]:
     trace_scope = str(trace_scope or "").strip()
     if not trace_scope:
         return {}
-    view = get_trace_db().find_canonical_semantic_fragment(
-        "cifi-full",
-        "libil2cpp.so",
-        "bridge_policy_fragment",
-        f"target-bridge-policy:{trace_scope}",
-    )
+    cached = _trace_bundle_cache_get("bridge-policy", trace_scope)
+    if cached is not None:
+        return dict(cached)
+    with _trace_profile_span("dbReads"):
+        view = get_trace_db().find_canonical_semantic_fragment(
+            "cifi-full",
+            "libil2cpp.so",
+            "bridge_policy_fragment",
+            f"target-bridge-policy:{trace_scope}",
+        )
     if not view:
         return {}
-    return dict(view.get("payload") or {})
+    payload = dict(view.get("payload") or {})
+    _trace_bundle_cache_put("bridge-policy", trace_scope, payload)
+    return dict(payload)
 
 
 def load_canonical_target_narrative(trace_scope: str) -> dict[str, Any]:
     trace_scope = str(trace_scope or "").strip()
     if not trace_scope:
         return {}
-    view = get_trace_db().find_canonical_semantic_fragment(
-        "cifi-full",
-        "libil2cpp.so",
-        "target_narrative_fragment",
-        f"target-narrative:{trace_scope}",
-    )
+    cached = _trace_bundle_cache_get("target-narrative", trace_scope)
+    if cached is not None:
+        return dict(cached)
+    with _trace_profile_span("dbReads"):
+        view = get_trace_db().find_canonical_semantic_fragment(
+            "cifi-full",
+            "libil2cpp.so",
+            "target_narrative_fragment",
+            f"target-narrative:{trace_scope}",
+        )
     if not view:
         return {}
-    return dict(view.get("payload") or {})
+    payload = dict(view.get("payload") or {})
+    _trace_bundle_cache_put("target-narrative", trace_scope, payload)
+    return dict(payload)
 
 
 def load_latest_materialized_target_bundle(trace_scope: str) -> dict[str, Any]:
     trace_scope = str(trace_scope or "").strip()
     if not trace_scope:
         return {}
-    view = get_trace_db().find_latest_materialized_target_bundle_view(
-        "cifi-full",
-        "libil2cpp.so",
-        trace_scope,
-    )
+    cached = _trace_bundle_cache_get("latest-target-bundle", trace_scope)
+    if cached is not None:
+        return dict(cached)
+    with _trace_profile_span("dbReads"):
+        view = get_trace_db().find_latest_materialized_target_bundle_view(
+            "cifi-full",
+            "libil2cpp.so",
+            trace_scope,
+        )
     if not view:
         return {}
-    return dict(view.get("payload") or {})
+    payload = dict(view.get("payload") or {})
+    _trace_bundle_cache_put("latest-target-bundle", trace_scope, payload)
+    return dict(payload)
+
+
+def load_trace_target_knowledge(
+    trace_scope: str,
+    *,
+    subject_kind: str = "",
+    subject_key: str = "",
+    family_id: str = "",
+    target_id: str = "",
+) -> dict[str, Any]:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope:
+        return {}
+    cache_key = "::".join([trace_scope, subject_kind, subject_key, family_id, target_id])
+    cached = _trace_bundle_cache_get("trace-target-knowledge", cache_key)
+    if cached is not None:
+        return dict(cached)
+    with _trace_profile_span("dbReads"):
+        payload = dict(
+            get_trace_db().resolve_trace_target_knowledge(
+                "cifi-full",
+                "libil2cpp.so",
+                trace_scope,
+                subject_kind=subject_kind,
+                subject_key=subject_key,
+                family_id=family_id,
+                compatibility_target_id=target_id,
+            )
+            or {}
+        )
+    _trace_bundle_cache_put("trace-target-knowledge", cache_key, payload)
+    return dict(payload)
 
 
 def load_handoff_target_metadata(target_id: str) -> dict[str, Any]:
@@ -237,29 +425,12 @@ def _parse_iso_datetime(value: str | None) -> datetime | None:
 
 
 def _latest_materialized_target_payloads() -> list[dict[str, Any]]:
-    db = get_trace_db()
-    with db.connect() as conn:
-        rows = conn.execute(
-            """
-            SELECT trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
-            FROM materialized_target_bundle_views
-            ORDER BY built_at DESC, request_signature DESC
-            """
-        ).fetchall()
-    latest_by_scope: dict[str, dict[str, Any]] = {}
-    for row in rows:
-        trace_scope = str(row["trace_scope"] or "")
-        if not trace_scope or trace_scope in latest_by_scope:
-            continue
-        latest_by_scope[trace_scope] = {
-            "traceScope": trace_scope,
-            "requestSignature": str(row["request_signature"] or ""),
-            "payload": json.loads(str(row["payload_json"] or "{}")),
-            "provenance": json.loads(str(row["provenance_json"] or "{}")),
-            "reducerVersion": str(row["reducer_version"] or ""),
-            "builtAt": str(row["built_at"] or ""),
-        }
-    return list(latest_by_scope.values())
+    cached = _trace_bundle_cache_get("latest-target-payloads", "all")
+    if cached is not None:
+        return [dict(row) for row in cached]
+    rows = get_trace_db().list_latest_materialized_target_bundle_views("cifi-full", "libil2cpp.so")
+    _trace_bundle_cache_put("latest-target-payloads", "all", rows)
+    return [dict(row) for row in rows]
 
 
 def _canonical_semantic_scopes_for_target(trace_scope: str, target_id: str | None = None) -> list[dict[str, Any]]:
@@ -267,6 +438,10 @@ def _canonical_semantic_scopes_for_target(trace_scope: str, target_id: str | Non
     target_id = str(target_id or "").strip()
     if not trace_scope and not target_id:
         return []
+    cache_key = "{}::{}".format(trace_scope, target_id)
+    cached = _trace_bundle_cache_get("semantic-scopes-for-target", cache_key)
+    if cached is not None:
+        return [dict(item) for item in cached]
     db = get_trace_db()
     with db.connect() as conn:
         rows = conn.execute(
@@ -303,7 +478,8 @@ def _canonical_semantic_scopes_for_target(trace_scope: str, target_id: str | Non
                     "builtAt": str(row["built_at"] or ""),
                 }
             )
-    return scopes
+    _trace_bundle_cache_put("semantic-scopes-for-target", cache_key, scopes)
+    return [dict(item) for item in scopes]
 
 
 def _looks_like_trace_anchor(value: str) -> bool:
@@ -629,73 +805,148 @@ def _execute_trace_bundle_run(
     registry: dict[str, Any],
     output_mode: str,
 ) -> dict[str, Any]:
-    trace_plan = plan_trace_bundle_request(args, registry)
-    planner_resolution = trace_plan["plannerResolution"]
-    execution_target_id = str(trace_plan.get("executionTargetId") or trace_plan.get("selectedTargetId") or "")
-    execution_trace_scope = str(trace_plan.get("executionTraceScope") or execution_target_id)
-    selected_family_id = str(trace_plan["selectedFamilyId"])
-    asset_set = trace_plan["assetSet"]
-    request_signature = str(trace_plan["requestSignature"])
+    global ACTIVE_TRACE_PROFILER
+    reset_trace_bundle_run_cache()
+    profiler = TraceRunProfiler(enabled=bool(getattr(args, "profile_timing", False)))
+    ACTIVE_TRACE_PROFILER = profiler
+    try:
+        with profiler.span("plannerTargetResolution"):
+            trace_plan = plan_trace_bundle_request(args, registry)
+            planner_resolution = trace_plan["plannerResolution"]
+            execution_target_id = str(trace_plan.get("executionTargetId") or trace_plan.get("selectedTargetId") or "")
+            execution_trace_scope = str(trace_plan.get("executionTraceScope") or execution_target_id)
+            selected_family_id = str(trace_plan["selectedFamilyId"])
+            knowledge_plan = dict(trace_plan.get("knowledgePlan") or {})
+            asset_set = trace_plan["assetSet"]
+            request_signature = str(trace_plan["requestSignature"])
 
-    if args.resume:
-        existing = get_trace_db().find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", execution_trace_scope, request_signature)
-        if existing is None:
-            existing = get_trace_db().find_materialized_trace_view("cifi-full", "libil2cpp.so", execution_trace_scope, request_signature)
-        if existing and trace_dataset_has_required_fragments(existing["payload"]):
-            dataset = dict(existing["payload"])
+        profiler.set_metadata("executionTraceScope", execution_trace_scope)
+        profiler.set_metadata("selectedFamilyId", selected_family_id)
+        profiler.set_metadata("requestSignature", request_signature)
+        if knowledge_plan:
+            profiler.set_metadata("traceDirectiveMode", knowledge_plan.get("mode"))
+            profiler.set_metadata("nextSeamId", ((knowledge_plan.get("nextSeam") or {}).get("id")))
+        next_seam_id = str((knowledge_plan.get("nextSeam") or {}).get("id") or "").strip()
+        cleared_edge_types = {
+            str(edge_type)
+            for edge_type in ((knowledge_plan.get("knowledge") or {}).get("clearedEdgeTypes") or [])
+            if str(edge_type).strip()
+        }
+        _set_active_trace_runtime_flags(
+            {
+                "skipUnityRawStringScan": (
+                    next_seam_id == "exact-display-update-path"
+                    and ("native-reconstruction" in cleared_edge_types or "exact-shell-to-prefab" in cleared_edge_types)
+                )
+            }
+        )
+
+        short_circuit_existing = False
+        if knowledge_plan.get("mode") == "reuse-materialized" and not args.force:
+            with profiler.span("dbReads"):
+                existing = get_trace_db().find_latest_materialized_target_bundle_view("cifi-full", "libil2cpp.so", execution_trace_scope)
+            if existing and trace_dataset_has_required_fragments(existing["payload"]):
+                dataset = dict(existing["payload"])
+                short_circuit_existing = True
+            elif args.resume:
+                with profiler.span("dbReads"):
+                    existing = get_trace_db().find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", execution_trace_scope, request_signature)
+                    if existing is None:
+                        existing = get_trace_db().find_materialized_trace_view("cifi-full", "libil2cpp.so", execution_trace_scope, request_signature)
+                if existing and trace_dataset_has_required_fragments(existing["payload"]):
+                    dataset = dict(existing["payload"])
+                else:
+                    dataset = collect_trace_bundle_components(args, trace_plan)
+        elif args.resume:
+            with profiler.span("dbReads"):
+                existing = get_trace_db().find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", execution_trace_scope, request_signature)
+                if existing is None:
+                    existing = get_trace_db().find_materialized_trace_view("cifi-full", "libil2cpp.so", execution_trace_scope, request_signature)
+            if existing and trace_dataset_has_required_fragments(existing["payload"]):
+                dataset = dict(existing["payload"])
+            else:
+                dataset = collect_trace_bundle_components(args, trace_plan)
         else:
-            dataset = collect_trace_bundle_components(args)
-    else:
-        dataset = collect_trace_bundle_components(args)
+            dataset = collect_trace_bundle_components(args, trace_plan)
 
-    export_requested = args.export or args.json_out != JSON_OUT or args.md_out != MD_OUT
-    json_out, md_out, run_id = allocate_trace_run_paths(
-        dataset["traceRegistry"].get("executionTraceScope") or "generic-explore",
-        dataset["traceRegistry"]["selectedFamilyId"],
-        args.json_out if args.json_out != JSON_OUT else None,
-        args.md_out if args.md_out != MD_OUT else None,
-    )
+        with profiler.span("finalBundleAssembly"):
+            export_requested = args.export or args.json_out != JSON_OUT or args.md_out != MD_OUT
+            json_out, md_out, run_id = allocate_trace_run_paths(
+                dataset["traceRegistry"].get("executionTraceScope") or "generic-explore",
+                dataset["traceRegistry"]["selectedFamilyId"],
+                args.json_out if args.json_out != JSON_OUT else None,
+                args.md_out if args.md_out != MD_OUT else None,
+            )
 
-    dataset["traceParams"] = {
-        "target": args.target,
-        "anchors": args.anchor,
-        "family": args.family,
-        "bestGap": args.best_gap,
-        "extendedSearch": args.extended_search,
-        "depthSearch": args.depth_search,
-        "nativeTimeout": args.native_timeout,
-        "level": args.level,
-        "anchorKind": args.anchor_kind,
-        "maxSteps": args.max_steps,
-    }
-    dataset["assetSet"] = asset_set
-    dataset["traceRun"] = {
-        "id": run_id,
-        "jsonOut": str(json_out) if export_requested else None,
-        "mdOut": str(md_out) if export_requested else None,
-        "mode": "stable-target-run",
-        "outputMode": output_mode,
-        "overwritesOnRepeat": export_requested,
-    }
+            dataset["traceParams"] = {
+                "target": args.target,
+                "anchors": args.anchor,
+                "family": args.family,
+                "bestGap": args.best_gap,
+                "extendedSearch": args.extended_search,
+                "depthSearch": args.depth_search,
+                "nativeTimeout": args.native_timeout,
+                "level": args.level,
+                "anchorKind": args.anchor_kind,
+                "maxSteps": args.max_steps,
+            }
+            dataset["assetSet"] = asset_set
+            dataset["traceKnowledge"] = dict((knowledge_plan.get("knowledge") or {}))
+            dataset["traceDirective"] = {
+                "mode": knowledge_plan.get("mode") or "run-seam-trace",
+                "executionRoutineId": knowledge_plan.get("executionRoutineId"),
+                "nextSeam": dict(knowledge_plan.get("nextSeam") or {}),
+            }
+            dataset["traceRun"] = {
+                "id": run_id,
+                "jsonOut": str(json_out) if export_requested else None,
+                "mdOut": str(md_out) if export_requested else None,
+                "mode": "db-knowledge-reuse" if short_circuit_existing else "stable-target-run",
+                "outputMode": output_mode,
+                "overwritesOnRepeat": export_requested,
+            }
 
-    persist_trace_bundle_fragments(
-        dataset,
-        str(dataset["traceRegistry"].get("executionTraceScope") or "generic-explore"),
-        request_signature,
-    )
-    dataset = materialize_trace_bundle_dataset(
-        dataset,
-        str(dataset["traceRegistry"].get("executionTraceScope") or "generic-explore"),
-        request_signature,
-    )
+        if not short_circuit_existing:
+            persist_trace_bundle_fragments(
+                dataset,
+                str(dataset["traceRegistry"].get("executionTraceScope") or "generic-explore"),
+                request_signature,
+            )
+            dataset = materialize_trace_bundle_dataset(
+                dataset,
+                str(dataset["traceRegistry"].get("executionTraceScope") or "generic-explore"),
+                request_signature,
+            )
 
-    if export_requested:
-        export_trace_run(dataset, json_out, md_out)
-        print(f"Trace bundle exported: {json_out}")
-        print(f"Markdown: {md_out}")
-    else:
-        print(f"Trace bundle materialized in DB for subject scope: {execution_trace_scope}")
-    return dataset
+        with profiler.span("finalBundleAssembly"):
+            if export_requested:
+                export_trace_run(dataset, json_out, md_out)
+                print(f"Trace bundle exported: {json_out}")
+                print(f"Markdown: {md_out}")
+            else:
+                if short_circuit_existing:
+                    print(f"Trace bundle reused from DB knowledge for subject scope: {execution_trace_scope}")
+                else:
+                    print(f"Trace bundle materialized in DB for subject scope: {execution_trace_scope}")
+
+        if profiler.enabled:
+            timing_report = profiler.report_payload()
+            dataset["traceTiming"] = timing_report
+            print("Trace timing (ms):")
+            for bucket, elapsed_ms in sorted(
+                timing_report.get("bucketsMs", {}).items(),
+                key=lambda item: item[1],
+                reverse=True,
+            ):
+                count = timing_report.get("bucketCounts", {}).get(bucket, 0)
+                print(f"  {bucket}={elapsed_ms:.3f} ({count} span{'s' if count != 1 else ''})")
+            print(f"  totalRunMs={timing_report.get('totalRunMs', 0.0):.3f}")
+            if timing_report.get("dominantBucket"):
+                print(f"  dominantBucket={timing_report['dominantBucket']}")
+        return dataset
+    finally:
+        _set_active_trace_runtime_flags({})
+        ACTIVE_TRACE_PROFILER = None
 
 
 def install_unitypy_stubs() -> None:
@@ -724,12 +975,198 @@ def install_unitypy_stubs() -> None:
 def get_unity_env():
     global UNITY_ENV
     if UNITY_ENV is None:
-        install_unitypy_stubs()
-        sys.path.insert(0, str((ROOT / ".deps").resolve()))
-        from UnityPy import Environment
-        UNITY_ENV = Environment()
-        UNITY_ENV.load_folder(str(UNITY_JOINED_DIR))
+        with _trace_profile_span("sourceLoading.unityEnvLoad"):
+            install_unitypy_stubs()
+            sys.path.insert(0, str((ROOT / ".deps").resolve()))
+            from UnityPy import Environment
+            UNITY_ENV = Environment()
+            UNITY_ENV.load_folder(str(UNITY_JOINED_DIR))
     return UNITY_ENV
+
+
+def _unity_search_index_source_paths() -> list[Path]:
+    return [
+        CANONICAL_SOURCE_PATHS["level0"],
+        *ASSET_SOURCE_MEMBER_PATHS.values(),
+    ]
+
+
+def _build_unity_search_index_fingerprint() -> str:
+    fingerprint_parts: list[str] = []
+    for path in _unity_search_index_source_paths():
+        if not path.exists():
+            continue
+        stat = path.stat()
+        fingerprint_parts.append(f"{repo_relative(path)}:{stat.st_size}:{stat.st_mtime_ns}")
+    return hashlib.sha1("|".join(fingerprint_parts).encode("utf-8")).hexdigest()[:16]
+
+
+def _unity_raw_string_index_source_paths() -> list[Path]:
+    return [
+        path
+        for source_id in ("level0", *ASSET_SOURCE_MEMBERS)
+        if (path := get_unity_source_path(source_id)) is not None
+    ]
+
+
+def _build_unity_raw_string_index_fingerprint() -> str:
+    fingerprint_parts: list[str] = []
+    for path in _unity_raw_string_index_source_paths():
+        if not path.exists():
+            continue
+        stat = path.stat()
+        fingerprint_parts.append(f"{repo_relative(path)}:{stat.st_size}:{stat.st_mtime_ns}")
+    return hashlib.sha1("|".join(fingerprint_parts).encode("utf-8")).hexdigest()[:16]
+
+
+def _load_cached_unity_search_index() -> dict[str, list[dict[str, Any]]] | None:
+    cache_path = UNITY_SEARCH_INDEX_CACHE_PATH
+    if not cache_path.exists():
+        return None
+    try:
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if str(payload.get("fingerprint") or "") != _build_unity_search_index_fingerprint():
+        return None
+    cached_index = payload.get("searchIndex")
+    if not isinstance(cached_index, dict):
+        return None
+    return {
+        str(source_id): list(entries or [])
+        for source_id, entries in cached_index.items()
+    }
+
+
+def _store_cached_unity_search_index(search_index: dict[str, list[dict[str, Any]]]) -> None:
+    cache_path = UNITY_SEARCH_INDEX_CACHE_PATH
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "fingerprint": _build_unity_search_index_fingerprint(),
+        "searchIndex": search_index,
+        "cachedAt": datetime.now().isoformat(timespec="seconds"),
+    }
+    cache_path.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
+
+
+def _load_cached_unity_raw_string_index() -> dict[str, list[dict[str, Any]]] | None:
+    cache_path = UNITY_RAW_STRING_INDEX_CACHE_PATH
+    if not cache_path.exists():
+        return None
+    try:
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if str(payload.get("fingerprint") or "") != _build_unity_raw_string_index_fingerprint():
+        return None
+    cached_index = payload.get("rawStringIndex")
+    if not isinstance(cached_index, dict):
+        return None
+    return {
+        str(source_id): list(entries or [])
+        for source_id, entries in cached_index.items()
+    }
+
+
+def _store_cached_unity_raw_string_index(raw_string_index: dict[str, list[dict[str, Any]]]) -> None:
+    cache_path = UNITY_RAW_STRING_INDEX_CACHE_PATH
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "fingerprint": _build_unity_raw_string_index_fingerprint(),
+        "rawStringIndex": raw_string_index,
+        "cachedAt": datetime.now().isoformat(timespec="seconds"),
+    }
+    cache_path.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
+
+
+def _ensure_unity_object_indexes() -> None:
+    global UNITY_OBJECTS_BY_PATH_ID
+    global UNITY_OBJECTS_BY_ASSET_AND_PATH_ID
+    global UNITY_SEARCH_INDEX
+    if (
+        UNITY_OBJECTS_BY_PATH_ID is not None
+        and UNITY_OBJECTS_BY_ASSET_AND_PATH_ID is not None
+        and UNITY_SEARCH_INDEX is not None
+    ):
+        return
+
+    with _trace_profile_span("sourceLoading.unityObjectIndex"):
+        env = get_unity_env()
+        preferred_assets = {"level0": 0, "globalgamemanagers.assets": 1, "sharedassets0.assets": 2}
+        chosen_by_path_id: dict[int, Any] = {}
+        objects_by_asset_and_path_id: dict[tuple[str, int], Any] = {}
+        cached_search_index = _load_cached_unity_search_index()
+        search_index: dict[str, list[dict[str, Any]]] = dict(cached_search_index or {})
+        build_search_index = cached_search_index is None
+
+        for obj in env.objects:
+            path_id = int(obj.path_id)
+            asset_name = getattr(getattr(obj, "assets_file", None), "name", "") or ""
+            objects_by_asset_and_path_id[(asset_name, path_id)] = obj
+
+            current = chosen_by_path_id.get(path_id)
+            if current is None:
+                chosen_by_path_id[path_id] = obj
+            else:
+                current_asset = getattr(getattr(current, "assets_file", None), "name", "") or ""
+                if preferred_assets.get(asset_name, 99) < preferred_assets.get(current_asset, 99):
+                    chosen_by_path_id[path_id] = obj
+
+            if not build_search_index:
+                continue
+
+            search_surfaces: list[tuple[str, str, int]] = []
+            if obj.type.name == "MonoBehaviour":
+                data = safe_unity_read(obj)
+                if data is not None:
+                    script = getattr(data, "m_Script", None)
+                    if script:
+                        try:
+                            script_data = script.read()
+                            class_name = getattr(script_data, "m_Name", "") or ""
+                            if class_name:
+                                search_surfaces.append(("class-name", class_name, 90))
+                        except Exception:
+                            pass
+                    obj_name = getattr(data, "m_Name", "") or ""
+                    if obj_name:
+                        search_surfaces.append(("object-name", obj_name, 80))
+            elif obj.type.name == "GameObject":
+                data = safe_unity_read(obj)
+                name = getattr(data, "m_Name", "") or "" if data is not None else ""
+                if name:
+                    search_surfaces.append(("object-name", name, 85))
+            elif obj.type.name in ("Text", "TextMeshProUGUI", "TextMeshPro"):
+                data = safe_unity_read(obj)
+                if data is not None:
+                    text_field = "m_text" if obj.type.name in ("TextMeshProUGUI", "TextMeshPro") else "m_Text"
+                    text_content = getattr(data, text_field, "") or ""
+                    if text_content:
+                        search_surfaces.append(("text-content", text_content, 70))
+
+            if not search_surfaces:
+                continue
+
+            entry = {
+                "pathId": obj.path_id,
+                "objectType": obj.type.name,
+                "surfaces": [
+                    {
+                        "surfaceType": surface_type,
+                        "surfaceValue": str(surface_value),
+                        "baseScore": base_score,
+                    }
+                    for surface_type, surface_value, base_score in search_surfaces
+                ],
+            }
+            for source_key in get_unity_source_keys(obj):
+                search_index.setdefault(source_key, []).append(entry)
+
+    UNITY_OBJECTS_BY_PATH_ID = chosen_by_path_id
+    UNITY_OBJECTS_BY_ASSET_AND_PATH_ID = objects_by_asset_and_path_id
+    UNITY_SEARCH_INDEX = search_index
+    if build_search_index:
+        _store_cached_unity_search_index(search_index)
 
 
 def safe_unity_read(obj: Any) -> Any | None:
@@ -746,34 +1183,15 @@ def safe_unity_read(obj: Any) -> Any | None:
 
 def get_unity_objects_by_path_id() -> dict[int, Any]:
     global UNITY_OBJECTS_BY_PATH_ID
-    if UNITY_OBJECTS_BY_PATH_ID is not None:
-        return UNITY_OBJECTS_BY_PATH_ID
-    env = get_unity_env()
-    preferred_assets = {"level0": 0, "globalgamemanagers.assets": 1, "sharedassets0.assets": 2}
-    chosen: dict[int, Any] = {}
-    for obj in env.objects:
-        path_id = int(obj.path_id)
-        asset_name = getattr(getattr(obj, "assets_file", None), "name", "") or ""
-        current = chosen.get(path_id)
-        if current is None:
-            chosen[path_id] = obj
-            continue
-        current_asset = getattr(getattr(current, "assets_file", None), "name", "") or ""
-        if preferred_assets.get(asset_name, 99) < preferred_assets.get(current_asset, 99):
-            chosen[path_id] = obj
-    UNITY_OBJECTS_BY_PATH_ID = chosen
+    if UNITY_OBJECTS_BY_PATH_ID is None:
+        _ensure_unity_object_indexes()
     return UNITY_OBJECTS_BY_PATH_ID
 
 
 def get_unity_objects_by_asset_and_path_id() -> dict[tuple[str, int], Any]:
     global UNITY_OBJECTS_BY_ASSET_AND_PATH_ID
-    if UNITY_OBJECTS_BY_ASSET_AND_PATH_ID is not None:
-        return UNITY_OBJECTS_BY_ASSET_AND_PATH_ID
-    env = get_unity_env()
-    UNITY_OBJECTS_BY_ASSET_AND_PATH_ID = {
-        ((getattr(getattr(obj, "assets_file", None), "name", "") or ""), int(obj.path_id)): obj
-        for obj in env.objects
-    }
+    if UNITY_OBJECTS_BY_ASSET_AND_PATH_ID is None:
+        _ensure_unity_object_indexes()
     return UNITY_OBJECTS_BY_ASSET_AND_PATH_ID
 
 
@@ -898,68 +1316,8 @@ def get_unity_source_path(source_id: str) -> Path | None:
 
 def get_unity_search_index() -> dict[str, list[dict[str, Any]]]:
     global UNITY_SEARCH_INDEX
-    if UNITY_SEARCH_INDEX is not None:
-        return UNITY_SEARCH_INDEX
-
-    env = get_unity_env()
-    index: dict[str, list[dict[str, Any]]] = {}
-    for obj in env.objects:
-        search_surfaces: list[tuple[str, str, int]] = []
-
-        if obj.type.name == "MonoBehaviour":
-            try:
-                data = obj.read()
-                script = getattr(data, "m_Script", None)
-                if script:
-                    try:
-                        script_data = script.read()
-                        class_name = getattr(script_data, "m_Name", "") or ""
-                        if class_name:
-                            search_surfaces.append(("class-name", class_name, 90))
-                    except Exception:
-                        pass
-                obj_name = getattr(data, "m_Name", "") or ""
-                if obj_name:
-                    search_surfaces.append(("object-name", obj_name, 80))
-            except Exception:
-                pass
-        elif obj.type.name == "GameObject":
-            try:
-                data = obj.read()
-                name = getattr(data, "m_Name", "") or ""
-                if name:
-                    search_surfaces.append(("object-name", name, 85))
-            except Exception:
-                pass
-        elif obj.type.name in ("Text", "TextMeshProUGUI", "TextMeshPro"):
-            try:
-                data = obj.read()
-                text_field = "m_text" if obj.type.name in ("TextMeshProUGUI", "TextMeshPro") else "m_Text"
-                text_content = getattr(data, text_field, "") or ""
-                if text_content:
-                    search_surfaces.append(("text-content", text_content, 70))
-            except Exception:
-                pass
-
-        if not search_surfaces:
-            continue
-
-        entry = {
-            "pathId": obj.path_id,
-            "objectType": obj.type.name,
-            "surfaces": [
-                {
-                    "surfaceType": surface_type,
-                    "surfaceValue": str(surface_value),
-                    "baseScore": base_score,
-                }
-                for surface_type, surface_value, base_score in search_surfaces
-            ],
-        }
-        for source_key in get_unity_source_keys(obj):
-            index.setdefault(source_key, []).append(entry)
-
-    UNITY_SEARCH_INDEX = index
+    if UNITY_SEARCH_INDEX is None:
+        _ensure_unity_object_indexes()
     return UNITY_SEARCH_INDEX
 
 
@@ -968,21 +1326,27 @@ def get_unity_raw_string_index() -> dict[str, list[dict[str, Any]]]:
     if UNITY_RAW_STRING_INDEX is not None:
         return UNITY_RAW_STRING_INDEX
 
-    index: dict[str, list[dict[str, Any]]] = {}
-    for source_id in ("level0", *ASSET_SOURCE_MEMBERS):
-        path = get_unity_source_path(source_id)
-        if not path or not path.exists():
-            index[source_id] = []
-            continue
-        entries = extract_strings(path.read_bytes())
-        index[source_id] = [
-            {
-                "offset": entry["offset"],
-                "encoding": entry["encoding"],
-                "value": entry["value"],
-            }
-            for entry in entries
-        ]
+    with _trace_profile_span("sourceLoading.rawStringIndex"):
+        cached_index = _load_cached_unity_raw_string_index()
+        if cached_index is not None:
+            index = cached_index
+        else:
+            index: dict[str, list[dict[str, Any]]] = {}
+            for source_id in ("level0", *ASSET_SOURCE_MEMBERS):
+                path = get_unity_source_path(source_id)
+                if not path or not path.exists():
+                    index[source_id] = []
+                    continue
+                entries = extract_strings(path.read_bytes())
+                index[source_id] = [
+                    {
+                        "offset": entry["offset"],
+                        "encoding": entry["encoding"],
+                        "value": entry["value"],
+                    }
+                    for entry in entries
+                ]
+            _store_cached_unity_raw_string_index(index)
     UNITY_RAW_STRING_INDEX = index
     return UNITY_RAW_STRING_INDEX
 
@@ -2670,134 +3034,232 @@ def build_token_shop_literal_text_recovery(
     shell_field = str(row_recovery.get("shellField") or "").strip()
     prefab_candidates = [str(item).strip() for item in row_recovery.get("prefabCandidates", []) or [] if str(item).strip()]
     prefab_text = " ".join(prefab_candidates)
+    row_signature_text = " ".join(
+        [
+            shell_field,
+            prefab_text,
+            *[
+                str(item.get("field") or "").strip()
+                for item in row_recovery.get("recoveredFormulaValues", []) or []
+                if str(item.get("field") or "").strip()
+            ],
+        ]
+    ).lower()
     schema = row_recovery.get("literalSchemaRecovery", {}) or {}
     schema_fields = set(schema.get("schemaFields", []) or [])
+
+    is_daily_tokenium_family = any(
+        marker in row_signature_text
+        for marker in (
+            "dailytokens",
+            "tokendailies",
+            "dailytokenium",
+            "daily token",
+        )
+    )
 
     bonus_value = value_by_field.get("ModBoostBonus")
     formatted_bonus = None
     if isinstance(bonus_value, (int, float)):
         formatted_bonus = f"x{float(bonus_value):.2f}"
 
-    output_candidates = [
-        entry for entry in raw_entries
-        if isinstance(entry.get("value"), str)
-        and entry["value"].startswith("Output: ")
-        and "Mod Points" in entry["value"]
-    ]
-    output_candidates.sort(
-        key=lambda item: (
-            0 if "(MP)" in str(item.get("value") or "") else 1,
-            len(str(item.get("value") or "")),
-            int(item.get("offset") or 0),
+    if is_daily_tokenium_family:
+        output_candidates = [
+            entry for entry in raw_entries
+            if isinstance(entry.get("value"), str)
+            and "daily tokenium" in entry["value"].lower()
+            and len(str(entry.get("value") or "")) <= 120
+        ]
+        output_candidates.sort(
+            key=lambda item: (
+                0 if str(item.get("value") or "").startswith("0 / ") else 1,
+                len(str(item.get("value") or "")),
+                int(item.get("offset") or 0),
+            )
         )
-    )
-    selected_output = output_candidates[0] if output_candidates else None
-    output_label = str(selected_output.get("value") or "").strip() if selected_output else None
-    output_core = output_label.removeprefix("Output: ").strip() if output_label else "Mod Points"
-    output_core_base = output_core.replace("(MP)", "").replace("()", "").strip()
-    output_abbreviation_match = re.search(r"\(([^)]+)\)", output_label or "")
-    output_abbreviation = output_abbreviation_match.group(1).strip() if output_abbreviation_match else None
+        selected_output = output_candidates[0] if output_candidates else None
+        output_label = str(selected_output.get("value") or "").strip() if selected_output else None
+        output_core_base = "Daily Tokens"
+        output_abbreviation = None
 
-    def title_score(value: str) -> tuple[int, int, int, str]:
-        lowered = value.lower()
-        score = 0
-        if output_core_base and output_core_base.lower() in lowered:
-            score += 10
-        if "booster" in lowered:
-            score += 8
-        if "output:" in lowered:
-            score -= 10
-        if "<" in value or ">" in value:
-            score -= 8
-        if ":" in value:
-            score -= 3
-        if shell_field.startswith("ATU4") and "ultima" in lowered:
-            score -= 2
-        if prefab_text and "modpointsbooster" in prefab_text.lower() and "mod points booster" == lowered:
-            score += 12
-        return (-score, len(value), lowered.count(" "), value)
+        def title_score(value: str) -> tuple[int, int, int, str]:
+            lowered = value.lower()
+            score = 0
+            if "daily tokens" in lowered:
+                score += 14
+            if "t2" in lowered:
+                score += 8
+            if "output:" in lowered:
+                score -= 10
+            if "<" in value or ">" in value:
+                score -= 8
+            if ":" in value:
+                score -= 3
+            return (-score, len(value), lowered.count(" "), value)
 
-    title_candidates = [
-        entry for entry in raw_entries
-        if isinstance(entry.get("value"), str)
-        and output_core_base.lower() in entry["value"].lower()
-        and "booster" in entry["value"].lower()
-        and len(entry["value"]) <= 80
-    ]
-    title_candidates.sort(key=lambda item: title_score(str(item.get("value") or "")))
-    selected_title = title_candidates[0] if title_candidates else None
+        title_candidates = [
+            entry for entry in raw_entries
+            if isinstance(entry.get("value"), str)
+            and "daily tokens" in entry["value"].lower()
+            and len(entry["value"]) <= 80
+        ]
+        title_candidates.sort(key=lambda item: title_score(str(item.get("value") or "")))
+        selected_title = title_candidates[0] if title_candidates else None
 
-    bonus_candidates = [
-        entry for entry in raw_entries
-        if isinstance(entry.get("value"), str)
-        and output_core_base.lower() in entry["value"].lower()
-        and "gained" in entry["value"].lower()
-        and len(entry["value"]) <= 80
-    ]
-    bonus_candidates.sort(key=lambda item: (0 if str(item.get("value") or "").startswith("2. ") else 1, len(str(item.get("value") or "")), int(item.get("offset") or 0)))
-    selected_bonus = bonus_candidates[0] if bonus_candidates else None
+        bonus_candidates = []
+        selected_bonus = None
 
-    description_candidates = []
-    for entry in raw_entries:
-        value = str(entry.get("value") or "")
-        lowered = value.lower()
-        if "this upgrade" not in lowered:
-            continue
-        if output_core_base.lower() not in lowered:
-            continue
-        if formatted_bonus and formatted_bonus.lower() not in lowered:
-            continue
-        score = 0
-        if "mission materials" in lowered:
-            score += 6
-        if "multiplicative" in lowered:
-            score += 6
-        if formatted_bonus and formatted_bonus.lower() in lowered:
-            score += 8
-        if "all " in lowered:
-            score += 2
-        description_candidates.append(
-            {
-                "offset": entry.get("offset"),
-                "encoding": entry.get("encoding"),
-                "value": value,
-                "score": score,
-            }
+        description_candidates = []
+        for entry in raw_entries:
+            value = str(entry.get("value") or "")
+            lowered = value.lower()
+            if "this upgrade" not in lowered:
+                continue
+            if "daily tokenium" not in lowered:
+                continue
+            score = 0
+            if "farm missions" in lowered:
+                score += 8
+            if "cap" in lowered:
+                score += 8
+            if "daily tokenium-553" in lowered:
+                score += 4
+            description_candidates.append(
+                {
+                    "offset": entry.get("offset"),
+                    "encoding": entry.get("encoding"),
+                    "value": value,
+                    "score": score,
+                }
+            )
+        description_candidates.sort(
+            key=lambda item: (-int(item.get("score") or 0), len(str(item.get("value") or "")), int(item.get("offset") or 0))
         )
-    description_candidates.sort(key=lambda item: (-int(item.get("score") or 0), len(str(item.get("value") or "")), int(item.get("offset") or 0)))
-    selected_description = description_candidates[0] if description_candidates else None
+        selected_description = description_candidates[0] if description_candidates else None
 
-    short_effect_candidates = []
-    for entry in raw_entries:
-        value = str(entry.get("value") or "").strip()
-        lowered = value.lower()
-        if not formatted_bonus or formatted_bonus.lower() not in lowered:
-            continue
-        if "gained" not in lowered:
-            continue
-        if output_abbreviation and output_abbreviation.lower() not in lowered:
-            continue
-        score = 0
-        if "<color=" in value:
-            score += 6
-        if formatted_bonus and formatted_bonus.lower() in lowered:
-            score += 8
-        if output_abbreviation and output_abbreviation.lower() in lowered:
-            score += 8
-        if "to <color" in lowered:
-            score += 3
-        short_effect_candidates.append(
-            {
-                "offset": entry.get("offset"),
-                "encoding": entry.get("encoding"),
-                "value": value,
-                "score": score,
-            }
+        short_effect_candidates = []
+        selected_short_effect = None
+    else:
+        output_candidates = [
+            entry for entry in raw_entries
+            if isinstance(entry.get("value"), str)
+            and entry["value"].startswith("Output: ")
+            and "Mod Points" in entry["value"]
+        ]
+        output_candidates.sort(
+            key=lambda item: (
+                0 if "(MP)" in str(item.get("value") or "") else 1,
+                len(str(item.get("value") or "")),
+                int(item.get("offset") or 0),
+            )
         )
-    short_effect_candidates.sort(
-        key=lambda item: (-int(item.get("score") or 0), len(str(item.get("value") or "")), int(item.get("offset") or 0))
-    )
-    selected_short_effect = short_effect_candidates[0] if short_effect_candidates else None
+        selected_output = output_candidates[0] if output_candidates else None
+        output_label = str(selected_output.get("value") or "").strip() if selected_output else None
+        output_core = output_label.removeprefix("Output: ").strip() if output_label else "Mod Points"
+        output_core_base = output_core.replace("(MP)", "").replace("()", "").strip()
+        output_abbreviation_match = re.search(r"\(([^)]+)\)", output_label or "")
+        output_abbreviation = output_abbreviation_match.group(1).strip() if output_abbreviation_match else None
+
+        def title_score(value: str) -> tuple[int, int, int, str]:
+            lowered = value.lower()
+            score = 0
+            if output_core_base and output_core_base.lower() in lowered:
+                score += 10
+            if "booster" in lowered:
+                score += 8
+            if "output:" in lowered:
+                score -= 10
+            if "<" in value or ">" in value:
+                score -= 8
+            if ":" in value:
+                score -= 3
+            if shell_field.startswith("ATU4") and "ultima" in lowered:
+                score -= 2
+            if prefab_text and "modpointsbooster" in prefab_text.lower() and "mod points booster" == lowered:
+                score += 12
+            return (-score, len(value), lowered.count(" "), value)
+
+        title_candidates = [
+            entry for entry in raw_entries
+            if isinstance(entry.get("value"), str)
+            and output_core_base.lower() in entry["value"].lower()
+            and "booster" in entry["value"].lower()
+            and len(entry["value"]) <= 80
+        ]
+        title_candidates.sort(key=lambda item: title_score(str(item.get("value") or "")))
+        selected_title = title_candidates[0] if title_candidates else None
+
+        bonus_candidates = [
+            entry for entry in raw_entries
+            if isinstance(entry.get("value"), str)
+            and output_core_base.lower() in entry["value"].lower()
+            and "gained" in entry["value"].lower()
+            and len(entry["value"]) <= 80
+        ]
+        bonus_candidates.sort(key=lambda item: (0 if str(item.get("value") or "").startswith("2. ") else 1, len(str(item.get("value") or "")), int(item.get("offset") or 0)))
+        selected_bonus = bonus_candidates[0] if bonus_candidates else None
+
+        description_candidates = []
+        for entry in raw_entries:
+            value = str(entry.get("value") or "")
+            lowered = value.lower()
+            if "this upgrade" not in lowered:
+                continue
+            if output_core_base.lower() not in lowered:
+                continue
+            if formatted_bonus and formatted_bonus.lower() not in lowered:
+                continue
+            score = 0
+            if "mission materials" in lowered:
+                score += 6
+            if "multiplicative" in lowered:
+                score += 6
+            if formatted_bonus and formatted_bonus.lower() in lowered:
+                score += 8
+            if "all " in lowered:
+                score += 2
+            description_candidates.append(
+                {
+                    "offset": entry.get("offset"),
+                    "encoding": entry.get("encoding"),
+                    "value": value,
+                    "score": score,
+                }
+            )
+        description_candidates.sort(key=lambda item: (-int(item.get("score") or 0), len(str(item.get("value") or "")), int(item.get("offset") or 0)))
+        selected_description = description_candidates[0] if description_candidates else None
+
+        short_effect_candidates = []
+        for entry in raw_entries:
+            value = str(entry.get("value") or "").strip()
+            lowered = value.lower()
+            if not formatted_bonus or formatted_bonus.lower() not in lowered:
+                continue
+            if "gained" not in lowered:
+                continue
+            if output_abbreviation and output_abbreviation.lower() not in lowered:
+                continue
+            score = 0
+            if "<color=" in value:
+                score += 6
+            if formatted_bonus and formatted_bonus.lower() in lowered:
+                score += 8
+            if output_abbreviation and output_abbreviation.lower() in lowered:
+                score += 8
+            if "to <color" in lowered:
+                score += 3
+            short_effect_candidates.append(
+                {
+                    "offset": entry.get("offset"),
+                    "encoding": entry.get("encoding"),
+                    "value": value,
+                    "score": score,
+                }
+            )
+        short_effect_candidates.sort(
+            key=lambda item: (-int(item.get("score") or 0), len(str(item.get("value") or "")), int(item.get("offset") or 0))
+        )
+        selected_short_effect = short_effect_candidates[0] if short_effect_candidates else None
 
     title_text = str(selected_title.get("value") or "").strip() if selected_title else None
     description_text = str(selected_description.get("value") or "").strip() if selected_description else None
@@ -3843,11 +4305,19 @@ def build_runtime_trace_catalog() -> dict[str, Any]:
         target_id = str(target.get("id") or row.get("traceScope") or "").strip()
         if not target_id:
             continue
+        resolver_target = get_trace_db().find_materialized_resolver_target_view(
+            "cifi-full",
+            "libil2cpp.so",
+            target_id,
+        ) or {}
+        resolver_payload = dict(resolver_target.get("payload") or {})
         merged_target = dict(target)
         merged_target["id"] = target_id
         merged_target.setdefault("label", target_id)
         merged_target.setdefault("requiredSourceFamilies", list(CANONICAL_SOURCE_IDS))
-        merged_target.setdefault("defaultAnchors", list(BOOTSTRAP_DEFAULT_ANCHORS.get(target_id) or []))
+        merged_target.setdefault("defaultAnchors", list(resolver_payload.get("anchorTerms") or []))
+        if resolver_payload.get("outputSummaryRules"):
+            merged_target["outputSummaryRules"] = dict(resolver_payload.get("outputSummaryRules") or {})
         targets[target_id] = merged_target
 
     for target_id in unique_strings(
@@ -3865,6 +4335,12 @@ def build_runtime_trace_catalog() -> dict[str, Any]:
             target_id,
             compatibility_target_id=target_id,
         )
+        resolver_target = get_trace_db().find_materialized_resolver_target_view(
+            "cifi-full",
+            "libil2cpp.so",
+            target_id,
+        ) or {}
+        resolver_payload = dict(resolver_target.get("payload") or {})
         family_id = str(execution_context.get("familyId") or "").strip()
         if not family_id:
             continue
@@ -3876,7 +4352,7 @@ def build_runtime_trace_catalog() -> dict[str, Any]:
             "joinGoal": execution_context.get("joinGoal"),
             "outputSummaryRules": execution_context.get("outputSummaryRules"),
             "requiredSourceFamilies": list(CANONICAL_SOURCE_IDS),
-            "defaultAnchors": list(BOOTSTRAP_DEFAULT_ANCHORS.get(target_id) or []),
+            "defaultAnchors": list(resolver_payload.get("anchorTerms") or []),
             "solvedBaselineTargetId": execution_context.get("solvedBaselineTargetId"),
             "blockedTargetId": execution_context.get("blockedTargetId"),
         }
@@ -3992,404 +4468,6 @@ def format_anchor_specs(anchor_specs: list[dict[str, Any]]) -> str:
     return ", ".join(f"{item['value']} ({item['kind']})" for item in anchor_specs)
 
 
-def _split_resolution_tokens(value: str) -> list[str]:
-    pieces = re.split(r"[^A-Za-z0-9]+", value)
-    tokens: list[str] = []
-    for piece in pieces:
-        if not piece:
-            continue
-        parts = re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?![a-z])|\d+", piece)
-        for part in parts:
-            lowered = part.lower()
-            if lowered:
-                tokens.append(lowered)
-    return tokens
-
-
-GENERIC_RESOLUTION_TOKENS = {
-    "token",
-    "shop",
-    "buy",
-    "button",
-    "text",
-    "title",
-    "description",
-    "desc",
-    "cost",
-    "level",
-    "bonus",
-    "fill",
-    "value",
-    "output",
-    "upgrade",
-    "trace",
-    "pass",
-    "runtime",
-    "boost",
-    "family",
-    "structure",
-    "audit",
-    "boundary",
-    "owner",
-    "state",
-    "save",
-    "market",
-}
-
-
-def _score_db_reconstruction_candidate(
-    candidate: dict[str, Any],
-    inputs: list[str],
-) -> dict[str, Any]:
-    payload = {
-        "target": dict(candidate.get("target") or {}),
-        "decisionSummary": dict(candidate.get("decisionSummary") or {}),
-        "nativeView": dict(candidate.get("nativeView") or {}),
-    }
-    trace_scope = str(candidate.get("traceScope") or "")
-    built_at = str(candidate.get("builtAt") or "")
-    semantic_scope_payloads = list(candidate.get("semanticScopePayloads") or [])
-    target = dict(payload.get("target") or {})
-    family_id = str(target.get("familyId") or "").strip()
-    label = str(target.get("label") or trace_scope).strip()
-    candidate_terms = list(candidate.get("resolutionTerms") or [])
-    normalized_candidate_terms = {
-        normalize_planner_term(term): term
-        for term in candidate_terms
-        if normalize_planner_term(term)
-    }
-    matched_inputs: list[str] = []
-    matched_terms: list[str] = []
-    score = 0
-    for input_value in inputs:
-        normalized_input = normalize_planner_term(input_value)
-        if not normalized_input:
-            continue
-        best_term = None
-        best_term_score = 0
-        for normalized_term, original_term in normalized_candidate_terms.items():
-            if normalized_input == normalized_term:
-                term_score = 120
-            elif normalized_input in normalized_term or normalized_term in normalized_input:
-                term_score = 45
-            else:
-                input_tokens = {
-                    token for token in _split_resolution_tokens(input_value)
-                    if token and token not in GENERIC_RESOLUTION_TOKENS
-                }
-                term_tokens = {
-                    token for token in _split_resolution_tokens(original_term)
-                    if token and token not in GENERIC_RESOLUTION_TOKENS
-                }
-                overlap = input_tokens & term_tokens
-                term_score = len(overlap) * 12
-            if term_score > best_term_score:
-                best_term = original_term
-                best_term_score = term_score
-        if best_term is None or best_term_score <= 0:
-            continue
-        score += best_term_score
-        if input_value not in matched_inputs:
-            matched_inputs.append(input_value)
-        if best_term not in matched_terms:
-            matched_terms.append(best_term)
-
-    if matched_terms:
-        score += len(matched_terms) * 4
-    if family_id:
-        family_normalized = normalize_planner_term(family_id)
-        for input_value in inputs:
-            normalized_input = normalize_planner_term(input_value)
-            if not normalized_input:
-                continue
-            if normalized_input == family_normalized or normalized_input in family_normalized or family_normalized in normalized_input:
-                score += 30
-                if "family" in trace_scope or "family" in label.lower():
-                    score += 25
-                break
-    if semantic_scope_payloads:
-        score += min(len(semantic_scope_payloads), 4) * 5
-    decision_summary = dict(payload.get("decisionSummary") or {})
-    blocked_edge_types = list(decision_summary.get("blockedEdgeTypes") or [])
-    score += min(int(decision_summary.get("provedEdgeCount") or 0), 12) * 2
-    score -= min(len(blocked_edge_types), 6)
-    if "family" in trace_scope or "family" in label.lower():
-        score += 8
-    built_dt = _parse_iso_datetime(built_at)
-    if built_dt is not None:
-        age_hours = max((datetime.now(built_dt.tzinfo) - built_dt).total_seconds() / 3600.0, 0.0)
-        if age_hours <= 24:
-            score += 4
-
-    anchor_candidates: list[tuple[int, str]] = []
-    for scope_payload in semantic_scope_payloads:
-        anchor_candidates.extend(_collect_trace_anchor_terms(scope_payload))
-    anchor_candidates.extend(_collect_trace_anchor_terms((payload.get("nativeView") or {}).get("searchTerms") or [], ("searchTerms",)))
-    anchor_candidates.extend(_collect_trace_anchor_terms((payload.get("nativeView") or {}).get("summary") or {}, ("nativeSummary",)))
-    ordered_anchor_terms: list[str] = []
-    seen_terms: set[str] = set()
-    for _, term in sorted(anchor_candidates, key=lambda item: (-item[0], item[1].lower())):
-        normalized = normalize_planner_term(term)
-        if not normalized or normalized in seen_terms:
-            continue
-        seen_terms.add(normalized)
-        ordered_anchor_terms.append(term)
-        if len(ordered_anchor_terms) >= 12:
-            break
-
-    return {
-        "targetId": str(target.get("id") or trace_scope),
-        "traceScope": trace_scope,
-        "familyId": family_id,
-        "label": label,
-        "matchedInputs": matched_inputs,
-        "matchedTerms": matched_terms,
-        "semanticScopePayloads": semantic_scope_payloads,
-        "semanticScopeSubjects": list(candidate.get("semanticScopeSubjects") or []),
-        "familyGraphSubjects": list(candidate.get("familyGraphSubjects") or []),
-        "anchors": ordered_anchor_terms,
-        "score": score,
-        "blockedEdgeTypes": blocked_edge_types,
-    }
-
-
-def _detect_db_reconstruction_override(
-    registry: dict[str, Any],
-    requested_queries: list[str],
-    requested_anchors: list[str],
-    include_legacy_targets: bool = False,
-) -> dict[str, Any] | None:
-    combined_inputs = unique_strings([*requested_queries, *requested_anchors])
-    if not combined_inputs:
-        return None
-    candidates: list[dict[str, Any]] = []
-    for row in get_trace_db().find_canonical_resolution_subject_candidates(
-        "cifi-full",
-        "libil2cpp.so",
-        include_legacy_targets=include_legacy_targets,
-    ):
-        trace_scope = str(row.get("traceScope") or "").strip()
-        target = dict(row.get("target") or {})
-        target_id = str(target.get("id") or trace_scope).strip()
-        if not trace_scope or not target_id:
-            continue
-        if target_id not in (registry.get("targets") or {}):
-            continue
-        registry_target = dict((registry.get("targets") or {}).get(target_id) or {})
-        row["target"] = {
-            **registry_target,
-            **target,
-            "id": target_id,
-        }
-        if not row["target"].get("label") and row.get("label"):
-            row["target"]["label"] = str(row.get("label") or "")
-        candidates.append(_score_db_reconstruction_candidate(row, combined_inputs))
-    candidates = [candidate for candidate in candidates if float(candidate.get("score") or 0) >= 20.0 and candidate.get("matchedTerms")]
-    if not candidates:
-        return None
-    candidates.sort(
-        key=lambda item: (
-            -float(item.get("score") or 0.0),
-            -len(item.get("matchedTerms") or []),
-            len(item.get("blockedEdgeTypes") or []),
-            str(item.get("traceScope") or ""),
-        )
-    )
-    best = candidates[0]
-    target_id = str(best["targetId"])
-    target = registry["targets"][target_id]
-    family_id = str(target["familyId"])
-    family_plan = registry["planner"]["families"][family_id]
-    semantic_scope_payloads = list(best.get("semanticScopePayloads") or [])
-    matched_terms = list(best.get("matchedTerms") or [])
-    selected_subject_kind = "target-reconstruction"
-    selected_subject_key = f"target:{target_id}"
-    selected_subject_label = str(best.get("label") or target.get("label") or target_id)
-
-    normalized_matched_terms = {normalize_planner_term(term) for term in matched_terms if normalize_planner_term(term)}
-    best_family_graph_subject: dict[str, Any] | None = None
-    best_family_graph_score = -1
-    for family_graph_subject in list(best.get("familyGraphSubjects") or []):
-        normalized_family_terms = {
-            normalize_planner_term(term)
-            for term in list(family_graph_subject.get("subjectTerms") or [])
-            if normalize_planner_term(term)
-        }
-        matched_family_terms = normalized_family_terms & normalized_matched_terms
-        if not matched_family_terms:
-            continue
-        family_graph_score = len(matched_family_terms) * 12 + 60
-        if family_id and normalize_planner_term(family_id) in matched_family_terms:
-            family_graph_score += 30
-        if family_graph_score <= best_family_graph_score:
-            continue
-        best_family_graph_score = family_graph_score
-        best_family_graph_subject = family_graph_subject
-
-    best_scope_subject: dict[str, Any] | None = None
-    best_scope_score = -1
-    for scope_subject in list(best.get("semanticScopeSubjects") or []):
-        normalized_scope_terms = {
-            normalize_planner_term(term)
-            for term in list(scope_subject.get("subjectTerms") or [])
-            if normalize_planner_term(term)
-        }
-        matched_scope_terms = normalized_scope_terms & normalized_matched_terms
-        if not matched_scope_terms:
-            continue
-        scope_id = str(scope_subject.get("scopeId") or "").strip()
-        scope_type = str(scope_subject.get("scopeType") or "").strip()
-        scope_score = len(matched_scope_terms) * 10
-        if scope_id.startswith("row:"):
-            scope_score += 100
-        elif scope_type:
-            scope_score += 40
-        if scope_score <= best_scope_score:
-            continue
-        best_scope_score = scope_score
-        best_scope_subject = scope_subject
-
-    if best_scope_subject is not None:
-        selected_subject_kind = "semantic-scope"
-        selected_subject_key = str(best_scope_subject.get("scopeId") or "")
-        selected_subject_label = str(best_scope_subject.get("label") or selected_subject_key)
-    elif best_family_graph_subject is not None:
-        selected_subject_kind = "family-graph"
-        selected_subject_key = str(best_family_graph_subject.get("semanticKey") or "")
-        selected_subject_label = str(best_family_graph_subject.get("label") or selected_subject_key)
-
-    if selected_subject_kind == "target-reconstruction":
-        token_shop_reconstruction_key = ""
-        if family_id == "token-shop":
-            token_shop_reconstruction_key = f"token-shop-reconstruction:{target_id}"
-        if token_shop_reconstruction_key:
-            selected_subject_kind = "reconstruction-fragment"
-            selected_subject_key = token_shop_reconstruction_key
-            selected_subject_label = str(target.get("label") or target_id)
-
-    expanded_anchors = unique_strings(
-        [
-            *requested_queries,
-            *requested_anchors,
-            *list(best.get("anchors") or []),
-            *[
-                str(((scope_payload.get("rowShell") or {}).get("field") or ""))
-                for scope_payload in semantic_scope_payloads
-            ],
-            *[
-                str(((scope_payload.get("purchaseAction") or {}).get("term") or ""))
-                for scope_payload in semantic_scope_payloads
-            ],
-        ]
-    )
-    return {
-        "selectionMode": "db-reconstruction",
-        "requestedQueries": requested_queries,
-        "requestedAnchors": requested_anchors,
-        "matchedInputs": list(best.get("matchedInputs") or []),
-        "matchedTerms": list(best.get("matchedTerms") or []),
-        "matchedFamilyId": family_id,
-        "matchedFamilyLabel": family_plan["label"],
-        "selectedSubjectKind": selected_subject_kind,
-        "selectedSubjectKey": selected_subject_key,
-        "selectedSubjectLabel": selected_subject_label,
-        "selectedTargetId": target_id,
-        "selectedRunMode": "trace",
-        "selectedComparePresetId": None,
-        "synonymSetsUsed": [],
-        "expandedAnchors": expanded_anchors,
-        "decisionNote": (
-            "Resolved the trace from DB-backed canonical semantic fragments first, "
-            f"selecting {target_id} as the strongest current reconstruction scope for {', '.join(list(best.get('matchedInputs') or combined_inputs))}. "
-            f"DB subject: {selected_subject_kind} {selected_subject_key}. "
-            "Materialized target bundles were not required for resolution."
-        ),
-    }
-
-
-def make_generic_explore_resolution(registry: dict[str, Any], queries: list[str], anchors: list[str]) -> dict[str, Any]:
-    combined_inputs = unique_strings([*queries, *anchors])
-    expanded_anchors = unique_strings(combined_inputs)
-    return {
-        "selectionMode": "generic-explore",
-        "requestedQueries": queries,
-        "requestedAnchors": anchors,
-        "matchedInputs": combined_inputs,
-        "matchedTerms": combined_inputs,
-        "matchedFamilyId": "exploration",
-        "matchedFamilyLabel": "Exploration",
-        "selectedSubjectKind": "flat-explore",
-        "selectedSubjectKey": "generic-explore",
-        "selectedSubjectLabel": "Flat cross-source exploration",
-        "selectedTargetId": "generic-explore",
-        "selectedRunMode": "trace",
-        "selectedComparePresetId": None,
-        "synonymSetsUsed": [],
-        "expandedAnchors": expanded_anchors,
-        "decisionNote": (
-            "No DB-backed reconstruction scope matched the provided inputs strongly enough, so the trace fell back to "
-            "flat cross-source exploration over committed metadata, Unity assets, and native extraction without using registry family routing."
-        ),
-    }
-
-
-def _resolve_execution_subject(
-    registry: dict[str, Any],
-    planner_resolution: dict[str, Any],
-) -> tuple[str, str]:
-    selected_target_id = str(planner_resolution.get("selectedTargetId") or "")
-    subject_kind = str(planner_resolution.get("selectedSubjectKind") or "")
-    subject_key = str(planner_resolution.get("selectedSubjectKey") or "")
-    execution_target_id = selected_target_id
-    execution_trace_scope = selected_target_id
-
-    if subject_kind == "reconstruction-fragment" and subject_key.startswith("token-shop-reconstruction:"):
-        execution_trace_scope = subject_key.removeprefix("token-shop-reconstruction:")
-        if execution_trace_scope in (registry.get("targets") or {}):
-            execution_target_id = execution_trace_scope
-    elif subject_kind == "family-graph" and subject_key:
-        family_graph_payload = get_trace_db().find_canonical_semantic_fragment(
-            "cifi-full",
-            "libil2cpp.so",
-            "family_graph_fragment",
-            subject_key,
-        )
-        if family_graph_payload:
-            payload = dict(family_graph_payload.get("payload") or {})
-            execution_trace_scope = str(
-                payload.get("traceScope")
-                or payload.get("targetId")
-                or selected_target_id
-            ).strip()
-            execution_target_id = str(
-                payload.get("targetId")
-                or execution_trace_scope
-                or selected_target_id
-            ).strip()
-    elif subject_kind == "semantic-scope" and subject_key:
-        scope_payload = load_canonical_semantic_scope(subject_key)
-        if scope_payload:
-            execution_trace_scope = str(
-                scope_payload.get("traceScope")
-                or scope_payload.get("targetId")
-                or selected_target_id
-            ).strip()
-            execution_target_id = str(
-                scope_payload.get("targetId")
-                or execution_trace_scope
-                or selected_target_id
-            ).strip()
-    elif subject_kind == "flat-explore":
-        execution_target_id = "generic-explore"
-        execution_trace_scope = "generic-explore"
-
-    if not execution_target_id:
-        execution_target_id = selected_target_id
-    if not execution_trace_scope:
-        execution_trace_scope = execution_target_id
-    return execution_target_id, execution_trace_scope
-
-
 def _apply_db_execution_plan(target: dict[str, Any], execution_trace_scope: str) -> tuple[dict[str, Any], dict[str, Any]]:
     execution_plan = load_canonical_execution_plan(execution_trace_scope)
     if not execution_plan:
@@ -4434,197 +4512,6 @@ def _apply_db_execution_context(
     if accepted_anchors:
         patched_target["acceptedAnchors"] = accepted_anchors
     return patched_target, execution_context
-
-
-def pick_synonym_sets(family_plan: dict[str, Any], inputs: list[str], matched_terms: list[str]) -> list[dict[str, Any]]:
-    matched_set = set(matched_terms)
-    selected: list[dict[str, Any]] = []
-    for set_id, terms in family_plan.get("synonymSets", {}).items():
-        set_matches = [term for term in terms if term in matched_set]
-        if not set_matches:
-            normalized_terms = [normalize_planner_term(term) for term in terms]
-            set_matches = [
-                term
-                for term, normalized_term in zip(terms, normalized_terms)
-                if any(normalized_term and normalized_term in normalize_planner_term(input_value) for input_value in inputs)
-            ]
-        if not set_matches:
-            continue
-        selected.append({"id": set_id, "matchedTerms": unique_strings(set_matches), "terms": terms})
-    return selected
-
-
-def choose_run_mode(family_plan: dict[str, Any], inputs: list[str], explicit_target: bool) -> str:
-    return "trace"
-
-
-def normalize_run_mode_for_target(target: dict[str, Any], run_mode: str) -> str:
-    return run_mode
-
-
-def expand_anchor_terms(
-    target: dict[str, Any],
-    family_plan: dict[str, Any],
-    queries: list[str],
-    anchors: list[str],
-    synonym_sets_used: list[dict[str, Any]],
-    include_family_expansion: bool = True,
-) -> list[str]:
-    values = list(target["defaultAnchors"]) + queries + anchors
-    if include_family_expansion:
-        values.extend(list(family_plan.get("anchorExpansionTerms", [])))
-    for synonym_set in synonym_sets_used:
-        values.extend(synonym_set["terms"])
-    return unique_strings(values)
-
-
-def build_planner_decision_note(
-    selection_mode: str,
-    family_plan: dict[str, Any],
-    resolution: dict[str, Any],
-    target: dict[str, Any],
-) -> str:
-    family_label = family_plan["label"]
-    selected_target_id = resolution["selectedTargetId"]
-    if selection_mode == "explicit-target":
-        return (
-            f"Used explicit target {selected_target_id} in the {family_label} family and kept anchor expansion bounded "
-            f"to the target plus any explicit query or anchor input."
-        )
-    matched_inputs = ", ".join(resolution["matchedInputs"]) if resolution["matchedInputs"] else family_label
-    synonym_labels = ", ".join(item["id"] for item in resolution["synonymSetsUsed"]) or "family defaults"
-    return (
-        f"Matched {matched_inputs} to {family_label} through {synonym_labels} and chose the single "
-        f"{selected_target_id} trace because the query already points at one checked family target."
-    )
-
-
-def resolve_planner_selection(
-    registry: dict[str, Any],
-    explicit_target_id: str | None,
-    queries: list[str],
-    anchors: list[str],
-    explicit_family_id: str | None = None,
-    include_legacy_targets: bool = False,
-) -> dict[str, Any]:
-    requested_queries = unique_strings(queries)
-    requested_anchors = unique_strings(anchors)
-    if explicit_target_id:
-        target = registry["targets"][explicit_target_id]
-        family_id = target["familyId"]
-        family_plan = registry["planner"]["families"][family_id]
-        combined_inputs = unique_strings([*requested_queries, *requested_anchors])
-        synonym_sets_used = pick_synonym_sets(family_plan, combined_inputs, combined_inputs)
-        expanded_anchors = expand_anchor_terms(
-            target,
-            family_plan,
-            requested_queries,
-            requested_anchors,
-            synonym_sets_used,
-            include_family_expansion=False,
-        )
-        resolution = {
-            "selectionMode": "explicit-target",
-            "requestedQueries": requested_queries,
-            "requestedAnchors": requested_anchors,
-            "matchedInputs": combined_inputs,
-            "matchedTerms": combined_inputs,
-            "matchedFamilyId": family_id,
-            "matchedFamilyLabel": family_plan["label"],
-            "selectedSubjectKind": "target",
-            "selectedSubjectKey": explicit_target_id,
-            "selectedSubjectLabel": str(target.get("label") or explicit_target_id),
-            "selectedTargetId": explicit_target_id,
-            "selectedRunMode": choose_run_mode(family_plan, combined_inputs, explicit_target=True),
-            "selectedComparePresetId": None,
-            "synonymSetsUsed": synonym_sets_used,
-            "expandedAnchors": expanded_anchors,
-        }
-        resolution["decisionNote"] = build_planner_decision_note("explicit-target", family_plan, {
-            "selectedTargetId": resolution["selectedTargetId"],
-            "matchedInputs": resolution["matchedInputs"],
-            "synonymSetsUsed": resolution["synonymSetsUsed"],
-            "runMode": resolution["selectedRunMode"],
-        }, target)
-        return resolution
-
-    if explicit_family_id:
-        family_id = explicit_family_id
-        family_plan = registry["planner"]["families"][family_id]
-        family_subject = get_trace_db().find_canonical_family_subject_candidate(
-            "cifi-full",
-            "libil2cpp.so",
-            family_id,
-        )
-        if not family_subject:
-            combined_inputs = unique_strings([family_plan["label"], *requested_queries, *requested_anchors])
-            return {
-                "selectionMode": "family-db-miss",
-                "requestedQueries": requested_queries,
-                "requestedAnchors": requested_anchors,
-                "matchedInputs": combined_inputs,
-                "matchedTerms": combined_inputs,
-                "matchedFamilyId": family_id,
-                "matchedFamilyLabel": family_plan["label"],
-                "selectedSubjectKind": "flat-explore",
-                "selectedSubjectKey": "generic-explore",
-                "selectedSubjectLabel": f"{family_plan['label']} unresolved DB family subject",
-                "selectedTargetId": "generic-explore",
-                "selectedRunMode": "trace",
-                "selectedComparePresetId": None,
-                "synonymSetsUsed": [],
-                "expandedAnchors": unique_strings([*combined_inputs, *list(family_plan.get("anchorExpansionTerms", []))]),
-                "decisionNote": (
-                    f"Used explicit family {family_plan['label']} but did not find a DB-owned family subject, "
-                    "so the trace degrades to flat exploration instead of falling back to a registry default target."
-                ),
-            }
-        target_id = str((family_subject or {}).get("targetId") or "")
-        target = registry["targets"][target_id]
-        combined_inputs = unique_strings([family_plan["label"], *requested_queries, *requested_anchors])
-        synonym_sets_used = pick_synonym_sets(family_plan, combined_inputs, combined_inputs)
-        expanded_anchors = expand_anchor_terms(target, family_plan, requested_queries, requested_anchors, synonym_sets_used)
-        run_mode = normalize_run_mode_for_target(
-            target,
-            choose_run_mode(family_plan, combined_inputs, explicit_target=False),
-        )
-        resolution = {
-            "selectionMode": "explicit-family",
-            "requestedQueries": requested_queries,
-            "requestedAnchors": requested_anchors,
-            "matchedInputs": combined_inputs,
-            "matchedTerms": combined_inputs,
-            "matchedFamilyId": family_id,
-            "matchedFamilyLabel": family_plan["label"],
-            "selectedSubjectKind": str((family_subject or {}).get("subjectKind") or "family"),
-            "selectedSubjectKey": str((family_subject or {}).get("subjectKey") or family_id),
-            "selectedSubjectLabel": str((family_subject or {}).get("subjectLabel") or family_plan["label"]),
-            "selectedTargetId": target_id,
-            "selectedRunMode": run_mode,
-            "selectedComparePresetId": None,
-            "synonymSetsUsed": synonym_sets_used,
-            "expandedAnchors": expanded_anchors,
-        }
-        resolution["decisionNote"] = (
-            f"Used explicit family {family_plan['label']} and resolved to DB-owned family subject "
-            f"{resolution['selectedSubjectKey']} with compatibility scope {target_id}."
-        )
-        return resolution
-
-    combined_inputs = unique_strings([*requested_queries, *requested_anchors])
-    if not combined_inputs:
-        raise ValueError("Pass --target or at least one --query/--anchor to resolve a unity trace.")
-    db_override = _detect_db_reconstruction_override(
-        registry,
-        requested_queries,
-        requested_anchors,
-        include_legacy_targets,
-    )
-    if db_override is not None:
-        return db_override
-    return make_generic_explore_resolution(registry, requested_queries, requested_anchors)
-
-
 def resolve_source_catalog(registry: dict[str, Any], family_ids: list[str]) -> tuple[dict[str, Path], list[dict[str, Any]]]:
     source_paths: dict[str, Path] = {}
     source_roles: list[dict[str, Any]] = []
@@ -5291,6 +5178,7 @@ def collect_unity_hits(source_id: str, anchor_specs: list[dict[str, Any]]) -> tu
     """Collect hits from Unity files using UnityPy"""
     hits: list[dict[str, Any]] = []
     suppressed_count = 0
+    skip_raw_string_scan = bool(_get_active_trace_runtime_flag("skipUnityRawStringScan", False))
     exact_terms = {spec["value"] for spec in anchor_specs}
     spec_by_value = {spec["value"]: spec for spec in anchor_specs}
 
@@ -5321,43 +5209,44 @@ def collect_unity_hits(source_id: str, anchor_specs: list[dict[str, Any]]) -> tu
                     })
                     break
 
-    seen = {(hit["term"], hit.get("surfaceType", ""), str(hit.get("pathId", "")), hit.get("matchedValue", "")) for hit in hits}
-    for entry in get_unity_raw_string_index().get(source_id, []):
-        value = entry["value"]
-        for term in exact_terms:
-            matched = False
-            match_mode = ""
-            if value == term:
-                matched = True
-                match_mode = "exact-string"
-            elif term.lower() in value.lower():
-                matched = True
-                match_mode = "bounded-containment"
-            if not matched:
-                continue
+    if not skip_raw_string_scan:
+        seen = {(hit["term"], hit.get("surfaceType", ""), str(hit.get("pathId", "")), hit.get("matchedValue", "")) for hit in hits}
+        for entry in get_unity_raw_string_index().get(source_id, []):
+            value = entry["value"]
+            for term in exact_terms:
+                matched = False
+                match_mode = ""
+                if value == term:
+                    matched = True
+                    match_mode = "exact-string"
+                elif term.lower() in value.lower():
+                    matched = True
+                    match_mode = "bounded-containment"
+                if not matched:
+                    continue
 
-            identity = (term, "raw-string", str(entry["offset"]), value[:200])
-            if identity in seen:
-                continue
-            seen.add(identity)
-            spec = spec_by_value[term]
-            score = 78 if match_mode == "exact-string" else 42
-            if spec["kind"] == "path id":
-                score -= 20
-            hits.append(
-                {
-                    "term": term,
-                    "matchedValue": value[:200],
-                    "surfaceType": "raw-string",
-                    "offset": entry["offset"],
-                    "encoding": entry["encoding"],
-                    "jsonPath": "raw-string@{}".format(entry["offset"]),
-                    "signalTier": "high-signal" if match_mode == "exact-string" else "supporting",
-                    "matchMode": match_mode,
-                    "score": score,
-                }
-            )
-            break
+                identity = (term, "raw-string", str(entry["offset"]), value[:200])
+                if identity in seen:
+                    continue
+                seen.add(identity)
+                spec = spec_by_value[term]
+                score = 78 if match_mode == "exact-string" else 42
+                if spec["kind"] == "path id":
+                    score -= 20
+                hits.append(
+                    {
+                        "term": term,
+                        "matchedValue": value[:200],
+                        "surfaceType": "raw-string",
+                        "offset": entry["offset"],
+                        "encoding": entry["encoding"],
+                        "jsonPath": "raw-string@{}".format(entry["offset"]),
+                        "signalTier": "high-signal" if match_mode == "exact-string" else "supporting",
+                        "matchMode": match_mode,
+                        "score": score,
+                    }
+                )
+                break
 
     return hits, suppressed_count
 
@@ -5642,6 +5531,13 @@ def _collect_native_trace_terms(
     planner_resolution: dict[str, Any],
     trace_payload: dict[str, Any],
 ) -> list[str]:
+    trace_scope = str(target.get("id") or target.get("traceScope") or "").strip()
+    support_context = load_or_synthesize_support_context(trace_scope, target) if trace_scope else {}
+    if support_context.get("disableNativeTrace") is True:
+        return []
+    configured_terms = [str(value) for value in (support_context.get("nativeTraceTerms") or []) if str(value).strip()]
+    if configured_terms:
+        return unique_strings(configured_terms)
     base_terms = unique_strings(
         [
             *(str(anchor) for anchor in target.get("anchors", [])),
@@ -5666,6 +5562,16 @@ def _build_token_shop_row_recovery(
     )
     trace_shell = trace_payload.get("shellWindow", {})
     trace_shell_field = trace_shell.get("shellField")
+    trace_shell_path_id = trace_shell.get("shellPathId")
+    support_context = load_or_synthesize_support_context(str(target.get("id") or target.get("traceScope") or ""), target)
+    if str(support_context.get("familyTraceProfile") or "") == "late-atu-family":
+        return None
+    if "through" in str(trace_shell_field or "").lower():
+        return None
+    try:
+        int(trace_shell_path_id)
+    except (TypeError, ValueError):
+        return None
     matches = list(bridge_plan.get("matches", []))
     match = None
     if trace_shell_field:
@@ -5750,6 +5656,17 @@ def _build_token_shop_row_recovery(
                         update_hook_candidates.append(term)
                     if term not in detached_text_candidates:
                         detached_text_candidates.append(term)
+    trace_scope = str(target.get("id") or target.get("traceScope") or "").strip()
+    support_context = load_or_synthesize_support_context(trace_scope, target) if trace_scope else {}
+    default_update_hook = str(support_context.get("defaultPresentationUpdateHook") or "").strip()
+    if (
+        default_update_hook
+        and not update_hook_candidates
+        and any(field_name.endswith(("StartCost", "AdditiveCost")) for field_name in owner_field_block)
+    ):
+        cost_updater_payload = _load_canonical_term_payload(default_update_hook)
+        if cost_updater_payload:
+            update_hook_candidates.append(default_update_hook)
     action_methods = [method for method in reconstructed_methods if method.startswith("Buy")]
     recovered_formula_values = []
     recovered_object_bindings = []
@@ -6183,6 +6100,9 @@ def build_mod_trace_graph(
     row_recovery: dict[str, Any] | None = None,
     row_scope: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    shell_field = str(shell_window.get("shellField") or "ATU4Button")
+    shell_path_id = shell_window.get("shellPathId") or "unknown"
+    owner_field_block = [str(item) for item in (shell_window.get("ownerFieldBlock") or []) if str(item).strip()]
     metadata_surface = find_surface(surfaces, "metadata-neighborhood")
     action_surface = find_surface(surfaces, "action-lane")
     prefab_surface = find_surface(surfaces, "prefab-lane")
@@ -6198,11 +6118,11 @@ def build_mod_trace_graph(
 
     metadata_shell_hit = find_hit(metadata_source, "ATU4Button")
     metadata_owner_hit = find_hit(metadata_source, "ModBoostStartCost")
-    action_buy_hit = find_hit(action_source, "BuyModBoost")
+    action_buy_hit = maybe_find_hit(action_source, "BuyModBoost")
     prefab_hit = find_hit(level0_prefab_source, "NewTokenUPGPrefab.T1.ModPointsBooster")
-    title_hit = find_hit(level0_title_source, "Token Ultima: MP") if level0_title_source else None
-    diamond_title_hit = find_hit(metadata_title_source, ":Diamond Upgrade 11 - ModBoost") if metadata_title_source else None
-    text_hook_hit = find_hit(level0_text_source, "SetAllTokenShopTexts") if level0_text_source else None
+    title_hit = maybe_find_hit(level0_title_source, "Token Ultima: MP") if level0_title_source else None
+    diamond_title_hit = maybe_find_hit(metadata_title_source, ":Diamond Upgrade 11 - ModBoost") if metadata_title_source else None
+    text_hook_hit = maybe_find_hit(level0_text_source, "SetAllTokenShopTexts") if level0_text_source else None
 
     row_recovery = row_recovery or {}
     presentation_update = row_recovery.get("presentationUpdatePath", {}) or {}
@@ -6277,9 +6197,9 @@ def build_mod_trace_graph(
             "present",
             "supporting",
             "The action lane preserves the matching direct buy hook BuyModBoost for the same ModBoost row family.",
-            [
-                cite_hit(action_source, action_buy_hit),
-            ],
+            compact_citations(
+                maybe_cite_hit(action_source, action_buy_hit),
+            ),
         ),
         make_edge(
             "action-hook-to-prefab",
@@ -6349,13 +6269,13 @@ def build_mod_trace_graph(
             "present",
             "supporting",
             "The generic TokenShop text updater survives separately from the recovered slot graph, but it still does not prove one row-specific rendered title string.",
-            [
+            compact_citations(
                 *[
-                    cite_hit(level0_text_source, find_hit(level0_text_source, hook))
+                    maybe_cite_hit(level0_text_source, maybe_find_hit(level0_text_source, hook))
                     for hook in update_hooks
-                    if level0_text_source and find_hit(level0_text_source, hook)
+                    if level0_text_source
                 ],
-            ],
+            ),
         ),
     ]
 
@@ -6420,8 +6340,8 @@ def build_mod_trace_graph(
 
     return {
         "nodes": [
-            make_node(shell_node, "shell-anchor", f"{shell_window['shellField']} path_id {shell_window['shellPathId']}", "present", "The exact target shell survives in the TokenShop payload."),
-            make_node(owner_node, "owner-field-block", ", ".join(shell_window["ownerFieldBlock"]), "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
+            make_node(shell_node, "shell-anchor", f"{shell_field} path_id {shell_path_id}", "present", "The exact target shell survives in the TokenShop payload."),
+            make_node(owner_node, "owner-field-block", ", ".join(owner_field_block) or "owner-field block unresolved", "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
             make_node(metadata_node, "metadata-neighborhood", "ATU4Button + ModBoost metadata neighborhood", "present", "Metadata still keeps the shell anchor and ModBoost declaration area together."),
             make_node(action_node, "action-hook", "BuyModBoost", "present", "The direct ModBoost buy hook is preserved in level0."),
             make_node(prefab_node, "prefab-identity", "NewTokenUPGPrefab.T1.ModPointsBooster", "present", "The exact token prefab identity is preserved."),
@@ -7007,18 +6927,18 @@ def build_mod_vs_blocked_diff(
             "status": "present",
             "provenanceStrength": "supporting",
             "statement": "The solved bridge preserves one checked row-specific buy hook.",
-            "provedBy": [
-                cite_hit(action_source, find_hit(action_source, "BuyModBoost"))
-            ],
+            "provedBy": compact_citations(
+                maybe_cite_hit(action_source, maybe_find_hit(action_source, "BuyModBoost"))
+            ),
         },
         {
             "type": "exact-shell-to-prefab",
             "status": "present",
             "provenanceStrength": "direct",
             "statement": "The solved bridge preserves one exact prefab identity on the same row family.",
-            "provedBy": [
-                cite_hit(prefab_source, find_hit(prefab_source, "NewTokenUPGPrefab.T1.ModPointsBooster"))
-            ],
+            "provedBy": compact_citations(
+                maybe_cite_hit(prefab_source, maybe_find_hit(prefab_source, "NewTokenUPGPrefab.T1.ModPointsBooster"))
+            ),
         },
         {
             "type": "exact-shell-to-title",
@@ -8790,9 +8710,41 @@ def build_token_shop_fallback_shell_window(
     target: dict[str, Any],
     token_shop_extract: dict[str, Any],
 ) -> dict[str, Any]:
+    extract_fields = {
+        str(field.get("field") or "").strip()
+        for field in (token_shop_extract.get("fields") or [])
+        if isinstance(field, dict) and str(field.get("field") or "").strip()
+    }
+
+    def resolve_concrete_shell_field(*candidate_groups: Any) -> str:
+        for group in candidate_groups:
+            if isinstance(group, str):
+                candidate = str(group).strip()
+                if candidate in extract_fields:
+                    return candidate
+                continue
+            if isinstance(group, dict):
+                nested_values = [
+                    group.get("shellField"),
+                    group.get("field"),
+                    group.get("terms"),
+                    group.get("anchors"),
+                    group.get("defaultAnchors"),
+                ]
+                candidate = resolve_concrete_shell_field(*nested_values)
+                if candidate:
+                    return candidate
+                continue
+            if isinstance(group, (list, tuple, set)):
+                for item in group:
+                    candidate = resolve_concrete_shell_field(item)
+                    if candidate:
+                        return candidate
+        return ""
+
     surface_plan = load_or_synthesize_surface_plan(trace_scope, target)
     shell_seed = dict(surface_plan.get("shellWindow") or {})
-    shell_field = str(shell_seed.get("shellField") or "").strip()
+    shell_field = resolve_concrete_shell_field(shell_seed.get("shellField"), shell_seed)
     shell_radius = shell_seed.get("shellWindowRadius")
     try:
         radius = int(shell_radius)
@@ -8801,9 +8753,16 @@ def build_token_shop_fallback_shell_window(
     if shell_field and radius is not None:
         return get_shell_window(token_shop_extract, shell_field, radius)
     strategy_config = load_or_synthesize_support_context(trace_scope, target) or get_target_strategy_config(target)
+    resolved_shell_field = resolve_concrete_shell_field(
+        strategy_config.get("shellField"),
+        strategy_config.get("surfaces"),
+        strategy_config.get("defaultAnchors"),
+        target.get("anchors"),
+        shell_field,
+    )
     return get_shell_window(
         token_shop_extract,
-        str(strategy_config.get("shellField") or shell_field),
+        resolved_shell_field,
         int(strategy_config.get("shellWindowRadius") or radius or 0),
     )
 
@@ -9220,6 +9179,7 @@ def build_token_shop_mod_trace(target_id: str, target: dict[str, Any], anchors: 
     row_scope = load_canonical_semantic_scope("row:ATU4Button")
     action_method = next(iter(row_recovery.get("recoveredActionMethods", [])), "BuyModBoost")
     prefab_identity = next(iter(row_recovery.get("prefabCandidates", [])), "NewTokenUPGPrefab.T1.ModPointsBooster")
+
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
@@ -9480,8 +9440,131 @@ def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict
     }
 
 
+def _build_token_shop_family_profile_payload(
+    profile_id: str,
+    target_id: str,
+    target: dict[str, Any],
+    shell_window: dict[str, Any],
+    surfaces: list[dict[str, Any]],
+    token_shop_extract: dict[str, Any],
+    documents: dict[str, Any],
+    available_source_ids: list[str],
+    depth_search: int,
+    anchors: list[str],
+    config: dict[str, Any],
+    family_context: dict[str, Any],
+) -> dict[str, Any] | None:
+    provisional_payload = {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "bridgeCheck": {"bridgeHits": []},
+        "traceGraph": {"nodes": [], "edges": [], "negativeEdges": [], "claimLedger": []},
+    }
+    row_recovery: dict[str, Any] = {}
+    if profile_id in {"daily-tokenium-family", "t3-trio-family"}:
+        row_recovery = _build_token_shop_row_recovery(target, provisional_payload, {"summary": {}}) or {}
+    depth_expansion = build_depth_expansion(
+        surfaces,
+        documents,
+        shell_window,
+        available_source_ids,
+        depth_search,
+        anchors,
+        target,
+    )
+    profiles: dict[str, dict[str, Any]] = {
+        "daily-tokenium-family": {
+            "graph": lambda: build_token_shop_daily_tokenium_family_graph(shell_window, surfaces, token_shop_extract, row_recovery),
+            "bridgePromotionRule": "This target is a bounded Daily Tokenium-family audit only. Do not promote cap-owner, planner, or canonical state behavior from it.",
+            "bridgeCheck": {
+                "candidateTerms": ["ATU14Button", "TokenDailiesT2", "ATU19Button", "T2Duo5"],
+                "bridgeCleared": True,
+                "bridgeHits": [
+                    {"surfaceId": "family-shells", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]), "term": "ATU14Button"},
+                    {"surfaceId": "family-shells", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]), "term": "TokenDailiesT2"},
+                    {"surfaceId": "prefab-roster", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T2.DailyTokens"},
+                    {"surfaceId": "prefab-roster", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T2.DuoBoosterFive"},
+                ],
+                "result": "checked Daily Tokenium-family owner-order audit recovered",
+            },
+            "solvedVsBlockedDiff": lambda: {},
+        },
+        "t3-trio-family": {
+            "graph": lambda: build_token_shop_t3_trio_family_graph(shell_window, surfaces, token_shop_extract, row_recovery),
+            "bridgePromotionRule": "This target is a bounded T3 trio-family audit only. Do not promote late-tier, planner, or canonical state behavior from it.",
+            "bridgeCheck": {
+                "candidateTerms": ["ATU21Button", "T3Trio1", "ATU22Button", "T3Trio2", "ATU23Button"],
+                "bridgeCleared": True,
+                "bridgeHits": [
+                    {"surfaceId": "family-shells", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]), "term": "ATU21Button"},
+                    {"surfaceId": "family-shells", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]), "term": "T3Trio1"},
+                    {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "BuyTrio1Boost"},
+                    {"surfaceId": "prefab-roster", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T3.TrinityBoosterOne"},
+                ],
+                "result": "checked T3 trio-family owner-order audit recovered",
+            },
+            "solvedVsBlockedDiff": lambda: {},
+        },
+        "late-atu-family": {
+            "graph": lambda: build_token_shop_late_atu_family_graph(
+                shell_window,
+                surfaces,
+                token_shop_extract,
+                dict(documents.get("tokenShopLateAtuBoundary") or {}),
+            ),
+            "bridgePromotionRule": "This target is a bounded late ATU family audit only. Do not promote row-order guesses, planner behavior, or canonical state behavior from it.",
+            "bridgeCheck": {
+                "candidateTerms": ["ATU24Button", "ATU28Button", "BuyATU24", "BuyATU28"],
+                "bridgeCleared": True,
+                "bridgeHits": [
+                    {"surfaceId": "family-shells", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["tokenShopExtract"]), "term": "ATU24Button"},
+                    {"surfaceId": "action-lane", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "BuyATU24"},
+                    {"surfaceId": "title-text-surfaces", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "Tier 3 Max Level Increaser"},
+                    {"surfaceId": "prefab-roster", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"},
+                ],
+                "result": "checked late ATU shell-side audit recovered",
+            },
+            "solvedVsBlockedDiff": lambda: {},
+        },
+        "generic-structure": {
+            "graph": lambda: resolve_token_shop_graph_plan(target_id) or build_family_structure_graph(shell_window, surfaces, token_shop_extract, family_context),
+            "bridgePromotionRule": "This target is a bounded family audit only. Do not promote any new TokenShop row remaps, planner behavior, or player-facing labels from it.",
+            "bridgeCheck": {
+                "candidateTerms": ["ATU1Button", "ATU2Button", "ATU4Button", "ATU5Button", "ATU6Button", "ATU7Button", "ATU3Button", "ATU24Button"],
+                "bridgeCleared": True,
+                "bridgeHits": [
+                    {"surfaceId": "bridge-proxies", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyTokenBoost"},
+                    {"surfaceId": "bridge-proxies", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyMK1TokenBoost"},
+                    {"surfaceId": "prefab-roster", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T1.MK2Booster"},
+                    {"surfaceId": "title-text-surfaces", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "Mk2 Generator Booster"},
+                ],
+                "result": "checked family structure audit recovered",
+            },
+            "solvedVsBlockedDiff": lambda: build_family_structure_diff(target_id, target, token_shop_extract, shell_window, surfaces, family_context),
+        },
+    }
+    profile = dict(profiles.get(profile_id) or {})
+    if not profile:
+        return None
+    return {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "depthExpansion": depth_expansion,
+        "traceGraph": profile["graph"](),
+        "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, str(profile.get("bridgePromotionRule") or "")),
+        "bridgeCheck": dict(profile.get("bridgeCheck") or {}),
+        "solvedVsBlockedDiff": dict(
+            profile["solvedVsBlockedDiff"]() if callable(profile.get("solvedVsBlockedDiff")) else (profile.get("solvedVsBlockedDiff") or {})
+        ),
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
+        "groundedConclusion": "",
+        "currentBoundary": [],
+    }
+
+
 def build_token_shop_family_structure_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
     config = get_target_strategy_config(target)
+    support_context = load_or_synthesize_support_context(target_id, target)
     token_shop_extract = documents["tokenShopExtract"]
     family_context = {
         "rowScopes": {
@@ -9519,37 +9602,728 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
     }
     fallback_surface_specs = []
     shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    if not shell_window.get("ownerFieldBlock") or not shell_window.get("window"):
+        fallback_row_window = build_token_shop_fallback_shell_window(target_id, target, token_shop_extract)
+        shell_window = {
+            **fallback_row_window,
+            **shell_window,
+        }
+        shell_window.setdefault("ownerFieldBlock", list(fallback_row_window.get("ownerFieldBlock") or []))
+        shell_window.setdefault("window", list(fallback_row_window.get("window") or []))
     surfaces = [build_surface_bundle(surface_config, anchors, documents, shell_window, available_source_ids, extended_search) for surface_config in surface_specs]
+    profile_id = str(support_context.get("familyTraceProfile") or "generic-structure").strip()
+    profile_payload = _build_token_shop_family_profile_payload(
+        profile_id,
+        target_id,
+        target,
+        shell_window,
+        surfaces,
+        token_shop_extract,
+        documents,
+        available_source_ids,
+        depth_search,
+        anchors,
+        config,
+        family_context,
+    )
+    if profile_payload is None:
+        raise ValueError(f"Unsupported TokenShop family trace profile: {profile_id}")
+    return profile_payload
+
+
+def build_token_shop_daily_tokenium_family_graph(
+    shell_window: dict[str, Any],
+    surfaces: list[dict[str, Any]],
+    token_shop_extract: dict[str, Any],
+    row_recovery: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    row_recovery = dict(row_recovery or {})
+    row_scope_id = str(row_recovery.get("semanticScopeId") or "row:ATU14Button").strip()
+    row_scope = load_canonical_semantic_scope(row_scope_id)
+    row_scope_status = _token_shop_row_scope_status(row_scope)
+    literal_summary = dict(row_recovery.get("literalRecoverySummary") or {})
+    title_text = str(literal_summary.get("title") or "").strip()
+    presentation_update = dict(row_recovery.get("presentationUpdatePath") or {})
+    interaction_paths = list(presentation_update.get("interactionToRenderPaths") or [])
+    update_hook_candidates = list(presentation_update.get("updateHookCandidates") or [])
+    title_recovered = _token_shop_title_recovered(row_recovery, row_scope)
+
+    shell_surface = find_surface(surfaces, "family-shells")
+    effect_surface = find_surface(surfaces, "effect-lane")
+    action_surface = find_surface(surfaces, "action-lane")
+    prefab_surface = find_surface(surfaces, "prefab-roster")
+    title_surface = find_surface(surfaces, "title-text-surfaces")
+
+    extract_source = find_source_entry(shell_surface, "tokenShopExtract")
+    metadata_shell_source = maybe_find_source_entry(shell_surface, "metadata")
+    metadata_effect_source = maybe_find_source_entry(effect_surface, "metadata")
+    level0_effect_source = maybe_find_source_entry(effect_surface, "level0")
+    metadata_action_source = maybe_find_source_entry(action_surface, "metadata")
+    level0_action_source = maybe_find_source_entry(action_surface, "level0")
+    level0_prefab_source = maybe_find_source_entry(prefab_surface, "level0")
+    level0_title_source = maybe_find_source_entry(title_surface, "level0")
+
+    atu14_shell_hit = maybe_find_hit(extract_source, "ATU14Button")
+    atu19_shell_hit = maybe_find_hit(extract_source, "ATU19Button")
+    token_dailies_hit = maybe_find_hit(extract_source, "TokenDailiesT2")
+    t2_duo5_hit = maybe_find_hit(extract_source, "T2Duo5")
+    effect_hit = maybe_find_hit(metadata_effect_source, "ATU14TokenDailiesBonus") or maybe_find_hit(level0_effect_source, "ATU14TokenDailiesBonus")
+    daily_prefab_hit = maybe_find_hit(level0_prefab_source, "NewTokenUPGPrefab.T2.DailyTokens")
+    duo_prefab_hit = maybe_find_hit(level0_prefab_source, "NewTokenUPGPrefab.T2.DuoBoosterFive")
+    title_hit = maybe_find_hit(level0_title_source, "Daily Tokens T2")
+    text_hook_hit = maybe_find_hit(level0_title_source, "SetAllTokenShopTexts") or maybe_find_hit(level0_title_source, "SetTokenTexts")
+    direct_action_hit = (
+        maybe_find_hit(metadata_action_source, "BuyTokenDailiesT2")
+        or maybe_find_hit(level0_action_source, "BuyTokenDailiesT2")
+        or maybe_find_hit(metadata_action_source, "BuyTokenDailyT2")
+        or maybe_find_hit(level0_action_source, "BuyTokenDailyT2")
+    )
+
+    shell_node = "daily-tokenium-family-shells"
+    owner_node = "daily-tokenium-owner-order"
+    effect_node = "daily-tokenium-effect-lane"
+    prefab_node = "daily-tokenium-prefab-roster"
+    title_node = "daily-tokenium-title-surfaces"
+    unresolved_node = "daily-tokenium-unresolved-seams"
+
+    edges = [
+        make_edge(
+            "daily-tokenium-owner-order",
+            shell_node,
+            owner_node,
+            "repeated-serialized-shell-adjacency",
+            "present",
+            "direct",
+            "The DB-backed TokenShop owner payload preserves one coherent Daily Tokenium-family shell order from ATU14Button on TokenDailiesT2 through ATU19Button on T2Duo5.",
+            compact_citations(
+                cite_token_shop_extract_field("ATU14Button", token_shop_extract),
+                cite_token_shop_extract_field("TokenDailiesT2StartCost", token_shop_extract),
+                cite_hit(extract_source, atu19_shell_hit) if atu19_shell_hit is not None else None,
+                cite_token_shop_extract_field("T2Duo5StartCost", token_shop_extract),
+            ),
+        ),
+        make_edge(
+            "daily-tokenium-effect-hook",
+            owner_node,
+            effect_node,
+            "row-family-effect-hook",
+            "present",
+            "direct" if effect_hit is not None else "supporting",
+            "ATU14TokenDailiesBonus survives as the checked effect-side clue anchoring the ATU14 start of the Daily Tokenium-family run.",
+            compact_citations(
+                maybe_cite_hit(metadata_effect_source, effect_hit),
+                maybe_cite_hit(level0_effect_source, effect_hit),
+            ),
+        ),
+        make_edge(
+            "daily-tokenium-prefab-roster",
+            owner_node,
+            prefab_node,
+            "repeated-prefab-family-candidate",
+            "present",
+            "supporting",
+            "Committed Unity object-name rosters still preserve the matching DailyTokens and T2 duo prefab family identities for this owner-order run.",
+            compact_citations(
+                maybe_cite_hit(level0_prefab_source, daily_prefab_hit),
+                maybe_cite_hit(level0_prefab_source, duo_prefab_hit),
+            ),
+        ),
+        *(
+            [
+                make_edge(
+                    "daily-tokenium-title-bridge",
+                    owner_node,
+                    title_node,
+                    "exact-shell-to-title",
+                    "present",
+                    "direct",
+                    f"ATU14Button now preserves one exact shell-to-title join on {title_text}.",
+                    compact_citations(
+                        maybe_cite_hit(level0_title_source, title_hit),
+                        cite_db_semantic_scope(
+                            row_scope_id,
+                            str(row_scope_status.get("status") or "semantic-closed"),
+                            "Canonical row-local graph now keeps the title seam closed for this shell family.",
+                        ),
+                    ),
+                ),
+            ]
+            if title_recovered and title_text
+            else []
+        ),
+        *(
+            [
+                make_edge(
+                    "daily-tokenium-display-bridge",
+                    owner_node,
+                    title_node,
+                    "exact-display-update-path",
+                    "present",
+                    "direct",
+                    "ATU14Button now preserves one checked cost-side updater bridge: SetCostRelatedAttributes writes the localized Daily Tokenium-family cost subtree rooted at UPGButton / CostBox / CostText.",
+                    compact_citations(
+                        {
+                            "sourceId": "dbTermView",
+                            "sourcePath": "db:materialized-term-view:SetCostRelatedAttributes",
+                            "term": "SetCostRelatedAttributes",
+                            "locator": "$.managedReconstruction.ownerToTerms",
+                            "note": "Cached canonical term view preserves the TokenShop-side cost updater family.",
+                        },
+                        *[
+                            {
+                                "sourceId": "level0",
+                                "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]),
+                                "term": str(item.get("interaction")),
+                                "locator": "$.rowRecovery.presentationUpdatePath.interactionToRenderPaths",
+                                "note": f"{item.get('hierarchyPath')} -> {item.get('renderNode')}",
+                            }
+                            for item in interaction_paths
+                            if str(item.get("renderRole") or "") == "cost"
+                        ],
+                        cite_db_semantic_scope(
+                            row_scope_id,
+                            str(row_scope_status.get("status") or "semantic-open"),
+                            "Canonical row-local graph no longer carries an exact-display-update-path seam for this shell family.",
+                        ),
+                    ),
+                ),
+            ]
+            if update_hook_candidates
+            else []
+        ),
+        make_edge(
+            "atu19-not-tokenboostt3",
+            owner_node,
+            unresolved_node,
+            "duplicate-owner-block-ruled-out",
+            "present",
+            "direct",
+            "The owner-side field order no longer supports the old ATU19 equals ATU20 duplicate theory because ATU19 stays on T2Duo5 before the TokenBoostT3 block begins.",
+            compact_citations(
+                cite_hit(extract_source, t2_duo5_hit) if t2_duo5_hit is not None else None,
+                cite_token_shop_extract_field("TokenBoostT3StartCost", token_shop_extract),
+            ),
+        ),
+    ]
+
+    negative_edges = []
+    if direct_action_hit is None:
+        negative_edges.append(
+            make_edge(
+                "daily-tokenium-direct-action-gap",
+                effect_node,
+                unresolved_node,
+                "exact-shell-to-action-hook",
+                "missing",
+                "supporting",
+                "The focused DB-backed trace still does not localize one exact shell-local Daily Tokenium direct purchase hook; the action lane remains noisy across singular versus plural method names.",
+                compact_citations(
+                    cite_row_boundary(
+                        "dbSystemUnit",
+                        "materialized_system_unit_views:token-shop",
+                        "BuyTokenDailiesT2 unresolved in active spend action lane",
+                    ),
+                ),
+            )
+        )
+    if not title_recovered:
+        negative_edges.append(
+            make_edge(
+                "daily-tokenium-title-gap",
+                prefab_node,
+                title_node,
+                "exact-shell-to-title",
+                "missing",
+                "supporting",
+                "Daily Tokenium title candidates still remain detached from one exact shell-local row-title join and continue to sit beside generic TokenShop text hooks.",
+                compact_citations(
+                    maybe_cite_hit(level0_title_source, title_hit),
+                    maybe_cite_hit(level0_title_source, text_hook_hit),
+                ),
+            )
+        )
+    if not update_hook_candidates:
+        negative_edges.append(
+            make_edge(
+                "daily-tokenium-display-gap",
+                title_node,
+                unresolved_node,
+                "exact-display-update-path",
+                "missing",
+                "supporting",
+                (
+                    "The current row-local trace now localizes the shell-to-render slot path from UPGButton into DescText and CostText, but it still does not recover one row-specific runtime updater that writes the Daily Tokenium-family presentation."
+                    if interaction_paths and not update_hook_candidates
+                    else "No committed DB-native semantic scope or materialized target bundle yet localizes the runtime display-update path for the Daily Tokenium-family shell run."
+                ),
+                compact_citations(
+                    maybe_cite_hit(level0_title_source, text_hook_hit),
+                    cite_db_semantic_scope(
+                        row_scope_id,
+                        str(row_scope_status.get("summary") or row_scope_status.get("status") or "semantic-open"),
+                        "The canonical row-local graph still carries an exact-display-update-path seam for this shell family.",
+                    ),
+                ),
+            )
+        )
 
     return {
-        "shellWindow": shell_window,
-        "surfaces": surfaces,
-        "depthExpansion": build_depth_expansion(surfaces, documents, shell_window, available_source_ids, depth_search, anchors, target),
-        "traceGraph": resolve_token_shop_graph_plan(target_id) or build_family_structure_graph(shell_window, surfaces, token_shop_extract, family_context),
-        "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, "This target is a bounded family audit only. Do not promote any new TokenShop row remaps, planner behavior, or player-facing labels from it."),
-        "bridgeCheck": {
-            "candidateTerms": [
-                "ATU1Button",
-                "ATU2Button",
-                "ATU4Button",
-                "ATU5Button",
-                "ATU6Button",
-                "ATU3Button",
-                "ATU24Button",
-            ],
-            "bridgeCleared": True,
-            "bridgeHits": [
-                {"surfaceId": "bridge-proxies", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyTokenBoost"},
-                {"surfaceId": "bridge-proxies", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "BuyMK1TokenBoost"},
-                {"surfaceId": "prefab-roster", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "NewTokenUPGPrefab.T1.MK2Booster"},
-                {"surfaceId": "title-text-surfaces", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]), "term": "Mk2 Generator Booster"},
-            ],
-            "result": "checked family structure audit recovered",
-        },
-        "solvedVsBlockedDiff": build_family_structure_diff(target_id, target, token_shop_extract, shell_window, surfaces, family_context),
-        "lostStructure": resolve_token_shop_lost_structure(target_id, list(config["lostStructure"])),
-        "groundedConclusion": "",
-        "currentBoundary": [],
+        "nodes": [
+            {"id": shell_node, "label": "Daily Tokenium family shells"},
+            {"id": owner_node, "label": "Owner-order recovery"},
+            {"id": effect_node, "label": "Effect hook lane"},
+            {"id": prefab_node, "label": "Prefab family roster"},
+            {"id": title_node, "label": "Title and text surfaces"},
+            {"id": unresolved_node, "label": "Unresolved seams"},
+        ],
+        "edges": edges,
+        "negativeEdges": negative_edges,
+    }
+
+
+def build_token_shop_t3_trio_family_graph(
+    shell_window: dict[str, Any],
+    surfaces: list[dict[str, Any]],
+    token_shop_extract: dict[str, Any],
+    row_recovery: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    row_recovery = dict(row_recovery or {})
+    row_scope_id = str(row_recovery.get("semanticScopeId") or "row:ATU21Button").strip()
+    row_scope = load_canonical_semantic_scope(row_scope_id)
+    row_scope_status = _token_shop_row_scope_status(row_scope)
+    literal_summary = dict(row_recovery.get("literalRecoverySummary") or {})
+    title_text = str(literal_summary.get("title") or "").strip()
+    presentation_update = dict(row_recovery.get("presentationUpdatePath") or {})
+    interaction_paths = list(presentation_update.get("interactionToRenderPaths") or [])
+    update_hook_candidates = list(presentation_update.get("updateHookCandidates") or [])
+    title_recovered = _token_shop_title_recovered(row_recovery, row_scope)
+
+    shell_surface = find_surface(surfaces, "family-shells")
+    effect_surface = find_surface(surfaces, "effect-lane")
+    action_surface = find_surface(surfaces, "action-lane")
+    prefab_surface = find_surface(surfaces, "prefab-roster")
+    title_surface = find_surface(surfaces, "title-text-surfaces")
+
+    extract_source = find_source_entry(shell_surface, "tokenShopExtract")
+    metadata_effect_source = maybe_find_source_entry(effect_surface, "metadata")
+    level0_effect_source = maybe_find_source_entry(effect_surface, "level0")
+    metadata_action_source = maybe_find_source_entry(action_surface, "metadata")
+    level0_action_source = maybe_find_source_entry(action_surface, "level0")
+    level0_prefab_source = maybe_find_source_entry(prefab_surface, "level0")
+    level0_title_source = maybe_find_source_entry(title_surface, "level0")
+
+    atu21_shell_hit = maybe_find_hit(extract_source, "ATU21Button")
+    atu22_shell_hit = maybe_find_hit(extract_source, "ATU22Button")
+    atu23_shell_hit = maybe_find_hit(extract_source, "ATU23Button")
+    trio1_hit = maybe_find_hit(extract_source, "T3Trio1")
+    trio2_hit = maybe_find_hit(extract_source, "T3Trio2")
+    atu24_start_hit = maybe_find_hit(extract_source, "ATU24StartCost")
+    effect_hit = maybe_find_hit(metadata_effect_source, "ATU21TokenDailiesBonus") or maybe_find_hit(level0_effect_source, "ATU21TokenDailiesBonus")
+    trio1_action_hit = maybe_find_hit(metadata_action_source, "BuyTrio1Boost") or maybe_find_hit(level0_action_source, "BuyTrio1Boost")
+    trio2_action_hit = maybe_find_hit(metadata_action_source, "BuyTrio2Boost") or maybe_find_hit(level0_action_source, "BuyTrio2Boost")
+    trio1_prefab_hit = maybe_find_hit(level0_prefab_source, "NewTokenUPGPrefab.T3.TrinityBoosterOne")
+    trio2_prefab_hit = maybe_find_hit(level0_prefab_source, "NewTokenUPGPrefab.T3.TrinityBoosterTwo")
+    title_hit = maybe_find_hit(level0_title_source, "Trinity Booster One")
+    detached_title_hit = maybe_find_hit(level0_title_source, "Trinity Oom Booster") or maybe_find_hit(level0_title_source, "Tier 3 Max Level Increaser")
+    text_hook_hit = maybe_find_hit(level0_title_source, "SetAllTokenShopTexts") or maybe_find_hit(level0_title_source, "SetTokenTexts")
+
+    shell_node = "t3-trio-family-shells"
+    owner_node = "t3-trio-owner-order"
+    effect_node = "t3-trio-effect-lane"
+    action_node = "t3-trio-action-lane"
+    prefab_node = "t3-trio-prefab-roster"
+    title_node = "t3-trio-title-surfaces"
+    unresolved_node = "t3-trio-unresolved-seams"
+
+    edges = [
+        make_edge(
+            "t3-trio-owner-order",
+            shell_node,
+            owner_node,
+            "repeated-serialized-shell-adjacency",
+            "present",
+            "direct",
+            "The DB-backed TokenShop owner payload preserves one coherent T3 trio shell order: ATU21Button aligns to T3Trio1, ATU22Button aligns to T3Trio2, and ATU23Button advances straight into the ATU24 block.",
+            compact_citations(
+                cite_hit(extract_source, atu21_shell_hit) if atu21_shell_hit is not None else None,
+                cite_hit(extract_source, trio1_hit) if trio1_hit is not None else None,
+                cite_hit(extract_source, atu22_shell_hit) if atu22_shell_hit is not None else None,
+                cite_hit(extract_source, trio2_hit) if trio2_hit is not None else None,
+                cite_hit(extract_source, atu23_shell_hit) if atu23_shell_hit is not None else None,
+                cite_hit(extract_source, atu24_start_hit) if atu24_start_hit is not None else None,
+            ),
+        ),
+        make_edge(
+            "t3-trio-effect-hook",
+            owner_node,
+            effect_node,
+            "row-family-effect-hook",
+            "present",
+            "direct" if effect_hit is not None else "supporting",
+            "ATU21TokenDailiesBonus survives as the checked effect-side clue at the start of the T3 trio neighborhood.",
+            compact_citations(
+                maybe_cite_hit(metadata_effect_source, effect_hit),
+                maybe_cite_hit(level0_effect_source, effect_hit),
+            ),
+        ),
+        make_edge(
+            "t3-trio-action-lane",
+            owner_node,
+            action_node,
+            "row-family-action-hook-subset",
+            "present",
+            "supporting",
+            "Named trio buy hooks survive for the two concrete T3 numeric blocks through BuyTrio1Boost and BuyTrio2Boost, while no third trio buy hook survives beside ATU23.",
+            compact_citations(
+                maybe_cite_hit(metadata_action_source, trio1_action_hit),
+                maybe_cite_hit(metadata_action_source, trio2_action_hit),
+                maybe_cite_hit(level0_action_source, trio1_action_hit),
+                maybe_cite_hit(level0_action_source, trio2_action_hit),
+            ),
+        ),
+        make_edge(
+            "t3-trio-prefab-roster",
+            owner_node,
+            prefab_node,
+            "repeated-prefab-family-candidate",
+            "present",
+            "supporting",
+            "Committed Unity object-name rosters preserve the matching TrinityBoosterOne and TrinityBoosterTwo prefab identities for the two concrete T3 trio rows.",
+            compact_citations(
+                maybe_cite_hit(level0_prefab_source, trio1_prefab_hit),
+                maybe_cite_hit(level0_prefab_source, trio2_prefab_hit),
+            ),
+        ),
+        *(
+            [
+                make_edge(
+                    "t3-trio-title-bridge",
+                    owner_node,
+                    title_node,
+                    "exact-shell-to-title",
+                    "present",
+                    "direct",
+                    f"ATU21Button now preserves one exact shell-to-title join on {title_text}.",
+                    compact_citations(
+                        maybe_cite_hit(level0_title_source, title_hit),
+                        cite_db_semantic_scope(
+                            row_scope_id,
+                            str(row_scope_status.get("status") or "semantic-closed"),
+                            "Canonical row-local graph now keeps the title seam closed for this shell family.",
+                        ),
+                    ),
+                ),
+            ]
+            if title_recovered and title_text
+            else []
+        ),
+        *(
+            [
+                make_edge(
+                    "t3-trio-display-bridge",
+                    owner_node,
+                    title_node,
+                    "exact-display-update-path",
+                    "present",
+                    "direct",
+                    "ATU21Button now preserves one checked cost-side updater bridge into the localized T3 trio presentation subtree.",
+                    compact_citations(
+                        *[
+                            {
+                                "sourceId": "level0",
+                                "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]),
+                                "term": str(item.get("interaction")),
+                                "locator": "$.rowRecovery.presentationUpdatePath.interactionToRenderPaths",
+                                "note": f"{item.get('hierarchyPath')} -> {item.get('renderNode')}",
+                            }
+                            for item in interaction_paths
+                            if str(item.get("renderRole") or "") == "cost"
+                        ],
+                        cite_db_semantic_scope(
+                            row_scope_id,
+                            str(row_scope_status.get("status") or "semantic-open"),
+                            "Canonical row-local graph no longer carries an exact-display-update-path seam for this shell family.",
+                        ),
+                    ),
+                ),
+            ]
+            if update_hook_candidates
+            else []
+        ),
+        make_edge(
+            "t3-trio-placeholder-check",
+            owner_node,
+            unresolved_node,
+            "placeholder-shell-check",
+            "present",
+            "direct",
+            "The owner-side field order keeps ATU23Button as shell plus max-overlay only and then advances directly into ATU24StartCost, so no committed T3Trio3 owner block survives for a third live trio row.",
+            compact_citations(
+                cite_hit(extract_source, atu23_shell_hit) if atu23_shell_hit is not None else None,
+                cite_token_shop_extract_field("ATU23MaxOverlay", token_shop_extract),
+                cite_hit(extract_source, atu24_start_hit) if atu24_start_hit is not None else None,
+            ),
+        ),
+    ]
+
+    negative_edges = []
+    if not title_recovered:
+        negative_edges.append(
+            make_edge(
+                "t3-trio-title-gap",
+                prefab_node,
+                title_node,
+                "exact-shell-to-title",
+                "missing",
+                "supporting",
+                "The surviving T3 title candidates still remain detached from one exact shell-local row-title join and continue to sit beside generic TokenShop text hooks.",
+                compact_citations(
+                    maybe_cite_hit(level0_title_source, title_hit),
+                    maybe_cite_hit(level0_title_source, detached_title_hit),
+                    maybe_cite_hit(level0_title_source, text_hook_hit),
+                ),
+            )
+        )
+    if not update_hook_candidates:
+        negative_edges.append(
+            make_edge(
+                "t3-trio-display-gap",
+                title_node,
+                unresolved_node,
+                "exact-display-update-path",
+                "missing",
+                "supporting",
+                (
+                    "The current row-local trace localizes the shell-side presentation subtree for ATU21, but it still does not recover one row-specific runtime updater that writes the T3 trio presentation."
+                    if interaction_paths and not update_hook_candidates
+                    else "No committed DB-native semantic scope or materialized target bundle yet localizes the runtime display-update path for the T3 trio shell run."
+                ),
+                compact_citations(
+                    maybe_cite_hit(level0_title_source, text_hook_hit),
+                    cite_db_semantic_scope(
+                        row_scope_id,
+                        str(row_scope_status.get("summary") or row_scope_status.get("status") or "semantic-open"),
+                        "The canonical row-local graph still carries an exact-display-update-path seam for this shell family.",
+                    ),
+                ),
+            )
+        )
+
+    return {
+        "nodes": [
+            {"id": shell_node, "label": "T3 trio family shells"},
+            {"id": owner_node, "label": "Owner-order recovery"},
+            {"id": effect_node, "label": "Effect hook lane"},
+            {"id": action_node, "label": "Action hook lane"},
+            {"id": prefab_node, "label": "Prefab family roster"},
+            {"id": title_node, "label": "Title and text surfaces"},
+            {"id": unresolved_node, "label": "Unresolved seams"},
+        ],
+        "edges": edges,
+        "negativeEdges": negative_edges,
+    }
+
+
+def build_token_shop_late_atu_family_graph(
+    shell_window: dict[str, Any],
+    surfaces: list[dict[str, Any]],
+    token_shop_extract: dict[str, Any],
+    late_boundary: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    late_boundary = dict(late_boundary or {})
+    action_boundary = dict(late_boundary.get("actionNeighborhood") or {})
+    title_boundary = dict(late_boundary.get("titleRosterBoundary") or {})
+    prefab_boundary = dict(late_boundary.get("prefabRosterBoundary") or {})
+    effect_boundary = dict(late_boundary.get("effectSideBoundary") or {})
+
+    shell_surface = find_surface(surfaces, "family-shells")
+    action_surface = find_surface(surfaces, "action-lane")
+    title_surface = find_surface(surfaces, "title-text-surfaces")
+    prefab_surface = find_surface(surfaces, "prefab-roster")
+    effect_surface = find_surface(surfaces, "effect-lane")
+
+    extract_source = find_source_entry(shell_surface, "tokenShopExtract")
+    metadata_action_source = maybe_find_source_entry(action_surface, "metadata")
+    level0_action_source = maybe_find_source_entry(action_surface, "level0")
+    level0_title_source = maybe_find_source_entry(title_surface, "level0")
+    level0_prefab_source = maybe_find_source_entry(prefab_surface, "level0")
+    metadata_effect_source = maybe_find_source_entry(effect_surface, "metadata")
+    level0_effect_source = maybe_find_source_entry(effect_surface, "level0")
+
+    atu24_shell_hit = maybe_find_hit(extract_source, "ATU24Button")
+    atu28_shell_hit = maybe_find_hit(extract_source, "ATU28Button")
+    buy_atu24_hit = maybe_find_hit(metadata_action_source, "BuyATU24") or maybe_find_hit(level0_action_source, "BuyATU24")
+    buy_atu28_hit = maybe_find_hit(metadata_action_source, "BuyATU28") or maybe_find_hit(level0_action_source, "BuyATU28")
+    title_hit = maybe_find_hit(level0_title_source, "Tier 3 Max Level Increaser") or maybe_find_hit(level0_title_source, "Academy Booster")
+    prefab_hit = maybe_find_hit(level0_prefab_source, "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser") or maybe_find_hit(level0_prefab_source, "NewTokenUPGPrefab.T5.CampaignFragments")
+    effect_hit = maybe_find_hit(metadata_effect_source, "ATU24Bonus3Shards") or maybe_find_hit(level0_effect_source, "Campaign Fragments")
+
+    title_cluster = ", ".join(
+        str(item.get("title") or "")
+        for item in (title_boundary.get("localTitleCluster") or [])
+        if str(item.get("title") or "").strip()
+    )
+    prefab_cluster = ", ".join(
+        str(item.get("identity") or "")
+        for item in (prefab_boundary.get("localPrefabCluster") or [])
+        if str(item.get("identity") or "").strip()
+    )
+    effect_cluster = ", ".join(str(item) for item in (effect_boundary.get("preservedEffectClues") or []) if str(item).strip())
+
+    shell_node = "late-atu-family-shells"
+    action_node = "late-atu-action-boundary"
+    title_node = "late-atu-title-roster"
+    prefab_node = "late-atu-prefab-roster"
+    effect_node = "late-atu-effect-lane"
+    unresolved_node = "late-atu-unresolved-identity"
+
+    edges = [
+        make_edge(
+            "late-atu-shell-range",
+            shell_node,
+            action_node,
+            "repeated-serialized-shell-adjacency",
+            "present",
+            "direct",
+            "The late ATU shell range preserves one exact serialized shell run from ATU24Button through ATU28Button and the same tier4plus owner-field window.",
+            compact_citations(
+                maybe_cite_hit(extract_source, atu24_shell_hit),
+                maybe_cite_hit(extract_source, atu28_shell_hit),
+                cite_token_shop_extract_field("ATU24StartCost", token_shop_extract),
+                cite_token_shop_extract_field("ATU28Fill", token_shop_extract),
+            ),
+        ),
+        make_edge(
+            "late-atu-action-shell",
+            action_node,
+            unresolved_node,
+            "row-family-action-hook",
+            "present",
+            "direct",
+            str(action_boundary.get("groundedConclusion") or "The late shell range keeps one coherent direct BuyATU24 through BuyATU28 action-side boundary."),
+            compact_citations(
+                maybe_cite_hit(metadata_action_source, buy_atu24_hit),
+                maybe_cite_hit(level0_action_source, buy_atu24_hit),
+                maybe_cite_hit(metadata_action_source, buy_atu28_hit),
+                maybe_cite_hit(level0_action_source, buy_atu28_hit),
+            ),
+        ),
+        make_edge(
+            "late-atu-title-roster",
+            shell_node,
+            title_node,
+            "late-title-roster-cluster",
+            "present",
+            "supporting",
+            str(title_boundary.get("groundedConclusion") or "A local late title roster survives, but without an exact shell owner join."),
+            compact_citations(
+                maybe_cite_hit(level0_title_source, title_hit),
+                {
+                    "sourceId": "tokenShopLateAtuBoundary",
+                    "sourcePath": get_source_reference("tokenShopLateAtuBoundary"),
+                    "term": "localTitleCluster",
+                    "locator": "$.titleRosterBoundary.localTitleCluster",
+                    "note": title_cluster or "Late title roster cluster",
+                },
+            ),
+        ),
+        make_edge(
+            "late-atu-prefab-roster",
+            shell_node,
+            prefab_node,
+            "late-prefab-roster-cluster",
+            "present",
+            "supporting",
+            str(prefab_boundary.get("groundedConclusion") or "A local late prefab roster survives, but without an exact shell owner join."),
+            compact_citations(
+                maybe_cite_hit(level0_prefab_source, prefab_hit),
+                {
+                    "sourceId": "tokenShopLateAtuBoundary",
+                    "sourcePath": get_source_reference("tokenShopLateAtuBoundary"),
+                    "term": "localPrefabCluster",
+                    "locator": "$.prefabRosterBoundary.localPrefabCluster",
+                    "note": prefab_cluster or "Late prefab roster cluster",
+                },
+            ),
+        ),
+        make_edge(
+            "late-atu-effect-lane",
+            shell_node,
+            effect_node,
+            "late-effect-domain-cluster",
+            "present",
+            "supporting",
+            str(effect_boundary.get("groundedConclusion") or "Effect-side clues survive in the late ATU lane, but they do not close shell identity."),
+            compact_citations(
+                maybe_cite_hit(metadata_effect_source, effect_hit),
+                maybe_cite_hit(level0_effect_source, effect_hit),
+                {
+                    "sourceId": "tokenShopLateAtuBoundary",
+                    "sourcePath": get_source_reference("tokenShopLateAtuBoundary"),
+                    "term": "preservedEffectClues",
+                    "locator": "$.effectSideBoundary.preservedEffectClues",
+                    "note": effect_cluster or "Late effect-side clue cluster",
+                },
+            ),
+        ),
+    ]
+
+    negative_edges = [
+        make_edge(
+            "late-atu-missing-title-join",
+            shell_node,
+            title_node,
+            "exact-shell-to-title",
+            "missing",
+            "negative",
+            str(title_boundary.get("missingJoin") or "The local late title roster does not preserve one exact shell-local title join."),
+            compact_citations(
+                maybe_cite_hit(level0_title_source, title_hit),
+                cite_token_shop_extract_field("ATU24Button", token_shop_extract),
+                cite_token_shop_extract_field("ATU28Button", token_shop_extract),
+            ),
+        ),
+        make_edge(
+            "late-atu-missing-prefab-join",
+            shell_node,
+            prefab_node,
+            "exact-shell-to-prefab",
+            "missing",
+            "negative",
+            str(prefab_boundary.get("missingJoin") or "The local late prefab roster does not preserve one exact shell-local prefab join."),
+            compact_citations(
+                maybe_cite_hit(level0_prefab_source, prefab_hit),
+                cite_token_shop_extract_field("ATU24Button", token_shop_extract),
+                cite_token_shop_extract_field("ATU28Button", token_shop_extract),
+            ),
+        ),
+        make_edge(
+            "late-atu-missing-effect-join",
+            shell_node,
+            effect_node,
+            "exact-effect-to-shell-join",
+            "missing",
+            "negative",
+            str(effect_boundary.get("missingJoin") or "The late effect-side clues still do not cross back to one exact shell owner."),
+            compact_citations(
+                maybe_cite_hit(metadata_effect_source, effect_hit),
+                maybe_cite_hit(level0_effect_source, effect_hit),
+                cite_token_shop_extract_field("ATU24Button", token_shop_extract),
+            ),
+        ),
+    ]
+
+    return {
+        "nodes": [
+            {"id": shell_node, "label": "Late ATU family shells"},
+            {"id": action_node, "label": "Late ATU action boundary"},
+            {"id": title_node, "label": "Late title roster"},
+            {"id": prefab_node, "label": "Late prefab roster"},
+            {"id": effect_node, "label": "Late effect-side lane"},
+            {"id": unresolved_node, "label": "Unresolved identity joins"},
+        ],
+        "edges": edges,
+        "negativeEdges": negative_edges,
     }
 
 
@@ -10366,121 +11140,8 @@ def build_bridge_comparison_reference_payload(target_id: str) -> dict[str, Any]:
     }
 
 
-def _resolve_token_shop_routine_from_scope(scope_payload: dict[str, Any]) -> str:
-    row_shell = dict(scope_payload.get("rowShell") or {})
-    row_field = str(row_shell.get("field") or "").strip()
-    scope_id = str(scope_payload.get("scopeId") or "").strip()
-    semantic_key = str(scope_payload.get("semanticKey") or "").strip()
-    semantic_key_lower = semantic_key.lower()
-    scope_id_lower = scope_id.lower()
-    row_field_lower = row_field.lower()
-    if row_field_lower == "atu4button" or "updater-display:atu4" in scope_id_lower:
-        return "token-shop-mod-trace"
-    if row_field_lower == "atu5button":
-        return "token-shop-mk1-title-trace"
-    if row_field_lower == "atu7button":
-        return "token-shop-mk3-bridge-trace"
-    if row_field_lower == "atu3button":
-        if "consumer-read" in semantic_key_lower or "consumer-read" in scope_id_lower:
-            return "token-shop-atu3-consumer-read-trace"
-        if "consumer" in semantic_key_lower or "consumer" in scope_id_lower:
-            return "token-shop-atu3-consumer-trace"
-        return "token-shop-atu3-effect-trace"
-    if scope_id_lower.startswith("row:atu"):
-        return "token-shop-family-trace"
-    if "token-shop-updater-display" in scope_id_lower:
-        return "token-shop-mod-trace"
-    return "token-shop-family-trace"
-
-
-def _resolve_execution_routine_from_trace_scope(trace_scope: str, family_id: str) -> str:
-    trace_scope = str(trace_scope or "").strip()
-    family_id = str(family_id or "").strip()
-    if trace_scope == "token-shop-atu4-mod":
-        return "token-shop-mod-trace"
-    if trace_scope == "token-shop-atu5-mk1-title":
-        return "token-shop-mk1-title-trace"
-    if trace_scope == "token-shop-atu7-mk3-bridge":
-        return "token-shop-mk3-bridge-trace"
-    if trace_scope == "token-shop-atu3-cells-effect":
-        return "token-shop-atu3-effect-trace"
-    if trace_scope == "token-shop-atu3-chest-consumer":
-        return "token-shop-atu3-consumer-trace"
-    if trace_scope == "token-shop-atu3-chest-consumer-read":
-        return "token-shop-atu3-consumer-read-trace"
-    if trace_scope == "token-shop-family-structure":
-        return "token-shop-family-trace"
-    if trace_scope == "shard-cost-su0-structure" or family_id == "shard-cost":
-        return "shard-cost-trace"
-    if trace_scope == "shard-owned-state-upgradeinfolist-population" or family_id == "shard-owned-state":
-        return "shard-owned-state-trace"
-    if trace_scope == "multiverse-market-save-owner-boundary" or family_id == "multiverse-market-save-owner":
-        return "multiverse-market-save-owner-trace"
-    return trace_scope
-
-
-def _resolve_execution_routine_from_subject(
-    planner_resolution: dict[str, Any],
-    compatibility_target: dict[str, Any],
-) -> tuple[str, dict[str, Any]]:
-    subject_kind = str(planner_resolution.get("selectedSubjectKind") or "")
-    subject_key = str(planner_resolution.get("selectedSubjectKey") or "")
-    compatibility_target_id = str(compatibility_target.get("id") or planner_resolution.get("selectedTargetId") or "")
-    compatibility_family_id = str(compatibility_target.get("familyId") or "").strip()
-    compatibility_routine = _resolve_execution_routine_from_trace_scope(
-        compatibility_target_id,
-        compatibility_family_id,
-    )
-
-    if subject_kind == "family-graph" and subject_key:
-        family_graph_view = get_trace_db().find_canonical_semantic_fragment(
-            "cifi-full",
-            "libil2cpp.so",
-            "family_graph_fragment",
-            subject_key,
-        )
-        family_graph_payload = dict((family_graph_view or {}).get("payload") or {})
-        family_id = str(family_graph_payload.get("familyId") or compatibility_target.get("familyId") or "").strip()
-        if family_id == "token-shop":
-            return "token-shop-family-trace", family_graph_payload
-        if family_id == "shard-cost":
-            return "shard-cost-trace", family_graph_payload
-        if family_id == "shard-owned-state":
-            return "shard-owned-state-trace", family_graph_payload
-        if family_id == "multiverse-market-save-owner":
-            return "multiverse-market-save-owner-trace", family_graph_payload
-
-    if subject_kind == "semantic-scope" and subject_key:
-        scope_payload = load_canonical_semantic_scope(subject_key)
-        family_id = str(scope_payload.get("familyId") or compatibility_target.get("familyId") or "").strip()
-        if family_id == "token-shop":
-            return _resolve_token_shop_routine_from_scope(scope_payload), scope_payload
-        if family_id == "shard-owned-state":
-            return "shard-owned-state-trace", scope_payload
-        if family_id == "shard-cost":
-            return "shard-cost-trace", scope_payload
-        if family_id == "multiverse-market-save-owner":
-            return "multiverse-market-save-owner-trace", scope_payload
-
-    if subject_kind == "reconstruction-fragment" and subject_key.startswith("token-shop-reconstruction:"):
-        trace_scope = subject_key.removeprefix("token-shop-reconstruction:")
-        if trace_scope == "token-shop-family-structure":
-            return "token-shop-family-trace", {"traceScope": trace_scope, "familyId": "token-shop"}
-        return _resolve_execution_routine_from_trace_scope(trace_scope, "token-shop"), {
-            "traceScope": trace_scope,
-            "targetId": trace_scope,
-            "familyId": "token-shop",
-        }
-
-    return compatibility_routine, {
-        "targetId": compatibility_target_id,
-        "traceScope": str(compatibility_target.get("traceScope") or compatibility_target_id),
-        "familyId": compatibility_family_id,
-    }
-
-
 def build_trace_payload_for_subject(
-    planner_resolution: dict[str, Any],
+    execution_routine: str,
     compatibility_target: dict[str, Any],
     anchors: list[str],
     documents: dict[str, Any],
@@ -10488,15 +11149,9 @@ def build_trace_payload_for_subject(
     extended_search: int,
     depth_search: int,
 ) -> dict[str, Any]:
-    execution_routine, subject_payload = _resolve_execution_routine_from_subject(
-        planner_resolution,
-        compatibility_target,
-    )
     target_id = str(
-        subject_payload.get("traceScope")
-        or subject_payload.get("targetId")
+        compatibility_target.get("traceScope")
         or compatibility_target.get("id")
-        or planner_resolution.get("selectedTargetId")
         or ""
     )
     target = compatibility_target
@@ -10544,6 +11199,7 @@ def get_priority_support_documents(target: dict[str, Any]) -> list[str]:
 
 
 def build_dataset(
+    trace_plan: dict[str, Any],
     target_id: str | None,
     queries: list[str],
     extra_anchors: list[str],
@@ -10552,86 +11208,96 @@ def build_dataset(
     depth_search: int | None = 0,
     native_timeout: int = 1800,
 ) -> dict[str, Any]:
-    registry = load_request_catalog()
-    planner_resolution = resolve_planner_selection(registry, target_id, queries, extra_anchors, family_id, False)
-    selected_target_id = str(planner_resolution["selectedTargetId"])
-    execution_target_id, execution_trace_scope = _resolve_execution_subject(registry, planner_resolution)
-    db_source_projection = (
-        load_latest_source_projection(execution_trace_scope)
-        if execution_trace_scope and execution_trace_scope != "generic-explore"
-        else {}
-    )
+    with _trace_profile_span("plannerTargetResolution"):
+        registry = load_request_catalog()
+        planner_resolution = dict(trace_plan["plannerResolution"])
+        selected_target_id = str(trace_plan.get("selectedTargetId") or planner_resolution["selectedTargetId"])
+        execution_target_id = str(trace_plan.get("executionTargetId") or selected_target_id)
+        execution_trace_scope = str(trace_plan.get("executionTraceScope") or execution_target_id)
+        knowledge_plan = dict(trace_plan.get("knowledgePlan") or {})
+        execution_routine_id = str(knowledge_plan.get("executionRoutineId") or execution_trace_scope or "generic-explore")
+        db_source_projection = (
+            load_latest_source_projection(execution_trace_scope)
+            if execution_trace_scope and execution_trace_scope != "generic-explore"
+            else {}
+        )
     execution_plan: dict[str, Any] = {}
     is_generic_explore = planner_resolution["selectionMode"] == "generic-explore"
-    if is_generic_explore:
-        target = {
-            "id": "generic-explore",
-            "label": "Generic cross-source exploration",
-            "familyId": "exploration",
-            "acceptedAnchors": ["class", "method", "string", "path id"],
-            "joinGoal": "Search ambiguous strings or unknown object names across committed metadata, Unity assets, and bounded extraction documents without forcing a family remap.",
-            "requiredSourceFamilies": list(registry["sourceFamilies"].keys()),
-            "solvedBaselineTargetId": None,
-            "blockedTargetId": None,
-        }
-        family_plan = {"label": "Exploration", "anchorExpansionTerms": []}
-        anchors = unique_strings([*planner_resolution["expandedAnchors"], *extra_anchors])
-        source_paths, source_roles = resolve_source_catalog(registry, target["requiredSourceFamilies"])
-        required_source_families = list(target["requiredSourceFamilies"])
-        source_projection_owner = "registry-fallback"
-        resolved_depth_search = 0 if depth_search is None else depth_search
-        execution_context = {}
-    else:
-        target = dict(registry["targets"][selected_target_id])
-        family_plan = registry["planner"]["families"][target["familyId"]]
-        target, execution_context = _apply_db_execution_context(target, execution_trace_scope, planner_resolution)
-        target, execution_plan = _apply_db_execution_plan(target, execution_trace_scope)
-        anchors = unique_strings(planner_resolution["expandedAnchors"])
-        if db_source_projection:
-            source_paths, source_roles = resolve_source_catalog_from_projection(db_source_projection)
-            source_paths, source_roles = narrow_source_catalog(
-                source_paths,
-                source_roles,
-                get_extended_source_ids_for_projection(db_source_projection, extended_search),
-            )
-            required_source_families = unique_strings(
-                [
-                    str(entry.get("familyId") or "")
-                    for entry in list((db_source_projection.get("families") or {}).values())
-                    if str(entry.get("familyId") or "").strip()
-                ]
-            ) or list(target["requiredSourceFamilies"])
-            source_projection_owner = "db-source-projection"
-        else:
-            source_family_ids = list(registry["sourceFamilies"].keys()) if extended_search >= 2 else target["requiredSourceFamilies"]
-            source_paths, source_roles = resolve_source_catalog(registry, source_family_ids)
-            source_paths, source_roles = narrow_source_catalog(source_paths, source_roles, get_extended_source_ids_for_target(registry, target, extended_search))
+    with _trace_profile_span("sourceLoading"):
+        if is_generic_explore:
+            target = {
+                "id": "generic-explore",
+                "label": "Generic cross-source exploration",
+                "familyId": "exploration",
+                "acceptedAnchors": ["class", "method", "string", "path id"],
+                "joinGoal": "Search ambiguous strings or unknown object names across committed metadata, Unity assets, and bounded extraction documents without forcing a family remap.",
+                "requiredSourceFamilies": list(registry["sourceFamilies"].keys()),
+                "solvedBaselineTargetId": None,
+                "blockedTargetId": None,
+            }
+            family_plan = {"label": "Exploration", "anchorExpansionTerms": []}
+            anchors = unique_strings([*planner_resolution["expandedAnchors"], *extra_anchors])
+            source_paths, source_roles = resolve_source_catalog(registry, target["requiredSourceFamilies"])
             required_source_families = list(target["requiredSourceFamilies"])
             source_projection_owner = "registry-fallback"
-        resolved_depth_search = target.get("defaultDepth", 0) if depth_search is None else depth_search
+            resolved_depth_search = 0 if depth_search is None else depth_search
+            execution_context = {}
+        else:
+            target = dict(registry["targets"][selected_target_id])
+            target_family_id = str(trace_plan.get("selectedFamilyId") or target.get("familyId") or "").strip()
+            if target_family_id not in registry["planner"]["families"]:
+                target_family_id = str(target.get("familyId") or "").strip()
+            family_plan = registry["planner"]["families"][target_family_id]
+            target, execution_context = _apply_db_execution_context(target, execution_trace_scope, planner_resolution)
+            target, execution_plan = _apply_db_execution_plan(target, execution_trace_scope)
+            anchors = unique_strings(planner_resolution["expandedAnchors"])
+            if db_source_projection:
+                source_paths, source_roles = resolve_source_catalog_from_projection(db_source_projection)
+                source_paths, source_roles = narrow_source_catalog(
+                    source_paths,
+                    source_roles,
+                    get_extended_source_ids_for_projection(db_source_projection, extended_search),
+                )
+                required_source_families = unique_strings(
+                    [
+                        str(entry.get("familyId") or "")
+                        for entry in list((db_source_projection.get("families") or {}).values())
+                        if str(entry.get("familyId") or "").strip()
+                    ]
+                ) or list(target["requiredSourceFamilies"])
+                source_projection_owner = "db-source-projection"
+            else:
+                source_family_ids = list(registry["sourceFamilies"].keys()) if extended_search >= 2 else target["requiredSourceFamilies"]
+                source_paths, source_roles = resolve_source_catalog(registry, source_family_ids)
+                source_paths, source_roles = narrow_source_catalog(source_paths, source_roles, get_extended_source_ids_for_target(registry, target, extended_search))
+                required_source_families = list(target["requiredSourceFamilies"])
+                source_projection_owner = "registry-fallback"
+            resolved_depth_search = target.get("defaultDepth", 0) if depth_search is None else depth_search
     execution_anchor_specs = build_anchor_specs(anchors, "execution-anchor")
     expanded_anchor_specs = build_anchor_specs(planner_resolution["expandedAnchors"], "planner-expanded-anchor")
-    support_documents = TraceDocumentCache(SUPPORT_DATASET_PATHS)
-    support_documents.preload(get_priority_support_documents(target))
-    trace_payload = (
-        build_generic_explore_trace(anchors, list(source_paths.keys()), support_documents)
-        if is_generic_explore
-        else build_trace_payload_for_subject(
-            planner_resolution,
-            target,
-            anchors,
-            support_documents,
-            list(source_paths.keys()),
-            extended_search,
-            resolved_depth_search,
+    with _trace_profile_span("sourceLoading"):
+        support_documents = TraceDocumentCache(SUPPORT_DATASET_PATHS)
+        support_documents.preload(get_priority_support_documents(target))
+        trace_payload = (
+            build_generic_explore_trace(anchors, list(source_paths.keys()), support_documents)
+            if is_generic_explore
+            else build_trace_payload_for_subject(
+                execution_routine_id,
+                target,
+                anchors,
+                support_documents,
+                list(source_paths.keys()),
+                extended_search,
+                resolved_depth_search,
+            )
         )
-    )
     native_anchor_values = _collect_native_trace_terms(target, planner_resolution, trace_payload)
-    native_trace = collect_native_trace(
-        native_anchor_values,
-        native_timeout,
-        target["familyId"],
-    )
+    with _trace_profile_span("nativeExtraction"):
+        native_trace = collect_native_trace(
+            native_anchor_values,
+            native_timeout,
+            target["familyId"],
+        )
     promoted_native_owner = _select_promoted_native_owner(target, trace_payload, native_trace.get("summary"))
     if promoted_native_owner and isinstance(native_trace.get("summary"), dict):
         native_trace["summary"]["promotedOwner"] = promoted_native_owner["owner"]
@@ -10645,24 +11311,26 @@ def build_dataset(
         trace_payload,
         native_trace.get("summary"),
     )
-    row_recovery = _build_token_shop_row_recovery(target, trace_payload, native_trace)
+    with _trace_profile_span("finalBundleAssembly"):
+        row_recovery = _build_token_shop_row_recovery(target, trace_payload, native_trace)
     closure_status = (row_recovery or {}).get("closureStatus") or {}
-    bridge_comparison_reference = (
-        build_bridge_comparison_reference_payload(execution_trace_scope)
-        if trace_payload.get("bridgeComparisonSeed")
-        else {}
-    )
-    narrative_reference = resolve_target_narrative(
-        execution_trace_scope,
-        str(trace_payload.get("groundedConclusion") or ""),
-        list(trace_payload.get("currentBoundary") or []),
-        subject_kind=str(planner_resolution.get("selectedSubjectKind") or ""),
-        subject_key=str(planner_resolution.get("selectedSubjectKey") or ""),
-        family_id=str(target.get("familyId") or ""),
-        compatibility_target_id=selected_target_id,
-        allow_fallback=is_generic_explore,
-    )
-    return {
+    with _trace_profile_span("finalBundleAssembly"):
+        bridge_comparison_reference = (
+            build_bridge_comparison_reference_payload(execution_trace_scope)
+            if trace_payload.get("bridgeComparisonSeed")
+            else {}
+        )
+        narrative_reference = resolve_target_narrative(
+            execution_trace_scope,
+            str(trace_payload.get("groundedConclusion") or ""),
+            list(trace_payload.get("currentBoundary") or []),
+            subject_kind=str(planner_resolution.get("selectedSubjectKind") or ""),
+            subject_key=str(planner_resolution.get("selectedSubjectKey") or ""),
+            family_id=str(target.get("familyId") or ""),
+            compatibility_target_id=selected_target_id,
+            allow_fallback=is_generic_explore,
+        )
+        dataset = {
         "dataset": "unity-trace-bundle",
         "generatedAt": datetime.now().isoformat(timespec="seconds"),
         "traceWorkflow": {
@@ -10769,7 +11437,8 @@ def build_dataset(
         },
         "narrativeSemanticKey": narrative_reference["narrativeSemanticKey"],
         "narrativeOwner": narrative_reference["narrativeOwner"],
-    }
+        }
+    return dataset
 
 
 def write_markdown(dataset: dict[str, Any]) -> None:
@@ -11590,7 +12259,6 @@ def extract_threshold_semantic_fragments(dataset: dict[str, Any]) -> list[dict[s
 def extract_dependency_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
     target = dataset.get("target") or {}
     fragments: list[dict[str, Any]] = []
-    semantic_scope_payload = _build_dependency_scope_summary(_load_canonical_semantic_scope_payload(dataset))
     for edge in _collect_dependency_edges(dataset):
         if not isinstance(edge, dict):
             continue
@@ -11609,8 +12277,6 @@ def extract_dependency_semantic_fragments(dataset: dict[str, Any]) -> list[dict[
                     "targetId": target.get("id"),
                     "familyId": target.get("familyId"),
                     "edge": edge,
-                    "nativeSummary": dataset.get("nativeReconstruction"),
-                    "semanticScope": semantic_scope_payload,
                 },
             }
         )
@@ -11850,22 +12516,51 @@ def plan_trace_bundle_request(
             args.query,
             args.anchor,
         )
-    else:
-        planner_resolution = resolve_planner_selection(
-            registry,
-            args.target,
-            args.query,
-            args.anchor,
-            args.family,
-            False,
+        selected_target_id = str(planner_resolution["selectedTargetId"])
+        execution_target_id = str(best_gap_plan.get("targetId") or best_gap_plan.get("traceScope") or selected_target_id)
+        execution_trace_scope = str(best_gap_plan.get("traceScope") or selected_target_id)
+        selected_family_id = (
+            str(registry["targets"][selected_target_id]["familyId"])
+            if selected_target_id in registry.get("targets", {})
+            else str(planner_resolution.get("matchedFamilyId") or args.family or "exploration")
         )
-    selected_target_id = str(planner_resolution["selectedTargetId"])
-    execution_target_id, execution_trace_scope = _resolve_execution_subject(registry, planner_resolution)
-    selected_family_id = (
-        str(registry["targets"][selected_target_id]["familyId"])
-        if selected_target_id in registry.get("targets", {})
-        else str(planner_resolution.get("matchedFamilyId") or args.family or "exploration")
-    )
+        knowledge_plan = {}
+        if execution_trace_scope and execution_trace_scope != "generic-explore":
+            knowledge_plan = dict(
+                get_trace_db().resolve_trace_execution_request(
+                    "cifi-full",
+                    "libil2cpp.so",
+                    execution_trace_scope,
+                    subject_kind=str(planner_resolution.get("selectedSubjectKind") or ""),
+                    subject_key=str(planner_resolution.get("selectedSubjectKey") or ""),
+                    family_id=selected_family_id,
+                    compatibility_target_id=selected_target_id,
+                )
+                or {}
+            )
+    else:
+        resolved_request = dict(
+            get_trace_db().resolve_trace_request(
+                "cifi-full",
+                "libil2cpp.so",
+                explicit_target_id=str(args.target or ""),
+                requested_queries=list(args.query or []),
+                requested_anchors=list(args.anchor or []),
+                family_id=str(args.family or ""),
+                include_legacy_targets=False,
+            )
+            or {}
+        )
+        planner_resolution = dict(resolved_request.get("plannerResolution") or {})
+        selected_target_id = str(resolved_request.get("selectedTargetId") or planner_resolution.get("selectedTargetId") or "")
+        execution_target_id = str(resolved_request.get("executionTargetId") or selected_target_id)
+        execution_trace_scope = str(resolved_request.get("executionTraceScope") or execution_target_id)
+        selected_family_id = str(resolved_request.get("selectedFamilyId") or planner_resolution.get("matchedFamilyId") or "").strip()
+        if not selected_family_id and selected_target_id in registry.get("targets", {}):
+            selected_family_id = str(registry["targets"][selected_target_id].get("familyId") or "").strip()
+        if not selected_family_id:
+            selected_family_id = str(args.family or "exploration")
+        knowledge_plan = dict(resolved_request.get("knowledgePlan") or {})
     asset_set = build_trace_asset_set()
     request_signature = build_trace_request_signature(
         execution_trace_scope,
@@ -11885,6 +12580,7 @@ def plan_trace_bundle_request(
         "executionTargetId": execution_target_id,
         "executionTraceScope": execution_trace_scope,
         "selectedFamilyId": selected_family_id,
+        "knowledgePlan": knowledge_plan,
         "assetSet": asset_set,
         "requestSignature": request_signature,
     }
@@ -11892,8 +12588,10 @@ def plan_trace_bundle_request(
 
 def collect_trace_bundle_components(
     args: argparse.Namespace,
+    trace_plan: dict[str, Any],
 ) -> dict[str, Any]:
     dataset = build_dataset(
+        trace_plan,
         args.target,
         args.query,
         args.anchor,
@@ -11902,7 +12600,8 @@ def collect_trace_bundle_components(
         args.depth_search,
         args.native_timeout,
     )
-    dataset["semanticFragments"] = collect_semantic_fragments(dataset)
+    with _trace_profile_span("finalBundleAssembly"):
+        dataset["semanticFragments"] = collect_semantic_fragments(dataset)
     return dataset
 
 
@@ -11912,7 +12611,8 @@ def persist_trace_bundle_fragments(
     request_signature: str,
 ) -> None:
     db = get_trace_db()
-    db.upsert_trace_dataset("cifi-full", "libil2cpp.so", trace_scope, request_signature, dataset)
+    with _trace_profile_span("dbWrites"):
+        db.upsert_trace_dataset("cifi-full", "libil2cpp.so", trace_scope, request_signature, dataset)
 
 
 def materialize_trace_bundle_dataset(
@@ -11922,19 +12622,21 @@ def materialize_trace_bundle_dataset(
 ) -> dict[str, Any]:
     current_trace_run = dict(dataset.get("traceRun", {}) or {})
     db = get_trace_db()
-    materialized = db.find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", trace_scope, request_signature)
-    if materialized is None:
-        materialized = db.find_materialized_trace_view("cifi-full", "libil2cpp.so", trace_scope, request_signature)
+    with _trace_profile_span("dbReads"):
+        materialized = db.find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", trace_scope, request_signature)
+        if materialized is None:
+            materialized = db.find_materialized_trace_view("cifi-full", "libil2cpp.so", trace_scope, request_signature)
     if materialized:
-        payload = dict(materialized["payload"])
-        trace_run = dict(current_trace_run)
-        trace_run["dbBacked"] = True
-        trace_run["traceScope"] = trace_scope
-        trace_run["requestSignature"] = request_signature
-        trace_run["materializedAt"] = materialized.get("builtAt")
-        trace_run["reducerVersion"] = materialized.get("reducerVersion")
-        payload["traceRun"] = trace_run
-        payload["traceProvenance"] = materialized.get("provenance", {})
+        with _trace_profile_span("reducerMaterializerRebuild"):
+            payload = dict(materialized["payload"])
+            trace_run = dict(current_trace_run)
+            trace_run["dbBacked"] = True
+            trace_run["traceScope"] = trace_scope
+            trace_run["requestSignature"] = request_signature
+            trace_run["materializedAt"] = materialized.get("builtAt")
+            trace_run["reducerVersion"] = materialized.get("reducerVersion")
+            payload["traceRun"] = trace_run
+            payload["traceProvenance"] = materialized.get("provenance", {})
         return payload
     dataset["traceRun"] = dict(current_trace_run)
     dataset["traceRun"]["dbBacked"] = True
@@ -12025,6 +12727,8 @@ def main() -> None:
                         help="Repo-side native/process-project timeout in seconds; use 0 to disable the wrapper timeout")
     parser.add_argument("--repeat", type=int, default=1,
                         help="When used with --best-gap and no explicit target/query/family, rerank and run again this many times")
+    parser.add_argument("--profile-timing", action="store_true",
+                        help="Print end-to-end trace timing buckets for performance profiling")
 
     args = parser.parse_args()
     registry = load_request_catalog()
@@ -12057,6 +12761,14 @@ def main() -> None:
         print("  family={}".format(trace_plan["selectedFamilyId"]))
         print("  selectionMode={}".format(planner_resolution["selectionMode"]))
         print("  anchors={}".format(", ".join(planner_resolution["expandedAnchors"]) or "none"))
+        knowledge_plan = dict(trace_plan.get("knowledgePlan") or {})
+        if knowledge_plan:
+            next_seam = dict(knowledge_plan.get("nextSeam") or {})
+            knowledge = dict(knowledge_plan.get("knowledge") or {})
+            print("  traceDirective={}".format(knowledge_plan.get("mode") or "run-seam-trace"))
+            print("  clearedEdges={}".format(", ".join(knowledge.get("clearedEdgeTypes") or []) or "none"))
+            print("  blockedEdges={}".format(", ".join(knowledge.get("blockedEdgeTypes") or []) or "none"))
+            print("  nextSeam={}".format(next_seam.get("id") or "none"))
         if best_gap_plan:
             print("  blocked={}".format(", ".join(best_gap_plan["blockedEdgeTypes"]) or "none"))
         return
@@ -12085,4 +12797,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

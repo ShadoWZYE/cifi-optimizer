@@ -527,7 +527,7 @@
               "Keep the checked TokenShop subset fixed to `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, `ATU12Level`, `ATU13Level`, and `ATU20Level` instead of widening the consumed-input contract.",
               "Reuse the already shipped checked-row panel as the boundary-safe shell for the next user-facing TokenShop tool slice.",
               "Drop canonical Tokens from the consumed-input contract because this row-detail slice no longer answers an affordability question.",
-              "Read only the checked subset levels plus the same rows' extracted `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields from `data/archive/token-shop-values.json`.",
+              "Read only the checked subset levels plus the same rows' extracted `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields from the active `db:derived:token-shop-values` extract (archived snapshot: `data/archive/token-shop-values.json`).",
               "Show each grounded subset row's identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect bonus-step change in fixed grounded slot order.",
               "Keep the row-detail surface explicitly non-optimizer and outside any best-buy, ROI, ranking, or next-purchase recommendation math.",
               "Keep unresolved TokenShop rows, token-bank state, Daily Tokenium state, Emporium state, and unresolved `ATU*` remap work outside the shipped module."
@@ -1830,7 +1830,7 @@
               "Keep the checked TokenShop subset fixed to `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, `ATU12Level`, `ATU13Level`, and `ATU20Level` instead of widening the consumed-input contract.",
               "Reuse the already shipped checked-row panel as the boundary-safe shell for the next user-facing TokenShop tool slice.",
               "Drop canonical Tokens from the consumed-input contract because this row-detail slice no longer answers an affordability question.",
-              "Read only the checked subset levels plus the same rows' extracted `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields from `data/archive/token-shop-values.json`.",
+              "Read only the checked subset levels plus the same rows' extracted `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields from the active `db:derived:token-shop-values` extract (archived snapshot: `data/archive/token-shop-values.json`).",
               "Show each grounded subset row's identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect bonus-step change in fixed grounded slot order.",
               "Keep the row-detail surface explicitly non-optimizer and outside any best-buy, ROI, ranking, or next-purchase recommendation math.",
               "Keep unresolved TokenShop rows, token-bank state, Daily Tokenium state, Emporium state, and unresolved `ATU*` remap work outside the shipped module."

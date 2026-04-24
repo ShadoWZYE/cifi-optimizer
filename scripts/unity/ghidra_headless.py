@@ -65,6 +65,12 @@ ASCII_MIN_LEN = 4
 METADATA_NEIGHBORHOOD_WINDOW = 0x120
 NATIVE_TRACE_SCHEMA_VERSION = 6
 _CACHE_DB: GhidraCacheDB | None = None
+PERSIST_NATIVE_DEBUG_ARTIFACTS = os.environ.get("CIFI_PERSIST_NATIVE_DEBUG_ARTIFACTS", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 
 def _get_cache_db() -> GhidraCacheDB:
@@ -77,6 +83,11 @@ def _get_cache_db() -> GhidraCacheDB:
 def _default_max_cpu() -> int:
     logical = os.cpu_count() or 8
     return max(6, min(14, logical))
+
+
+def _should_persist_debug_artifacts(status: str | None = None) -> bool:
+    normalized = str(status or "").strip().lower()
+    return PERSIST_NATIVE_DEBUG_ARTIFACTS or normalized in {"failed", "error", "timeout"}
 
 
 def _default_java_heap_gb() -> int:
@@ -1668,7 +1679,8 @@ def _run_single_process_project_term(
         fresh_result.setdefault("errors", []).append(error)
 
     output_file.write_text(json.dumps(fresh_result, indent=2), encoding="utf-8")
-    shutil.copy(output_file, CACHE_DIR / "{}_results.json".format(job_id))
+    if _should_persist_debug_artifacts(status):
+        shutil.copy(output_file, CACHE_DIR / "{}_results.json".format(job_id))
 
     job_info = {
         "job_id": job_id,
@@ -1740,7 +1752,8 @@ def _run_headless_command(
         timeout=effective_timeout,
         check=False,
     )
-    log_file.write_text(proc.stdout, encoding="utf-8")
+    if _should_persist_debug_artifacts("completed" if proc.returncode == 0 else "failed"):
+        log_file.write_text(proc.stdout, encoding="utf-8")
     return proc
 
 
@@ -1847,7 +1860,8 @@ def run_analysis(binary_path: str, search_strings: list[str], timeout: int = 600
         result_data.setdefault("errors", []).append(error)
 
     output_file.write_text(json.dumps(result_data, indent=2), encoding="utf-8")
-    shutil.copy(output_file, CACHE_DIR / "{}_results.json".format(job_id))
+    if _should_persist_debug_artifacts(status):
+        shutil.copy(output_file, CACHE_DIR / "{}_results.json".format(job_id))
 
     job_info = {
         "job_id": job_id,
@@ -1986,7 +2000,8 @@ def build_project(
         result_data.setdefault("errors", []).append(error)
 
     output_file.write_text(json.dumps(result_data, indent=2), encoding="utf-8")
-    shutil.copy(output_file, CACHE_DIR / "{}_results.json".format(job_id))
+    if _should_persist_debug_artifacts(status):
+        shutil.copy(output_file, CACHE_DIR / "{}_results.json".format(job_id))
 
     job_info = _read_job_info(job_dir)
     job_info.update(
@@ -2046,12 +2061,23 @@ def launch_build_project(project_name: str, binary_path: str, search_strings: li
     if sys.platform == "win32":
         creationflags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
 
-    with launcher_log.open("w", encoding="utf-8") as log_handle:
+    if _should_persist_debug_artifacts("running"):
+        with launcher_log.open("w", encoding="utf-8") as log_handle:
+            proc = subprocess.Popen(
+                command,
+                cwd=str(ROOT),
+                stdout=log_handle,
+                stderr=subprocess.STDOUT,
+                text=True,
+                creationflags=creationflags,
+                close_fds=True,
+            )
+    else:
         proc = subprocess.Popen(
             command,
             cwd=str(ROOT),
-            stdout=log_handle,
-            stderr=subprocess.STDOUT,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             text=True,
             creationflags=creationflags,
             close_fds=True,
@@ -2204,7 +2230,8 @@ def process_project(project_name: str, project_file: str, search_strings: list[s
             "Per-term native jobs failed for: {}".format(", ".join(failed_terms))
         )
     output_file.write_text(json.dumps(result_data, indent=2), encoding="utf-8")
-    shutil.copy(output_file, CACHE_DIR / "{}_results.json".format(job_id))
+    if _should_persist_debug_artifacts(status):
+        shutil.copy(output_file, CACHE_DIR / "{}_results.json".format(job_id))
     marker_file.write_text("merged\n", encoding="utf-8")
 
     reused_job_ids = [candidate.get("job", {}).get("job_id") for candidate in cached_term_hits if candidate.get("job", {}).get("job_id")]

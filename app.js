@@ -5155,92 +5155,104 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU14Level",
       slot: "ATU14",
-      identity: "NewTokenUPGPrefab.T2.DuoBoosterTwo",
-      identitySource: "Compatibility-mapped prefab identity",
+      identity:
+        boundary?.dailyTokeniumFamilyPass?.anchoredDailyTokensRow?.prefabIdentity ||
+        "NewTokenUPGPrefab.T2.DailyTokens",
+      identitySource: "DB-backed owner-order compatibility identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
       startCostField: "TokenDailiesT2StartCost",
       additiveCostField: "TokenDailiesT2AdditiveCost",
       bonusField: "TokenDailiesT2Bonus",
       maxLevelField: "TokenDailiesT2MaxLevel",
-      bonusStepLabel: "T2 Duo 2 Bonus",
+      bonusStepLabel: "Daily Tokens T2 Bonus",
       bonusStepMode: "multiplier",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
+      note: "DB-backed Daily Tokenium-family compatibility row. TokenDailiesT2 plus ATU14TokenDailiesBonus now anchor the owner-side row family, but direct purchase-hook recovery and the final player-facing title or runtime display path still stay quarantined."
     },
     {
       field: "ATU15Level",
       slot: "ATU15",
-      identity: "NewTokenUPGPrefab.T2.DuoBoosterThree",
-      identitySource: "Compatibility-mapped prefab identity",
+      identity:
+        boundary?.dailyTokeniumFamilyPass?.duoFamilyRows?.[0]?.prefabIdentity ||
+        "NewTokenUPGPrefab.T2.DuoBoosterOne",
+      identitySource: "DB-backed owner-order compatibility identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
       startCostField: "T2Duo1StartCost",
       additiveCostField: "T2Duo1AdditiveCost",
       bonusField: "T2Duo1Bonus",
       maxLevelField: "T2Duo1MaxLevel",
-      bonusStepLabel: "T2 Duo 3 Bonus",
+      bonusStepLabel: "T2 Duo 1 Bonus",
       bonusStepMode: "multiplier",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
+      note: "DB-backed Daily Tokenium-family compatibility row. The owner-side shell order now anchors this row on the T2 duo family, but the final player-facing title and runtime display path still stay quarantined."
     },
     {
       field: "ATU16Level",
       slot: "ATU16",
-      identity: "NewTokenUPGPrefab.T2.DuoBoosterFour",
-      identitySource: "Compatibility-mapped prefab identity",
+      identity:
+        boundary?.dailyTokeniumFamilyPass?.duoFamilyRows?.[1]?.prefabIdentity ||
+        "NewTokenUPGPrefab.T2.DuoBoosterTwo",
+      identitySource: "DB-backed owner-order compatibility identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
       startCostField: "T2Duo2StartCost",
       additiveCostField: "T2Duo2AdditiveCost",
       bonusField: "T2Duo2Bonus",
       maxLevelField: "T2Duo2MaxLevel",
-      bonusStepLabel: "T2 Duo 4 Bonus",
+      bonusStepLabel: "T2 Duo 2 Bonus",
       bonusStepMode: "multiplier",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
+      note: "DB-backed Daily Tokenium-family compatibility row. The owner-side shell order now anchors this row on the T2 duo family, but the final player-facing title and runtime display path still stay quarantined."
     },
     {
       field: "ATU17Level",
       slot: "ATU17",
-      identity: "NewTokenUPGPrefab.T2.DuoBoosterFive",
-      identitySource: "Compatibility-mapped prefab identity",
+      identity:
+        boundary?.dailyTokeniumFamilyPass?.duoFamilyRows?.[2]?.prefabIdentity ||
+        "NewTokenUPGPrefab.T2.DuoBoosterThree",
+      identitySource: "DB-backed owner-order compatibility identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
       startCostField: "T2Duo3StartCost",
       additiveCostField: "T2Duo3AdditiveCost",
       bonusField: "T2Duo3Bonus",
       maxLevelField: "T2Duo3MaxLevel",
-      bonusStepLabel: "T2 Duo 5 Bonus",
+      bonusStepLabel: "T2 Duo 3 Bonus",
       bonusStepMode: "multiplier",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
+      note: "DB-backed Daily Tokenium-family compatibility row. The owner-side shell order now anchors this row on the T2 duo family, but the final player-facing title and runtime display path still stay quarantined."
     },
     {
       field: "ATU18Level",
       slot: "ATU18",
-      identity: "NewTokenUPGPrefab.T2.DuoBoosterSix",
-      identitySource: "Compatibility-mapped prefab identity",
+      identity:
+        boundary?.dailyTokeniumFamilyPass?.duoFamilyRows?.[3]?.prefabIdentity ||
+        "NewTokenUPGPrefab.T2.DuoBoosterFour",
+      identitySource: "DB-backed owner-order compatibility identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
       startCostField: "T2Duo4StartCost",
       additiveCostField: "T2Duo4AdditiveCost",
       bonusField: "T2Duo4Bonus",
       maxLevelField: "T2Duo4MaxLevel",
-      bonusStepLabel: "T2 Duo 6 Bonus",
+      bonusStepLabel: "T2 Duo 4 Bonus",
       bonusStepMode: "multiplier",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
+      note: "DB-backed Daily Tokenium-family compatibility row. The owner-side shell order now anchors this row on the T2 duo family, but the final player-facing title and runtime display path still stay quarantined."
     },
     {
       field: "ATU19Level",
       slot: "ATU19",
-      identity: "NewTokenUPGPrefab.T3.TrinityBoosterOne",
-      identitySource: "Compatibility-mapped prefab identity",
+      identity:
+        boundary?.dailyTokeniumFamilyPass?.duoFamilyRows?.[4]?.prefabIdentity ||
+        "NewTokenUPGPrefab.T2.DuoBoosterFive",
+      identitySource: "DB-backed owner-order compatibility identity",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
       startCostField: "T2Duo5StartCost",
       additiveCostField: "T2Duo5AdditiveCost",
       bonusField: "T2Duo5Bonus",
       maxLevelField: "T2Duo5MaxLevel",
-      bonusStepLabel: "T3 Trinity 1 Bonus",
+      bonusStepLabel: "T2 Duo 5 Bonus",
       bonusStepMode: "multiplier",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; identity labeling still reflects legacy UI grouping rather than verified canonical row truth."
+      note: "DB-backed Daily Tokenium-family compatibility row. The old ATU19 equals ATU20 duplicate claim no longer clears on owner-field order, but the final player-facing title or runtime display path still stays quarantined."
     },
     {
       field: "ATU20Level",

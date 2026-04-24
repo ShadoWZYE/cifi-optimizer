@@ -6069,11 +6069,11 @@ assert.match(
 );
 assert.match(
   activeGroundingBoundariesDoc,
-  /Largest coherent adjacent slice: keep the current ATU bridge-side family quarantined until a coherent adjacent remap family is grounded/i
+  /Largest coherent adjacent slice: move to the late `ATU24-28` shell family as the next bounded family audit/i
 );
 assert.match(
   activeGroundingBoundariesDoc,
-  /only split into narrower `ATU\*` probes where the owner path, runtime path, or validation path genuinely diverges/i
+  /while keeping the ATU14-19 and ATU21-23 family targets as quarantined grounded endpoints unless a late-family pass directly consumes one of their still-open display-side seams/i
 );
 assert.match(activeGroundingBoundariesDoc, /closed ATU3 bonus-aggregation cluster/i);
 assert.match(activeGroundingBoundariesDoc, /closed ATU11 MK7 title-side seam/i);

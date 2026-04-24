@@ -18,6 +18,16 @@ Classification:
 - `legacy-compat`: compatibility/export carryover retained for old rows or user-facing continuity
 - `stale/removable`: no longer justified as a live dependency
 
+Default workflow policy for this lane:
+
+1. planner or query resolves the bounded target
+2. DB/cache/evidence is recovered or reused
+3. reducer/materializer emits canonical semantic or materialized state
+4. exports are regenerated only as snapshots or read models
+
+If step 3 does not happen, the next move is probe/tool/materializer realignment before widening into adjacent families.
+Long native or Ghidra-backed runs are expected while cacheable parsing and reduction are still converging, so runtime length alone should not be treated as a stall signal.
+
 ## Live Dependency Inventory
 
 ### 1. Verdict policy and assessment

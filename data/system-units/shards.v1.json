@@ -4501,7 +4501,7 @@
         ],
         "traceScope": "shard-owned-state-upgradeinfolist-population",
         "requestSignature": "9eb67ca7838c2c50",
-        "builtAt": "2026-04-23T06:06:58.767527",
+        "builtAt": "2026-04-23T18:37:57.266835",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": {
@@ -4614,7 +4614,7 @@
                 },
                 "targetId": "shard-owned-state-upgradeinfolist-population",
                 "traceScope": "shard-owned-state-upgradeinfolist-population",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "bridge_comparison_fragment": {
@@ -4742,7 +4742,7 @@
                 },
                 "targetId": "shard-owned-state-upgradeinfolist-population",
                 "traceScope": "shard-owned-state-upgradeinfolist-population",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "dependency_fragment": {
@@ -4830,7 +4830,7 @@
                 },
                 "targetId": "shard-owned-state-upgradeinfolist-population",
                 "traceScope": "shard-owned-state-upgradeinfolist-population",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "family_graph_fragment": {
@@ -4891,7 +4891,7 @@
                 ],
                 "targetId": "shard-owned-state-upgradeinfolist-population",
                 "traceScope": "shard-owned-state-upgradeinfolist-population",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "reconstruction_note_fragment": {
@@ -4994,7 +4994,7 @@
                   ],
                   "supportingEvidenceCount": 5
                 },
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "target_narrative_fragment": {
@@ -5020,7 +5020,7 @@
                 },
                 "targetId": "shard-owned-state-upgradeinfolist-population",
                 "traceScope": "shard-owned-state-upgradeinfolist-population",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             }
           },
@@ -5102,7 +5102,7 @@
             },
             "targetId": "shard-owned-state-upgradeinfolist-population",
             "traceScope": "shard-owned-state-upgradeinfolist-population",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "executionContextSemanticKey": "target-execution-context:shard-owned-state-upgradeinfolist-population",
           "executionPlan": null,
@@ -70224,7 +70224,7 @@
             },
             "targetId": "shard-owned-state-upgradeinfolist-population",
             "traceScope": "shard-owned-state-upgradeinfolist-population",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "tokenShopReconstruction": null,
           "tokenShopReconstructionSemanticKey": null,
@@ -72816,7 +72816,7 @@
         ],
         "traceScope": "shard-cost-su0-structure",
         "requestSignature": "42dd01b02fa06a53",
-        "builtAt": "2026-04-23T06:06:58.656012",
+        "builtAt": "2026-04-23T18:37:57.153419",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": {
@@ -72904,7 +72904,7 @@
                 },
                 "targetId": "shard-cost-su0-structure",
                 "traceScope": "shard-cost-su0-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "dependency_fragment": {
@@ -73012,7 +73012,7 @@
                 },
                 "targetId": "shard-cost-su0-structure",
                 "traceScope": "shard-cost-su0-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "family_graph_fragment": {
@@ -73065,7 +73065,7 @@
                 ],
                 "targetId": "shard-cost-su0-structure",
                 "traceScope": "shard-cost-su0-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "reconstruction_note_fragment": {
@@ -73113,7 +73113,7 @@
                 },
                 "targetId": "shard-cost-su0-structure",
                 "traceScope": "shard-cost-su0-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             }
           },
@@ -73196,7 +73196,7 @@
             },
             "targetId": "shard-cost-su0-structure",
             "traceScope": "shard-cost-su0-structure",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "executionContextSemanticKey": "target-execution-context:shard-cost-su0-structure",
           "executionPlan": null,
@@ -77590,7 +77590,7 @@
             },
             "targetId": "shard-cost-su0-structure",
             "traceScope": "shard-cost-su0-structure",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "tokenShopReconstruction": null,
           "tokenShopReconstructionSemanticKey": null,
@@ -84473,7 +84473,7 @@
       ],
       "traceScope": "shard-owned-state-upgradeinfolist-population",
       "requestSignature": "9eb67ca7838c2c50",
-      "builtAt": "2026-04-23T06:06:58.767527",
+      "builtAt": "2026-04-23T18:37:57.266835",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": {
@@ -84586,7 +84586,7 @@
               },
               "targetId": "shard-owned-state-upgradeinfolist-population",
               "traceScope": "shard-owned-state-upgradeinfolist-population",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "bridge_comparison_fragment": {
@@ -84714,7 +84714,7 @@
               },
               "targetId": "shard-owned-state-upgradeinfolist-population",
               "traceScope": "shard-owned-state-upgradeinfolist-population",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "dependency_fragment": {
@@ -84802,7 +84802,7 @@
               },
               "targetId": "shard-owned-state-upgradeinfolist-population",
               "traceScope": "shard-owned-state-upgradeinfolist-population",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "family_graph_fragment": {
@@ -84863,7 +84863,7 @@
               ],
               "targetId": "shard-owned-state-upgradeinfolist-population",
               "traceScope": "shard-owned-state-upgradeinfolist-population",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "reconstruction_note_fragment": {
@@ -84966,7 +84966,7 @@
                 ],
                 "supportingEvidenceCount": 5
               },
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "target_narrative_fragment": {
@@ -84992,7 +84992,7 @@
               },
               "targetId": "shard-owned-state-upgradeinfolist-population",
               "traceScope": "shard-owned-state-upgradeinfolist-population",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           }
         },
@@ -85074,7 +85074,7 @@
           },
           "targetId": "shard-owned-state-upgradeinfolist-population",
           "traceScope": "shard-owned-state-upgradeinfolist-population",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "executionContextSemanticKey": "target-execution-context:shard-owned-state-upgradeinfolist-population",
         "executionPlan": null,
@@ -150196,7 +150196,7 @@
           },
           "targetId": "shard-owned-state-upgradeinfolist-population",
           "traceScope": "shard-owned-state-upgradeinfolist-population",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "tokenShopReconstruction": null,
         "tokenShopReconstructionSemanticKey": null,
@@ -150235,7 +150235,7 @@
       ],
       "traceScope": "shard-cost-su0-structure",
       "requestSignature": "42dd01b02fa06a53",
-      "builtAt": "2026-04-23T06:06:58.656012",
+      "builtAt": "2026-04-23T18:37:57.153419",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": {
@@ -150323,7 +150323,7 @@
               },
               "targetId": "shard-cost-su0-structure",
               "traceScope": "shard-cost-su0-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "dependency_fragment": {
@@ -150431,7 +150431,7 @@
               },
               "targetId": "shard-cost-su0-structure",
               "traceScope": "shard-cost-su0-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "family_graph_fragment": {
@@ -150484,7 +150484,7 @@
               ],
               "targetId": "shard-cost-su0-structure",
               "traceScope": "shard-cost-su0-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "reconstruction_note_fragment": {
@@ -150532,7 +150532,7 @@
               },
               "targetId": "shard-cost-su0-structure",
               "traceScope": "shard-cost-su0-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           }
         },
@@ -150615,7 +150615,7 @@
           },
           "targetId": "shard-cost-su0-structure",
           "traceScope": "shard-cost-su0-structure",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "executionContextSemanticKey": "target-execution-context:shard-cost-su0-structure",
         "executionPlan": null,
@@ -155009,7 +155009,7 @@
           },
           "targetId": "shard-cost-su0-structure",
           "traceScope": "shard-cost-su0-structure",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "tokenShopReconstruction": null,
         "tokenShopReconstructionSemanticKey": null,

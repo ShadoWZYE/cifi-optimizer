@@ -1603,6 +1603,18 @@ def collect_native_trace(anchor_values: list[str], timeout: int = 120, family_hi
         "libil2cpp.so",
         str(extraction_plan.get("requestSignature", "")),
     )
+    if existing:
+        materialized = dict(existing)
+        materialized["summary"] = _summarize_native_result(
+            materialized.get("result"),
+            list(extraction_plan.get("requestedTerms", [])),
+            family_hint,
+        )
+        materialized["requestSignature"] = extraction_plan.get("requestSignature")
+        materialized["extractionPlan"] = extraction_plan
+        materialized["materializedFromDb"] = True
+        materialized["cacheHit"] = True
+        return materialized
     extraction_result = execute_native_trace_extraction(extraction_plan, timeout=timeout)
     if not extraction_result.get("available", True):
         return extraction_result

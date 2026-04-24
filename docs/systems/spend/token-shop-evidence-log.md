@@ -16,7 +16,7 @@ Fully map the TokenShop system from game assets to extend beyond the current 13 
 
 ### Findings
 
-#### Confirmed Grounded Rows (15 total)
+#### Confirmed Grounded Rows (20 bounded rows or shells)
 
 | ATU   | Prefab Identity                       | Evidence Type                    | Status         |
 | ----- | ------------------------------------- | -------------------------------- | -------------- |
@@ -33,7 +33,12 @@ Fully map the TokenShop system from game assets to extend beyond the current 13 
 | ATU11 | NewTokenUPGPrefab.T1.MK7Booster       | Prefab bridge only (no title)    | ⚠️ Quarantined |
 | ATU12 | NewTokenUPGPrefab.T1.MK8Booster       | Prefab + title text chain        | ✅ Complete    |
 | ATU13 | NewTokenUPGPrefab.T2.TokensBoost      | Shell-to-prefab bridge           | ✅ Complete    |
-| ATU14 | NewTokenUPGPrefab.T2.DuoBoosterOne    | Evidence extraction pending      | 🔄 Pending     |
+| ATU14 | NewTokenUPGPrefab.T2.DailyTokens      | DB-backed owner-order family     | ⚠️ Quarantined |
+| ATU15 | NewTokenUPGPrefab.T2.DuoBoosterOne    | DB-backed owner-order family     | ⚠️ Quarantined |
+| ATU16 | NewTokenUPGPrefab.T2.DuoBoosterTwo    | DB-backed owner-order family     | ⚠️ Quarantined |
+| ATU17 | NewTokenUPGPrefab.T2.DuoBoosterThree  | DB-backed owner-order family     | ⚠️ Quarantined |
+| ATU18 | NewTokenUPGPrefab.T2.DuoBoosterFour   | DB-backed owner-order family     | ⚠️ Quarantined |
+| ATU19 | NewTokenUPGPrefab.T2.DuoBoosterFive   | DB-backed owner-order check only | ⚠️ Quarantined |
 | ATU20 | NewTokenUPGPrefab.T3.TokensBoost      | Shell-to-prefab bridge           | ✅ Complete    |
 
 #### Evidence for T2 Duo Boosters (ATU14-18)
@@ -48,24 +53,33 @@ From `data/archive/uabea-extract-report.json`:
 
 From `data/archive/token-shop-values.json`:
 
-- ATU14Button: 15844, T2Duo1 fields (StartCost: 1275, Max: 500)
-- ATU15Button: 15850, T2Duo2 fields (StartCost: 75, Max: 2500)
-- ATU16Button: 15827, T2Duo3 fields (StartCost: 100, Max: 2500)
-- ATU17Button: 15841, T2Duo4 fields (StartCost: 125, Max: 2500)
-- ATU18Button: 15834, T2Duo5 fields (StartCost: 150, Max: 2500)
+- ATU14Button: 15844, TokenDailiesT2 fields (StartCost: 1000, Max: 10)
+- ATU15Button: 15850, T2Duo1 fields (StartCost: 1275, Max: 500)
+- ATU16Button: 15827, T2Duo2 fields (StartCost: 75, Max: 2500)
+- ATU17Button: 15841, T2Duo3 fields (StartCost: 100, Max: 2500)
+- ATU18Button: 15834, T2Duo4 fields (StartCost: 125, Max: 2500)
+- ATU19Button: 15842, T2Duo5 fields (StartCost: 150, Max: 2500)
 
-**Key Finding**: ATU14 has ATU14TokenDailiesBonus effect - this is a Daily Tokenium related row, not a standard token booster. This explains why it may not have standard buy hooks.
+**Key Finding**: ATU14 has `ATU14TokenDailiesBonus` and sits directly on `TokenDailiesT2`, so it anchors the whole ATU14-19 shell run as one Daily Tokenium-family sequence instead of the older off-by-one duo or trinity mapping. The active DB-backed target now closes the ATU14 shell-to-title and display seams, while the rest of the family stays bounded to owner-order compatibility and the ATU19 placeholder or duplicate check.
 
-#### Evidence for T3 Trio Boosters (ATU21-22)
+#### Evidence for T3 Trio Family (ATU21-23)
 
-From token-shop-row-remap-boundary.json:
+From `data/archive/token-shop-values.json`:
 
-- BuyTrio1Boost and BuyTrio2Boost hooks exist in metadata
-- T3Trio1 and T3Trio2 fields in `data/archive/token-shop-values.json`
+- `ATU21Button` sits on `T3Trio1*`
+- `ATU22Button` sits on `T3Trio2*`
+- `ATU23Button` is followed directly by `ATU24StartCost`, with no surviving `T3Trio3*` owner block
 
 From `data/archive/unity-apk-extract-report.json`:
 
-- `NewTokenUPGPrefab.T3.TrinityBoosterOne` exists
+- `NewTokenUPGPrefab.T3.TrinityBoosterOne`
+- `NewTokenUPGPrefab.T3.TrinityBoosterTwo`
+
+From the active `token-shop-t3-trio-family` DB target:
+
+- `BuyTrio1Boost` and `BuyTrio2Boost` survive as named trio-family buy hooks
+- the target clears `exact-shell-to-title` and preserves one bounded `ATU21` title-side join while leaving only `exact-display-update-path` open
+- the same target preserves one explicit `ATU23` placeholder-shell check instead of widening into a guessed live third trio row
 
 #### Evidence for Late ATU (ATU24-28)
 
@@ -83,51 +97,35 @@ From token-shop-row-remap-boundary.json:
 
 ### Blockers Identified
 
-1. **ATU14**:
-   - **CRITICAL FINDING**: ATU14TokenDailiesBonus - This is a Daily Tokenium row!
-   - Located in tier2 slot but provides Daily Tokenium bonuses
-   - Related to BuyTrio1Boost in Daily Tokenium lane, NOT standard TokenShop
+1. **ATU14-19**:
+   - The DB-backed owner-side shell order now clears as one coherent Daily Tokenium-family run: `ATU14 -> TokenDailiesT2`, then `ATU15 -> T2Duo1`, `ATU16 -> T2Duo2`, `ATU17 -> T2Duo3`, `ATU18 -> T2Duo4`, and `ATU19 -> T2Duo5`
+   - Matching prefab identities survive in committed UABEA object names: `NewTokenUPGPrefab.T2.DailyTokens` plus `NewTokenUPGPrefab.T2.DuoBoosterOne` through `Five`
+   - The active family target is no longer blocked on ATU14 title or display recovery; it now stays bounded because `ATU15-18` remain owner-order or prefab-family rows only and `ATU19` still lacks one final player-facing or runtime-local join
 
-2. **ATU15-18**:
-   - **CRITICAL FINDING**: BuyDuo1Boost through BuyDuo5Boost hooks found in Daily Tokenium lane!
-   - All 5 are Daily Tokenium rows, not standard TokenShop
-   - Prefab candidates: NewTokenUPGPrefab.T2.DuoBoosterOne through Five
+2. **ATU19**:
+   - The old `ATU19 == ATU20` duplicate claim no longer survives the checked owner-field order
+   - `ATU19Button` sits on `T2Duo5*`, and only the next shell advances into `TokenBoostT3`
+   - Placeholder or deprecated status is still unresolved, so this row remains quarantined instead of being promoted
 
-3. **ATU19**:
-   - **CRITICAL FINDING**: Unused slot! Shares TokenBoostT3 fields with ATU20
-   - Button path_id 15842 exists but is a duplicate of ATU20
-   - Appears to be deprecated or placeholder
+3. **ATU21-23**:
+   - The new bounded `token-shop-t3-trio-family` target now materializes cleanly in DB and preserves one coherent T3 trio shell run: `ATU21 -> T3Trio1`, `ATU22 -> T3Trio2`, and `ATU23` as the shell-only edge before `ATU24StartCost`
+   - The same target preserves `BuyTrio1Boost`, `BuyTrio2Boost`, and matching `NewTokenUPGPrefab.T3.TrinityBoosterOne/Two` prefab-family candidates
+   - The ATU21 row now clears one exact shell-to-title join, and the family target is blocked only on `exact-display-update-path`
 
-4. **ATU21-22**:
-   - **CRITICAL FINDING**: ATU21TokenDailiesBonus - Both are Daily Tokenium rows!
-   - BuyTrio1Boost and BuyTrio2Boost hooks in Daily Tokenium lane
-   - These provide daily tokenium bonuses, not standard token/diamond
-
-5. **ATU23**:
-   - **CRITICAL FINDING**: Unused slot!
-   - Button path_id 15828 exists but no cost fields after it
-   - Appears to be placeholder or deprecated
-
-6. **ATU24-28**:
-   - **CRITICAL FINDING**: All are Daily Tokenium related!
-   - BuyATU24-28 hooks exist in Daily Tokenium lane
-   - Likely related to shard/campaign progression
-
-7. **ATU23**:
+4. **ATU23**:
    - Button exists (15828) but no extracted cost fields
-   - Appears to be placeholder or early design
+   - The active T3 trio-family target now preserves that gap as one explicit placeholder-shell check instead of a guessed hidden third trio row
 
-8. **ATU24-28**:
+5. **ATU24-28**:
    - High-cost Ultima/Campaign tier
    - ATU24 has multi-step bonus (shard-related)
-   - Need to verify prefab mapping
+   - This is now the next largest coherent adjacent family slice, not a consumed input for the bounded T2/T3 family targets
 
 ### Next Steps
 
-1. Verify ATU14 is Daily Tokenium modifier (like ATU21)
-2. Attempt to trace ATU15-18 button path_ids to prefab connections
-3. Find BuyTrio1/2 exact method signatures in metadata
-4. Verify ATU24-28 prefab mapping (likely T4.Ultima or T5.CampaignFragments)
+1. Keep the grounded `ATU14-19` and `ATU21-23` family targets as bounded endpoints unless a later family pass directly consumes one of their remaining display-side seams
+2. Move into the adjacent `ATU24-28` late TokenShop shell family as the next coherent family audit
+3. Do not reopen the trace-performance lane unless a newly resumed grounding pass proves one instrument seam is again the true blocker
 
 ### Data Sources
 
@@ -140,18 +138,17 @@ From token-shop-row-remap-boundary.json:
 
 ### Summary
 
-The TokenShop system has 28 ATU rows:
+The TokenShop system currently has:
 
-- **14 Standard TokenShop rows** (ATU1-13, ATU20): Token, Diamond, Cell, Mod, MK1-8, TokenT2, TokenT3 boosters
-- **13 Daily Tokenium rows** (ATU14-18, ATU21-22, ATU24-28): These are actually daily tokenium related, not standard TokenShop
-- **2 Unused slots** (ATU19, ATU23): Duplicate/placeholder slots
+- **14 standard TokenShop rows** (ATU1-13, ATU20): Token, Diamond, Cell, Mod, MK1-8, TokenT2, TokenT3 boosters
+- **2 bounded adjacent family targets** (`ATU14-19` and `ATU21-23`): both now materialize as DB-backed family audits instead of archive-only clue bundles
+- **2 quarantined shell-local rows** (ATU19, ATU23): one still lacks a final live row-local join, and one now carries an explicit placeholder-shell check
+- **1 remaining large unresolved family** (`ATU24-28`): still the next coherent late-family slice
 
 This means the optimizer can work with the 14 standard TokenShop rows that have full cost/benefit data.
 
 ### Next Steps for Optimizer
 
-1. Enable optimization for standard TokenShop rows (ATU1-13, ATU20)
-2. Separate Daily Tokenium analysis (different currency)
-3. Keep unused slots (ATU19, ATU23) filtered out
-
-
+1. Enable optimization only for the standard TokenShop rows (ATU1-13, ATU20)
+2. Keep the bounded T2/T3 family targets on their separate compatibility or descriptive lane
+3. Keep ATU19 and ATU23 quarantined until one row-specific display join or stronger placeholder verdict clears

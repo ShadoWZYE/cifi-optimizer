@@ -12,12 +12,15 @@ Related docs:
 
 The supported pipeline is:
 
-1. asset/native extraction
-2. SQLite evidence and trace fragments
-3. reducer-owned canonical/materialized views
-4. optional system-unit JSON export for static fallback or snapshots
+1. planner/query-driven trace selection
+2. asset/native extraction only as needed for that trace
+3. SQLite evidence and trace fragments
+4. reducer-owned canonical/materialized views
+5. optional system-unit JSON export for static fallback, distribution, or snapshots
 
 The app/runtime should treat SQLite-backed system views as primary. Committed JSON exports are fallback or archival unless explicitly called out below.
+When a target does not emit the expected DB/materialized artifact, the next step is probe/tool/materializer realignment before widening scope.
+Long native or Ghidra-backed trace runs are expected while cacheable parsing is still progressing; duration alone is not evidence of a stall.
 
 ## Operator Entrypoints
 
@@ -110,6 +113,13 @@ python scripts/unity/unity_trace_bundle.py --best-gap --dry-run
 launch-trace-gap.bat
 ```
 
+Trace operating rule:
+
+- prefer `extract:trace` or `unity_trace_bundle.py` as the default recovery path
+- expect DB/cache/materialized artifacts to be the primary success signal
+- use `--export` or exported JSON outputs only when a snapshot/debug artifact is explicitly needed
+- if the expected DB/materialized artifact is missing after a run, fix the trace/probe/materializer path before moving to adjacent targets
+
 DB/lifecycle examples:
 
 ```bash
@@ -166,4 +176,3 @@ Before adding or reviving a tool:
 1. Prefer extending `unity_trace_bundle.py`, `ghidra_cache_db.py`, or `ghidra_headless.py`.
 2. Prefer DB-backed materialization over new committed intermediate JSON.
 3. Only keep standalone generators when they still produce a live input that the DB/export layer cannot yet derive.
-

@@ -148,7 +148,7 @@
         ],
         "traceScope": "token-shop-family-structure",
         "requestSignature": "bc8bef98dea5ad51",
-        "builtAt": "2026-04-23T06:06:59.090926",
+        "builtAt": "2026-04-23T18:37:57.631126",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": {
@@ -214,7 +214,7 @@
             },
             "targetId": "token-shop-family-structure",
             "traceScope": "token-shop-family-structure",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:57"
           },
           "bridgePolicySemanticKey": "target-bridge-policy:token-shop-family-structure",
           "canonicalSemanticViews": {
@@ -262,7 +262,7 @@
                 },
                 "targetId": "token-shop-family-structure",
                 "traceScope": "token-shop-family-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:57"
               }
             },
             "bridge_policy_fragment": {
@@ -291,7 +291,7 @@
                 },
                 "targetId": "token-shop-family-structure",
                 "traceScope": "token-shop-family-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:57"
               }
             },
             "dependency_fragment": {
@@ -398,7 +398,7 @@
                 },
                 "targetId": "token-shop-family-structure",
                 "traceScope": "token-shop-family-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:57"
               }
             },
             "execution_plan_fragment": {
@@ -514,7 +514,7 @@
                 },
                 "targetId": "token-shop-family-structure",
                 "traceScope": "token-shop-family-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:57"
               }
             },
             "family_graph_fragment": {
@@ -540,18 +540,27 @@
                 "rowShells": [
                   {
                     "controllerBlock": [
-                      "ATU4Button",
-                      "ATU4MaxOverlay",
-                      "ATU4Content",
-                      "ATU4Overlay"
+                      "ATU13MaxOverlay",
+                      "TokenDailiesT2StartCost",
+                      "TokenDailiesT2AdditiveCost",
+                      "TokenDailiesT2Bonus",
+                      "TokenDailiesT2MaxLevel",
+                      "TokenDailiesT2Fill",
+                      "ATU14Button",
+                      "ATU14MaxOverlay",
+                      "T2Duo1StartCost",
+                      "T2Duo1AdditiveCost",
+                      "T2Duo1Bonus",
+                      "T2Duo1MaxLevel",
+                      "T2Duo1Fill"
                     ],
                     "field": "ATU1Button",
                     "ownerFieldBlock": [
-                      "ModBoostStartCost",
-                      "ModBoostAdditiveCost",
-                      "ModBoostBonus",
-                      "ModBoostMaxLevel",
-                      "ModBoostFill"
+                      "TokenDailiesT2StartCost",
+                      "TokenDailiesT2AdditiveCost",
+                      "TokenDailiesT2Bonus",
+                      "TokenDailiesT2MaxLevel",
+                      "TokenDailiesT2Fill"
                     ],
                     "pathId": 15839
                   }
@@ -595,17 +604,17 @@
                 ],
                 "targetId": "token-shop-family-structure",
                 "traceScope": "token-shop-family-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:57"
               }
             },
             "formula_fragment": {
               "formula:token-shop": {
                 "familyId": "token-shop",
                 "groundedConstants": {
-                  "AdditiveCost": 5,
+                  "AdditiveCost": 800,
                   "Bonus": 0.20000000298023224,
-                  "MaxLevel": 20,
-                  "StartCost": 20
+                  "MaxLevel": 10,
+                  "StartCost": 1000
                 },
                 "inferredCostModel": {
                   "displaySlots": [
@@ -621,20 +630,19 @@
                       "additive",
                       "subtractive"
                     ],
-                    "ownerSchemaHasCostExponent": true
+                    "ownerSchemaHasCostExponent": false
                   },
                   "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
                   "groundedConstants": {
-                    "AdditiveCost": 5,
-                    "StartCost": 20
+                    "AdditiveCost": 800,
+                    "StartCost": 1000
                   },
                   "kind": "controller-linear-step",
                   "notes": [
                     "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
                     "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
                     "This supports a linear base-cost lane for ATU/controller rows.",
-                    "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane.",
-                    "ArcadeUpgradeSO still exposes CostExponent in the owner schema, so exponent-based or transformed runtime pricing remains a separate unresolved modifier lane."
+                    "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
                   ],
                   "status": "extracted-controller-linear"
                 },
@@ -644,8 +652,7 @@
                   "notes": [
                     "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                     "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
-                    "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
-                    "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
+                    "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
                   ],
                   "status": "unresolved-runtime-modifiers"
                 },
@@ -659,6 +666,7 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "contributingTraceScopes": [
@@ -668,9 +676,11 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "corroboratingFragmentIds": [
+                    3289,
                     1809,
                     161,
                     343,
@@ -683,6 +693,7 @@
                     {
                       "field": "groundedConstants.AdditiveCost",
                       "values": [
+                        800,
                         5,
                         0.12999999523162842,
                         0.10000000149011612,
@@ -701,6 +712,7 @@
                     {
                       "field": "groundedConstants.MaxLevel",
                       "values": [
+                        10,
                         20,
                         5000,
                         200,
@@ -710,6 +722,7 @@
                     {
                       "field": "groundedConstants.StartCost",
                       "values": [
+                        1000,
                         20,
                         3,
                         1,
@@ -719,6 +732,36 @@
                     {
                       "field": "inferredCostModel",
                       "values": [
+                        {
+                          "displaySlots": [
+                            "CostBox",
+                            "CostText"
+                          ],
+                          "evidence": {
+                            "controllerAdditiveCostFieldCount": 1,
+                            "controllerCostExponentFieldCount": 0,
+                            "controllerStartCostFieldCount": 1,
+                            "ownerCalculationTypeOptions": [
+                              "percentage",
+                              "additive",
+                              "subtractive"
+                            ],
+                            "ownerSchemaHasCostExponent": false
+                          },
+                          "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
+                          "groundedConstants": {
+                            "AdditiveCost": 800,
+                            "StartCost": 1000
+                          },
+                          "kind": "controller-linear-step",
+                          "notes": [
+                            "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
+                            "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
+                            "This supports a linear base-cost lane for ATU/controller rows.",
+                            "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
+                          ],
+                          "status": "extracted-controller-linear"
+                        },
                         {
                           "displaySlots": [
                             "CostBox",
@@ -892,6 +935,15 @@
                           "notes": [
                             "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                             "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
+                            "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
+                          ],
+                          "status": "unresolved-runtime-modifiers"
+                        },
+                        {
+                          "expression": "DisplayedCost(level) = BaseCost(level) plus unresolved runtime modifiers/evaluator-side transforms",
+                          "notes": [
+                            "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
+                            "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
                             "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
                             "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
                           ],
@@ -911,7 +963,7 @@
                       ]
                     }
                   ],
-                  "supportingEvidenceCount": 7
+                  "supportingEvidenceCount": 8
                 }
               }
             },
@@ -1442,12 +1494,27 @@
                   ]
                 },
                 "traceScope": "token-shop-family-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:57"
               }
             },
             "owner_controller_fragment": {
               "owner-controller:ArcadeUpgradeSO": {
                 "controllerBlocks": [
+                  [
+                    "ATU13MaxOverlay",
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill",
+                    "ATU14Button",
+                    "ATU14MaxOverlay",
+                    "T2Duo1StartCost",
+                    "T2Duo1AdditiveCost",
+                    "T2Duo1Bonus",
+                    "T2Duo1MaxLevel",
+                    "T2Duo1Fill"
+                  ],
                   [
                     "ATU4Button",
                     "ATU4MaxOverlay",
@@ -1472,6 +1539,34 @@
                 ],
                 "owner": "ArcadeUpgradeSO",
                 "ownerBlobRows": [
+                  {
+                    "additiveCost": 800,
+                    "bonus": 0.20000000298023224,
+                    "contentPathId": 1103626240,
+                    "fillPathId": 294972,
+                    "maxLevel": 10,
+                    "maxOverlayPathId": 49509,
+                    "nextRowPreviewScalars": [],
+                    "nextRowShellOffset": null,
+                    "nextRowShellRelativeOffset": null,
+                    "notes": [
+                      "The direct TokenShop owner blob row is anchored on the shell path id and currently resolves StartCost/AdditiveCost/Bonus/MaxLevel plus fill/content/overlay bindings.",
+                      "The current row data ends after the overlay path block; any repeated scalar block before the next shell belongs to the next serialized row, not the current one.",
+                      "If calculationType/finalSetValue are not present inside this row window, they must be supplied later by the runtime Upgrade instance/evaluator path rather than a hidden TokenShop row field."
+                    ],
+                    "overlayPathId": 0,
+                    "ownerComponent": {
+                      "componentPathId": 283631,
+                      "gameObjectPathId": 8768,
+                      "script": "TokenShop"
+                    },
+                    "rowDataEndRelativeOffset": 40,
+                    "serializedRuntimeFieldsPresent": false,
+                    "shellOffset": 1212,
+                    "shellPathId": 15844,
+                    "startCost": 1000,
+                    "status": "owner-blob-row-recovered"
+                  },
                   {
                     "additiveCost": 2,
                     "bonus": 1.0099999904632568,
@@ -1774,6 +1869,13 @@
                   }
                 ],
                 "ownerFieldBlocks": [
+                  [
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill"
+                  ],
                   [
                     "ModBoostStartCost",
                     "ModBoostAdditiveCost",
@@ -2130,7 +2232,7 @@
                   "contributingJobs": [
                     "process_20260423_034306",
                     "process_20260423_035430",
-                    "process_20260423_060440"
+                    "process_20260423_174033"
                   ],
                   "contributingTargets": [
                     "token-shop-atu3-cells-effect",
@@ -2139,6 +2241,7 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "contributingTraceScopes": [
@@ -2148,10 +2251,12 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "corroboratingFragmentIds": [
-                    3144,
+                    3288,
+                    3240,
                     2616,
                     2571,
                     1808,
@@ -2160,9 +2265,10 @@
                     44
                   ],
                   "fieldLevelConflicts": [],
-                  "supportingEvidenceCount": 7
+                  "supportingEvidenceCount": 8
                 },
                 "targetIds": [
+                  "token-shop-daily-tokenium-family",
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu3-chest-consumer",
@@ -2175,7 +2281,7 @@
             },
             "progression_fragment": {
               "progression:token-shop:ArcadeUpgradeSO": {
-                "assessmentSemanticKey": "target-assessment:token-shop-atu4-mod",
+                "assessmentSemanticKey": "target-assessment:token-shop-daily-tokenium-family",
                 "familyId": "token-shop",
                 "runtimeEvaluatorRecovery": {
                   "backingFields": [],
@@ -2223,7 +2329,7 @@
                   "contributingJobs": [
                     "process_20260423_034306",
                     "process_20260423_035430",
-                    "process_20260423_060440"
+                    "process_20260423_174033"
                   ],
                   "contributingTargets": [
                     "token-shop-atu3-cells-effect",
@@ -2232,6 +2338,7 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "contributingTraceScopes": [
@@ -2241,10 +2348,12 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "corroboratingFragmentIds": [
-                    3160,
+                    3297,
+                    3256,
                     2632,
                     2584,
                     1819,
@@ -2252,9 +2361,9 @@
                     171,
                     55
                   ],
-                  "supportingEvidenceCount": 7
+                  "supportingEvidenceCount": 8
                 },
-                "targetId": "token-shop-atu4-mod"
+                "targetId": "token-shop-daily-tokenium-family"
               }
             },
             "reconstruction_note_fragment": {
@@ -2513,7 +2622,7 @@
                 ],
                 "targetId": "token-shop-family-structure",
                 "traceScope": "token-shop-family-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:57"
               }
             },
             "target_narrative_fragment": {
@@ -2538,7 +2647,7 @@
                 },
                 "targetId": "token-shop-family-structure",
                 "traceScope": "token-shop-family-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:57"
               }
             },
             "threshold_fragment": {
@@ -2587,6 +2696,7 @@
                   ],
                   "verdict": "quarantine"
                 },
+                "boundedNegatives": [],
                 "familyId": "token-shop",
                 "formula": {
                   "groundedConstants": {
@@ -2743,18 +2853,27 @@
                 },
                 "rowShell": {
                   "controllerBlock": [
-                    "ATU4Button",
-                    "ATU4MaxOverlay",
-                    "ATU4Content",
-                    "ATU4Overlay"
+                    "ATU13MaxOverlay",
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill",
+                    "ATU14Button",
+                    "ATU14MaxOverlay",
+                    "T2Duo1StartCost",
+                    "T2Duo1AdditiveCost",
+                    "T2Duo1Bonus",
+                    "T2Duo1MaxLevel",
+                    "T2Duo1Fill"
                   ],
                   "field": "ATU1Button",
                   "ownerFieldBlock": [
-                    "ModBoostStartCost",
-                    "ModBoostAdditiveCost",
-                    "ModBoostBonus",
-                    "ModBoostMaxLevel",
-                    "ModBoostFill"
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill"
                   ],
                   "pathId": 15839
                 },
@@ -2769,6 +2888,7 @@
                   "detachedTextCandidateCount": 0,
                   "directTextCandidateCount": 12,
                   "literalStatus": "closed",
+                  "nonBlockingSeams": [],
                   "requiredGapKinds": [
                     "exact-display-update-path",
                     "runtime-model-gap"
@@ -2807,7 +2927,7 @@
                 },
                 "targetId": "token-shop-family-structure",
                 "traceScope": "token-shop-family-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:57"
               }
             },
             "ui_binding_fragment": {
@@ -3708,7 +3828,7 @@
             },
             "targetId": "token-shop-family-structure",
             "traceScope": "token-shop-family-structure",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:57"
           },
           "executionContextSemanticKey": "target-execution-context:token-shop-family-structure",
           "executionPlan": {
@@ -3823,7 +3943,7 @@
             },
             "targetId": "token-shop-family-structure",
             "traceScope": "token-shop-family-structure",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:57"
           },
           "executionPlanSemanticKey": "target-execution-plan:token-shop-family-structure",
           "generatedAt": null,
@@ -4353,7 +4473,7 @@
               ]
             },
             "traceScope": "token-shop-family-structure",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:57"
           },
           "graphPlanSemanticKey": "target-graph-plan:token-shop-family-structure",
           "groundedConclusion": "The TokenShop family audit is structurally informative but still quarantined. The repo repeatedly preserves shell-side ATU neighborhoods plus row-family proxy hooks and prefab identities on the solved subset, but repeated title-localization gaps remain for ATU1, ATU2, ATU4, ATU5, and ATU7, while ATU3 and the late ATU24-ATU28 block still fail the exact identity join entirely. ATU6 remains the strongest standout row neighborhood.",
@@ -4615,6 +4735,7 @@
                   {
                     "field": "groundedConstants.AdditiveCost",
                     "values": [
+                      800,
                       5,
                       0.12999999523162842,
                       0.10000000149011612,
@@ -4633,6 +4754,7 @@
                   {
                     "field": "groundedConstants.MaxLevel",
                     "values": [
+                      10,
                       20,
                       5000,
                       200,
@@ -4642,6 +4764,7 @@
                   {
                     "field": "groundedConstants.StartCost",
                     "values": [
+                      1000,
                       20,
                       3,
                       1,
@@ -4651,6 +4774,36 @@
                   {
                     "field": "inferredCostModel",
                     "values": [
+                      {
+                        "displaySlots": [
+                          "CostBox",
+                          "CostText"
+                        ],
+                        "evidence": {
+                          "controllerAdditiveCostFieldCount": 1,
+                          "controllerCostExponentFieldCount": 0,
+                          "controllerStartCostFieldCount": 1,
+                          "ownerCalculationTypeOptions": [
+                            "percentage",
+                            "additive",
+                            "subtractive"
+                          ],
+                          "ownerSchemaHasCostExponent": false
+                        },
+                        "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
+                        "groundedConstants": {
+                          "AdditiveCost": 800,
+                          "StartCost": 1000
+                        },
+                        "kind": "controller-linear-step",
+                        "notes": [
+                          "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
+                          "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
+                          "This supports a linear base-cost lane for ATU/controller rows.",
+                          "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
+                        ],
+                        "status": "extracted-controller-linear"
+                      },
                       {
                         "displaySlots": [
                           "CostBox",
@@ -4824,6 +4977,15 @@
                         "notes": [
                           "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                           "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
+                          "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
+                        ],
+                        "status": "unresolved-runtime-modifiers"
+                      },
+                      {
+                        "expression": "DisplayedCost(level) = BaseCost(level) plus unresolved runtime modifiers/evaluator-side transforms",
+                        "notes": [
+                          "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
+                          "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
                           "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
                           "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
                         ],
@@ -4876,6 +5038,7 @@
                 "token-shop-atu4-mod",
                 "token-shop-atu5-mk1-title",
                 "token-shop-atu7-mk3-bridge",
+                "token-shop-daily-tokenium-family",
                 "token-shop-family-structure"
               ],
               "owner-controller:ArcadeUpgradeSO": [
@@ -4885,6 +5048,7 @@
                 "token-shop-atu4-mod",
                 "token-shop-atu5-mk1-title",
                 "token-shop-atu7-mk3-bridge",
+                "token-shop-daily-tokenium-family",
                 "token-shop-family-structure"
               ],
               "progression:token-shop:ArcadeUpgradeSO": [
@@ -4894,6 +5058,7 @@
                 "token-shop-atu4-mod",
                 "token-shop-atu5-mk1-title",
                 "token-shop-atu7-mk3-bridge",
+                "token-shop-daily-tokenium-family",
                 "token-shop-family-structure"
               ],
               "reconstruction-note:token-shop:token-shop-family-structure": [
@@ -4966,6 +5131,11 @@
                 "progression:token-shop:ArcadeUpgradeSO"
               ],
               "token-shop-atu7-mk3-bridge": [
+                "formula:token-shop",
+                "owner-controller:ArcadeUpgradeSO",
+                "progression:token-shop:ArcadeUpgradeSO"
+              ],
+              "token-shop-daily-tokenium-family": [
                 "formula:token-shop",
                 "owner-controller:ArcadeUpgradeSO",
                 "progression:token-shop:ArcadeUpgradeSO"
@@ -7458,7 +7628,7 @@
             },
             "targetId": "token-shop-family-structure",
             "traceScope": "token-shop-family-structure",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:57"
           },
           "tokenShopReconstruction": {
             "assessment": {
@@ -7472,6 +7642,7 @@
               ],
               "verdict": "quarantine"
             },
+            "boundedNegatives": [],
             "familyId": "token-shop",
             "formula": {
               "groundedConstants": {
@@ -7628,18 +7799,27 @@
             },
             "rowShell": {
               "controllerBlock": [
-                "ATU4Button",
-                "ATU4MaxOverlay",
-                "ATU4Content",
-                "ATU4Overlay"
+                "ATU13MaxOverlay",
+                "TokenDailiesT2StartCost",
+                "TokenDailiesT2AdditiveCost",
+                "TokenDailiesT2Bonus",
+                "TokenDailiesT2MaxLevel",
+                "TokenDailiesT2Fill",
+                "ATU14Button",
+                "ATU14MaxOverlay",
+                "T2Duo1StartCost",
+                "T2Duo1AdditiveCost",
+                "T2Duo1Bonus",
+                "T2Duo1MaxLevel",
+                "T2Duo1Fill"
               ],
               "field": "ATU1Button",
               "ownerFieldBlock": [
-                "ModBoostStartCost",
-                "ModBoostAdditiveCost",
-                "ModBoostBonus",
-                "ModBoostMaxLevel",
-                "ModBoostFill"
+                "TokenDailiesT2StartCost",
+                "TokenDailiesT2AdditiveCost",
+                "TokenDailiesT2Bonus",
+                "TokenDailiesT2MaxLevel",
+                "TokenDailiesT2Fill"
               ],
               "pathId": 15839
             },
@@ -7654,6 +7834,7 @@
               "detachedTextCandidateCount": 0,
               "directTextCandidateCount": 12,
               "literalStatus": "closed",
+              "nonBlockingSeams": [],
               "requiredGapKinds": [
                 "exact-display-update-path",
                 "runtime-model-gap"
@@ -7692,7 +7873,7 @@
             },
             "targetId": "token-shop-family-structure",
             "traceScope": "token-shop-family-structure",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:57"
           },
           "tokenShopReconstructionSemanticKey": "token-shop-reconstruction:token-shop-family-structure",
           "traceParams": {
@@ -7724,7 +7905,7 @@
         ],
         "traceScope": "token-shop-atu3-cells-effect",
         "requestSignature": "05e55cd08cfbdd8d",
-        "builtAt": "2026-04-23T06:06:58.803380",
+        "builtAt": "2026-04-23T18:37:57.303973",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": {
@@ -7790,7 +7971,7 @@
             },
             "targetId": "token-shop-atu3-cells-effect",
             "traceScope": "token-shop-atu3-cells-effect",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "bridgePolicySemanticKey": "target-bridge-policy:token-shop-atu3-cells-effect",
           "canonicalSemanticViews": {
@@ -7838,7 +8019,7 @@
                 },
                 "targetId": "token-shop-atu3-cells-effect",
                 "traceScope": "token-shop-atu3-cells-effect",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "bridge_policy_fragment": {
@@ -7867,7 +8048,7 @@
                 },
                 "targetId": "token-shop-atu3-cells-effect",
                 "traceScope": "token-shop-atu3-cells-effect",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "dependency_fragment": {
@@ -7991,7 +8172,7 @@
                 },
                 "targetId": "token-shop-atu3-cells-effect",
                 "traceScope": "token-shop-atu3-cells-effect",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "execution_plan_fragment": {
@@ -8104,7 +8285,7 @@
                 },
                 "targetId": "token-shop-atu3-cells-effect",
                 "traceScope": "token-shop-atu3-cells-effect",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "family_graph_fragment": {
@@ -8130,18 +8311,27 @@
                 "rowShells": [
                   {
                     "controllerBlock": [
-                      "ATU4Button",
-                      "ATU4MaxOverlay",
-                      "ATU4Content",
-                      "ATU4Overlay"
+                      "ATU13MaxOverlay",
+                      "TokenDailiesT2StartCost",
+                      "TokenDailiesT2AdditiveCost",
+                      "TokenDailiesT2Bonus",
+                      "TokenDailiesT2MaxLevel",
+                      "TokenDailiesT2Fill",
+                      "ATU14Button",
+                      "ATU14MaxOverlay",
+                      "T2Duo1StartCost",
+                      "T2Duo1AdditiveCost",
+                      "T2Duo1Bonus",
+                      "T2Duo1MaxLevel",
+                      "T2Duo1Fill"
                     ],
                     "field": "ATU1Button",
                     "ownerFieldBlock": [
-                      "ModBoostStartCost",
-                      "ModBoostAdditiveCost",
-                      "ModBoostBonus",
-                      "ModBoostMaxLevel",
-                      "ModBoostFill"
+                      "TokenDailiesT2StartCost",
+                      "TokenDailiesT2AdditiveCost",
+                      "TokenDailiesT2Bonus",
+                      "TokenDailiesT2MaxLevel",
+                      "TokenDailiesT2Fill"
                     ],
                     "pathId": 15839
                   }
@@ -8185,17 +8375,17 @@
                 ],
                 "targetId": "token-shop-family-structure",
                 "traceScope": "token-shop-family-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:57"
               }
             },
             "formula_fragment": {
               "formula:token-shop": {
                 "familyId": "token-shop",
                 "groundedConstants": {
-                  "AdditiveCost": 5,
+                  "AdditiveCost": 800,
                   "Bonus": 0.20000000298023224,
-                  "MaxLevel": 20,
-                  "StartCost": 20
+                  "MaxLevel": 10,
+                  "StartCost": 1000
                 },
                 "inferredCostModel": {
                   "displaySlots": [
@@ -8211,20 +8401,19 @@
                       "additive",
                       "subtractive"
                     ],
-                    "ownerSchemaHasCostExponent": true
+                    "ownerSchemaHasCostExponent": false
                   },
                   "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
                   "groundedConstants": {
-                    "AdditiveCost": 5,
-                    "StartCost": 20
+                    "AdditiveCost": 800,
+                    "StartCost": 1000
                   },
                   "kind": "controller-linear-step",
                   "notes": [
                     "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
                     "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
                     "This supports a linear base-cost lane for ATU/controller rows.",
-                    "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane.",
-                    "ArcadeUpgradeSO still exposes CostExponent in the owner schema, so exponent-based or transformed runtime pricing remains a separate unresolved modifier lane."
+                    "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
                   ],
                   "status": "extracted-controller-linear"
                 },
@@ -8234,8 +8423,7 @@
                   "notes": [
                     "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                     "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
-                    "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
-                    "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
+                    "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
                   ],
                   "status": "unresolved-runtime-modifiers"
                 },
@@ -8249,6 +8437,7 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "contributingTraceScopes": [
@@ -8258,9 +8447,11 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "corroboratingFragmentIds": [
+                    3289,
                     1809,
                     161,
                     343,
@@ -8273,6 +8464,7 @@
                     {
                       "field": "groundedConstants.AdditiveCost",
                       "values": [
+                        800,
                         5,
                         0.12999999523162842,
                         0.10000000149011612,
@@ -8291,6 +8483,7 @@
                     {
                       "field": "groundedConstants.MaxLevel",
                       "values": [
+                        10,
                         20,
                         5000,
                         200,
@@ -8300,6 +8493,7 @@
                     {
                       "field": "groundedConstants.StartCost",
                       "values": [
+                        1000,
                         20,
                         3,
                         1,
@@ -8309,6 +8503,36 @@
                     {
                       "field": "inferredCostModel",
                       "values": [
+                        {
+                          "displaySlots": [
+                            "CostBox",
+                            "CostText"
+                          ],
+                          "evidence": {
+                            "controllerAdditiveCostFieldCount": 1,
+                            "controllerCostExponentFieldCount": 0,
+                            "controllerStartCostFieldCount": 1,
+                            "ownerCalculationTypeOptions": [
+                              "percentage",
+                              "additive",
+                              "subtractive"
+                            ],
+                            "ownerSchemaHasCostExponent": false
+                          },
+                          "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
+                          "groundedConstants": {
+                            "AdditiveCost": 800,
+                            "StartCost": 1000
+                          },
+                          "kind": "controller-linear-step",
+                          "notes": [
+                            "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
+                            "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
+                            "This supports a linear base-cost lane for ATU/controller rows.",
+                            "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
+                          ],
+                          "status": "extracted-controller-linear"
+                        },
                         {
                           "displaySlots": [
                             "CostBox",
@@ -8482,6 +8706,15 @@
                           "notes": [
                             "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                             "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
+                            "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
+                          ],
+                          "status": "unresolved-runtime-modifiers"
+                        },
+                        {
+                          "expression": "DisplayedCost(level) = BaseCost(level) plus unresolved runtime modifiers/evaluator-side transforms",
+                          "notes": [
+                            "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
+                            "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
                             "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
                             "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
                           ],
@@ -8501,7 +8734,7 @@
                       ]
                     }
                   ],
-                  "supportingEvidenceCount": 7
+                  "supportingEvidenceCount": 8
                 }
               }
             },
@@ -8892,12 +9125,27 @@
                   ]
                 },
                 "traceScope": "token-shop-atu3-cells-effect",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "owner_controller_fragment": {
               "owner-controller:ArcadeUpgradeSO": {
                 "controllerBlocks": [
+                  [
+                    "ATU13MaxOverlay",
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill",
+                    "ATU14Button",
+                    "ATU14MaxOverlay",
+                    "T2Duo1StartCost",
+                    "T2Duo1AdditiveCost",
+                    "T2Duo1Bonus",
+                    "T2Duo1MaxLevel",
+                    "T2Duo1Fill"
+                  ],
                   [
                     "ATU4Button",
                     "ATU4MaxOverlay",
@@ -8922,6 +9170,34 @@
                 ],
                 "owner": "ArcadeUpgradeSO",
                 "ownerBlobRows": [
+                  {
+                    "additiveCost": 800,
+                    "bonus": 0.20000000298023224,
+                    "contentPathId": 1103626240,
+                    "fillPathId": 294972,
+                    "maxLevel": 10,
+                    "maxOverlayPathId": 49509,
+                    "nextRowPreviewScalars": [],
+                    "nextRowShellOffset": null,
+                    "nextRowShellRelativeOffset": null,
+                    "notes": [
+                      "The direct TokenShop owner blob row is anchored on the shell path id and currently resolves StartCost/AdditiveCost/Bonus/MaxLevel plus fill/content/overlay bindings.",
+                      "The current row data ends after the overlay path block; any repeated scalar block before the next shell belongs to the next serialized row, not the current one.",
+                      "If calculationType/finalSetValue are not present inside this row window, they must be supplied later by the runtime Upgrade instance/evaluator path rather than a hidden TokenShop row field."
+                    ],
+                    "overlayPathId": 0,
+                    "ownerComponent": {
+                      "componentPathId": 283631,
+                      "gameObjectPathId": 8768,
+                      "script": "TokenShop"
+                    },
+                    "rowDataEndRelativeOffset": 40,
+                    "serializedRuntimeFieldsPresent": false,
+                    "shellOffset": 1212,
+                    "shellPathId": 15844,
+                    "startCost": 1000,
+                    "status": "owner-blob-row-recovered"
+                  },
                   {
                     "additiveCost": 2,
                     "bonus": 1.0099999904632568,
@@ -9224,6 +9500,13 @@
                   }
                 ],
                 "ownerFieldBlocks": [
+                  [
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill"
+                  ],
                   [
                     "ModBoostStartCost",
                     "ModBoostAdditiveCost",
@@ -9580,7 +9863,7 @@
                   "contributingJobs": [
                     "process_20260423_034306",
                     "process_20260423_035430",
-                    "process_20260423_060440"
+                    "process_20260423_174033"
                   ],
                   "contributingTargets": [
                     "token-shop-atu3-cells-effect",
@@ -9589,6 +9872,7 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "contributingTraceScopes": [
@@ -9598,10 +9882,12 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "corroboratingFragmentIds": [
-                    3144,
+                    3288,
+                    3240,
                     2616,
                     2571,
                     1808,
@@ -9610,9 +9896,10 @@
                     44
                   ],
                   "fieldLevelConflicts": [],
-                  "supportingEvidenceCount": 7
+                  "supportingEvidenceCount": 8
                 },
                 "targetIds": [
+                  "token-shop-daily-tokenium-family",
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu3-chest-consumer",
@@ -9625,7 +9912,7 @@
             },
             "progression_fragment": {
               "progression:token-shop:ArcadeUpgradeSO": {
-                "assessmentSemanticKey": "target-assessment:token-shop-atu4-mod",
+                "assessmentSemanticKey": "target-assessment:token-shop-daily-tokenium-family",
                 "familyId": "token-shop",
                 "runtimeEvaluatorRecovery": {
                   "backingFields": [],
@@ -9673,7 +9960,7 @@
                   "contributingJobs": [
                     "process_20260423_034306",
                     "process_20260423_035430",
-                    "process_20260423_060440"
+                    "process_20260423_174033"
                   ],
                   "contributingTargets": [
                     "token-shop-atu3-cells-effect",
@@ -9682,6 +9969,7 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "contributingTraceScopes": [
@@ -9691,10 +9979,12 @@
                     "token-shop-atu4-mod",
                     "token-shop-atu5-mk1-title",
                     "token-shop-atu7-mk3-bridge",
+                    "token-shop-daily-tokenium-family",
                     "token-shop-family-structure"
                   ],
                   "corroboratingFragmentIds": [
-                    3160,
+                    3297,
+                    3256,
                     2632,
                     2584,
                     1819,
@@ -9702,9 +9992,9 @@
                     171,
                     55
                   ],
-                  "supportingEvidenceCount": 7
+                  "supportingEvidenceCount": 8
                 },
-                "targetId": "token-shop-atu4-mod"
+                "targetId": "token-shop-daily-tokenium-family"
               }
             },
             "reconstruction_note_fragment": {
@@ -10550,7 +10840,7 @@
                 ],
                 "targetId": "token-shop-atu3-cells-effect",
                 "traceScope": "token-shop-atu3-cells-effect",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "target_narrative_fragment": {
@@ -10575,7 +10865,7 @@
                 },
                 "targetId": "token-shop-atu3-cells-effect",
                 "traceScope": "token-shop-atu3-cells-effect",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "threshold_fragment": {
@@ -10624,6 +10914,7 @@
                   ],
                   "verdict": "keep researching"
                 },
+                "boundedNegatives": [],
                 "familyId": "token-shop",
                 "formula": {
                   "groundedConstants": {
@@ -10784,18 +11075,27 @@
                 },
                 "rowShell": {
                   "controllerBlock": [
-                    "ATU4Button",
-                    "ATU4MaxOverlay",
-                    "ATU4Content",
-                    "ATU4Overlay"
+                    "ATU13MaxOverlay",
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill",
+                    "ATU14Button",
+                    "ATU14MaxOverlay",
+                    "T2Duo1StartCost",
+                    "T2Duo1AdditiveCost",
+                    "T2Duo1Bonus",
+                    "T2Duo1MaxLevel",
+                    "T2Duo1Fill"
                   ],
                   "field": "ATU3Button",
                   "ownerFieldBlock": [
-                    "ModBoostStartCost",
-                    "ModBoostAdditiveCost",
-                    "ModBoostBonus",
-                    "ModBoostMaxLevel",
-                    "ModBoostFill"
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill"
                   ],
                   "pathId": 15810
                 },
@@ -10812,6 +11112,7 @@
                   "detachedTextCandidateCount": 0,
                   "directTextCandidateCount": 11,
                   "literalStatus": "closed",
+                  "nonBlockingSeams": [],
                   "requiredGapKinds": [
                     "exact-display-update-path",
                     "runtime-model-gap"
@@ -10850,7 +11151,7 @@
                 },
                 "targetId": "token-shop-atu3-cells-effect",
                 "traceScope": "token-shop-atu3-cells-effect",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "ui_binding_fragment": {
@@ -11750,7 +12051,7 @@
             },
             "targetId": "token-shop-atu3-cells-effect",
             "traceScope": "token-shop-atu3-cells-effect",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "executionContextSemanticKey": "target-execution-context:token-shop-atu3-cells-effect",
           "executionPlan": {
@@ -11862,7 +12163,7 @@
             },
             "targetId": "token-shop-atu3-cells-effect",
             "traceScope": "token-shop-atu3-cells-effect",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "executionPlanSemanticKey": "target-execution-plan:token-shop-atu3-cells-effect",
           "generatedAt": null,
@@ -12252,7 +12553,7 @@
               ]
             },
             "traceScope": "token-shop-atu3-cells-effect",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "graphPlanSemanticKey": "target-graph-plan:token-shop-atu3-cells-effect",
           "groundedConclusion": "The ATU3Button or 15810 cross-system trace clears one checked shell-to-action-hook-to-shared-effect chain. The row preserves direct shell adjacency to the CellBoost owner block, the checked action lane preserves BuyCellBoost, the shared title and effect-text surfaces preserve the Cells Booster (Chests) chest-effect lane, and the raw CellBoostBonus value of 1 is consistent with the surviving +1-second player-facing effect text. The remaining break is the exact typed gameplay owner or chest-reward applier that consumes that parameter.",
@@ -13317,6 +13618,7 @@
                   {
                     "field": "groundedConstants.AdditiveCost",
                     "values": [
+                      800,
                       5,
                       0.12999999523162842,
                       0.10000000149011612,
@@ -13335,6 +13637,7 @@
                   {
                     "field": "groundedConstants.MaxLevel",
                     "values": [
+                      10,
                       20,
                       5000,
                       200,
@@ -13344,6 +13647,7 @@
                   {
                     "field": "groundedConstants.StartCost",
                     "values": [
+                      1000,
                       20,
                       3,
                       1,
@@ -13353,6 +13657,36 @@
                   {
                     "field": "inferredCostModel",
                     "values": [
+                      {
+                        "displaySlots": [
+                          "CostBox",
+                          "CostText"
+                        ],
+                        "evidence": {
+                          "controllerAdditiveCostFieldCount": 1,
+                          "controllerCostExponentFieldCount": 0,
+                          "controllerStartCostFieldCount": 1,
+                          "ownerCalculationTypeOptions": [
+                            "percentage",
+                            "additive",
+                            "subtractive"
+                          ],
+                          "ownerSchemaHasCostExponent": false
+                        },
+                        "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
+                        "groundedConstants": {
+                          "AdditiveCost": 800,
+                          "StartCost": 1000
+                        },
+                        "kind": "controller-linear-step",
+                        "notes": [
+                          "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
+                          "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
+                          "This supports a linear base-cost lane for ATU/controller rows.",
+                          "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
+                        ],
+                        "status": "extracted-controller-linear"
+                      },
                       {
                         "displaySlots": [
                           "CostBox",
@@ -13526,6 +13860,15 @@
                         "notes": [
                           "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                           "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
+                          "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
+                        ],
+                        "status": "unresolved-runtime-modifiers"
+                      },
+                      {
+                        "expression": "DisplayedCost(level) = BaseCost(level) plus unresolved runtime modifiers/evaluator-side transforms",
+                        "notes": [
+                          "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
+                          "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
                           "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
                           "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
                         ],
@@ -13580,6 +13923,7 @@
                 "token-shop-atu4-mod",
                 "token-shop-atu5-mk1-title",
                 "token-shop-atu7-mk3-bridge",
+                "token-shop-daily-tokenium-family",
                 "token-shop-family-structure"
               ],
               "formula:token-shop:CellBoostStartCost:CellBoostAdditiveCost:CellBoostBonus:CellBoostMaxLevel:CellBoostFill": [
@@ -13593,6 +13937,7 @@
                 "token-shop-atu4-mod",
                 "token-shop-atu5-mk1-title",
                 "token-shop-atu7-mk3-bridge",
+                "token-shop-daily-tokenium-family",
                 "token-shop-family-structure"
               ],
               "progression:token-shop:ArcadeUpgradeSO": [
@@ -13602,6 +13947,7 @@
                 "token-shop-atu4-mod",
                 "token-shop-atu5-mk1-title",
                 "token-shop-atu7-mk3-bridge",
+                "token-shop-daily-tokenium-family",
                 "token-shop-family-structure"
               ],
               "reconstruction-note:token-shop:token-shop-atu3-cells-effect": [
@@ -13697,6 +14043,11 @@
               ],
               "token-shop-atu7-mk3-bridge": [
                 "dependency:token-shop:serialized-adjacency:target-shell:owner-field-block",
+                "formula:token-shop",
+                "owner-controller:ArcadeUpgradeSO",
+                "progression:token-shop:ArcadeUpgradeSO"
+              ],
+              "token-shop-daily-tokenium-family": [
                 "formula:token-shop",
                 "owner-controller:ArcadeUpgradeSO",
                 "progression:token-shop:ArcadeUpgradeSO"
@@ -18308,7 +18659,7 @@
             },
             "targetId": "token-shop-atu3-cells-effect",
             "traceScope": "token-shop-atu3-cells-effect",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "tokenShopReconstruction": {
             "assessment": {
@@ -18322,6 +18673,7 @@
               ],
               "verdict": "keep researching"
             },
+            "boundedNegatives": [],
             "familyId": "token-shop",
             "formula": {
               "groundedConstants": {
@@ -18482,18 +18834,27 @@
             },
             "rowShell": {
               "controllerBlock": [
-                "ATU4Button",
-                "ATU4MaxOverlay",
-                "ATU4Content",
-                "ATU4Overlay"
+                "ATU13MaxOverlay",
+                "TokenDailiesT2StartCost",
+                "TokenDailiesT2AdditiveCost",
+                "TokenDailiesT2Bonus",
+                "TokenDailiesT2MaxLevel",
+                "TokenDailiesT2Fill",
+                "ATU14Button",
+                "ATU14MaxOverlay",
+                "T2Duo1StartCost",
+                "T2Duo1AdditiveCost",
+                "T2Duo1Bonus",
+                "T2Duo1MaxLevel",
+                "T2Duo1Fill"
               ],
               "field": "ATU3Button",
               "ownerFieldBlock": [
-                "ModBoostStartCost",
-                "ModBoostAdditiveCost",
-                "ModBoostBonus",
-                "ModBoostMaxLevel",
-                "ModBoostFill"
+                "TokenDailiesT2StartCost",
+                "TokenDailiesT2AdditiveCost",
+                "TokenDailiesT2Bonus",
+                "TokenDailiesT2MaxLevel",
+                "TokenDailiesT2Fill"
               ],
               "pathId": 15810
             },
@@ -18510,6 +18871,7 @@
               "detachedTextCandidateCount": 0,
               "directTextCandidateCount": 11,
               "literalStatus": "closed",
+              "nonBlockingSeams": [],
               "requiredGapKinds": [
                 "exact-display-update-path",
                 "runtime-model-gap"
@@ -18548,7 +18910,7 @@
             },
             "targetId": "token-shop-atu3-cells-effect",
             "traceScope": "token-shop-atu3-cells-effect",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "tokenShopReconstructionSemanticKey": "token-shop-reconstruction:token-shop-atu3-cells-effect",
           "traceParams": {
@@ -18580,7 +18942,7 @@
         ],
         "traceScope": "shard-cost-su0-structure",
         "requestSignature": "42dd01b02fa06a53",
-        "builtAt": "2026-04-23T06:06:58.656012",
+        "builtAt": "2026-04-23T18:37:57.153419",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": {
@@ -18668,7 +19030,7 @@
                 },
                 "targetId": "shard-cost-su0-structure",
                 "traceScope": "shard-cost-su0-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "dependency_fragment": {
@@ -18776,7 +19138,7 @@
                 },
                 "targetId": "shard-cost-su0-structure",
                 "traceScope": "shard-cost-su0-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "family_graph_fragment": {
@@ -18829,7 +19191,7 @@
                 ],
                 "targetId": "shard-cost-su0-structure",
                 "traceScope": "shard-cost-su0-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "reconstruction_note_fragment": {
@@ -18877,7 +19239,7 @@
                 },
                 "targetId": "shard-cost-su0-structure",
                 "traceScope": "shard-cost-su0-structure",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             }
           },
@@ -18960,7 +19322,7 @@
             },
             "targetId": "shard-cost-su0-structure",
             "traceScope": "shard-cost-su0-structure",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "executionContextSemanticKey": "target-execution-context:shard-cost-su0-structure",
           "executionPlan": null,
@@ -23354,7 +23716,7 @@
             },
             "targetId": "shard-cost-su0-structure",
             "traceScope": "shard-cost-su0-structure",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "tokenShopReconstruction": null,
           "tokenShopReconstructionSemanticKey": null,
@@ -23387,7 +23749,7 @@
         ],
         "traceScope": "shard-owned-state-upgradeinfolist-population",
         "requestSignature": "9eb67ca7838c2c50",
-        "builtAt": "2026-04-23T06:06:58.767527",
+        "builtAt": "2026-04-23T18:37:57.266835",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": {
@@ -23500,7 +23862,7 @@
                 },
                 "targetId": "shard-owned-state-upgradeinfolist-population",
                 "traceScope": "shard-owned-state-upgradeinfolist-population",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "bridge_comparison_fragment": {
@@ -23628,7 +23990,7 @@
                 },
                 "targetId": "shard-owned-state-upgradeinfolist-population",
                 "traceScope": "shard-owned-state-upgradeinfolist-population",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "dependency_fragment": {
@@ -23716,7 +24078,7 @@
                 },
                 "targetId": "shard-owned-state-upgradeinfolist-population",
                 "traceScope": "shard-owned-state-upgradeinfolist-population",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "family_graph_fragment": {
@@ -23777,7 +24139,7 @@
                 ],
                 "targetId": "shard-owned-state-upgradeinfolist-population",
                 "traceScope": "shard-owned-state-upgradeinfolist-population",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "reconstruction_note_fragment": {
@@ -23880,7 +24242,7 @@
                   ],
                   "supportingEvidenceCount": 5
                 },
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "target_narrative_fragment": {
@@ -23906,7 +24268,7 @@
                 },
                 "targetId": "shard-owned-state-upgradeinfolist-population",
                 "traceScope": "shard-owned-state-upgradeinfolist-population",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             }
           },
@@ -23988,7 +24350,7 @@
             },
             "targetId": "shard-owned-state-upgradeinfolist-population",
             "traceScope": "shard-owned-state-upgradeinfolist-population",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "executionContextSemanticKey": "target-execution-context:shard-owned-state-upgradeinfolist-population",
           "executionPlan": null,
@@ -89110,7 +89472,7 @@
             },
             "targetId": "shard-owned-state-upgradeinfolist-population",
             "traceScope": "shard-owned-state-upgradeinfolist-population",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "tokenShopReconstruction": null,
           "tokenShopReconstructionSemanticKey": null,
@@ -89149,7 +89511,7 @@
         ],
         "traceScope": "multiverse-market-save-owner-boundary",
         "requestSignature": "01e596a425c49ecf",
-        "builtAt": "2026-04-23T06:06:58.651091",
+        "builtAt": "2026-04-23T18:37:57.148512",
         "reducerVersion": "target-bundle-v1",
         "data": {
           "assetSet": {
@@ -89249,7 +89611,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "bridge_comparison_fragment": {
@@ -89359,7 +89721,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "dependency_fragment": {
@@ -89487,7 +89849,7 @@
                 },
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "family_graph_fragment": {
@@ -89545,7 +89907,7 @@
                 ],
                 "targetId": "multiverse-market-save-owner-boundary",
                 "traceScope": "multiverse-market-save-owner-boundary",
-                "updatedAt": "2026-04-23T06:06:58"
+                "updatedAt": "2026-04-23T18:37:56"
               }
             },
             "reconstruction_note_fragment": {
@@ -89656,7 +90018,7 @@
             },
             "targetId": "multiverse-market-save-owner-boundary",
             "traceScope": "multiverse-market-save-owner-boundary",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "executionContextSemanticKey": "target-execution-context:multiverse-market-save-owner-boundary",
           "executionPlan": null,
@@ -95097,7 +95459,7 @@
             },
             "targetId": "multiverse-market-save-owner-boundary",
             "traceScope": "multiverse-market-save-owner-boundary",
-            "updatedAt": "2026-04-23T06:06:58"
+            "updatedAt": "2026-04-23T18:37:56"
           },
           "tokenShopReconstruction": null,
           "tokenShopReconstructionSemanticKey": null,
@@ -95145,6 +95507,7 @@
         "token-shop-atu4-mod",
         "token-shop-atu5-mk1-title",
         "token-shop-atu7-mk3-bridge",
+        "token-shop-daily-tokenium-family",
         "token-shop-family-structure"
       ],
       "familyIds": [
@@ -95209,6 +95572,12 @@
           "label": "TokenShop ATU4 runtime cost pass"
         },
         {
+          "traceScope": "token-shop-atu4-mod",
+          "targetId": "token-shop-atu4-mod",
+          "familyId": "token-shop",
+          "label": "TokenShop ATU4 runtime cost pass"
+        },
+        {
           "traceScope": "token-shop-atu5-mk1-title",
           "targetId": "token-shop-atu5-mk1-title",
           "familyId": "",
@@ -95225,6 +95594,12 @@
           "targetId": "token-shop-atu7-mk3-bridge",
           "familyId": "token-shop",
           "label": "TokenShop ATU7 MK3 bridge pass"
+        },
+        {
+          "traceScope": "token-shop-daily-tokenium-family",
+          "targetId": "token-shop-daily-tokenium-family",
+          "familyId": "token-shop",
+          "label": "token-shop-daily-tokenium-family"
         },
         {
           "traceScope": "token-shop-family-structure",
@@ -95254,6 +95629,7 @@
         "token-shop-atu4-mod",
         "token-shop-atu5-mk1-title",
         "token-shop-atu7-mk3-bridge",
+        "token-shop-daily-tokenium-family",
         "token-shop-family-structure"
       ],
       "familyIds": [
@@ -95318,6 +95694,12 @@
           "label": "TokenShop ATU4 runtime cost pass"
         },
         {
+          "traceScope": "token-shop-atu4-mod",
+          "targetId": "token-shop-atu4-mod",
+          "familyId": "token-shop",
+          "label": "TokenShop ATU4 runtime cost pass"
+        },
+        {
           "traceScope": "token-shop-atu5-mk1-title",
           "targetId": "token-shop-atu5-mk1-title",
           "familyId": "",
@@ -95336,6 +95718,12 @@
           "label": "TokenShop ATU7 MK3 bridge pass"
         },
         {
+          "traceScope": "token-shop-daily-tokenium-family",
+          "targetId": "token-shop-daily-tokenium-family",
+          "familyId": "token-shop",
+          "label": "token-shop-daily-tokenium-family"
+        },
+        {
           "traceScope": "token-shop-family-structure",
           "targetId": "token-shop-family-structure",
           "familyId": "token-shop",
@@ -95352,7 +95740,7 @@
       ],
       "traceScope": "token-shop-family-structure",
       "requestSignature": "bc8bef98dea5ad51",
-      "builtAt": "2026-04-23T06:06:59.090926",
+      "builtAt": "2026-04-23T18:37:57.631126",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": {
@@ -95418,7 +95806,7 @@
           },
           "targetId": "token-shop-family-structure",
           "traceScope": "token-shop-family-structure",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:57"
         },
         "bridgePolicySemanticKey": "target-bridge-policy:token-shop-family-structure",
         "canonicalSemanticViews": {
@@ -95466,7 +95854,7 @@
               },
               "targetId": "token-shop-family-structure",
               "traceScope": "token-shop-family-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:57"
             }
           },
           "bridge_policy_fragment": {
@@ -95495,7 +95883,7 @@
               },
               "targetId": "token-shop-family-structure",
               "traceScope": "token-shop-family-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:57"
             }
           },
           "dependency_fragment": {
@@ -95602,7 +95990,7 @@
               },
               "targetId": "token-shop-family-structure",
               "traceScope": "token-shop-family-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:57"
             }
           },
           "execution_plan_fragment": {
@@ -95718,7 +96106,7 @@
               },
               "targetId": "token-shop-family-structure",
               "traceScope": "token-shop-family-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:57"
             }
           },
           "family_graph_fragment": {
@@ -95744,18 +96132,27 @@
               "rowShells": [
                 {
                   "controllerBlock": [
-                    "ATU4Button",
-                    "ATU4MaxOverlay",
-                    "ATU4Content",
-                    "ATU4Overlay"
+                    "ATU13MaxOverlay",
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill",
+                    "ATU14Button",
+                    "ATU14MaxOverlay",
+                    "T2Duo1StartCost",
+                    "T2Duo1AdditiveCost",
+                    "T2Duo1Bonus",
+                    "T2Duo1MaxLevel",
+                    "T2Duo1Fill"
                   ],
                   "field": "ATU1Button",
                   "ownerFieldBlock": [
-                    "ModBoostStartCost",
-                    "ModBoostAdditiveCost",
-                    "ModBoostBonus",
-                    "ModBoostMaxLevel",
-                    "ModBoostFill"
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill"
                   ],
                   "pathId": 15839
                 }
@@ -95799,17 +96196,17 @@
               ],
               "targetId": "token-shop-family-structure",
               "traceScope": "token-shop-family-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:57"
             }
           },
           "formula_fragment": {
             "formula:token-shop": {
               "familyId": "token-shop",
               "groundedConstants": {
-                "AdditiveCost": 5,
+                "AdditiveCost": 800,
                 "Bonus": 0.20000000298023224,
-                "MaxLevel": 20,
-                "StartCost": 20
+                "MaxLevel": 10,
+                "StartCost": 1000
               },
               "inferredCostModel": {
                 "displaySlots": [
@@ -95825,20 +96222,19 @@
                     "additive",
                     "subtractive"
                   ],
-                  "ownerSchemaHasCostExponent": true
+                  "ownerSchemaHasCostExponent": false
                 },
                 "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
                 "groundedConstants": {
-                  "AdditiveCost": 5,
-                  "StartCost": 20
+                  "AdditiveCost": 800,
+                  "StartCost": 1000
                 },
                 "kind": "controller-linear-step",
                 "notes": [
                   "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
                   "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
                   "This supports a linear base-cost lane for ATU/controller rows.",
-                  "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane.",
-                  "ArcadeUpgradeSO still exposes CostExponent in the owner schema, so exponent-based or transformed runtime pricing remains a separate unresolved modifier lane."
+                  "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
                 ],
                 "status": "extracted-controller-linear"
               },
@@ -95848,8 +96244,7 @@
                 "notes": [
                   "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                   "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
-                  "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
-                  "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
+                  "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
                 ],
                 "status": "unresolved-runtime-modifiers"
               },
@@ -95863,6 +96258,7 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "contributingTraceScopes": [
@@ -95872,9 +96268,11 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "corroboratingFragmentIds": [
+                  3289,
                   1809,
                   161,
                   343,
@@ -95887,6 +96285,7 @@
                   {
                     "field": "groundedConstants.AdditiveCost",
                     "values": [
+                      800,
                       5,
                       0.12999999523162842,
                       0.10000000149011612,
@@ -95905,6 +96304,7 @@
                   {
                     "field": "groundedConstants.MaxLevel",
                     "values": [
+                      10,
                       20,
                       5000,
                       200,
@@ -95914,6 +96314,7 @@
                   {
                     "field": "groundedConstants.StartCost",
                     "values": [
+                      1000,
                       20,
                       3,
                       1,
@@ -95923,6 +96324,36 @@
                   {
                     "field": "inferredCostModel",
                     "values": [
+                      {
+                        "displaySlots": [
+                          "CostBox",
+                          "CostText"
+                        ],
+                        "evidence": {
+                          "controllerAdditiveCostFieldCount": 1,
+                          "controllerCostExponentFieldCount": 0,
+                          "controllerStartCostFieldCount": 1,
+                          "ownerCalculationTypeOptions": [
+                            "percentage",
+                            "additive",
+                            "subtractive"
+                          ],
+                          "ownerSchemaHasCostExponent": false
+                        },
+                        "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
+                        "groundedConstants": {
+                          "AdditiveCost": 800,
+                          "StartCost": 1000
+                        },
+                        "kind": "controller-linear-step",
+                        "notes": [
+                          "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
+                          "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
+                          "This supports a linear base-cost lane for ATU/controller rows.",
+                          "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
+                        ],
+                        "status": "extracted-controller-linear"
+                      },
                       {
                         "displaySlots": [
                           "CostBox",
@@ -96096,6 +96527,15 @@
                         "notes": [
                           "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                           "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
+                          "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
+                        ],
+                        "status": "unresolved-runtime-modifiers"
+                      },
+                      {
+                        "expression": "DisplayedCost(level) = BaseCost(level) plus unresolved runtime modifiers/evaluator-side transforms",
+                        "notes": [
+                          "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
+                          "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
                           "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
                           "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
                         ],
@@ -96115,7 +96555,7 @@
                     ]
                   }
                 ],
-                "supportingEvidenceCount": 7
+                "supportingEvidenceCount": 8
               }
             }
           },
@@ -96646,12 +97086,27 @@
                 ]
               },
               "traceScope": "token-shop-family-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:57"
             }
           },
           "owner_controller_fragment": {
             "owner-controller:ArcadeUpgradeSO": {
               "controllerBlocks": [
+                [
+                  "ATU13MaxOverlay",
+                  "TokenDailiesT2StartCost",
+                  "TokenDailiesT2AdditiveCost",
+                  "TokenDailiesT2Bonus",
+                  "TokenDailiesT2MaxLevel",
+                  "TokenDailiesT2Fill",
+                  "ATU14Button",
+                  "ATU14MaxOverlay",
+                  "T2Duo1StartCost",
+                  "T2Duo1AdditiveCost",
+                  "T2Duo1Bonus",
+                  "T2Duo1MaxLevel",
+                  "T2Duo1Fill"
+                ],
                 [
                   "ATU4Button",
                   "ATU4MaxOverlay",
@@ -96676,6 +97131,34 @@
               ],
               "owner": "ArcadeUpgradeSO",
               "ownerBlobRows": [
+                {
+                  "additiveCost": 800,
+                  "bonus": 0.20000000298023224,
+                  "contentPathId": 1103626240,
+                  "fillPathId": 294972,
+                  "maxLevel": 10,
+                  "maxOverlayPathId": 49509,
+                  "nextRowPreviewScalars": [],
+                  "nextRowShellOffset": null,
+                  "nextRowShellRelativeOffset": null,
+                  "notes": [
+                    "The direct TokenShop owner blob row is anchored on the shell path id and currently resolves StartCost/AdditiveCost/Bonus/MaxLevel plus fill/content/overlay bindings.",
+                    "The current row data ends after the overlay path block; any repeated scalar block before the next shell belongs to the next serialized row, not the current one.",
+                    "If calculationType/finalSetValue are not present inside this row window, they must be supplied later by the runtime Upgrade instance/evaluator path rather than a hidden TokenShop row field."
+                  ],
+                  "overlayPathId": 0,
+                  "ownerComponent": {
+                    "componentPathId": 283631,
+                    "gameObjectPathId": 8768,
+                    "script": "TokenShop"
+                  },
+                  "rowDataEndRelativeOffset": 40,
+                  "serializedRuntimeFieldsPresent": false,
+                  "shellOffset": 1212,
+                  "shellPathId": 15844,
+                  "startCost": 1000,
+                  "status": "owner-blob-row-recovered"
+                },
                 {
                   "additiveCost": 2,
                   "bonus": 1.0099999904632568,
@@ -96978,6 +97461,13 @@
                 }
               ],
               "ownerFieldBlocks": [
+                [
+                  "TokenDailiesT2StartCost",
+                  "TokenDailiesT2AdditiveCost",
+                  "TokenDailiesT2Bonus",
+                  "TokenDailiesT2MaxLevel",
+                  "TokenDailiesT2Fill"
+                ],
                 [
                   "ModBoostStartCost",
                   "ModBoostAdditiveCost",
@@ -97334,7 +97824,7 @@
                 "contributingJobs": [
                   "process_20260423_034306",
                   "process_20260423_035430",
-                  "process_20260423_060440"
+                  "process_20260423_174033"
                 ],
                 "contributingTargets": [
                   "token-shop-atu3-cells-effect",
@@ -97343,6 +97833,7 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "contributingTraceScopes": [
@@ -97352,10 +97843,12 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "corroboratingFragmentIds": [
-                  3144,
+                  3288,
+                  3240,
                   2616,
                   2571,
                   1808,
@@ -97364,9 +97857,10 @@
                   44
                 ],
                 "fieldLevelConflicts": [],
-                "supportingEvidenceCount": 7
+                "supportingEvidenceCount": 8
               },
               "targetIds": [
+                "token-shop-daily-tokenium-family",
                 "token-shop-atu4-mod",
                 "token-shop-atu5-mk1-title",
                 "token-shop-atu3-chest-consumer",
@@ -97379,7 +97873,7 @@
           },
           "progression_fragment": {
             "progression:token-shop:ArcadeUpgradeSO": {
-              "assessmentSemanticKey": "target-assessment:token-shop-atu4-mod",
+              "assessmentSemanticKey": "target-assessment:token-shop-daily-tokenium-family",
               "familyId": "token-shop",
               "runtimeEvaluatorRecovery": {
                 "backingFields": [],
@@ -97427,7 +97921,7 @@
                 "contributingJobs": [
                   "process_20260423_034306",
                   "process_20260423_035430",
-                  "process_20260423_060440"
+                  "process_20260423_174033"
                 ],
                 "contributingTargets": [
                   "token-shop-atu3-cells-effect",
@@ -97436,6 +97930,7 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "contributingTraceScopes": [
@@ -97445,10 +97940,12 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "corroboratingFragmentIds": [
-                  3160,
+                  3297,
+                  3256,
                   2632,
                   2584,
                   1819,
@@ -97456,9 +97953,9 @@
                   171,
                   55
                 ],
-                "supportingEvidenceCount": 7
+                "supportingEvidenceCount": 8
               },
-              "targetId": "token-shop-atu4-mod"
+              "targetId": "token-shop-daily-tokenium-family"
             }
           },
           "reconstruction_note_fragment": {
@@ -97717,7 +98214,7 @@
               ],
               "targetId": "token-shop-family-structure",
               "traceScope": "token-shop-family-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:57"
             }
           },
           "target_narrative_fragment": {
@@ -97742,7 +98239,7 @@
               },
               "targetId": "token-shop-family-structure",
               "traceScope": "token-shop-family-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:57"
             }
           },
           "threshold_fragment": {
@@ -97791,6 +98288,7 @@
                 ],
                 "verdict": "quarantine"
               },
+              "boundedNegatives": [],
               "familyId": "token-shop",
               "formula": {
                 "groundedConstants": {
@@ -97947,18 +98445,27 @@
               },
               "rowShell": {
                 "controllerBlock": [
-                  "ATU4Button",
-                  "ATU4MaxOverlay",
-                  "ATU4Content",
-                  "ATU4Overlay"
+                  "ATU13MaxOverlay",
+                  "TokenDailiesT2StartCost",
+                  "TokenDailiesT2AdditiveCost",
+                  "TokenDailiesT2Bonus",
+                  "TokenDailiesT2MaxLevel",
+                  "TokenDailiesT2Fill",
+                  "ATU14Button",
+                  "ATU14MaxOverlay",
+                  "T2Duo1StartCost",
+                  "T2Duo1AdditiveCost",
+                  "T2Duo1Bonus",
+                  "T2Duo1MaxLevel",
+                  "T2Duo1Fill"
                 ],
                 "field": "ATU1Button",
                 "ownerFieldBlock": [
-                  "ModBoostStartCost",
-                  "ModBoostAdditiveCost",
-                  "ModBoostBonus",
-                  "ModBoostMaxLevel",
-                  "ModBoostFill"
+                  "TokenDailiesT2StartCost",
+                  "TokenDailiesT2AdditiveCost",
+                  "TokenDailiesT2Bonus",
+                  "TokenDailiesT2MaxLevel",
+                  "TokenDailiesT2Fill"
                 ],
                 "pathId": 15839
               },
@@ -97973,6 +98480,7 @@
                 "detachedTextCandidateCount": 0,
                 "directTextCandidateCount": 12,
                 "literalStatus": "closed",
+                "nonBlockingSeams": [],
                 "requiredGapKinds": [
                   "exact-display-update-path",
                   "runtime-model-gap"
@@ -98011,7 +98519,7 @@
               },
               "targetId": "token-shop-family-structure",
               "traceScope": "token-shop-family-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:57"
             }
           },
           "ui_binding_fragment": {
@@ -98912,7 +99420,7 @@
           },
           "targetId": "token-shop-family-structure",
           "traceScope": "token-shop-family-structure",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:57"
         },
         "executionContextSemanticKey": "target-execution-context:token-shop-family-structure",
         "executionPlan": {
@@ -99027,7 +99535,7 @@
           },
           "targetId": "token-shop-family-structure",
           "traceScope": "token-shop-family-structure",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:57"
         },
         "executionPlanSemanticKey": "target-execution-plan:token-shop-family-structure",
         "generatedAt": null,
@@ -99557,7 +100065,7 @@
             ]
           },
           "traceScope": "token-shop-family-structure",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:57"
         },
         "graphPlanSemanticKey": "target-graph-plan:token-shop-family-structure",
         "groundedConclusion": "The TokenShop family audit is structurally informative but still quarantined. The repo repeatedly preserves shell-side ATU neighborhoods plus row-family proxy hooks and prefab identities on the solved subset, but repeated title-localization gaps remain for ATU1, ATU2, ATU4, ATU5, and ATU7, while ATU3 and the late ATU24-ATU28 block still fail the exact identity join entirely. ATU6 remains the strongest standout row neighborhood.",
@@ -99819,6 +100327,7 @@
                 {
                   "field": "groundedConstants.AdditiveCost",
                   "values": [
+                    800,
                     5,
                     0.12999999523162842,
                     0.10000000149011612,
@@ -99837,6 +100346,7 @@
                 {
                   "field": "groundedConstants.MaxLevel",
                   "values": [
+                    10,
                     20,
                     5000,
                     200,
@@ -99846,6 +100356,7 @@
                 {
                   "field": "groundedConstants.StartCost",
                   "values": [
+                    1000,
                     20,
                     3,
                     1,
@@ -99855,6 +100366,36 @@
                 {
                   "field": "inferredCostModel",
                   "values": [
+                    {
+                      "displaySlots": [
+                        "CostBox",
+                        "CostText"
+                      ],
+                      "evidence": {
+                        "controllerAdditiveCostFieldCount": 1,
+                        "controllerCostExponentFieldCount": 0,
+                        "controllerStartCostFieldCount": 1,
+                        "ownerCalculationTypeOptions": [
+                          "percentage",
+                          "additive",
+                          "subtractive"
+                        ],
+                        "ownerSchemaHasCostExponent": false
+                      },
+                      "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
+                      "groundedConstants": {
+                        "AdditiveCost": 800,
+                        "StartCost": 1000
+                      },
+                      "kind": "controller-linear-step",
+                      "notes": [
+                        "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
+                        "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
+                        "This supports a linear base-cost lane for ATU/controller rows.",
+                        "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
+                      ],
+                      "status": "extracted-controller-linear"
+                    },
                     {
                       "displaySlots": [
                         "CostBox",
@@ -100028,6 +100569,15 @@
                       "notes": [
                         "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                         "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
+                        "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
+                      ],
+                      "status": "unresolved-runtime-modifiers"
+                    },
+                    {
+                      "expression": "DisplayedCost(level) = BaseCost(level) plus unresolved runtime modifiers/evaluator-side transforms",
+                      "notes": [
+                        "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
+                        "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
                         "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
                         "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
                       ],
@@ -100080,6 +100630,7 @@
               "token-shop-atu4-mod",
               "token-shop-atu5-mk1-title",
               "token-shop-atu7-mk3-bridge",
+              "token-shop-daily-tokenium-family",
               "token-shop-family-structure"
             ],
             "owner-controller:ArcadeUpgradeSO": [
@@ -100089,6 +100640,7 @@
               "token-shop-atu4-mod",
               "token-shop-atu5-mk1-title",
               "token-shop-atu7-mk3-bridge",
+              "token-shop-daily-tokenium-family",
               "token-shop-family-structure"
             ],
             "progression:token-shop:ArcadeUpgradeSO": [
@@ -100098,6 +100650,7 @@
               "token-shop-atu4-mod",
               "token-shop-atu5-mk1-title",
               "token-shop-atu7-mk3-bridge",
+              "token-shop-daily-tokenium-family",
               "token-shop-family-structure"
             ],
             "reconstruction-note:token-shop:token-shop-family-structure": [
@@ -100170,6 +100723,11 @@
               "progression:token-shop:ArcadeUpgradeSO"
             ],
             "token-shop-atu7-mk3-bridge": [
+              "formula:token-shop",
+              "owner-controller:ArcadeUpgradeSO",
+              "progression:token-shop:ArcadeUpgradeSO"
+            ],
+            "token-shop-daily-tokenium-family": [
               "formula:token-shop",
               "owner-controller:ArcadeUpgradeSO",
               "progression:token-shop:ArcadeUpgradeSO"
@@ -102662,7 +103220,7 @@
           },
           "targetId": "token-shop-family-structure",
           "traceScope": "token-shop-family-structure",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:57"
         },
         "tokenShopReconstruction": {
           "assessment": {
@@ -102676,6 +103234,7 @@
             ],
             "verdict": "quarantine"
           },
+          "boundedNegatives": [],
           "familyId": "token-shop",
           "formula": {
             "groundedConstants": {
@@ -102832,18 +103391,27 @@
           },
           "rowShell": {
             "controllerBlock": [
-              "ATU4Button",
-              "ATU4MaxOverlay",
-              "ATU4Content",
-              "ATU4Overlay"
+              "ATU13MaxOverlay",
+              "TokenDailiesT2StartCost",
+              "TokenDailiesT2AdditiveCost",
+              "TokenDailiesT2Bonus",
+              "TokenDailiesT2MaxLevel",
+              "TokenDailiesT2Fill",
+              "ATU14Button",
+              "ATU14MaxOverlay",
+              "T2Duo1StartCost",
+              "T2Duo1AdditiveCost",
+              "T2Duo1Bonus",
+              "T2Duo1MaxLevel",
+              "T2Duo1Fill"
             ],
             "field": "ATU1Button",
             "ownerFieldBlock": [
-              "ModBoostStartCost",
-              "ModBoostAdditiveCost",
-              "ModBoostBonus",
-              "ModBoostMaxLevel",
-              "ModBoostFill"
+              "TokenDailiesT2StartCost",
+              "TokenDailiesT2AdditiveCost",
+              "TokenDailiesT2Bonus",
+              "TokenDailiesT2MaxLevel",
+              "TokenDailiesT2Fill"
             ],
             "pathId": 15839
           },
@@ -102858,6 +103426,7 @@
             "detachedTextCandidateCount": 0,
             "directTextCandidateCount": 12,
             "literalStatus": "closed",
+            "nonBlockingSeams": [],
             "requiredGapKinds": [
               "exact-display-update-path",
               "runtime-model-gap"
@@ -102896,7 +103465,7 @@
           },
           "targetId": "token-shop-family-structure",
           "traceScope": "token-shop-family-structure",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:57"
         },
         "tokenShopReconstructionSemanticKey": "token-shop-reconstruction:token-shop-family-structure",
         "traceParams": {
@@ -102928,7 +103497,7 @@
       ],
       "traceScope": "token-shop-atu3-cells-effect",
       "requestSignature": "05e55cd08cfbdd8d",
-      "builtAt": "2026-04-23T06:06:58.803380",
+      "builtAt": "2026-04-23T18:37:57.303973",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": {
@@ -102994,7 +103563,7 @@
           },
           "targetId": "token-shop-atu3-cells-effect",
           "traceScope": "token-shop-atu3-cells-effect",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "bridgePolicySemanticKey": "target-bridge-policy:token-shop-atu3-cells-effect",
         "canonicalSemanticViews": {
@@ -103042,7 +103611,7 @@
               },
               "targetId": "token-shop-atu3-cells-effect",
               "traceScope": "token-shop-atu3-cells-effect",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "bridge_policy_fragment": {
@@ -103071,7 +103640,7 @@
               },
               "targetId": "token-shop-atu3-cells-effect",
               "traceScope": "token-shop-atu3-cells-effect",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "dependency_fragment": {
@@ -103195,7 +103764,7 @@
               },
               "targetId": "token-shop-atu3-cells-effect",
               "traceScope": "token-shop-atu3-cells-effect",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "execution_plan_fragment": {
@@ -103308,7 +103877,7 @@
               },
               "targetId": "token-shop-atu3-cells-effect",
               "traceScope": "token-shop-atu3-cells-effect",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "family_graph_fragment": {
@@ -103334,18 +103903,27 @@
               "rowShells": [
                 {
                   "controllerBlock": [
-                    "ATU4Button",
-                    "ATU4MaxOverlay",
-                    "ATU4Content",
-                    "ATU4Overlay"
+                    "ATU13MaxOverlay",
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill",
+                    "ATU14Button",
+                    "ATU14MaxOverlay",
+                    "T2Duo1StartCost",
+                    "T2Duo1AdditiveCost",
+                    "T2Duo1Bonus",
+                    "T2Duo1MaxLevel",
+                    "T2Duo1Fill"
                   ],
                   "field": "ATU1Button",
                   "ownerFieldBlock": [
-                    "ModBoostStartCost",
-                    "ModBoostAdditiveCost",
-                    "ModBoostBonus",
-                    "ModBoostMaxLevel",
-                    "ModBoostFill"
+                    "TokenDailiesT2StartCost",
+                    "TokenDailiesT2AdditiveCost",
+                    "TokenDailiesT2Bonus",
+                    "TokenDailiesT2MaxLevel",
+                    "TokenDailiesT2Fill"
                   ],
                   "pathId": 15839
                 }
@@ -103389,17 +103967,17 @@
               ],
               "targetId": "token-shop-family-structure",
               "traceScope": "token-shop-family-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:57"
             }
           },
           "formula_fragment": {
             "formula:token-shop": {
               "familyId": "token-shop",
               "groundedConstants": {
-                "AdditiveCost": 5,
+                "AdditiveCost": 800,
                 "Bonus": 0.20000000298023224,
-                "MaxLevel": 20,
-                "StartCost": 20
+                "MaxLevel": 10,
+                "StartCost": 1000
               },
               "inferredCostModel": {
                 "displaySlots": [
@@ -103415,20 +103993,19 @@
                     "additive",
                     "subtractive"
                   ],
-                  "ownerSchemaHasCostExponent": true
+                  "ownerSchemaHasCostExponent": false
                 },
                 "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
                 "groundedConstants": {
-                  "AdditiveCost": 5,
-                  "StartCost": 20
+                  "AdditiveCost": 800,
+                  "StartCost": 1000
                 },
                 "kind": "controller-linear-step",
                 "notes": [
                   "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
                   "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
                   "This supports a linear base-cost lane for ATU/controller rows.",
-                  "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane.",
-                  "ArcadeUpgradeSO still exposes CostExponent in the owner schema, so exponent-based or transformed runtime pricing remains a separate unresolved modifier lane."
+                  "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
                 ],
                 "status": "extracted-controller-linear"
               },
@@ -103438,8 +104015,7 @@
                 "notes": [
                   "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                   "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
-                  "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
-                  "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
+                  "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
                 ],
                 "status": "unresolved-runtime-modifiers"
               },
@@ -103453,6 +104029,7 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "contributingTraceScopes": [
@@ -103462,9 +104039,11 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "corroboratingFragmentIds": [
+                  3289,
                   1809,
                   161,
                   343,
@@ -103477,6 +104056,7 @@
                   {
                     "field": "groundedConstants.AdditiveCost",
                     "values": [
+                      800,
                       5,
                       0.12999999523162842,
                       0.10000000149011612,
@@ -103495,6 +104075,7 @@
                   {
                     "field": "groundedConstants.MaxLevel",
                     "values": [
+                      10,
                       20,
                       5000,
                       200,
@@ -103504,6 +104085,7 @@
                   {
                     "field": "groundedConstants.StartCost",
                     "values": [
+                      1000,
                       20,
                       3,
                       1,
@@ -103513,6 +104095,36 @@
                   {
                     "field": "inferredCostModel",
                     "values": [
+                      {
+                        "displaySlots": [
+                          "CostBox",
+                          "CostText"
+                        ],
+                        "evidence": {
+                          "controllerAdditiveCostFieldCount": 1,
+                          "controllerCostExponentFieldCount": 0,
+                          "controllerStartCostFieldCount": 1,
+                          "ownerCalculationTypeOptions": [
+                            "percentage",
+                            "additive",
+                            "subtractive"
+                          ],
+                          "ownerSchemaHasCostExponent": false
+                        },
+                        "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
+                        "groundedConstants": {
+                          "AdditiveCost": 800,
+                          "StartCost": 1000
+                        },
+                        "kind": "controller-linear-step",
+                        "notes": [
+                          "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
+                          "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
+                          "This supports a linear base-cost lane for ATU/controller rows.",
+                          "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
+                        ],
+                        "status": "extracted-controller-linear"
+                      },
                       {
                         "displaySlots": [
                           "CostBox",
@@ -103686,6 +104298,15 @@
                         "notes": [
                           "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                           "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
+                          "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
+                        ],
+                        "status": "unresolved-runtime-modifiers"
+                      },
+                      {
+                        "expression": "DisplayedCost(level) = BaseCost(level) plus unresolved runtime modifiers/evaluator-side transforms",
+                        "notes": [
+                          "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
+                          "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
                           "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
                           "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
                         ],
@@ -103705,7 +104326,7 @@
                     ]
                   }
                 ],
-                "supportingEvidenceCount": 7
+                "supportingEvidenceCount": 8
               }
             }
           },
@@ -104096,12 +104717,27 @@
                 ]
               },
               "traceScope": "token-shop-atu3-cells-effect",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "owner_controller_fragment": {
             "owner-controller:ArcadeUpgradeSO": {
               "controllerBlocks": [
+                [
+                  "ATU13MaxOverlay",
+                  "TokenDailiesT2StartCost",
+                  "TokenDailiesT2AdditiveCost",
+                  "TokenDailiesT2Bonus",
+                  "TokenDailiesT2MaxLevel",
+                  "TokenDailiesT2Fill",
+                  "ATU14Button",
+                  "ATU14MaxOverlay",
+                  "T2Duo1StartCost",
+                  "T2Duo1AdditiveCost",
+                  "T2Duo1Bonus",
+                  "T2Duo1MaxLevel",
+                  "T2Duo1Fill"
+                ],
                 [
                   "ATU4Button",
                   "ATU4MaxOverlay",
@@ -104126,6 +104762,34 @@
               ],
               "owner": "ArcadeUpgradeSO",
               "ownerBlobRows": [
+                {
+                  "additiveCost": 800,
+                  "bonus": 0.20000000298023224,
+                  "contentPathId": 1103626240,
+                  "fillPathId": 294972,
+                  "maxLevel": 10,
+                  "maxOverlayPathId": 49509,
+                  "nextRowPreviewScalars": [],
+                  "nextRowShellOffset": null,
+                  "nextRowShellRelativeOffset": null,
+                  "notes": [
+                    "The direct TokenShop owner blob row is anchored on the shell path id and currently resolves StartCost/AdditiveCost/Bonus/MaxLevel plus fill/content/overlay bindings.",
+                    "The current row data ends after the overlay path block; any repeated scalar block before the next shell belongs to the next serialized row, not the current one.",
+                    "If calculationType/finalSetValue are not present inside this row window, they must be supplied later by the runtime Upgrade instance/evaluator path rather than a hidden TokenShop row field."
+                  ],
+                  "overlayPathId": 0,
+                  "ownerComponent": {
+                    "componentPathId": 283631,
+                    "gameObjectPathId": 8768,
+                    "script": "TokenShop"
+                  },
+                  "rowDataEndRelativeOffset": 40,
+                  "serializedRuntimeFieldsPresent": false,
+                  "shellOffset": 1212,
+                  "shellPathId": 15844,
+                  "startCost": 1000,
+                  "status": "owner-blob-row-recovered"
+                },
                 {
                   "additiveCost": 2,
                   "bonus": 1.0099999904632568,
@@ -104428,6 +105092,13 @@
                 }
               ],
               "ownerFieldBlocks": [
+                [
+                  "TokenDailiesT2StartCost",
+                  "TokenDailiesT2AdditiveCost",
+                  "TokenDailiesT2Bonus",
+                  "TokenDailiesT2MaxLevel",
+                  "TokenDailiesT2Fill"
+                ],
                 [
                   "ModBoostStartCost",
                   "ModBoostAdditiveCost",
@@ -104784,7 +105455,7 @@
                 "contributingJobs": [
                   "process_20260423_034306",
                   "process_20260423_035430",
-                  "process_20260423_060440"
+                  "process_20260423_174033"
                 ],
                 "contributingTargets": [
                   "token-shop-atu3-cells-effect",
@@ -104793,6 +105464,7 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "contributingTraceScopes": [
@@ -104802,10 +105474,12 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "corroboratingFragmentIds": [
-                  3144,
+                  3288,
+                  3240,
                   2616,
                   2571,
                   1808,
@@ -104814,9 +105488,10 @@
                   44
                 ],
                 "fieldLevelConflicts": [],
-                "supportingEvidenceCount": 7
+                "supportingEvidenceCount": 8
               },
               "targetIds": [
+                "token-shop-daily-tokenium-family",
                 "token-shop-atu4-mod",
                 "token-shop-atu5-mk1-title",
                 "token-shop-atu3-chest-consumer",
@@ -104829,7 +105504,7 @@
           },
           "progression_fragment": {
             "progression:token-shop:ArcadeUpgradeSO": {
-              "assessmentSemanticKey": "target-assessment:token-shop-atu4-mod",
+              "assessmentSemanticKey": "target-assessment:token-shop-daily-tokenium-family",
               "familyId": "token-shop",
               "runtimeEvaluatorRecovery": {
                 "backingFields": [],
@@ -104877,7 +105552,7 @@
                 "contributingJobs": [
                   "process_20260423_034306",
                   "process_20260423_035430",
-                  "process_20260423_060440"
+                  "process_20260423_174033"
                 ],
                 "contributingTargets": [
                   "token-shop-atu3-cells-effect",
@@ -104886,6 +105561,7 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "contributingTraceScopes": [
@@ -104895,10 +105571,12 @@
                   "token-shop-atu4-mod",
                   "token-shop-atu5-mk1-title",
                   "token-shop-atu7-mk3-bridge",
+                  "token-shop-daily-tokenium-family",
                   "token-shop-family-structure"
                 ],
                 "corroboratingFragmentIds": [
-                  3160,
+                  3297,
+                  3256,
                   2632,
                   2584,
                   1819,
@@ -104906,9 +105584,9 @@
                   171,
                   55
                 ],
-                "supportingEvidenceCount": 7
+                "supportingEvidenceCount": 8
               },
-              "targetId": "token-shop-atu4-mod"
+              "targetId": "token-shop-daily-tokenium-family"
             }
           },
           "reconstruction_note_fragment": {
@@ -105754,7 +106432,7 @@
               ],
               "targetId": "token-shop-atu3-cells-effect",
               "traceScope": "token-shop-atu3-cells-effect",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "target_narrative_fragment": {
@@ -105779,7 +106457,7 @@
               },
               "targetId": "token-shop-atu3-cells-effect",
               "traceScope": "token-shop-atu3-cells-effect",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "threshold_fragment": {
@@ -105828,6 +106506,7 @@
                 ],
                 "verdict": "keep researching"
               },
+              "boundedNegatives": [],
               "familyId": "token-shop",
               "formula": {
                 "groundedConstants": {
@@ -105988,18 +106667,27 @@
               },
               "rowShell": {
                 "controllerBlock": [
-                  "ATU4Button",
-                  "ATU4MaxOverlay",
-                  "ATU4Content",
-                  "ATU4Overlay"
+                  "ATU13MaxOverlay",
+                  "TokenDailiesT2StartCost",
+                  "TokenDailiesT2AdditiveCost",
+                  "TokenDailiesT2Bonus",
+                  "TokenDailiesT2MaxLevel",
+                  "TokenDailiesT2Fill",
+                  "ATU14Button",
+                  "ATU14MaxOverlay",
+                  "T2Duo1StartCost",
+                  "T2Duo1AdditiveCost",
+                  "T2Duo1Bonus",
+                  "T2Duo1MaxLevel",
+                  "T2Duo1Fill"
                 ],
                 "field": "ATU3Button",
                 "ownerFieldBlock": [
-                  "ModBoostStartCost",
-                  "ModBoostAdditiveCost",
-                  "ModBoostBonus",
-                  "ModBoostMaxLevel",
-                  "ModBoostFill"
+                  "TokenDailiesT2StartCost",
+                  "TokenDailiesT2AdditiveCost",
+                  "TokenDailiesT2Bonus",
+                  "TokenDailiesT2MaxLevel",
+                  "TokenDailiesT2Fill"
                 ],
                 "pathId": 15810
               },
@@ -106016,6 +106704,7 @@
                 "detachedTextCandidateCount": 0,
                 "directTextCandidateCount": 11,
                 "literalStatus": "closed",
+                "nonBlockingSeams": [],
                 "requiredGapKinds": [
                   "exact-display-update-path",
                   "runtime-model-gap"
@@ -106054,7 +106743,7 @@
               },
               "targetId": "token-shop-atu3-cells-effect",
               "traceScope": "token-shop-atu3-cells-effect",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "ui_binding_fragment": {
@@ -106954,7 +107643,7 @@
           },
           "targetId": "token-shop-atu3-cells-effect",
           "traceScope": "token-shop-atu3-cells-effect",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "executionContextSemanticKey": "target-execution-context:token-shop-atu3-cells-effect",
         "executionPlan": {
@@ -107066,7 +107755,7 @@
           },
           "targetId": "token-shop-atu3-cells-effect",
           "traceScope": "token-shop-atu3-cells-effect",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "executionPlanSemanticKey": "target-execution-plan:token-shop-atu3-cells-effect",
         "generatedAt": null,
@@ -107456,7 +108145,7 @@
             ]
           },
           "traceScope": "token-shop-atu3-cells-effect",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "graphPlanSemanticKey": "target-graph-plan:token-shop-atu3-cells-effect",
         "groundedConclusion": "The ATU3Button or 15810 cross-system trace clears one checked shell-to-action-hook-to-shared-effect chain. The row preserves direct shell adjacency to the CellBoost owner block, the checked action lane preserves BuyCellBoost, the shared title and effect-text surfaces preserve the Cells Booster (Chests) chest-effect lane, and the raw CellBoostBonus value of 1 is consistent with the surviving +1-second player-facing effect text. The remaining break is the exact typed gameplay owner or chest-reward applier that consumes that parameter.",
@@ -108521,6 +109210,7 @@
                 {
                   "field": "groundedConstants.AdditiveCost",
                   "values": [
+                    800,
                     5,
                     0.12999999523162842,
                     0.10000000149011612,
@@ -108539,6 +109229,7 @@
                 {
                   "field": "groundedConstants.MaxLevel",
                   "values": [
+                    10,
                     20,
                     5000,
                     200,
@@ -108548,6 +109239,7 @@
                 {
                   "field": "groundedConstants.StartCost",
                   "values": [
+                    1000,
                     20,
                     3,
                     1,
@@ -108557,6 +109249,36 @@
                 {
                   "field": "inferredCostModel",
                   "values": [
+                    {
+                      "displaySlots": [
+                        "CostBox",
+                        "CostText"
+                      ],
+                      "evidence": {
+                        "controllerAdditiveCostFieldCount": 1,
+                        "controllerCostExponentFieldCount": 0,
+                        "controllerStartCostFieldCount": 1,
+                        "ownerCalculationTypeOptions": [
+                          "percentage",
+                          "additive",
+                          "subtractive"
+                        ],
+                        "ownerSchemaHasCostExponent": false
+                      },
+                      "expression": "BaseCost(level) = StartCost + AdditiveCost * level",
+                      "groundedConstants": {
+                        "AdditiveCost": 800,
+                        "StartCost": 1000
+                      },
+                      "kind": "controller-linear-step",
+                      "notes": [
+                        "Recovered directly from the TokenShop owner blob in level0 as a StartCost/AdditiveCost pair.",
+                        "No owner-blob-side *CostExponent fields are exposed in the serialized TokenShop row payload.",
+                        "This supports a linear base-cost lane for ATU/controller rows.",
+                        "Displayed in-game cost can still diverge if scriptable-object-side evaluators or runtime modifiers apply on top of the base lane."
+                      ],
+                      "status": "extracted-controller-linear"
+                    },
                     {
                       "displaySlots": [
                         "CostBox",
@@ -108730,6 +109452,15 @@
                       "notes": [
                         "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
                         "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
+                        "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers."
+                      ],
+                      "status": "unresolved-runtime-modifiers"
+                    },
+                    {
+                      "expression": "DisplayedCost(level) = BaseCost(level) plus unresolved runtime modifiers/evaluator-side transforms",
+                      "notes": [
+                        "The extracted controller payload closes the base row formula but not the full runtime display calculation.",
+                        "The direct TokenShop owner blob closes the base row formula but not the full runtime display calculation.",
                         "If live in-game values exceed the recovered linear lane, the remaining gap is in scriptable-object-side evaluation, discounts, clamps, or other external upgrade modifiers.",
                         "ArcadeUpgradeSO owner schema still names CostExponent, which is the strongest current signal for a higher-order runtime pricing transform outside the flattened TokenShop row payload."
                       ],
@@ -108784,6 +109515,7 @@
               "token-shop-atu4-mod",
               "token-shop-atu5-mk1-title",
               "token-shop-atu7-mk3-bridge",
+              "token-shop-daily-tokenium-family",
               "token-shop-family-structure"
             ],
             "formula:token-shop:CellBoostStartCost:CellBoostAdditiveCost:CellBoostBonus:CellBoostMaxLevel:CellBoostFill": [
@@ -108797,6 +109529,7 @@
               "token-shop-atu4-mod",
               "token-shop-atu5-mk1-title",
               "token-shop-atu7-mk3-bridge",
+              "token-shop-daily-tokenium-family",
               "token-shop-family-structure"
             ],
             "progression:token-shop:ArcadeUpgradeSO": [
@@ -108806,6 +109539,7 @@
               "token-shop-atu4-mod",
               "token-shop-atu5-mk1-title",
               "token-shop-atu7-mk3-bridge",
+              "token-shop-daily-tokenium-family",
               "token-shop-family-structure"
             ],
             "reconstruction-note:token-shop:token-shop-atu3-cells-effect": [
@@ -108901,6 +109635,11 @@
             ],
             "token-shop-atu7-mk3-bridge": [
               "dependency:token-shop:serialized-adjacency:target-shell:owner-field-block",
+              "formula:token-shop",
+              "owner-controller:ArcadeUpgradeSO",
+              "progression:token-shop:ArcadeUpgradeSO"
+            ],
+            "token-shop-daily-tokenium-family": [
               "formula:token-shop",
               "owner-controller:ArcadeUpgradeSO",
               "progression:token-shop:ArcadeUpgradeSO"
@@ -113512,7 +114251,7 @@
           },
           "targetId": "token-shop-atu3-cells-effect",
           "traceScope": "token-shop-atu3-cells-effect",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "tokenShopReconstruction": {
           "assessment": {
@@ -113526,6 +114265,7 @@
             ],
             "verdict": "keep researching"
           },
+          "boundedNegatives": [],
           "familyId": "token-shop",
           "formula": {
             "groundedConstants": {
@@ -113686,18 +114426,27 @@
           },
           "rowShell": {
             "controllerBlock": [
-              "ATU4Button",
-              "ATU4MaxOverlay",
-              "ATU4Content",
-              "ATU4Overlay"
+              "ATU13MaxOverlay",
+              "TokenDailiesT2StartCost",
+              "TokenDailiesT2AdditiveCost",
+              "TokenDailiesT2Bonus",
+              "TokenDailiesT2MaxLevel",
+              "TokenDailiesT2Fill",
+              "ATU14Button",
+              "ATU14MaxOverlay",
+              "T2Duo1StartCost",
+              "T2Duo1AdditiveCost",
+              "T2Duo1Bonus",
+              "T2Duo1MaxLevel",
+              "T2Duo1Fill"
             ],
             "field": "ATU3Button",
             "ownerFieldBlock": [
-              "ModBoostStartCost",
-              "ModBoostAdditiveCost",
-              "ModBoostBonus",
-              "ModBoostMaxLevel",
-              "ModBoostFill"
+              "TokenDailiesT2StartCost",
+              "TokenDailiesT2AdditiveCost",
+              "TokenDailiesT2Bonus",
+              "TokenDailiesT2MaxLevel",
+              "TokenDailiesT2Fill"
             ],
             "pathId": 15810
           },
@@ -113714,6 +114463,7 @@
             "detachedTextCandidateCount": 0,
             "directTextCandidateCount": 11,
             "literalStatus": "closed",
+            "nonBlockingSeams": [],
             "requiredGapKinds": [
               "exact-display-update-path",
               "runtime-model-gap"
@@ -113752,7 +114502,7 @@
           },
           "targetId": "token-shop-atu3-cells-effect",
           "traceScope": "token-shop-atu3-cells-effect",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "tokenShopReconstructionSemanticKey": "token-shop-reconstruction:token-shop-atu3-cells-effect",
         "traceParams": {
@@ -113784,7 +114534,7 @@
       ],
       "traceScope": "shard-cost-su0-structure",
       "requestSignature": "42dd01b02fa06a53",
-      "builtAt": "2026-04-23T06:06:58.656012",
+      "builtAt": "2026-04-23T18:37:57.153419",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": {
@@ -113872,7 +114622,7 @@
               },
               "targetId": "shard-cost-su0-structure",
               "traceScope": "shard-cost-su0-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "dependency_fragment": {
@@ -113980,7 +114730,7 @@
               },
               "targetId": "shard-cost-su0-structure",
               "traceScope": "shard-cost-su0-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "family_graph_fragment": {
@@ -114033,7 +114783,7 @@
               ],
               "targetId": "shard-cost-su0-structure",
               "traceScope": "shard-cost-su0-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "reconstruction_note_fragment": {
@@ -114081,7 +114831,7 @@
               },
               "targetId": "shard-cost-su0-structure",
               "traceScope": "shard-cost-su0-structure",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           }
         },
@@ -114164,7 +114914,7 @@
           },
           "targetId": "shard-cost-su0-structure",
           "traceScope": "shard-cost-su0-structure",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "executionContextSemanticKey": "target-execution-context:shard-cost-su0-structure",
         "executionPlan": null,
@@ -118558,7 +119308,7 @@
           },
           "targetId": "shard-cost-su0-structure",
           "traceScope": "shard-cost-su0-structure",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "tokenShopReconstruction": null,
         "tokenShopReconstructionSemanticKey": null,
@@ -118591,7 +119341,7 @@
       ],
       "traceScope": "shard-owned-state-upgradeinfolist-population",
       "requestSignature": "9eb67ca7838c2c50",
-      "builtAt": "2026-04-23T06:06:58.767527",
+      "builtAt": "2026-04-23T18:37:57.266835",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": {
@@ -118704,7 +119454,7 @@
               },
               "targetId": "shard-owned-state-upgradeinfolist-population",
               "traceScope": "shard-owned-state-upgradeinfolist-population",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "bridge_comparison_fragment": {
@@ -118832,7 +119582,7 @@
               },
               "targetId": "shard-owned-state-upgradeinfolist-population",
               "traceScope": "shard-owned-state-upgradeinfolist-population",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "dependency_fragment": {
@@ -118920,7 +119670,7 @@
               },
               "targetId": "shard-owned-state-upgradeinfolist-population",
               "traceScope": "shard-owned-state-upgradeinfolist-population",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "family_graph_fragment": {
@@ -118981,7 +119731,7 @@
               ],
               "targetId": "shard-owned-state-upgradeinfolist-population",
               "traceScope": "shard-owned-state-upgradeinfolist-population",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "reconstruction_note_fragment": {
@@ -119084,7 +119834,7 @@
                 ],
                 "supportingEvidenceCount": 5
               },
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "target_narrative_fragment": {
@@ -119110,7 +119860,7 @@
               },
               "targetId": "shard-owned-state-upgradeinfolist-population",
               "traceScope": "shard-owned-state-upgradeinfolist-population",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           }
         },
@@ -119192,7 +119942,7 @@
           },
           "targetId": "shard-owned-state-upgradeinfolist-population",
           "traceScope": "shard-owned-state-upgradeinfolist-population",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "executionContextSemanticKey": "target-execution-context:shard-owned-state-upgradeinfolist-population",
         "executionPlan": null,
@@ -184314,7 +185064,7 @@
           },
           "targetId": "shard-owned-state-upgradeinfolist-population",
           "traceScope": "shard-owned-state-upgradeinfolist-population",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "tokenShopReconstruction": null,
         "tokenShopReconstructionSemanticKey": null,
@@ -184353,7 +185103,7 @@
       ],
       "traceScope": "multiverse-market-save-owner-boundary",
       "requestSignature": "01e596a425c49ecf",
-      "builtAt": "2026-04-23T06:06:58.651091",
+      "builtAt": "2026-04-23T18:37:57.148512",
       "reducerVersion": "target-bundle-v1",
       "data": {
         "assetSet": {
@@ -184453,7 +185203,7 @@
               },
               "targetId": "multiverse-market-save-owner-boundary",
               "traceScope": "multiverse-market-save-owner-boundary",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "bridge_comparison_fragment": {
@@ -184563,7 +185313,7 @@
               },
               "targetId": "multiverse-market-save-owner-boundary",
               "traceScope": "multiverse-market-save-owner-boundary",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "dependency_fragment": {
@@ -184691,7 +185441,7 @@
               },
               "targetId": "multiverse-market-save-owner-boundary",
               "traceScope": "multiverse-market-save-owner-boundary",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "family_graph_fragment": {
@@ -184749,7 +185499,7 @@
               ],
               "targetId": "multiverse-market-save-owner-boundary",
               "traceScope": "multiverse-market-save-owner-boundary",
-              "updatedAt": "2026-04-23T06:06:58"
+              "updatedAt": "2026-04-23T18:37:56"
             }
           },
           "reconstruction_note_fragment": {
@@ -184860,7 +185610,7 @@
           },
           "targetId": "multiverse-market-save-owner-boundary",
           "traceScope": "multiverse-market-save-owner-boundary",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "executionContextSemanticKey": "target-execution-context:multiverse-market-save-owner-boundary",
         "executionPlan": null,
@@ -190301,7 +191051,7 @@
           },
           "targetId": "multiverse-market-save-owner-boundary",
           "traceScope": "multiverse-market-save-owner-boundary",
-          "updatedAt": "2026-04-23T06:06:58"
+          "updatedAt": "2026-04-23T18:37:56"
         },
         "tokenShopReconstruction": null,
         "tokenShopReconstructionSemanticKey": null,

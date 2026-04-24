@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-13",
+  "generatedAt": "2026-04-23",
   "dataset": "token-shop-row-remap-boundary",
   "sources": {
     "tokenShopExtract": "data/archive/token-shop-values.json",
@@ -800,6 +800,123 @@
       "prefab-only naming without a checked object join"
     ]
   },
+  "dailyTokeniumFamilyPass": {
+    "targetNeighborhood": {
+      "saveFieldRange": "ATU14Level through ATU19Level",
+      "shellFieldRange": "ATU14Button through ATU19Button",
+      "numericFieldRange": "TokenDailiesT2StartCost through T2Duo5Fill",
+      "group": "tier2-daily-tokenium-family"
+    },
+    "anchoredDailyTokensRow": {
+      "shellField": "ATU14Button",
+      "shellPathId": 15844,
+      "ownerFieldBlock": [
+        "TokenDailiesT2StartCost",
+        "TokenDailiesT2AdditiveCost",
+        "TokenDailiesT2Bonus",
+        "TokenDailiesT2MaxLevel",
+        "TokenDailiesT2Fill"
+      ],
+      "supportingEffectHook": "ATU14TokenDailiesBonus",
+      "prefabIdentity": "NewTokenUPGPrefab.T2.DailyTokens",
+      "titleProbeTitle": "Daily Tokens T2",
+      "directPurchaseHookStatus": "No DB-backed direct purchase hook is localized for TokenDailiesT2; the active spend action lane still keeps BuyTokenDailiesT2 unresolved.",
+      "groundedConclusion": "ATU14Button now has one DB-backed owner-order anchor on the TokenDailiesT2 field family, plus one matching DailyTokens prefab-family candidate and the checked ATU14TokenDailiesBonus effect hook. That is strong enough for quarantined compatibility labeling, but not yet one fully localized shell-to-title or runtime-display join."
+    },
+    "duoFamilyRows": [
+      {
+        "shellField": "ATU15Button",
+        "shellPathId": 15850,
+        "ownerFieldBlock": [
+          "T2Duo1StartCost",
+          "T2Duo1AdditiveCost",
+          "T2Duo1Bonus",
+          "T2Duo1MaxLevel",
+          "T2Duo1Fill"
+        ],
+        "anchoredAfterShell": "ATU14Button",
+        "prefabIdentity": "NewTokenUPGPrefab.T2.DuoBoosterOne",
+        "groundedConclusion": "ATU15Button now has one DB-backed owner-order anchor on the T2Duo1 field family, and the matching T2 duo prefab roster still points at NewTokenUPGPrefab.T2.DuoBoosterOne. That is strong enough for quarantined compatibility labeling, but not yet one fully localized shell-to-title or runtime-display join."
+      },
+      {
+        "shellField": "ATU16Button",
+        "shellPathId": 15827,
+        "ownerFieldBlock": [
+          "T2Duo2StartCost",
+          "T2Duo2AdditiveCost",
+          "T2Duo2Bonus",
+          "T2Duo2MaxLevel",
+          "T2Duo2Fill"
+        ],
+        "anchoredAfterShell": "ATU15Button",
+        "prefabIdentity": "NewTokenUPGPrefab.T2.DuoBoosterTwo",
+        "groundedConclusion": "ATU16Button now has one DB-backed owner-order anchor on the T2Duo2 field family, and the matching T2 duo prefab roster still points at NewTokenUPGPrefab.T2.DuoBoosterTwo. That is strong enough for quarantined compatibility labeling, but not yet one fully localized shell-to-title or runtime-display join."
+      },
+      {
+        "shellField": "ATU17Button",
+        "shellPathId": 15841,
+        "ownerFieldBlock": [
+          "T2Duo3StartCost",
+          "T2Duo3AdditiveCost",
+          "T2Duo3Bonus",
+          "T2Duo3MaxLevel",
+          "T2Duo3Fill"
+        ],
+        "anchoredAfterShell": "ATU16Button",
+        "prefabIdentity": "NewTokenUPGPrefab.T2.DuoBoosterThree",
+        "groundedConclusion": "ATU17Button now has one DB-backed owner-order anchor on the T2Duo3 field family, and the matching T2 duo prefab roster still points at NewTokenUPGPrefab.T2.DuoBoosterThree. That is strong enough for quarantined compatibility labeling, but not yet one fully localized shell-to-title or runtime-display join."
+      },
+      {
+        "shellField": "ATU18Button",
+        "shellPathId": 15834,
+        "ownerFieldBlock": [
+          "T2Duo4StartCost",
+          "T2Duo4AdditiveCost",
+          "T2Duo4Bonus",
+          "T2Duo4MaxLevel",
+          "T2Duo4Fill"
+        ],
+        "anchoredAfterShell": "ATU17Button",
+        "prefabIdentity": "NewTokenUPGPrefab.T2.DuoBoosterFour",
+        "groundedConclusion": "ATU18Button now has one DB-backed owner-order anchor on the T2Duo4 field family, and the matching T2 duo prefab roster still points at NewTokenUPGPrefab.T2.DuoBoosterFour. That is strong enough for quarantined compatibility labeling, but not yet one fully localized shell-to-title or runtime-display join."
+      },
+      {
+        "shellField": "ATU19Button",
+        "shellPathId": 15842,
+        "ownerFieldBlock": [
+          "T2Duo5StartCost",
+          "T2Duo5AdditiveCost",
+          "T2Duo5Bonus",
+          "T2Duo5MaxLevel",
+          "T2Duo5Fill"
+        ],
+        "anchoredAfterShell": "ATU18Button",
+        "prefabIdentity": "NewTokenUPGPrefab.T2.DuoBoosterFive",
+        "groundedConclusion": "ATU19Button now has one DB-backed owner-order anchor on the T2Duo5 field family, and the matching T2 duo prefab roster still points at NewTokenUPGPrefab.T2.DuoBoosterFive. That is strong enough for quarantined compatibility labeling, but not yet one fully localized shell-to-title or runtime-display join."
+      }
+    ],
+    "atu19DuplicatePlaceholderCheck": {
+      "shellField": "ATU19Button",
+      "shellPathId": 15842,
+      "checkedOwnerFieldBlock": [
+        "T2Duo5StartCost",
+        "T2Duo5AdditiveCost",
+        "T2Duo5Bonus",
+        "T2Duo5MaxLevel",
+        "T2Duo5Fill"
+      ],
+      "nextOwnerFieldBlock": [
+        "TokenBoostT3StartCost",
+        "TokenBoostT3AdditiveCost",
+        "TokenBoostT3Bonus",
+        "TokenBoostT3MaxLevel",
+        "TokenBoostT3Fill"
+      ],
+      "ruledOutClaim": "ATU19Button does not share the TokenBoostT3 owner block with ATU20Button.",
+      "groundedConclusion": "The nearby duplicate-or-placeholder theory for ATU19 narrows but does not clear. The exact owner payload keeps ATU19Button on the T2Duo5 numeric block and only then advances into TokenBoostT3 for ATU20Button, so the old 'ATU19 duplicates ATU20' claim is no longer supported by the committed owner-field order. ATU19 still stays quarantined because no committed shell-local final title or runtime display-update join yet proves whether this anchored T2Duo5 row survives to the final player-facing TokenShop surface or only to a hidden or deprecated shell."
+    },
+    "result": "ATU14 through ATU19 now have one DB-backed Daily Tokenium-family owner-order compatibility pass, but direct purchase-hook, title-localization, and runtime display joins still remain unresolved"
+  },
   "currentBoundary": [
     "The repo now has thirteen checked TokenShop row bridges: ATU1Button aligns directly with the TokenBoost owner-field block while broader probes preserve ATU1TokenBonus, checked action-lane clues preserve BuyTokenBoost, and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.TokensBoost; ATU2Button aligns directly with the DiamondBoost owner-field block while broader probes preserve ATU2DiamondsBonus and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.DiamondBoost; ATU4Button aligns directly with the ModBoost owner-field block while checked action-lane clues preserve BuyModBoost and the checked prefab roster preserves NewTokenUPGPrefab.T1.ModPointsBooster; ATU5Button aligns directly with the MK1TokenBoost owner-field block while checked action-lane clues preserve BuyMK1TokenBoost and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.MK1Booster; ATU6Button aligns directly with the MK2TokenBoost owner-field block while checked action-lane clues preserve BuyMK2TokenBoost and the checked level0 prefab roster preserves NewTokenUPGPrefab.T1.MK2Booster; ATU7Button aligns directly with the MK3TokenBoost owner-field block while checked action-lane clues preserve BuyMK3TokenBoost and the checked prefab roster preserves NewTokenUPGPrefab.T1.MK3Booster; ATU8Button aligns directly with the MK4TokenBoost owner-field block while checked action-lane clues preserve BuyMK4TokenBoost and the checked prefab roster preserves NewTokenUPGPrefab.T1.MK4Booster; ATU9Button aligns directly with the MK5TokenBoost owner-field block while checked action-lane clues preserve BuyMK5TokenBoost and the checked prefab roster preserves NewTokenUPGPrefab.T1.MK5Booster; ATU10Button aligns directly with the MK6TokenBoost owner-field block while checked action-lane clues preserve BuyMK6TokenBoost and the checked prefab roster preserves NewTokenUPGPrefab.T1.MK6Booster; ATU11Button aligns directly with the MK7TokenBoost owner-field block while checked action-lane clues preserve BuyMK7TokenBoost and the checked prefab roster preserves NewTokenUPGPrefab.T1.MK7Booster; ATU12Button aligns directly with the MK8TokenBoost owner-field block while checked action-lane clues preserve BuyMK8TokenBoost and the checked prefab roster preserves NewTokenUPGPrefab.T1.MK8Booster; ATU13Button aligns directly with the TokenBoostT2 owner-field block while committed probe output preserves BuyTokenT2 and the checked level0 prefab roster preserves NewTokenUPGPrefab.T2.TokensBoost; and ATU20Button aligns directly with the TokenBoostT3 owner-field block while committed probe output preserves BuyTokenT3 and the checked level0 prefab roster preserves NewTokenUPGPrefab.T3.TokensBoost.",
     "The rest of the ATU family still only has stronger grounded non-label clues: raw SaveData row levels, shared ATU numbering on the TokenShop owner payload, effect-hook names such as ATU2DiamondsBonus and ATU24Bonus3Shards, and late direct-buy hooks such as BuyATU24 through BuyATU28.",
@@ -812,14 +929,15 @@
     "The new explicit CellBoostBonus-anchor follow-up keeps that same seam bounded negative instead of widening the lane: committed metadata now makes the owner-side CellBoostBonus neighborhood explicit beside CellBoostStartCost, CellBoostAdditiveCost, CellBoostMaxLevel, CellBoostFill, and ATU3Button, rules out the outer TokenChestRoutine or DiamondChestRoutine shell, rules out the final token-or-diamond chest bonus backing fields, and also rules out the remaining internal getter-or-booster aggregation shell plus the FinalBoosterAdBonus setter-or-backing-field surfaces because every committed hit for that family stays in a separate AdManager bonus neighborhood rather than crossing back to CellBoostBonus.",
     "One grounded shell-to-prefab-to-title chain now clears on the MK2 row: ATU6Button aligns directly with the MK2TokenBoost owner-field block, checked action-lane clues preserve BuyMK2TokenBoost, the checked prefab roster preserves NewTokenUPGPrefab.T1.MK2Booster, and the title-side TokenShop probe surface preserves the final player-facing title Mk2 Generator Booster with matching MK2-generator upgrade text.",
     "The neighboring grounded shell-side rows still remain more limited: ATU5Button now preserves one bounded player-facing named identity join through 1. MK1 Generator Output plus the matching detached MK1 generator support text, but it still lacks one checked exact final player-facing row-title string; ATU7Button now also preserves one bounded title-side chain through Mk3 Generator Booster with matching MK3 support text; ATU8Button now also preserves one bounded title-side chain through Mk4 Generator Booster with matching MK4 support text; ATU9Button now also preserves one bounded title-side chain through Mk5 Generator Booster with matching MK5 support text; ATU10Button now also preserves one bounded title-side chain through Mk6 Generator Booster with matching MK6 support text; ATU11Button now also preserves one narrower detached MK7 title-side surface through MK7 GEN ENHANCEMENT with matching MK7 support text but still lacks one checked exact final player-facing row title; ATU12Button now also preserves one bounded title-side chain through Mk8 Generator Booster with matching MK8 support text; and the new ATU13Button plus ATU20Button follow-ups now clear only as bridge-only token-booster rows while the detached Tokens Booster T2 and Tokens Booster T3 title-side clues still do not cross back to their exact shell ids.",
+    "A new coherent Daily Tokenium-family pass now anchors the next unresolved tier2 shell run without reopening the closed ATU3 or ATU24-28 negatives: the DB-backed owner payload keeps ATU14Button on TokenDailiesT2, then ATU15Button on T2Duo1, ATU16Button on T2Duo2, ATU17Button on T2Duo3, ATU18Button on T2Duo4, and ATU19Button on T2Duo5, while committed metadata preserves ATU14TokenDailiesBonus and committed UABEA object names still preserve the matching DailyTokens and T2 duo prefab families.",
+    "That DB-backed Daily Tokenium-family pass still stays quarantined instead of promoting canon: the repo now has one bounded owner-order compatibility sequence for ATU14 through ATU19, but no committed DB-native semantic scope or materialized target bundle yet crosses those shells back to one exact shell-local direct purchase hook, final player-facing title, or runtime display-update path, and ATU14 or ATU21 still do not justify any Daily Tokenium cap-owner claim.",
+    "The nearby ATU19 duplicate-or-placeholder theory also narrows instead of clearing: committed owner-field order keeps T2Duo5 directly on ATU19Button and only then advances into TokenBoostT3 for ATU20Button, so the old ATU19 equals ATU20 duplicate claim no longer survives as a checked owner-side explanation, but ATU19 still remains quarantined until one final title or runtime join proves whether that anchored T2Duo5 shell is fully live on the player-facing TokenShop surface.",
     "Grounded metadata neighborhoods now tighten the late-row shell further: BuyATU24 through BuyATU28 sit beside named tier-buy hooks like BuyTokenT3, BuyTokenDailyT3, BuyTrio1Boost, and BuyTrio2Boost, while getter neighborhoods preserve ATU1TokenBonus, ATU2DiamondsBonus, ATU14TokenDailiesBonus, and ATU24Bonus3Shards through ATU24Bonus5AP in one ATU-numbered family.",
     "Grounded level0 neighborhoods now tighten the text-hook blocker further: SetAllTokenShopTexts and SetTokenTexts sit in a token-menu or token-bank text-handler cluster with CheckFirstTokenMenuTime, ClaimTokenium, token-bank formula strings, TokenClaimRecolor, and TokenShopRecoloring, while most NewTokenUPGPrefab.* names remain one separate prefab roster cluster and player-facing titles such as Trinity Booster One, Academy Booster, Tokens Booster T3, and Campaign Fragments remain a separate title cluster.",
     "The bounded ATU1 title-side pass also stays negative: the generic SetAllTokenShopTexts or SetTokenTexts surface remains a separate text-handler cluster, while Tokens Booster, Tokens Booster T1, and >Diamond Upgrade 9 - TokensBoost remain detached title candidates instead of one exact shell-local final title or named-identity join. The last honest blocker is still one exact join from one of those detached tokens-domain title clues back to ATU1Button path id 15839.",
     "The bounded ATU4 title-side pass is no longer the real blocker: the canonical row-local graph now closes the shell-to-title seam, while the remaining honest blocker is the exact row-specific runtime display-update path for ATU4Button path id 15796.",
     "The bounded ATU5 last-title-blocker pass now narrows cleanly: the detached MK1 generator support-text cluster already clears one checked ATU5Button -> NewTokenUPGPrefab.T1.MK1Booster -> 1. MK1 Generator Output named-identity and support-text chain, while the remaining honest blocker is only the absent exact final player-facing row-title string such as one exact Mk1 Generator Booster join.",
     "Because the checked repo evidence still lacks direct object or text joins for the rest of the ATU-numbered row shells, canonical promotion and planner use should remain blocked outside the recovered ATU1, ATU2, ATU4, ATU5, ATU6, ATU7, ATU8, ATU9, ATU10, ATU11, ATU12, ATU13, and ATU20 bridges plus the one checked ATU6 shell-to-prefab-to-title chain, and the unrecovered ATU family should stay compatibility-only instead of entering planner logic or canonical state.playerProfile.",
-    "The narrowest honest next slice is still not a general TokenShop row-remap search. The generic text-hook surface is a bounded negative result, the explicit ATU3 prefab-or-title remap pass stays bounded negative, the ATU3 effect-driven trace reaches the AdManager chest consumer family, the explicit CellBoostBonus-anchor follow-up closes the remaining internal AdManager bonus-aggregation cluster as a bounded negative result, ATU11 now closes one row-specific MK7 title-side seam, ATU12 now also closes one bounded MK8 bridge-plus-title-side-text seam, and the new ATU13 plus ATU20 bridge-only token-booster passes still stop short of exact title joins. The next follow-up should move to a different unresolved shell without reopening those closed surfaces."
+    "The narrowest honest next slice is still not a general TokenShop row-remap search. The generic text-hook surface is a bounded negative result, the explicit ATU3 prefab-or-title remap pass stays bounded negative, the ATU3 effect-driven trace reaches the AdManager chest consumer family, the explicit CellBoostBonus-anchor follow-up closes the remaining internal AdManager bonus-aggregation cluster as a bounded negative result, ATU11 now closes one row-specific MK7 title-side seam, ATU12 now also closes one bounded MK8 bridge-plus-title-side-text seam, and the Daily Tokenium-family pass now closes the ATU14 through ATU19 owner-side shell order without localizing one exact title or runtime display join. The next follow-up should therefore stay in the same lane but prefer a focused probe or tool realignment around the Daily Tokenium-family text or action surfaces before widening to another unresolved shell family."
   ]
 }
-
-

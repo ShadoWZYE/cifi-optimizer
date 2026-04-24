@@ -11,6 +11,16 @@ If an agent encounters a mechanic, label, owner, currency, unlock rule, or playe
 
 Agents should treat external sources as fallback evidence, not the first stop, for unresolved game-mechanic questions.
 
+Default extraction workflow policy:
+
+1. resolve the request through the trace/query planner
+2. collect or reuse DB/cache/evidence
+3. rebuild reducer/materializer-owned semantic and view state
+4. export JSON or markdown only when a snapshot or operator-facing artifact is explicitly needed
+
+Do not treat committed export files as the default recovery path when DB-backed trace/materialized state exists for the lane.
+Use export-file archaeology only for debug, distribution, or historical comparison.
+
 # Unity Audit Playbook
 
 This document captures the current extraction pathway for grounded CIFI mechanics from the Android/Unity build so the work can be resumed on another machine without reconstructing the process from chat history.
@@ -59,6 +69,7 @@ Repo-local npm extraction wrappers:
   - or pin an exact preset with `npm run extract:trace -- --target <target-id> --anchor <anchor>`
   - persists DB-backed trace state first; add `--export` only when you want derived `workbench/trace-runs/` outputs
   - those DB-backed target bundles are then projected into `data/system-units/trace.v1.json` and the other `data/system-units/*.json` read models by `node scripts/contracts/generate-system-units.mjs`
+  - default operator path is planner/query -> DB/cache/evidence -> reducer/materializer views; exported files are debug/distribution outputs, not the active owner path
   - reads the DB/bootstrap request catalog first and treats the archived target registry only as historical compatibility provenance
   - resolves loose Codex-first queries through DB-owned subject/family coverage, expands them into family-aware anchors and semantic terms, then chooses one bounded trace scope or flat exploration
   - reads committed `workbench/apk/base/global-metadata.dat`, `workbench/unity/joined/level0`, `workbench/unity/joined/sharedassets0.assets`, direct extractor-backed support datasets, and the persistent Ghidra project when native behavior is needed
@@ -90,6 +101,10 @@ Repo-local npm extraction wrappers:
   - reads canonical repo inputs plus DB-backed `materialized_target_bundle_views`
   - writes `data/system-units/*.json` only as exported app/browser read models
   - also persists matching `materialized_system_unit_views` in SQLite so app-facing system units are not a parallel file-first truth path
+- default lane decision rule:
+  - if a target does not emit the expected DB-backed semantic or materialized artifact, the next move is probe/tool/materializer realignment before widening to adjacent families
+  - long native or Ghidra-backed trace runs are expected while cacheable parsing or semantic reduction is still converging; duration alone is not evidence of a stall
+  - treat the missing artifact itself as the blocker until the path emits it or shrinks to one named instrument seam
 - `python scripts/unity/ghidra_headless.py invalidate`
   - supports evidence invalidation with `--script`
   - supports trace-fragment-only invalidation with `--trace-scope`, `--trace-fragment`, `--trace-fragment-key`, `--trace-script`, and `--trace-request-signature`
@@ -108,10 +123,25 @@ Important primary files:
 2. Extract the APK and split APK payloads into `workbench/apk/base`.
 3. Merge the split APK native libraries with the base APK assets into `workbench/apk/merged`.
 4. Join Unity split asset containers into `workbench/unity/joined`.
-5. Use `rg -aob` against `global-metadata.dat` to locate class names, method names, and field neighborhoods for the target system.
-6. Use `level0` string anchors to locate the concrete scene prefab names and UI owner objects.
-7. Resolve the real `MonoBehaviour` owner by scanning MonoBehaviour headers and matching `m_Script` path IDs back to `MonoScript` names.
-8. Parse the raw serialized object payload directly when tool-side IL2CPP typetree generation fails.
+5. Start from `npm run extract:trace` with a query, family, best-gap, or explicit target so the planner resolves the bounded subject first.
+6. Let the trace path recover or reuse DB/cache/evidence, then check whether the expected semantic or materialized artifact was emitted.
+7. Run `node scripts/contracts/generate-system-units.mjs` only after DB-backed trace/materializer state is in place or needs to be reprojected into read models.
+8. Use raw metadata, `level0`, object-header scans, or serialized payload parsing as instrument-level support work inside that trace/materializer path, not as the default export-archaeology fallback.
+
+## Long-run expectations
+
+While cacheable parsing, native summaries, or Ghidra-backed reduction are still converging, long trace runs are expected.
+
+Do not assume a long run is stalled only because it is long.
+Treat it as a workflow blocker only when the expected DB/materialized artifact does not appear.
+
+When that happens, the next step is:
+
+1. inspect the probe/tool/materializer seam
+2. fix the narrowest named instrument issue
+3. rerun the same target
+
+Only after that path is realigned should adjacent families or broader searches become the default next move.
 
 ## Why Raw Parsing Was Needed
 
@@ -220,6 +250,7 @@ The current repo-local candidate ranking for that step is recorded in:
 - On Windows, the wrapper accepts either `python` or `py -3`. On macOS/Linux, it looks for `python3` first and falls back to `python`.
 - The current wrappers assume a shell environment that can execute `node`, `dotnet`, and Python from `PATH`; they do not bootstrap those toolchains for a fresh machine.
 - `data/archive/uabea-extract-report.json` and `data/archive/unity-apk-extract-report.json` should be treated as raw extraction exports or historical provenance inputs, not as default active support surfaces.
+- `data/system-units/*.json`, `workbench/trace-runs/*`, and other exported snapshots should also be treated as read-model, distribution, or debug surfaces; active extraction truth should come from DB-backed evidence, semantic fragments, materialized target bundles, and materialized system views first.
 - When only typed LibCpp2IL tables are needed from the UABEA export, prefer `data/uabea-type-metadata-support.v1.json`.
 - `shard-owned-state:upgradeinfolist-population` semantic scope is now reducer-owned in SQLite. It is refreshed during `rebuild_trace_views()` from persisted shard trace fragments rather than being a hand-maintained DB insert path.
 - token-shop row semantic scopes such as `row:ATU4Button` are also reducer-owned in SQLite. `unity_trace_bundle.py` still assembles row recovery inputs during a trace run, but canonical row semantic scopes are refreshed during `rebuild_trace_views()` instead of being inserted directly by the bundle.
@@ -304,7 +335,6 @@ If those gaps remain open, keep the system in extraction and verification docs r
 - Full save/export decoding is still unresolved.
 - `MultiverseMarket` is only partially decoded; the post-validated late block still needs a second-pass parser.
 - Community naming should not be substituted for in-game names unless clearly labeled as external.
-
 
 
 
