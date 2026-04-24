@@ -3655,6 +3655,392 @@ def _dependency_hash_payload(value: Any) -> str:
     return hashlib.sha1(_json_dumps(value).encode("utf-8")).hexdigest()[:16]
 
 
+def _collect_trace_edge_proofs(trace_payload: dict[str, Any]) -> list[dict[str, Any]]:
+    trace_graph = dict(trace_payload.get("traceGraph") or {})
+    bridge_hits = list((trace_payload.get("bridgeCheck") or {}).get("bridgeHits") or [])
+    proof_items: list[dict[str, Any]] = []
+    for item in bridge_hits:
+        if not isinstance(item, dict):
+            continue
+        proof_items.append(
+            {
+                "edgeType": str(item.get("edgeType") or ""),
+                "sourceId": str(item.get("sourceId") or ""),
+                "sourcePath": str(item.get("sourcePath") or ""),
+                "term": str(item.get("term") or ""),
+                "locator": str(item.get("locator") or ""),
+            }
+        )
+    if proof_items:
+        return proof_items[:8]
+    for edge in (trace_graph.get("edges") or []):
+        if not isinstance(edge, dict):
+            continue
+        edge_type = str(edge.get("type") or "").strip()
+        if not edge_type:
+            continue
+        for proof in (edge.get("provedBy") or []):
+            if not isinstance(proof, dict):
+                continue
+            proof_items.append(
+                {
+                    "edgeType": edge_type,
+                    "sourceId": str(proof.get("sourceId") or ""),
+                    "sourcePath": str(proof.get("sourcePath") or ""),
+                    "term": str(proof.get("term") or ""),
+                    "locator": str(proof.get("locator") or ""),
+                }
+            )
+            if len(proof_items) >= 8:
+                return proof_items
+    return proof_items
+
+
+def _build_subject_edge_facts(
+    trace_scope: str,
+    subject_id: str,
+    subject_class: str,
+    execution_context: dict[str, Any],
+    execution_plan: dict[str, Any],
+    decision_summary: dict[str, Any],
+    trace_payload: dict[str, Any],
+    reconstruction_payload: dict[str, Any] | None = None,
+    support_terms: list[str] | None = None,
+    support_proofs: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    trace_graph = dict(trace_payload.get("traceGraph") or {})
+    reconstruction_payload = dict(reconstruction_payload or {})
+    reconstruction_assessment = dict(reconstruction_payload.get("assessment") or {})
+    depth_plan = [step for step in (execution_plan.get("depthPlan") or []) if isinstance(step, dict)]
+    follow_up_terms = [str(value) for value in (execution_plan.get("followUpTerms") or []) if str(value).strip()]
+    support_terms = _unique_strings([str(value) for value in (support_terms or []) if str(value).strip()])
+    support_proofs = [dict(item) for item in (support_proofs or []) if isinstance(item, dict)]
+    proof_items = _collect_trace_edge_proofs(trace_payload)
+    proof_map: dict[str, list[dict[str, Any]]] = {}
+    for item in proof_items:
+        edge_type = str(item.get("edgeType") or "").strip()
+        if not edge_type:
+            continue
+        proof_map.setdefault(edge_type, []).append(item)
+
+    facts: list[dict[str, Any]] = []
+    seen_keys: set[tuple[str, str]] = set()
+
+    def add_fact(
+        edge_type: str,
+        edge_status: str,
+        *,
+        priority: int,
+        reason: str = "",
+        terms: list[str] | None = None,
+        source_ids: list[str] | None = None,
+        goal: str = "",
+        proofs: list[dict[str, Any]] | None = None,
+    ) -> None:
+        normalized_edge_type = str(edge_type or "").strip()
+        normalized_status = str(edge_status or "").strip()
+        if not normalized_edge_type or not normalized_status:
+            return
+        fact_key = (normalized_edge_type, normalized_status)
+        if fact_key in seen_keys:
+            return
+        seen_keys.add(fact_key)
+        facts.append(
+            {
+                "subjectId": subject_id,
+                "subjectClass": subject_class or None,
+                "traceScope": trace_scope,
+                "edgeType": normalized_edge_type,
+                "status": normalized_status,
+                "priority": int(priority),
+                "reason": str(reason or "").strip() or None,
+                "terms": _unique_strings([str(value) for value in (terms or []) if str(value).strip()])[:12],
+                "sourceIds": _unique_strings([str(value) for value in (source_ids or []) if str(value).strip()]),
+                "goal": str(goal or "").strip() or None,
+                "proofs": list(proofs or []),
+            }
+        )
+
+    known_edge_types = _unique_strings(
+        [
+            *[str(value) for value in (decision_summary.get("supportingEdgeTypes") or [])],
+            *[
+                str(edge.get("type") or "")
+                for edge in (trace_graph.get("edges") or [])
+                if isinstance(edge, dict) and str(edge.get("type") or "").strip()
+            ],
+        ]
+    )
+    for edge_type in known_edge_types:
+        add_fact(
+            edge_type,
+            "known",
+            priority=10000,
+            reason="trace:proved-edge",
+            proofs=(proof_map.get(edge_type, []) or support_proofs)[:4],
+        )
+
+    row_local_graph = dict(reconstruction_payload.get("rowLocalGraph") or {})
+    reconstruction_status = dict(reconstruction_payload.get("status") or {})
+    if subject_class == "row-local" and row_local_graph:
+        if list(row_local_graph.get("actionMethods") or []):
+            add_fact(
+                "exact-shell-to-action-hook",
+                "known",
+                priority=5000,
+                reason="reconstruction:action-methods",
+                terms=[*follow_up_terms, *support_terms],
+                source_ids=["reconstruction-fragment", "canonical-term-view", "graph-links"],
+                goal=str(execution_context.get("joinGoal") or "").strip(),
+                proofs=support_proofs[:4],
+            )
+        if list(row_local_graph.get("prefabCandidates") or []):
+            add_fact(
+                "exact-shell-to-prefab",
+                "known",
+                priority=5001,
+                reason="reconstruction:prefab-candidates",
+                terms=[*follow_up_terms, *support_terms],
+                source_ids=["reconstruction-fragment", "canonical-term-view", "graph-links"],
+                goal=str(execution_context.get("joinGoal") or "").strip(),
+                proofs=support_proofs[:4],
+            )
+        if bool(row_local_graph.get("literalTitleRecovered")):
+            add_fact(
+                "exact-shell-to-title",
+                "known",
+                priority=5002,
+                reason="reconstruction:literal-title",
+                terms=[*follow_up_terms, *support_terms],
+                source_ids=["reconstruction-fragment", "canonical-term-view", "graph-links"],
+                goal=str(execution_context.get("joinGoal") or "").strip(),
+                proofs=support_proofs[:4],
+            )
+        if list(row_local_graph.get("updateHooks") or []):
+            add_fact(
+                "exact-display-update-path",
+                "known",
+                priority=5003,
+                reason="reconstruction:update-hooks",
+                terms=[*follow_up_terms, *support_terms],
+                source_ids=["reconstruction-fragment", "canonical-term-view", "graph-links"],
+                goal=str(execution_context.get("joinGoal") or "").strip(),
+                proofs=support_proofs[:4],
+            )
+        if str((reconstruction_status.get("runtimeStatus") or "")).strip().lower() == "closed":
+            add_fact(
+                "runtime-model-gap",
+                "known",
+                priority=5004,
+                reason="reconstruction:runtime-closed",
+                terms=[*follow_up_terms, *support_terms],
+                source_ids=["reconstruction-fragment", "canonical-term-view", "graph-links"],
+                goal=str(execution_context.get("joinGoal") or "").strip(),
+                proofs=support_proofs[:4],
+            )
+
+    for seam in (reconstruction_status.get("nonBlockingSeams") or []):
+        if not isinstance(seam, dict):
+            continue
+        seam_id = str(seam.get("id") or "").strip()
+        if not seam_id:
+            continue
+        add_fact(
+            seam_id,
+            "nonblocking",
+            priority=7000,
+            reason="reconstruction:bounded-nonblocking",
+            terms=[*follow_up_terms, *support_terms],
+            source_ids=["reconstruction-fragment", "canonical-term-view", "graph-links"],
+            goal=str(execution_context.get("joinGoal") or "").strip(),
+            proofs=support_proofs[:4],
+        )
+
+    claim_stages = [stage for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]
+    missing_priority = 0
+    if subject_class == "range-family":
+        for gap_type in _unique_strings([str(value) for value in (reconstruction_assessment.get("baselineGap") or []) if str(value).strip()]):
+            add_fact(
+                gap_type,
+                "missing",
+                priority=missing_priority,
+                reason="reconstruction:baseline-gap",
+                terms=[*follow_up_terms, *support_terms],
+                source_ids=["reconstruction-fragment", "canonical-term-view", "graph-links"],
+                goal=str(execution_context.get("joinGoal") or "").strip(),
+            )
+            missing_priority += 1
+    if subject_class == "row-local":
+        for seam in (reconstruction_payload.get("missingSeams") or []):
+            if not isinstance(seam, dict):
+                continue
+            gap_type = str(seam.get("id") or "").strip()
+            if not gap_type:
+                continue
+            add_fact(
+                gap_type,
+                "missing",
+                priority=missing_priority,
+                reason="reconstruction:missing-seam",
+                terms=[*follow_up_terms, *support_terms],
+                source_ids=["reconstruction-fragment", "canonical-term-view", "graph-links"],
+                goal=str(execution_context.get("joinGoal") or "").strip(),
+            )
+            missing_priority += 1
+    for stage_index, stage in enumerate(claim_stages):
+        stage_reason = "{}:{}".format(
+            str(stage.get("id") or "claim-stage"),
+            str(stage.get("label") or stage.get("id") or "unlabeled-stage"),
+        )
+        matching_depth_step = depth_plan[stage_index] if stage_index < len(depth_plan) else (depth_plan[0] if depth_plan else {})
+        terms = [
+            *[str(value) for value in (matching_depth_step.get("terms") or []) if str(value).strip()],
+            *follow_up_terms,
+            *support_terms,
+        ]
+        source_ids = [
+            *[str(value) for value in (matching_depth_step.get("sourceIds") or []) if str(value).strip()],
+            *[str(value) for value in (execution_plan.get("sourceIds") or []) if str(value).strip()],
+        ]
+        goal = str(matching_depth_step.get("goal") or execution_context.get("joinGoal") or "").strip()
+        for seam_id in (stage.get("missingSeamIds") or []):
+            normalized = str(seam_id or "").strip()
+            if not normalized:
+                continue
+            add_fact(
+                normalized,
+                "missing",
+                priority=missing_priority,
+                reason=stage_reason,
+                terms=terms,
+                source_ids=source_ids,
+                goal=goal,
+            )
+            missing_priority += 1
+
+    if not claim_stages:
+        for gap_type in _unique_strings([str(value) for value in (decision_summary.get("baselineGap") or []) if str(value).strip()]):
+            add_fact(
+                gap_type,
+                "missing",
+                priority=missing_priority,
+                reason="assessment:baseline-gap",
+                terms=[*follow_up_terms, *support_terms],
+                source_ids=["canonical-term-view", "graph-links"],
+                goal=str(execution_context.get("joinGoal") or "").strip(),
+            )
+            missing_priority += 1
+
+    blocked_edge_types = _unique_strings(
+        [
+            *[str(value) for value in (decision_summary.get("blockedEdgeTypes") or [])],
+            *[
+                str(edge.get("type") or "")
+                for edge in (trace_graph.get("negativeEdges") or [])
+                if isinstance(edge, dict) and str(edge.get("type") or "").strip()
+            ],
+        ]
+    )
+    if subject_class == "range-family":
+        blocked_edge_types = _unique_strings(
+            [
+                *[str(value) for value in (reconstruction_assessment.get("blockedEdgeTypes") or [])],
+                *blocked_edge_types,
+            ]
+        )
+    for blocked_index, edge_type in enumerate(blocked_edge_types):
+        matching_depth_step = next(
+            (
+                step
+                for step in depth_plan
+                if str(edge_type).lower() in str(step.get("goal") or "").lower()
+            ),
+            depth_plan[0] if depth_plan else {},
+        )
+        terms = [
+            *[str(value) for value in (matching_depth_step.get("terms") or []) if str(value).strip()],
+            *follow_up_terms,
+            *support_terms,
+        ]
+        source_ids = _unique_strings([
+            *[str(value) for value in (matching_depth_step.get("sourceIds") or []) if str(value).strip()],
+            *[str(value) for value in (execution_plan.get("sourceIds") or []) if str(value).strip()],
+            "canonical-term-view" if support_proofs else "",
+            "graph-links" if support_proofs else "",
+        ])
+        add_fact(
+            edge_type,
+            "blocked",
+            priority=1000 + blocked_index,
+            reason="reconstruction:blocked-edge" if subject_class == "range-family" else "assessment:blocked-edge",
+            terms=terms,
+            source_ids=source_ids,
+            goal=str(matching_depth_step.get("goal") or execution_context.get("joinGoal") or "").strip(),
+        )
+    return facts
+
+
+def _derive_subject_state_from_edge_facts(
+    trace_scope: str,
+    subject_id: str,
+    subject_class: str,
+    facts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    known_edges = _unique_strings(
+        [str(item.get("edgeType") or "") for item in facts if str(item.get("status") or "") == "known"]
+    )
+    missing_edges = _unique_strings(
+        [str(item.get("edgeType") or "") for item in facts if str(item.get("status") or "") == "missing"]
+    )
+    blocked_edges = _unique_strings(
+        [str(item.get("edgeType") or "") for item in facts if str(item.get("status") or "") == "blocked"]
+    )
+    nonblocking_edges = _unique_strings(
+        [str(item.get("edgeType") or "") for item in facts if str(item.get("status") or "") == "nonblocking"]
+    )
+    candidate_facts = [
+        item
+        for item in facts
+        if str(item.get("status") or "") in {"missing", "blocked"} and str(item.get("edgeType") or "").strip()
+    ]
+    candidate_facts.sort(
+        key=lambda item: (
+            0 if str(item.get("status") or "") == "missing" else 1,
+            int(item.get("priority") or 0),
+            str(item.get("edgeType") or ""),
+        )
+    )
+    next_fact = candidate_facts[0] if candidate_facts else {}
+    proofs: list[dict[str, Any]] = []
+    for item in facts:
+        for proof in (item.get("proofs") or []):
+            if isinstance(proof, dict):
+                proofs.append(proof)
+            if len(proofs) >= 8:
+                break
+        if len(proofs) >= 8:
+            break
+    return {
+        "semanticKey": f"subject-state:{trace_scope}",
+        "traceScope": trace_scope,
+        "subjectId": subject_id,
+        "subjectClass": subject_class or None,
+        "knownEdges": known_edges,
+        "missingEdges": missing_edges,
+        "blockedEdges": blocked_edges,
+        "nonblockingEdges": nonblocking_edges,
+        "nextSeam": {
+            "status": "clear" if not next_fact else "open",
+            "id": str(next_fact.get("edgeType") or "").strip() or None,
+            "reason": str(next_fact.get("reason") or "").strip() or ("facts:no-open-seam" if not next_fact else None),
+            "terms": list(next_fact.get("terms") or [])[:12],
+            "sourceIds": list(next_fact.get("sourceIds") or []),
+            "goal": str(next_fact.get("goal") or "").strip() or None,
+        },
+        "proofs": proofs,
+    }
+
+
 def _build_dependency_proof(inputs: dict[str, Any]) -> dict[str, Any]:
     normalized = {
         key: _dependency_hash_payload(value)
@@ -3782,14 +4168,17 @@ def _resolver_anchor_terms(
 def _infer_resolver_target_class(
     trace_scope: str,
     support_rows: list[dict[str, Any]],
+    subject_state: dict[str, Any],
     latest_bundle_payload: dict[str, Any],
 ) -> str:
     if len(support_rows) > 1:
         if "range" in trace_scope or "late" in trace_scope:
             return "range-family-audit"
         return "family-audit"
-    decision_summary = dict(latest_bundle_payload.get("decisionSummary") or {})
-    blocked_edges = [str(value) for value in (decision_summary.get("blockedEdgeTypes") or []) if str(value).strip()]
+    blocked_edges = [str(value) for value in (subject_state.get("blockedEdges") or []) if str(value).strip()]
+    if not blocked_edges:
+        decision_summary = dict(latest_bundle_payload.get("decisionSummary") or {})
+        blocked_edges = [str(value) for value in (decision_summary.get("blockedEdgeTypes") or []) if str(value).strip()]
     if "runtime-model-gap" in blocked_edges or "exact-display-update-path" in blocked_edges:
         return "row-remap-audit"
     return "target"
@@ -3798,14 +4187,18 @@ def _infer_resolver_target_class(
 def _resolver_why_exists(
     trace_scope: str,
     execution_context: dict[str, Any],
+    subject_state: dict[str, Any],
     latest_bundle_payload: dict[str, Any],
     support_rows: list[dict[str, Any]],
     support_surfaces: list[dict[str, Any]],
     target_class: str,
 ) -> str:
-    decision_summary = dict(latest_bundle_payload.get("decisionSummary") or {})
-    blocked_edges = [str(value) for value in (decision_summary.get("blockedEdgeTypes") or []) if str(value).strip()]
-    supporting_edges = [str(value) for value in (decision_summary.get("supportingEdgeTypes") or []) if str(value).strip()]
+    blocked_edges = [str(value) for value in (subject_state.get("blockedEdges") or []) if str(value).strip()]
+    supporting_edges = [str(value) for value in (subject_state.get("knownEdges") or []) if str(value).strip()]
+    if not blocked_edges and not supporting_edges:
+        decision_summary = dict(latest_bundle_payload.get("decisionSummary") or {})
+        blocked_edges = [str(value) for value in (decision_summary.get("blockedEdgeTypes") or []) if str(value).strip()]
+        supporting_edges = [str(value) for value in (decision_summary.get("supportingEdgeTypes") or []) if str(value).strip()]
     label = str(execution_context.get("label") or trace_scope).strip() or trace_scope
     shell_labels = [str(row.get("shellField") or row.get("field") or "").strip() for row in support_rows if str(row.get("shellField") or row.get("field") or "").strip()]
     surface_labels = [str(surface.get("label") or "").strip() for surface in support_surfaces if str(surface.get("label") or "").strip()]
@@ -3917,14 +4310,43 @@ def _derive_support_context_from_resolver_state(
     resolver_payload = dict(resolver_target or {})
     support_surfaces = list(resolver_payload.get("supportSurfaces") or [])
     support_rows = list(resolver_payload.get("supportRows") or [])
-    support_surface_ids = {str(surface.get("id") or "").strip() for surface in support_surfaces if str(surface.get("id") or "").strip()}
-    target_class = str(resolver_payload.get("targetClass") or "").strip()
-    blocked_edge_types = {str(value) for value in (resolver_payload.get("blockedEdgeTypes") or []) if str(value).strip()}
-    effective_family_id = (
-        str(execution_context.get("familyId") or "").strip()
-        or str(resolver_payload.get("familyId") or "").strip()
-        or ("token-shop" if trace_scope.startswith("token-shop") else "")
-    )
+
+    support_context = {
+        "traceRoutineHint": str(resolver_payload.get("traceRoutineHint") or "").strip() or None,
+        "familyTraceProfile": str(resolver_payload.get("familyTraceProfile") or "").strip() or None,
+        "disableNativeTrace": resolver_payload.get("disableNativeTrace") is True,
+        "defaultPresentationUpdateHook": str(resolver_payload.get("defaultPresentationUpdateHook") or "").strip() or None,
+        "nativeTraceTerms": list(resolver_payload.get("nativeTraceTerms") or []),
+        "resolutionAliases": list(resolver_payload.get("resolutionAliases") or []),
+        "surfaces": support_surfaces,
+        "acceptedAnchors": list(resolver_payload.get("acceptedAnchors") or execution_context.get("acceptedAnchors") or []),
+        "defaultAnchors": list(resolver_payload.get("anchorTerms") or []),
+        "outputSummaryRules": dict(resolver_payload.get("outputSummaryRules") or execution_context.get("outputSummaryRules") or {}),
+        "supportRows": support_rows,
+        "shellWindow": dict(surface_plan.get("shellWindow") or {}),
+        "blockedEdgeTypes": list(resolver_payload.get("blockedEdgeTypes") or []),
+        "clearedEdgeTypes": list(resolver_payload.get("clearedEdgeTypes") or []),
+        "nextSeam": str(((latest_bundle_payload.get("knowledgePlan") or {}).get("nextSeam") or "")).strip() or None,
+    }
+    return {key: value for key, value in support_context.items() if value not in (None, "", [], {})}
+
+
+def _derive_resolver_trace_workflow_policy(
+    trace_scope: str,
+    family_id: str,
+    target_class: str,
+    support_rows: list[dict[str, Any]],
+    support_surfaces: list[dict[str, Any]],
+    blocked_edge_types: list[str],
+    anchor_terms: list[str],
+) -> dict[str, Any]:
+    effective_family_id = str(family_id or "").strip() or ("token-shop" if trace_scope.startswith("token-shop") else "")
+    support_surface_ids = {
+        str(surface.get("id") or "").strip()
+        for surface in support_surfaces
+        if str(surface.get("id") or "").strip()
+    }
+    blocked_edge_type_set = {str(value).strip() for value in blocked_edge_types if str(value).strip()}
     trace_routine_hint = ""
     family_trace_profile = ""
     disable_native_trace = False
@@ -3952,29 +4374,18 @@ def _derive_support_context_from_resolver_state(
                 trace_routine_hint = "token-shop-atu3-consumer-trace"
             elif {"consumer-family", "consumer-routines", "booster-bonus-shell"} <= support_surface_ids:
                 trace_routine_hint = "token-shop-atu3-consumer-read-trace"
-            if "exact-display-update-path" in blocked_edge_types:
+            if "exact-display-update-path" in blocked_edge_type_set:
                 default_presentation_update_hook = "SetCostRelatedAttributes"
         if not disable_native_trace:
-            native_trace_terms = _unique_strings(list(resolver_payload.get("anchorTerms") or [])[:12])
+            native_trace_terms = _unique_strings(list(anchor_terms or [])[:12])
 
-    support_context = {
-        "traceRoutineHint": trace_routine_hint,
+    return {
+        "traceRoutineHint": trace_routine_hint or None,
         "familyTraceProfile": family_trace_profile or None,
         "disableNativeTrace": disable_native_trace,
         "defaultPresentationUpdateHook": default_presentation_update_hook or None,
         "nativeTraceTerms": native_trace_terms,
-        "resolutionAliases": list(resolver_payload.get("resolutionAliases") or []),
-        "surfaces": support_surfaces,
-        "acceptedAnchors": list(resolver_payload.get("acceptedAnchors") or execution_context.get("acceptedAnchors") or []),
-        "defaultAnchors": list(resolver_payload.get("anchorTerms") or []),
-        "outputSummaryRules": dict(resolver_payload.get("outputSummaryRules") or execution_context.get("outputSummaryRules") or {}),
-        "supportRows": support_rows,
-        "shellWindow": dict(surface_plan.get("shellWindow") or {}),
-        "blockedEdgeTypes": list(resolver_payload.get("blockedEdgeTypes") or []),
-        "clearedEdgeTypes": list(resolver_payload.get("clearedEdgeTypes") or []),
-        "nextSeam": str(((latest_bundle_payload.get("knowledgePlan") or {}).get("nextSeam") or "")).strip() or None,
     }
-    return {key: value for key, value in support_context.items() if value not in (None, "", [], {})}
 
 
 def _stable_proof_value(value: Any) -> Any:
@@ -5219,6 +5630,36 @@ class GhidraCacheDB:
                 );
                 CREATE INDEX IF NOT EXISTS idx_materialized_resolver_target_views_latest
                     ON materialized_resolver_target_views(project_name, project_file, trace_scope, built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS materialized_subject_edge_facts (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    edge_type TEXT NOT NULL,
+                    edge_status TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT,
+                    built_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, edge_type, edge_status)
+                );
+                CREATE INDEX IF NOT EXISTS idx_materialized_subject_edge_facts_scope
+                    ON materialized_subject_edge_facts(project_name, project_file, trace_scope, subject_id, edge_status, built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS materialized_subject_state_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT,
+                    built_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_materialized_subject_state_views_scope
+                    ON materialized_subject_state_views(project_name, project_file, trace_scope, subject_id, built_at DESC);
 
                 CREATE TABLE IF NOT EXISTS materialized_system_unit_views (
                     system_id TEXT NOT NULL,
@@ -8041,6 +8482,339 @@ class GhidraCacheDB:
             for row in rows
         ]
 
+    def find_materialized_subject_edge_facts(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+    ) -> list[dict[str, Any]]:
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT * FROM materialized_subject_edge_facts
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY edge_status ASC, edge_type ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        return [
+            {
+                "traceScope": str(row["trace_scope"]),
+                "subjectId": str(row["subject_id"]),
+                "edgeType": str(row["edge_type"]),
+                "edgeStatus": str(row["edge_status"]),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"]),
+                "builtAt": str(row["built_at"]),
+            }
+            for row in rows
+        ]
+
+    def find_materialized_subject_state_view(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+    ) -> dict[str, Any] | None:
+        with self.connect() as conn:
+            row = conn.execute(
+                """
+                SELECT * FROM materialized_subject_state_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "traceScope": str(row["trace_scope"]),
+            "subjectId": str(row["subject_id"]),
+            "payload": _json_loads(row["payload_json"], {}),
+            "provenance": _json_loads(row["provenance_json"], {}),
+            "reducerVersion": str(row["reducer_version"]),
+            "builtAt": str(row["built_at"]),
+        }
+
+    def find_or_materialize_subject_state_view(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        *,
+        subject_kind: str = "",
+        subject_key: str = "",
+        family_id: str = "",
+        compatibility_target_id: str = "",
+    ) -> dict[str, Any]:
+        trace_scope = str(trace_scope or "").strip()
+        compatibility_target_id = str(compatibility_target_id or trace_scope or "").strip()
+        execution_context = self.find_or_synthesize_execution_context(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_kind=subject_kind,
+            subject_key=subject_key,
+            family_id=family_id,
+            compatibility_target_id=compatibility_target_id,
+        )
+        subject_id = str(execution_context.get("targetId") or compatibility_target_id or trace_scope).strip()
+        subject_class = (
+            "range-family"
+            if "family" in trace_scope or "family" in str(subject_kind or "")
+            else "row-local"
+        )
+        resolver_target = self.find_materialized_resolver_target_view(project_name, project_file, trace_scope) or {}
+        resolver_payload = dict((resolver_target or {}).get("payload") or {})
+        existing = self.find_materialized_subject_state_view(project_name, project_file, trace_scope, subject_id)
+        execution_plan = dict(
+            (
+                self.find_canonical_semantic_fragment(
+                    project_name,
+                    project_file,
+                    "execution_plan_fragment",
+                    f"target-execution-plan:{trace_scope}",
+                )
+                or {}
+            ).get("payload")
+            or {}
+        )
+        reconstruction_payload = dict(
+            (
+                self.find_canonical_semantic_fragment(
+                    project_name,
+                    project_file,
+                    "token_shop_reconstruction_fragment",
+                    f"token-shop-reconstruction:{compatibility_target_id or trace_scope}",
+                )
+                or {}
+            ).get("payload")
+            or {}
+        )
+        latest_bundle = self.find_latest_materialized_target_bundle_view(project_name, project_file, trace_scope) or {}
+        latest_payload = dict(latest_bundle.get("payload") or {})
+        assessment_payload = dict(
+            (
+                self.find_canonical_semantic_fragment(
+                    project_name,
+                    project_file,
+                    "assessment_fragment",
+                    f"target-assessment:{trace_scope}",
+                )
+                or {}
+            ).get("payload")
+            or {}
+        )
+        decision_summary = dict(latest_payload.get("decisionSummary") or assessment_payload.get("decisionSummary") or {})
+        surface_plan = self.find_or_synthesize_surface_plan(
+            project_name,
+            project_file,
+            trace_scope,
+            family_id=str(execution_context.get("familyId") or family_id or ""),
+            compatibility_target_id=compatibility_target_id,
+        ) or {}
+        support_surface_terms = [
+            str(term)
+            for surface in (_resolver_support_surfaces_from_surface_plan(surface_plan) if surface_plan else [])
+            if isinstance(surface, dict)
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        support_terms = _unique_strings(
+            [
+                *[str(value) for value in (resolver_payload.get("anchorTerms") or []) if str(value).strip()],
+                *[
+                    str(term)
+                    for surface in (resolver_payload.get("supportSurfaces") or [])
+                    if isinstance(surface, dict)
+                    for term in (surface.get("terms") or [])
+                    if str(term).strip()
+                ],
+                *support_surface_terms,
+            ]
+        )
+        support_proofs: list[dict[str, Any]] = []
+        for term in support_terms[:8]:
+            canonical_term = self.find_canonical_term_view(project_name, project_file, term)
+            if canonical_term:
+                support_proofs.append(
+                    {
+                        "edgeType": "",
+                        "sourceId": "canonical-term-view",
+                        "sourcePath": str(((canonical_term.get("job") or {}).get("job_id")) or ""),
+                        "term": str(term),
+                        "locator": "materialized_term_views",
+                    }
+                )
+            for graph_item in self.find_graph_backfill(project_name, project_file, term)[:4]:
+                support_proofs.append(
+                    {
+                        "edgeType": "",
+                        "sourceId": "graph-links",
+                        "sourcePath": str(graph_item.get("sourceRef") or ""),
+                        "term": str(graph_item.get("sourceTerm") or term),
+                        "locator": str(graph_item.get("kind") or ""),
+                    }
+                )
+        edge_facts = _build_subject_edge_facts(
+            trace_scope,
+            subject_id,
+            subject_class,
+            execution_context,
+            execution_plan,
+            decision_summary,
+            latest_payload,
+            reconstruction_payload,
+            support_terms,
+            support_proofs,
+        )
+        state_payload = _derive_subject_state_from_edge_facts(trace_scope, subject_id, subject_class, edge_facts)
+        state_payload["decisionSummary"] = decision_summary
+        state_payload["claimStages"] = list(execution_plan.get("claimStages") or [])
+        state_payload["depthPlan"] = list(execution_plan.get("depthPlan") or [])
+        edge_hashes = [
+            _dependency_hash_payload(
+                {
+                    "edgeType": str(item.get("edgeType") or ""),
+                    "status": str(item.get("status") or ""),
+                    "priority": int(item.get("priority") or 0),
+                    "reason": str(item.get("reason") or ""),
+                    "terms": list(item.get("terms") or []),
+                    "sourceIds": list(item.get("sourceIds") or []),
+                    "goal": str(item.get("goal") or ""),
+                    "proofs": list(item.get("proofs") or []),
+                }
+            )
+            for item in edge_facts
+        ]
+        state_provenance = {
+            "reducer": "materialized-subject-state-view-v1",
+            "traceScope": trace_scope,
+            "subjectId": subject_id,
+            "inputs": {
+                "executionContextSemanticKey": f"target-execution-context:{trace_scope}",
+                "executionPlanSemanticKey": f"target-execution-plan:{trace_scope}",
+                "assessmentSemanticKey": f"target-assessment:{trace_scope}",
+                "latestBundleBuiltAt": str(latest_bundle.get("builtAt") or ""),
+                "edgeFactHashes": edge_hashes,
+            },
+            "payloadHash": _dependency_hash_payload(state_payload),
+        }
+        existing_edge_rows = self.find_materialized_subject_edge_facts(project_name, project_file, trace_scope, subject_id)
+        existing_edge_signatures = sorted(
+            [
+                _dependency_hash_payload(
+                    {
+                        "edgeType": str(item.get("edgeType") or ""),
+                        "edgeStatus": str(item.get("edgeStatus") or ""),
+                        "payload": dict(item.get("payload") or {}),
+                    }
+                )
+                for item in existing_edge_rows
+            ]
+        )
+        next_edge_signatures = sorted(
+            [
+                _dependency_hash_payload(
+                    {
+                        "edgeType": str(item.get("edgeType") or ""),
+                        "edgeStatus": str(item.get("status") or ""),
+                        "payload": dict(item),
+                    }
+                )
+                for item in edge_facts
+            ]
+        )
+        if (
+            existing
+            and _json_dumps(existing.get("payload") or {}) == _json_dumps(state_payload)
+            and existing_edge_signatures == next_edge_signatures
+        ):
+            return dict(existing.get("payload") or {})
+        built_at = datetime.now().isoformat(timespec="microseconds")
+        with self.connect() as conn:
+            stale_keys = {
+                (str(row["edge_type"]), str(row["edge_status"]))
+                for row in conn.execute(
+                    """
+                    SELECT edge_type, edge_status FROM materialized_subject_edge_facts
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                    """,
+                    (project_name, project_file, trace_scope, subject_id),
+                ).fetchall()
+            }
+            current_keys = {
+                (str(item.get("edgeType") or ""), str(item.get("status") or ""))
+                for item in edge_facts
+            }
+            for edge_type, edge_status in sorted(stale_keys - current_keys):
+                conn.execute(
+                    """
+                    DELETE FROM materialized_subject_edge_facts
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ? AND edge_type = ? AND edge_status = ?
+                    """,
+                    (project_name, project_file, trace_scope, subject_id, edge_type, edge_status),
+                )
+            for item in edge_facts:
+                edge_payload = dict(item)
+                edge_provenance = {
+                    "reducer": "materialized-subject-edge-facts-v1",
+                    "traceScope": trace_scope,
+                    "subjectId": subject_id,
+                    "status": str(item.get("status") or ""),
+                    "payloadHash": _dependency_hash_payload(edge_payload),
+                }
+                conn.execute(
+                    """
+                    INSERT INTO materialized_subject_edge_facts(
+                        project_name, project_file, trace_scope, subject_id, edge_type, edge_status,
+                        payload_json, provenance_json, reducer_version, built_at
+                    ) VALUES(?,?,?,?,?,?,?,?,?,?)
+                    ON CONFLICT(project_name, project_file, trace_scope, subject_id, edge_type, edge_status) DO UPDATE SET
+                        payload_json=excluded.payload_json,
+                        provenance_json=excluded.provenance_json,
+                        reducer_version=excluded.reducer_version,
+                        built_at=excluded.built_at
+                    """,
+                    (
+                        project_name,
+                        project_file,
+                        trace_scope,
+                        subject_id,
+                        str(item.get("edgeType") or ""),
+                        str(item.get("status") or ""),
+                        _json_dumps(edge_payload),
+                        _json_dumps(edge_provenance),
+                        "materialized-subject-edge-facts-v1",
+                        built_at,
+                    ),
+                )
+            conn.execute(
+                """
+                INSERT INTO materialized_subject_state_views(
+                    project_name, project_file, trace_scope, subject_id, payload_json, provenance_json, reducer_version, built_at
+                ) VALUES(?,?,?,?,?,?,?,?)
+                ON CONFLICT(project_name, project_file, trace_scope, subject_id) DO UPDATE SET
+                    payload_json=excluded.payload_json,
+                    provenance_json=excluded.provenance_json,
+                    reducer_version=excluded.reducer_version,
+                    built_at=excluded.built_at
+                """,
+                (
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_id,
+                    _json_dumps(state_payload),
+                    _json_dumps(state_provenance),
+                    "materialized-subject-state-view-v1",
+                    built_at,
+                ),
+            )
+        return state_payload
+
     def find_or_materialize_resolver_target_view(
         self,
         project_name: str,
@@ -8097,6 +8871,15 @@ class GhidraCacheDB:
             ).get("payload")
             or {}
         )
+        subject_state = self.find_or_materialize_subject_state_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_kind=subject_kind,
+            subject_key=subject_key,
+            family_id=str(execution_context.get("familyId") or family_id or ""),
+            compatibility_target_id=compatibility_target_id,
+        ) or {}
         reconstruction_payload = dict(
             (
                 self.find_canonical_semantic_fragment(
@@ -8126,9 +8909,9 @@ class GhidraCacheDB:
             support_rows,
             support_surfaces,
         )
-        target_class = _infer_resolver_target_class(trace_scope, support_rows, latest_bundle_payload)
-        blocked_edge_types = _unique_strings([str(value) for value in (decision_summary.get("blockedEdgeTypes") or []) if str(value).strip()])
-        cleared_edge_types = _unique_strings([str(value) for value in (decision_summary.get("supportingEdgeTypes") or []) if str(value).strip()])
+        target_class = _infer_resolver_target_class(trace_scope, support_rows, subject_state, latest_bundle_payload)
+        blocked_edge_types = _unique_strings([str(value) for value in (subject_state.get("blockedEdges") or []) if str(value).strip()])
+        cleared_edge_types = _unique_strings([str(value) for value in (subject_state.get("knownEdges") or []) if str(value).strip()])
         resolution_aliases = _derive_resolver_resolution_aliases(
             trace_scope,
             str(execution_context.get("targetId") or compatibility_target_id or trace_scope),
@@ -8138,6 +8921,15 @@ class GhidraCacheDB:
             target_class,
         )
         output_summary_rules = _derive_output_summary_rules_from_state(trace_scope, target_class, decision_summary)
+        trace_workflow_policy = _derive_resolver_trace_workflow_policy(
+            trace_scope,
+            str(execution_context.get("familyId") or family_id or ""),
+            target_class,
+            support_rows,
+            support_surfaces,
+            blocked_edge_types,
+            anchor_terms,
+        )
         defining_views = _unique_strings(
             [
                 "canonical_semantic_fragments:execution_context_fragment",
@@ -8145,6 +8937,8 @@ class GhidraCacheDB:
                 "canonical_semantic_fragments:assessment_fragment",
                 "canonical_semantic_fragments:target_narrative_fragment",
                 "materialized_target_bundle_views",
+                "materialized_subject_state_views",
+                "materialized_subject_edge_facts",
             ]
         )
         payload = {
@@ -8154,7 +8948,7 @@ class GhidraCacheDB:
             "familyId": str(execution_context.get("familyId") or family_id or "") or None,
             "label": str(execution_context.get("label") or compatibility_target_id or trace_scope),
             "targetClass": target_class,
-            "whyExists": _resolver_why_exists(trace_scope, execution_context, latest_bundle_payload, support_rows, support_surfaces, target_class),
+            "whyExists": _resolver_why_exists(trace_scope, execution_context, subject_state, latest_bundle_payload, support_rows, support_surfaces, target_class),
             "supportRows": support_rows,
             "supportSurfaces": support_surfaces,
             "shellWindow": dict(surface_plan.get("shellWindow") or {}),
@@ -8164,6 +8958,11 @@ class GhidraCacheDB:
             "outputSummaryRules": output_summary_rules,
             "blockedEdgeTypes": blocked_edge_types,
             "clearedEdgeTypes": cleared_edge_types,
+            "traceRoutineHint": trace_workflow_policy.get("traceRoutineHint"),
+            "familyTraceProfile": trace_workflow_policy.get("familyTraceProfile"),
+            "disableNativeTrace": trace_workflow_policy.get("disableNativeTrace"),
+            "defaultPresentationUpdateHook": trace_workflow_policy.get("defaultPresentationUpdateHook"),
+            "nativeTraceTerms": trace_workflow_policy.get("nativeTraceTerms"),
             "summary": str(decision_summary.get("summary") or ""),
             "targetNarrative": {
                 "groundedConclusion": str(target_narrative.get("groundedConclusion") or ""),
@@ -8798,78 +9597,21 @@ class GhidraCacheDB:
             or {}
         )
         decision_summary = dict(latest_payload.get("decisionSummary") or assessment_payload.get("decisionSummary") or {})
-        trace_graph = dict(latest_payload.get("traceGraph") or {})
-        blocked_edge_types = _unique_strings(
-            [str(value) for value in (decision_summary.get("blockedEdgeTypes") or [])]
-        )
-        cleared_edge_types = _unique_strings(
-            [
-                *[str(value) for value in (decision_summary.get("supportingEdgeTypes") or [])],
-                *[
-                    str(edge.get("type") or "")
-                    for edge in (trace_graph.get("edges") or [])
-                    if isinstance(edge, dict) and str(edge.get("type") or "").strip()
-                ],
-            ]
-        )
-        claim_stages = list(execution_plan.get("claimStages") or [])
-        depth_plan = list(execution_plan.get("depthPlan") or [])
-        seam_candidates: list[str] = []
-        seam_reasons: list[str] = []
-        for stage in claim_stages:
-            if not isinstance(stage, dict):
-                continue
-            for seam_id in (stage.get("missingSeamIds") or []):
-                normalized = str(seam_id or "").strip()
-                if normalized:
-                    seam_candidates.append(normalized)
-                    seam_reasons.append(
-                        "{}:{}".format(
-                            str(stage.get("id") or "claim-stage"),
-                            str(stage.get("label") or stage.get("id") or "unlabeled-stage"),
-                        )
-                    )
-        if not seam_candidates:
-            seam_candidates.extend(blocked_edge_types)
-            seam_reasons.extend(["assessment:blocked-edge"] * len(blocked_edge_types))
-        next_seam_id = seam_candidates[0] if seam_candidates else ""
-        matching_depth_step = next(
-            (
-                step
-                for step in depth_plan
-                if isinstance(step, dict)
-                and next_seam_id
-                and next_seam_id.lower() in str(step.get("goal") or "").lower()
-            ),
-            depth_plan[0] if depth_plan else {},
-        )
-        next_seam_terms = _unique_strings(
-            [
-                *[str(value) for value in (matching_depth_step.get("terms") or [])],
-                *[str(value) for value in (execution_plan.get("followUpTerms") or [])],
-            ]
-        )
-        bridge_hits = list((latest_payload.get("bridgeCheck") or {}).get("bridgeHits") or [])
-        proof_items = bridge_hits[:8]
-        if not proof_items:
-            for edge in (trace_graph.get("edges") or []):
-                if not isinstance(edge, dict):
-                    continue
-                for proof in (edge.get("provedBy") or []):
-                    if isinstance(proof, dict):
-                        proof_items.append(
-                            {
-                                "edgeType": str(edge.get("type") or ""),
-                                "sourceId": str(proof.get("sourceId") or ""),
-                                "sourcePath": str(proof.get("sourcePath") or ""),
-                                "term": str(proof.get("term") or ""),
-                                "locator": str(proof.get("locator") or ""),
-                            }
-                        )
-                    if len(proof_items) >= 8:
-                        break
-                if len(proof_items) >= 8:
-                    break
+        subject_state = self.find_or_materialize_subject_state_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_kind=subject_kind,
+            subject_key=subject_key,
+            family_id=str(execution_context.get("familyId") or family_id or ""),
+            compatibility_target_id=compatibility_target_id,
+        ) or {}
+        blocked_edge_types = _unique_strings([str(value) for value in (subject_state.get("blockedEdges") or []) if str(value).strip()])
+        cleared_edge_types = _unique_strings([str(value) for value in (subject_state.get("knownEdges") or []) if str(value).strip()])
+        missing_edge_types = _unique_strings([str(value) for value in (subject_state.get("missingEdges") or []) if str(value).strip()])
+        claim_stages = list(subject_state.get("claimStages") or execution_plan.get("claimStages") or [])
+        depth_plan = list(subject_state.get("depthPlan") or execution_plan.get("depthPlan") or [])
+        proof_items = list(subject_state.get("proofs") or [])
         routine_hint = str(support_context.get("traceRoutineHint") or "").strip()
         family_id = str(
             execution_context.get("familyId")
@@ -8888,14 +9630,7 @@ class GhidraCacheDB:
                 routine_hint = "multiverse-market-save-owner-trace"
             else:
                 routine_hint = trace_scope or "generic-explore"
-        next_seam = {
-            "status": "clear" if not next_seam_id else "open",
-            "id": next_seam_id or None,
-            "reason": seam_reasons[0] if seam_reasons else ("assessment:no-open-seam" if not next_seam_id else None),
-            "terms": next_seam_terms[:12],
-            "sourceIds": list(matching_depth_step.get("sourceIds") or execution_plan.get("sourceIds") or []),
-            "goal": str(matching_depth_step.get("goal") or execution_context.get("joinGoal") or "").strip() or None,
-        }
+        next_seam = dict(subject_state.get("nextSeam") or {})
         return {
             "traceScope": trace_scope,
             "targetId": compatibility_target_id or trace_scope,
@@ -8906,10 +9641,12 @@ class GhidraCacheDB:
             "executionRoutineHint": routine_hint,
             "decisionSummary": decision_summary,
             "clearedEdgeTypes": cleared_edge_types,
+            "missingEdgeTypes": missing_edge_types,
             "blockedEdgeTypes": blocked_edge_types,
             "claimStages": claim_stages,
             "depthPlan": depth_plan,
             "proofs": proof_items,
+            "subjectState": subject_state,
             "surfacePlanSemanticKey": str(surface_plan.get("semanticKey") or ""),
             "supportContext": support_context,
             "targetDefinition": target_definition,

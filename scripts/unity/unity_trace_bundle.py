@@ -567,11 +567,29 @@ def _candidate_gap_plan(
     run_count: int = 0,
 ) -> dict[str, Any]:
     target = dict((registry.get("targets") or {}).get(target_id) or {})
-    decision_summary = dict(payload.get("decisionSummary") or {})
     planner_resolution = dict(payload.get("plannerResolution") or {})
     trace_registry = dict(payload.get("traceRegistry") or {})
-    blocked_edge_types = list(decision_summary.get("blockedEdgeTypes") or [])
-    baseline_gap = list(decision_summary.get("baselineGap") or [])
+    subject_state = get_trace_db().find_or_materialize_subject_state_view(
+        "cifi-full",
+        "libil2cpp.so",
+        trace_scope,
+        subject_kind=str(planner_resolution.get("selectedSubjectKind") or trace_registry.get("selectedSubjectKind") or ""),
+        subject_key=str(planner_resolution.get("selectedSubjectKey") or trace_registry.get("selectedSubjectKey") or ""),
+        family_id=str(target.get("familyId") or ""),
+        compatibility_target_id=target_id,
+    ) or {}
+    if subject_state:
+        decision_summary = dict(subject_state.get("decisionSummary") or {})
+        blocked_edge_types = list(subject_state.get("blockedEdges") or [])
+        baseline_gap = list(subject_state.get("missingEdges") or [])
+        known_edge_types = list(subject_state.get("knownEdges") or [])
+        nonblocking_edge_types = list(subject_state.get("nonblockingEdges") or [])
+    else:
+        decision_summary = dict(payload.get("decisionSummary") or {})
+        blocked_edge_types = list(decision_summary.get("blockedEdgeTypes") or [])
+        baseline_gap = list(decision_summary.get("baselineGap") or [])
+        known_edge_types = list(decision_summary.get("supportingEdgeTypes") or [])
+        nonblocking_edge_types = []
     if not blocked_edge_types:
         return {}
     scopes = _canonical_semantic_scopes_for_target(trace_scope, target_id)
@@ -608,7 +626,7 @@ def _candidate_gap_plan(
         seen_terms.add(normalized)
         ordered_anchor_terms.append(term)
     ordered_anchor_terms = ordered_anchor_terms[:14]
-    proved_edge_count = int(decision_summary.get("provedEdgeCount") or 0)
+    proved_edge_count = int(decision_summary.get("provedEdgeCount") or len(known_edge_types) or 0)
     negative_edge_count = int(decision_summary.get("negativeEdgeCount") or len(blocked_edge_types))
     verdict = str(decision_summary.get("verdict") or "")
     built_dt = _parse_iso_datetime(built_at)
@@ -665,6 +683,8 @@ def _candidate_gap_plan(
         "verdict": verdict,
         "blockedEdgeTypes": blocked_edge_types,
         "baselineGap": baseline_gap,
+        "knownEdgeTypes": known_edge_types,
+        "nonblockingEdgeTypes": nonblocking_edge_types,
         "provedEdgeCount": proved_edge_count,
         "negativeEdgeCount": negative_edge_count,
         "semanticScopeIds": semantic_scope_ids,
@@ -675,6 +695,7 @@ def _candidate_gap_plan(
         "score": round(score, 2),
         "builtAt": built_at,
         "decisionSummary": decision_summary,
+        "subjectState": subject_state,
         "ageHours": round(age_hours, 2),
         "runCount": run_count,
     }
