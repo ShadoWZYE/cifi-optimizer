@@ -313,6 +313,10 @@ const spendBoundarySummaryJs = await readFile(
   new URL("../support/spend-boundary-summary.js", import.meta.url),
   "utf8"
 );
+const tokenShopSubjectContractsJs = await readFile(
+  new URL("../support/token-shop-subject-contracts.js", import.meta.url),
+  "utf8"
+);
 const tokenShopProgressionModel = await readFile(
   new URL("../token-shop-progression-model.js", import.meta.url),
   "utf8"
@@ -7006,6 +7010,56 @@ assert.match(spendBoundarySummaryJs, /function getTokenBankControllerShellSummar
 assert.match(appJs, /Token-bank controller shell/);
 assert.match(
   appJs,
+  /const hasTokenShopSubjectContracts = Boolean\(\s*tokenShop\?\.subjectContracts && Object\.keys\(tokenShop\.subjectContracts\)\.length\s*\)/
+);
+assert.match(appJs, /const hasTokeniumNamingRead =/);
+assert.match(appJs, /const hasTokenShopCostLaneRead =/);
+assert.match(appJs, /const hasSpendActionLaneRead =/);
+assert.match(appJs, /const hasTokenShopOwnerShellRead =/);
+assert.match(appJs, /const hasTokenShopSaveBoundaryRead =/);
+assert.match(appJs, /const hasTokenBankControllerShellRead =/);
+assert.match(appJs, /const hasTokenBankStateRead =/);
+assert.match(appJs, /const hasDailyTokeniumLaneRead =/);
+assert.match(appJs, /const hasTokenBankFormulaRead =/);
+assert.match(appJs, /if \(hasTokeniumNamingRead\)/);
+assert.match(appJs, /if \(hasTokenShopCostLaneRead\)/);
+assert.match(appJs, /if \(hasSpendActionLaneRead\)/);
+assert.match(appJs, /if \(hasTokenShopOwnerShellRead\)/);
+assert.match(appJs, /if \(hasTokenShopSaveBoundaryRead\)/);
+assert.match(appJs, /if \(hasTokenBankControllerShellRead\)/);
+assert.match(appJs, /if \(hasTokenBankStateRead\)/);
+assert.match(appJs, /if \(hasDailyTokeniumLaneRead\)/);
+assert.match(appJs, /if \(hasTokenBankFormulaRead\)/);
+assert.match(
+  appJs,
+  /Contract-backed row detail with compatibility level import: \$\{row\.identity\} \(\$\{row\.slot\}\)/
+);
+assert.match(
+  appJs,
+  /Compatibility imports remain the level source here, but rows with grounded subject contracts now render canonical row detail first\./
+);
+assert.match(
+  tokenShopSubjectContractsJs,
+  /ATU21Level:\s*"token-shop-t3-trio-family"[\s\S]*ATU22Level:\s*"token-shop-t3-trio-family"[\s\S]*ATU23Level:\s*"token-shop-t3-trio-family"/
+);
+assert.match(
+  tokenShopSubjectContractsJs,
+  /ATU6Level:\s*"token-shop-family-structure"[\s\S]*ATU8Level:\s*"token-shop-family-structure"[\s\S]*ATU12Level:\s*"token-shop-family-structure"/
+);
+assert.match(
+  appJs,
+  /\$\{tokeniumNamingSummary\.rangeFamilySubjectId \|\| tokeniumNamingSummary\.rowLocalSubjectId \|\| "canonical TokenShop subject"\} preserves \${tokeniumNamingSummary\.resourceLabel}, \${tokeniumNamingSummary\.academyLabel}, \${tokeniumNamingSummary\.tokenShellLabel}, and \${tokeniumNamingSummary\.tokeniumShellLabel}/
+);
+assert.match(
+  appJs,
+  /Canonical TokenShop contracts now preserve \$\{dailyTokeniumSummary\.rangeFamilySubjectId \|\| dailyTokeniumSummary\.rowLocalSubjectId \|\| "the Daily Tokenium lane"\} with \$\{dailyTokeniumSummary\.ownerFamilyLabel\}, \$\{dailyTokeniumSummary\.academyController\}, \$\{dailyTokeniumSummary\.textHandler\}, and \$\{dailyTokeniumSummary\.missionFamilyLabel\}\./
+);
+assert.match(
+  appJs,
+  /\$\{dailyTokeniumSummary\.loopHook\}, \$\{dailyTokeniumSummary\.purchaseHook\}, \$\{dailyTokeniumSummary\.finalBonusHook\}, \$\{dailyTokeniumSummary\.purchaseOwner\}, and collector-pack copy are now grounded on the canonical Daily Tokenium lane contract rather than read from legacy clue bundles\./
+);
+assert.match(
+  appJs,
   /Canonical TokenShop controller shell or legacy token-bank controller shell preserved/
 );
 assert.match(
@@ -7014,7 +7068,32 @@ assert.match(
 );
 assert.match(
   appJs,
+  /Canonical TokenShop contracts now preserve token-bank state on \${tokenBankStateSummary\.rowLocalSubjectId \|\| tokenBankStateSummary\.rangeFamilySubjectId \|\| "the current TokenShop subject"}, with \${tokenBankStateSummary\.claimMethod}, \${tokenBankStateSummary\.capMethod}, \${tokenBankStateSummary\.displayShell}, and \${tokenBankStateSummary\.loopHook}\./
+);
+assert.match(
+  appJs,
+  /\$\{tokenBankStateSummary\.rowLocalSubjectId \|\| tokenBankStateSummary\.rangeFamilySubjectId \|\| "canonical TokenShop subject"\} preserves \${tokenBankStateSummary\.claimMethod}, \${tokenBankStateSummary\.capMethod}, \${tokenBankStateSummary\.displayShell}, and \${tokenBankStateSummary\.loopHook}/
+);
+assert.match(
+  appJs,
+  /\$\{dailyTokeniumSummary\.rangeFamilySubjectId \|\| dailyTokeniumSummary\.rowLocalSubjectId \|\| "canonical TokenShop subject"\} preserves \${dailyTokeniumSummary\.ownerFamilyLabel}, \${dailyTokeniumSummary\.missionFamilyLabel}, \${dailyTokeniumSummary\.loopHook}, \${dailyTokeniumSummary\.purchaseHook}, and \${dailyTokeniumSummary\.purchaseOwner}/
+);
+assert.match(
+  appJs,
   /FinalTokenBank outputs remain non-owner clues rather than recovered saved-state fields/
+);
+assert.match(appJs, /tokenBankFormulaSummary\.coverageSource === "subject-contracts"/);
+assert.match(
+  appJs,
+  /\$\{tokenBankFormulaSummary\.rowLocalSubjectId \|\| tokenBankFormulaSummary\.rangeFamilySubjectId \|\| "Canonical TokenShop subject"\} now preserves \$\{tokenBankFormulaSummary\.capAccessor\}, \$\{tokenBankFormulaSummary\.fillAccessor\}, \$\{tokenBankFormulaSummary\.capField\}, and \$\{tokenBankFormulaSummary\.fillField\} on the subject contract\./
+);
+assert.match(
+  appJs,
+  /The contract-backed derived-output lane still records no save-family overlap in the grounded context\./
+);
+assert.match(
+  appJs,
+  /Canonical TokenShop contracts still keep the CloudSavePlayerProfile shell narrowed through \${tokenBankStateSummary\.cloudSaveInfoRoutine}, \${tokenBankStateSummary\.cloudSaveProfileRoutine}, and \${tokenBankStateSummary\.cloudSaveStateMachine}\./
 );
 assert.match(appJs, /CloudSavePlayerProfile evidence only preserves a metadata-side shell/);
 assert.match(
@@ -7272,6 +7351,10 @@ assert.match(readme, /docs\/tools\/ocr\.md/);
 assert.match(readme, /npm run test:unit/);
 assert.match(readme, /npm run check:syntax/);
 
+await runBlockingCheck(
+  "daily tokenium subject-state monotonicity",
+  verifyDailyTokeniumSubjectStateMonotonicity
+);
 await runBlockingCheck("launcher-mode lifecycle", verifyLauncherModeServerLifecycle);
 
 const shipWinner = [...snapshot.shipLoadouts]
@@ -8031,6 +8114,89 @@ function summarizeError(error) {
     return message.length > 220 ? `${message.slice(0, 220)}...` : message;
   }
   return summarizeValue(error);
+}
+
+async function verifyDailyTokeniumSubjectStateMonotonicity() {
+  const pythonScript = `
+import json
+import sys
+from pathlib import Path
+root = Path(r"""${repoRoot}""")
+sys.path.insert(0, str(root / "scripts" / "unity"))
+from ghidra_cache_db import GhidraCacheDB
+db = GhidraCacheDB(root / "workbench" / "ghidra-cache" / "ghidra_cache.sqlite3", root / "workbench" / "ghidra-jobs")
+state = db.find_or_materialize_subject_state_view(
+    "cifi-full",
+    "libil2cpp.so",
+    "token-shop-daily-tokenium-family",
+    compatibility_target_id="token-shop-daily-tokenium-family",
+)
+contract = db.find_or_materialize_subject_contract_view(
+    "cifi-full",
+    "libil2cpp.so",
+    "token-shop-daily-tokenium-family",
+    compatibility_target_id="token-shop-daily-tokenium-family",
+)
+print(json.dumps({"state": state, "contract": contract}))
+`;
+  let stdout;
+  try {
+    ({ stdout } = await execFileAsync("python", ["-c", pythonScript], {
+      cwd: repoRoot
+    }));
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "EPERM") {
+      console.warn(
+        "Skipping daily tokenium subject-state monotonicity smoke check because child_process spawn is not permitted here."
+      );
+      return;
+    }
+    throw error;
+  }
+  const payload = JSON.parse(stdout.trim());
+  const state = payload.state ?? {};
+  const contract = payload.contract ?? {};
+
+  assert.equal(
+    state.subjectId,
+    "range:token-shop:ATU14Button-ATU19Button",
+    "Daily Tokenium subject-state selector should preserve the stronger canonical range subject"
+  );
+  assert.deepEqual(
+    state.blockedEdges ?? [],
+    [],
+    "Daily Tokenium subject-state should stay clear after weaker reruns"
+  );
+  assert.deepEqual(
+    state.nonblockingEdges ?? [],
+    ["exact-shell-to-action-hook", "runtime-model-gap"],
+    "Daily Tokenium subject-state should retain the bounded nonblocking seams"
+  );
+  assert.equal(
+    state.nextSeam?.status,
+    "clear",
+    "Daily Tokenium next seam should remain clear when the stronger grounded state still exists"
+  );
+  assert.equal(
+    contract.subjectId,
+    "range:token-shop:ATU14Button-ATU19Button",
+    "Daily Tokenium subject-contract should project the preserved canonical range subject"
+  );
+  assert.equal(
+    contract.blockedInputReasons?.tokeniumNaming ?? null,
+    null,
+    "Tokenium naming should stay cleared after evidence acquisition"
+  );
+  assert.deepEqual(
+    contract.groundedFields?.tokeniumNaming ?? {},
+    {
+      resourceLabel: "Resource_Tokenium",
+      academyLabel: "Aca.Tokenium553",
+      tokenShellLabel: "CostBox-Tokens",
+      tokeniumShellLabel: "CostBox-Tokenium"
+    },
+    "Daily Tokenium contract should accumulate naming evidence without regressing the stronger subject state"
+  );
 }
 
 function summarizeAssertionLocation(stack) {

@@ -99,6 +99,8 @@ Agents should prefer APK/Unity extraction/mapping when grounded game truth is mi
 
 For active extraction lanes, prefer DB-backed trace/materializer outputs over archived export surfaces when both exist.
 
+For the current DB-native reconstruction model and consumer-migration rules, see [docs/unity/db-native-reconstruction-framework.md](docs/unity/db-native-reconstruction-framework.md).
+
 ## Trace and materializer policy
 
 Long native or Ghidra-backed trace runs are expected while cacheable parsing, semantic reduction, or materializer coverage is still converging. Duration alone is not evidence of a stalled lane.

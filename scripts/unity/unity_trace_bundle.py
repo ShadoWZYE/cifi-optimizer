@@ -53,6 +53,22 @@ UNITY_OBJECTS_BY_PATH_ID: dict[int, Any] | None = None
 UNITY_OBJECTS_BY_ASSET_AND_PATH_ID: dict[tuple[str, int], Any] | None = None
 
 
+def _infer_runtime_family_id(*values: Any) -> str:
+    for value in values:
+        normalized = str(value or "").strip().lower()
+        if not normalized:
+            continue
+        if normalized.startswith("token-shop"):
+            return "token-shop"
+        if normalized.startswith("shard-cost"):
+            return "shard-cost"
+        if normalized.startswith("shard-owned-state"):
+            return "shard-owned-state"
+        if normalized.startswith("multiverse-market"):
+            return "multiverse-market-save-owner"
+    return ""
+
+
 class TraceRunProfiler:
     def __init__(self, enabled: bool = False):
         self.enabled = bool(enabled)
@@ -150,6 +166,161 @@ def _trace_bundle_cache_get(bucket: str, key: str) -> Any | None:
 def _trace_bundle_cache_put(bucket: str, key: str, value: Any) -> Any:
     TRACE_BUNDLE_RUN_CACHE[(bucket, key)] = value
     return value
+
+
+def _diagnostic_evidence_sources_checked(evidence: dict[str, Any]) -> list[str]:
+    return [
+        str(source_id)
+        for source_id in (evidence.get("sourceIds") or [])
+        if str(source_id).strip()
+    ]
+
+
+def _pick_acquisition_evidence_source_job_id(
+    project_name: str,
+    project_file: str,
+    request_signature: str,
+    preferred_terms: list[str],
+) -> str:
+    exact_job = get_trace_db().find_exact_subset_job(project_name, project_file, request_signature)
+    exact_job_id = str((exact_job or {}).get("job_id") or "").strip()
+    if exact_job_id:
+        return exact_job_id
+
+    preferred_tokens = {
+        token
+        for value in preferred_terms
+        for token in re.split(r"[^a-z0-9]+", str(value or "").lower())
+        if token
+    }
+    for job in get_trace_db().get_completed_process_jobs(project_name, project_file):
+        job_id = str(job.get("job_id") or "").strip()
+        if not job_id:
+            continue
+        search_strings = [str(value).strip() for value in (job.get("search_strings") or []) if str(value).strip()]
+        search_blob = " ".join(search_strings).lower()
+        if any(term.lower() in search_blob for term in preferred_terms if str(term).strip()):
+            return job_id
+        search_tokens = {
+            token
+            for value in search_strings
+            for token in re.split(r"[^a-z0-9]+", value.lower())
+            if token
+        }
+        if preferred_tokens and preferred_tokens.intersection(search_tokens):
+            return job_id
+    # Exact acquisition hits can surface durable literal evidence even when the
+    # underlying process job metadata did not record the full requested string.
+    # In that case, bind the promoted evidence to the latest completed process
+    # job for the same binary so the evidence row survives scope churn.
+    for job in get_trace_db().get_completed_process_jobs(project_name, project_file):
+        job_id = str(job.get("job_id") or "").strip()
+        if job_id:
+            return job_id
+    return ""
+
+
+def _persist_acquisition_exact_term_evidence(
+    *,
+    project_name: str,
+    project_file: str,
+    trace_scope: str,
+    request_signature: str,
+    target_id: str,
+    execution_routine_id: str,
+    term: str,
+    why_chosen: list[str],
+    evidence: dict[str, Any],
+) -> None:
+    normalized_term = str(term or "").strip().lower()
+    if not normalized_term or not bool(evidence.get("found")):
+        return
+    source_job_id = _pick_acquisition_evidence_source_job_id(
+        project_name,
+        project_file,
+        request_signature,
+        [term, trace_scope, target_id, execution_routine_id, *why_chosen],
+    )
+    if not source_job_id:
+        return
+    now = datetime.now().isoformat()
+    get_trace_db().upsert_custom_evidence_rows(
+        [
+            {
+                "project_name": project_name,
+                "project_file": project_file,
+                "normalized_term": normalized_term,
+                "term": str(term or "").strip(),
+                "aspect_kind": "acquisition_exact_term",
+                "aspect_key": str(trace_scope or "").strip() or "__self__",
+                "source_job_id": source_job_id,
+                "payload": {
+                    "term": str(term or "").strip(),
+                    "traceScope": str(trace_scope or "").strip(),
+                    "targetId": str(target_id or "").strip(),
+                    "requestSignature": str(request_signature or "").strip(),
+                    "executionRoutineId": str(execution_routine_id or "").strip(),
+                    "whyChosen": [str(value) for value in (why_chosen or []) if str(value).strip()],
+                    "evidenceHits": _diagnostic_evidence_hits(evidence),
+                    "evidenceSourcesChecked": _diagnostic_evidence_sources_checked(evidence),
+                    "durableEvidence": True,
+                    "source": "acquisition-exact-hit",
+                },
+                "confidence": 0.99,
+                "reducer_priority": 99,
+                "schema_version": 7,
+                "script_name": "unity_trace_bundle.py",
+                "producer_version": str(request_signature or "").strip(),
+                "start_time": now,
+            }
+        ],
+        rebuild_materialized=True,
+    )
+
+
+def _diagnostic_evidence_hits(evidence: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "found": bool(evidence.get("found")),
+        "graphRefs": [dict(item) for item in (evidence.get("graphRefs") or []) if isinstance(item, dict)][:6],
+        "payloadHits": [dict(item) for item in (evidence.get("payloadHits") or []) if isinstance(item, dict)][:6],
+    }
+
+
+def _recommended_next_acquisition_step(
+    term: str,
+    selected_scope: str,
+    evidence: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    evidence = dict(evidence or {})
+    graph_refs = [dict(item) for item in (evidence.get("graphRefs") or []) if isinstance(item, dict)]
+    if graph_refs:
+        recommended_scope = str((graph_refs[0].get("traceScope") or selected_scope or "")).strip()
+        return {
+            "term": str(term or "").strip(),
+            "traceScope": recommended_scope,
+            "reason": "graph-linked-narrowing",
+        }
+    return {
+        "term": str(term or "").strip(),
+        "traceScope": str(selected_scope or "").strip(),
+        "reason": "narrow-to-exact-term",
+    }
+
+
+def _persist_acquisition_term_diagnostic(
+    request_signature: str,
+    trace_scope: str,
+    term: str,
+    payload: dict[str, Any],
+) -> None:
+    get_trace_db().upsert_materialized_acquisition_diagnostic_view(
+        "cifi-full",
+        "libil2cpp.so",
+        request_signature,
+        trace_scope,
+        term,
+        payload,
+    )
 
 
 def load_canonical_semantic_scope(scope_id: str) -> dict[str, Any]:
@@ -859,11 +1030,64 @@ def _execute_trace_bundle_run(
                 )
             }
         )
+        for term_diagnostic in [dict(item) for item in (acquisition_plan.get("termDiagnostics") or []) if isinstance(item, dict)]:
+            if str(term_diagnostic.get("status") or "").strip() != "routing-failure":
+                continue
+            diagnostic_term = str(term_diagnostic.get("term") or "").strip()
+            if not diagnostic_term:
+                continue
+            diagnostic_scope = str(term_diagnostic.get("selectedTraceScope") or execution_trace_scope or "").strip()
+            _persist_acquisition_term_diagnostic(
+                request_signature,
+                diagnostic_scope,
+                diagnostic_term,
+                {
+                    "status": "routing-failure",
+                    "outcome": "routing-failure",
+                    "failureKind": "routing-failure",
+                    "selectedTraceScope": diagnostic_scope,
+                    "expectedCoverage": list(term_diagnostic.get("expectedCoverage") or []),
+                    "whyChosen": list(term_diagnostic.get("whyChosen") or []),
+                    "evidenceHits": {"found": False, "graphRefs": [], "payloadHits": []},
+                    "evidenceSourcesChecked": [],
+                    "detail": "Planner could not rank a runnable acquisition scope for the exact missing term.",
+                    "nextRecommended": dict(term_diagnostic.get("recommendedNext") or {}) or None,
+                },
+            )
 
         short_circuit_existing = False
         if knowledge_plan.get("mode") == "run-evidence-acquisition" and list(acquisition_plan.get("steps") or []) and not args.resume:
             acquisition_results: list[dict[str, Any]] = []
             dataset = {}
+            requested_terms = [str(term).strip() for term in (acquisition_plan.get("requestedTerms") or []) if str(term).strip()]
+            for term_diagnostic in [dict(item) for item in (acquisition_plan.get("termDiagnostics") or []) if isinstance(item, dict)]:
+                diagnostic_term = str(term_diagnostic.get("term") or "").strip()
+                if not diagnostic_term:
+                    continue
+                diagnostic_scope = str(term_diagnostic.get("selectedTraceScope") or execution_trace_scope or "").strip()
+                status = str(term_diagnostic.get("status") or "").strip() or "planned"
+                if status == "routing-failure":
+                    continue
+                failure_kind = str(term_diagnostic.get("failureKind") or "").strip() or None
+                payload = {
+                    "status": status,
+                    "failureKind": failure_kind,
+                    "selectedTraceScope": diagnostic_scope,
+                    "expectedCoverage": list(term_diagnostic.get("expectedCoverage") or []),
+                    "whyChosen": list(term_diagnostic.get("whyChosen") or []),
+                    "evidenceHits": {"found": False, "graphRefs": [], "payloadHits": []},
+                    "evidenceSourcesChecked": [],
+                    "nextRecommended": dict(term_diagnostic.get("recommendedNext") or {}) or None,
+                }
+                if status == "routing-failure":
+                    payload["outcome"] = "routing-failure"
+                    payload["detail"] = "Planner could not rank a runnable acquisition scope for the exact missing term."
+                _persist_acquisition_term_diagnostic(
+                    request_signature,
+                    diagnostic_scope,
+                    diagnostic_term,
+                    payload,
+                )
             for step in list(acquisition_plan.get("steps") or []):
                 step_trace_scope = str(step.get("traceScope") or "")
                 step_target_id = str(step.get("targetId") or step_trace_scope)
@@ -915,12 +1139,87 @@ def _execute_trace_bundle_run(
                         "requestSignature": step_request_signature,
                     }
                 )
+                for step_term in step_queries:
+                    _persist_acquisition_term_diagnostic(
+                        request_signature,
+                        step_trace_scope,
+                        step_term,
+                        {
+                            "status": "in-progress",
+                            "outcome": "running",
+                            "selectedTraceScope": step_trace_scope,
+                            "selectedTargetId": step_target_id,
+                            "executionRoutineId": str(step_knowledge_plan.get("executionRoutineId") or ""),
+                            "expectedCoverage": [step_term],
+                            "whyChosen": list(step.get("whyChosen") or []),
+                            "evidenceHits": {"found": False, "graphRefs": [], "payloadHits": []},
+                            "evidenceSourcesChecked": [],
+                            "nextRecommended": _recommended_next_acquisition_step(step_term, step_trace_scope),
+                        },
+                    )
                 step_args = argparse.Namespace(**vars(args))
                 step_args.query = step_queries
                 step_args.anchor = step_anchors
-                step_dataset = collect_trace_bundle_components(step_args, step_trace_plan)
-                persist_trace_bundle_fragments(step_dataset, step_trace_scope, step_request_signature)
-                step_dataset = materialize_trace_bundle_dataset(step_dataset, step_trace_scope, step_request_signature)
+                try:
+                    step_dataset = collect_trace_bundle_components(step_args, step_trace_plan)
+                    persist_trace_bundle_fragments(step_dataset, step_trace_scope, step_request_signature)
+                    step_dataset = materialize_trace_bundle_dataset(step_dataset, step_trace_scope, step_request_signature)
+                except Exception as exc:
+                    for step_term in step_queries:
+                        _persist_acquisition_term_diagnostic(
+                            request_signature,
+                            step_trace_scope,
+                            step_term,
+                            {
+                                "status": "execution-compatibility-failure",
+                                "outcome": "execution-failure",
+                                "failureKind": "execution-compatibility-failure",
+                                "selectedTraceScope": step_trace_scope,
+                                "selectedTargetId": step_target_id,
+                                "executionRoutineId": str(step_knowledge_plan.get("executionRoutineId") or ""),
+                                "expectedCoverage": [step_term],
+                                "whyChosen": list(step.get("whyChosen") or []),
+                                "detail": f"{type(exc).__name__}: {exc}",
+                                "evidenceHits": {"found": False, "graphRefs": [], "payloadHits": []},
+                                "evidenceSourcesChecked": [],
+                                "nextRecommended": _recommended_next_acquisition_step(step_term, step_trace_scope),
+                            },
+                        )
+                    raise
+                evidence_diagnostics: dict[str, dict[str, Any]] = {}
+                for step_term in step_queries:
+                    term_evidence = get_trace_db().find_contract_term_evidence("cifi-full", "libil2cpp.so", step_term)
+                    evidence_diagnostics[step_term] = term_evidence
+                    evidence_found = bool(term_evidence.get("found"))
+                    if evidence_found:
+                        _persist_acquisition_exact_term_evidence(
+                            project_name="cifi-full",
+                            project_file="libil2cpp.so",
+                            trace_scope=step_trace_scope,
+                            request_signature=step_request_signature,
+                            target_id=step_target_id,
+                            execution_routine_id=str(step_knowledge_plan.get("executionRoutineId") or ""),
+                            term=step_term,
+                            why_chosen=list(step.get("whyChosen") or []),
+                            evidence=term_evidence,
+                        )
+                    _persist_acquisition_term_diagnostic(
+                        request_signature,
+                        step_trace_scope,
+                        step_term,
+                        {
+                            "status": "exact-evidence-found" if evidence_found else "true-missing-evidence",
+                            "outcome": "exact-hit" if evidence_found else "no-exact-hit",
+                            "selectedTraceScope": step_trace_scope,
+                            "selectedTargetId": step_target_id,
+                            "executionRoutineId": str(step_knowledge_plan.get("executionRoutineId") or ""),
+                            "expectedCoverage": [step_term],
+                            "whyChosen": list(step.get("whyChosen") or []),
+                            "evidenceHits": _diagnostic_evidence_hits(term_evidence),
+                            "evidenceSourcesChecked": _diagnostic_evidence_sources_checked(term_evidence),
+                            "nextRecommended": None if evidence_found else _recommended_next_acquisition_step(step_term, step_trace_scope, term_evidence),
+                        },
+                    )
                 acquisition_results.append(
                     {
                         "traceScope": step_trace_scope,
@@ -928,11 +1227,17 @@ def _execute_trace_bundle_run(
                         "expectedTerms": step_queries,
                         "anchors": step_anchors,
                         "whyChosen": list(step.get("whyChosen") or []),
+                        "termStatuses": {
+                            step_term: str(
+                                "exact-evidence-found" if bool((evidence_diagnostics.get(step_term) or {}).get("found")) else "true-missing-evidence"
+                            )
+                            for step_term in step_queries
+                        },
                     }
                 )
                 dataset = step_dataset
             dataset["traceAcquisitionPlan"] = {
-                "requestedTerms": list(acquisition_plan.get("requestedTerms") or []),
+                "requestedTerms": requested_terms,
                 "steps": acquisition_results,
                 "remainingTerms": list(acquisition_plan.get("remainingTerms") or []),
             }
@@ -4410,6 +4715,12 @@ def build_runtime_trace_catalog() -> dict[str, Any]:
         merged_target = dict(target)
         merged_target["id"] = target_id
         merged_target.setdefault("label", target_id)
+        merged_target["familyId"] = str(merged_target.get("familyId") or "").strip() or _infer_runtime_family_id(
+            target_id,
+            row.get("traceScope"),
+            resolver_payload.get("traceScope"),
+            resolver_payload.get("subjectId"),
+        )
         merged_target.setdefault("requiredSourceFamilies", list(CANONICAL_SOURCE_IDS))
         merged_target.setdefault("defaultAnchors", list(resolver_payload.get("anchorTerms") or []))
         merged_target.setdefault("acceptedAnchors", list(resolver_payload.get("acceptedAnchors") or target.get("acceptedAnchors") or []))
@@ -4426,7 +4737,11 @@ def build_runtime_trace_catalog() -> dict[str, Any]:
             target_id,
             compatibility_target_id=target_id,
         )
-        family_id = str(execution_context.get("familyId") or "").strip()
+        family_id = str(execution_context.get("familyId") or "").strip() or _infer_runtime_family_id(
+            target_id,
+            execution_context.get("traceScope"),
+            execution_context.get("targetId"),
+        )
         if not family_id:
             continue
         targets[target_id] = {
@@ -6675,14 +6990,16 @@ def build_mk3_bridge_trace_graph(
     level0_prefab_source = find_source_entry(prefab_surface, "level0")
     metadata_shell_hit = find_hit(metadata_source, "ATU7Button")
     metadata_owner_hit = find_hit(metadata_source, "MK3TokenBoostStartCost")
-    action_buy_hit = find_hit(action_source, "BuyMK3TokenBoost")
-    level0_prefab_hit = find_hit(level0_prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")
+    action_buy_hit = maybe_find_hit(action_source, "BuyMK3TokenBoost")
+    level0_prefab_hit = maybe_find_hit(level0_prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")
 
     shell_node = "target-shell"
     owner_node = "owner-field-block"
     metadata_node = "metadata-neighborhood"
     action_node = "action-hook"
     prefab_node = "prefab-identity"
+    action_present = action_buy_hit is not None
+    prefab_present = level0_prefab_hit is not None
 
     edges = [
         make_edge(
@@ -6720,24 +7037,32 @@ def build_mk3_bridge_trace_graph(
             shell_node,
             action_node,
             "exact-shell-to-action-hook",
-            "present",
-            "supporting",
-            "The checked action lane preserves the matching direct buy hook BuyMK3TokenBoost for the same MK3 row family.",
-            [
-                cite_hit(action_source, action_buy_hit),
-            ],
+            "present" if action_present else "absent",
+            "supporting" if action_present else "contextual",
+            (
+                "The checked action lane preserves the matching direct buy hook BuyMK3TokenBoost for the same MK3 row family."
+                if action_present
+                else "This acquisition scope does not currently surface the legacy BuyMK3TokenBoost hook, so the MK3 bridge stays shell-only."
+            ),
+            compact_citations(
+                maybe_cite_hit(action_source, action_buy_hit),
+            ),
         ),
         make_edge(
             "action-hook-to-prefab",
             action_node,
             prefab_node,
             "exact-shell-to-prefab",
-            "present",
-            "direct",
-            "The checked prefab roster preserves the exact MK3Booster identity on the same traced row family.",
-            [
-                cite_hit(level0_prefab_source, level0_prefab_hit),
-            ],
+            "present" if prefab_present else "absent",
+            "direct" if prefab_present else "contextual",
+            (
+                "The checked prefab roster preserves the exact MK3Booster identity on the same traced row family."
+                if prefab_present
+                else "This acquisition scope does not currently surface the legacy MK3 prefab identity, so the bridge remains unpromoted."
+            ),
+            compact_citations(
+                maybe_cite_hit(level0_prefab_source, level0_prefab_hit),
+            ),
         ),
     ]
 
@@ -6746,8 +7071,24 @@ def build_mk3_bridge_trace_graph(
             make_node(shell_node, "shell-anchor", f"{shell_window['shellField']} path_id {shell_window['shellPathId']}", "present", "The exact target shell survives in the committed TokenShop payload."),
             make_node(owner_node, "owner-field-block", ", ".join(shell_window["ownerFieldBlock"]), "present", "The exact adjacent owner-field block remains serialized next to the target shell."),
             make_node(metadata_node, "metadata-neighborhood", "ATU7Button + MK3TokenBoost metadata neighborhood", "present", "Metadata still keeps the shell anchor and MK3TokenBoost declaration area together."),
-            make_node(action_node, "action-hook", "BuyMK3TokenBoost", "present", "The committed support datasets preserve the matching MK3 buy hook."),
-            make_node(prefab_node, "prefab-identity", "NewTokenUPGPrefab.T1.MK3Booster", "present", "The exact token prefab identity is preserved."),
+            make_node(
+                action_node,
+                "action-hook",
+                "BuyMK3TokenBoost",
+                "present" if action_present else "absent",
+                "The committed support datasets preserve the matching MK3 buy hook."
+                if action_present
+                else "The current DB-derived acquisition scope does not expose the legacy MK3 buy hook.",
+            ),
+            make_node(
+                prefab_node,
+                "prefab-identity",
+                "NewTokenUPGPrefab.T1.MK3Booster",
+                "present" if prefab_present else "absent",
+                "The exact token prefab identity is preserved."
+                if prefab_present
+                else "The current DB-derived acquisition scope does not expose the legacy MK3 prefab identity.",
+            ),
         ],
         "edges": edges,
         "negativeEdges": [],
@@ -7356,6 +7697,8 @@ def build_mk3_vs_blocked_diff(
 ) -> dict[str, Any]:
     action_source = find_source_entry(find_surface(surfaces, "action-lane"), "level0")
     prefab_source = find_source_entry(find_surface(surfaces, "prefab-lane"), "level0")
+    action_buy_hit = maybe_find_hit(action_source, "BuyMK3TokenBoost")
+    prefab_hit = maybe_find_hit(prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")
     row_scope = dict(mk3_context.get("rowScope") or {})
     effect_target = dict(mk3_context.get("effectTarget") or {})
     row_scope_status = _token_shop_row_scope_status(row_scope)
@@ -7376,36 +7719,48 @@ def build_mk3_vs_blocked_diff(
         },
         {
             "type": "exact-shell-to-action-hook",
-            "status": "present",
-            "provenanceStrength": "supporting",
-            "statement": "The solved bridge preserves one checked row-specific buy hook.",
-            "provedBy": [
-                cite_hit(action_source, find_hit(action_source, "BuyMK3TokenBoost"))
-            ],
+            "status": "present" if action_buy_hit is not None else "absent",
+            "provenanceStrength": "supporting" if action_buy_hit is not None else "contextual",
+            "statement": (
+                "The solved bridge preserves one checked row-specific buy hook."
+                if action_buy_hit is not None
+                else "The current acquisition scope does not preserve one checked row-specific MK3 buy hook."
+            ),
+            "provedBy": compact_citations(
+                maybe_cite_hit(action_source, action_buy_hit)
+            ),
         },
         {
             "type": "exact-shell-to-prefab",
-            "status": "present",
-            "provenanceStrength": "direct",
-            "statement": "The solved bridge preserves one exact prefab identity on the same row family.",
-            "provedBy": [
-                cite_hit(prefab_source, find_hit(prefab_source, "NewTokenUPGPrefab.T1.MK3Booster"))
-            ],
+            "status": "present" if prefab_hit is not None else "absent",
+            "provenanceStrength": "direct" if prefab_hit is not None else "contextual",
+            "statement": (
+                "The solved bridge preserves one exact prefab identity on the same row family."
+                if prefab_hit is not None
+                else "The current acquisition scope does not preserve one exact MK3 prefab identity."
+            ),
+            "provedBy": compact_citations(
+                maybe_cite_hit(prefab_source, prefab_hit)
+            ),
         },
         {
             "type": "multi-support-prefab-corroboration",
-            "status": "present",
-            "provenanceStrength": "supporting",
-            "statement": "The solved bridge is corroborated by multiple checked prefab surfaces.",
-            "provedBy": [
-                cite_hit(action_source, find_hit(action_source, "BuyMK3TokenBoost")),
-                cite_hit(prefab_source, find_hit(prefab_source, "NewTokenUPGPrefab.T1.MK3Booster")),
+            "status": "present" if action_buy_hit is not None and prefab_hit is not None else "absent",
+            "provenanceStrength": "supporting" if action_buy_hit is not None and prefab_hit is not None else "contextual",
+            "statement": (
+                "The solved bridge is corroborated by multiple checked prefab surfaces."
+                if action_buy_hit is not None and prefab_hit is not None
+                else "The current acquisition scope does not preserve the full checked MK3 corroboration set."
+            ),
+            "provedBy": compact_citations(
+                maybe_cite_hit(action_source, action_buy_hit),
+                maybe_cite_hit(prefab_source, prefab_hit),
                 cite_db_semantic_scope(
                     "row:ATU7Button",
                     str(row_scope_status.get("status") or "semantic-open"),
                     "ATU7 remains DB-derived and corroborated by the current canonical row scope.",
                 ),
-            ],
+            ),
         },
     ]
     blocked_edges = build_token_shop_atu3_blocked_edges(token_shop_extract, row_scope, effect_target)
@@ -11413,6 +11768,14 @@ def build_dataset(
             target_family_id = str(trace_plan.get("selectedFamilyId") or target.get("familyId") or "").strip()
             if target_family_id not in registry["planner"]["families"]:
                 target_family_id = str(target.get("familyId") or "").strip()
+            if target_family_id not in registry["planner"]["families"]:
+                target_family_id = _infer_runtime_family_id(
+                    execution_trace_scope,
+                    execution_target_id,
+                    selected_target_id,
+                )
+            if target_family_id not in registry["planner"]["families"]:
+                target_family_id = "exploration"
             family_plan = registry["planner"]["families"][target_family_id]
             target, execution_context = _apply_db_execution_context(target, execution_trace_scope, planner_resolution)
             target, execution_plan = _apply_db_execution_plan(target, execution_trace_scope)
@@ -12690,6 +13053,15 @@ def plan_trace_bundle_request(
             if selected_target_id in registry.get("targets", {})
             else str(planner_resolution.get("matchedFamilyId") or args.family or "exploration")
         )
+        if not str(selected_family_id or "").strip():
+            selected_family_id = _infer_runtime_family_id(
+                selected_target_id,
+                execution_target_id,
+                execution_trace_scope,
+                best_gap_plan.get("familyId"),
+            )
+        if not str(selected_family_id or "").strip():
+            selected_family_id = "exploration"
         knowledge_plan = {}
         if execution_trace_scope and execution_trace_scope != "generic-explore":
             knowledge_plan = dict(
@@ -12724,6 +13096,13 @@ def plan_trace_bundle_request(
         selected_family_id = str(resolved_request.get("selectedFamilyId") or planner_resolution.get("matchedFamilyId") or "").strip()
         if not selected_family_id and selected_target_id in registry.get("targets", {}):
             selected_family_id = str(registry["targets"][selected_target_id].get("familyId") or "").strip()
+        if not selected_family_id:
+            selected_family_id = _infer_runtime_family_id(
+                selected_target_id,
+                execution_target_id,
+                execution_trace_scope,
+                args.family,
+            )
         if not selected_family_id:
             selected_family_id = str(args.family or "exploration")
         knowledge_plan = dict(resolved_request.get("knowledgePlan") or {})
@@ -12945,6 +13324,21 @@ def main() -> None:
                             step.get("traceScope") or "unknown",
                             ", ".join(step.get("expectedTerms") or []) or "none",
                             "; ".join(step.get("whyChosen") or []) or "none",
+                        )
+                    )
+                for term_diagnostic in [dict(item) for item in (acquisition_plan.get("termDiagnostics") or []) if isinstance(item, dict)]:
+                    if str(term_diagnostic.get("status") or "").strip() == "planned":
+                        continue
+                    recommended_next = dict(term_diagnostic.get("recommendedNext") or {})
+                    print(
+                        "  acquisitionTermStatus {}={} scope={} next={}".format(
+                            term_diagnostic.get("term") or "unknown",
+                            term_diagnostic.get("status") or "unknown",
+                            term_diagnostic.get("selectedTraceScope") or "none",
+                            "{}@{}".format(
+                                recommended_next.get("term") or "none",
+                                recommended_next.get("traceScope") or "none",
+                            ),
                         )
                     )
         if best_gap_plan:

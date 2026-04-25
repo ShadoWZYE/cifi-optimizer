@@ -2206,8 +2206,8 @@ function renderSpendSaveSideBoundary() {
 
   const summary = getMultiverseMarketMetadataSummary(multiverseMarketMetadataNeighborhood);
   const validatedCoverage = getMultiverseMarketValidatedCoverage(multiverseMarket);
-  const dailyTokeniumSummary = getDailyTokeniumLaneSummary(dailyTokeniumLaneClues);
-  const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenBankFormulaBoundary);
+  const dailyTokeniumSummary = getDailyTokeniumLaneSummary(tokenShop);
+  const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenShop);
   const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(
     multiverseMarketRangeBoundary
   );
@@ -2277,13 +2277,13 @@ function renderSpendSaveSideBoundary() {
         </article>
         <article class="validation-card ${dailyTokeniumSummary.hasOwnerFamilyClues ? "pass" : "warn"}">
           <strong>Daily Tokenium owner family</strong>
-          <p class="meta">${dailyTokeniumSummary.hasOwnerFamilyClues ? "SpaceAcademy, SpaceAcademyMain, TextHandlerSpaceAcademy, and FarmMissions now appear in a checked-in lane clue bundle." : "Daily Tokenium owner-family clues are incomplete in the checked-in lane clue bundle."}</p>
-          <p class="meta">${dailyTokeniumSummary.hasModifierBoundary ? "LM244 hooks, BuyLM244, FinalDailyTokenBonus, and Collector-pack copy still behave like modifier-family clues around the lane, not recovered saved-state owners." : "Daily Tokenium modifier-family clues are incomplete in the checked-in lane clue bundle."}</p>
+          <p class="meta">${dailyTokeniumSummary.hasOwnerFamilyClues ? (dailyTokeniumSummary.coverageSource === "subject-contracts" ? `Canonical TokenShop contracts now preserve ${dailyTokeniumSummary.rangeFamilySubjectId || dailyTokeniumSummary.rowLocalSubjectId || "the Daily Tokenium lane"} with ${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.academyController}, ${dailyTokeniumSummary.textHandler}, and ${dailyTokeniumSummary.missionFamilyLabel}.` : "SpaceAcademy, SpaceAcademyMain, TextHandlerSpaceAcademy, and FarmMissions now appear in a checked-in lane clue bundle.") : "Daily Tokenium owner-family clues are incomplete in the checked-in lane clue bundle."}</p>
+          <p class="meta">${dailyTokeniumSummary.hasModifierBoundary ? (dailyTokeniumSummary.coverageSource === "subject-contracts" ? `${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, ${dailyTokeniumSummary.finalBonusHook}, ${dailyTokeniumSummary.purchaseOwner}, and collector-pack copy are now grounded on the canonical Daily Tokenium lane contract rather than read from legacy clue bundles.` : "LM244 hooks, BuyLM244, FinalDailyTokenBonus, and Collector-pack copy still behave like modifier-family clues around the lane, not recovered saved-state owners.") : "Daily Tokenium modifier-family clues are incomplete in the checked-in lane clue bundle."}</p>
         </article>
         <article class="validation-card ${tokenBankFormulaSummary.hasDerivedOutputBoundary ? "pass" : "warn"}">
           <strong>Token-bank derived output boundary</strong>
-          <p class="meta">${tokenBankFormulaSummary.hasDerivedOutputBoundary ? "FinalTokenBankCap and FinalTokenBankFillSpeed now appear in a checked-in accessor and backing-field cluster." : "Token-bank derived-output clues are incomplete in the checked-in boundary bundle."}</p>
-          <p class="meta">${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? "The same checked local context still does not expose PlayerProfileData or CloudSavePlayerProfile beside those outputs." : "The checked derived-output context now overlaps a broader save-family clue and needs review."}</p>
+          <p class="meta">${tokenBankFormulaSummary.hasDerivedOutputBoundary ? (tokenBankFormulaSummary.coverageSource === "subject-contracts" ? `${tokenBankFormulaSummary.rowLocalSubjectId || tokenBankFormulaSummary.rangeFamilySubjectId || "Canonical TokenShop subject"} now preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} on the subject contract.` : "FinalTokenBankCap and FinalTokenBankFillSpeed now appear in a checked-in accessor and backing-field cluster.") : "Token-bank derived-output clues are incomplete in the checked-in boundary bundle."}</p>
+          <p class="meta">${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? (tokenBankFormulaSummary.coverageSource === "subject-contracts" ? "The contract-backed derived-output lane still records no save-family overlap in the grounded context." : "The same checked local context still does not expose PlayerProfileData or CloudSavePlayerProfile beside those outputs.") : "The checked derived-output context now overlaps a broader save-family clue and needs review."}</p>
         </article>
         <article class="validation-card warn">
           <strong>Still blocked for planner wiring</strong>
@@ -2845,12 +2845,10 @@ function renderResearchTrackSupport(track) {
     const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
       market?.saveOwner?.marketMemberBoundary
     );
-    const tokeniumNamingSummary = getTokeniumNamingSummary(tokenShop?.tokenBank?.namingClues);
+    const tokeniumNamingSummary = getTokeniumNamingSummary(tokenShop);
     const tokenBankStateSummary = getTokenBankStateSummary(tokenShop);
-    const dailyTokeniumSummary = getDailyTokeniumLaneSummary(tokenShop?.dailyTokenium?.laneClues);
-    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(
-      tokenShop?.tokenBank?.formulaBoundary
-    );
+    const dailyTokeniumSummary = getDailyTokeniumLaneSummary(tokenShop);
+    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenShop);
     const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(
       market?.rowIdentity?.rangeBoundary
     );
@@ -2946,9 +2944,7 @@ function renderResearchTrackSupport(track) {
     const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(tokenShop);
     const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(tokenShop);
     const tokenBankStateSummary = getTokenBankStateSummary(tokenShop);
-    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(
-      tokenShop?.tokenBank?.formulaBoundary
-    );
+    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenShop);
     const tokenBankOwnerNotes = [
       tokenShopOwnerShellSummary.hasOwnerShell
         ? tokenShopOwnerShellSummary.coverageSource === "subject-contracts"
@@ -2966,18 +2962,26 @@ function renderResearchTrackSupport(track) {
           : `The token-bank controller shell preserves ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.`
         : "Token-bank controller-shell clues are not available in this build.",
       tokenBankStateSummary.hasControllerSplit
-        ? `Display clues such as ${tokenBankStateSummary.displayShell} and ${tokenBankStateSummary.loopHook} stay beside controller methods like ${tokenBankStateSummary.capMethod}.`
+        ? tokenBankStateSummary.coverageSource === "subject-contracts"
+          ? `Canonical TokenShop contracts now preserve token-bank state on ${tokenBankStateSummary.rowLocalSubjectId || tokenBankStateSummary.rangeFamilySubjectId || "the current TokenShop subject"}, with ${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook}.`
+          : `Display clues such as ${tokenBankStateSummary.displayShell} and ${tokenBankStateSummary.loopHook} stay beside controller methods like ${tokenBankStateSummary.capMethod}.`
         : "Token-bank controller or display split clues are not available in this build."
     ];
     const tokenBankBlockedNotes = [
       tokenBankFormulaSummary.hasDerivedOutputBoundary
-        ? `Derived-output cluster preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField}.`
+        ? tokenBankFormulaSummary.coverageSource === "subject-contracts"
+          ? `${tokenBankFormulaSummary.rowLocalSubjectId || tokenBankFormulaSummary.rangeFamilySubjectId || "Canonical TokenShop subject"} preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} on the subject contract.`
+          : `Derived-output cluster preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField}.`
         : "Token-bank derived-output clues are not available in this build.",
       tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext
-        ? "FinalTokenBank outputs remain non-owner clues rather than recovered saved-state fields."
+        ? tokenBankFormulaSummary.coverageSource === "subject-contracts"
+          ? "The contract-backed derived-output lane still records no save-family overlap in the grounded context."
+          : "FinalTokenBank outputs remain non-owner clues rather than recovered saved-state fields."
         : "The checked derived-output cluster now overlaps the broader save-family search and needs review.",
       tokenBankStateSummary.hasCloudSaveShellBoundary
-        ? `Remaining CloudSavePlayerProfile evidence only preserves a metadata-side shell through ${tokenBankStateSummary.cloudSaveInfoRoutine}, ${tokenBankStateSummary.cloudSaveProfileRoutine}, and ${tokenBankStateSummary.cloudSaveStateMachine}.`
+        ? tokenBankStateSummary.coverageSource === "subject-contracts"
+          ? `Canonical TokenShop contracts still keep the CloudSavePlayerProfile shell narrowed through ${tokenBankStateSummary.cloudSaveInfoRoutine}, ${tokenBankStateSummary.cloudSaveProfileRoutine}, and ${tokenBankStateSummary.cloudSaveStateMachine}.`
+          : `Remaining CloudSavePlayerProfile evidence only preserves a metadata-side shell through ${tokenBankStateSummary.cloudSaveInfoRoutine}, ${tokenBankStateSummary.cloudSaveProfileRoutine}, and ${tokenBankStateSummary.cloudSaveStateMachine}.`
         : "The narrowed CloudSavePlayerProfile shell boundary is not available in this build.",
       "This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state."
     ];
@@ -4218,24 +4222,18 @@ function buildApkGroundingValidationCases() {
   const shardSystem = getCurrentShardSystemView();
   const tokenShop = spendSystem?.tokenShop;
   const market = spendSystem?.multiverseMarket;
+  const hasTokenShopSubjectContracts = Boolean(
+    tokenShop?.subjectContracts && Object.keys(tokenShop.subjectContracts).length
+  );
   const multiverseMarket = market?.saveOwner?.extract;
   const multiverseMarketMetadataNeighborhood = market?.rowIdentity?.metadataNeighborhood;
-  const tokeniumNamingClues = tokenShop?.tokenBank?.namingClues;
-  const tokenBankStateClues = tokenShop?.tokenBank?.stateClues;
-  const dailyTokeniumLaneClues = tokenShop?.dailyTokenium?.laneClues;
-  const tokenBankFormulaBoundary = tokenShop?.tokenBank?.formulaBoundary;
   const multiverseMarketRangeBoundary = market?.rowIdentity?.rangeBoundary;
   const multiverseMarketRowTextCoverage = market?.rowIdentity?.rowTextCoverage;
   const multiverseMarketPrefabRemapBoundary = market?.rowIdentity?.prefabRemapBoundary;
-  const tokenShopCostLanes = tokenShop?.spendLanes?.costLanes;
-  const spendActionLaneClues = tokenShop?.spendLanes?.actionLaneClues;
   const multiverseMarketActionShell = market?.uiShell?.actionShell;
   const multiverseMarketOwnerFamily = market?.uiShell?.ownerFamily;
-  const tokenShopOwnerShell = tokenShop?.tokenBank?.ownerShell;
-  const tokenShopSaveBoundary = tokenShop?.rows?.boundaries?.save;
   const multiverseMarketSaveBoundary = market?.saveOwner?.saveBoundary;
   const multiverseMarketMarketMemberBoundary = market?.saveOwner?.marketMemberBoundary;
-  const tokenBankControllerShell = tokenShop?.tokenBank?.controllerShell;
   const shardMilestones = shardSystem?.family?.grounded?.milestones;
   const shardAssetGrounding = shardSystem?.family?.grounded?.assetGrounding;
   const shardOwnerFamilyBoundary = shardSystem?.family?.boundaries?.ownerFamily;
@@ -4248,6 +4246,33 @@ function buildApkGroundingValidationCases() {
   const shardMilestoneRowShellBoundary = shardSystem?.family?.boundaries?.rowShell;
   const shardMilestoneRowAlignmentBoundary = shardSystem?.family?.boundaries?.rowAlignment;
   const shardSaveBoundary = shardSystem?.ownedState?.saveBoundary;
+  const tokeniumNamingSummary = getTokeniumNamingSummary(tokenShop);
+  const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShop);
+  const spendActionLaneSummary = getSpendActionLaneSummary(tokenShop);
+  const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(tokenShop);
+  const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(tokenShop);
+  const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(tokenShop);
+  const tokenBankStateSummary = getTokenBankStateSummary(tokenShop);
+  const dailyTokeniumSummary = getDailyTokeniumLaneSummary(tokenShop);
+  const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenShop);
+  const hasTokeniumNamingRead =
+    hasTokenShopSubjectContracts || Boolean(tokenShop?.tokenBank?.namingClues);
+  const hasTokenShopCostLaneRead =
+    hasTokenShopSubjectContracts || Boolean(tokenShop?.spendLanes?.costLanes);
+  const hasSpendActionLaneRead =
+    hasTokenShopSubjectContracts || Boolean(tokenShop?.spendLanes?.actionLaneClues);
+  const hasTokenShopOwnerShellRead =
+    hasTokenShopSubjectContracts || Boolean(tokenShop?.tokenBank?.ownerShell);
+  const hasTokenShopSaveBoundaryRead =
+    hasTokenShopSubjectContracts || Boolean(tokenShop?.rows?.boundaries?.save);
+  const hasTokenBankControllerShellRead =
+    hasTokenShopSubjectContracts || Boolean(tokenShop?.tokenBank?.controllerShell);
+  const hasTokenBankStateRead =
+    hasTokenShopSubjectContracts || Boolean(tokenShop?.tokenBank?.stateClues);
+  const hasDailyTokeniumLaneRead =
+    hasTokenShopSubjectContracts || Boolean(tokenShop?.dailyTokenium?.laneClues);
+  const hasTokenBankFormulaRead =
+    hasTokenShopSubjectContracts || Boolean(tokenShop?.tokenBank?.formulaBoundary);
   const cases = [];
 
   if (shardAssetGrounding) {
@@ -4495,8 +4520,6 @@ function buildApkGroundingValidationCases() {
   if (tokenShop) {
     const numericTable = tokenShop.numeric_table ?? {};
     const tokenShopCoverage = getTokenShopCoverageSummary(getCurrentSpendSystemView()?.tokenShop);
-    const tokeniumNamingSummary = getTokeniumNamingSummary(tokeniumNamingClues);
-    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop);
     const hasTokeniumCurrencyShell = tokeniumNamingSummary.hasNamingClues;
     const hasTokenBankAnchors = tokenBankStateSummary.hasControllerSplit;
     cases.push({
@@ -4625,22 +4648,22 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (tokeniumNamingClues) {
-    const tokeniumNamingSummary = getTokeniumNamingSummary(tokeniumNamingClues);
+  if (hasTokeniumNamingRead) {
     cases.push({
       title: "Spend tokenium naming clues",
       expected:
         "Resource_Tokenium, Aca.Tokenium553, CostBox-Tokens, and CostBox-Tokenium available",
       actual: tokeniumNamingSummary.hasNamingClues
-        ? `${tokeniumNamingSummary.resourceLabel}, ${tokeniumNamingSummary.academyLabel}, ${tokeniumNamingSummary.tokenShellLabel}, and ${tokeniumNamingSummary.tokeniumShellLabel} available`
+        ? tokeniumNamingSummary.coverageSource === "subject-contracts"
+          ? `${tokeniumNamingSummary.rangeFamilySubjectId || tokeniumNamingSummary.rowLocalSubjectId || "canonical TokenShop subject"} preserves ${tokeniumNamingSummary.resourceLabel}, ${tokeniumNamingSummary.academyLabel}, ${tokeniumNamingSummary.tokenShellLabel}, and ${tokeniumNamingSummary.tokeniumShellLabel}`
+          : `${tokeniumNamingSummary.resourceLabel}, ${tokeniumNamingSummary.academyLabel}, ${tokeniumNamingSummary.tokenShellLabel}, and ${tokeniumNamingSummary.tokeniumShellLabel} available`
         : "Missing token or tokenium naming clues",
       pass: tokeniumNamingSummary.hasNamingClues,
       scope: "APK"
     });
   }
 
-  if (tokenShopCostLanes || tokenShop?.subjectContracts) {
-    const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShop);
+  if (hasTokenShopCostLaneRead) {
     cases.push({
       title: "TokenShop cost-lane split",
       expected:
@@ -4657,8 +4680,7 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (spendActionLaneClues || tokenShop?.subjectContracts) {
-    const spendActionLaneSummary = getSpendActionLaneSummary(tokenShop);
+  if (hasSpendActionLaneRead) {
     cases.push({
       title: "Spend action-lane split",
       expected: "Canonical TokenShop action coverage or legacy spend action-lane clues preserved",
@@ -4674,8 +4696,7 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (tokenShopOwnerShell || tokenShop?.subjectContracts) {
-    const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(tokenShop);
+  if (hasTokenShopOwnerShellRead) {
     cases.push({
       title: "TokenShop owner shell",
       expected: "Canonical TokenShop subject owner shell or legacy local owner shell preserved",
@@ -4689,8 +4710,7 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (tokenShopSaveBoundary || tokenShop?.subjectContracts) {
-    const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(tokenShop);
+  if (hasTokenShopSaveBoundaryRead) {
     cases.push({
       title: "TokenShop save boundary",
       expected:
@@ -4705,8 +4725,7 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (tokenBankControllerShell || tokenShop?.subjectContracts) {
-    const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(tokenShop);
+  if (hasTokenBankControllerShellRead) {
     cases.push({
       title: "Token-bank controller shell",
       expected:
@@ -4721,42 +4740,45 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (tokenBankStateClues || tokenShop?.subjectContracts) {
-    const tokenBankStateSummary = getTokenBankStateSummary(tokenShop);
+  if (hasTokenBankStateRead) {
     cases.push({
       title: "Token-bank controller split clues",
       expected:
         "ClaimBankedTokens, get_TokenBankCap, BigStatisticPrefab.TokenBankCap, and SetLM244BonusText available",
       actual: tokenBankStateSummary.hasControllerSplit
-        ? `${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook} available`
+        ? tokenBankStateSummary.coverageSource === "subject-contracts"
+          ? `${tokenBankStateSummary.rowLocalSubjectId || tokenBankStateSummary.rangeFamilySubjectId || "canonical TokenShop subject"} preserves ${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook}`
+          : `${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook} available`
         : "Missing token-bank controller split clues",
       pass: tokenBankStateSummary.hasControllerSplit,
       scope: "APK"
     });
   }
 
-  if (dailyTokeniumLaneClues) {
-    const dailyTokeniumSummary = getDailyTokeniumLaneSummary(dailyTokeniumLaneClues);
+  if (hasDailyTokeniumLaneRead) {
     cases.push({
       title: "Daily Tokenium owner-family clues",
       expected:
         "SpaceAcademy, FarmMissions, SetLM244BonusText, BuyLM244, and BuyCollectorDevice available",
       actual: dailyTokeniumSummary.hasOwnerFamilyClues
-        ? `${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.missionFamilyLabel}, ${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, and ${dailyTokeniumSummary.purchaseOwner} available`
+        ? dailyTokeniumSummary.coverageSource === "subject-contracts"
+          ? `${dailyTokeniumSummary.rangeFamilySubjectId || dailyTokeniumSummary.rowLocalSubjectId || "canonical TokenShop subject"} preserves ${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.missionFamilyLabel}, ${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, and ${dailyTokeniumSummary.purchaseOwner}`
+          : `${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.missionFamilyLabel}, ${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, and ${dailyTokeniumSummary.purchaseOwner} available`
         : "Missing Daily Tokenium owner-family clues",
       pass: dailyTokeniumSummary.hasOwnerFamilyClues && dailyTokeniumSummary.hasModifierBoundary,
       scope: "APK"
     });
   }
 
-  if (tokenBankFormulaBoundary) {
-    const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenBankFormulaBoundary);
+  if (hasTokenBankFormulaRead) {
     cases.push({
       title: "Token-bank derived output boundary",
       expected:
         "FinalTokenBankCap and FinalTokenBankFillSpeed cluster without PlayerProfileData or CloudSavePlayerProfile joins",
       actual: tokenBankFormulaSummary.hasDerivedOutputBoundary
-        ? `${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} cluster${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? " without save-family joins" : " with save-family overlap"}.`
+        ? tokenBankFormulaSummary.coverageSource === "subject-contracts"
+          ? `${tokenBankFormulaSummary.rowLocalSubjectId || tokenBankFormulaSummary.rangeFamilySubjectId || "canonical TokenShop subject"} preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField}${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? " without save-family joins" : " with save-family overlap"}.`
+          : `${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} cluster${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? " without save-family joins" : " with save-family overlap"}.`
         : "Missing token-bank derived output boundary clues",
       pass:
         tokenBankFormulaSummary.hasDerivedOutputBoundary &&
@@ -5438,7 +5460,10 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
   const resolvedTokenShopState =
     tokenShopState && typeof tokenShopState === "object" ? tokenShopState : {};
   const rows = getTokenShopGroundedSubsetDefinitions(boundary).map((row) => ({
-    label: `Compatibility-only subset level: ${row.identity} (${row.slot})`,
+    label:
+      row?.subjectId && row?.rowDetail?.isGrounded
+        ? `Contract-backed row detail with compatibility level import: ${row.identity} (${row.slot})`
+        : `Compatibility-only subset level: ${row.identity} (${row.slot})`,
     value: resolvedTokenShopState[row.field],
     path: `compatibility.unmappedSystemState.tokenShop.${row.field}`,
     note: row.note
@@ -5448,7 +5473,7 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
     rows,
     importedCount: rows.filter((row) => isBoundaryValuePresent(row.value)).length,
     quarantineNote:
-      "Only rows with checked remap-boundary joins are surfaced here. Remaining `ATU*Level` rows stay quarantined under `compatibility.unmappedSystemState.tokenShop` until more grounded row identities clear."
+      "Compatibility imports remain the level source here, but rows with grounded subject contracts now render canonical row detail first. Remaining `ATU*Level` rows stay quarantined under `compatibility.unmappedSystemState.tokenShop` until more grounded row identities clear."
   };
 }
 

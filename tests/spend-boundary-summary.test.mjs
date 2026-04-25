@@ -3,10 +3,12 @@ import assert from "node:assert/strict";
 
 import {
   formatNumericRanges,
+  getDailyTokeniumLaneSummary,
   getImportedMultiverseMarketPreview,
   getMultiverseMarketMarketMemberBoundarySummary,
   getSpendActionLaneSummary,
   getTokenBankControllerShellSummary,
+  getTokenBankFormulaBoundarySummary,
   getTokeniumNamingSummary,
   getTokenBankStateSummary,
   getTokenShopCoverageSummary,
@@ -34,6 +36,8 @@ test("getTokenShopCostLaneSummary preserves the spend-lane split labels", () => 
     {
       hasLaneSplit: true,
       coverageSource: "legacy-cost-lanes",
+      fallbackMode: "export-debug-compatibility",
+      usesLegacyCompatibilityFallback: true,
       keepsDailyTokeniumSeparate: true,
       tokenLaneLabel: "TokenBoost",
       diamondLaneLabel: "DiamondBoost",
@@ -133,6 +137,94 @@ test("getSpendActionLaneSummary prefers canonical subject contracts when availab
   );
 });
 
+test("getDailyTokeniumLaneSummary prefers canonical subject contracts when available", () => {
+  assert.deepEqual(
+    getDailyTokeniumLaneSummary({
+      subjectContracts: {
+        "token-shop-atu4-mod": {
+          subjectId: "row:ATU4Button",
+          subjectKind: "row-local",
+          groundedFields: {
+            dailyTokeniumLane: {
+              ownerFamilyLabel: "SpaceAcademy",
+              academyController: "SpaceAcademyMain",
+              textHandler: "TextHandlerSpaceAcademy",
+              missionFamilyLabel: "FarmMissions",
+              loopHook: "SetLM244BonusText",
+              purchaseHook: "BuyLM244",
+              finalBonusHook: "FinalDailyTokenBonus",
+              purchaseOwner: "BuyCollectorDevice",
+              premiumCapBonus: "CollectorCapBonus",
+              premiumMatsBonus: "CollectorMatsBonus",
+              progressString: "0 / 2000 Daily Tokenium (from blue farm missions)",
+              capDescriptionString:
+                "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
+              collectorPackDescriptionString:
+                "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+            }
+          },
+          blockedInputReasons: {
+            dailyTokeniumLane: null
+          }
+        },
+        "token-shop-daily-tokenium-family": {
+          subjectId: "range:token-shop:ATU14Button-ATU19Button",
+          subjectKind: "range-family",
+          groundedFields: {
+            dailyTokeniumLane: {
+              ownerFamilyLabel: "SpaceAcademy",
+              academyController: "SpaceAcademyMain",
+              textHandler: "TextHandlerSpaceAcademy",
+              missionFamilyLabel: "FarmMissions",
+              loopHook: "SetLM244BonusText",
+              purchaseHook: "BuyLM244",
+              finalBonusHook: "FinalDailyTokenBonus",
+              purchaseOwner: "BuyCollectorDevice",
+              premiumCapBonus: "CollectorCapBonus",
+              premiumMatsBonus: "CollectorMatsBonus",
+              progressString: "0 / 2000 Daily Tokenium (from blue farm missions)",
+              capDescriptionString:
+                "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
+              collectorPackDescriptionString:
+                "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+            }
+          },
+          blockedInputReasons: {
+            dailyTokeniumLane: null
+          }
+        }
+      }
+    }),
+    {
+      hasOwnerFamilyClues: true,
+      hasModifierBoundary: true,
+      hasPlayerFacingBoundary: true,
+      coverageSource: "subject-contracts",
+      ownerFamilyLabel: "SpaceAcademy",
+      missionFamilyLabel: "FarmMissions",
+      academyController: "SpaceAcademyMain",
+      textHandler: "TextHandlerSpaceAcademy",
+      loopHook: "SetLM244BonusText",
+      purchaseHook: "BuyLM244",
+      finalBonusHook: "FinalDailyTokenBonus",
+      purchaseOwner: "BuyCollectorDevice",
+      premiumCapBonus: "CollectorCapBonus",
+      premiumMatsBonus: "CollectorMatsBonus",
+      progressString: "0 / 2000 Daily Tokenium (from blue farm missions)",
+      capDescriptionString:
+        "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
+      collectorPackDescriptionString:
+        "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu",
+      premiumPack: "COLLECTERS PACK",
+      rowLocalSubjectId: "row:ATU4Button",
+      rangeFamilySubjectId: "range:token-shop:ATU14Button-ATU19Button",
+      rowLocalSubjectKind: "row-local",
+      rangeFamilySubjectKind: "range-family",
+      blockedInputReason: null
+    }
+  );
+});
+
 test("getTokenBankStateSummary keeps the cloud-save boundary separate from controller clues", () => {
   assert.deepEqual(
     getTokenBankStateSummary({
@@ -149,6 +241,9 @@ test("getTokenBankStateSummary keeps the cloud-save boundary separate from contr
     {
       hasControllerSplit: true,
       hasCloudSaveShellBoundary: true,
+      coverageSource: "legacy-token-bank-state",
+      fallbackMode: "export-debug-compatibility",
+      usesLegacyCompatibilityFallback: true,
       claimMethod: "ClaimBankedTokens",
       capMethod: "get_TokenBankCap",
       displayShell: "BigStatisticPrefab.TokenBankCap",
@@ -173,10 +268,63 @@ test("token spend naming and coverage summaries preserve the checked lane anchor
     }),
     {
       hasNamingClues: true,
+      coverageSource: "legacy-tokenium-naming",
+      fallbackMode: "export-debug-compatibility",
+      usesLegacyCompatibilityFallback: true,
       resourceLabel: "Resource_Tokenium",
       academyLabel: "Aca.Tokenium553",
       tokenShellLabel: "CostBox-Tokens",
       tokeniumShellLabel: "CostBox-Tokenium"
+    }
+  );
+
+  assert.deepEqual(
+    getTokeniumNamingSummary({
+      subjectContracts: {
+        "token-shop-atu7-mk3-bridge": {
+          subjectId: "row:ATU7Button",
+          subjectKind: "row-local",
+          groundedFields: {
+            tokeniumNaming: {
+              resourceLabel: "Resource_Tokenium",
+              academyLabel: "Aca.Tokenium553",
+              tokenShellLabel: "CostBox-Tokens",
+              tokeniumShellLabel: "CostBox-Tokenium"
+            }
+          },
+          blockedInputReasons: {
+            tokeniumNaming: null
+          }
+        },
+        "token-shop-daily-tokenium-family": {
+          subjectId: "range:token-shop:ATU14Button-ATU19Button",
+          subjectKind: "range-family",
+          groundedFields: {
+            tokeniumNaming: {
+              resourceLabel: "Resource_Tokenium",
+              academyLabel: "Aca.Tokenium553",
+              tokenShellLabel: "CostBox-Tokens",
+              tokeniumShellLabel: "CostBox-Tokenium"
+            }
+          },
+          blockedInputReasons: {
+            tokeniumNaming: null
+          }
+        }
+      }
+    }),
+    {
+      hasNamingClues: true,
+      coverageSource: "subject-contracts",
+      resourceLabel: "Resource_Tokenium",
+      academyLabel: "Aca.Tokenium553",
+      tokenShellLabel: "CostBox-Tokens",
+      tokeniumShellLabel: "CostBox-Tokenium",
+      rowLocalSubjectId: "row:ATU7Button",
+      rangeFamilySubjectId: "range:token-shop:ATU14Button-ATU19Button",
+      rowLocalSubjectKind: "row-local",
+      rangeFamilySubjectKind: "range-family",
+      blockedInputReason: null
     }
   );
 
@@ -194,7 +342,9 @@ test("token spend naming and coverage summaries preserve the checked lane anchor
     }),
     {
       hasCoverage: true,
-      coverageSource: "extract",
+      coverageSource: "legacy-extract",
+      fallbackMode: "export-debug-compatibility",
+      usesLegacyCompatibilityFallback: true,
       numericGroupCount: 3,
       hasNamedLanes: true,
       namedLaneLabel: "TokenBoost, DiamondBoost, TokenDailiesT2",
@@ -202,6 +352,108 @@ test("token spend naming and coverage summaries preserve the checked lane anchor
       hasControllerAnchors: true
     }
   );
+});
+
+test("contract-backed Daily Tokenium summary ignores conflicting legacy fallback clues", () => {
+  const summary = getDailyTokeniumLaneSummary({
+    subjectContracts: {
+      "token-shop-atu4-mod": {
+        subjectId: "row:ATU4Button",
+        subjectKind: "row-local",
+        groundedFields: {
+          dailyTokeniumLane: {
+            ownerFamilyLabel: "SpaceAcademy",
+            academyController: "SpaceAcademyMain",
+            textHandler: "TextHandlerSpaceAcademy",
+            missionFamilyLabel: "FarmMissions",
+            loopHook: "SetLM244BonusText",
+            purchaseHook: "BuyLM244",
+            finalBonusHook: "FinalDailyTokenBonus",
+            purchaseOwner: "BuyCollectorDevice",
+            premiumCapBonus: "CollectorCapBonus",
+            premiumMatsBonus: "CollectorMatsBonus",
+            progressString: "0 / 2000 Daily Tokenium (from blue farm missions)",
+            capDescriptionString:
+              "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
+            collectorPackDescriptionString:
+              "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+          }
+        },
+        blockedInputReasons: {
+          dailyTokeniumLane: null
+        }
+      },
+      "token-shop-daily-tokenium-family": {
+        subjectId: "range:token-shop:ATU14Button-ATU19Button",
+        subjectKind: "range-family",
+        groundedFields: {
+          dailyTokeniumLane: {
+            ownerFamilyLabel: "SpaceAcademy",
+            academyController: "SpaceAcademyMain",
+            textHandler: "TextHandlerSpaceAcademy",
+            missionFamilyLabel: "FarmMissions",
+            loopHook: "SetLM244BonusText",
+            purchaseHook: "BuyLM244",
+            finalBonusHook: "FinalDailyTokenBonus",
+            purchaseOwner: "BuyCollectorDevice",
+            premiumCapBonus: "CollectorCapBonus",
+            premiumMatsBonus: "CollectorMatsBonus",
+            progressString: "0 / 2000 Daily Tokenium (from blue farm missions)",
+            capDescriptionString:
+              "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
+            collectorPackDescriptionString:
+              "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+          }
+        },
+        blockedInputReasons: {
+          dailyTokeniumLane: null
+        }
+      }
+    },
+    dailyTokenium: {
+      laneClues: {
+        ownerFamilyClues: [],
+        modifierClues: [],
+        premiumModifierClues: [],
+        playerFacingStrings: []
+      }
+    }
+  });
+
+  assert.equal(summary.coverageSource, "subject-contracts");
+  assert.equal(summary.purchaseHook, "BuyLM244");
+  assert.equal(summary.ownerFamilyLabel, "SpaceAcademy");
+});
+
+test("contract-backed tokenium naming ignores conflicting legacy fallback clues", () => {
+  const summary = getTokeniumNamingSummary({
+    subjectContracts: {
+      "token-shop-atu7-mk3-bridge": {
+        subjectId: "row:ATU7Button",
+        subjectKind: "row-local",
+        groundedFields: {
+          tokeniumNaming: {
+            resourceLabel: "Resource_Tokenium",
+            academyLabel: "Aca.Tokenium553",
+            tokenShellLabel: "CostBox-Tokens",
+            tokeniumShellLabel: "CostBox-Tokenium"
+          }
+        },
+        blockedInputReasons: {
+          tokeniumNaming: null
+        }
+      }
+    },
+    assetNames: {
+      resourceIcons: ["Wrong_Resource"],
+      academySprites: ["Wrong_Academy"]
+    },
+    level0Shells: ["Wrong-Shell"]
+  });
+
+  assert.equal(summary.coverageSource, "subject-contracts");
+  assert.equal(summary.resourceLabel, "Resource_Tokenium");
+  assert.equal(summary.academyLabel, "Aca.Tokenium553");
 });
 
 test("getTokenShopCoverageSummary prefers canonical subject contracts when available", () => {
@@ -260,8 +512,7 @@ test("getTokenShopOwnerShellSummary prefers canonical subject contracts when ava
           subjectId: "range:token-shop:ATU24Button-ATU28Button",
           subjectKind: "range-family",
           knownEdges: ["row-family-action-hook"],
-          blockedEdges: ["exact-shell-to-title"],
-          blockedInputReason: "reconstruction:baseline-gap"
+          blockedEdges: ["exact-shell-to-title"]
         }
       }
     }),
@@ -279,7 +530,39 @@ test("getTokenShopOwnerShellSummary prefers canonical subject contracts when ava
       rowLocalKnownEdges: ["exact-shell-to-action-hook"],
       rangeKnownEdges: ["row-family-action-hook"],
       rangeBlockedEdges: ["exact-shell-to-title"],
-      blockedInputReason: "reconstruction:baseline-gap"
+      blockedInputReason: null
+    }
+  );
+});
+
+test("getTokenShopOwnerShellSummary preserves legacy fallback when contract remains blocked", () => {
+  assert.deepEqual(
+    getTokenShopOwnerShellSummary({
+      subjectContracts: {
+        "token-shop-atu7-mk3-bridge": {
+          subjectId: "row:ATU7Button",
+          subjectKind: "row-local",
+          groundedFields: {
+            actionMethods: ["BuyMK3TokenBoost"]
+          },
+          knownEdges: ["exact-shell-to-action-hook"],
+          blockedInputReason: "reconstruction:missing-seam"
+        }
+      },
+      ownerAnchors: ["TokenShop", "InitializeTokenShop"],
+      tokenBankMethods: ["ClaimBankedTokens"],
+      notificationHooks: ["CheckTokenClaimNotification"],
+      adjacentDeviceHooks: ["BuyAutoTokenClicker"]
+    }),
+    {
+      hasOwnerShell: true,
+      coverageSource: "legacy-owner-shell",
+      fallbackMode: "export-debug-compatibility",
+      usesLegacyCompatibilityFallback: true,
+      ownerAnchor: "TokenShop",
+      bankMethod: "ClaimBankedTokens",
+      notificationHook: "CheckTokenClaimNotification",
+      deviceHook: "BuyAutoTokenClicker"
     }
   );
 });
@@ -342,7 +625,7 @@ test("getTokenBankControllerShellSummary prefers canonical subject contracts whe
             }
           },
           blockedInputReasons: {
-            tokenBankController: "reconstruction:missing-seam"
+            tokenBankController: null
           }
         },
         "token-shop-late-atu-family": {
@@ -374,7 +657,57 @@ test("getTokenBankControllerShellSummary prefers canonical subject contracts whe
         "IncreaseBankedTokens",
         "TokenShopButtonNotification"
       ],
-      blockedInputReason: "reconstruction:missing-seam"
+      blockedInputReason: null
+    }
+  );
+});
+
+test("getTokenBankControllerShellSummary preserves legacy fallback when contract remains blocked", () => {
+  assert.deepEqual(
+    getTokenBankControllerShellSummary({
+      subjectContracts: {
+        "token-shop-atu7-mk3-bridge": {
+          subjectId: "row:ATU7Button",
+          subjectKind: "row-local",
+          groundedFields: {
+            tokenBankController: {
+              claimMethod: "ClaimBankedTokens",
+              fillMethod: "SetBankFill",
+              fillField: "BankFill",
+              descriptionShell: "TokenBankDescriptionText",
+              notificationHook: "CheckTokenClaimNotification",
+              adjacentTerms: ["get_TokenBankCap"]
+            }
+          },
+          blockedInputReasons: {
+            tokenBankController: "reconstruction:missing-seam"
+          }
+        }
+      },
+      controllerAnchors: [
+        "ClaimBankedTokens",
+        "SetBankFill",
+        "BankFill",
+        "TokenBankDescriptionText",
+        "CheckTokenClaimNotification",
+        "TokenShopButtonNotification"
+      ],
+      adjacentControllerMethods: [
+        "get_TokenBankCap",
+        "get_ClaimableBankTokens",
+        "IncreaseBankedTokens"
+      ]
+    }),
+    {
+      hasControllerShell: true,
+      coverageSource: "legacy-token-bank-controller",
+      fallbackMode: "export-debug-compatibility",
+      usesLegacyCompatibilityFallback: true,
+      claimMethod: "ClaimBankedTokens",
+      fillMethod: "SetBankFill",
+      fillField: "BankFill",
+      descriptionShell: "TokenBankDescriptionText",
+      notificationHook: "CheckTokenClaimNotification"
     }
   );
 });
@@ -407,9 +740,6 @@ test("getTokenBankStateSummary prefers canonical subject contracts when availabl
             tokenBankState: {
               claimMethod: "ClaimBankedTokens"
             }
-          },
-          blockedInputReasons: {
-            tokenBankState: "reconstruction:baseline-gap"
           }
         }
       }
@@ -431,7 +761,194 @@ test("getTokenBankStateSummary prefers canonical subject contracts when availabl
       rangeFamilySubjectId: "range:token-shop:ATU24Button-ATU28Button",
       rowLocalSubjectKind: "row-local",
       rangeFamilySubjectKind: "range-family",
-      blockedInputReason: "reconstruction:baseline-gap"
+      blockedInputReason: null
+    }
+  );
+});
+
+test("getTokenBankStateSummary preserves legacy fallback when contract remains blocked", () => {
+  assert.deepEqual(
+    getTokenBankStateSummary({
+      subjectContracts: {
+        "token-shop-daily-tokenium-family": {
+          subjectId: "range:token-shop:ATU14Button-ATU19Button",
+          subjectKind: "range-family",
+          groundedFields: {
+            tokenBankState: {
+              claimMethod: "ClaimBankedTokens",
+              capMethod: "get_TokenBankCap",
+              loopHandler: "TextHandlerLoopMods",
+              loopHook: "SetLM244BonusText",
+              cloudSaveShell: "CloudSavePlayerProfile",
+              cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
+              cloudSaveProfileRoutine: "GetPlayerProfileInfo",
+              cloudSaveStateMachine: "<CloudSavePlayerProfile>d__24"
+            }
+          },
+          blockedInputReasons: {
+            tokenBankState:
+              "missing-db-term-evidence:tokenBankState:BigStatisticPrefab.TokenBankCap"
+          }
+        }
+      },
+      tokenShopMethods: ["ClaimBankedTokens", "get_TokenBankCap"],
+      displayOrHandlerClues: ["BigStatisticPrefab.TokenBankCap", "SetLM244BonusText"],
+      cloudSavePlayerProfileBoundary: {
+        scriptName: "CloudSavePlayerProfile",
+        typedTargetFound: false,
+        metadataAnchorFound: true,
+        metadataShellMethods: ["GetCurrentSaveFileInfo", "GetPlayerProfileInfo"],
+        metadataStateMachines: ["<CloudSavePlayerProfile>d__24"]
+      }
+    }),
+    {
+      hasControllerSplit: true,
+      hasCloudSaveShellBoundary: true,
+      coverageSource: "legacy-token-bank-state",
+      fallbackMode: "export-debug-compatibility",
+      usesLegacyCompatibilityFallback: true,
+      claimMethod: "ClaimBankedTokens",
+      capMethod: "get_TokenBankCap",
+      displayShell: "BigStatisticPrefab.TokenBankCap",
+      loopHandler: "TextHandlerLoopMods",
+      loopHook: "SetLM244BonusText",
+      cloudSaveShell: "CloudSavePlayerProfile",
+      cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
+      cloudSaveProfileRoutine: "GetPlayerProfileInfo",
+      cloudSaveStateMachine: "<CloudSavePlayerProfile>d__24"
+    }
+  );
+});
+
+test("getTokenBankFormulaBoundarySummary prefers canonical subject contracts when available", () => {
+  assert.deepEqual(
+    getTokenBankFormulaBoundarySummary({
+      subjectContracts: {
+        "token-shop-atu4-mod": {
+          subjectId: "row:ATU4Button",
+          subjectKind: "row-local",
+          groundedFields: {
+            tokenBankFormula: {
+              capAccessor: "get_FinalTokenBankCap",
+              fillAccessor: "get_FinalTokenBankFillSpeed",
+              capField: "<FinalTokenBankCap>k__BackingField",
+              fillField: "<FinalTokenBankFillSpeed>k__BackingField",
+              saveFamilyOverlapClear: true
+            }
+          }
+        },
+        "token-shop-late-atu-family": {
+          subjectId: "range:token-shop:ATU24Button-ATU28Button",
+          subjectKind: "range-family",
+          groundedFields: {
+            tokenBankFormula: {
+              capAccessor: "get_FinalTokenBankCap"
+            }
+          },
+          blockedInputReasons: {
+            tokenBankFormula: null
+          }
+        }
+      }
+    }),
+    {
+      hasDerivedOutputBoundary: true,
+      hasNoSaveJoinInDerivedContext: true,
+      coverageSource: "subject-contracts",
+      capAccessor: "get_FinalTokenBankCap",
+      fillAccessor: "get_FinalTokenBankFillSpeed",
+      capField: "<FinalTokenBankCap>k__BackingField",
+      fillField: "<FinalTokenBankFillSpeed>k__BackingField",
+      rowLocalSubjectId: "row:ATU4Button",
+      rangeFamilySubjectId: "range:token-shop:ATU24Button-ATU28Button",
+      rowLocalSubjectKind: "row-local",
+      rangeFamilySubjectKind: "range-family",
+      blockedInputReason: null
+    }
+  );
+});
+
+test("getTokenBankFormulaBoundarySummary preserves legacy fallback when contract remains blocked", () => {
+  assert.deepEqual(
+    getTokenBankFormulaBoundarySummary({
+      subjectContracts: {
+        "token-shop-late-atu-family": {
+          subjectId: "range:token-shop:ATU24Button-ATU28Button",
+          subjectKind: "range-family",
+          groundedFields: {
+            tokenBankFormula: {
+              capAccessor: "get_FinalTokenBankCap",
+              fillAccessor: "get_FinalTokenBankFillSpeed",
+              capField: "<FinalTokenBankCap>k__BackingField",
+              fillField: "<FinalTokenBankFillSpeed>k__BackingField",
+              saveFamilyOverlapClear: false
+            }
+          },
+          blockedInputReasons: {
+            tokenBankFormula: "missing-db-derived-context-clearance:tokenBankFormula"
+          }
+        }
+      },
+      tokenBank: {
+        formulaBoundary: {
+          derivedOutputCluster: [
+            "get_FinalTokenBankCap",
+            "get_FinalTokenBankFillSpeed",
+            "<FinalTokenBankCap>k__BackingField",
+            "<FinalTokenBankFillSpeed>k__BackingField"
+          ],
+          saveFamilyCluesInDerivedContext: []
+        }
+      }
+    }),
+    {
+      hasDerivedOutputBoundary: true,
+      hasNoSaveJoinInDerivedContext: true,
+      coverageSource: "legacy-token-bank-formula",
+      fallbackMode: "export-debug-compatibility",
+      usesLegacyCompatibilityFallback: true,
+      capAccessor: "get_FinalTokenBankCap",
+      fillAccessor: "get_FinalTokenBankFillSpeed",
+      capField: "<FinalTokenBankCap>k__BackingField",
+      fillField: "<FinalTokenBankFillSpeed>k__BackingField"
+    }
+  );
+});
+
+test("getTokeniumNamingSummary preserves legacy fallback when contract remains blocked", () => {
+  assert.deepEqual(
+    getTokeniumNamingSummary({
+      subjectContracts: {
+        "token-shop-daily-tokenium-family": {
+          subjectId: "range:token-shop:ATU14Button-ATU19Button",
+          subjectKind: "range-family",
+          groundedFields: {
+            tokeniumNaming: {
+              resourceLabel: "Resource_Tokenium",
+              tokenShellLabel: "CostBox-Tokens",
+              tokeniumShellLabel: "CostBox-Tokenium"
+            }
+          },
+          blockedInputReasons: {
+            tokeniumNaming: "missing-db-term-evidence:tokeniumNaming:Aca.Tokenium553"
+          }
+        }
+      },
+      assetNames: {
+        resourceIcons: ["Resource_Tokenium"],
+        academySprites: ["Aca.Tokenium553"]
+      },
+      level0Shells: ["CostBox-Tokens", "CostBox-Tokenium"]
+    }),
+    {
+      hasNamingClues: true,
+      coverageSource: "legacy-tokenium-naming",
+      fallbackMode: "export-debug-compatibility",
+      usesLegacyCompatibilityFallback: true,
+      resourceLabel: "Resource_Tokenium",
+      academyLabel: "Aca.Tokenium553",
+      tokenShellLabel: "CostBox-Tokens",
+      tokeniumShellLabel: "CostBox-Tokenium"
     }
   );
 });

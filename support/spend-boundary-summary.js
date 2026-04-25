@@ -35,6 +35,15 @@ export function formatNumericRanges(values) {
   return ranges.join(" and ");
 }
 
+function markLegacyTokenShopFallback(summary, coverageSource) {
+  return {
+    ...summary,
+    coverageSource,
+    fallbackMode: "export-debug-compatibility",
+    usesLegacyCompatibilityFallback: true
+  };
+}
+
 export function getTokenShopCostLaneSummary(clues) {
   const contracts = normalizeTokenShopContracts(clues);
   if (contracts.length) {
@@ -100,25 +109,30 @@ export function getTokenShopCostLaneSummary(clues) {
       ? clues.tracePresentation
       : {};
 
-  return {
-    hasLaneSplit:
-      tokenSpendGroups.includes("TokenBoost") &&
-      diamondGroups.includes("DiamondBoost") &&
-      dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
-      tracePresentation.costShell === "CostBox" &&
-      tracePresentation.descriptionRenderNode === "DescText",
-    coverageSource: "legacy-cost-lanes",
-    keepsDailyTokeniumSeparate:
-      dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
-      dailyTokeniumModifierGroups.includes("TokenDailiesT3") &&
-      tracePresentation.costRenderNode === "CostText",
-    tokenLaneLabel: "TokenBoost",
-    diamondLaneLabel: "DiamondBoost",
-    dailyLaneLabel: "TokenDailiesT2",
-    costShellLabel: tracePresentation.costShell ?? "CostBox",
-    costRenderLabel: tracePresentation.costRenderNode ?? "CostText",
-    descriptionRenderLabel: tracePresentation.descriptionRenderNode ?? "DescText"
-  };
+  // Compatibility-only fallback: active UI reads should use canonical subject contracts when
+  // they are present. This branch remains only for export/debug views or when subject contracts
+  // are absent from the caller payload.
+  return markLegacyTokenShopFallback(
+    {
+      hasLaneSplit:
+        tokenSpendGroups.includes("TokenBoost") &&
+        diamondGroups.includes("DiamondBoost") &&
+        dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
+        tracePresentation.costShell === "CostBox" &&
+        tracePresentation.descriptionRenderNode === "DescText",
+      keepsDailyTokeniumSeparate:
+        dailyTokeniumModifierGroups.includes("TokenDailiesT2") &&
+        dailyTokeniumModifierGroups.includes("TokenDailiesT3") &&
+        tracePresentation.costRenderNode === "CostText",
+      tokenLaneLabel: "TokenBoost",
+      diamondLaneLabel: "DiamondBoost",
+      dailyLaneLabel: "TokenDailiesT2",
+      costShellLabel: tracePresentation.costShell ?? "CostBox",
+      costRenderLabel: tracePresentation.costRenderNode ?? "CostText",
+      descriptionRenderLabel: tracePresentation.descriptionRenderNode ?? "DescText"
+    },
+    "legacy-cost-lanes"
+  );
 }
 
 export function getSpendActionLaneSummary(tokenShop) {
@@ -203,24 +217,30 @@ export function getSpendActionLaneSummary(tokenShop) {
       ? clues.searchResults.level0
       : {};
 
-  return {
-    hasActionSplit:
-      tokenDirectBuyHooks.includes("BuyTokenBoost") &&
-      diamondDirectBuyHooks.includes("BuyDiamondBoost") &&
-      dailyTokeniumModifierHooks.includes("BuyLM244") &&
-      dailyTokeniumModifierHooks.includes("BuyCollectorDevice"),
-    keepsDailyDirectHooksUnrecovered:
-      searchMetadata.BuyTokenDailiesT2 === 0 &&
-      searchMetadata.BuyTokenDailiesT3 === 0 &&
-      searchLevel0.BuyTokenDailiesT2 === 0 &&
-      searchLevel0.BuyTokenDailiesT3 === 0,
-    tokenHook: "BuyTokenBoost",
-    diamondHook: "BuyDiamondBoost",
-    loopModifierHook: "BuyLM244",
-    premiumModifierHook: "BuyCollectorDevice",
-    dailyHookT2: "BuyTokenDailiesT2",
-    dailyHookT3: "BuyTokenDailiesT3"
-  };
+  // Compatibility-only fallback: active UI reads should use canonical subject contracts when
+  // they are present. This branch remains only for export/debug views or when subject contracts
+  // are absent from the caller payload.
+  return markLegacyTokenShopFallback(
+    {
+      hasActionSplit:
+        tokenDirectBuyHooks.includes("BuyTokenBoost") &&
+        diamondDirectBuyHooks.includes("BuyDiamondBoost") &&
+        dailyTokeniumModifierHooks.includes("BuyLM244") &&
+        dailyTokeniumModifierHooks.includes("BuyCollectorDevice"),
+      keepsDailyDirectHooksUnrecovered:
+        searchMetadata.BuyTokenDailiesT2 === 0 &&
+        searchMetadata.BuyTokenDailiesT3 === 0 &&
+        searchLevel0.BuyTokenDailiesT2 === 0 &&
+        searchLevel0.BuyTokenDailiesT3 === 0,
+      tokenHook: "BuyTokenBoost",
+      diamondHook: "BuyDiamondBoost",
+      loopModifierHook: "BuyLM244",
+      premiumModifierHook: "BuyCollectorDevice",
+      dailyHookT2: "BuyTokenDailiesT2",
+      dailyHookT3: "BuyTokenDailiesT3"
+    },
+    "legacy-action-lane"
+  );
 }
 
 export function getTokenBankStateSummary(clues) {
@@ -250,34 +270,38 @@ export function getTokenBankStateSummary(clues) {
       (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
       (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
       null;
+    const canUseContract =
+      blockedInputReason === null &&
+      typeof stateFields.claimMethod === "string" &&
+      typeof stateFields.capMethod === "string" &&
+      typeof stateFields.displayShell === "string" &&
+      typeof stateFields.loopHook === "string" &&
+      typeof stateFields.cloudSaveShell === "string" &&
+      typeof stateFields.cloudSaveInfoRoutine === "string" &&
+      typeof stateFields.cloudSaveProfileRoutine === "string" &&
+      typeof stateFields.cloudSaveStateMachine === "string";
 
-    return {
-      hasControllerSplit:
-        typeof stateFields.claimMethod === "string" &&
-        typeof stateFields.capMethod === "string" &&
-        typeof stateFields.displayShell === "string" &&
-        typeof stateFields.loopHook === "string",
-      hasCloudSaveShellBoundary:
-        typeof stateFields.cloudSaveShell === "string" &&
-        typeof stateFields.cloudSaveInfoRoutine === "string" &&
-        typeof stateFields.cloudSaveProfileRoutine === "string" &&
-        typeof stateFields.cloudSaveStateMachine === "string",
-      coverageSource: "subject-contracts",
-      claimMethod: stateFields.claimMethod || "ClaimBankedTokens",
-      capMethod: stateFields.capMethod || "get_TokenBankCap",
-      displayShell: stateFields.displayShell || "BigStatisticPrefab.TokenBankCap",
-      loopHandler: stateFields.loopHandler || "TextHandlerLoopMods",
-      loopHook: stateFields.loopHook || "SetLM244BonusText",
-      cloudSaveShell: stateFields.cloudSaveShell || "CloudSavePlayerProfile",
-      cloudSaveInfoRoutine: stateFields.cloudSaveInfoRoutine || "GetCurrentSaveFileInfo",
-      cloudSaveProfileRoutine: stateFields.cloudSaveProfileRoutine || "GetPlayerProfileInfo",
-      cloudSaveStateMachine: stateFields.cloudSaveStateMachine || "<CloudSavePlayerProfile>d__24",
-      rowLocalSubjectId: rowLocal?.subjectId || null,
-      rangeFamilySubjectId: rangeFamily?.subjectId || null,
-      rowLocalSubjectKind: rowLocal?.subjectKind || null,
-      rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
-      blockedInputReason
-    };
+    if (canUseContract) {
+      return {
+        hasControllerSplit: true,
+        hasCloudSaveShellBoundary: true,
+        coverageSource: "subject-contracts",
+        claimMethod: stateFields.claimMethod,
+        capMethod: stateFields.capMethod,
+        displayShell: stateFields.displayShell,
+        loopHandler: stateFields.loopHandler || "TextHandlerLoopMods",
+        loopHook: stateFields.loopHook,
+        cloudSaveShell: stateFields.cloudSaveShell,
+        cloudSaveInfoRoutine: stateFields.cloudSaveInfoRoutine,
+        cloudSaveProfileRoutine: stateFields.cloudSaveProfileRoutine,
+        cloudSaveStateMachine: stateFields.cloudSaveStateMachine,
+        rowLocalSubjectId: rowLocal?.subjectId || null,
+        rangeFamilySubjectId: rangeFamily?.subjectId || null,
+        rowLocalSubjectKind: rowLocal?.subjectKind || null,
+        rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+        blockedInputReason
+      };
+    }
   }
 
   const tokenShopMethods = Array.isArray(clues?.tokenShopMethods) ? clues.tokenShopMethods : [];
@@ -296,93 +320,242 @@ export function getTokenBankStateSummary(clues) {
     ? cloudSaveBoundary.metadataStateMachines
     : [];
 
-  return {
-    hasControllerSplit:
-      tokenShopMethods.includes("ClaimBankedTokens") &&
-      tokenShopMethods.includes("get_TokenBankCap") &&
-      displayOrHandlerClues.includes("BigStatisticPrefab.TokenBankCap") &&
-      displayOrHandlerClues.includes("SetLM244BonusText"),
-    hasCloudSaveShellBoundary:
-      cloudSaveBoundary.scriptName === "CloudSavePlayerProfile" &&
-      cloudSaveBoundary.typedTargetFound === false &&
-      cloudSaveBoundary.metadataAnchorFound === true &&
-      cloudSaveShellMethods.includes("GetCurrentSaveFileInfo") &&
-      cloudSaveShellMethods.includes("GetPlayerProfileInfo") &&
-      cloudSaveStateMachines.includes("<CloudSavePlayerProfile>d__24"),
-    claimMethod: "ClaimBankedTokens",
-    capMethod: "get_TokenBankCap",
-    displayShell: "BigStatisticPrefab.TokenBankCap",
-    loopHandler: "TextHandlerLoopMods",
-    loopHook: "SetLM244BonusText",
-    cloudSaveShell: "CloudSavePlayerProfile",
-    cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
-    cloudSaveProfileRoutine: "GetPlayerProfileInfo",
-    cloudSaveStateMachine: "<CloudSavePlayerProfile>d__24"
-  };
+  // Required compatibility fallback: keep this path until tokenBankState contracts are both
+  // present and unblocked. Blocked cases are expected to fall back rather than presenting partial
+  // contract truth as grounded.
+  return markLegacyTokenShopFallback(
+    {
+      hasControllerSplit:
+        tokenShopMethods.includes("ClaimBankedTokens") &&
+        tokenShopMethods.includes("get_TokenBankCap") &&
+        displayOrHandlerClues.includes("BigStatisticPrefab.TokenBankCap") &&
+        displayOrHandlerClues.includes("SetLM244BonusText"),
+      hasCloudSaveShellBoundary:
+        cloudSaveBoundary.scriptName === "CloudSavePlayerProfile" &&
+        cloudSaveBoundary.typedTargetFound === false &&
+        cloudSaveBoundary.metadataAnchorFound === true &&
+        cloudSaveShellMethods.includes("GetCurrentSaveFileInfo") &&
+        cloudSaveShellMethods.includes("GetPlayerProfileInfo") &&
+        cloudSaveStateMachines.includes("<CloudSavePlayerProfile>d__24"),
+      claimMethod: "ClaimBankedTokens",
+      capMethod: "get_TokenBankCap",
+      displayShell: "BigStatisticPrefab.TokenBankCap",
+      loopHandler: "TextHandlerLoopMods",
+      loopHook: "SetLM244BonusText",
+      cloudSaveShell: "CloudSavePlayerProfile",
+      cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
+      cloudSaveProfileRoutine: "GetPlayerProfileInfo",
+      cloudSaveStateMachine: "<CloudSavePlayerProfile>d__24"
+    },
+    "legacy-token-bank-state"
+  );
 }
 
 export function getDailyTokeniumLaneSummary(clues) {
-  const ownerFamilyClues = Array.isArray(clues?.ownerFamilyClues) ? clues.ownerFamilyClues : [];
-  const modifierClues = Array.isArray(clues?.modifierClues) ? clues.modifierClues : [];
-  const premiumModifierClues = Array.isArray(clues?.premiumModifierClues)
-    ? clues.premiumModifierClues
+  const contracts = normalizeTokenShopContracts(clues);
+  if (contracts.length) {
+    const rowLocal =
+      contracts.find(
+        (contract) =>
+          contract?.subjectKind === "row-local" &&
+          typeof contract?.groundedFields?.dailyTokeniumLane === "object" &&
+          contract.groundedFields.dailyTokeniumLane
+      ) ?? null;
+    const rangeFamily =
+      contracts.find(
+        (contract) =>
+          contract?.subjectKind === "range-family" &&
+          typeof contract?.groundedFields?.dailyTokeniumLane === "object" &&
+          contract.groundedFields.dailyTokeniumLane
+      ) ?? null;
+    const laneFields =
+      rowLocal?.groundedFields?.dailyTokeniumLane ??
+      rangeFamily?.groundedFields?.dailyTokeniumLane ??
+      {};
+    const blockedInputReason =
+      (typeof rowLocal?.blockedInputReasons?.dailyTokeniumLane === "string" &&
+        rowLocal.blockedInputReasons.dailyTokeniumLane) ||
+      (typeof rangeFamily?.blockedInputReasons?.dailyTokeniumLane === "string" &&
+        rangeFamily.blockedInputReasons.dailyTokeniumLane) ||
+      (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
+      (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
+      null;
+
+    return {
+      hasOwnerFamilyClues:
+        typeof laneFields.ownerFamilyLabel === "string" &&
+        typeof laneFields.academyController === "string" &&
+        typeof laneFields.textHandler === "string" &&
+        typeof laneFields.missionFamilyLabel === "string",
+      hasModifierBoundary:
+        typeof laneFields.loopHook === "string" &&
+        typeof laneFields.purchaseHook === "string" &&
+        typeof laneFields.finalBonusHook === "string" &&
+        typeof laneFields.purchaseOwner === "string" &&
+        typeof laneFields.premiumCapBonus === "string" &&
+        typeof laneFields.premiumMatsBonus === "string",
+      hasPlayerFacingBoundary:
+        typeof laneFields.progressString === "string" &&
+        typeof laneFields.capDescriptionString === "string" &&
+        typeof laneFields.collectorPackDescriptionString === "string",
+      coverageSource: "subject-contracts",
+      ownerFamilyLabel: laneFields.ownerFamilyLabel || "SpaceAcademy",
+      missionFamilyLabel: laneFields.missionFamilyLabel || "FarmMissions",
+      academyController: laneFields.academyController || "SpaceAcademyMain",
+      textHandler: laneFields.textHandler || "TextHandlerSpaceAcademy",
+      loopHook: laneFields.loopHook || "SetLM244BonusText",
+      purchaseHook: laneFields.purchaseHook || "BuyLM244",
+      finalBonusHook: laneFields.finalBonusHook || "FinalDailyTokenBonus",
+      purchaseOwner: laneFields.purchaseOwner || "BuyCollectorDevice",
+      premiumCapBonus: laneFields.premiumCapBonus || "CollectorCapBonus",
+      premiumMatsBonus: laneFields.premiumMatsBonus || "CollectorMatsBonus",
+      progressString:
+        laneFields.progressString || "0 / 2000 Daily Tokenium (from blue farm missions)",
+      capDescriptionString:
+        laneFields.capDescriptionString ||
+        "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)",
+      collectorPackDescriptionString:
+        laneFields.collectorPackDescriptionString ||
+        "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu",
+      premiumPack: "COLLECTERS PACK",
+      rowLocalSubjectId: rowLocal?.subjectId || null,
+      rangeFamilySubjectId: rangeFamily?.subjectId || null,
+      rowLocalSubjectKind: rowLocal?.subjectKind || null,
+      rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+      blockedInputReason
+    };
+  }
+
+  const laneClues = clues?.dailyTokenium?.laneClues ?? clues;
+  const ownerFamilyClues = Array.isArray(laneClues?.ownerFamilyClues)
+    ? laneClues.ownerFamilyClues
     : [];
-  const playerFacingStrings = Array.isArray(clues?.playerFacingStrings)
-    ? clues.playerFacingStrings
+  const modifierClues = Array.isArray(laneClues?.modifierClues) ? laneClues.modifierClues : [];
+  const premiumModifierClues = Array.isArray(laneClues?.premiumModifierClues)
+    ? laneClues.premiumModifierClues
+    : [];
+  const playerFacingStrings = Array.isArray(laneClues?.playerFacingStrings)
+    ? laneClues.playerFacingStrings
     : [];
 
-  return {
-    hasOwnerFamilyClues:
-      ownerFamilyClues.includes("SpaceAcademy") &&
-      ownerFamilyClues.includes("SpaceAcademyMain") &&
-      ownerFamilyClues.includes("TextHandlerSpaceAcademy") &&
-      ownerFamilyClues.includes("FarmMissions"),
-    hasModifierBoundary:
-      modifierClues.includes("SetLM244BonusText") &&
-      modifierClues.includes("BuyLM244") &&
-      modifierClues.includes("FinalDailyTokenBonus") &&
-      premiumModifierClues.includes("BuyCollectorDevice") &&
-      premiumModifierClues.includes("CollectorCapBonus") &&
-      premiumModifierClues.includes("CollectorMatsBonus"),
-    hasPlayerFacingBoundary:
-      playerFacingStrings.includes("0 / 2000 Daily Tokenium (from blue farm missions)") &&
-      playerFacingStrings.includes(
-        "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)"
-      ) &&
-      playerFacingStrings.includes(
-        "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
-      ),
-    ownerFamilyLabel: "SpaceAcademy",
-    missionFamilyLabel: "FarmMissions",
-    academyController: "SpaceAcademyMain",
-    textHandler: "TextHandlerSpaceAcademy",
-    loopHook: "SetLM244BonusText",
-    purchaseHook: "BuyLM244",
-    purchaseOwner: "BuyCollectorDevice",
-    premiumPack: "COLLECTERS PACK"
-  };
+  // Compatibility-only fallback: active UI reads should use canonical subject contracts when
+  // they are present. This branch remains only for export/debug views or when subject contracts
+  // are absent from the caller payload.
+  return markLegacyTokenShopFallback(
+    {
+      hasOwnerFamilyClues:
+        ownerFamilyClues.includes("SpaceAcademy") &&
+        ownerFamilyClues.includes("SpaceAcademyMain") &&
+        ownerFamilyClues.includes("TextHandlerSpaceAcademy") &&
+        ownerFamilyClues.includes("FarmMissions"),
+      hasModifierBoundary:
+        modifierClues.includes("SetLM244BonusText") &&
+        modifierClues.includes("BuyLM244") &&
+        modifierClues.includes("FinalDailyTokenBonus") &&
+        premiumModifierClues.includes("BuyCollectorDevice") &&
+        premiumModifierClues.includes("CollectorCapBonus") &&
+        premiumModifierClues.includes("CollectorMatsBonus"),
+      hasPlayerFacingBoundary:
+        playerFacingStrings.includes("0 / 2000 Daily Tokenium (from blue farm missions)") &&
+        playerFacingStrings.includes(
+          "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)"
+        ) &&
+        playerFacingStrings.includes(
+          "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+        ),
+      ownerFamilyLabel: "SpaceAcademy",
+      missionFamilyLabel: "FarmMissions",
+      academyController: "SpaceAcademyMain",
+      textHandler: "TextHandlerSpaceAcademy",
+      loopHook: "SetLM244BonusText",
+      purchaseHook: "BuyLM244",
+      purchaseOwner: "BuyCollectorDevice",
+      premiumPack: "COLLECTERS PACK"
+    },
+    "legacy-daily-tokenium-lane"
+  );
 }
 
 export function getTokenBankFormulaBoundarySummary(clues) {
-  const derivedOutputCluster = Array.isArray(clues?.derivedOutputCluster)
-    ? clues.derivedOutputCluster
+  const contracts = normalizeTokenShopContracts(clues);
+  if (contracts.length) {
+    const rowLocal =
+      contracts.find(
+        (contract) =>
+          contract?.subjectKind === "row-local" &&
+          typeof contract?.groundedFields?.tokenBankFormula === "object" &&
+          contract.groundedFields.tokenBankFormula
+      ) ?? null;
+    const rangeFamily =
+      contracts.find(
+        (contract) =>
+          contract?.subjectKind === "range-family" &&
+          typeof contract?.groundedFields?.tokenBankFormula === "object" &&
+          contract.groundedFields.tokenBankFormula
+      ) ?? null;
+    const formulaFields =
+      rowLocal?.groundedFields?.tokenBankFormula ??
+      rangeFamily?.groundedFields?.tokenBankFormula ??
+      {};
+    const blockedInputReason =
+      (typeof rowLocal?.blockedInputReasons?.tokenBankFormula === "string" &&
+        rowLocal.blockedInputReasons.tokenBankFormula) ||
+      (typeof rangeFamily?.blockedInputReasons?.tokenBankFormula === "string" &&
+        rangeFamily.blockedInputReasons.tokenBankFormula) ||
+      (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
+      (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
+      null;
+
+    const canUseContract =
+      blockedInputReason === null &&
+      typeof formulaFields.capAccessor === "string" &&
+      typeof formulaFields.fillAccessor === "string" &&
+      typeof formulaFields.capField === "string" &&
+      typeof formulaFields.fillField === "string" &&
+      formulaFields.saveFamilyOverlapClear === true;
+
+    if (canUseContract) {
+      return {
+        hasDerivedOutputBoundary: true,
+        hasNoSaveJoinInDerivedContext: true,
+        coverageSource: "subject-contracts",
+        capAccessor: formulaFields.capAccessor || "get_FinalTokenBankCap",
+        fillAccessor: formulaFields.fillAccessor || "get_FinalTokenBankFillSpeed",
+        capField: formulaFields.capField || "<FinalTokenBankCap>k__BackingField",
+        fillField: formulaFields.fillField || "<FinalTokenBankFillSpeed>k__BackingField",
+        rowLocalSubjectId: rowLocal?.subjectId || null,
+        rangeFamilySubjectId: rangeFamily?.subjectId || null,
+        rowLocalSubjectKind: rowLocal?.subjectKind || null,
+        rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+        blockedInputReason
+      };
+    }
+  }
+  const source = clues?.tokenBank?.formulaBoundary ?? clues;
+  const derivedOutputCluster = Array.isArray(source?.derivedOutputCluster)
+    ? source.derivedOutputCluster
     : [];
-  const saveFamilyCluesInDerivedContext = Array.isArray(clues?.saveFamilyCluesInDerivedContext)
-    ? clues.saveFamilyCluesInDerivedContext
+  const saveFamilyCluesInDerivedContext = Array.isArray(source?.saveFamilyCluesInDerivedContext)
+    ? source.saveFamilyCluesInDerivedContext
     : [];
 
-  return {
-    hasDerivedOutputBoundary:
-      derivedOutputCluster.includes("get_FinalTokenBankCap") &&
-      derivedOutputCluster.includes("get_FinalTokenBankFillSpeed") &&
-      derivedOutputCluster.includes("<FinalTokenBankCap>k__BackingField") &&
-      derivedOutputCluster.includes("<FinalTokenBankFillSpeed>k__BackingField"),
-    hasNoSaveJoinInDerivedContext: saveFamilyCluesInDerivedContext.length === 0,
-    capAccessor: "get_FinalTokenBankCap",
-    fillAccessor: "get_FinalTokenBankFillSpeed",
-    capField: "<FinalTokenBankCap>k__BackingField",
-    fillField: "<FinalTokenBankFillSpeed>k__BackingField"
-  };
+  // Required compatibility fallback: keep this path until tokenBankFormula contracts are both
+  // present and unblocked. Blocked or incomplete formula contracts should fall back explicitly.
+  return markLegacyTokenShopFallback(
+    {
+      hasDerivedOutputBoundary:
+        derivedOutputCluster.includes("get_FinalTokenBankCap") &&
+        derivedOutputCluster.includes("get_FinalTokenBankFillSpeed") &&
+        derivedOutputCluster.includes("<FinalTokenBankCap>k__BackingField") &&
+        derivedOutputCluster.includes("<FinalTokenBankFillSpeed>k__BackingField"),
+      hasNoSaveJoinInDerivedContext: saveFamilyCluesInDerivedContext.length === 0,
+      capAccessor: "get_FinalTokenBankCap",
+      fillAccessor: "get_FinalTokenBankFillSpeed",
+      capField: "<FinalTokenBankCap>k__BackingField",
+      fillField: "<FinalTokenBankFillSpeed>k__BackingField"
+    },
+    "legacy-token-bank-formula"
+  );
 }
 
 export function calculateTokenBankCap(tierUnlocks) {
@@ -583,28 +756,34 @@ export function getTokenShopOwnerShellSummary(shell) {
       ? rangeFamily.blockedEdges
       : [];
 
-    return {
-      hasOwnerShell:
-        Boolean(rowLocal?.subjectId) &&
-        rowLocalKnownEdges.includes("exact-shell-to-action-hook") &&
-        Boolean(rangeFamily?.subjectId),
-      coverageSource: "subject-contracts",
-      ownerAnchor: rowLocal?.subjectId || "row-local subject",
-      bankMethod: rowLocalActionMethods[0] || "action-method-unavailable",
-      notificationHook: rowLocal?.nextSeam?.id || "next-seam-unavailable",
-      deviceHook: rangeFamily?.subjectId || "range-family subject",
-      rowLocalSubjectId: rowLocal?.subjectId || null,
-      rangeFamilySubjectId: rangeFamily?.subjectId || null,
-      rowLocalSubjectKind: rowLocal?.subjectKind || null,
-      rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
-      rowLocalKnownEdges,
-      rangeKnownEdges,
-      rangeBlockedEdges,
-      blockedInputReason:
-        (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
-        (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
-        null
-    };
+    const blockedInputReason =
+      (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
+      (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
+      null;
+    const canUseContract =
+      blockedInputReason === null &&
+      Boolean(rowLocal?.subjectId) &&
+      rowLocalKnownEdges.includes("exact-shell-to-action-hook") &&
+      Boolean(rangeFamily?.subjectId);
+
+    if (canUseContract) {
+      return {
+        hasOwnerShell: true,
+        coverageSource: "subject-contracts",
+        ownerAnchor: rowLocal?.subjectId || "row-local subject",
+        bankMethod: rowLocalActionMethods[0] || "action-method-unavailable",
+        notificationHook: rowLocal?.nextSeam?.id || "next-seam-unavailable",
+        deviceHook: rangeFamily?.subjectId || "range-family subject",
+        rowLocalSubjectId: rowLocal?.subjectId || null,
+        rangeFamilySubjectId: rangeFamily?.subjectId || null,
+        rowLocalSubjectKind: rowLocal?.subjectKind || null,
+        rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+        rowLocalKnownEdges,
+        rangeKnownEdges,
+        rangeBlockedEdges,
+        blockedInputReason
+      };
+    }
   }
 
   const ownerAnchors = Array.isArray(shell?.ownerAnchors) ? shell.ownerAnchors : [];
@@ -614,19 +793,23 @@ export function getTokenShopOwnerShellSummary(shell) {
     ? shell.adjacentDeviceHooks
     : [];
 
-  return {
-    hasOwnerShell:
-      ownerAnchors.includes("TokenShop") &&
-      ownerAnchors.includes("InitializeTokenShop") &&
-      tokenBankMethods.includes("ClaimBankedTokens") &&
-      notificationHooks.includes("CheckTokenClaimNotification") &&
-      adjacentDeviceHooks.includes("BuyAutoTokenClicker"),
-    coverageSource: "legacy-owner-shell",
-    ownerAnchor: "TokenShop",
-    bankMethod: "ClaimBankedTokens",
-    notificationHook: "CheckTokenClaimNotification",
-    deviceHook: "BuyAutoTokenClicker"
-  };
+  // Required compatibility fallback: keep this path until owner-shell contracts are present and
+  // unblocked for both the row-local and range-family subjects used by the summary.
+  return markLegacyTokenShopFallback(
+    {
+      hasOwnerShell:
+        ownerAnchors.includes("TokenShop") &&
+        ownerAnchors.includes("InitializeTokenShop") &&
+        tokenBankMethods.includes("ClaimBankedTokens") &&
+        notificationHooks.includes("CheckTokenClaimNotification") &&
+        adjacentDeviceHooks.includes("BuyAutoTokenClicker"),
+      ownerAnchor: "TokenShop",
+      bankMethod: "ClaimBankedTokens",
+      notificationHook: "CheckTokenClaimNotification",
+      deviceHook: "BuyAutoTokenClicker"
+    },
+    "legacy-owner-shell"
+  );
 }
 
 export function getTokenShopSaveBoundarySummary(boundary) {
@@ -640,26 +823,30 @@ export function getTokenShopSaveBoundarySummary(boundary) {
       (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
       null;
 
-    return {
-      hasSeparationBoundary:
-        Boolean(rowLocal?.subjectId) &&
-        Boolean(rangeFamily?.subjectId) &&
-        typeof blockedInputReason === "string" &&
-        blockedInputReason.length > 0,
-      coverageSource: "subject-contracts",
-      ownerAnchor: rowLocal?.subjectId || "row-local subject",
-      saveAnchor: rangeFamily?.subjectId || "range-family subject",
-      overlapLabel: "canonical subject-state separation",
-      rowLocalSubjectId: rowLocal?.subjectId || null,
-      rangeFamilySubjectId: rangeFamily?.subjectId || null,
-      rowLocalSubjectKind: rowLocal?.subjectKind || null,
-      rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
-      rowLocalBlockedEdges: Array.isArray(rowLocal?.blockedEdges) ? rowLocal.blockedEdges : [],
-      rangeFamilyBlockedEdges: Array.isArray(rangeFamily?.blockedEdges)
-        ? rangeFamily.blockedEdges
-        : [],
-      blockedInputReason
-    };
+    const canUseContract =
+      Boolean(rowLocal?.subjectId) &&
+      Boolean(rangeFamily?.subjectId) &&
+      typeof blockedInputReason === "string" &&
+      blockedInputReason.length > 0;
+
+    if (canUseContract) {
+      return {
+        hasSeparationBoundary: true,
+        coverageSource: "subject-contracts",
+        ownerAnchor: rowLocal?.subjectId || "row-local subject",
+        saveAnchor: rangeFamily?.subjectId || "range-family subject",
+        overlapLabel: "canonical subject-state separation",
+        rowLocalSubjectId: rowLocal?.subjectId || null,
+        rangeFamilySubjectId: rangeFamily?.subjectId || null,
+        rowLocalSubjectKind: rowLocal?.subjectKind || null,
+        rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+        rowLocalBlockedEdges: Array.isArray(rowLocal?.blockedEdges) ? rowLocal.blockedEdges : [],
+        rangeFamilyBlockedEdges: Array.isArray(rangeFamily?.blockedEdges)
+          ? rangeFamily.blockedEdges
+          : [],
+        blockedInputReason
+      };
+    }
   }
 
   const ownerShellTermsChecked = Array.isArray(boundary?.ownerShellTermsChecked)
@@ -673,19 +860,24 @@ export function getTokenShopSaveBoundarySummary(boundary) {
       ? boundary.boundaryEvidence
       : {};
 
-  return {
-    hasSeparationBoundary:
-      ownerShellTermsChecked.includes("TokenShop") &&
-      saveFamilyTermsChecked.includes("PlayerProfileData") &&
-      boundaryEvidence.metadataHasSaveTerms === true &&
-      boundaryEvidence.level0HasSaveTerms === false &&
-      boundaryEvidence.ownerShellWithSaveOverlapCount === 0 &&
-      boundaryEvidence.directTokenShopPlayerProfileContext === false,
-    coverageSource: "legacy-save-boundary",
-    ownerAnchor: "TokenShop",
-    saveAnchor: "PlayerProfileData",
-    overlapLabel: "zero overlap"
-  };
+  // Compatibility-only fallback: active UI reads should use canonical subject contracts when
+  // they are present. This branch remains only for export/debug views or when subject contracts
+  // are absent from the caller payload.
+  return markLegacyTokenShopFallback(
+    {
+      hasSeparationBoundary:
+        ownerShellTermsChecked.includes("TokenShop") &&
+        saveFamilyTermsChecked.includes("PlayerProfileData") &&
+        boundaryEvidence.metadataHasSaveTerms === true &&
+        boundaryEvidence.level0HasSaveTerms === false &&
+        boundaryEvidence.ownerShellWithSaveOverlapCount === 0 &&
+        boundaryEvidence.directTokenShopPlayerProfileContext === false,
+      ownerAnchor: "TokenShop",
+      saveAnchor: "PlayerProfileData",
+      overlapLabel: "zero overlap"
+    },
+    "legacy-save-boundary"
+  );
 }
 
 export function getTokenBankControllerShellSummary(shell) {
@@ -721,29 +913,34 @@ export function getTokenBankControllerShellSummary(shell) {
       (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
       null;
 
-    return {
-      hasControllerShell:
-        typeof controllerFields.claimMethod === "string" &&
-        typeof controllerFields.fillMethod === "string" &&
-        typeof controllerFields.fillField === "string" &&
-        typeof controllerFields.descriptionShell === "string" &&
-        typeof controllerFields.notificationHook === "string" &&
-        adjacentTerms.includes("get_TokenBankCap") &&
-        adjacentTerms.includes("get_ClaimableBankTokens") &&
-        adjacentTerms.includes("IncreaseBankedTokens"),
-      coverageSource: "subject-contracts",
-      claimMethod: controllerFields.claimMethod || "ClaimBankedTokens",
-      fillMethod: controllerFields.fillMethod || "SetBankFill",
-      fillField: controllerFields.fillField || "BankFill",
-      descriptionShell: controllerFields.descriptionShell || "TokenBankDescriptionText",
-      notificationHook: controllerFields.notificationHook || "CheckTokenClaimNotification",
-      rowLocalSubjectId: rowLocal?.subjectId || null,
-      rangeFamilySubjectId: rangeFamily?.subjectId || null,
-      rowLocalSubjectKind: rowLocal?.subjectKind || null,
-      rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
-      adjacentTerms,
-      blockedInputReason
-    };
+    const canUseContract =
+      blockedInputReason === null &&
+      typeof controllerFields.claimMethod === "string" &&
+      typeof controllerFields.fillMethod === "string" &&
+      typeof controllerFields.fillField === "string" &&
+      typeof controllerFields.descriptionShell === "string" &&
+      typeof controllerFields.notificationHook === "string" &&
+      adjacentTerms.includes("get_TokenBankCap") &&
+      adjacentTerms.includes("get_ClaimableBankTokens") &&
+      adjacentTerms.includes("IncreaseBankedTokens");
+
+    if (canUseContract) {
+      return {
+        hasControllerShell: true,
+        coverageSource: "subject-contracts",
+        claimMethod: controllerFields.claimMethod || "ClaimBankedTokens",
+        fillMethod: controllerFields.fillMethod || "SetBankFill",
+        fillField: controllerFields.fillField || "BankFill",
+        descriptionShell: controllerFields.descriptionShell || "TokenBankDescriptionText",
+        notificationHook: controllerFields.notificationHook || "CheckTokenClaimNotification",
+        rowLocalSubjectId: rowLocal?.subjectId || null,
+        rangeFamilySubjectId: rangeFamily?.subjectId || null,
+        rowLocalSubjectKind: rowLocal?.subjectKind || null,
+        rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+        adjacentTerms,
+        blockedInputReason
+      };
+    }
   }
 
   const controllerAnchors = Array.isArray(shell?.controllerAnchors) ? shell.controllerAnchors : [];
@@ -751,23 +948,28 @@ export function getTokenBankControllerShellSummary(shell) {
     ? shell.adjacentControllerMethods
     : [];
 
-  return {
-    hasControllerShell:
-      controllerAnchors.includes("ClaimBankedTokens") &&
-      controllerAnchors.includes("SetBankFill") &&
-      controllerAnchors.includes("BankFill") &&
-      controllerAnchors.includes("TokenBankDescriptionText") &&
-      controllerAnchors.includes("CheckTokenClaimNotification") &&
-      controllerAnchors.includes("TokenShopButtonNotification") &&
-      adjacentControllerMethods.includes("get_TokenBankCap") &&
-      adjacentControllerMethods.includes("get_ClaimableBankTokens") &&
-      adjacentControllerMethods.includes("IncreaseBankedTokens"),
-    claimMethod: "ClaimBankedTokens",
-    fillMethod: "SetBankFill",
-    fillField: "BankFill",
-    descriptionShell: "TokenBankDescriptionText",
-    notificationHook: "CheckTokenClaimNotification"
-  };
+  // Required compatibility fallback: keep this path until tokenBankController contracts are both
+  // present and unblocked. Blocked or incomplete controller contracts should fall back explicitly.
+  return markLegacyTokenShopFallback(
+    {
+      hasControllerShell:
+        controllerAnchors.includes("ClaimBankedTokens") &&
+        controllerAnchors.includes("SetBankFill") &&
+        controllerAnchors.includes("BankFill") &&
+        controllerAnchors.includes("TokenBankDescriptionText") &&
+        controllerAnchors.includes("CheckTokenClaimNotification") &&
+        controllerAnchors.includes("TokenShopButtonNotification") &&
+        adjacentControllerMethods.includes("get_TokenBankCap") &&
+        adjacentControllerMethods.includes("get_ClaimableBankTokens") &&
+        adjacentControllerMethods.includes("IncreaseBankedTokens"),
+      claimMethod: "ClaimBankedTokens",
+      fillMethod: "SetBankFill",
+      fillField: "BankFill",
+      descriptionShell: "TokenBankDescriptionText",
+      notificationHook: "CheckTokenClaimNotification"
+    },
+    "legacy-token-bank-controller"
+  );
 }
 
 export function getMultiverseMarketSaveBoundarySummary(boundary) {
@@ -1136,6 +1338,55 @@ export function getMultiverseMarketValidatedCoverage(multiverseMarket) {
 }
 
 export function getTokeniumNamingSummary(clues) {
+  const contracts = normalizeTokenShopContracts(clues);
+  if (contracts.length) {
+    const rowLocal =
+      contracts.find(
+        (contract) =>
+          contract?.subjectKind === "row-local" &&
+          typeof contract?.groundedFields?.tokeniumNaming === "object" &&
+          contract.groundedFields.tokeniumNaming
+      ) ?? null;
+    const rangeFamily =
+      contracts.find(
+        (contract) =>
+          contract?.subjectKind === "range-family" &&
+          typeof contract?.groundedFields?.tokeniumNaming === "object" &&
+          contract.groundedFields.tokeniumNaming
+      ) ?? null;
+    const namingFields =
+      rowLocal?.groundedFields?.tokeniumNaming ?? rangeFamily?.groundedFields?.tokeniumNaming ?? {};
+    const blockedInputReason =
+      (typeof rowLocal?.blockedInputReasons?.tokeniumNaming === "string" &&
+        rowLocal.blockedInputReasons.tokeniumNaming) ||
+      (typeof rangeFamily?.blockedInputReasons?.tokeniumNaming === "string" &&
+        rangeFamily.blockedInputReasons.tokeniumNaming) ||
+      (typeof rowLocal?.blockedInputReason === "string" && rowLocal.blockedInputReason) ||
+      (typeof rangeFamily?.blockedInputReason === "string" && rangeFamily.blockedInputReason) ||
+      null;
+    const canUseContract =
+      blockedInputReason === null &&
+      typeof namingFields.resourceLabel === "string" &&
+      typeof namingFields.academyLabel === "string" &&
+      typeof namingFields.tokenShellLabel === "string" &&
+      typeof namingFields.tokeniumShellLabel === "string";
+
+    if (canUseContract) {
+      return {
+        hasNamingClues: true,
+        coverageSource: "subject-contracts",
+        resourceLabel: namingFields.resourceLabel,
+        academyLabel: namingFields.academyLabel,
+        tokenShellLabel: namingFields.tokenShellLabel,
+        tokeniumShellLabel: namingFields.tokeniumShellLabel,
+        rowLocalSubjectId: rowLocal?.subjectId || null,
+        rangeFamilySubjectId: rangeFamily?.subjectId || null,
+        rowLocalSubjectKind: rowLocal?.subjectKind || null,
+        rangeFamilySubjectKind: rangeFamily?.subjectKind || null,
+        blockedInputReason
+      };
+    }
+  }
   const resourceIcons = Array.isArray(clues?.assetNames?.resourceIcons)
     ? clues.assetNames.resourceIcons
     : [];
@@ -1144,19 +1395,25 @@ export function getTokeniumNamingSummary(clues) {
     : [];
   const level0Shells = Array.isArray(clues?.level0Shells) ? clues.level0Shells : [];
 
-  return {
-    hasNamingClues:
-      resourceIcons.includes("Resource_Tokenium") &&
-      academySprites.includes("Aca.Tokenium553") &&
-      level0Shells.includes("CostBox-Tokens") &&
-      level0Shells.includes("CostBox-Tokenium"),
-    resourceLabel:
-      resourceIcons.find((value) => value === "Resource_Tokenium") || "Resource_Tokenium",
-    academyLabel: academySprites.find((value) => value === "Aca.Tokenium553") || "Aca.Tokenium553",
-    tokenShellLabel: level0Shells.find((value) => value === "CostBox-Tokens") || "CostBox-Tokens",
-    tokeniumShellLabel:
-      level0Shells.find((value) => value === "CostBox-Tokenium") || "CostBox-Tokenium"
-  };
+  // Required compatibility fallback: keep this path until tokeniumNaming contracts are both
+  // present and unblocked. Blocked naming contracts should fall back explicitly.
+  return markLegacyTokenShopFallback(
+    {
+      hasNamingClues:
+        resourceIcons.includes("Resource_Tokenium") &&
+        academySprites.includes("Aca.Tokenium553") &&
+        level0Shells.includes("CostBox-Tokens") &&
+        level0Shells.includes("CostBox-Tokenium"),
+      resourceLabel:
+        resourceIcons.find((value) => value === "Resource_Tokenium") || "Resource_Tokenium",
+      academyLabel:
+        academySprites.find((value) => value === "Aca.Tokenium553") || "Aca.Tokenium553",
+      tokenShellLabel: level0Shells.find((value) => value === "CostBox-Tokens") || "CostBox-Tokens",
+      tokeniumShellLabel:
+        level0Shells.find((value) => value === "CostBox-Tokenium") || "CostBox-Tokenium"
+    },
+    "legacy-tokenium-naming"
+  );
 }
 
 function normalizeTokenShopContracts(tokenShop) {
@@ -1221,16 +1478,21 @@ export function getTokenShopCoverageSummary(tokenShop) {
     (key) => key in numericTable
   );
 
-  return {
-    hasCoverage: numericKeys.length > 0,
-    coverageSource: "extract",
-    numericGroupCount: numericKeys.length,
-    hasNamedLanes: namedLanes.length === 3,
-    namedLaneLabel: namedLanes.join(", "),
-    tierLabel: groups.join(", "),
-    hasControllerAnchors:
-      controllerFieldNames.has("BankFill") && controllerFieldNames.has("TokenBankDescriptionText")
-  };
+  // Compatibility-only fallback: active UI reads should use canonical subject contracts when
+  // they are present. This branch remains only for export/debug views or when subject contracts
+  // are absent from the caller payload.
+  return markLegacyTokenShopFallback(
+    {
+      hasCoverage: numericKeys.length > 0,
+      numericGroupCount: numericKeys.length,
+      hasNamedLanes: namedLanes.length === 3,
+      namedLaneLabel: namedLanes.join(", "),
+      tierLabel: groups.join(", "),
+      hasControllerAnchors:
+        controllerFieldNames.has("BankFill") && controllerFieldNames.has("TokenBankDescriptionText")
+    },
+    "legacy-extract"
+  );
 }
 
 export function getImportedMultiverseMarketPreview(

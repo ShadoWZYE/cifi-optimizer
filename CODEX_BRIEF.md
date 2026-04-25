@@ -42,6 +42,8 @@ Treat archived JSON or export snapshots as:
 - historical provenance
 - compatibility fallback only when DB-backed state is missing
 
+For the active DB-native reconstruction model, see [docs/unity/db-native-reconstruction-framework.md](docs/unity/db-native-reconstruction-framework.md).
+
 ## Trace run policy
 
 Long native or Ghidra-backed trace runs are normal while cacheable parsing is still maturing. Runtime length by itself is not evidence of a stall.
