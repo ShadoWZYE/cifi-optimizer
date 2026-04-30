@@ -8121,7 +8121,7 @@ async function verifyDailyTokeniumSubjectStateMonotonicity() {
 import json
 import sys
 from pathlib import Path
-root = Path(r"""${repoRoot}""")
+root = Path(r"""${repoRoot.replace(/\\/g, "/")}""")
 sys.path.insert(0, str(root / "scripts" / "unity"))
 from ghidra_cache_db import GhidraCacheDB
 db = GhidraCacheDB(root / "workbench" / "ghidra-cache" / "ghidra_cache.sqlite3", root / "workbench" / "ghidra-jobs")
