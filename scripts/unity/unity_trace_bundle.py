@@ -972,6 +972,7 @@ def _pick_best_subject_state_for_trace_scope(
                 "row": row,
                 "aliasMatch": alias_match,
                 "nextSeamOpen": next_seam_open,
+                "builtAtSort": int(re.sub(r"\D", "", str(row.get("builtAt") or "")) or "0"),
                 "knownCount": len([value for value in (payload.get("knownEdges") or []) if str(value).strip()]),
                 "missingCount": len([value for value in (payload.get("missingEdges") or []) if str(value).strip()]),
                 "blockedCount": len([value for value in (payload.get("blockedEdges") or []) if str(value).strip()]),
@@ -989,6 +990,7 @@ def _pick_best_subject_state_for_trace_scope(
             int(item.get("blockedCount") or 0),
             int(item.get("missingCount") or 0),
             -int(item.get("nonblockingCount") or 0),
+            -int(item.get("builtAtSort") or 0),
             0 if str(item.get("subjectKind") or "") == "row-local" else 1,
             str(((item.get("row") or {}).get("subjectId")) or ""),
         )
@@ -1281,6 +1283,11 @@ def _build_acquisition_first_best_gap_candidates(
         for row in resolver_target_rows
         if str(row.get("traceScope") or "").strip()
     }
+    target_id_by_scope = {
+        str(row.get("traceScope") or "").strip(): str(((row.get("payload") or {}).get("target") or {}).get("targetId") or "").strip()
+        for row in target_rows
+        if str(row.get("traceScope") or "").strip()
+    }
     canonical_row_subjects_by_scope: dict[str, set[str]] = {}
     for row in subject_state_rows:
         trace_scope = str(row.get("traceScope") or "").strip()
@@ -1294,7 +1301,23 @@ def _build_acquisition_first_best_gap_candidates(
     subject_mentions_by_anchor: dict[str, list[dict[str, str]]] = {}
     candidate_bases: list[dict[str, Any]] = []
 
+    selected_subject_rows: list[dict[str, Any]] = []
+    seen_trace_scopes: set[str] = set()
     for row in subject_state_rows:
+        trace_scope = str(row.get("traceScope") or "").strip()
+        if not trace_scope or trace_scope in seen_trace_scopes:
+            continue
+        selected_row = _pick_best_subject_state_for_trace_scope(
+            trace_scope,
+            target_id_by_scope.get(trace_scope) or trace_scope,
+            subject_state_rows,
+        )
+        if not selected_row:
+            continue
+        seen_trace_scopes.add(trace_scope)
+        selected_subject_rows.append(selected_row)
+
+    for row in selected_subject_rows:
         trace_scope = str(row.get("traceScope") or "").strip()
         subject_state = dict(row.get("payload") or {})
         if not trace_scope or not subject_state:

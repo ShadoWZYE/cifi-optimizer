@@ -2824,23 +2824,58 @@ def _derive_target_assessment_fragment(
     baseline_gap = list(diff.get("blockedMissingEdgeTypes") or negative_types)
     native_summary = dict(payload.get("nativeReconstruction") or {})
     rules = dict(target.get("outputSummaryRules") or {})
+    legacy_decision_summary = dict(payload.get("decisionSummary") or {})
+    legacy_supporting_edge_types = [
+        str(value)
+        for value in (legacy_decision_summary.get("supportingEdgeTypes") or [])
+        if str(value).strip()
+    ]
+    legacy_blocked_edge_types = [
+        str(value)
+        for value in (legacy_decision_summary.get("blockedEdgeTypes") or [])
+        if str(value).strip()
+    ]
+    if not proved_edges and not negative_edges and (legacy_supporting_edge_types or legacy_blocked_edge_types):
+        baseline_gap = list(legacy_decision_summary.get("baselineGap") or baseline_gap)
+        negative_types = list(legacy_blocked_edge_types)
     if not rules:
         rules = _derive_output_summary_rules_from_state(
             trace_scope,
             "family-audit" if "family" in trace_scope else "target",
             {
                 "blockedEdgeTypes": negative_types,
-                "supportingEdgeTypes": [
-                    str(edge.get("type"))
-                    for edge in proved_edges
-                    if isinstance(edge, dict) and str(edge.get("type") or "")
-                ],
-                "provedEdgeCount": len(proved_edges),
-                "negativeEdgeCount": len(negative_edges),
-                "summary": str(((payload.get("decisionSummary") or {}).get("summary") or "")).strip(),
+                "supportingEdgeTypes": (
+                    legacy_supporting_edge_types
+                    if not proved_edges and legacy_supporting_edge_types
+                    else [
+                        str(edge.get("type"))
+                        for edge in proved_edges
+                        if isinstance(edge, dict) and str(edge.get("type") or "")
+                    ]
+                ),
+                "provedEdgeCount": (
+                    len(legacy_supporting_edge_types)
+                    if not proved_edges and legacy_supporting_edge_types
+                    else len(proved_edges)
+                ),
+                "negativeEdgeCount": (
+                    len(negative_types)
+                    if not negative_edges and negative_types
+                    else len(negative_edges)
+                ),
+                "summary": str((legacy_decision_summary.get("summary") or "")).strip(),
             },
         )
-    legacy_decision_summary = dict(payload.get("decisionSummary") or {})
+    effective_proved_edge_count = (
+        len(legacy_supporting_edge_types)
+        if not proved_edges and legacy_supporting_edge_types
+        else len(proved_edges)
+    )
+    effective_negative_edge_count = (
+        len(negative_types)
+        if not negative_edges and negative_types
+        else len(negative_edges)
+    )
 
     if not rules:
         if legacy_decision_summary:
@@ -2859,9 +2894,9 @@ def _derive_target_assessment_fragment(
     else:
         wire = dict(rules.get("wire") or {})
         quarantine = dict(rules.get("quarantine") or {})
-        if len(proved_edges) >= int(wire.get("minPresentEdges", 0) or 0) and len(negative_edges) <= int(wire.get("maxNegativeEdges", 0) or 0):
+        if effective_proved_edge_count >= int(wire.get("minPresentEdges", 0) or 0) and effective_negative_edge_count <= int(wire.get("maxNegativeEdges", 0) or 0):
             verdict = "wire"
-        elif len(proved_edges) >= int(quarantine.get("minPresentEdges", 0) or 0) and all(edge_type in (quarantine.get("allowedNegativeEdgeTypes") or []) for edge_type in negative_types):
+        elif effective_proved_edge_count >= int(quarantine.get("minPresentEdges", 0) or 0) and all(edge_type in (quarantine.get("allowedNegativeEdgeTypes") or []) for edge_type in negative_types):
             verdict = "quarantine"
         else:
             verdict = "keep researching"
@@ -2904,12 +2939,12 @@ def _derive_target_assessment_fragment(
         "decisionSummary": {
             "verdict": verdict,
             "summary": summary,
-            "provedEdgeCount": len(proved_edges),
-            "negativeEdgeCount": len(negative_edges),
+            "provedEdgeCount": effective_proved_edge_count,
+            "negativeEdgeCount": effective_negative_edge_count,
             "baselineGap": baseline_gap,
             "supportingEdgeTypes": (
-                list(legacy_decision_summary.get("supportingEdgeTypes") or [])
-                if not rules and legacy_decision_summary.get("supportingEdgeTypes")
+                list(legacy_supporting_edge_types)
+                if not proved_edges and legacy_supporting_edge_types
                 else [
                     str(edge.get("type"))
                     for edge in proved_edges
@@ -2917,9 +2952,7 @@ def _derive_target_assessment_fragment(
                 ]
             ),
             "blockedEdgeTypes": (
-                list(legacy_decision_summary.get("blockedEdgeTypes") or [])
-                if not rules and legacy_decision_summary.get("blockedEdgeTypes")
-                else negative_types
+                list(negative_types)
             ),
         },
         "updatedAt": datetime.now().isoformat(timespec="seconds"),
@@ -4001,6 +4034,28 @@ def _build_subject_edge_facts(
     facts: list[dict[str, Any]] = []
     seen_keys: set[tuple[str, str]] = set()
 
+    decision_baseline_gap = _unique_strings(
+        [str(value) for value in (decision_summary.get("baselineGap") or []) if str(value).strip()]
+    )
+    reconstruction_baseline_gap = _unique_strings(
+        [str(value) for value in (reconstruction_assessment.get("baselineGap") or []) if str(value).strip()]
+    )
+    decision_blocked_edge_types = _unique_strings(
+        [str(value) for value in (decision_summary.get("blockedEdgeTypes") or []) if str(value).strip()]
+    )
+    reconstruction_blocked_edge_types = _unique_strings(
+        [str(value) for value in (reconstruction_assessment.get("blockedEdgeTypes") or []) if str(value).strip()]
+    )
+    prefer_decision_summary_range_gaps = (
+        subject_class == "range-family"
+        and bool(decision_blocked_edge_types)
+        and any(not str(edge_type).startswith("repeated-") for edge_type in decision_blocked_edge_types)
+        and (
+            any(str(edge_type).startswith("repeated-") for edge_type in reconstruction_baseline_gap)
+            or any(str(edge_type).startswith("repeated-") for edge_type in reconstruction_blocked_edge_types)
+        )
+    )
+
     def add_fact(
         edge_type: str,
         edge_status: str,
@@ -4182,7 +4237,8 @@ def _build_subject_edge_facts(
     claim_stages = [stage for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]
     missing_priority = 0
     if subject_class == "range-family":
-        for gap_type in _unique_strings([str(value) for value in (reconstruction_assessment.get("baselineGap") or []) if str(value).strip()]):
+        range_baseline_gap = decision_baseline_gap if prefer_decision_summary_range_gaps else reconstruction_baseline_gap
+        for gap_type in range_baseline_gap:
             add_fact(
                 gap_type,
                 "missing",
@@ -4299,12 +4355,15 @@ def _build_subject_edge_facts(
             if not str(edge_type).startswith("repeated-")
         ]
     if subject_class == "range-family":
-        blocked_edge_types = _unique_strings(
-            [
-                *[str(value) for value in (reconstruction_assessment.get("blockedEdgeTypes") or [])],
-                *blocked_edge_types,
-            ]
-        )
+        if prefer_decision_summary_range_gaps:
+            blocked_edge_types = decision_blocked_edge_types
+        else:
+            blocked_edge_types = _unique_strings(
+                [
+                    *reconstruction_blocked_edge_types,
+                    *blocked_edge_types,
+                ]
+            )
     for blocked_index, edge_type in enumerate(blocked_edge_types):
         matching_depth_step = next(
             (
@@ -10236,6 +10295,24 @@ class GhidraCacheDB:
                 if _looks_like_anchor(str(value))
             ]
         selected_anchors = _unique_strings([term for term in selected_anchors if term])[:12]
+        if (
+            str(subject_state.get("subjectKind") or "").strip() == "range-family"
+            and selected_seam_id == "exact-display-update-path"
+        ):
+            local_anchor_terms = [
+                str(value).strip()
+                for value in (resolver_payload.get("anchorTerms") or [])
+                if _looks_like_anchor(str(value))
+            ]
+            if local_anchor_terms:
+                selected_anchors = _unique_strings(local_anchor_terms)[:12]
+                local_requested_terms = [
+                    term
+                    for term in selected_anchors
+                    if term.endswith("Button") or term.startswith("Buy") or "Prefab" in term
+                ]
+                if local_requested_terms:
+                    exact_requested_terms = _unique_strings(local_requested_terms)[:12]
         selected_surface_ids = _unique_strings([surface_id for surface_id in selected_surface_ids if surface_id])
 
         trace_scope = str(knowledge.get("traceScope") or resolver_payload.get("traceScope") or "").strip()
