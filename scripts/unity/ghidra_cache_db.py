@@ -7924,7 +7924,21 @@ class GhidraCacheDB:
         project_file: str,
         lane_id: str,
         current_subject_state: dict[str, Any],
+        current_shared_lane_contract: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
+        current_shared_lane_contract = dict(current_shared_lane_contract or {})
+        current_grounded_fields = dict(
+            (((current_shared_lane_contract.get("groundedFields") or {}).get(lane_id)) or {})
+        )
+        current_support_summary = dict(
+            (((current_shared_lane_contract.get("supportSummary") or {}).get(lane_id)) or {})
+        )
+        current_provenance_summary = list(
+            (((current_shared_lane_contract.get("provenanceSummary") or {}).get(lane_id)) or [])
+        )
+        current_blocked_reason = str(
+            (((current_shared_lane_contract.get("blockedInputReasons") or {}).get(lane_id)) or "")
+        ).strip() or None
         candidates: list[dict[str, Any]] = [
             {
                 "subjectId": str(current_subject_state.get("subjectId") or "").strip(),
@@ -7933,6 +7947,10 @@ class GhidraCacheDB:
                 "knownEdges": list(current_subject_state.get("knownEdges") or []),
                 "missingEdges": list(current_subject_state.get("missingEdges") or []),
                 "blockedEdges": list(current_subject_state.get("blockedEdges") or []),
+                "laneGroundedFields": current_grounded_fields,
+                "laneSupportSummary": current_support_summary,
+                "laneProvenanceSummary": current_provenance_summary,
+                "laneBlockedReason": current_blocked_reason,
                 "source": "current-subject-state",
             }
         ]
@@ -7952,34 +7970,74 @@ class GhidraCacheDB:
                     "source": "materialized-subject-state-view",
                 }
             )
+        for contract_row in self.list_latest_materialized_subject_contract_views(project_name, project_file):
+            payload = dict(contract_row.get("payload") or {})
+            subject_id = str(payload.get("subjectId") or "").strip()
+            if not subject_id.startswith(("row:", "range:token-shop:")):
+                continue
+            lane_grounded_fields = dict((((payload.get("groundedFields") or {}).get(lane_id)) or {}))
+            lane_support_summary = dict((((payload.get("supportSummary") or {}).get("sharedLanes") or {}).get(lane_id)) or {})
+            lane_provenance_summary = list((((payload.get("provenanceSummary") or {}).get("sharedLanes") or {}).get(lane_id)) or [])
+            lane_blocked_reason = str((((payload.get("blockedInputReasons") or {}).get(lane_id)) or "")).strip() or None
+            if not lane_grounded_fields and not lane_support_summary and not lane_provenance_summary and lane_blocked_reason is None:
+                continue
+            candidates.append(
+                {
+                    "subjectId": subject_id,
+                    "subjectKind": str(payload.get("subjectKind") or "").strip(),
+                    "nextSeam": {},
+                    "knownEdges": [],
+                    "missingEdges": [],
+                    "blockedEdges": [],
+                    "laneGroundedFields": lane_grounded_fields,
+                    "laneSupportSummary": lane_support_summary,
+                    "laneProvenanceSummary": lane_provenance_summary,
+                    "laneBlockedReason": lane_blocked_reason,
+                    "builtAt": str(contract_row.get("builtAt") or ""),
+                    "source": "materialized-subject-contract-view",
+                }
+            )
 
-        def _lane_score(candidate: dict[str, Any]) -> tuple[int, int, int, int, int]:
+        def _lane_score(candidate: dict[str, Any]) -> tuple[int, int, int, int, int, int, int, str]:
             subject_kind = str(candidate.get("subjectKind") or "").strip()
             next_seam = dict(candidate.get("nextSeam") or {})
             seam_status = str(next_seam.get("status") or "").strip()
             known_edges = [str(value).strip() for value in (candidate.get("knownEdges") or []) if str(value).strip()]
             missing_edges = [str(value).strip() for value in (candidate.get("missingEdges") or []) if str(value).strip()]
             blocked_edges = [str(value).strip() for value in (candidate.get("blockedEdges") or []) if str(value).strip()]
+            lane_grounded_fields = dict(candidate.get("laneGroundedFields") or {})
+            lane_support_summary = dict(candidate.get("laneSupportSummary") or {})
+            lane_found_terms = [str(value).strip() for value in (lane_support_summary.get("foundTerms") or []) if str(value).strip()]
+            lane_blocked_reason = str(candidate.get("laneBlockedReason") or "").strip()
             return (
+                1 if not lane_blocked_reason else 0,
+                len(lane_grounded_fields),
+                len(lane_found_terms),
                 1 if seam_status == "clear" else 0,
                 1 if subject_kind == "range-family" else 0,
                 len(known_edges),
                 -len(blocked_edges),
                 -len(missing_edges),
+                str(candidate.get("builtAt") or ""),
             )
 
         selected = max(candidates, key=_lane_score)
         next_seam = dict(selected.get("nextSeam") or {})
-        blocked_reason = (
-            str(next_seam.get("reason") or "").strip() or None
-            if str(next_seam.get("status") or "").strip() != "clear"
-            else None
-        )
+        blocked_reason = str(selected.get("laneBlockedReason") or "").strip() or None
+        if blocked_reason is None:
+            blocked_reason = (
+                str(next_seam.get("reason") or "").strip() or None
+                if str(next_seam.get("status") or "").strip() != "clear"
+                else None
+            )
         return {
             "selectedSubjectId": str(selected.get("subjectId") or "").strip() or None,
             "selectedSubjectKind": str(selected.get("subjectKind") or "").strip() or None,
             "selectionSource": str(selected.get("source") or "").strip() or None,
             "blockedReason": blocked_reason,
+            "groundedFields": dict(selected.get("laneGroundedFields") or {}),
+            "supportSummary": dict(selected.get("laneSupportSummary") or {}),
+            "provenanceSummary": list(selected.get("laneProvenanceSummary") or []),
         }
 
     def reclaim_expired_running_jobs(self, now: datetime | None = None) -> list[str]:
@@ -11399,11 +11457,37 @@ class GhidraCacheDB:
             support_summary,
             blocked_input_reason,
         )
+        strongest_tokenium_naming_contract = self._select_strongest_token_shop_lane_contract(
+            project_name,
+            project_file,
+            "tokeniumNaming",
+            subject_state,
+            shared_lane_contract,
+        )
+        if strongest_tokenium_naming_contract.get("groundedFields"):
+            shared_lane_contract["groundedFields"]["tokeniumNaming"] = dict(
+                strongest_tokenium_naming_contract.get("groundedFields") or {}
+            )
+        shared_lane_contract["blockedInputReasons"]["tokeniumNaming"] = (
+            strongest_tokenium_naming_contract.get("blockedReason")
+        )
+        shared_lane_contract["supportSummary"]["tokeniumNaming"] = {
+            **dict((shared_lane_contract.get("supportSummary") or {}).get("tokeniumNaming") or {}),
+            **dict(strongest_tokenium_naming_contract.get("supportSummary") or {}),
+            "selectedSubjectId": strongest_tokenium_naming_contract.get("selectedSubjectId"),
+            "selectedSubjectKind": strongest_tokenium_naming_contract.get("selectedSubjectKind"),
+            "selectionSource": strongest_tokenium_naming_contract.get("selectionSource"),
+        }
+        shared_lane_contract["provenanceSummary"]["tokeniumNaming"] = list(
+            strongest_tokenium_naming_contract.get("provenanceSummary")
+            or ((shared_lane_contract.get("provenanceSummary") or {}).get("tokeniumNaming") or [])
+        )
         strongest_daily_lane_contract = self._select_strongest_token_shop_lane_contract(
             project_name,
             project_file,
             "dailyTokeniumLane",
             subject_state,
+            shared_lane_contract,
         )
         shared_lane_contract["blockedInputReasons"]["dailyTokeniumLane"] = (
             strongest_daily_lane_contract.get("blockedReason")
