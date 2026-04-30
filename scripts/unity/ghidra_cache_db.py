@@ -6516,10 +6516,11 @@ class GhidraCacheDB:
                 add(term, "graph_backfill_link", link, link_key, 0.78)
         return evidence_rows
 
-    def _upsert_evidence_rows(self, evidence_rows: list[dict[str, Any]]) -> None:
+    def _upsert_evidence_rows(self, evidence_rows: list[dict[str, Any]]) -> set[tuple[str, str, str]]:
         if not evidence_rows:
-            return
+            return set()
         now = datetime.now().isoformat()
+        affected_terms: set[tuple[str, str, str]] = set()
         with self.connect() as conn:
             for evidence in evidence_rows:
                 aspect_kind = str(evidence["aspect_kind"] or "")
@@ -6633,7 +6634,6 @@ class GhidraCacheDB:
                         and int(existing["schema_version"] or 0) == int(evidence["schema_version"])
                         and str(existing["script_name"] or "") == str(evidence["script_name"] or "")
                         and str(existing["producer_version"] or "") == str(evidence["producer_version"] or "")
-                        and str(existing["start_time"] or "") == str(evidence["start_time"] or "")
                         and str(existing["term"] or "") == str(evidence["term"] or "")
                         and int(existing["is_valid"] or 0) == 1
                         and existing["invalidated_at"] is None
@@ -6685,23 +6685,21 @@ class GhidraCacheDB:
                         now,
                     ),
                 )
+                affected_terms.add(
+                    (
+                        str(evidence["project_name"] or "").strip(),
+                        str(evidence["project_file"] or "").strip(),
+                        str(evidence["normalized_term"] or "").strip().lower(),
+                    )
+                )
             self._prune_evidence_retention(conn)
+        return affected_terms
 
     def upsert_custom_evidence_rows(self, evidence_rows: list[dict[str, Any]], rebuild_materialized: bool = True) -> None:
-        self._upsert_evidence_rows(evidence_rows)
-        if rebuild_materialized:
+        affected_terms = self._upsert_evidence_rows(evidence_rows)
+        if rebuild_materialized and affected_terms:
             self._rebuild_canonical_and_materialized(
-                affected_terms={
-                    (
-                        str(row.get("project_name") or "").strip(),
-                        str(row.get("project_file") or "").strip(),
-                        str(row.get("normalized_term") or "").strip().lower(),
-                    )
-                    for row in evidence_rows
-                    if str(row.get("project_name") or "").strip()
-                    and str(row.get("project_file") or "").strip()
-                    and str(row.get("normalized_term") or "").strip()
-                }
+                affected_terms=affected_terms
             )
 
     def _reduce_rows(self, rows: list[sqlite3.Row], aspect_kind: str) -> tuple[Any, list[str], list[dict[str, Any]], dict[str, Any]]:
@@ -7270,6 +7268,76 @@ class GhidraCacheDB:
             },
             "result": payload,
             "terms": [str(row["term"])],
+        }
+
+    def find_live_evidence_row(
+        self,
+        project_name: str,
+        project_file: str,
+        normalized_term: str,
+        aspect_kind: str,
+        aspect_key: str = "__self__",
+        *,
+        source_job_id: str = "",
+        producer_version: str = "",
+    ) -> dict[str, Any] | None:
+        self.sync_from_jobs_if_needed()
+        normalized_term = str(normalized_term or "").strip().lower()
+        aspect_kind = str(aspect_kind or "").strip()
+        aspect_key = str(aspect_key or "").strip() or "__self__"
+        if not normalized_term or not aspect_kind:
+            return None
+        clauses = [
+            "project_name = ?",
+            "project_file = ?",
+            "normalized_term = ?",
+            "aspect_kind = ?",
+            "aspect_key = ?",
+            "is_valid = 1",
+            "invalidated_at IS NULL",
+        ]
+        params: list[Any] = [
+            project_name,
+            project_file,
+            normalized_term,
+            aspect_kind,
+            aspect_key,
+        ]
+        if source_job_id:
+            clauses.append("source_job_id = ?")
+            params.append(str(source_job_id))
+        if producer_version:
+            clauses.append("producer_version = ?")
+            params.append(str(producer_version))
+        with self.connect() as conn:
+            row = conn.execute(
+                """
+                SELECT *
+                FROM evidence
+                WHERE {}
+                ORDER BY evidence_id DESC
+                LIMIT 1
+                """.format(" AND ".join(clauses)),
+                tuple(params),
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "evidenceId": int(row["evidence_id"]),
+            "projectName": str(row["project_name"] or ""),
+            "projectFile": str(row["project_file"] or ""),
+            "normalizedTerm": str(row["normalized_term"] or ""),
+            "term": str(row["term"] or ""),
+            "aspectKind": str(row["aspect_kind"] or ""),
+            "aspectKey": str(row["aspect_key"] or ""),
+            "sourceJobId": str(row["source_job_id"] or ""),
+            "payload": _json_loads(row["payload_json"], {}),
+            "confidence": float(row["confidence"] or 0.0),
+            "reducerPriority": int(row["reducer_priority"] or 0),
+            "schemaVersion": int(row["schema_version"] or 0),
+            "scriptName": str(row["script_name"] or ""),
+            "producerVersion": str(row["producer_version"] or ""),
+            "startTime": str(row["start_time"] or ""),
         }
 
     def record_extraction_job(self, job_info: dict[str, Any]) -> None:
