@@ -46,12 +46,12 @@ TRACE_BUNDLE_RUN_CACHE: dict[tuple[str, str], Any] = {}
 ACTIVE_TRACE_PROFILER: "TraceRunProfiler | None" = None
 ACTIVE_TRACE_RUNTIME_FLAGS: dict[str, Any] = {}
 
-UNITY_ENV: Any = None
+UNITY_ENV_BY_SLICE: dict[tuple[str, ...], Any] = {}
 METADATA_STRING_ENTRIES: list[dict[str, Any]] | None = None
-UNITY_SEARCH_INDEX: dict[str, list[dict[str, Any]]] | None = None
-UNITY_RAW_STRING_INDEX: dict[str, list[dict[str, Any]]] | None = None
-UNITY_OBJECTS_BY_PATH_ID: dict[int, Any] | None = None
-UNITY_OBJECTS_BY_ASSET_AND_PATH_ID: dict[tuple[str, int], Any] | None = None
+UNITY_SEARCH_INDEX_BY_SLICE: dict[tuple[str, ...], dict[str, list[dict[str, Any]]]] = {}
+UNITY_RAW_STRING_INDEX_BY_SLICE: dict[tuple[str, ...], dict[str, list[dict[str, Any]]]] = {}
+UNITY_OBJECTS_BY_PATH_ID_BY_SLICE: dict[tuple[str, ...], dict[int, Any]] = {}
+UNITY_OBJECTS_BY_ASSET_AND_PATH_ID_BY_SLICE: dict[tuple[str, ...], dict[tuple[str, int], Any]] = {}
 
 
 def _infer_runtime_family_id(*values: Any) -> str:
@@ -77,6 +77,7 @@ class TraceRunProfiler:
         self._counts: dict[str, int] = {}
         self._metadata: dict[str, Any] = {}
         self._phase_order: list[dict[str, Any]] = []
+        self._phase_counter = 0
         self._started_at: float | None = perf_counter() if self.enabled else None
         self._live_path = TRACE_TIMING_LIVE_PATH if self.enabled else None
         if self.enabled and self._live_path is not None:
@@ -103,7 +104,9 @@ class TraceRunProfiler:
             yield
             return
         phase_bucket = str(bucket or label).strip() or str(label).strip() or "phase"
-        print(f"[phase] {label}...")
+        self._phase_counter += 1
+        phase_number = self._phase_counter
+        print(f"[phase {phase_number}] {label}...")
         started = perf_counter()
         try:
             with self.span(phase_bucket):
@@ -111,8 +114,15 @@ class TraceRunProfiler:
         finally:
             elapsed_ms = round((perf_counter() - started) * 1000.0, 3)
             self._phase_order.append({"label": label, "bucket": phase_bucket, "elapsedMs": elapsed_ms})
-            print(f"[phase] {label} done in {elapsed_ms:.3f}ms")
+            print(f"[phase {phase_number}] {label} done in {elapsed_ms:.3f}ms (total {self.total_run_ms():.3f}ms)")
             self._write_live_snapshot()
+
+    def progress(self, label: str, detail: str | None = None) -> None:
+        if not self.enabled:
+            return
+        suffix = f": {detail}" if detail else ""
+        print(f"[progress] {label}{suffix}")
+        self._write_live_snapshot()
 
     def set_metadata(self, key: str, value: Any) -> None:
         if self.enabled:
@@ -187,6 +197,43 @@ def _get_active_trace_runtime_flag(key: str, default: Any = None) -> Any:
 
 def reset_trace_bundle_run_cache() -> None:
     TRACE_BUNDLE_RUN_CACHE.clear()
+
+
+def _current_unity_slice_source_ids() -> tuple[str, ...]:
+    active_source_ids = _get_active_trace_runtime_flag("activeUnitySourceIds")
+    source_ids = active_source_ids if isinstance(active_source_ids, list) else None
+    return _normalize_unity_source_ids(source_ids, fallback_to_all=True)
+
+
+def _normalize_unity_source_ids(
+    source_ids: list[str] | tuple[str, ...] | None,
+    *,
+    fallback_to_all: bool,
+) -> tuple[str, ...]:
+    normalized: list[str] = []
+    for raw_source_id in list(source_ids or []):
+        source_id = str(raw_source_id or "").strip()
+        if not source_id:
+            continue
+        if source_id == "assets":
+            normalized.extend(ASSET_SOURCE_MEMBERS)
+            continue
+        if source_id in ("level0", *ASSET_SOURCE_MEMBERS):
+            normalized.append(source_id)
+    normalized = unique_strings(normalized)
+    if not normalized and fallback_to_all:
+        normalized = ["level0", *ASSET_SOURCE_MEMBERS]
+    return tuple(normalized)
+
+
+def _unity_source_fingerprint(source_id: str) -> str | None:
+    path = get_unity_source_path(source_id)
+    if path is None or not path.exists():
+        return None
+    stat = path.stat()
+    return hashlib.sha1(
+        f"{repo_relative(path)}:{stat.st_size}:{stat.st_mtime_ns}".encode("utf-8")
+    ).hexdigest()[:16]
 
 
 def _trace_bundle_cache_get(bucket: str, key: str) -> Any | None:
@@ -1642,18 +1689,8 @@ def choose_best_gap_plan(registry: dict[str, Any] | None = None) -> dict[str, An
         )
     )
     best = dict(candidates[0])
-    evidence_terms = [str(term).strip() for term in (best.get("evidenceTerms") or []) if str(term).strip()]
-    if evidence_terms:
-        full_evidence = _aggregate_term_evidence_summaries(evidence_terms[:6], full=True)
-    else:
-        full_evidence = _cached_contract_term_evidence(str(best.get("unresolvedAnchor") or ""))
-    best["evidence"] = full_evidence
-    best["evidenceFrequency"] = {
-        "payloadHitTotal": sum(int((entry or {}).get("count") or 0) for entry in (full_evidence.get("payloadHits") or []) if isinstance(entry, dict)),
-        "payloadHits": [dict(entry) for entry in (full_evidence.get("payloadHits") or []) if isinstance(entry, dict)],
-        "graphRefCount": len([entry for entry in (full_evidence.get("graphRefs") or []) if isinstance(entry, dict)]),
-        "sourceIds": [str(source_id) for source_id in (full_evidence.get("sourceIds") or []) if str(source_id).strip()],
-    }
+    best["evidence"] = dict(best.get("evidence") or {})
+    best["evidenceDetailMode"] = "summary-only"
     best["rankedAlternatives"] = candidates[:5]
     return best
 
@@ -1669,12 +1706,21 @@ def _print_best_gap_plan(best_gap_plan: dict[str, Any]) -> None:
         print("  unresolvedAnchor={}".format(best_gap_plan.get("unresolvedAnchor") or "none"))
     if best_gap_plan.get("selectedSubjectKind") and best_gap_plan.get("selectedSubjectKey"):
         print(
-            "  subject={} {} executionScope={}".format(
+            "  subject={} {} label={} executionScope={}".format(
                 best_gap_plan.get("selectedSubjectKind"),
                 best_gap_plan.get("selectedSubjectKey"),
+                best_gap_plan.get("selectedSubjectLabel") or "unknown",
                 best_gap_plan.get("executionTraceScope") or best_gap_plan.get("traceScope") or "unknown",
             )
         )
+    print(
+        "  selectionMode={} coverageMode={} family={} target={}".format(
+            best_gap_plan.get("selectionMode") or "best-gap-db",
+            best_gap_plan.get("coverageMode") or "term-shaped",
+            best_gap_plan.get("familyId") or "unknown",
+            best_gap_plan.get("targetId") or "unknown",
+        )
+    )
     if best_gap_plan.get("selectedSeamId") or best_gap_plan.get("executionRoutineId"):
         print(
             "  seam={} routine={}".format(
@@ -1727,9 +1773,10 @@ def _print_best_gap_plan(best_gap_plan: dict[str, Any]) -> None:
     planned_action = dict(best_gap_plan.get("plannedAction") or {})
     if planned_action:
         print(
-            "  acquisitionAction scope={} routine={} anchors={} terms={}".format(
+            "  acquisitionAction scope={} routine={} seam={} anchors={} terms={}".format(
                 planned_action.get("traceScope") or "unknown",
                 planned_action.get("routine") or "unknown",
+                best_gap_plan.get("selectedSeamId") or "none",
                 ", ".join(planned_action.get("anchors") or []) or "none",
                 ", ".join(planned_action.get("expectedTerms") or []) or "none",
             )
@@ -1743,8 +1790,21 @@ def _print_best_gap_plan(best_gap_plan: dict[str, Any]) -> None:
                     ", ".join(relation_probe.get("requiredCoverageSeamIds") or []) or "none",
                 )
             )
+    subject_state = dict(best_gap_plan.get("subjectState") or {})
+    if subject_state:
+        next_seam = dict(subject_state.get("nextSeam") or {})
+        print(
+            "  discoveries known={} missing={} nonblocking={} nextSeam={}".format(
+                ", ".join(subject_state.get("knownEdges") or []) or "none",
+                ", ".join(subject_state.get("missingEdges") or []) or "none",
+                ", ".join(subject_state.get("nonblockingEdges") or []) or "none",
+                next_seam.get("id") or best_gap_plan.get("selectedSeamId") or "none",
+            )
+        )
     if best_gap_plan.get("anchors"):
         print("  anchors={}".format(", ".join(best_gap_plan["anchors"])))
+    if best_gap_plan.get("selectedAnchors"):
+        print("  selectedAnchors={}".format(", ".join(best_gap_plan.get("selectedAnchors") or []) or "none"))
     if best_gap_plan.get("targetAliases"):
         print("  targetAliases={}".format(", ".join(best_gap_plan.get("targetAliases") or []) or "none"))
     if best_gap_plan.get("anchorSelectionReasons"):
@@ -1917,6 +1977,15 @@ def _execute_trace_bundle_run(
                 knowledge_plan = dict(trace_plan.get("knowledgePlan") or {})
                 asset_set = trace_plan["assetSet"]
                 request_signature = str(trace_plan["requestSignature"])
+        profiler.progress(
+            "Execution subject selected",
+            "{} {} scope={} family={}".format(
+                planner_resolution.get("selectedSubjectKind") or "unknown-subject",
+                planner_resolution.get("selectedSubjectKey") or "unknown",
+                execution_trace_scope or "unknown",
+                selected_family_id or "unknown",
+            ),
+        )
 
         profiler.set_metadata("executionTraceScope", execution_trace_scope)
         profiler.set_metadata("selectedFamilyId", selected_family_id)
@@ -2077,6 +2146,15 @@ def _execute_trace_bundle_run(
                 step_args = argparse.Namespace(**vars(args))
                 step_args.query = step_queries
                 step_args.anchor = step_anchors
+                profiler.progress(
+                    "Acquisition step",
+                    "{} seam={} routine={} anchors={}".format(
+                        step_trace_scope or "unknown",
+                        step.get("seamId") or "none",
+                        step.get("executionRoutineId") or step.get("selectedRoutine") or "none",
+                        ", ".join(step_anchors) or "none",
+                    ),
+                )
                 try:
                     step_dataset = collect_trace_bundle_components(step_args, step_trace_plan, registry)
                     persist_trace_bundle_fragments(step_dataset, step_trace_scope, step_request_signature)
@@ -2465,16 +2543,21 @@ def install_unitypy_stubs() -> None:
     sys.modules.setdefault("PIL.Image", pil_image)
 
 
-def get_unity_env():
-    global UNITY_ENV
-    if UNITY_ENV is None:
+def get_unity_env(source_ids: list[str] | tuple[str, ...] | None = None):
+    slice_key = _normalize_unity_source_ids(source_ids, fallback_to_all=True)
+    env = UNITY_ENV_BY_SLICE.get(slice_key)
+    if env is None:
         with _trace_profile_span("sourceLoading.unityEnvLoad"):
             install_unitypy_stubs()
             sys.path.insert(0, str((ROOT / ".deps").resolve()))
             from UnityPy import Environment
-            UNITY_ENV = Environment()
-            UNITY_ENV.load_folder(str(UNITY_JOINED_DIR))
-    return UNITY_ENV
+            env = Environment()
+            for unity_source_id in slice_key:
+                path = get_unity_source_path(unity_source_id)
+                if path is not None and path.exists():
+                    env.load_file(str(path))
+            UNITY_ENV_BY_SLICE[slice_key] = env
+    return env
 
 
 def _unity_search_index_source_paths() -> list[Path]:
@@ -2484,13 +2567,25 @@ def _unity_search_index_source_paths() -> list[Path]:
     ]
 
 
+def _build_unity_search_index_fingerprint_map(
+    source_ids: list[str] | tuple[str, ...] | None = None,
+) -> dict[str, str]:
+    slice_key = _normalize_unity_source_ids(source_ids, fallback_to_all=True)
+    fingerprint_map: dict[str, str] = {}
+    for unity_source_id in slice_key:
+        fingerprint = _unity_source_fingerprint(unity_source_id)
+        if fingerprint:
+            fingerprint_map[unity_source_id] = fingerprint
+    return fingerprint_map
+
+
 def _build_unity_search_index_fingerprint() -> str:
-    fingerprint_parts: list[str] = []
-    for path in _unity_search_index_source_paths():
-        if not path.exists():
-            continue
-        stat = path.stat()
-        fingerprint_parts.append(f"{repo_relative(path)}:{stat.st_size}:{stat.st_mtime_ns}")
+    fingerprint_parts = [
+        f"{source_id}:{fingerprint}"
+        for source_id, fingerprint in sorted(
+            _build_unity_search_index_fingerprint_map().items()
+        )
+    ]
     return hashlib.sha1("|".join(fingerprint_parts).encode("utf-8")).hexdigest()[:16]
 
 
@@ -2502,47 +2597,105 @@ def _unity_raw_string_index_source_paths() -> list[Path]:
     ]
 
 
+def _build_unity_raw_string_index_fingerprint_map(
+    source_ids: list[str] | tuple[str, ...] | None = None,
+) -> dict[str, str]:
+    slice_key = _normalize_unity_source_ids(source_ids, fallback_to_all=True)
+    fingerprint_map: dict[str, str] = {}
+    for unity_source_id in slice_key:
+        fingerprint = _unity_source_fingerprint(unity_source_id)
+        if fingerprint:
+            fingerprint_map[unity_source_id] = fingerprint
+    return fingerprint_map
+
+
 def _build_unity_raw_string_index_fingerprint() -> str:
-    fingerprint_parts: list[str] = []
-    for path in _unity_raw_string_index_source_paths():
-        if not path.exists():
-            continue
-        stat = path.stat()
-        fingerprint_parts.append(f"{repo_relative(path)}:{stat.st_size}:{stat.st_mtime_ns}")
+    fingerprint_parts = [
+        f"{source_id}:{fingerprint}"
+        for source_id, fingerprint in sorted(
+            _build_unity_raw_string_index_fingerprint_map().items()
+        )
+    ]
     return hashlib.sha1("|".join(fingerprint_parts).encode("utf-8")).hexdigest()[:16]
 
 
-def _load_cached_unity_search_index() -> dict[str, list[dict[str, Any]]] | None:
+def _load_cached_unity_search_index(
+    source_ids: list[str] | tuple[str, ...] | None = None,
+) -> dict[str, list[dict[str, Any]]] | None:
+    slice_key = _normalize_unity_source_ids(source_ids, fallback_to_all=True)
     cache_path = UNITY_SEARCH_INDEX_CACHE_PATH
     if not cache_path.exists():
         return None
     try:
         payload = json.loads(cache_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
+        return None
+    cached_index = payload.get("searchIndexBySource")
+    cached_fingerprints = payload.get("sourceFingerprints")
+    if isinstance(cached_index, dict) and isinstance(cached_fingerprints, dict):
+        expected_fingerprints = _build_unity_search_index_fingerprint_map(slice_key)
+        slice_index: dict[str, list[dict[str, Any]]] = {}
+        for unity_source_id in slice_key:
+            if str(cached_fingerprints.get(unity_source_id) or "") != str(expected_fingerprints.get(unity_source_id) or ""):
+                return None
+            entries = cached_index.get(unity_source_id)
+            if not isinstance(entries, list):
+                return None
+            slice_index[unity_source_id] = list(entries or [])
+        return slice_index
+    if slice_key != _normalize_unity_source_ids(None, fallback_to_all=True):
         return None
     if str(payload.get("fingerprint") or "") != _build_unity_search_index_fingerprint():
         return None
-    cached_index = payload.get("searchIndex")
-    if not isinstance(cached_index, dict):
+    legacy_index = payload.get("searchIndex")
+    if not isinstance(legacy_index, dict):
         return None
-    return {
-        str(source_id): list(entries or [])
-        for source_id, entries in cached_index.items()
-    }
+    return {str(source_id): list(entries or []) for source_id, entries in legacy_index.items()}
 
 
-def _store_cached_unity_search_index(search_index: dict[str, list[dict[str, Any]]]) -> None:
+def _store_cached_unity_search_index(
+    search_index: dict[str, list[dict[str, Any]]],
+    source_ids: list[str] | tuple[str, ...] | None = None,
+) -> None:
+    slice_key = _normalize_unity_source_ids(source_ids, fallback_to_all=True)
     cache_path = UNITY_SEARCH_INDEX_CACHE_PATH
     cache_path.parent.mkdir(parents=True, exist_ok=True)
+    existing_index: dict[str, list[dict[str, Any]]] = {}
+    existing_fingerprints: dict[str, str] = {}
+    if cache_path.exists():
+        try:
+            existing_payload = json.loads(cache_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            existing_payload = {}
+        if isinstance(existing_payload.get("searchIndexBySource"), dict):
+            existing_index = {
+                str(source_id): list(entries or [])
+                for source_id, entries in existing_payload["searchIndexBySource"].items()
+            }
+        if isinstance(existing_payload.get("sourceFingerprints"), dict):
+            existing_fingerprints = {
+                str(source_id): str(fingerprint or "")
+                for source_id, fingerprint in existing_payload["sourceFingerprints"].items()
+            }
+    expected_fingerprints = _build_unity_search_index_fingerprint_map(slice_key)
+    for unity_source_id in slice_key:
+        existing_index[unity_source_id] = list(search_index.get(unity_source_id) or [])
+        fingerprint = expected_fingerprints.get(unity_source_id)
+        if fingerprint:
+            existing_fingerprints[unity_source_id] = fingerprint
     payload = {
-        "fingerprint": _build_unity_search_index_fingerprint(),
-        "searchIndex": search_index,
+        "version": 2,
+        "sourceFingerprints": existing_fingerprints,
+        "searchIndexBySource": existing_index,
         "cachedAt": datetime.now().isoformat(timespec="seconds"),
     }
     cache_path.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
 
 
-def _load_cached_unity_raw_string_index() -> dict[str, list[dict[str, Any]]] | None:
+def _load_cached_unity_raw_string_index(
+    source_ids: list[str] | tuple[str, ...] | None = None,
+) -> dict[str, list[dict[str, Any]]] | None:
+    slice_key = _normalize_unity_source_ids(source_ids, fallback_to_all=True)
     cache_path = UNITY_RAW_STRING_INDEX_CACHE_PATH
     if not cache_path.exists():
         return None
@@ -2550,46 +2703,87 @@ def _load_cached_unity_raw_string_index() -> dict[str, list[dict[str, Any]]] | N
         payload = json.loads(cache_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return None
+    cached_index = payload.get("rawStringIndexBySource")
+    cached_fingerprints = payload.get("sourceFingerprints")
+    if isinstance(cached_index, dict) and isinstance(cached_fingerprints, dict):
+        expected_fingerprints = _build_unity_raw_string_index_fingerprint_map(slice_key)
+        slice_index: dict[str, list[dict[str, Any]]] = {}
+        for unity_source_id in slice_key:
+            if str(cached_fingerprints.get(unity_source_id) or "") != str(expected_fingerprints.get(unity_source_id) or ""):
+                return None
+            entries = cached_index.get(unity_source_id)
+            if not isinstance(entries, list):
+                return None
+            slice_index[unity_source_id] = list(entries or [])
+        return slice_index
+    if slice_key != _normalize_unity_source_ids(None, fallback_to_all=True):
+        return None
     if str(payload.get("fingerprint") or "") != _build_unity_raw_string_index_fingerprint():
         return None
-    cached_index = payload.get("rawStringIndex")
-    if not isinstance(cached_index, dict):
+    legacy_index = payload.get("rawStringIndex")
+    if not isinstance(legacy_index, dict):
         return None
-    return {
-        str(source_id): list(entries or [])
-        for source_id, entries in cached_index.items()
-    }
+    return {str(source_id): list(entries or []) for source_id, entries in legacy_index.items()}
 
 
-def _store_cached_unity_raw_string_index(raw_string_index: dict[str, list[dict[str, Any]]]) -> None:
+def _store_cached_unity_raw_string_index(
+    raw_string_index: dict[str, list[dict[str, Any]]],
+    source_ids: list[str] | tuple[str, ...] | None = None,
+) -> None:
+    slice_key = _normalize_unity_source_ids(source_ids, fallback_to_all=True)
     cache_path = UNITY_RAW_STRING_INDEX_CACHE_PATH
     cache_path.parent.mkdir(parents=True, exist_ok=True)
+    existing_index: dict[str, list[dict[str, Any]]] = {}
+    existing_fingerprints: dict[str, str] = {}
+    if cache_path.exists():
+        try:
+            existing_payload = json.loads(cache_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            existing_payload = {}
+        if isinstance(existing_payload.get("rawStringIndexBySource"), dict):
+            existing_index = {
+                str(source_id): list(entries or [])
+                for source_id, entries in existing_payload["rawStringIndexBySource"].items()
+            }
+        if isinstance(existing_payload.get("sourceFingerprints"), dict):
+            existing_fingerprints = {
+                str(source_id): str(fingerprint or "")
+                for source_id, fingerprint in existing_payload["sourceFingerprints"].items()
+            }
+    expected_fingerprints = _build_unity_raw_string_index_fingerprint_map(slice_key)
+    for unity_source_id in slice_key:
+        existing_index[unity_source_id] = list(raw_string_index.get(unity_source_id) or [])
+        fingerprint = expected_fingerprints.get(unity_source_id)
+        if fingerprint:
+            existing_fingerprints[unity_source_id] = fingerprint
     payload = {
-        "fingerprint": _build_unity_raw_string_index_fingerprint(),
-        "rawStringIndex": raw_string_index,
+        "version": 2,
+        "sourceFingerprints": existing_fingerprints,
+        "rawStringIndexBySource": existing_index,
         "cachedAt": datetime.now().isoformat(timespec="seconds"),
     }
     cache_path.write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
 
 
-def _ensure_unity_object_indexes() -> None:
-    global UNITY_OBJECTS_BY_PATH_ID
-    global UNITY_OBJECTS_BY_ASSET_AND_PATH_ID
-    global UNITY_SEARCH_INDEX
+def _ensure_unity_object_indexes(source_ids: list[str] | tuple[str, ...] | None = None) -> None:
+    slice_key = _normalize_unity_source_ids(source_ids, fallback_to_all=True)
     if (
-        UNITY_OBJECTS_BY_PATH_ID is not None
-        and UNITY_OBJECTS_BY_ASSET_AND_PATH_ID is not None
-        and UNITY_SEARCH_INDEX is not None
+        slice_key in UNITY_OBJECTS_BY_PATH_ID_BY_SLICE
+        and slice_key in UNITY_OBJECTS_BY_ASSET_AND_PATH_ID_BY_SLICE
+        and slice_key in UNITY_SEARCH_INDEX_BY_SLICE
     ):
         return
 
     with _trace_profile_span("sourceLoading.unityObjectIndex"):
-        env = get_unity_env()
+        env = get_unity_env(slice_key)
         preferred_assets = {"level0": 0, "globalgamemanagers.assets": 1, "sharedassets0.assets": 2}
         chosen_by_path_id: dict[int, Any] = {}
         objects_by_asset_and_path_id: dict[tuple[str, int], Any] = {}
-        cached_search_index = _load_cached_unity_search_index()
-        search_index: dict[str, list[dict[str, Any]]] = dict(cached_search_index or {})
+        cached_search_index = _load_cached_unity_search_index(slice_key)
+        search_index: dict[str, list[dict[str, Any]]] = {
+            unity_source_id: list((cached_search_index or {}).get(unity_source_id) or [])
+            for unity_source_id in slice_key
+        }
         build_search_index = cached_search_index is None
 
         for obj in env.objects:
@@ -2653,13 +2847,15 @@ def _ensure_unity_object_indexes() -> None:
                 ],
             }
             for source_key in get_unity_source_keys(obj):
+                if source_key not in search_index:
+                    continue
                 search_index.setdefault(source_key, []).append(entry)
 
-    UNITY_OBJECTS_BY_PATH_ID = chosen_by_path_id
-    UNITY_OBJECTS_BY_ASSET_AND_PATH_ID = objects_by_asset_and_path_id
-    UNITY_SEARCH_INDEX = search_index
+    UNITY_OBJECTS_BY_PATH_ID_BY_SLICE[slice_key] = chosen_by_path_id
+    UNITY_OBJECTS_BY_ASSET_AND_PATH_ID_BY_SLICE[slice_key] = objects_by_asset_and_path_id
+    UNITY_SEARCH_INDEX_BY_SLICE[slice_key] = search_index
     if build_search_index:
-        _store_cached_unity_search_index(search_index)
+        _store_cached_unity_search_index(search_index, slice_key)
 
 
 def safe_unity_read(obj: Any) -> Any | None:
@@ -2675,17 +2871,17 @@ def safe_unity_read(obj: Any) -> Any | None:
 
 
 def get_unity_objects_by_path_id() -> dict[int, Any]:
-    global UNITY_OBJECTS_BY_PATH_ID
-    if UNITY_OBJECTS_BY_PATH_ID is None:
-        _ensure_unity_object_indexes()
-    return UNITY_OBJECTS_BY_PATH_ID
+    slice_key = _normalize_unity_source_ids(None, fallback_to_all=True)
+    if slice_key not in UNITY_OBJECTS_BY_PATH_ID_BY_SLICE:
+        _ensure_unity_object_indexes(slice_key)
+    return UNITY_OBJECTS_BY_PATH_ID_BY_SLICE[slice_key]
 
 
 def get_unity_objects_by_asset_and_path_id() -> dict[tuple[str, int], Any]:
-    global UNITY_OBJECTS_BY_ASSET_AND_PATH_ID
-    if UNITY_OBJECTS_BY_ASSET_AND_PATH_ID is None:
-        _ensure_unity_object_indexes()
-    return UNITY_OBJECTS_BY_ASSET_AND_PATH_ID
+    slice_key = _normalize_unity_source_ids(None, fallback_to_all=True)
+    if slice_key not in UNITY_OBJECTS_BY_ASSET_AND_PATH_ID_BY_SLICE:
+        _ensure_unity_object_indexes(slice_key)
+    return UNITY_OBJECTS_BY_ASSET_AND_PATH_ID_BY_SLICE[slice_key]
 
 
 def _resolve_external_asset_name(source_asset_name: str | None, file_id: int | None) -> str | None:
@@ -2807,25 +3003,45 @@ def get_unity_source_path(source_id: str) -> Path | None:
     return ASSET_SOURCE_MEMBER_PATHS.get(source_id)
 
 
-def get_unity_search_index() -> dict[str, list[dict[str, Any]]]:
-    global UNITY_SEARCH_INDEX
-    if UNITY_SEARCH_INDEX is None:
-        _ensure_unity_object_indexes()
-    return UNITY_SEARCH_INDEX
+def get_unity_search_index(
+    source_ids: list[str] | tuple[str, ...] | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    slice_key = (
+        _normalize_unity_source_ids(source_ids, fallback_to_all=False)
+        if source_ids is not None
+        else _current_unity_slice_source_ids()
+    )
+    if not slice_key:
+        slice_key = _normalize_unity_source_ids(None, fallback_to_all=True)
+    if slice_key not in UNITY_SEARCH_INDEX_BY_SLICE:
+        cached_index = _load_cached_unity_search_index(slice_key)
+        if cached_index is not None:
+            UNITY_SEARCH_INDEX_BY_SLICE[slice_key] = cached_index
+        else:
+            _ensure_unity_object_indexes(slice_key)
+    return UNITY_SEARCH_INDEX_BY_SLICE[slice_key]
 
 
-def get_unity_raw_string_index() -> dict[str, list[dict[str, Any]]]:
-    global UNITY_RAW_STRING_INDEX
-    if UNITY_RAW_STRING_INDEX is not None:
-        return UNITY_RAW_STRING_INDEX
+def get_unity_raw_string_index(
+    source_ids: list[str] | tuple[str, ...] | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    slice_key = (
+        _normalize_unity_source_ids(source_ids, fallback_to_all=False)
+        if source_ids is not None
+        else _current_unity_slice_source_ids()
+    )
+    if not slice_key:
+        slice_key = _normalize_unity_source_ids(None, fallback_to_all=True)
+    if slice_key in UNITY_RAW_STRING_INDEX_BY_SLICE:
+        return UNITY_RAW_STRING_INDEX_BY_SLICE[slice_key]
 
     with _trace_profile_span("sourceLoading.rawStringIndex"):
-        cached_index = _load_cached_unity_raw_string_index()
+        cached_index = _load_cached_unity_raw_string_index(slice_key)
         if cached_index is not None:
             index = cached_index
         else:
             index: dict[str, list[dict[str, Any]]] = {}
-            for source_id in ("level0", *ASSET_SOURCE_MEMBERS):
+            for source_id in slice_key:
                 path = get_unity_source_path(source_id)
                 if not path or not path.exists():
                     index[source_id] = []
@@ -2839,9 +3055,9 @@ def get_unity_raw_string_index() -> dict[str, list[dict[str, Any]]]:
                     }
                     for entry in entries
                 ]
-            _store_cached_unity_raw_string_index(index)
-    UNITY_RAW_STRING_INDEX = index
-    return UNITY_RAW_STRING_INDEX
+            _store_cached_unity_raw_string_index(index, slice_key)
+    UNITY_RAW_STRING_INDEX_BY_SLICE[slice_key] = index
+    return UNITY_RAW_STRING_INDEX_BY_SLICE[slice_key]
 
 
 def classify_presentation_role(name: str, script_names: list[str]) -> str | None:
@@ -4503,7 +4719,7 @@ def build_token_shop_literal_schema_follow_up(
 def build_token_shop_literal_text_recovery(
     row_recovery: dict[str, Any],
 ) -> dict[str, Any]:
-    raw_entries = get_unity_raw_string_index().get("level0", [])
+    raw_entries = get_unity_raw_string_index(["level0"]).get("level0", [])
     if not raw_entries:
         return {
             "status": "literal-text-unavailable",
@@ -5573,7 +5789,7 @@ def build_token_shop_fast_buy_recovery(
         if abs(sample_ratio - rounded_ratio) < 1e-9 and rounded_ratio > 1:
             inferred_purchase_factor = int(rounded_ratio)
 
-    search_index = get_unity_search_index().get("level0", [])
+    search_index = get_unity_search_index(["level0"]).get("level0", [])
     fast_buy_objects: list[dict[str, Any]] = []
     bulk_buy_objects: list[dict[str, Any]] = []
     for entry in search_index:
@@ -5606,7 +5822,7 @@ def build_token_shop_fast_buy_recovery(
                 }
             )
 
-    raw_entries = get_unity_raw_string_index().get("level0", [])
+    raw_entries = get_unity_raw_string_index(["level0"]).get("level0", [])
     raw_string_hits = [
         entry["value"]
         for entry in raw_entries
@@ -6608,9 +6824,42 @@ def get_shell_window(token_shop_extract: dict[str, Any], shell_field: str, radiu
 
 
 def collect_source_hits(documents: dict[str, Any], source_id: str, anchor_specs: list[dict[str, Any]], shell_window: dict[str, Any] | None = None) -> dict[str, Any]:
+    shell_window_key = ""
+    if isinstance(shell_window, dict) and shell_window:
+        shell_window_key = hashlib.sha1(
+            json.dumps(
+                {
+                    "shellField": shell_window.get("shellField"),
+                    "shellPathId": shell_window.get("shellPathId"),
+                    "ownerFieldBlock": shell_window.get("ownerFieldBlock"),
+                    "window": shell_window.get("window"),
+                },
+                sort_keys=True,
+                default=str,
+            ).encode("utf-8")
+        ).hexdigest()[:16]
+    cache_key = hashlib.sha1(
+        json.dumps(
+            {
+                "sourceId": source_id,
+                "anchorSpecs": [
+                    {
+                        "value": str(spec.get("value") or ""),
+                        "kind": str(spec.get("kind") or ""),
+                    }
+                    for spec in anchor_specs
+                ],
+                "shellWindow": shell_window_key,
+            },
+            sort_keys=True,
+        ).encode("utf-8")
+    ).hexdigest()[:20]
+    cached = _trace_bundle_cache_get("source-hit-collection", cache_key)
+    if cached is not None:
+        return dict(cached)
     if source_id == "metadata":
         hits, suppressed_count = collect_metadata_hits(anchor_specs)
-        return {
+        payload = {
             "sourceId": source_id,
             "sourcePath": get_source_reference(source_id),
             "searchModes": get_source_search_modes(source_id),
@@ -6621,6 +6870,7 @@ def collect_source_hits(documents: dict[str, Any], source_id: str, anchor_specs:
             "suppressedNoiseCount": suppressed_count,
             "hits": hits,
         }
+        return _trace_bundle_cache_put("source-hit-collection", cache_key, payload)
     if source_id in ("level0", "assets", *ASSET_SOURCE_MEMBERS):
         unity_source_ids = [source_id] if source_id != "assets" else list(ASSET_SOURCE_MEMBERS)
         hits: list[dict[str, Any]] = []
@@ -6629,7 +6879,7 @@ def collect_source_hits(documents: dict[str, Any], source_id: str, anchor_specs:
             member_hits, member_suppressed = collect_unity_hits(unity_source_id, anchor_specs)
             hits.extend(member_hits)
             suppressed_count += member_suppressed
-        return {
+        payload = {
             "sourceId": source_id,
             "sourcePath": get_source_reference(source_id),
             "searchModes": ["object-name", "class-name", "component-type", "text-content"],
@@ -6640,8 +6890,9 @@ def collect_source_hits(documents: dict[str, Any], source_id: str, anchor_specs:
             "suppressedNoiseCount": suppressed_count,
             "hits": hits,
         }
+        return _trace_bundle_cache_put("source-hit-collection", cache_key, payload)
     if source_id == "native":
-        return {
+        payload = {
             "sourceId": source_id,
             "sourcePath": get_source_reference(source_id),
             "searchModes": ["bridge-plan", "process-project", "db-materialized-native-trace"],
@@ -6652,8 +6903,9 @@ def collect_source_hits(documents: dict[str, Any], source_id: str, anchor_specs:
             "suppressedNoiseCount": 0,
             "hits": [],
         }
+        return _trace_bundle_cache_put("source-hit-collection", cache_key, payload)
     hits, suppressed_count = collect_exact_hits(documents[source_id], anchor_specs, source_id, shell_window)
-    return {
+    payload = {
         "sourceId": source_id,
         "sourcePath": get_source_reference(source_id),
         "searchModes": get_source_search_modes(source_id),
@@ -6664,6 +6916,7 @@ def collect_source_hits(documents: dict[str, Any], source_id: str, anchor_specs:
         "suppressedNoiseCount": suppressed_count,
         "hits": hits,
     }
+    return _trace_bundle_cache_put("source-hit-collection", cache_key, payload)
 
 
 def collect_unity_hits(source_id: str, anchor_specs: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], int]:
@@ -6672,73 +6925,67 @@ def collect_unity_hits(source_id: str, anchor_specs: list[dict[str, Any]]) -> tu
     suppressed_count = 0
     skip_raw_string_scan = bool(_get_active_trace_runtime_flag("skipUnityRawStringScan", False))
     exact_terms = {spec["value"] for spec in anchor_specs}
+    exact_terms_lower = {term.lower(): term for term in exact_terms}
+    ordered_lower_terms = sorted(exact_terms_lower.keys(), key=len, reverse=True)
     spec_by_value = {spec["value"]: spec for spec in anchor_specs}
+
+    def resolve_match(value: str) -> tuple[str | None, str]:
+        matched_term = exact_terms_lower.get(value.lower())
+        if matched_term is not None:
+            return matched_term, "exact-string"
+        lowered_value = value.lower()
+        for lowered_term in ordered_lower_terms:
+            if lowered_term in lowered_value:
+                return exact_terms_lower[lowered_term], "bounded-containment"
+        return None, ""
 
     for entry in get_unity_search_index().get(source_id, []):
         for surface in entry["surfaces"]:
             str_value = surface["surfaceValue"]
-            for term in exact_terms:
-                matched = False
-                match_mode = ""
-                if str_value == term:
-                    matched = True
-                    match_mode = "exact-string"
-                elif term.lower() in str_value.lower():
-                    matched = True
-                    match_mode = "bounded-containment"
-
-                if matched:
-                    signal_tier = "high-signal" if match_mode == "exact-string" else "supporting"
-                    hits.append({
-                        "term": term,
-                        "matchedValue": str_value[:200],
-                        "surfaceType": surface["surfaceType"],
-                        "pathId": entry["pathId"],
-                        "objectType": entry["objectType"],
-                        "signalTier": signal_tier,
-                        "matchMode": match_mode,
-                        "score": surface["baseScore"] if match_mode == "exact-string" else surface["baseScore"] // 2,
-                    })
-                    break
+            matched_term, match_mode = resolve_match(str_value)
+            if matched_term is None:
+                continue
+            signal_tier = "high-signal" if match_mode == "exact-string" else "supporting"
+            hits.append({
+                "term": matched_term,
+                "matchedValue": str_value[:200],
+                "surfaceType": surface["surfaceType"],
+                "pathId": entry["pathId"],
+                "objectType": entry["objectType"],
+                "signalTier": signal_tier,
+                "matchMode": match_mode,
+                "score": surface["baseScore"] if match_mode == "exact-string" else surface["baseScore"] // 2,
+            })
 
     if not skip_raw_string_scan:
         seen = {(hit["term"], hit.get("surfaceType", ""), str(hit.get("pathId", "")), hit.get("matchedValue", "")) for hit in hits}
         for entry in get_unity_raw_string_index().get(source_id, []):
             value = entry["value"]
-            for term in exact_terms:
-                matched = False
-                match_mode = ""
-                if value == term:
-                    matched = True
-                    match_mode = "exact-string"
-                elif term.lower() in value.lower():
-                    matched = True
-                    match_mode = "bounded-containment"
-                if not matched:
-                    continue
+            matched_term, match_mode = resolve_match(value)
+            if matched_term is None:
+                continue
 
-                identity = (term, "raw-string", str(entry["offset"]), value[:200])
-                if identity in seen:
-                    continue
-                seen.add(identity)
-                spec = spec_by_value[term]
-                score = 78 if match_mode == "exact-string" else 42
-                if spec["kind"] == "path id":
-                    score -= 20
-                hits.append(
-                    {
-                        "term": term,
-                        "matchedValue": value[:200],
-                        "surfaceType": "raw-string",
-                        "offset": entry["offset"],
-                        "encoding": entry["encoding"],
-                        "jsonPath": "raw-string@{}".format(entry["offset"]),
-                        "signalTier": "high-signal" if match_mode == "exact-string" else "supporting",
-                        "matchMode": match_mode,
-                        "score": score,
-                    }
-                )
-                break
+            identity = (matched_term, "raw-string", str(entry["offset"]), value[:200])
+            if identity in seen:
+                continue
+            seen.add(identity)
+            spec = spec_by_value[matched_term]
+            score = 78 if match_mode == "exact-string" else 42
+            if spec["kind"] == "path id":
+                score -= 20
+            hits.append(
+                {
+                    "term": matched_term,
+                    "matchedValue": value[:200],
+                    "surfaceType": "raw-string",
+                    "offset": entry["offset"],
+                    "encoding": entry["encoding"],
+                    "jsonPath": "raw-string@{}".format(entry["offset"]),
+                    "signalTier": "high-signal" if match_mode == "exact-string" else "supporting",
+                    "matchMode": match_mode,
+                    "score": score,
+                }
+            )
 
     return hits, suppressed_count
 
@@ -10221,28 +10468,136 @@ def build_surface_bundle(
     available_source_ids: list[str],
     extended_search: int,
 ) -> dict[str, Any]:
-    terms = list(dict.fromkeys([*surface["terms"], *anchors]))
-    anchor_specs = build_anchor_specs(terms, "surface-search")
-    canonical_source_ids = unique_strings([canonicalize_source_family_id(source_id) for source_id in surface["sourceIds"]])
-    sources = [collect_source_hits(documents, source_id, anchor_specs, shell_window) for source_id in canonical_source_ids]
+    surface_id = str(surface.get("id") or "surface")
+    with _trace_profile_span(f"sourceLoading.surfaceBundle.{surface_id}"):
+        terms = list(dict.fromkeys([*surface["terms"], *anchors]))
+        anchor_specs = build_anchor_specs(terms, "surface-search")
+        canonical_source_ids = unique_strings([canonicalize_source_family_id(source_id) for source_id in surface["sourceIds"]])
+        sources = [collect_source_hits(documents, source_id, anchor_specs, shell_window) for source_id in canonical_source_ids]
 
-    if extended_search > 0:
-        for source_id in available_source_ids:
-            if source_id in canonical_source_ids:
-                continue
-            source_entry = collect_source_hits(documents, source_id, anchor_specs, shell_window)
-            if source_entry["hitCount"] <= 0:
-                continue
-            source_entry["searchExtension"] = "supplemental"
-            sources.append(source_entry)
+        if extended_search > 0:
+            for source_id in available_source_ids:
+                if source_id in canonical_source_ids:
+                    continue
+                source_entry = collect_source_hits(documents, source_id, anchor_specs, shell_window)
+                if source_entry["hitCount"] <= 0:
+                    continue
+                source_entry["searchExtension"] = "supplemental"
+                sources.append(source_entry)
 
-    return {
-        "id": surface["id"],
-        "label": surface["label"],
-        "terms": terms,
-        "anchorSpecs": anchor_specs,
-        "sources": sources,
+        return {
+            "id": surface["id"],
+            "label": surface["label"],
+            "terms": terms,
+            "anchorSpecs": anchor_specs,
+            "sources": sources,
+        }
+
+
+def _hit_matches_surface_terms(hit: dict[str, Any], term_set: set[str]) -> bool:
+    if str(hit.get("term") or "") in term_set:
+        return True
+    for matched_term in hit.get("matchedTerms", []) or []:
+        if str(matched_term) in term_set:
+            return True
+    return False
+
+
+def _project_source_entry_to_surface(source_entry: dict[str, Any], term_set: set[str]) -> dict[str, Any]:
+    filtered_hits = [
+        dict(hit)
+        for hit in (source_entry.get("hits") or [])
+        if isinstance(hit, dict) and _hit_matches_surface_terms(hit, term_set)
+    ]
+    projected = {
+        "sourceId": source_entry.get("sourceId"),
+        "sourcePath": source_entry.get("sourcePath"),
+        "searchModes": list(source_entry.get("searchModes") or []),
+        "hitCount": len(filtered_hits),
+        "highSignalHitCount": sum(1 for hit in filtered_hits if hit.get("signalTier") == "high-signal"),
+        "supportingHitCount": sum(1 for hit in filtered_hits if hit.get("signalTier") == "supporting"),
+        "incidentalHitCount": sum(1 for hit in filtered_hits if hit.get("signalTier") == "incidental"),
+        "suppressedNoiseCount": int(source_entry.get("suppressedNoiseCount") or 0),
+        "hits": filtered_hits,
     }
+    if source_entry.get("searchExtension"):
+        projected["searchExtension"] = source_entry.get("searchExtension")
+    return projected
+
+
+def build_surface_bundles_batched(
+    surfaces: list[dict[str, Any]],
+    anchors: list[str],
+    documents: dict[str, Any],
+    shell_window: dict[str, Any] | None,
+    available_source_ids: list[str],
+    extended_search: int,
+) -> list[dict[str, Any]]:
+    prepared_surfaces: list[dict[str, Any]] = []
+    source_to_terms: dict[str, list[str]] = {}
+    for surface in surfaces:
+        terms = list(dict.fromkeys([*surface["terms"], *anchors]))
+        anchor_specs = build_anchor_specs(terms, "surface-search")
+        canonical_source_ids = unique_strings([canonicalize_source_family_id(source_id) for source_id in surface["sourceIds"]])
+        supplemental_source_ids = [
+            source_id
+            for source_id in available_source_ids
+            if extended_search > 0 and source_id not in canonical_source_ids
+        ]
+        prepared_surface = {
+            "id": surface["id"],
+            "label": surface["label"],
+            "terms": terms,
+            "termSet": set(terms),
+            "anchorSpecs": anchor_specs,
+            "canonicalSourceIds": canonical_source_ids,
+            "supplementalSourceIds": supplemental_source_ids,
+        }
+        prepared_surfaces.append(prepared_surface)
+        for source_id in [*canonical_source_ids, *supplemental_source_ids]:
+            source_to_terms.setdefault(source_id, [])
+            source_to_terms[source_id].extend(terms)
+
+    batched_source_entries: dict[str, dict[str, Any]] = {}
+    for source_id, source_terms in source_to_terms.items():
+        with _trace_profile_span(f"sourceLoading.surfaceBatch.{source_id}"):
+            batched_source_entries[source_id] = collect_source_hits(
+                documents,
+                source_id,
+                build_anchor_specs(unique_strings(source_terms), "surface-search"),
+                shell_window,
+            )
+
+    bundled_surfaces: list[dict[str, Any]] = []
+    for surface in prepared_surfaces:
+        surface_id = str(surface.get("id") or "surface")
+        with _trace_profile_span(f"sourceLoading.surfaceBundle.{surface_id}"):
+            surface_sources: list[dict[str, Any]] = []
+            for source_id in surface["canonicalSourceIds"]:
+                source_entry = _project_source_entry_to_surface(
+                    batched_source_entries[source_id],
+                    surface["termSet"],
+                )
+                surface_sources.append(source_entry)
+            for source_id in surface["supplementalSourceIds"]:
+                source_entry = _project_source_entry_to_surface(
+                    batched_source_entries[source_id],
+                    surface["termSet"],
+                )
+                if source_entry["hitCount"] <= 0:
+                    continue
+                source_entry["searchExtension"] = "supplemental"
+                surface_sources.append(source_entry)
+            bundled_surfaces.append(
+                {
+                    "id": surface["id"],
+                    "label": surface["label"],
+                    "terms": surface["terms"],
+                    "anchorSpecs": surface["anchorSpecs"],
+                    "sources": surface_sources,
+                }
+            )
+    return bundled_surfaces
 
 
 def resolve_surface_plan(
@@ -11092,16 +11447,18 @@ def _build_token_shop_family_profile_payload(
     }
     row_recovery: dict[str, Any] = {}
     if profile_id in {"daily-tokenium-family", "t3-trio-family"}:
-        row_recovery = _build_token_shop_row_recovery(target, provisional_payload, {"summary": {}}) or {}
-    depth_expansion = build_depth_expansion(
-        surfaces,
-        documents,
-        shell_window,
-        available_source_ids,
-        depth_search,
-        anchors,
-        target,
-    )
+        with _trace_profile_span("sourceLoading.tracePayloadBuild.rowRecovery"):
+            row_recovery = _build_token_shop_row_recovery(target, provisional_payload, {"summary": {}}) or {}
+    with _trace_profile_span("sourceLoading.tracePayloadBuild.depthExpansion"):
+        depth_expansion = build_depth_expansion(
+            surfaces,
+            documents,
+            shell_window,
+            available_source_ids,
+            depth_search,
+            anchors,
+            target,
+        )
     profiles: dict[str, dict[str, Any]] = {
         "daily-tokenium-family": {
             "graph": lambda: build_token_shop_daily_tokenium_family_graph(shell_window, surfaces, token_shop_extract, row_recovery),
@@ -11176,28 +11533,29 @@ def _build_token_shop_family_profile_payload(
     profile = dict(profiles.get(profile_id) or {})
     if not profile:
         return None
+    with _trace_profile_span(f"sourceLoading.tracePayloadBuild.profile.{profile_id}"):
+        trace_graph = profile["graph"]()
+        solved_vs_blocked = dict(
+            profile["solvedVsBlockedDiff"]() if callable(profile.get("solvedVsBlockedDiff")) else (profile.get("solvedVsBlockedDiff") or {})
+        )
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
         "depthExpansion": depth_expansion,
-        "traceGraph": profile["graph"](),
+        "traceGraph": trace_graph,
         "bridgePromotionRule": resolve_token_shop_bridge_policy(target_id, str(profile.get("bridgePromotionRule") or "")),
         "bridgeCheck": dict(profile.get("bridgeCheck") or {}),
-        "solvedVsBlockedDiff": dict(
-            profile["solvedVsBlockedDiff"]() if callable(profile.get("solvedVsBlockedDiff")) else (profile.get("solvedVsBlockedDiff") or {})
-        ),
+        "solvedVsBlockedDiff": solved_vs_blocked,
         "lostStructure": resolve_token_shop_lost_structure(target_id, list(builder_context["lostStructure"])),
         "groundedConclusion": "",
         "currentBoundary": [],
     }
 
 
-def build_token_shop_family_structure_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
-    config = get_target_strategy_config(target)
-    support_context = load_or_synthesize_support_context(target_id, target)
-    builder_context = get_token_shop_builder_context(target_id, target, config)
-    token_shop_extract = documents["tokenShopExtract"]
-    family_context = {
+def _load_token_shop_family_context(profile_id: str) -> dict[str, Any]:
+    if profile_id != "generic-structure":
+        return {}
+    return {
         "rowScopes": {
             scope_id: load_canonical_semantic_scope(scope_id)
             for scope_id in (
@@ -11210,6 +11568,17 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
         },
         "atu3Target": load_latest_materialized_target_bundle("token-shop-atu3-cells-effect"),
     }
+
+
+def build_token_shop_family_structure_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
+    config = get_target_strategy_config(target)
+    with _trace_profile_span("sourceLoading.tracePayloadBuild.supportContext"):
+        support_context = load_or_synthesize_support_context(target_id, target)
+    builder_context = get_token_shop_builder_context(target_id, target, config)
+    token_shop_extract = documents["tokenShopExtract"]
+    profile_id = str(support_context.get("familyTraceProfile") or "generic-structure").strip()
+    with _trace_profile_span("sourceLoading.tracePayloadBuild.familyContext"):
+        family_context = _load_token_shop_family_context(profile_id)
     fallback_surface_specs = []
     fallback_shell_window = {
         "source": get_source_reference("tokenShopExtract"),
@@ -11232,31 +11601,41 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
         ],
     }
     fallback_surface_specs = []
-    shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    with _trace_profile_span("sourceLoading.tracePayloadBuild.surfacePlan"):
+        shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
     if not shell_window.get("ownerFieldBlock") or not shell_window.get("window"):
-        fallback_row_window = build_token_shop_fallback_shell_window(target_id, target, token_shop_extract)
+        with _trace_profile_span("sourceLoading.tracePayloadBuild.fallbackShellWindow"):
+            fallback_row_window = build_token_shop_fallback_shell_window(target_id, target, token_shop_extract)
         shell_window = {
             **fallback_row_window,
             **shell_window,
         }
         shell_window.setdefault("ownerFieldBlock", list(fallback_row_window.get("ownerFieldBlock") or []))
         shell_window.setdefault("window", list(fallback_row_window.get("window") or []))
-    surfaces = [build_surface_bundle(surface_config, anchors, documents, shell_window, available_source_ids, extended_search) for surface_config in surface_specs]
-    profile_id = str(support_context.get("familyTraceProfile") or "generic-structure").strip()
-    profile_payload = _build_token_shop_family_profile_payload(
-        profile_id,
-        target_id,
-        target,
-        shell_window,
-        surfaces,
-        token_shop_extract,
-        documents,
-        available_source_ids,
-        depth_search,
-        anchors,
-        config,
-        family_context,
-    )
+    with _trace_profile_span("sourceLoading.tracePayloadBuild.surfaceBundles"):
+        surfaces = build_surface_bundles_batched(
+            surface_specs,
+            anchors,
+            documents,
+            shell_window,
+            available_source_ids,
+            extended_search,
+        )
+    with _trace_profile_span("sourceLoading.tracePayloadBuild.profilePayload"):
+        profile_payload = _build_token_shop_family_profile_payload(
+            profile_id,
+            target_id,
+            target,
+            shell_window,
+            surfaces,
+            token_shop_extract,
+            documents,
+            available_source_ids,
+            depth_search,
+            anchors,
+            config,
+            family_context,
+        )
     if profile_payload is None:
         raise ValueError(f"Unsupported TokenShop family trace profile: {profile_id}")
     return profile_payload
@@ -12807,7 +13186,10 @@ def build_trace_payload_for_subject(
         return build_token_shop_family_structure_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
     if execution_routine == "shard-cost-trace":
         return build_shard_cost_trace(target, anchors, documents)
-    if execution_routine == "shard-owned-state-trace":
+    if execution_routine in {
+        "shard-owned-state-trace",
+        "shard-owned-state-upgradeinfolist-population",
+    }:
         return build_shard_owned_state_trace(target, anchors, documents, available_source_ids)
     if execution_routine == "multiverse-market-save-owner-trace":
         return build_multiverse_market_save_owner_trace(target, anchors, documents)
@@ -12915,24 +13297,29 @@ def build_dataset(
                 required_source_families = list(target["requiredSourceFamilies"])
                 source_projection_owner = "registry-fallback"
             resolved_depth_search = target.get("defaultDepth", 0) if depth_search is None else depth_search
+    runtime_flags = dict(ACTIVE_TRACE_RUNTIME_FLAGS)
+    runtime_flags["activeUnitySourceIds"] = list(source_paths.keys())
+    _set_active_trace_runtime_flags(runtime_flags)
     execution_anchor_specs = build_anchor_specs(anchors, "execution-anchor")
     expanded_anchor_specs = build_anchor_specs(planner_resolution["expandedAnchors"], "planner-expanded-anchor")
     with _trace_profile_span("sourceLoading"):
-        support_documents = TraceDocumentCache(SUPPORT_DATASET_PATHS)
-        support_documents.preload(get_priority_support_documents(target))
-        trace_payload = (
-            build_generic_explore_trace(anchors, list(source_paths.keys()), support_documents)
-            if is_generic_explore
-            else build_trace_payload_for_subject(
-                execution_routine_id,
-                target,
-                anchors,
-                support_documents,
-                list(source_paths.keys()),
-                extended_search,
-                resolved_depth_search,
+        with _trace_profile_span("sourceLoading.supportDocuments"):
+            support_documents = TraceDocumentCache(SUPPORT_DATASET_PATHS)
+            support_documents.preload(get_priority_support_documents(target))
+        with _trace_phase("Static source scan", "sourceLoading.tracePayloadBuild"):
+            trace_payload = (
+                build_generic_explore_trace(anchors, list(source_paths.keys()), support_documents)
+                if is_generic_explore
+                else build_trace_payload_for_subject(
+                    execution_routine_id,
+                    target,
+                    anchors,
+                    support_documents,
+                    list(source_paths.keys()),
+                    extended_search,
+                    resolved_depth_search,
+                )
             )
-        )
     native_anchor_values = _collect_native_trace_terms(target, planner_resolution, trace_payload)
     active_acquisition_plan = dict(_get_active_trace_runtime_flag("acquisitionPlan") or {})
     relation_probe = dict(active_acquisition_plan.get("selectedRelationProbe") or {})
@@ -14540,16 +14927,27 @@ def main() -> None:
                 dry_run_args.anchor = list(best_gap_plan.get("selectedAnchors") or best_gap_plan.get("anchors") or [])
                 dry_run_args.best_gap_plan = best_gap_plan
                 _print_best_gap_plan(best_gap_plan)
-            with cli_profiler.phase("Subject-state / contract materialization", "phase.subjectStateMaterialization"):
+                cli_profiler.progress(
+                    "Best-gap selected",
+                    "{} seam={} routine={}".format(
+                        best_gap_plan.get("traceScope") or "unknown",
+                        best_gap_plan.get("selectedSeamId") or "none",
+                        best_gap_plan.get("executionRoutineId") or "unknown",
+                    ),
+                )
+            with cli_profiler.phase("DB/cache dry-run planning", "phase.subjectStateMaterialization"):
                 trace_plan = plan_trace_bundle_request(dry_run_args, registry)
             planner_resolution = trace_plan["plannerResolution"]
             print("Dry run only.")
+            print("  execution=not-launched")
+            print("  dryRunMode=db-cache-only")
             print(
                 "  subject={} {}".format(
                     planner_resolution.get("selectedSubjectKind") or "unknown-subject",
                     planner_resolution.get("selectedSubjectKey") or "unknown",
                 )
             )
+            print("  subjectLabel={}".format(planner_resolution.get("selectedSubjectLabel") or "unknown"))
             print("  executionScope={}".format(trace_plan["executionTraceScope"]))
             print("  family={}".format(trace_plan["selectedFamilyId"]))
             print("  selectionMode={}".format(planner_resolution["selectionMode"]))
@@ -14646,6 +15044,14 @@ def main() -> None:
                 run_args.anchor = list(best_gap_plan.get("selectedAnchors") or best_gap_plan.get("anchors") or [])
                 run_args.best_gap_plan = best_gap_plan
                 _print_best_gap_plan(best_gap_plan)
+                cli_profiler.progress(
+                    "Best-gap selected",
+                    "{} seam={} routine={}".format(
+                        best_gap_plan.get("traceScope") or "unknown",
+                        best_gap_plan.get("selectedSeamId") or "none",
+                        best_gap_plan.get("executionRoutineId") or "unknown",
+                    ),
+                )
             dataset = _execute_trace_bundle_run(run_args, registry, output_mode)
             _print_completed_trace_run(dataset, iteration, total_iterations)
             if auto_best_gap_mode and iteration < total_iterations:
