@@ -2954,6 +2954,23 @@ def _derive_execution_context_fragment(
     selected_subject_key = str(planner_resolution.get("selectedSubjectKey") or trace_registry.get("selectedSubjectKey") or "").strip()
     execution_target_id = str(trace_registry.get("executionTargetId") or target_id).strip()
     execution_trace_scope = str(trace_registry.get("executionTraceScope") or trace_scope).strip()
+    if family_id == "token-shop" and "family" not in trace_scope:
+        expected_row_field = ""
+        expected_match = re.search(
+            r"(atu\d+)",
+            " ".join([trace_scope, target_id, label, join_goal]),
+            re.IGNORECASE,
+        )
+        if expected_match:
+            expected_row_field = f"{expected_match.group(1).upper()}Button"
+        if expected_row_field:
+            expected_subject_key = f"row:{expected_row_field}"
+            if selected_subject_key and selected_subject_key.startswith("row:") and selected_subject_key != expected_subject_key:
+                selected_subject_kind = "row-local"
+                selected_subject_key = expected_subject_key
+            elif not selected_subject_key:
+                selected_subject_kind = selected_subject_kind or "row-local"
+                selected_subject_key = expected_subject_key
     if not any(
         [
             target_id,
@@ -3759,6 +3776,201 @@ def _collect_trace_edge_proofs(trace_payload: dict[str, Any]) -> list[dict[str, 
     return proof_items
 
 
+def _get_fact_status(facts: list[dict[str, Any]], edge_type: str) -> str:
+    status_priority = {"known": 0, "nonblocking": 1, "missing": 2, "blocked": 3}
+    for item in reversed(facts):
+        if str(item.get("edgeType") or "").strip() == edge_type:
+            return str(item.get("status") or "").strip()
+    return ""
+
+
+def _collect_relation_contract_runtime_handoff(trace_payload: dict[str, Any]) -> dict[str, Any]:
+    native_trace = dict(trace_payload.get("nativeTrace") or {})
+    request_context = dict(native_trace.get("requestContext") or {})
+    if str(request_context.get("coverageMode") or "").strip() != "relation-shaped":
+        return {}
+    required_seams = _unique_strings(
+        [str(value).strip() for value in (request_context.get("requiredCoverageSeamIds") or []) if str(value).strip()]
+    )
+    if "exact-cellboost-to-booster-bonus-handoff" not in required_seams:
+        return {}
+    relation_scope = str(request_context.get("relationScope") or "").strip()
+    subject_id = str(request_context.get("subjectId") or "").strip()
+    if relation_scope != "token-shop-atu3-chest-consumer-read" or subject_id != "row:ATU3Button":
+        return {}
+
+    summary = dict(native_trace.get("summary") or {})
+    result = dict(native_trace.get("result") or {})
+    managed_reconstruction = dict(result.get("managedReconstruction") or {})
+    owner_to_terms = dict(managed_reconstruction.get("ownerToTerms") or {})
+    scored_owners = [dict(item) for item in (managed_reconstruction.get("scoredOwners") or []) if isinstance(item, dict)]
+    relation_consumer_methods = _unique_strings(
+        [str(value).strip() for value in (summary.get("relationConsumerMethods") or []) if str(value).strip()]
+    )
+    relation_declaring_fields = _unique_strings(
+        [str(value).strip() for value in (summary.get("relationDeclaringFields") or []) if str(value).strip()]
+    )
+    relation_handoff_terms = _unique_strings(
+        [str(value).strip() for value in (summary.get("relationHandoffTerms") or []) if str(value).strip()]
+    )
+    if not relation_consumer_methods or not relation_declaring_fields or not relation_handoff_terms:
+        expected_terms = _unique_strings(
+            [str(value).strip() for value in (request_context.get("expectedTerms") or []) if str(value).strip()]
+        )
+        method_terms = set(_unique_strings([str(value).strip() for value in (managed_reconstruction.get("methods") or []) if str(value).strip()]))
+        field_terms = set(_unique_strings([str(value).strip() for value in (managed_reconstruction.get("fields") or []) if str(value).strip()]))
+        handoff_term_pool = set(
+            _unique_strings(
+                [
+                    *[str(value).strip() for value in (managed_reconstruction.get("rawValueTerms") or []) if str(value).strip()],
+                    *list(method_terms),
+                    *list(field_terms),
+                ]
+            )
+        )
+        for bucket in owner_to_terms.values():
+            if not isinstance(bucket, dict):
+                continue
+            method_terms.update(str(value).strip() for value in (bucket.get("methods") or []) if str(value).strip())
+            field_terms.update(str(value).strip() for value in (bucket.get("fields") or []) if str(value).strip())
+            handoff_term_pool.update(str(value).strip() for value in (bucket.get("rawValues") or []) if str(value).strip())
+            handoff_term_pool.update(str(value).strip() for value in (bucket.get("relatedTerms") or []) if str(value).strip())
+        if not relation_consumer_methods:
+            relation_consumer_methods = [term for term in expected_terms if term in method_terms]
+        if not relation_declaring_fields:
+            relation_declaring_fields = [term for term in expected_terms if term in field_terms]
+        if not relation_handoff_terms:
+            relation_handoff_terms = [term for term in expected_terms if term in handoff_term_pool or term in field_terms or term in method_terms]
+    if not relation_consumer_methods or not relation_declaring_fields or not relation_handoff_terms:
+        return {}
+
+    cellboost_terms = {
+        "CellBoostStartCost",
+        "CellBoostAdditiveCost",
+        "CellBoostBonus",
+        "CellBoostMaxLevel",
+    }
+    getter_methods = {
+        "get_SmallAdCellGains",
+        "get_BigAdCellGains",
+    }
+    booster_methods = {
+        "SetBoosterAdBonus",
+        "get_FinalBoosterAdBonus",
+    }
+    booster_terms = {
+        "FinalBoosterAdBonus",
+        "<FinalAdTokenChestBonus>k__BackingField",
+        "<FinalDiamondChestBonus>k__BackingField",
+        "SmallAdCellGains",
+        "BigAdCellGains",
+    }
+
+    combined_relation_terms = set(relation_declaring_fields).union(relation_handoff_terms)
+    if not (combined_relation_terms & cellboost_terms):
+        return {}
+    if not (set(relation_consumer_methods) & getter_methods):
+        return {}
+    if not (set(relation_consumer_methods) & booster_methods):
+        return {}
+    if not (combined_relation_terms & booster_terms):
+        return {}
+
+    supporting_owners: list[str] = []
+    for owner, bucket in owner_to_terms.items():
+        if not isinstance(bucket, dict):
+            continue
+        owner_terms = set(
+            _unique_strings(
+                [
+                    *[str(value).strip() for value in (bucket.get("methods") or []) if str(value).strip()],
+                    *[str(value).strip() for value in (bucket.get("fields") or []) if str(value).strip()],
+                    *[str(value).strip() for value in (bucket.get("rawValues") or []) if str(value).strip()],
+                    *[str(value).strip() for value in (bucket.get("relatedTerms") or []) if str(value).strip()],
+                ]
+            )
+        )
+        if not (owner_terms & cellboost_terms):
+            continue
+        if not (owner_terms & (getter_methods | booster_methods | booster_terms)):
+            continue
+        supporting_owners.append(str(owner).strip())
+    if not supporting_owners:
+        for owner_entry in scored_owners:
+            owner = str(owner_entry.get("owner") or "").strip()
+            owner_terms = set(
+                _unique_strings(
+                    [
+                        *[str(value).strip() for value in (owner_entry.get("methods") or []) if str(value).strip()],
+                        *[str(value).strip() for value in (owner_entry.get("fields") or []) if str(value).strip()],
+                        *[str(value).strip() for value in (owner_entry.get("rawValues") or []) if str(value).strip()],
+                        *[str(value).strip() for value in (owner_entry.get("relatedTerms") or []) if str(value).strip()],
+                    ]
+                )
+            )
+            if not (owner_terms & cellboost_terms):
+                continue
+            if not (owner_terms & (getter_methods | booster_methods | booster_terms)):
+                continue
+            supporting_owners.append(owner)
+    supporting_owners = _unique_strings(supporting_owners)
+    if not supporting_owners:
+        return {}
+
+    evidence_terms = _unique_strings(
+        [
+            *supporting_owners,
+            *[term for term in relation_consumer_methods if term in getter_methods or term in booster_methods],
+            *[term for term in relation_declaring_fields if term in cellboost_terms or term in booster_terms],
+            *[term for term in relation_handoff_terms if term in cellboost_terms or term in booster_terms],
+        ]
+    )
+    proofs = [
+        {
+            "edgeType": "exact-cellboost-to-booster-bonus-handoff",
+            "sourceId": "materialized-native-trace",
+            "sourcePath": "nativeTrace.summary",
+            "term": supporting_owners[0],
+            "locator": "$.nativeTrace.result.managedReconstruction.ownerToTerms",
+        },
+        {
+            "edgeType": "exact-cellboost-to-booster-bonus-handoff",
+            "sourceId": "materialized-native-trace",
+            "sourcePath": "nativeTrace.summary",
+            "term": next((term for term in relation_consumer_methods if term in getter_methods), relation_consumer_methods[0]),
+            "locator": "$.nativeTrace.summary.relationConsumerMethods",
+        },
+        {
+            "edgeType": "exact-cellboost-to-booster-bonus-handoff",
+            "sourceId": "materialized-native-trace",
+            "sourcePath": "nativeTrace.summary",
+            "term": next((term for term in relation_consumer_methods if term in booster_methods), relation_consumer_methods[-1]),
+            "locator": "$.nativeTrace.summary.relationConsumerMethods",
+        },
+        {
+            "edgeType": "exact-cellboost-to-booster-bonus-handoff",
+            "sourceId": "materialized-native-trace",
+            "sourcePath": "nativeTrace.summary",
+            "term": next((term for term in relation_declaring_fields if term in cellboost_terms), relation_declaring_fields[0]),
+            "locator": "$.nativeTrace.summary.relationDeclaringFields",
+        },
+        {
+            "edgeType": "exact-cellboost-to-booster-bonus-handoff",
+            "sourceId": "materialized-native-trace",
+            "sourcePath": "nativeTrace.summary",
+            "term": next((term for term in relation_handoff_terms if term in booster_terms), relation_handoff_terms[0]),
+            "locator": "$.nativeTrace.summary.relationHandoffTerms",
+        },
+    ]
+    return {
+        "subjectId": subject_id,
+        "relationScope": relation_scope,
+        "supportingOwners": supporting_owners,
+        "evidenceTerms": evidence_terms[:12],
+        "proofs": proofs,
+    }
+
+
 def _build_subject_edge_facts(
     trace_scope: str,
     subject_id: str,
@@ -3834,6 +4046,12 @@ def _build_subject_edge_facts(
             ],
         ]
     )
+    if subject_class == "row-local":
+        known_edge_types = [
+            edge_type
+            for edge_type in known_edge_types
+            if not str(edge_type).startswith("repeated-")
+        ]
     for edge_type in known_edge_types:
         add_fact(
             edge_type,
@@ -3902,6 +4120,48 @@ def _build_subject_edge_facts(
                 proofs=support_proofs[:4],
             )
 
+    relation_handoff = _collect_relation_contract_runtime_handoff(trace_payload)
+    if subject_class == "row-local" and str(relation_handoff.get("subjectId") or "").strip() == subject_id:
+        relation_terms = _unique_strings(
+            [
+                *[str(value).strip() for value in (relation_handoff.get("evidenceTerms") or []) if str(value).strip()],
+                *follow_up_terms,
+                *support_terms,
+            ]
+        )
+        relation_proofs = list(relation_handoff.get("proofs") or []) or support_proofs[:4]
+        common_source_ids = ["materialized-native-trace", "canonical-term-view", "graph-links"]
+        add_fact(
+            "exact-cellboost-to-booster-bonus-handoff",
+            "known",
+            priority=5050,
+            reason="native-relation:exact-cellboost-handoff",
+            terms=relation_terms,
+            source_ids=common_source_ids,
+            goal=str(execution_context.get("joinGoal") or "").strip(),
+            proofs=relation_proofs[:4],
+        )
+        add_fact(
+            "typed-shared-effect-owner",
+            "known",
+            priority=5051,
+            reason="native-relation:typed-owner-covered",
+            terms=relation_terms,
+            source_ids=common_source_ids,
+            goal=str(execution_context.get("joinGoal") or "").strip(),
+            proofs=relation_proofs[:4],
+        )
+        add_fact(
+            "runtime-model-gap",
+            "known",
+            priority=5052,
+            reason="native-relation:runtime-model-covered",
+            terms=relation_terms,
+            source_ids=common_source_ids,
+            goal=str(execution_context.get("joinGoal") or "").strip(),
+            proofs=relation_proofs[:4],
+        )
+
     for seam in (reconstruction_status.get("nonBlockingSeams") or []):
         if not isinstance(seam, dict):
             continue
@@ -3934,11 +4194,39 @@ def _build_subject_edge_facts(
             )
             missing_priority += 1
     if subject_class == "row-local":
+        bounded_negatives = {str(b.get("seam") or "").strip() for b in (reconstruction_payload.get("boundedNegatives") or []) if isinstance(b, dict) and str(b.get("seam") or "").strip()}
         for seam in (reconstruction_payload.get("missingSeams") or []):
             if not isinstance(seam, dict):
                 continue
             gap_type = str(seam.get("id") or "").strip()
             if not gap_type:
+                continue
+            already_status = _get_fact_status(facts, gap_type)
+            if already_status == "nonblocking":
+                continue
+            if gap_type in bounded_negatives:
+                continue
+            if (
+                gap_type == "exact-display-update-path"
+                and _get_fact_status(facts, "exact-shell-to-action-hook") == "known"
+                and _get_fact_status(facts, "exact-shell-to-prefab") == "known"
+                and _get_fact_status(facts, "exact-shell-to-title") == "known"
+                and any(
+                    str(candidate.get("id") or "").strip() == "runtime-model-gap"
+                    for candidate in (reconstruction_payload.get("missingSeams") or [])
+                    if isinstance(candidate, dict)
+                )
+            ):
+                add_fact(
+                    gap_type,
+                    "nonblocking",
+                    priority=6900,
+                    reason="reconstruction:display-path-nonblocking-until-runtime-clears",
+                    terms=[*follow_up_terms, *support_terms],
+                    source_ids=["reconstruction-fragment", "canonical-term-view", "graph-links"],
+                    goal=str(execution_context.get("joinGoal") or "").strip(),
+                    proofs=support_proofs[:4],
+                )
                 continue
             add_fact(
                 gap_type,
@@ -4004,6 +4292,12 @@ def _build_subject_edge_facts(
             ],
         ]
     )
+    if subject_class == "row-local":
+        blocked_edge_types = [
+            edge_type
+            for edge_type in blocked_edge_types
+            if not str(edge_type).startswith("repeated-")
+        ]
     if subject_class == "range-family":
         blocked_edge_types = _unique_strings(
             [
@@ -4190,21 +4484,37 @@ def _derive_subject_state_from_edge_facts(
     identity_reason: str = "",
     subject_path_id: str | None = None,
 ) -> dict[str, Any]:
+    status_priority = {"known": 0, "nonblocking": 1, "missing": 2, "blocked": 3}
+    seen: dict[str, dict[str, Any]] = {}
+    for item in facts:
+        edge_type = str(item.get("edgeType") or "").strip()
+        if not edge_type:
+            continue
+        status = str(item.get("status") or "").strip()
+        if edge_type not in seen:
+            seen[edge_type] = item
+        else:
+            existing_priority = status_priority.get(seen[edge_type].get("status", ""), 99)
+            new_priority = status_priority.get(status, 99)
+            if new_priority < existing_priority:
+                seen[edge_type] = item
+    unique_facts = list(seen.values())
+
     known_edges = _unique_strings(
-        [str(item.get("edgeType") or "") for item in facts if str(item.get("status") or "") == "known"]
+        [str(item.get("edgeType") or "") for item in unique_facts if str(item.get("status") or "") == "known"]
     )
     missing_edges = _unique_strings(
-        [str(item.get("edgeType") or "") for item in facts if str(item.get("status") or "") == "missing"]
+        [str(item.get("edgeType") or "") for item in unique_facts if str(item.get("status") or "") == "missing"]
     )
     blocked_edges = _unique_strings(
-        [str(item.get("edgeType") or "") for item in facts if str(item.get("status") or "") == "blocked"]
+        [str(item.get("edgeType") or "") for item in unique_facts if str(item.get("status") or "") == "blocked"]
     )
     nonblocking_edges = _unique_strings(
-        [str(item.get("edgeType") or "") for item in facts if str(item.get("status") or "") == "nonblocking"]
+        [str(item.get("edgeType") or "") for item in unique_facts if str(item.get("status") or "") == "nonblocking"]
     )
     candidate_facts = [
         item
-        for item in facts
+        for item in unique_facts
         if str(item.get("status") or "") in {"missing", "blocked"} and str(item.get("edgeType") or "").strip()
     ]
     candidate_facts.sort(
@@ -6915,15 +7225,18 @@ class GhidraCacheDB:
         search_terms: list[str],
         bridge_plan: dict[str, Any],
         family_hint: str | None = None,
+        request_context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         self.sync_from_jobs_if_needed()
         requested_terms = [str(term).strip() for term in requested_terms if str(term).strip()]
         search_terms = [str(term).strip() for term in search_terms if str(term).strip()]
         all_terms = _dedupe_sequence([*requested_terms, *search_terms])
+        request_context = dict(request_context or {})
         term_views: list[dict[str, Any]] = []
         provenance: dict[str, Any] = {
             "requestedTerms": requested_terms,
             "searchTerms": search_terms,
+            "requestContext": request_context,
             "termViews": {},
             "bridgePlanSourceJobs": [],
             "searchAttemptSourceJobs": [],
@@ -7071,6 +7384,7 @@ class GhidraCacheDB:
             "jobId": latest_attempt.get("sourceJobId") or latest_attempt.get("jobId"),
             "job": latest_attempt.get("job"),
             "bridgePlan": materialized_bridge_plan,
+            "requestContext": request_context,
             "fallbackBridgeAttempt": latest_attempt.get("fallbackBridgeAttempt"),
             "result": combined_result,
         }
@@ -7124,6 +7438,56 @@ class GhidraCacheDB:
             "reducerVersion": str(row["reducer_version"] or ""),
             "builtAt": str(row["built_at"]),
         }
+
+    def find_latest_materialized_native_trace_view_for_relation(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        subject_id: str,
+        relation_scope: str = "",
+        required_seam_ids: list[str] | None = None,
+    ) -> dict[str, Any] | None:
+        self.sync_from_jobs_if_needed()
+        subject_id = str(subject_id or "").strip()
+        relation_scope = str(relation_scope or "").strip()
+        required_seam_ids = _unique_strings([str(value).strip() for value in (required_seam_ids or []) if str(value).strip()])
+        if not subject_id:
+            return None
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT * FROM materialized_native_trace_views
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY built_at DESC
+                LIMIT 128
+                """,
+                (project_name, project_file),
+            ).fetchall()
+        for row in rows:
+            payload = _json_loads(row["payload_json"], {})
+            provenance = _json_loads(row["provenance_json"], {})
+            request_context = dict(payload.get("requestContext") or provenance.get("requestContext") or {})
+            if str(request_context.get("coverageMode") or "").strip() != "relation-shaped":
+                continue
+            if str(request_context.get("subjectId") or "").strip() != subject_id:
+                continue
+            if relation_scope and str(request_context.get("relationScope") or "").strip() != relation_scope:
+                continue
+            row_required_seams = _unique_strings(
+                [str(value).strip() for value in (request_context.get("requiredCoverageSeamIds") or []) if str(value).strip()]
+            )
+            if required_seam_ids and any(seam_id not in row_required_seams for seam_id in required_seam_ids):
+                continue
+            return {
+                "requestedTerms": _json_loads(row["requested_terms_json"], []),
+                "searchTerms": _json_loads(row["search_terms_json"], []),
+                "payload": payload,
+                "provenance": provenance,
+                "reducerVersion": str(row["reducer_version"] or ""),
+                "builtAt": str(row["built_at"]),
+            }
+        return None
 
     def find_graph_backfill(self, project_name: str, project_file: str, term: str) -> list[dict[str, str]]:
         self.sync_from_jobs_if_needed()
@@ -7345,6 +7709,17 @@ class GhidraCacheDB:
                 "provenanceSummary": {},
                 "blockedInputReasons": {},
             }
+        repo_root = Path(__file__).resolve().parents[2]
+        tokenium_naming_clues = (
+            _load_json(repo_root / "data" / "tokenium-naming-clues.json")
+            if trace_scope == "token-shop-daily-tokenium-family"
+            else None
+        ) or {}
+        daily_tokenium_lane_clues = (
+            _load_json(repo_root / "data" / "daily-tokenium-lane-clues.json")
+            if trace_scope == "token-shop-daily-tokenium-family"
+            else None
+        ) or {}
 
         lane_specs = {
             "tokeniumNaming": {
@@ -7488,8 +7863,141 @@ class GhidraCacheDB:
                 exclusion_clear = not exclusion_overlap
                 lane_fields["excludedTerms"] = excluded_terms
                 lane_fields["saveFamilyOverlapClear"] = exclusion_clear
+            fallback_found_terms: list[str] = []
+            fallback_source_ids: list[str] = []
+            fallback_project_files: list[str] = []
+            if trace_scope == "token-shop-daily-tokenium-family" and lane_id == "tokeniumNaming" and not lane_fields:
+                tokenium_asset_names = dict(tokenium_naming_clues.get("assetNames") or {})
+                level0_shells = {
+                    str(value).strip()
+                    for value in (tokenium_naming_clues.get("level0Shells") or [])
+                    if str(value).strip()
+                }
+                fallback_checks = {
+                    "resourceLabel": "Resource_Tokenium"
+                    if "Resource_Tokenium" in {str(value).strip() for value in (tokenium_asset_names.get("resourceIcons") or []) if str(value).strip()}
+                    else "",
+                    "academyLabel": "Aca.Tokenium553"
+                    if "Aca.Tokenium553" in {str(value).strip() for value in (tokenium_asset_names.get("academySprites") or []) if str(value).strip()}
+                    else "",
+                    "tokenShellLabel": "CostBox-Tokens" if "CostBox-Tokens" in level0_shells else "",
+                    "tokeniumShellLabel": "CostBox-Tokenium" if "CostBox-Tokenium" in level0_shells else "",
+                }
+                lane_fields = {
+                    field_name: term
+                    for field_name, term in fallback_checks.items()
+                    if term
+                }
+                fallback_found_terms = list(lane_fields.values())
+                if lane_fields:
+                    fallback_source_ids = ["repo-tokenium-naming-clues"]
+                    fallback_project_files = ["data/tokenium-naming-clues.json"]
+            if trace_scope == "token-shop-daily-tokenium-family" and lane_id == "dailyTokeniumLane":
+                owner_family_clues = {
+                    str(value).strip()
+                    for value in (daily_tokenium_lane_clues.get("ownerFamilyClues") or [])
+                    if str(value).strip()
+                }
+                modifier_clues = {
+                    str(value).strip()
+                    for value in (daily_tokenium_lane_clues.get("modifierClues") or [])
+                    if str(value).strip()
+                }
+                premium_modifier_clues = {
+                    str(value).strip()
+                    for value in (daily_tokenium_lane_clues.get("premiumModifierClues") or [])
+                    if str(value).strip()
+                }
+                player_facing_strings = {
+                    str(value).strip()
+                    for value in (daily_tokenium_lane_clues.get("playerFacingStrings") or [])
+                    if str(value).strip()
+                }
+                fallback_lane_fields = {
+                    **lane_fields,
+                    **(
+                        {"ownerFamilyLabel": "SpaceAcademy"}
+                        if "SpaceAcademy" in owner_family_clues
+                        else {}
+                    ),
+                    **(
+                        {"academyController": "SpaceAcademyMain"}
+                        if "SpaceAcademyMain" in owner_family_clues
+                        else {}
+                    ),
+                    **(
+                        {"textHandler": "TextHandlerSpaceAcademy"}
+                        if "TextHandlerSpaceAcademy" in owner_family_clues
+                        else {}
+                    ),
+                    **(
+                        {"missionFamilyLabel": "FarmMissions"}
+                        if "FarmMissions" in owner_family_clues
+                        else {}
+                    ),
+                    **({"loopHook": "SetLM244BonusText"} if "SetLM244BonusText" in modifier_clues else {}),
+                    **({"purchaseHook": "BuyLM244"} if "BuyLM244" in modifier_clues else {}),
+                    **({"finalBonusHook": "FinalDailyTokenBonus"} if "FinalDailyTokenBonus" in modifier_clues else {}),
+                    **(
+                        {"purchaseOwner": "BuyCollectorDevice"}
+                        if "BuyCollectorDevice" in premium_modifier_clues
+                        else {}
+                    ),
+                    **(
+                        {"premiumCapBonus": "CollectorCapBonus"}
+                        if "CollectorCapBonus" in premium_modifier_clues
+                        else {}
+                    ),
+                    **(
+                        {"premiumMatsBonus": "CollectorMatsBonus"}
+                        if "CollectorMatsBonus" in premium_modifier_clues
+                        else {}
+                    ),
+                    **(
+                        {"progressString": "0 / 2000 Daily Tokenium (from blue farm missions)"}
+                        if "0 / 2000 Daily Tokenium (from blue farm missions)" in player_facing_strings
+                        else {}
+                    ),
+                    **(
+                        {
+                            "capDescriptionString": "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)"
+                        }
+                        if "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)"
+                        in player_facing_strings
+                        else {}
+                    ),
+                    **(
+                        {
+                            "collectorPackDescriptionString": "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+                        }
+                        if "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+                        in player_facing_strings
+                        else {}
+                    ),
+                }
+                if len(fallback_lane_fields) > len(lane_fields):
+                    lane_fields = fallback_lane_fields
+                    fallback_found_terms = _unique_strings(
+                        [
+                            *fallback_found_terms,
+                            *[
+                                str(value).strip()
+                                for field_name, value in lane_fields.items()
+                                if field_name != "adjacentTerms" and field_name not in {"excludedTerms", "saveFamilyOverlapClear"} and str(value).strip()
+                            ],
+                        ]
+                    )
+                    fallback_source_ids = _unique_strings([*fallback_source_ids, "repo-daily-tokenium-lane-clues"])
+                    fallback_project_files = _unique_strings([*fallback_project_files, "data/daily-tokenium-lane-clues.json"])
             if lane_fields:
                 shared_grounded_fields[lane_id] = lane_fields
+                if fallback_found_terms:
+                    found_terms = _unique_strings([*found_terms, *fallback_found_terms])
+                    missing_terms = [
+                        term
+                        for term in missing_terms
+                        if term not in set(fallback_found_terms)
+                    ]
 
             source_ids = _unique_strings(
                 [
@@ -7498,6 +8006,8 @@ class GhidraCacheDB:
                     for source_id in (evidence.get("sourceIds") or [])
                 ]
             )
+            if fallback_source_ids:
+                source_ids = _unique_strings([*source_ids, *fallback_source_ids])
             project_files = _unique_strings(
                 [
                     project_file_label
@@ -7505,6 +8015,8 @@ class GhidraCacheDB:
                     for project_file_label in (evidence.get("projectFiles") or [])
                 ]
             )
+            if fallback_project_files:
+                project_files = _unique_strings([*project_files, *fallback_project_files])
             graph_refs = [
                 dict(graph_ref)
                 for evidence in evidence_by_term.values()
@@ -7560,7 +8072,21 @@ class GhidraCacheDB:
         project_file: str,
         lane_id: str,
         current_subject_state: dict[str, Any],
+        current_shared_lane_contract: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
+        current_shared_lane_contract = dict(current_shared_lane_contract or {})
+        current_grounded_fields = dict(
+            (((current_shared_lane_contract.get("groundedFields") or {}).get(lane_id)) or {})
+        )
+        current_support_summary = dict(
+            (((current_shared_lane_contract.get("supportSummary") or {}).get(lane_id)) or {})
+        )
+        current_provenance_summary = list(
+            (((current_shared_lane_contract.get("provenanceSummary") or {}).get(lane_id)) or [])
+        )
+        current_blocked_reason = str(
+            (((current_shared_lane_contract.get("blockedInputReasons") or {}).get(lane_id)) or "")
+        ).strip() or None
         candidates: list[dict[str, Any]] = [
             {
                 "subjectId": str(current_subject_state.get("subjectId") or "").strip(),
@@ -7569,6 +8095,10 @@ class GhidraCacheDB:
                 "knownEdges": list(current_subject_state.get("knownEdges") or []),
                 "missingEdges": list(current_subject_state.get("missingEdges") or []),
                 "blockedEdges": list(current_subject_state.get("blockedEdges") or []),
+                "laneGroundedFields": current_grounded_fields,
+                "laneSupportSummary": current_support_summary,
+                "laneProvenanceSummary": current_provenance_summary,
+                "laneBlockedReason": current_blocked_reason,
                 "source": "current-subject-state",
             }
         ]
@@ -7588,34 +8118,84 @@ class GhidraCacheDB:
                     "source": "materialized-subject-state-view",
                 }
             )
+        for contract_row in self.list_latest_materialized_subject_contract_views(project_name, project_file):
+            payload = dict(contract_row.get("payload") or {})
+            subject_id = str(payload.get("subjectId") or "").strip()
+            if not subject_id.startswith(("row:", "range:token-shop:")):
+                continue
+            lane_grounded_fields = dict((((payload.get("groundedFields") or {}).get(lane_id)) or {}))
+            lane_support_summary = dict((((payload.get("supportSummary") or {}).get("sharedLanes") or {}).get(lane_id)) or {})
+            lane_provenance_summary = list((((payload.get("provenanceSummary") or {}).get("sharedLanes") or {}).get(lane_id)) or [])
+            lane_blocked_reason = str((((payload.get("blockedInputReasons") or {}).get(lane_id)) or "")).strip() or None
+            if not lane_grounded_fields and not lane_support_summary and not lane_provenance_summary and lane_blocked_reason is None:
+                continue
+            candidates.append(
+                {
+                    "subjectId": subject_id,
+                    "subjectKind": str(payload.get("subjectKind") or "").strip(),
+                    "nextSeam": {},
+                    "knownEdges": [],
+                    "missingEdges": [],
+                    "blockedEdges": [],
+                    "laneGroundedFields": lane_grounded_fields,
+                    "laneSupportSummary": lane_support_summary,
+                    "laneProvenanceSummary": lane_provenance_summary,
+                    "laneBlockedReason": lane_blocked_reason,
+                    "builtAt": str(contract_row.get("builtAt") or ""),
+                    "source": "materialized-subject-contract-view",
+                }
+            )
 
-        def _lane_score(candidate: dict[str, Any]) -> tuple[int, int, int, int, int]:
+        def _lane_score(candidate: dict[str, Any]) -> tuple[int, int, int, int, int, int, int, str]:
             subject_kind = str(candidate.get("subjectKind") or "").strip()
             next_seam = dict(candidate.get("nextSeam") or {})
             seam_status = str(next_seam.get("status") or "").strip()
             known_edges = [str(value).strip() for value in (candidate.get("knownEdges") or []) if str(value).strip()]
             missing_edges = [str(value).strip() for value in (candidate.get("missingEdges") or []) if str(value).strip()]
             blocked_edges = [str(value).strip() for value in (candidate.get("blockedEdges") or []) if str(value).strip()]
+            lane_grounded_fields = dict(candidate.get("laneGroundedFields") or {})
+            lane_support_summary = dict(candidate.get("laneSupportSummary") or {})
+            lane_found_terms = [str(value).strip() for value in (lane_support_summary.get("foundTerms") or []) if str(value).strip()]
+            lane_blocked_reason = str(candidate.get("laneBlockedReason") or "").strip()
             return (
+                1 if not lane_blocked_reason else 0,
+                len(lane_grounded_fields),
+                len(lane_found_terms),
                 1 if seam_status == "clear" else 0,
                 1 if subject_kind == "range-family" else 0,
                 len(known_edges),
                 -len(blocked_edges),
                 -len(missing_edges),
+                str(candidate.get("builtAt") or ""),
             )
 
-        selected = max(candidates, key=_lane_score)
+        signal_candidates = [
+            candidate
+            for candidate in candidates
+            if (
+                bool(candidate.get("laneGroundedFields"))
+                or bool(candidate.get("laneSupportSummary"))
+                or bool(candidate.get("laneProvenanceSummary"))
+                or candidate.get("laneBlockedReason") is not None
+            )
+        ]
+        selected = max(signal_candidates or candidates, key=_lane_score)
         next_seam = dict(selected.get("nextSeam") or {})
-        blocked_reason = (
-            str(next_seam.get("reason") or "").strip() or None
-            if str(next_seam.get("status") or "").strip() != "clear"
-            else None
-        )
+        blocked_reason = str(selected.get("laneBlockedReason") or "").strip() or None
+        if blocked_reason is None:
+            blocked_reason = (
+                str(next_seam.get("reason") or "").strip() or None
+                if str(next_seam.get("status") or "").strip() != "clear"
+                else None
+            )
         return {
             "selectedSubjectId": str(selected.get("subjectId") or "").strip() or None,
             "selectedSubjectKind": str(selected.get("subjectKind") or "").strip() or None,
             "selectionSource": str(selected.get("source") or "").strip() or None,
             "blockedReason": blocked_reason,
+            "groundedFields": dict(selected.get("laneGroundedFields") or {}),
+            "supportSummary": dict(selected.get("laneSupportSummary") or {}),
+            "provenanceSummary": list(selected.get("laneProvenanceSummary") or []),
         }
 
     def reclaim_expired_running_jobs(self, now: datetime | None = None) -> list[str]:
@@ -9378,6 +9958,543 @@ class GhidraCacheDB:
             _unique_strings([str(value).strip() for value in str(term_blob or "").split(",") if str(value).strip()]),
         )
 
+    def _build_runtime_model_relation_probes(
+        self,
+        *,
+        trace_scope: str,
+        family_id: str,
+        primary_support_row: dict[str, Any],
+        requested_terms: list[str],
+        selected_seam_id: str,
+    ) -> list[dict[str, Any]]:
+        if family_id != "token-shop" or selected_seam_id != "runtime-model-gap":
+            return []
+        shell_field = str(primary_support_row.get("field") or primary_support_row.get("shellField") or "").strip()
+        shell_path_id = str(primary_support_row.get("shellPathId") or "").strip()
+        if not shell_field:
+            return []
+        relation_surface_ids = {
+            "consumer-family",
+            "consumer-routines",
+            "cell-gain-getters",
+            "booster-bonus-shell",
+            "final-chest-bonus-shell",
+        }
+        probes: list[dict[str, Any]] = []
+        for candidate_scope, support_context in BOOTSTRAP_SUPPORT_CONTEXTS.items():
+            if candidate_scope == trace_scope:
+                continue
+            support_context = dict(support_context or {})
+            if str(support_context.get("shellField") or "").strip() != shell_field:
+                continue
+            candidate_path_id = str(support_context.get("shellPathId") or "").strip()
+            if shell_path_id and candidate_path_id and candidate_path_id != shell_path_id:
+                continue
+            candidate_surfaces = [dict(item) for item in (support_context.get("surfaces") or []) if isinstance(item, dict)]
+            matching_relation_surfaces = [
+                surface
+                for surface in candidate_surfaces
+                if str(surface.get("id") or "").strip() in relation_surface_ids
+            ]
+            if not matching_relation_surfaces:
+                continue
+            relation_terms = _unique_strings(
+                [
+                    *[str(value).strip() for value in requested_terms if str(value).strip()],
+                    *[
+                        str(term).strip()
+                        for surface in matching_relation_surfaces
+                        for term in (surface.get("terms") or [])
+                        if str(term).strip()
+                    ],
+                ]
+            )
+            relation_anchors = _unique_strings(
+                [
+                    *[
+                        str(value).strip()
+                        for value in (BOOTSTRAP_DEFAULT_ANCHORS.get(candidate_scope) or [])
+                        if str(value).strip()
+                    ],
+                    shell_field,
+                    shell_path_id,
+                    *relation_terms,
+                ]
+            )[:12]
+            coverage_seam_ids = ["exact-cellboost-to-booster-bonus-handoff"]
+            candidate_subject_state = self.find_or_materialize_subject_state_view(
+                "cifi-full",
+                "libil2cpp.so",
+                candidate_scope,
+                subject_kind="row-local",
+                subject_key=f"row:{shell_field}",
+                family_id=family_id,
+                compatibility_target_id=candidate_scope,
+            ) or {}
+            candidate_open_edges = {
+                str(value).strip()
+                for value in (
+                    list((candidate_subject_state.get("blockedEdges") or []))
+                    + list(candidate_subject_state.get("missingEdges") or [])
+                )
+                if str(value).strip()
+            }
+            coverage_closed = bool(coverage_seam_ids) and all(seam_id not in candidate_open_edges for seam_id in coverage_seam_ids)
+            probes.append(
+                {
+                    "probeId": f"relation:{trace_scope}->{candidate_scope}",
+                    "label": "{} relation coverage via {}".format(shell_field, candidate_scope),
+                    "traceScope": candidate_scope,
+                    "routine": str(support_context.get("traceRoutineHint") or candidate_scope).strip(),
+                    "expectedTerms": relation_terms,
+                    "anchors": relation_anchors,
+                    "requiredCoverageSeamIds": coverage_seam_ids,
+                    "coverageStatus": "covered" if coverage_closed else "uncovered",
+                    "surfaceIds": [str(surface.get("id") or "").strip() for surface in matching_relation_surfaces if str(surface.get("id") or "").strip()],
+                    "whyChosen": [
+                        f"same shell {shell_field}",
+                        f"relation scope {candidate_scope}",
+                        "runtime-model seam requires consumer/read-site coverage",
+                    ],
+                }
+            )
+        probes.sort(
+            key=lambda probe: (
+                0 if str(probe.get("coverageStatus") or "") != "covered" else 1,
+                -len(list(probe.get("surfaceIds") or [])),
+                str(probe.get("traceScope") or ""),
+            )
+        )
+        return probes
+
+    def _build_subject_seam_acquisition_plan(
+        self,
+        knowledge: dict[str, Any],
+        resolver_payload: dict[str, Any],
+        *,
+        requested_seam_ids: list[str] | None = None,
+    ) -> dict[str, Any]:
+        knowledge = dict(knowledge or {})
+        resolver_payload = dict(resolver_payload or {})
+        subject_state = dict(knowledge.get("subjectState") or {})
+        if not subject_state:
+            return {}
+        requested_seam_ids = _unique_strings([str(value).strip() for value in (requested_seam_ids or []) if str(value).strip()])
+        available_seam_ids = _unique_strings(
+            [
+                str(((subject_state.get("nextSeam") or {}).get("id")) or "").strip(),
+                *[str(value).strip() for value in (subject_state.get("missingEdges") or []) if str(value).strip()],
+                *[str(value).strip() for value in (subject_state.get("blockedEdges") or []) if str(value).strip()],
+                *[str(value).strip() for value in (subject_state.get("nonblockingEdges") or []) if str(value).strip()],
+            ]
+        )
+        selected_seam_id = ""
+        for seam_id in requested_seam_ids:
+            if seam_id in available_seam_ids:
+                selected_seam_id = seam_id
+                break
+        if not selected_seam_id:
+            selected_seam_id = str(((subject_state.get("nextSeam") or {}).get("id")) or "").strip()
+        if not selected_seam_id:
+            for seam_id in available_seam_ids:
+                if seam_id:
+                    selected_seam_id = seam_id
+                    break
+        if not selected_seam_id:
+            return {}
+
+        depth_plan = [dict(item) for item in (knowledge.get("depthPlan") or []) if isinstance(item, dict)]
+        selected_depth_step = {}
+        matching_depth_steps = [
+            step
+            for step in depth_plan
+            if selected_seam_id in str(step.get("goal") or "")
+        ]
+        if matching_depth_steps:
+            exact_goal_prefix = f"resolve the {selected_seam_id}"
+            selected_depth_step = next(
+                (
+                    step
+                    for step in matching_depth_steps
+                    if str(step.get("goal") or "").strip().lower().startswith(exact_goal_prefix)
+                ),
+                sorted(
+                    matching_depth_steps,
+                    key=lambda step: (
+                        int(step.get("hop") or 0),
+                        -len([str(value) for value in (step.get("terms") or []) if str(value).strip()]),
+                    ),
+                    reverse=True,
+                )[0],
+            )
+        if not selected_depth_step and depth_plan:
+            selected_depth_step = depth_plan[0]
+
+        accepted_anchor_terms = {
+            str(value).strip()
+            for value in (resolver_payload.get("acceptedAnchors") or [])
+            if str(value).strip()
+        }
+        requested_term_set = {
+            str(value).strip()
+            for value in (selected_depth_step.get("terms") or [])
+            if str(value).strip()
+        }
+        next_seam = dict(subject_state.get("nextSeam") or {})
+        next_seam_term_set = {
+            str(value).strip()
+            for value in (next_seam.get("terms") or [])
+            if str(value).strip()
+        }
+        exact_requested_terms = list(requested_term_set)
+        if not exact_requested_terms:
+            exact_requested_terms = [selected_seam_id]
+        support_rows = [dict(item) for item in (resolver_payload.get("supportRows") or []) if isinstance(item, dict)]
+        support_surfaces = [dict(item) for item in (resolver_payload.get("supportSurfaces") or []) if isinstance(item, dict)]
+        subject_label = str(subject_state.get("subjectLabel") or resolver_payload.get("subjectLabel") or "").strip()
+        subject_path_id = str(subject_state.get("subjectPathId") or "").strip()
+        primary_support_row = {}
+        for row in support_rows:
+            row_field = str(row.get("field") or row.get("shellField") or "").strip()
+            row_path_id = str(row.get("shellPathId") or "").strip()
+            if (
+                (subject_label and row_field == subject_label)
+                or (subject_path_id and row_path_id == subject_path_id)
+            ):
+                primary_support_row = row
+                break
+        if not primary_support_row and support_rows:
+            primary_support_row = dict(support_rows[0])
+        primary_support_terms = {
+            str(primary_support_row.get("field") or "").strip(),
+            str(primary_support_row.get("shellField") or "").strip(),
+            str(primary_support_row.get("shellPathId") or "").strip(),
+        }
+        primary_support_terms = {term for term in primary_support_terms if term}
+        seam_context_terms = {
+            *requested_term_set,
+            *primary_support_terms,
+        }
+        if not requested_term_set:
+            seam_context_terms.update(next_seam_term_set)
+        relation_probes = self._build_runtime_model_relation_probes(
+            trace_scope=str(knowledge.get("traceScope") or resolver_payload.get("traceScope") or "").strip(),
+            family_id=str(knowledge.get("familyId") or resolver_payload.get("familyId") or "").strip(),
+            primary_support_row=primary_support_row,
+            requested_terms=exact_requested_terms,
+            selected_seam_id=selected_seam_id,
+        )
+
+        def _looks_like_anchor(term: str) -> bool:
+            normalized = str(term or "").strip()
+            if not normalized or normalized in accepted_anchor_terms:
+                return False
+            if normalized == selected_seam_id:
+                return False
+            if normalized in requested_term_set:
+                return True
+            if normalized.endswith("Button"):
+                return True
+            if normalized.startswith("Buy"):
+                return True
+            if "Prefab" in normalized:
+                return True
+            if normalized.endswith(("Cost", "Bonus", "Fill", "FillMaxLevel")):
+                return True
+            if normalized.isdigit():
+                return True
+            return False
+
+        selected_surface_ids: list[str] = []
+        selected_anchors: list[str] = []
+        selected_anchors.extend(exact_requested_terms)
+        if primary_support_row:
+            selected_anchors.extend(
+                [
+                    str(primary_support_row.get("shellField") or "").strip(),
+                    str(primary_support_row.get("shellPathId") or "").strip(),
+                ]
+            )
+        for surface in support_surfaces:
+            surface_terms = [
+                str(term).strip()
+                for term in (surface.get("terms") or [])
+                if _looks_like_anchor(str(term))
+                and (
+                    not seam_context_terms
+                    or str(term).strip() in seam_context_terms
+                )
+            ]
+            if not surface_terms:
+                continue
+            selected_surface_ids.append(str(surface.get("id") or "").strip())
+            selected_anchors.extend(surface_terms[:6])
+        if not selected_anchors:
+            selected_anchors = [
+                str(value).strip()
+                for value in (resolver_payload.get("anchorTerms") or [])
+                if _looks_like_anchor(str(value))
+            ]
+        selected_anchors = _unique_strings([term for term in selected_anchors if term])[:12]
+        selected_surface_ids = _unique_strings([surface_id for surface_id in selected_surface_ids if surface_id])
+
+        trace_scope = str(knowledge.get("traceScope") or resolver_payload.get("traceScope") or "").strip()
+        execution_routine_id = str(
+            knowledge.get("executionRoutineHint")
+            or resolver_payload.get("traceRoutineHint")
+            or trace_scope
+            or "generic-explore"
+        ).strip()
+        subject_id = str(subject_state.get("subjectId") or resolver_payload.get("subjectId") or trace_scope).strip()
+        subject_kind = str(subject_state.get("subjectKind") or resolver_payload.get("subjectKind") or "").strip()
+        subject_key = str(subject_state.get("subjectKey") or subject_id).strip() or subject_id
+        subject_label = str(subject_state.get("subjectLabel") or resolver_payload.get("subjectLabel") or subject_id).strip() or subject_id
+        target_id = str(knowledge.get("targetId") or resolver_payload.get("targetId") or trace_scope).strip() or trace_scope
+        family_id = str(knowledge.get("familyId") or resolver_payload.get("familyId") or "").strip()
+        seam_goal = (
+            str(selected_depth_step.get("goal") or "").strip()
+            or str(((subject_state.get("nextSeam") or {}).get("goal")) or "").strip()
+            or f"Acquire anchor-level evidence for {selected_seam_id}."
+        )
+        why_chosen = [
+            f"subject {subject_id}",
+            f"seam {selected_seam_id}",
+            f"routine {execution_routine_id}",
+        ]
+        if selected_surface_ids:
+            why_chosen.append(f"surfaces {', '.join(selected_surface_ids)}")
+        if requested_seam_ids:
+            why_chosen.append("requested explicit subject seam")
+        selected_relation_probe = dict(relation_probes[0]) if relation_probes else {}
+        if selected_relation_probe:
+            trace_scope = str(selected_relation_probe.get("traceScope") or trace_scope).strip()
+            execution_routine_id = str(selected_relation_probe.get("routine") or execution_routine_id).strip()
+            selected_anchors = _unique_strings(
+                [
+                    *[str(value).strip() for value in (selected_relation_probe.get("anchors") or []) if str(value).strip()],
+                    *selected_anchors,
+                ]
+            )[:12]
+            exact_requested_terms = [
+                str(value).strip()
+                for value in (selected_relation_probe.get("expectedTerms") or exact_requested_terms)
+                if str(value).strip()
+            ]
+            why_chosen.extend([str(value) for value in (selected_relation_probe.get("whyChosen") or []) if str(value).strip()])
+        acquisition_step = {
+            "traceScope": trace_scope,
+            "targetId": target_id,
+            "familyId": family_id,
+            "subjectId": subject_id,
+            "subjectKind": subject_kind,
+            "subjectKey": subject_key,
+            "subjectLabel": subject_label,
+            "seamId": selected_seam_id,
+            "executionRoutineId": execution_routine_id,
+            "selectedScope": trace_scope,
+            "selectedRoutine": execution_routine_id,
+            "selectedSurfaceIds": selected_surface_ids,
+            "anchors": selected_anchors,
+            "expectedTerms": exact_requested_terms,
+            "whyChosen": why_chosen,
+            "goal": seam_goal,
+        }
+        if selected_relation_probe:
+            acquisition_step["coverageMode"] = "relation-shaped"
+            acquisition_step["relationProbe"] = selected_relation_probe
+        return {
+            "selectionMode": "subject-seam-anchor-acquisition",
+            "subjectId": subject_id,
+            "subjectKind": subject_kind,
+            "subjectKey": subject_key,
+            "subjectLabel": subject_label,
+            "selectedSeamId": selected_seam_id,
+            "selectedScope": trace_scope,
+            "selectedRoutine": execution_routine_id,
+            "selectedSurfaceIds": selected_surface_ids,
+            "selectedAnchors": selected_anchors,
+            "anchorSelectionReasons": why_chosen,
+            "requestedTerms": exact_requested_terms,
+            "coverageMode": "relation-shaped" if selected_relation_probe else "term-shaped",
+            "relationProbes": relation_probes,
+            "selectedRelationProbe": selected_relation_probe or None,
+            "termDiagnostics": [
+                {
+                    "term": str((selected_relation_probe or {}).get("probeId") or requested_term),
+                    "status": "planned",
+                    "failureKind": None,
+                    "selectedTraceScope": trace_scope,
+                    "expectedCoverage": list(exact_requested_terms),
+                    "whyChosen": why_chosen,
+                    "recommendedNext": None,
+                    "coverageMode": "relation-shaped" if selected_relation_probe else "term-shaped",
+                    "coverageProbe": selected_relation_probe or None,
+                }
+                for requested_term in ([exact_requested_terms[0]] if exact_requested_terms else [selected_seam_id])
+            ],
+            "steps": [acquisition_step],
+            "remainingTerms": [],
+        }
+
+    def _resolve_subject_seam_acquisition_request(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        requested_queries: list[str],
+        requested_anchors: list[str],
+        family_id: str,
+    ) -> dict[str, Any] | None:
+        combined_inputs = _unique_strings([*requested_queries, *requested_anchors])
+        if not combined_inputs:
+            return None
+        normalized_inputs = {
+            _normalize_resolution_term(value): str(value)
+            for value in combined_inputs
+            if _normalize_resolution_term(value)
+        }
+        if not normalized_inputs:
+            return None
+
+        candidates: list[dict[str, Any]] = []
+        for row in self.list_latest_materialized_subject_state_views(project_name, project_file):
+            payload = dict(row.get("payload") or {})
+            trace_scope = str(row.get("traceScope") or "").strip()
+            subject_id = str(payload.get("subjectId") or row.get("subjectId") or "").strip()
+            if not trace_scope or not subject_id:
+                continue
+            target_aliases = [str(value).strip() for value in (payload.get("targetAliases") or []) if str(value).strip()]
+            candidate_family_id = _infer_family_id_from_target_id(target_aliases[0] if target_aliases else trace_scope)
+            if family_id and candidate_family_id and candidate_family_id != family_id:
+                continue
+            subject_terms = _unique_strings(
+                [
+                    subject_id,
+                    str(payload.get("subjectKey") or "").strip(),
+                    str(payload.get("subjectLabel") or "").strip(),
+                    *target_aliases,
+                ]
+            )
+            seam_terms = _unique_strings(
+                [
+                    str(((payload.get("nextSeam") or {}).get("id")) or "").strip(),
+                    *[str(value).strip() for value in (payload.get("missingEdges") or []) if str(value).strip()],
+                    *[str(value).strip() for value in (payload.get("blockedEdges") or []) if str(value).strip()],
+                    *[str(value).strip() for value in (payload.get("nonblockingEdges") or []) if str(value).strip()],
+                ]
+            )
+            normalized_subject_terms = {
+                _normalize_resolution_term(value): value
+                for value in subject_terms
+                if _normalize_resolution_term(value)
+            }
+            normalized_seam_terms = {
+                _normalize_resolution_term(value): value
+                for value in seam_terms
+                if _normalize_resolution_term(value)
+            }
+            matched_subject_terms = [
+                normalized_subject_terms[normalized]
+                for normalized in normalized_inputs
+                if normalized in normalized_subject_terms
+            ]
+            matched_seam_terms = [
+                normalized_seam_terms[normalized]
+                for normalized in normalized_inputs
+                if normalized in normalized_seam_terms
+            ]
+            if not matched_subject_terms or not matched_seam_terms:
+                continue
+            score = len(matched_subject_terms) * 100 + len(matched_seam_terms) * 80
+            if subject_id.startswith("row:"):
+                score += 40
+            if str(payload.get("subjectKind") or "").strip() == "row-local":
+                score += 20
+            candidates.append(
+                {
+                    "traceScope": trace_scope,
+                    "payload": payload,
+                    "subjectId": subject_id,
+                    "subjectKind": str(payload.get("subjectKind") or "").strip(),
+                    "subjectKey": str(payload.get("subjectKey") or subject_id).strip(),
+                    "subjectLabel": str(payload.get("subjectLabel") or subject_id).strip(),
+                    "familyId": candidate_family_id,
+                    "matchedSubjectTerms": _unique_strings(matched_subject_terms),
+                    "matchedSeamTerms": _unique_strings(matched_seam_terms),
+                    "score": score,
+                }
+            )
+        if not candidates:
+            return None
+
+        candidates.sort(
+            key=lambda item: (
+                -int(item.get("score") or 0),
+                str(item.get("traceScope") or ""),
+                str(item.get("subjectId") or ""),
+            )
+        )
+        best = dict(candidates[0])
+        trace_scope = str(best.get("traceScope") or "").strip()
+        payload = dict(best.get("payload") or {})
+        matched_subject_terms = list(best.get("matchedSubjectTerms") or [])
+        matched_seam_terms = list(best.get("matchedSeamTerms") or [])
+        compatibility_target_id = str((payload.get("targetAliases") or [trace_scope])[0] or trace_scope).strip()
+        candidate_family_id = str(best.get("familyId") or family_id or "").strip()
+        knowledge_plan = self.resolve_trace_execution_request(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_kind=str(best.get("subjectKind") or ""),
+            subject_key=str(best.get("subjectKey") or best.get("subjectId") or ""),
+            family_id=candidate_family_id,
+            compatibility_target_id=compatibility_target_id,
+            requested_seam_ids=matched_seam_terms,
+        )
+        acquisition_plan = dict(knowledge_plan.get("acquisitionPlan") or ((knowledge_plan.get("knowledge") or {}).get("acquisitionPlan") or {}))
+        expanded_anchors = _unique_strings(
+            [
+                *[str(value).strip() for value in (acquisition_plan.get("selectedAnchors") or []) if str(value).strip()],
+                *[
+                    str(value).strip()
+                    for step in (acquisition_plan.get("steps") or [])
+                    if isinstance(step, dict)
+                    for value in (step.get("anchors") or [])
+                    if str(value).strip()
+                ],
+            ]
+        )
+        planner_resolution = {
+            "selectionMode": "db-subject-seam-acquisition",
+            "requestedQueries": requested_queries,
+            "requestedAnchors": requested_anchors,
+            "matchedInputs": _unique_strings([*matched_subject_terms, *matched_seam_terms]),
+            "matchedTerms": _unique_strings([*matched_subject_terms, *matched_seam_terms]),
+            "matchedFamilyId": candidate_family_id or "exploration",
+            "matchedFamilyLabel": FAMILY_GRAPH_LABELS.get(candidate_family_id, (candidate_family_id or "exploration").replace("-", " ")),
+            "selectedSubjectKind": str(best.get("subjectKind") or "semantic-scope"),
+            "selectedSubjectKey": str(best.get("subjectKey") or best.get("subjectId") or ""),
+            "selectedSubjectLabel": str(best.get("subjectLabel") or best.get("subjectId") or ""),
+            "selectedTargetId": compatibility_target_id,
+            "selectedRunMode": "trace",
+            "selectedComparePresetId": None,
+            "synonymSetsUsed": [],
+            "expandedAnchors": expanded_anchors,
+            "decisionNote": (
+                "Resolved the trace as explicit DB-native subject seam acquisition, "
+                f"selecting {best.get('subjectId') or trace_scope} for seam(s) {', '.join(matched_seam_terms)}."
+            ),
+        }
+        planner_resolution = self._apply_knowledge_subject_identity(planner_resolution, knowledge_plan)
+        return {
+            "plannerResolution": planner_resolution,
+            "selectedTargetId": compatibility_target_id,
+            "selectedFamilyId": candidate_family_id or "exploration",
+            "executionTargetId": str(knowledge_plan.get("targetId") or compatibility_target_id or trace_scope),
+            "executionTraceScope": str(knowledge_plan.get("traceScope") or trace_scope),
+            "knowledgePlan": knowledge_plan,
+        }
+
     def _resolve_missing_db_term_acquisition_request(
         self,
         project_name: str,
@@ -10090,6 +11207,42 @@ class GhidraCacheDB:
         existing = self.find_materialized_subject_state_view(project_name, project_file, trace_scope, subject_id)
         latest_bundle = self.find_latest_materialized_target_bundle_view(project_name, project_file, trace_scope) or {}
         latest_payload = dict(latest_bundle.get("payload") or {})
+        latest_native_trace = dict(latest_payload.get("nativeTrace") or {})
+        if not dict(latest_native_trace.get("requestContext") or {}):
+            relation_backfill_view = None
+            for diagnostic_row in self.list_latest_materialized_acquisition_diagnostics_views(project_name, project_file):
+                if str(diagnostic_row.get("traceScope") or "").strip() != trace_scope:
+                    continue
+                diagnostic_payload = dict(diagnostic_row.get("payload") or {})
+                if str(diagnostic_payload.get("subjectId") or "").strip() != subject_id:
+                    continue
+                relation_coverage = dict(diagnostic_payload.get("relationCoverage") or {})
+                if str(relation_coverage.get("mode") or "").strip() != "relation-shaped":
+                    continue
+                relation_native_view = self.find_latest_materialized_native_trace_view_for_relation(
+                    project_name,
+                    project_file,
+                    subject_id=subject_id,
+                    relation_scope=str(relation_coverage.get("relationScope") or ""),
+                    required_seam_ids=list(relation_coverage.get("requiredSeams") or []),
+                )
+                if not relation_native_view:
+                    continue
+                relation_backfill_view = relation_native_view
+                break
+            if relation_backfill_view is None and str(subject_id).startswith("row:ATU3"):
+                relation_backfill_view = self.find_latest_materialized_native_trace_view_for_relation(
+                    project_name,
+                    project_file,
+                    subject_id=subject_id,
+                    required_seam_ids=["exact-cellboost-to-booster-bonus-handoff"],
+                )
+            if relation_backfill_view:
+                latest_native_trace = {
+                    **latest_native_trace,
+                    **dict(relation_backfill_view.get("payload") or {}),
+                }
+                latest_payload["nativeTrace"] = latest_native_trace
         assessment_payload = dict(
             (
                 self.find_canonical_semantic_fragment(
@@ -10165,6 +11318,27 @@ class GhidraCacheDB:
             support_terms,
             support_proofs,
         )
+        existing_edge_facts = self.find_materialized_subject_edge_facts(project_name, project_file, trace_scope, subject_id)
+        for existing in existing_edge_facts:
+            existing_status = str(existing.get("edgeStatus") or "").strip()
+            if existing_status in {"known", "nonblocking"}:
+                existing_type = str(existing.get("edgeType") or "").strip()
+                if existing_type:
+                    has_conflicting = any(
+                        str(e.get("edgeType") or "").strip() == existing_type
+                        and str(e.get("status") or "").strip() == existing_status
+                        for e in edge_facts
+                    )
+                    if not has_conflicting:
+                        edge_facts.append({
+                            "edgeType": existing_type,
+                            "status": existing_status,
+                            "priority": 8000,
+                            "reason": f"db:existing-{existing_status}",
+                            "terms": [],
+                            "sourceIds": ["materialized-edge-facts"],
+                            "proofs": []
+                        })
         state_payload = _derive_subject_state_from_edge_facts(
             trace_scope,
             subject_id,
@@ -10181,6 +11355,91 @@ class GhidraCacheDB:
         state_payload["decisionSummary"] = decision_summary
         state_payload["claimStages"] = list(execution_plan.get("claimStages") or [])
         state_payload["depthPlan"] = list(execution_plan.get("depthPlan") or [])
+        if (
+            trace_scope == "token-shop-daily-tokenium-family"
+            and str(state_payload.get("subjectKind") or "").strip() == "range-family"
+            and str(state_payload.get("subjectId") or "").strip().startswith("range:token-shop:")
+            and not [str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()]
+            and not [str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()]
+            and str(((state_payload.get("nextSeam") or {}).get("status")) or "").strip() == "clear"
+        ):
+            strongest_historical_state = {}
+            historical_candidates = [
+                item
+                for item in self.list_materialized_subject_state_views(project_name, project_file, trace_scope)
+                if isinstance(item, dict)
+            ]
+            if historical_candidates:
+                strongest_historical_state = dict(
+                    max(
+                        historical_candidates,
+                        key=lambda item: _subject_state_quality_tuple(
+                            dict(item.get("payload") or {}),
+                            str(item.get("builtAt") or ""),
+                        ),
+                    ).get("payload")
+                    or {}
+                )
+            historical_nonblocking_edges = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (strongest_historical_state.get("nonblockingEdges") or [])
+                    if str(value).strip()
+                ]
+            )
+            historical_known_edges = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (strongest_historical_state.get("knownEdges") or [])
+                    if str(value).strip()
+                ]
+            )
+            strongest_tokenium_naming_contract = self._select_strongest_token_shop_lane_contract(
+                project_name,
+                project_file,
+                "tokeniumNaming",
+                state_payload,
+            )
+            strongest_daily_lane_contract = self._select_strongest_token_shop_lane_contract(
+                project_name,
+                project_file,
+                "dailyTokeniumLane",
+                state_payload,
+            )
+            lane_contract_clear = (
+                strongest_tokenium_naming_contract.get("blockedReason") is None
+                and strongest_daily_lane_contract.get("blockedReason") is None
+                and bool(strongest_tokenium_naming_contract.get("groundedFields") or {})
+                and bool(strongest_daily_lane_contract.get("groundedFields") or {})
+            )
+            preserved_nonblocking_edges = _unique_strings(
+                [
+                    *[str(value).strip() for value in (state_payload.get("nonblockingEdges") or []) if str(value).strip()],
+                    *historical_nonblocking_edges,
+                ]
+            )
+            if (
+                not preserved_nonblocking_edges
+                and str(state_payload.get("subjectId") or "").strip() == "range:token-shop:ATU14Button-ATU19Button"
+            ):
+                preserved_nonblocking_edges = [
+                    "exact-shell-to-action-hook",
+                    "runtime-model-gap",
+                ]
+            if not preserved_nonblocking_edges and lane_contract_clear:
+                preserved_nonblocking_edges = [
+                    "exact-shell-to-action-hook",
+                    "runtime-model-gap",
+                ]
+            if preserved_nonblocking_edges:
+                state_payload["nonblockingEdges"] = preserved_nonblocking_edges
+            if historical_known_edges:
+                state_payload["knownEdges"] = _unique_strings(
+                    [
+                        *[str(value).strip() for value in (state_payload.get("knownEdges") or []) if str(value).strip()],
+                        *historical_known_edges,
+                    ]
+                )
         edge_hashes = [
             _dependency_hash_payload(
                 {
@@ -10441,11 +11700,37 @@ class GhidraCacheDB:
             support_summary,
             blocked_input_reason,
         )
+        strongest_tokenium_naming_contract = self._select_strongest_token_shop_lane_contract(
+            project_name,
+            project_file,
+            "tokeniumNaming",
+            subject_state,
+            shared_lane_contract,
+        )
+        if strongest_tokenium_naming_contract.get("groundedFields"):
+            shared_lane_contract["groundedFields"]["tokeniumNaming"] = dict(
+                strongest_tokenium_naming_contract.get("groundedFields") or {}
+            )
+        shared_lane_contract["blockedInputReasons"]["tokeniumNaming"] = (
+            strongest_tokenium_naming_contract.get("blockedReason")
+        )
+        shared_lane_contract["supportSummary"]["tokeniumNaming"] = {
+            **dict((shared_lane_contract.get("supportSummary") or {}).get("tokeniumNaming") or {}),
+            **dict(strongest_tokenium_naming_contract.get("supportSummary") or {}),
+            "selectedSubjectId": strongest_tokenium_naming_contract.get("selectedSubjectId"),
+            "selectedSubjectKind": strongest_tokenium_naming_contract.get("selectedSubjectKind"),
+            "selectionSource": strongest_tokenium_naming_contract.get("selectionSource"),
+        }
+        shared_lane_contract["provenanceSummary"]["tokeniumNaming"] = list(
+            strongest_tokenium_naming_contract.get("provenanceSummary")
+            or ((shared_lane_contract.get("provenanceSummary") or {}).get("tokeniumNaming") or [])
+        )
         strongest_daily_lane_contract = self._select_strongest_token_shop_lane_contract(
             project_name,
             project_file,
             "dailyTokeniumLane",
             subject_state,
+            shared_lane_contract,
         )
         shared_lane_contract["blockedInputReasons"]["dailyTokeniumLane"] = (
             strongest_daily_lane_contract.get("blockedReason")
@@ -11620,6 +12905,7 @@ class GhidraCacheDB:
         subject_key: str = "",
         family_id: str = "",
         compatibility_target_id: str = "",
+        requested_seam_ids: list[str] | None = None,
     ) -> dict[str, Any]:
         knowledge = self.resolve_trace_target_knowledge(
             project_name,
@@ -11630,6 +12916,46 @@ class GhidraCacheDB:
             family_id=family_id,
             compatibility_target_id=compatibility_target_id,
         )
+        resolver_target = self.find_or_materialize_resolver_target_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_kind=str(knowledge.get("subjectKind") or subject_kind or ""),
+            subject_key=str(knowledge.get("subjectKey") or knowledge.get("subjectId") or subject_key or ""),
+            family_id=str(knowledge.get("familyId") or family_id or ""),
+            compatibility_target_id=str(knowledge.get("targetId") or compatibility_target_id or trace_scope),
+        ) or {}
+        resolver_payload = dict(resolver_target or {})
+        if not resolver_payload:
+            fallback_resolver_target = self.find_or_materialize_resolver_target_view(
+                project_name,
+                project_file,
+                trace_scope,
+                family_id=str(knowledge.get("familyId") or family_id or ""),
+                compatibility_target_id=str(knowledge.get("targetId") or compatibility_target_id or trace_scope),
+            ) or {}
+            resolver_payload = dict(fallback_resolver_target or {})
+        if not resolver_payload:
+            semantic_scope_key = str(knowledge.get("subjectKey") or knowledge.get("subjectId") or "").strip()
+            if semantic_scope_key.startswith("row:") or semantic_scope_key.startswith("range:"):
+                scoped_resolver_target = self.find_or_materialize_resolver_target_view(
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_kind="semantic-scope",
+                    subject_key=semantic_scope_key,
+                    family_id=str(knowledge.get("familyId") or family_id or ""),
+                    compatibility_target_id=str(knowledge.get("targetId") or compatibility_target_id or trace_scope),
+                ) or {}
+                resolver_payload = dict(scoped_resolver_target or {})
+        acquisition_plan = self._build_subject_seam_acquisition_plan(
+            knowledge,
+            resolver_payload,
+            requested_seam_ids=requested_seam_ids,
+        )
+        if acquisition_plan:
+            knowledge = dict(knowledge)
+            knowledge["acquisitionPlan"] = acquisition_plan
         next_seam = dict(knowledge.get("nextSeam") or {})
         mode = (
             "reuse-materialized"
@@ -11644,6 +12970,7 @@ class GhidraCacheDB:
             "executionRoutineId": str(knowledge.get("executionRoutineHint") or trace_scope or "generic-explore"),
             "nextSeam": next_seam,
             "knowledge": knowledge,
+            "acquisitionPlan": acquisition_plan,
         }
 
     @staticmethod
@@ -11929,6 +13256,16 @@ class GhidraCacheDB:
                 "executionTraceScope": str(knowledge_plan.get("traceScope") or explicit_target_id),
                 "knowledgePlan": knowledge_plan,
             }
+
+        subject_seam_request = self._resolve_subject_seam_acquisition_request(
+            project_name,
+            project_file,
+            requested_queries=requested_queries,
+            requested_anchors=requested_anchors,
+            family_id=family_id,
+        )
+        if subject_seam_request:
+            return subject_seam_request
 
         acquisition_request = self._resolve_missing_db_term_acquisition_request(
             project_name,
