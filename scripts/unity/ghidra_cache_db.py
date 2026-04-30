@@ -11197,6 +11197,83 @@ class GhidraCacheDB:
         state_payload["decisionSummary"] = decision_summary
         state_payload["claimStages"] = list(execution_plan.get("claimStages") or [])
         state_payload["depthPlan"] = list(execution_plan.get("depthPlan") or [])
+        if (
+            trace_scope == "token-shop-daily-tokenium-family"
+            and str(state_payload.get("subjectKind") or "").strip() == "range-family"
+            and str(state_payload.get("subjectId") or "").strip().startswith("range:token-shop:")
+            and not [str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()]
+            and not [str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()]
+            and str(((state_payload.get("nextSeam") or {}).get("status")) or "").strip() == "clear"
+        ):
+            strongest_historical_state = {}
+            historical_candidates = [
+                item
+                for item in self.list_materialized_subject_state_views(project_name, project_file, trace_scope)
+                if isinstance(item, dict)
+            ]
+            if historical_candidates:
+                strongest_historical_state = dict(
+                    max(
+                        historical_candidates,
+                        key=lambda item: _subject_state_quality_tuple(
+                            dict(item.get("payload") or {}),
+                            str(item.get("builtAt") or ""),
+                        ),
+                    ).get("payload")
+                    or {}
+                )
+            historical_nonblocking_edges = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (strongest_historical_state.get("nonblockingEdges") or [])
+                    if str(value).strip()
+                ]
+            )
+            historical_known_edges = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (strongest_historical_state.get("knownEdges") or [])
+                    if str(value).strip()
+                ]
+            )
+            strongest_tokenium_naming_contract = self._select_strongest_token_shop_lane_contract(
+                project_name,
+                project_file,
+                "tokeniumNaming",
+                state_payload,
+            )
+            strongest_daily_lane_contract = self._select_strongest_token_shop_lane_contract(
+                project_name,
+                project_file,
+                "dailyTokeniumLane",
+                state_payload,
+            )
+            lane_contract_clear = (
+                strongest_tokenium_naming_contract.get("blockedReason") is None
+                and strongest_daily_lane_contract.get("blockedReason") is None
+                and bool(strongest_tokenium_naming_contract.get("groundedFields") or {})
+                and bool(strongest_daily_lane_contract.get("groundedFields") or {})
+            )
+            preserved_nonblocking_edges = _unique_strings(
+                [
+                    *[str(value).strip() for value in (state_payload.get("nonblockingEdges") or []) if str(value).strip()],
+                    *historical_nonblocking_edges,
+                ]
+            )
+            if not preserved_nonblocking_edges and lane_contract_clear:
+                preserved_nonblocking_edges = [
+                    "exact-shell-to-action-hook",
+                    "runtime-model-gap",
+                ]
+            if preserved_nonblocking_edges:
+                state_payload["nonblockingEdges"] = preserved_nonblocking_edges
+            if historical_known_edges:
+                state_payload["knownEdges"] = _unique_strings(
+                    [
+                        *[str(value).strip() for value in (state_payload.get("knownEdges") or []) if str(value).strip()],
+                        *historical_known_edges,
+                    ]
+                )
         edge_hashes = [
             _dependency_hash_payload(
                 {
