@@ -253,6 +253,130 @@ def _diagnostic_evidence_sources_checked(evidence: dict[str, Any]) -> list[str]:
     ]
 
 
+def _provenance_fingerprint(value: Any) -> str:
+    return hashlib.sha1(_json_dumps(value).encode("utf-8")).hexdigest()[:16]
+
+
+def _cached_exact_term_evidence_provenance_snapshot(term: str) -> dict[str, Any]:
+    normalized = str(term or "").strip()
+    if not normalized:
+        return {}
+    cache_key = normalize_planner_term(normalized) or normalized.lower()
+    cached = _trace_bundle_cache_get("post-run-exact-term-provenance-snapshot", cache_key)
+    if cached is not None:
+        return dict(cached)
+    with _trace_profile_span("dbReads.bestGapFastTermEvidence"):
+        term_view = get_trace_db().find_canonical_term_view("cifi-full", "libil2cpp.so", normalized)
+        graph_refs = get_trace_db().find_graph_backfill("cifi-full", "libil2cpp.so", normalized)
+    snapshot = {
+        "term": normalized,
+        "sourceIds": unique_strings(
+            [
+                "canonical-term-view" if term_view else "",
+                "graph-links" if graph_refs else "",
+            ]
+        ),
+        "canonicalTermFound": bool(term_view),
+        "canonicalTermProvenance": dict(((term_view or {}).get("job") or {}).get("provenance") or {}),
+        "graphRefs": [dict(entry) for entry in (graph_refs or []) if isinstance(entry, dict)],
+    }
+    snapshot["fingerprint"] = _provenance_fingerprint(
+        {
+            "sourceIds": snapshot["sourceIds"],
+            "canonicalTermProvenance": snapshot["canonicalTermProvenance"],
+            "graphRefs": snapshot["graphRefs"],
+        }
+    )
+    return _trace_bundle_cache_put("post-run-exact-term-provenance-snapshot", cache_key, snapshot)
+
+
+def _build_exact_term_evidence_provenance_audit(
+    *,
+    term: str,
+    trace_scope: str,
+    request_signature: str,
+    target_id: str,
+    execution_routine_id: str,
+    why_chosen: list[str],
+    source_job_id: str,
+    provenance_snapshot: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    snapshot = dict(provenance_snapshot or {})
+    return {
+        "term": str(term or "").strip(),
+        "traceScope": str(trace_scope or "").strip(),
+        "requestSignature": str(request_signature or "").strip(),
+        "targetId": str(target_id or "").strip(),
+        "executionRoutineId": str(execution_routine_id or "").strip(),
+        "whyChosen": [str(value) for value in (why_chosen or []) if str(value).strip()],
+        "sourceJobId": str(source_job_id or "").strip(),
+        "sourceIds": [str(value) for value in (snapshot.get("sourceIds") or []) if str(value).strip()],
+        "provenanceFingerprint": str(snapshot.get("fingerprint") or "").strip(),
+    }
+
+
+def _reuse_post_run_exact_term_evidence_if_unchanged(
+    *,
+    term: str,
+    trace_scope: str,
+    request_signature: str,
+    target_id: str,
+    execution_routine_id: str,
+    why_chosen: list[str],
+    provenance_snapshot: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    term = str(term or "").strip()
+    if not term:
+        return None
+    source_job_id = _pick_acquisition_evidence_source_job_id(
+        "cifi-full",
+        "libil2cpp.so",
+        request_signature,
+        [term, trace_scope, target_id, execution_routine_id, *[str(value) for value in (why_chosen or []) if str(value).strip()]],
+    )
+    if not source_job_id:
+        return None
+    expected_audit = _build_exact_term_evidence_provenance_audit(
+        term=term,
+        trace_scope=trace_scope,
+        request_signature=request_signature,
+        target_id=target_id,
+        execution_routine_id=execution_routine_id,
+        why_chosen=why_chosen,
+        source_job_id=source_job_id,
+        provenance_snapshot=provenance_snapshot,
+    )
+    existing_row = get_trace_db().find_live_evidence_row(
+        "cifi-full",
+        "libil2cpp.so",
+        term.lower(),
+        "acquisition_exact_term",
+        str(trace_scope or "").strip() or "__self__",
+        source_job_id=source_job_id,
+        producer_version=request_signature,
+    )
+    if not existing_row:
+        return None
+    existing_payload = dict(existing_row.get("payload") or {})
+    evidence_hits = dict(existing_payload.get("evidenceHits") or {})
+    payload_hits = [dict(item) for item in (evidence_hits.get("payloadHits") or []) if isinstance(item, dict)]
+    if payload_hits:
+        return None
+    if dict(existing_payload.get("provenanceAudit") or {}) != expected_audit:
+        return None
+    return {
+        "evidence": {
+            "term": term,
+            "found": True,
+            "sourceIds": [str(value) for value in (existing_payload.get("evidenceSourcesChecked") or []) if str(value).strip()],
+            "graphRefs": [dict(item) for item in (evidence_hits.get("graphRefs") or []) if isinstance(item, dict)],
+            "payloadHits": payload_hits,
+        },
+        "provenanceAudit": expected_audit,
+        "sourceJobId": source_job_id,
+    }
+
+
 def _pick_acquisition_evidence_source_job_id(
     project_name: str,
     project_file: str,
@@ -309,37 +433,69 @@ def _persist_acquisition_exact_term_evidence(
     why_chosen: list[str],
     evidence: dict[str, Any],
 ) -> None:
-    normalized_term = str(term or "").strip().lower()
-    if not normalized_term or not bool(evidence.get("found")):
-        return
-    source_job_id = _pick_acquisition_evidence_source_job_id(
-        project_name,
-        project_file,
-        request_signature,
-        [term, trace_scope, target_id, execution_routine_id, *why_chosen],
-    )
-    if not source_job_id:
-        return
-    now = datetime.now().isoformat()
-    get_trace_db().upsert_custom_evidence_rows(
+    _persist_acquisition_exact_term_evidence_batch(
         [
             {
                 "project_name": project_name,
                 "project_file": project_file,
+                "trace_scope": trace_scope,
+                "request_signature": request_signature,
+                "target_id": target_id,
+                "execution_routine_id": execution_routine_id,
+                "term": term,
+                "why_chosen": list(why_chosen or []),
+                "evidence": dict(evidence or {}),
+            }
+        ]
+    )
+
+
+def _persist_acquisition_exact_term_evidence_batch(entries: list[dict[str, Any]]) -> None:
+    evidence_rows: list[dict[str, Any]] = []
+    now = datetime.now().isoformat()
+    for entry in entries:
+        project_name = str(entry.get("project_name") or "").strip()
+        project_file = str(entry.get("project_file") or "").strip()
+        trace_scope = str(entry.get("trace_scope") or "").strip()
+        request_signature = str(entry.get("request_signature") or "").strip()
+        target_id = str(entry.get("target_id") or "").strip()
+        execution_routine_id = str(entry.get("execution_routine_id") or "").strip()
+        term = str(entry.get("term") or "").strip()
+        why_chosen = [str(value) for value in (entry.get("why_chosen") or []) if str(value).strip()]
+        evidence = dict(entry.get("evidence") or {})
+        provenance_audit = dict(entry.get("provenance_audit") or {})
+        normalized_term = term.lower()
+        if not project_name or not project_file or not normalized_term or not bool(evidence.get("found")):
+            continue
+        source_job_id = str(provenance_audit.get("sourceJobId") or "").strip()
+        if not source_job_id:
+            source_job_id = _pick_acquisition_evidence_source_job_id(
+                project_name,
+                project_file,
+                request_signature,
+                [term, trace_scope, target_id, execution_routine_id, *why_chosen],
+            )
+        if not source_job_id:
+            continue
+        evidence_rows.append(
+            {
+                "project_name": project_name,
+                "project_file": project_file,
                 "normalized_term": normalized_term,
-                "term": str(term or "").strip(),
+                "term": term,
                 "aspect_kind": "acquisition_exact_term",
-                "aspect_key": str(trace_scope or "").strip() or "__self__",
+                "aspect_key": trace_scope or "__self__",
                 "source_job_id": source_job_id,
                 "payload": {
-                    "term": str(term or "").strip(),
-                    "traceScope": str(trace_scope or "").strip(),
-                    "targetId": str(target_id or "").strip(),
-                    "requestSignature": str(request_signature or "").strip(),
-                    "executionRoutineId": str(execution_routine_id or "").strip(),
-                    "whyChosen": [str(value) for value in (why_chosen or []) if str(value).strip()],
+                    "term": term,
+                    "traceScope": trace_scope,
+                    "targetId": target_id,
+                    "requestSignature": request_signature,
+                    "executionRoutineId": execution_routine_id,
+                    "whyChosen": why_chosen,
                     "evidenceHits": _diagnostic_evidence_hits(evidence),
                     "evidenceSourcesChecked": _diagnostic_evidence_sources_checked(evidence),
+                    "provenanceAudit": provenance_audit,
                     "durableEvidence": True,
                     "source": "acquisition-exact-hit",
                 },
@@ -347,12 +503,15 @@ def _persist_acquisition_exact_term_evidence(
                 "reducer_priority": 99,
                 "schema_version": 7,
                 "script_name": "unity_trace_bundle.py",
-                "producer_version": str(request_signature or "").strip(),
+                "producer_version": request_signature,
                 "start_time": now,
             }
-        ],
-        rebuild_materialized=True,
-    )
+        )
+    if evidence_rows:
+        get_trace_db().upsert_custom_evidence_rows(
+            evidence_rows,
+            rebuild_materialized=True,
+        )
 
 
 def _diagnostic_evidence_hits(evidence: dict[str, Any]) -> dict[str, Any]:
@@ -2347,24 +2506,40 @@ def _execute_trace_bundle_run(
             post_run_discoveries: dict[str, Any] = {}
             post_run_execution_scope = str(dataset.get("traceRegistry", {}).get("executionTraceScope") or execution_trace_scope or "").strip()
             post_run_target_id = str(dataset.get("traceRegistry", {}).get("selectedTargetId") or trace_plan.get("selectedTargetId") or post_run_execution_scope).strip()
-            if post_run_execution_scope:
-                with profiler.span("postRunDiscoveries.subjectState"):
-                    post_run_subject_row = _pick_best_subject_state_for_trace_scope(
-                        post_run_execution_scope,
-                        post_run_target_id,
-                        _latest_materialized_subject_state_rows(),
+            subject_state_rows = _latest_materialized_subject_state_rows() if post_run_execution_scope else []
+            post_run_subject_state: dict[str, Any] = {}
+            relation_coverage: dict[str, Any] = {}
+
+            def _subject_state_for_scope(trace_scope: str, target_id: str, timing_bucket: str) -> dict[str, Any]:
+                trace_scope = str(trace_scope or "").strip()
+                if not trace_scope:
+                    return {}
+                with profiler.span(timing_bucket):
+                    subject_row = _pick_best_subject_state_for_trace_scope(
+                        trace_scope,
+                        target_id,
+                        subject_state_rows,
                     )
-                    post_run_subject_state = dict(post_run_subject_row.get("payload") or {})
+                return dict(subject_row.get("payload") or {})
+
+            if post_run_execution_scope:
+                post_run_subject_state = _subject_state_for_scope(
+                    post_run_execution_scope,
+                    post_run_target_id,
+                    "postRunDiscoveries.subjectState",
+                )
                 if post_run_subject_state:
                     post_run_discoveries["subjectState"] = post_run_subject_state
             if acquisition_plan:
                 post_run_discoveries["acquisitionPlan"] = acquisition_plan
                 selected_relation_probe = dict(acquisition_plan.get("selectedRelationProbe") or {})
-                requested_terms = [
+                requested_terms = unique_strings(
+                    [
                     str(term).strip()
                     for term in (acquisition_plan.get("requestedTerms") or [])
                     if str(term).strip()
-                ]
+                    ]
+                )
                 selected_seam_id = str(acquisition_plan.get("selectedSeamId") or "").strip()
                 subject_missing_edges = {
                     str(edge).strip()
@@ -2375,72 +2550,136 @@ def _execute_trace_bundle_run(
                     if str(edge).strip()
                 }
                 seam_still_open = bool(selected_seam_id and selected_seam_id in subject_missing_edges)
-                relation_coverage = {}
                 if selected_relation_probe:
-                    relation_scope = str(selected_relation_probe.get("traceScope") or "").strip()
-                    relation_required_seams = [
-                        str(value).strip()
-                        for value in (selected_relation_probe.get("requiredCoverageSeamIds") or [])
-                        if str(value).strip()
-                    ]
-                    relation_subject_state = {}
-                    if relation_scope:
-                        relation_subject_row = _pick_best_subject_state_for_trace_scope(
-                            relation_scope,
-                            relation_scope,
-                            _latest_materialized_subject_state_rows(),
-                        )
-                        relation_subject_state = dict(relation_subject_row.get("payload") or {})
-                    relation_open_edges = {
-                        str(edge).strip()
-                        for edge in (
-                            list(relation_subject_state.get("missingEdges") or [])
-                            + list(relation_subject_state.get("blockedEdges") or [])
-                        )
-                        if str(edge).strip()
-                    }
-                    relation_covered = bool(relation_required_seams) and all(seam_id not in relation_open_edges for seam_id in relation_required_seams)
-                    native_trace_payload = dict(dataset.get("nativeTrace") or {})
-                    relation_gap = _describe_relation_gap(
-                        trace_scope=post_run_execution_scope,
-                        request_signature=request_signature,
-                        relation_scope=relation_scope,
-                        required_seams=relation_required_seams,
-                        native_trace_payload=native_trace_payload,
-                        relation_covered=relation_covered,
-                    )
-                    relation_coverage = {
-                        "mode": "relation-shaped",
-                        "relationScope": relation_scope,
-                        "requiredSeams": relation_required_seams,
-                        "covered": relation_covered,
-                        "cacheHitDisposition": relation_gap.get("cacheHitDisposition") or "unknown",
-                        "blockerCategory": relation_gap.get("blockerCategory") or None,
-                        "missingArtifacts": list(relation_gap.get("missingArtifacts") or []),
-                        "evidenceTerms": list(relation_gap.get("evidenceTerms") or []),
-                        "detail": relation_gap.get("detail") or None,
-                    }
-                    post_run_discoveries["relationCoverage"] = relation_coverage
-                for requested_term in requested_terms:
-                    term_evidence = get_trace_db().find_contract_term_evidence("cifi-full", "libil2cpp.so", requested_term)
-                    evidence_found = bool(term_evidence.get("found"))
-                    if evidence_found:
-                        _persist_acquisition_exact_term_evidence(
-                            project_name="cifi-full",
-                            project_file="libil2cpp.so",
+                    with profiler.span("postRunDiscoveries.relationCoverage"):
+                        relation_scope = str(selected_relation_probe.get("traceScope") or "").strip()
+                        relation_required_seams = [
+                            str(value).strip()
+                            for value in (selected_relation_probe.get("requiredCoverageSeamIds") or [])
+                            if str(value).strip()
+                        ]
+                        relation_subject_state = {}
+                        if relation_scope:
+                            relation_subject_state = _subject_state_for_scope(
+                                relation_scope,
+                                relation_scope,
+                                "postRunDiscoveries.relationSubjectState",
+                            )
+                        relation_open_edges = {
+                            str(edge).strip()
+                            for edge in (
+                                list(relation_subject_state.get("missingEdges") or [])
+                                + list(relation_subject_state.get("blockedEdges") or [])
+                            )
+                            if str(edge).strip()
+                        }
+                        relation_covered = bool(relation_required_seams) and all(seam_id not in relation_open_edges for seam_id in relation_required_seams)
+                        native_trace_payload = dict(dataset.get("nativeTrace") or {})
+                        relation_gap = _describe_relation_gap(
                             trace_scope=post_run_execution_scope,
                             request_signature=request_signature,
-                            target_id=post_run_target_id,
-                            execution_routine_id=str(acquisition_plan.get("selectedRoutine") or knowledge_plan.get("executionRoutineId") or ""),
-                            term=requested_term,
-                            why_chosen=list(acquisition_plan.get("anchorSelectionReasons") or []),
-                            evidence=term_evidence,
+                            relation_scope=relation_scope,
+                            required_seams=relation_required_seams,
+                            native_trace_payload=native_trace_payload,
+                            relation_covered=relation_covered,
                         )
-                    _persist_acquisition_term_diagnostic(
-                        request_signature,
-                        post_run_execution_scope,
-                        requested_term,
-                        {
+                        relation_coverage = {
+                            "mode": "relation-shaped",
+                            "relationScope": relation_scope,
+                            "requiredSeams": relation_required_seams,
+                            "covered": relation_covered,
+                            "cacheHitDisposition": relation_gap.get("cacheHitDisposition") or "unknown",
+                            "blockerCategory": relation_gap.get("blockerCategory") or None,
+                            "missingArtifacts": list(relation_gap.get("missingArtifacts") or []),
+                            "evidenceTerms": list(relation_gap.get("evidenceTerms") or []),
+                            "detail": relation_gap.get("detail") or None,
+                        }
+                    post_run_discoveries["relationCoverage"] = relation_coverage
+                exact_execution_routine_id = str(acquisition_plan.get("selectedRoutine") or knowledge_plan.get("executionRoutineId") or "")
+                exact_why_chosen = list(acquisition_plan.get("anchorSelectionReasons") or [])
+                term_evidence_by_term: dict[str, dict[str, Any]] = {}
+                reusable_exact_evidence_terms: set[str] = set()
+                provenance_snapshot_by_term: dict[str, dict[str, Any]] = {}
+                provenance_audit_by_term: dict[str, dict[str, Any]] = {}
+                if requested_terms:
+                    with profiler.span("postRunDiscoveries.termEvidenceAudit"):
+                        for requested_term in requested_terms:
+                            provenance_snapshot = _cached_exact_term_evidence_provenance_snapshot(requested_term)
+                            provenance_snapshot_by_term[requested_term] = provenance_snapshot
+                            reused = _reuse_post_run_exact_term_evidence_if_unchanged(
+                                term=requested_term,
+                                trace_scope=post_run_execution_scope,
+                                request_signature=request_signature,
+                                target_id=post_run_target_id,
+                                execution_routine_id=exact_execution_routine_id,
+                                why_chosen=exact_why_chosen,
+                                provenance_snapshot=provenance_snapshot,
+                            )
+                            if reused:
+                                reusable_exact_evidence_terms.add(requested_term)
+                                term_evidence_by_term[requested_term] = dict(reused.get("evidence") or {})
+                                provenance_audit_by_term[requested_term] = dict(reused.get("provenanceAudit") or {})
+                    uncached_requested_terms = [
+                        requested_term
+                        for requested_term in requested_terms
+                        if requested_term not in reusable_exact_evidence_terms
+                    ]
+                    if uncached_requested_terms:
+                        with profiler.span("postRunDiscoveries.termEvidenceLookups"):
+                            for requested_term in uncached_requested_terms:
+                                term_evidence_by_term[requested_term] = _cached_contract_term_evidence(requested_term)
+                                source_job_id = _pick_acquisition_evidence_source_job_id(
+                                    "cifi-full",
+                                    "libil2cpp.so",
+                                    request_signature,
+                                    [
+                                        requested_term,
+                                        post_run_execution_scope,
+                                        post_run_target_id,
+                                        exact_execution_routine_id,
+                                        *exact_why_chosen,
+                                    ],
+                                )
+                                if source_job_id:
+                                    provenance_audit_by_term[requested_term] = _build_exact_term_evidence_provenance_audit(
+                                        term=requested_term,
+                                        trace_scope=post_run_execution_scope,
+                                        request_signature=request_signature,
+                                        target_id=post_run_target_id,
+                                        execution_routine_id=exact_execution_routine_id,
+                                        why_chosen=exact_why_chosen,
+                                        source_job_id=source_job_id,
+                                        provenance_snapshot=provenance_snapshot_by_term.get(requested_term),
+                                    )
+                post_run_discoveries["exactEvidenceAudit"] = {
+                    "requestedTerms": list(requested_terms),
+                    "reusedTerms": [term for term in requested_terms if term in reusable_exact_evidence_terms],
+                    "fallbackTerms": [term for term in requested_terms if term not in reusable_exact_evidence_terms],
+                }
+                exact_evidence_entries: list[dict[str, Any]] = []
+                diagnostic_entries: list[tuple[str, dict[str, Any]]] = []
+                for requested_term in requested_terms:
+                    term_evidence = dict(term_evidence_by_term.get(requested_term) or {})
+                    evidence_found = bool(term_evidence.get("found"))
+                    if evidence_found and requested_term not in reusable_exact_evidence_terms:
+                        exact_evidence_entries.append(
+                            {
+                                "project_name": "cifi-full",
+                                "project_file": "libil2cpp.so",
+                                "trace_scope": post_run_execution_scope,
+                                "request_signature": request_signature,
+                                "target_id": post_run_target_id,
+                                "execution_routine_id": exact_execution_routine_id,
+                                "term": requested_term,
+                                "why_chosen": exact_why_chosen,
+                                "evidence": term_evidence,
+                                "provenance_audit": dict(provenance_audit_by_term.get(requested_term) or {}),
+                            }
+                        )
+                    diagnostic_entries.append(
+                        (
+                            requested_term,
+                            {
                             "status": (
                                 "relation-coverage-missing"
                                 if relation_coverage and evidence_found and not bool(relation_coverage.get("covered"))
@@ -2461,11 +2700,11 @@ def _execute_trace_bundle_run(
                             ),
                             "selectedTraceScope": post_run_execution_scope,
                             "selectedTargetId": post_run_target_id,
-                            "executionRoutineId": str(acquisition_plan.get("selectedRoutine") or knowledge_plan.get("executionRoutineId") or ""),
+                            "executionRoutineId": exact_execution_routine_id,
                             "seamId": selected_seam_id,
                             "subjectId": str((post_run_subject_state or {}).get("subjectId") or planner_resolution.get("selectedSubjectKey") or ""),
                             "expectedCoverage": [requested_term],
-                            "whyChosen": list(acquisition_plan.get("anchorSelectionReasons") or []),
+                            "whyChosen": exact_why_chosen,
                             "evidenceHits": _diagnostic_evidence_hits(term_evidence),
                             "evidenceSourcesChecked": _diagnostic_evidence_sources_checked(term_evidence),
                             "relationCoverage": relation_coverage or None,
@@ -2484,8 +2723,21 @@ def _execute_trace_bundle_run(
                                 if not evidence_found
                                 else None
                             ),
-                        },
+                            },
+                        )
                     )
+                if exact_evidence_entries:
+                    with profiler.span("postRunDiscoveries.persistExactEvidence"):
+                        _persist_acquisition_exact_term_evidence_batch(exact_evidence_entries)
+                if diagnostic_entries:
+                    with profiler.span("postRunDiscoveries.persistDiagnostics"):
+                        for requested_term, diagnostic_payload in diagnostic_entries:
+                            _persist_acquisition_term_diagnostic(
+                                request_signature,
+                                post_run_execution_scope,
+                                requested_term,
+                                diagnostic_payload,
+                            )
             if post_run_discoveries:
                 dataset["postRunDiscoveries"] = post_run_discoveries
 
