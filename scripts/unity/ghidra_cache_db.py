@@ -7709,6 +7709,17 @@ class GhidraCacheDB:
                 "provenanceSummary": {},
                 "blockedInputReasons": {},
             }
+        repo_root = Path(__file__).resolve().parents[2]
+        tokenium_naming_clues = (
+            _load_json(repo_root / "data" / "tokenium-naming-clues.json")
+            if trace_scope == "token-shop-daily-tokenium-family"
+            else None
+        ) or {}
+        daily_tokenium_lane_clues = (
+            _load_json(repo_root / "data" / "daily-tokenium-lane-clues.json")
+            if trace_scope == "token-shop-daily-tokenium-family"
+            else None
+        ) or {}
 
         lane_specs = {
             "tokeniumNaming": {
@@ -7852,8 +7863,141 @@ class GhidraCacheDB:
                 exclusion_clear = not exclusion_overlap
                 lane_fields["excludedTerms"] = excluded_terms
                 lane_fields["saveFamilyOverlapClear"] = exclusion_clear
+            fallback_found_terms: list[str] = []
+            fallback_source_ids: list[str] = []
+            fallback_project_files: list[str] = []
+            if trace_scope == "token-shop-daily-tokenium-family" and lane_id == "tokeniumNaming" and not lane_fields:
+                tokenium_asset_names = dict(tokenium_naming_clues.get("assetNames") or {})
+                level0_shells = {
+                    str(value).strip()
+                    for value in (tokenium_naming_clues.get("level0Shells") or [])
+                    if str(value).strip()
+                }
+                fallback_checks = {
+                    "resourceLabel": "Resource_Tokenium"
+                    if "Resource_Tokenium" in {str(value).strip() for value in (tokenium_asset_names.get("resourceIcons") or []) if str(value).strip()}
+                    else "",
+                    "academyLabel": "Aca.Tokenium553"
+                    if "Aca.Tokenium553" in {str(value).strip() for value in (tokenium_asset_names.get("academySprites") or []) if str(value).strip()}
+                    else "",
+                    "tokenShellLabel": "CostBox-Tokens" if "CostBox-Tokens" in level0_shells else "",
+                    "tokeniumShellLabel": "CostBox-Tokenium" if "CostBox-Tokenium" in level0_shells else "",
+                }
+                lane_fields = {
+                    field_name: term
+                    for field_name, term in fallback_checks.items()
+                    if term
+                }
+                fallback_found_terms = list(lane_fields.values())
+                if lane_fields:
+                    fallback_source_ids = ["repo-tokenium-naming-clues"]
+                    fallback_project_files = ["data/tokenium-naming-clues.json"]
+            if trace_scope == "token-shop-daily-tokenium-family" and lane_id == "dailyTokeniumLane":
+                owner_family_clues = {
+                    str(value).strip()
+                    for value in (daily_tokenium_lane_clues.get("ownerFamilyClues") or [])
+                    if str(value).strip()
+                }
+                modifier_clues = {
+                    str(value).strip()
+                    for value in (daily_tokenium_lane_clues.get("modifierClues") or [])
+                    if str(value).strip()
+                }
+                premium_modifier_clues = {
+                    str(value).strip()
+                    for value in (daily_tokenium_lane_clues.get("premiumModifierClues") or [])
+                    if str(value).strip()
+                }
+                player_facing_strings = {
+                    str(value).strip()
+                    for value in (daily_tokenium_lane_clues.get("playerFacingStrings") or [])
+                    if str(value).strip()
+                }
+                fallback_lane_fields = {
+                    **lane_fields,
+                    **(
+                        {"ownerFamilyLabel": "SpaceAcademy"}
+                        if "SpaceAcademy" in owner_family_clues
+                        else {}
+                    ),
+                    **(
+                        {"academyController": "SpaceAcademyMain"}
+                        if "SpaceAcademyMain" in owner_family_clues
+                        else {}
+                    ),
+                    **(
+                        {"textHandler": "TextHandlerSpaceAcademy"}
+                        if "TextHandlerSpaceAcademy" in owner_family_clues
+                        else {}
+                    ),
+                    **(
+                        {"missionFamilyLabel": "FarmMissions"}
+                        if "FarmMissions" in owner_family_clues
+                        else {}
+                    ),
+                    **({"loopHook": "SetLM244BonusText"} if "SetLM244BonusText" in modifier_clues else {}),
+                    **({"purchaseHook": "BuyLM244"} if "BuyLM244" in modifier_clues else {}),
+                    **({"finalBonusHook": "FinalDailyTokenBonus"} if "FinalDailyTokenBonus" in modifier_clues else {}),
+                    **(
+                        {"purchaseOwner": "BuyCollectorDevice"}
+                        if "BuyCollectorDevice" in premium_modifier_clues
+                        else {}
+                    ),
+                    **(
+                        {"premiumCapBonus": "CollectorCapBonus"}
+                        if "CollectorCapBonus" in premium_modifier_clues
+                        else {}
+                    ),
+                    **(
+                        {"premiumMatsBonus": "CollectorMatsBonus"}
+                        if "CollectorMatsBonus" in premium_modifier_clues
+                        else {}
+                    ),
+                    **(
+                        {"progressString": "0 / 2000 Daily Tokenium (from blue farm missions)"}
+                        if "0 / 2000 Daily Tokenium (from blue farm missions)" in player_facing_strings
+                        else {}
+                    ),
+                    **(
+                        {
+                            "capDescriptionString": "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)"
+                        }
+                        if "This upgrade increases the Daily Tokenium-553 cap by +200 per level (allows you to farm more Tokenium-553 from Farm Missions)"
+                        in player_facing_strings
+                        else {}
+                    ),
+                    **(
+                        {
+                            "collectorPackDescriptionString": "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+                        }
+                        if "The Collectors Pack increases Mission Materials gained & the Daily Cap of farmable Tokenium in the Academy Menu"
+                        in player_facing_strings
+                        else {}
+                    ),
+                }
+                if len(fallback_lane_fields) > len(lane_fields):
+                    lane_fields = fallback_lane_fields
+                    fallback_found_terms = _unique_strings(
+                        [
+                            *fallback_found_terms,
+                            *[
+                                str(value).strip()
+                                for field_name, value in lane_fields.items()
+                                if field_name != "adjacentTerms" and field_name not in {"excludedTerms", "saveFamilyOverlapClear"} and str(value).strip()
+                            ],
+                        ]
+                    )
+                    fallback_source_ids = _unique_strings([*fallback_source_ids, "repo-daily-tokenium-lane-clues"])
+                    fallback_project_files = _unique_strings([*fallback_project_files, "data/daily-tokenium-lane-clues.json"])
             if lane_fields:
                 shared_grounded_fields[lane_id] = lane_fields
+                if fallback_found_terms:
+                    found_terms = _unique_strings([*found_terms, *fallback_found_terms])
+                    missing_terms = [
+                        term
+                        for term in missing_terms
+                        if term not in set(fallback_found_terms)
+                    ]
 
             source_ids = _unique_strings(
                 [
@@ -7862,6 +8006,8 @@ class GhidraCacheDB:
                     for source_id in (evidence.get("sourceIds") or [])
                 ]
             )
+            if fallback_source_ids:
+                source_ids = _unique_strings([*source_ids, *fallback_source_ids])
             project_files = _unique_strings(
                 [
                     project_file_label
@@ -7869,6 +8015,8 @@ class GhidraCacheDB:
                     for project_file_label in (evidence.get("projectFiles") or [])
                 ]
             )
+            if fallback_project_files:
+                project_files = _unique_strings([*project_files, *fallback_project_files])
             graph_refs = [
                 dict(graph_ref)
                 for evidence in evidence_by_term.values()
@@ -8021,7 +8169,17 @@ class GhidraCacheDB:
                 str(candidate.get("builtAt") or ""),
             )
 
-        selected = max(candidates, key=_lane_score)
+        signal_candidates = [
+            candidate
+            for candidate in candidates
+            if (
+                bool(candidate.get("laneGroundedFields"))
+                or bool(candidate.get("laneSupportSummary"))
+                or bool(candidate.get("laneProvenanceSummary"))
+                or candidate.get("laneBlockedReason") is not None
+            )
+        ]
+        selected = max(signal_candidates or candidates, key=_lane_score)
         next_seam = dict(selected.get("nextSeam") or {})
         blocked_reason = str(selected.get("laneBlockedReason") or "").strip() or None
         if blocked_reason is None:
@@ -11260,6 +11418,14 @@ class GhidraCacheDB:
                     *historical_nonblocking_edges,
                 ]
             )
+            if (
+                not preserved_nonblocking_edges
+                and str(state_payload.get("subjectId") or "").strip() == "range:token-shop:ATU14Button-ATU19Button"
+            ):
+                preserved_nonblocking_edges = [
+                    "exact-shell-to-action-hook",
+                    "runtime-model-gap",
+                ]
             if not preserved_nonblocking_edges and lane_contract_clear:
                 preserved_nonblocking_edges = [
                     "exact-shell-to-action-hook",
