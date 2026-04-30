@@ -253,6 +253,10 @@ def _diagnostic_evidence_sources_checked(evidence: dict[str, Any]) -> list[str]:
     ]
 
 
+def _json_dumps(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
 def _provenance_fingerprint(value: Any) -> str:
     return hashlib.sha1(_json_dumps(value).encode("utf-8")).hexdigest()[:16]
 
