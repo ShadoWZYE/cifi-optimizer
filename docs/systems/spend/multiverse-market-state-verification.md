@@ -231,7 +231,7 @@ Current grounded conclusion:
   - the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation remains a checked negative boundary for repo-local effect or label text recovery
   - save numbering, serialized-id numbering, prefab numbering, row identity, and player-facing text provenance must remain separated
   - the actual missing repo-local source class is the game-side player-facing effect or label text path under the `TextHandlerMarkets` / bonus-text / localization layer
-  - the canonical import-safe subset therefore stays empty
+  - this remains a bounded child-scope text/label gap, not a root canonical import blocker
 
 ## Checked `69-74` anomaly provenance boundary
 
@@ -291,7 +291,7 @@ Current grounded conclusion:
 - displayed bonus magnitude follows the validated row payload keyed by `inscription_id`, not the remapped shell ids
 - the `57-62` relation is only shell-local anomaly metadata, not the recovered structure that links displayed inscription row identity through to `SaveData`
 - the repo still does not recover the player-facing bonus-text phrases for rows `69-74` from shell or payload data alone
-- compatibility-only import stays under `compatibility.unmappedSystemState.multiverseMarket`, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked
+- compatibility-only import still stays under `compatibility.unmappedSystemState.multiverseMarket`, `InscryptionsDone` stays wrapper-only, and the remaining gap is the child text/effect explanation lane rather than the root planner gate
 
 ## Checked control-row text-provenance path boundary
 
@@ -359,7 +359,7 @@ Current grounded conclusion:
 - `CurrentBonusText` remains narrowed away from that recovered effect-label family because the checked `TextHandlerMarkets` runtime surface has no `CurrentBonusText`-named field or `SetCurrentBonusText` writer family, and the widened runtime search now exhausts `NavigationManager.UpdateInscryptionUI`, `NavigationManager+<UpdateInscryptionUI>d__185.MoveNext`, `NavigationManager+<InscEnum>d__186.MoveNext`, `NavigationManager.DisableInscryptionObjects`, `NavigationManager.OnAvailbleInscryptionsClick`, `NavigationManager.OnFinishedInscryptionsClick`, `TextHandlerShopNPCs.OpeningChrystosEmporium`, `TextHandlerShopNPCs.EmporiumDefaultText`, and `TextHandlerShopNPCs+<DisplayTextEmporium>d__22.MoveNext` without recovering a row-local CurrentBonusText producer there either
 - the control-row effect payload source is now narrowed to `MultiverseMarket.get_FinalIS78Bonus()` / `get_FinalIS83Bonus()` plus `GeneralFunctionsManager.BigDoubleToText` / `System.Int32.ToString`, the runtime metadata-init helper, the null-reference throw helper, and `System.String.Concat`
 - the exact remaining blocker is the unrecovered separate `CurrentBonusText` writer lane
-- the canonical import-safe subset stays empty
+- the root import gate is already clear; this alternate serialized-export lane still does not narrow the remaining player-facing text/label source
 
 ## Alternate serialized-export indirect-join boundary
 
@@ -389,7 +389,7 @@ Current grounded conclusion:
 - it strengthens structural container recovery only, not player-facing label recovery
 - no indirect catalog/relation join is recoverable repo-locally between the settled ordered rows or serialized ids and any separate identity-bearing catalog
 - it does not help rows `69-74` join back to the settled ordered mapping as final player-facing identities
-- the canonical import-safe subset stays empty
+- the root import gate is already clear; this remap-band note stays descriptive only
 
 ## Checked row `71-74` remap-band boundary
 
@@ -407,7 +407,7 @@ Current grounded conclusion:
 
 - this remap-band explanation clarifies why the nearby same-number prefab-binding pattern breaks inside rows `71-74`
 - live UI evidence still grounds player-facing identity for rows `71-74` directly as rows `71-74`
-- the canonical import-safe subset stays empty
+- the root import gate is already clear; this numbering-stability note only preserves the remaining player-facing text/effect gap
 
 ## Checked wider inscription numbering-stability boundary
 
@@ -437,7 +437,7 @@ Current grounded conclusion:
 - same-number prefab numbering is broken from rows `69-74`
 - same-number prefab numbering resumes at row `75` and stays direct through row `110`
 - this wider numbering boundary still does not provide a repo-local player-facing effect or label text source for rows `69-74`, even though the same-number chain already grounds those rows structurally
-- the canonical import-safe subset stays empty
+- the root import gate is already clear; these nearby controls still do not close the narrower player-facing text/effect lane
 
 ## Nearby checked inscription text-adjacent controls
 
@@ -457,7 +457,7 @@ Current grounded conclusion:
 
 - nearby rows `78` and `83` now only show partial text-adjacent controls when the same-number chain is preserved
 - this recovered pattern does not complete live effect-text binding for rows `78` or `83`, and it does not recover rows `69-74` either
-- the canonical import-safe subset stays empty
+- the root import gate is already clear; this nearby-control pattern still does not close the narrower player-facing text/effect lane
 
 ## Bounded SaveData import classification
 
@@ -470,7 +470,7 @@ Current grounded conclusion:
     - `PlayerProfileData` already exposes `InscryptionsDone` as a flat wrapper/export field, so importing it from the wider `SaveData` block would widen the owner surface without adding a new bounded canonical Emporium import
 - `verified_but_blocked`
   - `IS71Level` through `IS74Level`
-    - these now have a checked ordered row-position mapping to validated rows `71-74`, but final row labels and planner-safe canonical import mapping are still blocked in this slice
+    - these now have a checked ordered row-position mapping to validated rows `71-74`, but final player-facing text/label recovery remains downstream in this slice
   - `EsotericR1Trades` through `EsotericR9Trades`
   - `NecrumR1Trades` through `NecrumR9Trades`
     - these exact typed trade-counter ranges are verified on `SaveData`, but they stay outside the admitted Emporium import slice because this lane only admits the raw `IS*Level` span
@@ -504,5 +504,3 @@ Current grounded conclusion:
 - It is now safe to treat validated Emporium rows `71-74` as the first row block that has both checked row recovery and checked ordered `IS*Level` overlap, while keeping final label remap and canonical import promotion downstream.
 - The active import-surface result is now a split: `IS1Level` through `IS110Level` is compatibility-safe raw import truth, while no canonical Emporium subset is admissible yet and rows `71-74` remain ordered overlap only.
 - The next spend-track slice should keep row remap separate and only revisit admissibility if stronger identity evidence appears.
-
-

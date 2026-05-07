@@ -6,20 +6,19 @@ import {
   resolveTokenShopProgressionLevelSource
 } from "../token-shop-progression-model.js";
 
-test("resolveTokenShopProgressionLevelSource prefers local, then player state, then compatibility", () => {
+test("resolveTokenShopProgressionLevelSource prefers checked player state, then compatibility", () => {
   assert.deepEqual(
     resolveTokenShopProgressionLevelSource(
       "ATU1Level",
       {
-        checkedSubsetLevels: { ATU1Level: 4 },
         checkedSubsetPlayerState: { ATU1Level: 3 }
       },
       { ATU1Level: 2 }
     ),
     {
-      value: 4,
-      sourceLabel: "Local progression override",
-      path: "planning.tokenShop.checkedSubsetLevels.ATU1Level"
+      value: 3,
+      sourceLabel: "Checked player state",
+      path: "planning.tokenShop.checkedSubsetPlayerState.ATU1Level"
     }
   );
 
@@ -48,8 +47,7 @@ test("resolveTokenShopProgressionLevelSource prefers local, then player state, t
 test("buildTokenShopProgressionModel shapes rows, affordability, and summary counts", () => {
   const summary = buildTokenShopProgressionModel({
     progressionState: {
-      checkedSubsetLevels: { ATU1Level: 2 },
-      checkedSubsetPlayerState: { ATU2Level: 3 }
+      checkedSubsetPlayerState: { ATU1Level: 2, ATU2Level: 3 }
     },
     compatibilityLevels: { ATU3Level: 1 },
     boundary: { marker: true },
@@ -124,8 +122,7 @@ test("buildTokenShopProgressionModel shapes rows, affordability, and summary cou
 
   assert.equal(summary.currentTokens, 25);
   assert.equal(summary.rows.length, 4);
-  assert.equal(summary.localCount, 1);
-  assert.equal(summary.playerStateCount, 1);
+  assert.equal(summary.playerStateCount, 2);
   assert.equal(summary.compatibilityCount, 1);
   assert.equal(summary.defaultCount, 1);
   assert.equal(summary.affordableCount, 1);
@@ -140,8 +137,8 @@ test("buildTokenShopProgressionModel shapes rows, affordability, and summary cou
     maxLevelField: "MaxA",
     rowType: "prefab-driven",
     currentLevel: 2,
-    currentLevelPath: "planning.tokenShop.checkedSubsetLevels.ATU1Level",
-    currentLevelSourceLabel: "Local progression override",
+    currentLevelPath: "planning.tokenShop.checkedSubsetPlayerState.ATU1Level",
+    currentLevelSourceLabel: "Checked player state",
     startCost: 10,
     additiveCost: 5,
     bonusValue: 1.5,

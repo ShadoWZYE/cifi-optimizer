@@ -9332,7 +9332,7 @@ function validateTokenShopLateAtuBoundary(boundary) {
   );
   assert.match(
     boundary.groundedConclusion,
-    /ATU24-ATU28 late shell neighborhood now has a tighter bounded negative result/i,
+    /ATU24-ATU28 late shell neighborhood now has a (tighter bounded negative result|stronger family-level bounded negative result)/i,
     "token shop late ATU boundary grounded conclusion drifted"
   );
   assert.ok(

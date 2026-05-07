@@ -377,6 +377,48 @@ h3 {
   cursor: not-allowed;
 }
 
+.token-shop-storefront-tabs {
+  margin-top: 2px;
+  margin-bottom: 2px;
+  justify-content: center;
+  padding: 8px 12px 4px;
+  border: 2px solid rgba(188, 145, 45, 0.72);
+  background: linear-gradient(180deg, rgba(106, 84, 31, 0.72), rgba(67, 48, 12, 0.72));
+}
+
+.token-shop-storefront-tabs .tier-tab {
+  display: grid;
+  justify-items: center;
+  min-width: 86px;
+  border-radius: 0;
+  padding: 6px 10px 5px;
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.02em;
+  background: rgba(49, 44, 35, 0.9);
+  border-color: rgba(198, 160, 78, 0.62);
+  color: rgba(244, 234, 211, 0.92);
+}
+
+.token-shop-storefront-tabs .tier-tab.active {
+  background: linear-gradient(180deg, rgba(115, 233, 157, 0.2), rgba(64, 132, 74, 0.22));
+  border-color: rgba(164, 255, 172, 0.72);
+  color: #d3ffd8;
+}
+
+.token-shop-tier-index {
+  font-size: 2.6rem;
+  line-height: 0.86;
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(20, 14, 4, 0.7);
+}
+
+.token-shop-tier-count {
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.86;
+}
+
 .field-group.locked {
   opacity: 0.5;
 }
@@ -688,6 +730,41 @@ textarea {
   border-top: 1px solid rgba(118, 154, 202, 0.12);
 }
 
+.trace-gap-summary-card {
+  gap: 14px;
+}
+
+.trace-gap-log {
+  display: grid;
+  gap: 8px;
+  max-height: 420px;
+  overflow: auto;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(118, 154, 202, 0.16);
+  background: rgba(7, 13, 24, 0.86);
+}
+
+.trace-gap-log-line {
+  display: grid;
+  gap: 4px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #d9e7fb;
+}
+
+.trace-gap-log-line.is-stderr {
+  color: #ffd07a;
+}
+
+.trace-gap-log-meta {
+  color: #7f99bd;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+}
+
 .ship-page-grid {
   grid-template-columns: 1fr;
   align-items: start;
@@ -747,12 +824,30 @@ textarea {
 
 .token-shop-affordability-card {
   gap: 12px;
-  padding: 14px;
+  padding: 0;
   background:
     linear-gradient(180deg, rgba(55, 33, 9, 0.96), rgba(40, 24, 8, 0.96)),
     linear-gradient(90deg, rgba(210, 159, 45, 0.08), transparent 55%);
   border-color: rgba(208, 157, 41, 0.28);
   color: #f5ead3;
+  overflow: hidden;
+}
+
+.token-shop-affordability-card.recommended {
+  border-color: rgba(255, 222, 114, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 242, 196, 0.18),
+    0 0 0 2px rgba(218, 181, 76, 0.12);
+  background:
+    linear-gradient(180deg, rgba(70, 42, 10, 0.98), rgba(45, 28, 8, 0.98)),
+    radial-gradient(circle at top left, rgba(255, 217, 118, 0.14), transparent 42%);
+}
+
+.token-shop-affordability-card.late-shelf {
+  background:
+    linear-gradient(180deg, rgba(34, 24, 40, 0.97), rgba(23, 17, 31, 0.97)),
+    linear-gradient(90deg, rgba(135, 92, 214, 0.08), transparent 55%);
+  border-color: rgba(161, 121, 224, 0.28);
 }
 
 .token-shop-affordability-head {
@@ -768,27 +863,92 @@ textarea {
   gap: 12px;
 }
 
-.token-shop-game-row {
+.token-shop-shelf-grid {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) 136px;
-  gap: 12px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.token-shop-shell-card {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 108px;
+  grid-template-areas:
+    "overlay overlay overlay"
+    "progress title buy"
+    "progress content buy"
+    "details details details";
   align-items: stretch;
+  min-height: 100%;
+  border: 2px solid rgba(195, 146, 32, 0.72);
+  border-radius: 0;
+  background:
+    linear-gradient(180deg, rgba(46, 31, 8, 0.96), rgba(29, 20, 5, 0.97)),
+    linear-gradient(90deg, rgba(255, 222, 116, 0.06), transparent 68%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 219, 130, 0.12),
+    0 6px 22px rgba(0, 0, 0, 0.28);
+}
+
+.token-shop-title-box {
+  grid-area: title;
+  display: grid;
+  gap: 3px;
+  align-content: start;
+  padding: 4px 8px 2px 2px;
+  background: linear-gradient(180deg, rgba(87, 60, 18, 0.34), rgba(61, 39, 13, 0));
+}
+
+.token-shop-title-box strong {
+  font-size: 0.84rem;
+  line-height: 1.06;
+  color: #f6efe0;
+}
+
+.token-shop-title-box-eyebrow {
+  display: none;
+}
+
+.token-shop-shell-content {
+  grid-area: content;
+  display: grid;
+  gap: 6px;
+  padding: 2px 8px 6px 2px;
+  border-right: 1px solid rgba(246, 210, 125, 0.16);
+}
+
+.token-shop-progress-cluster {
+  grid-area: progress;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  align-content: start;
+  padding: 7px 0 4px 4px;
 }
 
 .token-shop-level-ring {
   display: grid;
-  align-content: start;
+  align-content: center;
   justify-items: center;
-  gap: 4px;
-  padding: 10px 8px;
-  border-radius: 26px;
-  border: 3px solid rgba(241, 186, 65, 0.9);
+  gap: 1px;
+  width: 82px;
+  min-height: 82px;
+  padding: 6px 5px;
+  border-radius: 999px;
+  border: 4px solid rgba(241, 186, 65, 0.95);
   background:
-    radial-gradient(circle at 35% 30%, rgba(87, 101, 132, 0.78), rgba(21, 27, 42, 0.98) 70%),
-    linear-gradient(180deg, rgba(255, 214, 97, 0.2), rgba(82, 55, 11, 0.18));
+    radial-gradient(circle at 35% 30%, rgba(78, 89, 116, 0.82), rgba(17, 22, 34, 0.99) 72%),
+    linear-gradient(180deg, rgba(255, 214, 97, 0.24), rgba(82, 55, 11, 0.12));
   box-shadow:
-    inset 0 0 0 2px rgba(255, 238, 173, 0.16),
-    0 0 0 3px rgba(105, 66, 9, 0.32);
+    inset 0 0 0 2px rgba(255, 238, 173, 0.12),
+    0 0 0 2px rgba(105, 66, 9, 0.46);
+  transform: translateX(-8px);
+}
+
+.token-shop-level-caption {
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 240, 205, 0.74);
 }
 
 .token-shop-level-value,
@@ -800,7 +960,7 @@ textarea {
 
 .token-shop-level-value,
 .token-shop-level-cap {
-  font-size: 1.2rem;
+  font-size: 0.98rem;
   line-height: 1;
   font-weight: 700;
 }
@@ -808,6 +968,35 @@ textarea {
 .token-shop-level-divider {
   font-size: 0.92rem;
   opacity: 0.8;
+}
+
+.token-shop-fill-track {
+  position: relative;
+  width: 100%;
+  max-width: 90px;
+  height: 10px;
+  padding: 2px;
+  border-radius: 3px;
+  background: rgba(18, 25, 39, 0.92);
+  border: 1px solid rgba(255, 225, 147, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 240, 200, 0.06);
+}
+
+.token-shop-fill-track-rail {
+  position: absolute;
+  inset: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(28, 37, 58, 0.96), rgba(14, 20, 34, 0.96));
+}
+
+.token-shop-fill-track-core {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(126, 241, 255, 0.98), rgba(36, 169, 214, 0.98));
+  box-shadow: 0 0 10px rgba(77, 206, 235, 0.28);
 }
 
 .token-shop-level-editor {
@@ -837,6 +1026,12 @@ textarea {
   min-width: 0;
 }
 
+.token-shop-support-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .token-shop-row-tags {
   display: flex;
   flex-wrap: wrap;
@@ -862,9 +1057,25 @@ textarea {
   color: rgba(232, 247, 255, 0.9);
 }
 
+.token-shop-recommendation-line {
+  margin: 1px 0 0;
+  color: #ffdf85;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .token-shop-effect-line {
-  font-size: 0.98rem;
-  color: rgba(245, 234, 211, 0.9);
+  font-size: 0.96rem;
+  line-height: 1.12;
+  color: rgba(245, 234, 211, 0.94);
+  margin: 0;
+}
+
+.token-shop-support-preview {
+  margin: 0;
+  font-size: 0.65rem;
 }
 
 .token-shop-top-band {
@@ -884,34 +1095,257 @@ textarea {
 }
 
 .token-shop-buy-panel {
+  grid-area: buy;
   display: grid;
-  grid-template-rows: auto auto auto auto 1fr auto;
-  align-items: start;
-  justify-items: stretch;
-  gap: 8px;
-  padding: 12px 10px;
-  border-radius: 14px;
-  border: 1px solid rgba(62, 181, 207, 0.42);
-  background: linear-gradient(180deg, rgba(30, 126, 152, 0.98), rgba(18, 77, 102, 0.98));
+  grid-template-rows: auto auto 1fr auto;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 8px;
+  border-left: 1px solid rgba(246, 210, 125, 0.16);
+  background:
+    linear-gradient(180deg, rgba(40, 158, 186, 0.98), rgba(20, 100, 126, 0.98)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent 70%);
   text-align: center;
-  height: 100%;
+}
+
+.token-shop-buy-panel.actionable {
+  cursor: pointer;
+}
+
+.token-shop-buy-panel.recommended {
+  border-color: rgba(255, 224, 135, 0.72);
+  background:
+    linear-gradient(180deg, rgba(53, 174, 204, 1), rgba(26, 100, 129, 1)),
+    radial-gradient(circle at top center, rgba(255, 231, 168, 0.12), transparent 40%);
+  box-shadow: 0 0 0 2px rgba(255, 238, 181, 0.14);
+}
+
+.token-shop-affordability-card.late-shelf .token-shop-buy-panel {
+  background: linear-gradient(180deg, rgba(95, 73, 145, 0.98), rgba(62, 46, 102, 0.98));
+  border-color: rgba(182, 155, 237, 0.38);
+}
+
+.token-shop-buy-panel:focus-visible {
+  outline: 3px solid rgba(255, 236, 176, 0.72);
+  outline-offset: 2px;
 }
 
 .token-shop-buy-label {
-  font-size: 0.84rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: #effcff;
 }
 
 .token-shop-buy-panel strong {
-  font-size: 1.15rem;
+  font-size: 1.02rem;
   line-height: 1;
 }
 
 .token-shop-buy-panel .meta {
-  font-size: 0.76rem;
+  font-size: 0.66rem;
   color: rgba(232, 249, 255, 0.88);
+  margin: 0;
+}
+
+.token-shop-buy-cta {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2px;
+  min-height: 22px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(255, 231, 168, 0.98), rgba(231, 177, 55, 0.98));
+  color: #17313d;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.token-shop-buy-hint {
+  font-size: 0.58rem;
+  color: rgba(232, 249, 255, 0.82);
+  align-self: end;
+  line-height: 1.2;
+}
+
+.token-shop-buff-strip {
+  display: grid;
+  gap: 6px;
+  align-items: stretch;
+  margin-top: 0;
+}
+
+.token-shop-buff-plate {
+  display: grid;
+  gap: 3px;
+  align-content: center;
+  min-height: 52px;
+  padding: 6px 8px 7px;
+  border: 1px solid rgba(82, 112, 154, 0.46);
+  background: linear-gradient(180deg, rgba(29, 40, 59, 0.98), rgba(20, 29, 43, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+
+.token-shop-buff-label {
+  font-size: 0.52rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(197, 218, 255, 0.8);
+  order: 2;
+}
+
+.token-shop-buff-value {
+  font-size: 0.9rem;
+  line-height: 1;
+  color: #dff3ff;
+  order: 1;
+}
+
+.token-shop-buff-plate[data-tone="token"] .token-shop-buff-value {
+  color: #ffd76a;
+}
+
+.token-shop-buff-plate[data-tone="diamond"] .token-shop-buff-value {
+  color: #86f1ff;
+}
+
+.token-shop-buff-plate[data-tone="generator"] .token-shop-buff-value {
+  color: #7deaa8;
+}
+
+.token-shop-buff-plate[data-tone="mod"] .token-shop-buff-value {
+  color: #ff9b85;
+}
+
+.token-shop-buff-plate[data-tone="shard"] .token-shop-buff-value {
+  color: #8eb8ff;
+}
+
+.token-shop-buff-plate[data-tone="rp"] .token-shop-buff-value {
+  color: #ffc06e;
+}
+
+.token-shop-buff-plate[data-tone="ap"] .token-shop-buff-value {
+  color: #bca3ff;
+}
+
+.token-shop-buff-plate[data-tone="cells"] .token-shop-buff-value {
+  color: #8fefba;
+}
+
+.token-shop-buff-plate[data-tone="uplift"] .token-shop-buff-value {
+  color: #ffe3a3;
+}
+
+.token-shop-bank-shell {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 12px 12px 14px;
+  border: 3px solid rgba(169, 123, 28, 0.8);
+  background:
+    linear-gradient(180deg, rgba(132, 88, 18, 0.62), rgba(73, 45, 8, 0.62) 18%, rgba(40, 24, 6, 0.95) 18%, rgba(34, 21, 7, 0.98)),
+    linear-gradient(90deg, rgba(255, 208, 108, 0.08), transparent 72%);
+  box-shadow: inset 0 0 0 2px rgba(255, 221, 132, 0.1);
+}
+
+.token-shop-bank-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 250px);
+  gap: 6px;
+  align-items: stretch;
+}
+
+.token-shop-bank-title,
+.token-shop-bank-hero {
+  display: grid;
+  gap: 4px;
+  padding: 7px 9px;
+  border: 2px solid rgba(196, 149, 46, 0.72);
+  background: rgba(31, 27, 24, 0.88);
+}
+
+.token-shop-bank-title {
+  align-content: center;
+}
+
+.token-shop-bank-title strong,
+.token-shop-bank-hero strong {
+  font-size: 1.24rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.token-shop-bank-meter {
+  display: grid;
+  gap: 4px;
+}
+
+.token-shop-bank-meter-track {
+  position: relative;
+  height: 28px;
+  border: 2px solid rgba(242, 197, 87, 0.72);
+  background: rgba(233, 228, 188, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 238, 181, 0.18);
+}
+
+.token-shop-bank-meter-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  min-width: 0;
+  background: linear-gradient(90deg, rgba(255, 196, 74, 0.98), rgba(255, 217, 100, 0.98));
+}
+
+.token-shop-bank-hero-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 222, 132, 0.82);
+}
+
+.token-shop-bank-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-start;
+}
+
+.token-shop-store-list {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+.token-shop-shelf-section {
+  display: grid;
+  gap: 8px;
+}
+
+.token-shop-shelf-status {
+  display: grid;
+  gap: 2px;
+  padding: 0 1px 2px;
+}
+
+.token-shop-shelf-status .meta {
+  font-size: 0.64rem;
+}
+
+.token-shop-store-details {
+  border-top: 1px solid rgba(218, 181, 91, 0.22);
+  padding-top: 8px;
+}
+
+.token-shop-store-hero,
+.token-shop-affordability-card,
+.token-shop-shelf-section {
+  width: 100%;
 }
 
 .token-shop-stat-strip {
@@ -943,9 +1377,9 @@ textarea {
 
 .token-shop-evidence-note summary {
   cursor: pointer;
-  color: rgba(255, 224, 165, 0.96);
-  font-size: 0.76rem;
-  font-weight: 700;
+  color: rgba(240, 212, 147, 0.88);
+  font-size: 0.68rem;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -963,28 +1397,106 @@ textarea {
   text-align: left;
 }
 
-.token-shop-buy-button {
-  width: 100%;
-  margin-top: auto;
-  padding: 10px 8px;
-  border: 0;
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgba(255, 231, 168, 0.98), rgba(231, 177, 55, 0.98));
-  color: #17313d;
-  font-size: 0.84rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.token-shop-buy-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.58;
-}
-
 .token-shop-affordability-card .score {
   display: none;
+}
+
+.token-shop-store-hero {
+  gap: 10px;
+  background:
+    linear-gradient(180deg, rgba(16, 44, 63, 0.98), rgba(10, 30, 43, 0.98)),
+    radial-gradient(circle at top left, rgba(255, 220, 125, 0.1), transparent 40%);
+  border-color: rgba(126, 205, 228, 0.34);
+}
+
+.token-shop-overlay-ribbon {
+  grid-area: overlay;
+  display: grid;
+  gap: 2px;
+  padding: 8px 14px;
+  background: linear-gradient(180deg, rgba(69, 34, 34, 0.94), rgba(46, 22, 22, 0.94));
+  border-bottom: 1px solid rgba(255, 170, 170, 0.16);
+}
+
+.token-shop-overlay-ribbon.maxed {
+  background: linear-gradient(180deg, rgba(53, 62, 31, 0.96), rgba(34, 43, 21, 0.96));
+  border-bottom-color: rgba(200, 234, 120, 0.18);
+}
+
+.token-shop-overlay-ribbon p {
+  margin: 0;
+  font-size: 0.74rem;
+  color: rgba(245, 234, 211, 0.82);
+}
+
+.token-shop-overlay-label {
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 236, 176, 0.92);
+}
+
+.token-shop-evidence-note {
+  grid-area: details;
+}
+
+@media (max-width: 980px) {
+  .token-shop-shell-card {
+    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-areas:
+      "overlay overlay"
+      "title title"
+      "progress content"
+      "buy buy"
+      "details details";
+  }
+
+  .token-shop-shell-content {
+    border-right: 0;
+  }
+
+  .token-shop-buy-panel {
+    border-left: 0;
+    border-top: 1px solid rgba(246, 210, 125, 0.16);
+  }
+
+  .token-shop-bank-header {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .token-shop-buff-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .token-shop-shell-card {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "overlay"
+      "title"
+      "progress"
+      "content"
+      "buy"
+      "details";
+  }
+
+  .token-shop-progress-cluster {
+    padding: 12px 14px 0;
+  }
+
+  .token-shop-shell-content {
+    padding-top: 10px;
+  }
+
+  .token-shop-bank-title strong,
+  .token-shop-bank-hero strong {
+    font-size: 1.16rem;
+  }
+
+  .token-shop-buff-strip {
+    grid-template-columns: 1fr;
+  }
 }
 
 .shard-threshold-grid,

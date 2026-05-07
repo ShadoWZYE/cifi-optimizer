@@ -9,14 +9,6 @@ export function resolveTokenShopProgressionLevelSource(
   progressionState,
   compatibilityLevels
 ) {
-  const localOverrideValue = progressionState?.checkedSubsetLevels?.[fieldName];
-  if (typeof localOverrideValue === "number" && Number.isFinite(localOverrideValue)) {
-    return {
-      value: localOverrideValue,
-      sourceLabel: "Local progression override",
-      path: `planning.tokenShop.checkedSubsetLevels.${fieldName}`
-    };
-  }
   const playerStateValue = progressionState?.checkedSubsetPlayerState?.[fieldName];
   if (typeof playerStateValue === "number" && Number.isFinite(playerStateValue)) {
     return {
@@ -36,7 +28,7 @@ export function resolveTokenShopProgressionLevelSource(
   return {
     value: 0,
     sourceLabel: "Default level 0",
-    path: `planning.tokenShop.checkedSubsetLevels.${fieldName}`
+    path: `planning.tokenShop.checkedSubsetPlayerState.${fieldName}`
   };
 }
 
@@ -93,10 +85,8 @@ export function buildTokenShopProgressionModel({
   return {
     currentTokens,
     displayRule:
-      "Rows are shown in grounded ATU slot order by tier: T1 (ATU1-ATU12), T2 (ATU13-ATU18), T3 (ATU19-ATU23), T4 (ATU24-ATU25), T5 (ATU26-ATU28). Locked tiers are hidden in player input.",
+      "Rows are shown in grounded ATU slot order by visible in-game tier shell: T1 (ATU1-ATU12), T2 (ATU13-ATU19), T3 (ATU20-ATU23), T4 (ATU24-ATU28). Player-profile checked state is primary, compatibility is fallback only, and tier locks remain heuristic policy until stronger in-game gating clears.",
     rows,
-    localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override")
-      .length,
     playerStateCount: rows.filter((row) => row.currentLevelSourceLabel === "Checked player state")
       .length,
     compatibilityCount: rows.filter(

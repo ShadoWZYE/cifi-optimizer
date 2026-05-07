@@ -207,5 +207,15 @@ This lane already points to several future owner families that matter beyond the
 - It is now safe to keep token-bank cap and claimable or ready-state recovery beyond the checked `PlayerProfileHandler.saveInfoCache` / `ConvertSaveDataToProfileData(...) -> PlayerProfileData` export bridge instead of treating `TokenShop` methods, direct `PlayerProfileData.Tokens` or `Tokenium` wrapper strings, the broader generic `SaveData.ClaimableTokenium` field, the metadata-only `CloudSavePlayerProfile` save/load shell, or `FinalTokenBank*` symbols as recovered saved-state owners.
 - Any future planner or import work should treat token-bank state as `available but unmapped` until those owned fields are proven from assets.
 
+## Current runtime surface
+
+- The active DB-backed token-bank state summary now preserves this lane as one narrowed runtime surface instead of splitting it back across archived clue files.
+- That runtime surface is expected to keep:
+  - exact stored-amount ownership on `SaveData.BankedTokens`
+  - the broader generic negative on `SaveData.ClaimableTokenium`
+  - the checked `PlayerProfileHandler.saveInfoCache` plus `ConvertSaveDataToProfileData(...) -> PlayerProfileData` bridge
+  - the metadata-only `CloudSavePlayerProfile` shell boundary
+- This does not change the blocker:
+  - current bank cap, claimable-bank, fill, or ready-state ownership is still unresolved beyond the stored-amount field
 
 

@@ -12,8 +12,8 @@ function shouldUseDbSystemUnitApi(origin, serverCapabilities) {
   return String(origin || "").startsWith("http") && serverCapabilities?.systemUnitApi === true;
 }
 
-function shouldUseDbSubjectContractApi(origin, serverCapabilities) {
-  return String(origin || "").startsWith("http") && serverCapabilities?.subjectContractApi === true;
+function shouldUseDbSystemBundleApi(origin, serverCapabilities) {
+  return String(origin || "").startsWith("http") && serverCapabilities?.systemDbBundleApi === true;
 }
 
 function shouldAllowStaticFallback(origin, serverCapabilities, allowStaticFallback) {
@@ -40,15 +40,34 @@ async function loadStaticSystemUnits(fetchJson) {
   };
 }
 
-async function loadDbSubjectContracts(fetchJson, systemId, scopes) {
+async function loadDbSystemBundle(fetchJson, systemId, scopes) {
   if (!scopes.length) {
-    return null;
+    return {
+      subjectMetadata: null,
+      genericMechanics: null
+    };
   }
   const query = new URLSearchParams({
     systemId,
-    scopes: scopes.join(",")
+    scopes: scopes.join(","),
+    mode: "core"
   });
-  return fetchJson(`/api/subject-contracts?${query.toString()}`);
+  return fetchJson(`/api/system-db?${query.toString()}`);
+}
+
+function getResolvedSystemDbScopes(systemDbScopes = {}, tokenShopDbScopes = {}) {
+  const resolved = {};
+  for (const [systemId, scopes] of Object.entries(systemDbScopes)) {
+    if (Array.isArray(scopes) && scopes.length) {
+      resolved[systemId] = Array.from(new Set(scopes.filter(Boolean)));
+    }
+  }
+  for (const [systemId, scopes] of Object.entries(tokenShopDbScopes)) {
+    if (!resolved[systemId] && Array.isArray(scopes) && scopes.length) {
+      resolved[systemId] = Array.from(new Set(scopes.filter(Boolean)));
+    }
+  }
+  return resolved;
 }
 
 export async function loadSystemUnits({
@@ -56,27 +75,68 @@ export async function loadSystemUnits({
   origin,
   serverCapabilities,
   allowStaticFallback,
-  subjectContractScopes = {}
+  systemDbScopes = {},
+  tokenShopDbScopes = {},
+  subjectContractScopes = {},
+  genericMechanicsScopes = {}
 }) {
   if (shouldUseDbSystemUnitApi(origin, serverCapabilities)) {
     try {
       const query = new URLSearchParams({ ids: SYSTEM_UNIT_IDS.join(",") });
-      const [payload, tokenShopSubjectContracts] = await Promise.all([
+      const useGenericSystemDbBundleApi = shouldUseDbSystemBundleApi(origin, serverCapabilities);
+      const resolvedSystemDbScopes = getResolvedSystemDbScopes(systemDbScopes, tokenShopDbScopes);
+      const tokenShopScopes =
+        resolvedSystemDbScopes.tokenShop ??
+        Array.from(
+          new Set([
+            ...(Array.isArray(subjectContractScopes?.tokenShop) ? subjectContractScopes.tokenShop : []),
+            ...(Array.isArray(genericMechanicsScopes?.tokenShop) ? genericMechanicsScopes.tokenShop : [])
+          ].filter(Boolean))
+        );
+      const multiverseMarketScopes = resolvedSystemDbScopes.multiverseMarket ?? [];
+      const shardScopes = resolvedSystemDbScopes.shards ?? [];
+      const [
+        payload,
+        tokenShopSystemDbBundle,
+        multiverseMarketSystemDbBundle,
+        shardSystemDbBundle
+      ] = await Promise.all([
         fetchJson(`/api/system-units?${query.toString()}`),
-        shouldUseDbSubjectContractApi(origin, serverCapabilities)
-          ? loadDbSubjectContracts(
+        useGenericSystemDbBundleApi
+          ? loadDbSystemBundle(fetchJson, "token-shop", tokenShopScopes).catch(() => null)
+          : Promise.resolve(null),
+        useGenericSystemDbBundleApi
+          ? loadDbSystemBundle(
               fetchJson,
-              "token-shop",
-              Array.isArray(subjectContractScopes?.tokenShop) ? subjectContractScopes.tokenShop : []
+              "multiverse-market",
+              multiverseMarketScopes
             ).catch(() => null)
+          : Promise.resolve(null),
+        useGenericSystemDbBundleApi
+          ? loadDbSystemBundle(fetchJson, "shards", shardScopes).catch(() => null)
           : Promise.resolve(null)
       ]);
+      const resolvedTokenShopBundle = tokenShopSystemDbBundle;
       return {
         mode: "db",
         source: "materialized_system_unit_views",
         builtAt: payload?.builtAt ?? null,
-        subjectContracts: {
-          tokenShop: tokenShopSubjectContracts
+        systemDb: {
+          tokenShop: {
+            subjectMetadata:
+              resolvedTokenShopBundle?.subjectMetadata ?? null,
+            genericMechanics:
+              resolvedTokenShopBundle?.genericMechanics ?? null
+          },
+          shards: {
+            subjectMetadata: shardSystemDbBundle?.subjectMetadata ?? null,
+            genericMechanics: shardSystemDbBundle?.genericMechanics ?? null
+          },
+          multiverseMarket: {
+            subjectMetadata:
+              multiverseMarketSystemDbBundle?.subjectMetadata ?? null,
+            genericMechanics: multiverseMarketSystemDbBundle?.genericMechanics ?? null
+          }
         },
         units: {
           appMeta: payload?.units?.["app-meta"] ?? null,
@@ -103,8 +163,19 @@ export async function loadSystemUnits({
   const staticPayload = await loadStaticSystemUnits(fetchJson);
   return {
     ...staticPayload,
-    subjectContracts: {
-      tokenShop: null
+    systemDb: {
+      tokenShop: {
+        subjectMetadata: null,
+        genericMechanics: null
+      },
+      shards: {
+        subjectMetadata: null,
+        genericMechanics: null
+      },
+      multiverseMarket: {
+        subjectMetadata: null,
+        genericMechanics: null
+      }
     }
   };
 }

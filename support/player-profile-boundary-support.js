@@ -157,11 +157,19 @@ export function getImportedMultiverseMarketPreviewCardModel(preview, formatShard
       preview.hasOverlapGroundedRows
         ? `${preview.importedOverlapRowCount}/${preview.overlapRowCount} ordered-overlap rows imported`
         : null,
+      preview.coverageSource ? `DB ${preview.coverageSource}` : null,
+      preview.nextSeamLabel ? `Next seam ${preview.nextSeamLabel}` : null,
       "Compatibility only",
       "Planner blocked"
     ].filter(Boolean),
     metaLines: [
-      "Only compatibility-only evidence from the checked SaveData quarantine is shown here. This card does not reopen row-label recovery, row remap, planner logic, or canonical PlayerProfile promotion.",
+      `The checked ${preview.saveAnchor || "SaveData"} Emporium import surface remains quarantined compatibility evidence only. This card stays bounded to ${preview.typedSpanLabel || "the checked typed span"} and does not reopen row-label recovery, row remap, planner logic, or canonical PlayerProfile promotion.`,
+      preview.coverageSource
+        ? `DB-backed multiverse coverage currently reports ${preview.coverageSource}${preview.nextSeamLabel ? ` with next seams ${preview.nextSeamLabel}` : ""}.`
+        : "DB-backed multiverse coverage is not currently available for this compatibility preview.",
+      preview.canonicalImportSafeSubsetLabel
+        ? `Current DB-backed import-safe subset label: ${preview.canonicalImportSafeSubsetLabel}.`
+        : null,
       {
         code: preview.wrapperOnlyFieldLabel,
         suffix:
@@ -194,13 +202,14 @@ export function getImportedMultiverseMarketPreviewCardModel(preview, formatShard
         : "No raw Emporium level fields are currently imported from the checked compatibility span.",
       preview.missingSpanCount
         ? `Missing raw span fields still absent from this import: ${preview.missingSpanLabel}${preview.missingSpanCount > 12 ? "..." : ""}.`
-        : "All raw fields in the checked IS1Level through IS110Level compatibility span are present in this import.",
-      "Broader SaveData progression neighbors after the dual-declared InscryptionsDone boundary stay outside this admitted Emporium import slice, even when the repo has verified them on SaveData.",
+        : `All raw fields in the checked ${preview.typedSpanLabel} import span are present in this compatibility slice.`,
+      `Broader ${preview.saveAnchor || "SaveData"} progression neighbors after the dual-declared ${preview.wrapperOnlyFieldLabel} boundary stay outside this admitted Emporium import slice, even when the repo has verified them on ${preview.saveAnchor || "SaveData"}.`,
+      preview.broaderRowRemapStatus || null,
       preview.hasOverlapGroundedRows
         ? `The checked ordered-overlap support rows ${preview.overlapRangeLabel} are tracked only as boundary evidence. Missing ordered-overlap imports: ${preview.missingOverlapLabel}.`
         : "No ordered-overlap support rows are available in this build.",
       "Planner use stays blocked. These imported levels remain quarantined compatibility evidence, not canonical player truth, not row-label claims, not complete live-text bindings, and not recommendation inputs."
-    ],
+    ].filter(Boolean),
     overlapCards: preview.hasOverlapLevelPreview
       ? preview.overlapRowSummaries.map((entry) => ({
           title: `IS${entry.rowId}Level overlap support`,

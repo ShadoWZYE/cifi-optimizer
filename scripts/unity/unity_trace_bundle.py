@@ -5,11 +5,12 @@ import concurrent.futures
 import hashlib
 import json
 import re
+import sqlite3
 import struct
 import sys
 import types
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from time import perf_counter
 from typing import Any
@@ -17,11 +18,13 @@ from typing import Any
 from ghidra_cache_db import (
     FAMILY_GRAPH_LABELS,
     GhidraCacheDB,
+    RELATION_SEAM_CONTRACT_REGISTRY,
 )
 from portable_paths import md_link, repo_relative
 from trace_extractors import (
     TraceDocumentCache,
     _summarize_native_result,
+    plan_native_trace_extraction,
     build_token_shop_native_bridge_plan,
     collect_native_trace,
     find_cached_native_trace,
@@ -45,6 +48,26 @@ TRACE_DB: GhidraCacheDB | None = None
 TRACE_BUNDLE_RUN_CACHE: dict[tuple[str, str], Any] = {}
 ACTIVE_TRACE_PROFILER: "TraceRunProfiler | None" = None
 ACTIVE_TRACE_RUNTIME_FLAGS: dict[str, Any] = {}
+
+TRACE_TARGET_SUPPORT_DEFAULTS: dict[str, dict[str, Any]] = {
+    "shard-owned-state-upgradeinfolist-population": {
+        "sceneOwner": "ShardMining",
+        "runtimeShell": "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo",
+        "genericLead": "ConstructionMilestones, Assembly-CSharp",
+        "saveCandidate": "PlayerProfile-side shard member shell",
+    },
+    "shard-cost-su0-structure": {
+        "accessor": "get_SU0Cost",
+        "ownerType": "ShardUpgradeInfo",
+        "parameterShell": [
+            "SU0StartCost",
+            "SU0CostExponent",
+            "SU0GrowthExponent",
+            "SU0GrowthExponent2",
+            "SU0GrowthExponent3",
+        ],
+    },
+}
 
 UNITY_ENV_BY_SLICE: dict[tuple[str, ...], Any] = {}
 METADATA_STRING_ENTRIES: list[dict[str, Any]] | None = None
@@ -243,6 +266,29 @@ def _trace_bundle_cache_get(bucket: str, key: str) -> Any | None:
 def _trace_bundle_cache_put(bucket: str, key: str, value: Any) -> Any:
     TRACE_BUNDLE_RUN_CACHE[(bucket, key)] = value
     return value
+
+
+def _trace_bundle_cache_drop(bucket: str, key: str) -> None:
+    TRACE_BUNDLE_RUN_CACHE.pop((bucket, key), None)
+
+
+def _invalidate_best_gap_evidence_caches(terms: list[str] | None = None) -> None:
+    for bucket, key in [
+        ("evidence-frontier-term-rows", "all"),
+        ("materialized-term-rows", "all"),
+        ("latest-target-payloads", "all"),
+        ("latest-subject-state-rows", "all"),
+        ("materialized-resolver-target-rows", "all"),
+        ("best-gap-nonclosing-acquisition-terms", "all"),
+        ("best-gap-nonclosing-acquisition-seams", "all"),
+    ]:
+        _trace_bundle_cache_drop(bucket, key)
+    for term in unique_strings([str(term).strip() for term in (terms or []) if str(term).strip()]):
+        normalized_term = normalize_planner_term(term)
+        if not normalized_term:
+            continue
+        _trace_bundle_cache_drop("best-gap-fast-term-evidence", normalized_term)
+        _trace_bundle_cache_drop("best-gap-contract-term-evidence", normalized_term)
 
 
 def _diagnostic_evidence_sources_checked(evidence: dict[str, Any]) -> list[str]:
@@ -454,7 +500,7 @@ def _persist_acquisition_exact_term_evidence(
     )
 
 
-def _persist_acquisition_exact_term_evidence_batch(entries: list[dict[str, Any]]) -> None:
+def _persist_acquisition_exact_term_evidence_batch(entries: list[dict[str, Any]]) -> bool:
     evidence_rows: list[dict[str, Any]] = []
     now = datetime.now().isoformat()
     for entry in entries:
@@ -512,10 +558,16 @@ def _persist_acquisition_exact_term_evidence_batch(entries: list[dict[str, Any]]
             }
         )
     if evidence_rows:
-        get_trace_db().upsert_custom_evidence_rows(
+        changed = get_trace_db().upsert_custom_evidence_rows(
             evidence_rows,
             rebuild_materialized=True,
+            rebuild_job_views=False,
         )
+        _invalidate_best_gap_evidence_caches(
+            [str(row.get("term") or "") for row in evidence_rows]
+        )
+        return bool(changed)
+    return False
 
 
 def _diagnostic_evidence_hits(evidence: dict[str, Any]) -> dict[str, Any]:
@@ -553,6 +605,27 @@ def _persist_acquisition_term_diagnostic(
     term: str,
     payload: dict[str, Any],
 ) -> None:
+    trace_scope = str(trace_scope or "").strip()
+    term = str(term or "").strip()
+    if not trace_scope or not term:
+        return
+    cache_key = trace_scope
+    latest_payloads = _trace_bundle_cache_get("latest-acquisition-diagnostic-payloads", cache_key)
+    if latest_payloads is None:
+        rows = get_trace_db().list_latest_materialized_acquisition_diagnostics_for_scope(
+            "cifi-full",
+            "libil2cpp.so",
+            trace_scope,
+        )
+        latest_payloads = {
+            str(row.get("acquisitionTerm") or "").strip(): dict(row.get("payload") or {})
+            for row in rows
+            if str(row.get("acquisitionTerm") or "").strip()
+        }
+        _trace_bundle_cache_put("latest-acquisition-diagnostic-payloads", cache_key, latest_payloads)
+    existing_payload = dict((latest_payloads or {}).get(term) or {})
+    if existing_payload and json.dumps(existing_payload, sort_keys=True, ensure_ascii=False) == json.dumps(dict(payload or {}), sort_keys=True, ensure_ascii=False):
+        return
     get_trace_db().upsert_materialized_acquisition_diagnostic_view(
         "cifi-full",
         "libil2cpp.so",
@@ -561,6 +634,12 @@ def _persist_acquisition_term_diagnostic(
         term,
         payload,
     )
+    latest_payloads = dict(latest_payloads or {})
+    latest_payloads[term] = dict(payload or {})
+    _trace_bundle_cache_put("latest-acquisition-diagnostic-payloads", cache_key, latest_payloads)
+    _trace_bundle_cache_drop("recent-nonclosing-acquisition-terms", "all")
+    _trace_bundle_cache_drop("recent-nonclosing-acquisition-seams", "all")
+    _trace_bundle_cache_drop("best-gap-latest-acquisition-status-by-scope-term", "all")
 
 
 def _rebind_acquisition_dataset_to_request(
@@ -849,6 +928,109 @@ def _describe_relation_gap(
     }
 
 
+def _describe_contract_gap(
+    *,
+    probe_mode: str,
+    relation_scope: str,
+    required_seams: list[str],
+    required_fact_kinds: list[str],
+    required_relation_kinds: list[str],
+    progress_relation_kinds: list[str],
+    relation_subject_state: dict[str, Any],
+    relation_boundary_rows: list[dict[str, Any]],
+    relation_fact_rows: list[dict[str, Any]],
+    relation_relation_rows: list[dict[str, Any]],
+    requested_terms: list[str],
+) -> dict[str, Any]:
+    probe_mode = str(probe_mode or "term-shaped").strip() or "term-shaped"
+    relation_open_edges = {
+        str(edge).strip()
+        for edge in (
+            list((relation_subject_state or {}).get("missingEdges") or [])
+            + list((relation_subject_state or {}).get("blockedEdges") or [])
+        )
+        if str(edge).strip()
+    }
+    for row in (relation_boundary_rows or []):
+        if str(row.get("boundaryKind") or "").strip() != "subject-boundary":
+            continue
+        payload = dict(row.get("payload") or {})
+        for edge in [
+            *list(payload.get("missingEdges") or []),
+            *list(payload.get("blockedEdges") or []),
+        ]:
+            edge_value = str(edge).strip()
+            if edge_value:
+                relation_open_edges.add(edge_value)
+    fact_kinds_present = {
+        str(row.get("factKind") or "").strip()
+        for row in (relation_fact_rows or [])
+        if str(row.get("factKind") or "").strip()
+    }
+    relation_kinds_present = {
+        str(row.get("relationKind") or "").strip()
+        for row in (relation_relation_rows or [])
+        if str(row.get("relationKind") or "").strip()
+    }
+    missing_seams = [seam_id for seam_id in required_seams if seam_id in relation_open_edges]
+    missing_fact_kinds = [fact_kind for fact_kind in required_fact_kinds if fact_kind not in fact_kinds_present]
+    missing_relation_kinds = [relation_kind for relation_kind in required_relation_kinds if relation_kind not in relation_kinds_present]
+    recovered_progress_relation_kinds = [
+        relation_kind for relation_kind in progress_relation_kinds if relation_kind in relation_kinds_present
+    ]
+    covered = not missing_seams and not missing_fact_kinds and not missing_relation_kinds
+    if covered:
+        return {
+            "covered": True,
+            "cacheHitDisposition": f"{probe_mode}-covered",
+            "missingArtifacts": [],
+            "blockerCategory": "",
+            "detail": "",
+            "evidenceTerms": list(requested_terms or []),
+            "progressArtifacts": [f"relation:{value}" for value in recovered_progress_relation_kinds],
+        }
+    missing_artifacts = [
+        *[f"seam:{value}" for value in missing_seams],
+        *[f"fact:{value}" for value in missing_fact_kinds],
+        *[f"relation:{value}" for value in missing_relation_kinds],
+    ]
+    blocker_category = (
+        "subject-state-materialization"
+        if missing_seams
+        else "missing-relation-artifact"
+        if missing_relation_kinds
+        else "missing-fact-artifact"
+        if missing_fact_kinds
+        else f"{probe_mode}-contract-uncovered"
+    )
+    detail_parts: list[str] = []
+    if missing_seams:
+        detail_parts.append(
+            "required seam coverage is still open: " + ", ".join(missing_seams)
+        )
+    if missing_fact_kinds:
+        detail_parts.append(
+            "required fact kinds are still missing: " + ", ".join(missing_fact_kinds)
+        )
+    if missing_relation_kinds:
+        detail_parts.append(
+            "required relation kinds are still missing: " + ", ".join(missing_relation_kinds)
+        )
+    if recovered_progress_relation_kinds:
+        detail_parts.append(
+            "bounded progress relation kinds recovered: " + ", ".join(recovered_progress_relation_kinds)
+        )
+    return {
+        "covered": False,
+        "cacheHitDisposition": f"{probe_mode}-contract-uncovered",
+        "missingArtifacts": missing_artifacts,
+        "blockerCategory": blocker_category,
+        "detail": ". ".join(detail_parts) if detail_parts else "The requested seam contract remains uncovered after materialization.",
+        "evidenceTerms": list(requested_terms or []),
+        "progressArtifacts": [f"relation:{value}" for value in recovered_progress_relation_kinds],
+    }
+
+
 def load_canonical_semantic_scope(scope_id: str) -> dict[str, Any]:
     scope_id = str(scope_id or "").strip()
     if not scope_id:
@@ -945,20 +1127,25 @@ def load_or_synthesize_support_context(trace_scope: str, target: dict[str, Any] 
     cached = _trace_bundle_cache_get("support-context", cache_key)
     if cached is not None:
         return dict(cached)
-    with _trace_profile_span("dbReads"):
-        payload = dict(
-            (
-                get_trace_db().find_or_synthesize_support_context(
-                    "cifi-full",
-                    "libil2cpp.so",
-                    trace_scope,
-                    family_id=str(target.get("familyId") or ""),
-                    compatibility_target_id=str(target.get("id") or trace_scope),
-                )
+    try:
+        with _trace_profile_span("dbReads"):
+            payload = dict(
+                (
+                    get_trace_db().find_or_synthesize_support_context(
+                        "cifi-full",
+                        "libil2cpp.so",
+                        trace_scope,
+                        family_id=str(target.get("familyId") or ""),
+                        compatibility_target_id=str(target.get("id") or trace_scope),
+                    )
+                    or {}
+                ).get("supportContext")
                 or {}
-            ).get("supportContext")
-            or {}
-        )
+            )
+    except sqlite3.OperationalError as error:
+        if "database is locked" not in str(error).lower():
+            raise
+        payload = dict(TRACE_TARGET_SUPPORT_DEFAULTS.get(trace_scope) or {})
     _trace_bundle_cache_put("support-context", cache_key, payload)
     return dict(payload)
 
@@ -1148,6 +1335,160 @@ def _materialized_resolver_target_rows() -> list[dict[str, Any]]:
     return [dict(row) for row in rows]
 
 
+def _materialized_term_view_rows() -> list[dict[str, Any]]:
+    cached = _trace_bundle_cache_get("materialized-term-rows", "all")
+    if cached is not None:
+        return [dict(row) for row in cached]
+    with _trace_profile_span("dbReads.bestGapTermViews"):
+        with get_trace_db().connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT project_name, project_file, normalized_term, term, payload_json, provenance_json, updated_at
+                FROM materialized_term_views
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY updated_at DESC, term ASC
+                """,
+                ("cifi-full", "libil2cpp.so"),
+            ).fetchall()
+    normalized_rows = [
+        {
+            "normalizedTerm": str(row["normalized_term"] or ""),
+            "term": str(row["term"] or ""),
+            "payload": json.loads(str(row["payload_json"] or "{}")),
+            "provenance": json.loads(str(row["provenance_json"] or "{}")),
+            "updatedAt": str(row["updated_at"] or ""),
+        }
+        for row in rows
+    ]
+    _trace_bundle_cache_put("materialized-term-rows", "all", normalized_rows)
+    return [dict(row) for row in normalized_rows]
+
+
+def _refresh_best_gap_subject_views(
+    target_rows: list[dict[str, Any]],
+    preferred_scopes: set[str] | None = None,
+) -> None:
+    existing_subject_rows = _latest_materialized_subject_state_rows()
+    latest_subject_built_at_by_scope: dict[str, int] = {}
+    latest_subject_bundle_input_by_scope: dict[str, str] = {}
+    malformed_scope_ids: set[str] = set()
+    subject_scope_presence: set[str] = set()
+    for row in existing_subject_rows:
+        trace_scope = str(row.get("traceScope") or "").strip()
+        if not trace_scope:
+            continue
+        subject_scope_presence.add(trace_scope)
+        built_at_sort = int(re.sub(r"\D", "", str(row.get("builtAt") or "")) or "0")
+        latest_subject_built_at_by_scope[trace_scope] = max(
+            latest_subject_built_at_by_scope.get(trace_scope, 0),
+            built_at_sort,
+        )
+        provenance = dict(row.get("provenance") or {})
+        input_bundle_built_at = str(
+            dict(provenance.get("inputs") or {}).get("latestBundleBuiltAt") or ""
+        ).strip()
+        if input_bundle_built_at:
+            existing_input_sort = int(
+                re.sub(r"\D", "", latest_subject_bundle_input_by_scope.get(trace_scope, "")) or "0"
+            )
+            candidate_input_sort = int(re.sub(r"\D", "", input_bundle_built_at) or "0")
+            if candidate_input_sort >= existing_input_sort:
+                latest_subject_bundle_input_by_scope[trace_scope] = input_bundle_built_at
+        payload = dict(row.get("payload") or {})
+        subject_id = str(payload.get("subjectId") or row.get("subjectId") or "").strip()
+        if " through " in subject_id:
+            malformed_scope_ids.add(trace_scope)
+
+    preferred_scopes = {str(value).strip() for value in (preferred_scopes or set()) if str(value).strip()}
+    refresh_candidates: list[dict[str, Any]] = []
+    for row in target_rows:
+        payload = dict(row.get("payload") or {})
+        trace_scope = str(row.get("traceScope") or payload.get("traceRegistry", {}).get("executionTraceScope") or "").strip()
+        if not trace_scope or trace_scope == "generic-explore":
+            continue
+        if preferred_scopes and trace_scope not in preferred_scopes:
+            continue
+        target_built_at = str(row.get("builtAt") or payload.get("generatedAt") or "").strip()
+        target_built_at_sort = int(re.sub(r"\D", "", target_built_at) or "0")
+        latest_subject_built_at = latest_subject_built_at_by_scope.get(trace_scope, 0)
+        latest_subject_bundle_input = latest_subject_bundle_input_by_scope.get(trace_scope, "")
+        has_subject_state = trace_scope in subject_scope_presence
+        needs_refresh = (
+            trace_scope in malformed_scope_ids
+            or not has_subject_state
+            or (
+                target_built_at_sort > latest_subject_built_at
+                and latest_subject_bundle_input != target_built_at
+            )
+        )
+        if not needs_refresh:
+            continue
+        decision_summary = dict(payload.get("decisionSummary") or {})
+        blocked_count = len([item for item in (decision_summary.get("blockedEdgeTypes") or []) if str(item).strip()])
+        unresolved_count = len([item for item in (decision_summary.get("unresolvedEdgeTypes") or []) if str(item).strip()])
+        missing_count = len([item for item in (decision_summary.get("missingEdgeTypes") or []) if str(item).strip()])
+        known_count = int(decision_summary.get("provedEdgeCount") or 0)
+        verdict = str(decision_summary.get("verdict") or "").strip()
+        refresh_candidates.append(
+            {
+                "row": row,
+                "traceScope": trace_scope,
+                "priority": (
+                    2 if trace_scope in malformed_scope_ids else 0,
+                    1 if not has_subject_state else 0,
+                    1 if target_built_at_sort > latest_subject_built_at else 0,
+                    1 if verdict == "quarantine" else 0,
+                    blocked_count + unresolved_count + missing_count,
+                    -known_count,
+                    target_built_at_sort,
+                ),
+            }
+        )
+
+    refresh_candidates.sort(key=lambda item: item["priority"], reverse=True)
+    refresh_budget = len(preferred_scopes) if preferred_scopes else 8
+    prioritized_rows = [dict(item.get("row") or {}) for item in refresh_candidates[:refresh_budget]]
+
+    db = get_trace_db()
+    for row in prioritized_rows:
+        payload = dict(row.get("payload") or {})
+        trace_scope = str(row.get("traceScope") or payload.get("traceRegistry", {}).get("executionTraceScope") or "").strip()
+        if not trace_scope or trace_scope == "generic-explore":
+            continue
+        target_payload = dict(payload.get("target") or {})
+        planner_resolution = dict(payload.get("plannerResolution") or {})
+        try:
+            db.find_or_materialize_subject_state_view(
+                "cifi-full",
+                "libil2cpp.so",
+                trace_scope,
+                subject_kind=str(planner_resolution.get("selectedSubjectKind") or "").strip(),
+                subject_key=str(planner_resolution.get("selectedSubjectKey") or "").strip(),
+                family_id=str(target_payload.get("familyId") or payload.get("traceRegistry", {}).get("selectedFamilyId") or "").strip(),
+                compatibility_target_id=str(target_payload.get("id") or trace_scope).strip(),
+            )
+        except Exception:
+            continue
+
+
+def _sort_best_gap_candidates(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    candidates.sort(
+        key=lambda item: (
+            int(item.get("acquisitionReadinessRank") or 0),
+            0 if str(item.get("coverageMode") or "") == "relation-shaped" else 1,
+            -float(item.get("score") or 0.0),
+            -int((item.get("evidenceFrequency") or {}).get("payloadHitTotal") or 0),
+            -len(item.get("canonicalSubjectsMentioningAnchor") or []),
+            -int(item.get("provedEdgeCount") or 0),
+            int(item.get("negativeEdgeCount") or 0),
+            int(len(item.get("blockedEdgeTypes") or [])),
+            str(item.get("unresolvedAnchor") or ""),
+            str(item.get("traceScope") or ""),
+        )
+    )
+    return candidates
+
+
 def _pick_best_subject_state_for_trace_scope(
     trace_scope: str,
     target_id: str,
@@ -1188,6 +1529,7 @@ def _pick_best_subject_state_for_trace_scope(
                 "blockedCount": len([value for value in (payload.get("blockedEdges") or []) if str(value).strip()]),
                 "nonblockingCount": len([value for value in (payload.get("nonblockingEdges") or []) if str(value).strip()]),
                 "subjectKind": subject_kind,
+                "subjectIdPenalty": 1 if " through " in subject_id else 0,
             }
         )
     if not candidates:
@@ -1200,6 +1542,7 @@ def _pick_best_subject_state_for_trace_scope(
             int(item.get("blockedCount") or 0),
             int(item.get("missingCount") or 0),
             -int(item.get("nonblockingCount") or 0),
+            int(item.get("subjectIdPenalty") or 0),
             -int(item.get("builtAtSort") or 0),
             0 if str(item.get("subjectKind") or "") == "row-local" else 1,
             str(((item.get("row") or {}).get("subjectId")) or ""),
@@ -1345,7 +1688,15 @@ def _cached_contract_term_evidence(term: str) -> dict[str, Any]:
     if cached is not None:
         return dict(cached)
     with _trace_profile_span("dbReads.bestGapTermEvidence"):
-        payload = dict(get_trace_db().find_contract_term_evidence("cifi-full", "libil2cpp.so", normalized) or {})
+        payload = dict(
+            get_trace_db().find_contract_term_evidence(
+                "cifi-full",
+                "libil2cpp.so",
+                normalized,
+                sync_jobs=False,
+            )
+            or {}
+        )
     _trace_bundle_cache_put("best-gap-contract-term-evidence", cache_key, payload)
     return dict(payload)
 
@@ -1359,8 +1710,18 @@ def _cached_fast_term_evidence_summary(term: str) -> dict[str, Any]:
     if cached is not None:
         return dict(cached)
     with _trace_profile_span("dbReads.bestGapFastTermEvidence"):
-        term_view = get_trace_db().find_canonical_term_view("cifi-full", "libil2cpp.so", normalized)
-        graph_refs = get_trace_db().find_graph_backfill("cifi-full", "libil2cpp.so", normalized)
+        term_view = get_trace_db().find_canonical_term_view(
+            "cifi-full",
+            "libil2cpp.so",
+            normalized,
+            sync_jobs=False,
+        )
+        graph_refs = get_trace_db().find_graph_backfill(
+            "cifi-full",
+            "libil2cpp.so",
+            normalized,
+            sync_jobs=False,
+        )
     payload = {
         "term": normalized,
         "found": bool(term_view) or bool(graph_refs),
@@ -1375,6 +1736,36 @@ def _cached_fast_term_evidence_summary(term: str) -> dict[str, Any]:
     }
     _trace_bundle_cache_put("best-gap-fast-term-evidence", cache_key, payload)
     return dict(payload)
+
+
+def _prime_fast_term_evidence_summaries(terms: list[str]) -> None:
+    normalized_terms = [str(term).strip() for term in terms if str(term).strip()]
+    missing_terms: list[str] = []
+    cache_keys: dict[str, str] = {}
+    for term in normalized_terms:
+        cache_key = normalize_planner_term(term) or term.lower()
+        cache_keys[cache_key] = term
+        if _trace_bundle_cache_get("best-gap-fast-term-evidence", cache_key) is None:
+            missing_terms.append(term)
+    if not missing_terms:
+        return
+    with _trace_profile_span("dbReads.bestGapFastTermEvidence"):
+        summaries = get_trace_db().find_fast_term_evidence_summaries(
+            "cifi-full",
+            "libil2cpp.so",
+            missing_terms,
+            sync_jobs=False,
+        )
+    for term in missing_terms:
+        cache_key = normalize_planner_term(term) or term.lower()
+        summary = dict(summaries.get(cache_key) or {
+            "term": term,
+            "found": False,
+            "sourceIds": [],
+            "graphRefs": [],
+            "payloadHits": [],
+        })
+        _trace_bundle_cache_put("best-gap-fast-term-evidence", cache_key, summary)
 
 
 def _aggregate_term_evidence_summaries(terms: list[str], *, full: bool = False) -> dict[str, Any]:
@@ -1426,9 +1817,9 @@ def _cached_recent_nonclosing_acquisition_terms() -> dict[tuple[str, str], set[s
         trace_scope = str(row.get("traceScope") or payload.get("selectedTraceScope") or "").strip()
         seam_id = str(payload.get("seamId") or "").strip()
         term = str(row.get("acquisitionTerm") or "").strip()
-        if not trace_scope or not seam_id or not term:
+        if not trace_scope or not term:
             continue
-        exhausted.setdefault((trace_scope, seam_id), set()).add(term)
+        exhausted.setdefault((trace_scope, seam_id), set()).add(normalize_planner_term(term) or term.lower())
     _trace_bundle_cache_put(
         "best-gap-nonclosing-acquisition-terms",
         "all",
@@ -1437,21 +1828,599 @@ def _cached_recent_nonclosing_acquisition_terms() -> dict[tuple[str, str], set[s
     return exhausted
 
 
+def _cached_latest_acquisition_status_by_scope_term() -> dict[tuple[str, str, str], dict[str, Any]]:
+    cached = _trace_bundle_cache_get("best-gap-latest-acquisition-status-by-scope-term", "all")
+    if cached is not None:
+        return {
+            (str(key[0]), str(key[1]), str(key[2])): dict(value)
+            for key, value in cached.items()
+        }
+    rows = get_trace_db().list_latest_materialized_acquisition_diagnostics_views("cifi-full", "libil2cpp.so")
+    latest: dict[tuple[str, str, str], dict[str, Any]] = {}
+    for row in rows:
+        payload = dict(row.get("payload") or {})
+        trace_scope = str(row.get("traceScope") or payload.get("selectedTraceScope") or "").strip()
+        seam_id = str(payload.get("seamId") or "").strip()
+        term = str(row.get("acquisitionTerm") or "").strip()
+        if not trace_scope or not term:
+            continue
+        normalized_term = normalize_planner_term(term) or term.lower()
+        built_at = str(row.get("builtAt") or "").strip()
+        key = (trace_scope, seam_id, normalized_term)
+        current = latest.get(key)
+        current_sort = int(re.sub(r"\D", "", str((current or {}).get("builtAt") or "")) or "0")
+        candidate_sort = int(re.sub(r"\D", "", built_at) or "0")
+        if current is None or candidate_sort >= current_sort:
+            latest[key] = {
+                "term": term,
+                "status": str(payload.get("status") or "").strip(),
+                "outcome": str(payload.get("outcome") or "").strip(),
+                "builtAt": built_at,
+            }
+    _trace_bundle_cache_put(
+        "best-gap-latest-acquisition-status-by-scope-term",
+        "all",
+        {key: dict(value) for key, value in latest.items()},
+    )
+    return latest
+
+
+ACQUISITION_NONCLOSING_RETRY_COOLDOWN_MINUTES = 240
+
+
+def _planner_term_shape_signature(term: str) -> str:
+    candidate = normalize_planner_term(term) or str(term or "").strip().lower()
+    if not candidate:
+        return ""
+    candidate = re.sub(r"\d+", "#", candidate)
+    candidate = re.sub(r"#+", "#", candidate)
+    return candidate
+
+
+def _is_recent_negative_acquisition_status(status: str, built_at: str) -> bool:
+    status = str(status or "").strip()
+    built_at = str(built_at or "").strip()
+    if status not in {
+        "true-missing-evidence",
+        "exact-evidence-nonclosing",
+        "attempted-missing",
+        "relation-coverage-missing",
+        "recent-nonclosing-skip",
+    }:
+        return False
+    try:
+        built_at_dt = datetime.fromisoformat(built_at)
+    except ValueError:
+        return True
+    return datetime.now() - built_at_dt < timedelta(
+        minutes=ACQUISITION_NONCLOSING_RETRY_COOLDOWN_MINUTES
+    )
+
+
+def _cached_recent_nonclosing_acquisition_seams() -> dict[tuple[str, str], dict[str, Any]]:
+    cached = _trace_bundle_cache_get("best-gap-nonclosing-acquisition-seams", "all")
+    if cached is not None:
+        return {
+            (str(key[0]), str(key[1])): dict(value)
+            for key, value in cached.items()
+        }
+    rows = get_trace_db().list_latest_materialized_acquisition_diagnostics_views("cifi-full", "libil2cpp.so")
+    latest_request_by_seam: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in rows:
+        payload = dict(row.get("payload") or {})
+        trace_scope = str(row.get("traceScope") or "").strip()
+        seam_id = str(payload.get("seamId") or "").strip()
+        request_signature = str(row.get("requestSignature") or "").strip()
+        built_at = str(row.get("builtAt") or "").strip()
+        if not trace_scope or not seam_id or not request_signature or not built_at:
+            continue
+        seam_key = (trace_scope, seam_id)
+        current = latest_request_by_seam.get(seam_key)
+        if current is not None:
+            current_sort = int(re.sub(r"\D", "", str(current.get("builtAt") or "")) or "0")
+            candidate_sort = int(re.sub(r"\D", "", built_at) or "0")
+            if candidate_sort < current_sort:
+                continue
+            if candidate_sort == current_sort and request_signature != str(current.get("requestSignature") or ""):
+                continue
+        bucket = current
+        if bucket is None or request_signature != str(bucket.get("requestSignature") or ""):
+            bucket = {
+                "requestSignature": request_signature,
+                "builtAt": built_at,
+                "statuses": [],
+            }
+            latest_request_by_seam[seam_key] = bucket
+        bucket["statuses"].append(str(payload.get("status") or "").strip())
+    stalled: dict[tuple[str, str], dict[str, Any]] = {}
+    nonclosing_statuses = {
+        "knowledge-covered-skip",
+        "recent-nonclosing-skip",
+        "true-missing-evidence",
+        "exact-evidence-nonclosing",
+    }
+    for seam_key, payload in latest_request_by_seam.items():
+        statuses = {
+            str(status).strip()
+            for status in (payload.get("statuses") or [])
+            if str(status).strip()
+        }
+        if not statuses:
+            continue
+        if "exact-evidence-found" in statuses:
+            continue
+        if not statuses.issubset(nonclosing_statuses):
+            continue
+        stalled[seam_key] = {
+            "requestSignature": str(payload.get("requestSignature") or ""),
+            "builtAt": str(payload.get("builtAt") or ""),
+            "statuses": sorted(statuses),
+        }
+    _trace_bundle_cache_put(
+        "best-gap-nonclosing-acquisition-seams",
+        "all",
+        {key: dict(value) for key, value in stalled.items()},
+    )
+    return stalled
+
+
+def _is_atomic_multiverse_typed_owner_term(term: str) -> bool:
+    candidate = str(term or "").strip()
+    if not candidate:
+        return False
+    return candidate in {
+        "PlayerProfileHandler",
+        "PlayerProfileData",
+        "SaveData",
+        "ArcadeSaveData",
+        "MultiverseMarket",
+        "Market",
+        "FillPlayerProfileData",
+        "ConvertSaveDataToProfileData",
+        "InscryptionsDone",
+        "EsotericR1Trades",
+        "IS1Level",
+        "IS71Level",
+        "IS110Level",
+    }
+
+
+def _classify_incremental_native_terms(
+    trace_scope: str,
+    seam_id: str,
+    requested_terms: list[str],
+    *,
+    coverage_mode: str = "term-shaped",
+    force_retrace: bool = False,
+    use_fast_evidence_only: bool = False,
+) -> dict[str, list[str]]:
+    normalized_terms = unique_strings([str(term).strip() for term in requested_terms if str(term).strip()])
+    if not normalized_terms:
+        return {
+            "traceTerms": [],
+            "knowledgeCoveredTerms": [],
+            "deferredNonclosingTerms": [],
+        }
+    trace_scope = str(trace_scope or "").strip()
+    seam_id = str(seam_id or "").strip()
+    scope_only_mode = not seam_id
+    if force_retrace or not trace_scope:
+        return {
+            "traceTerms": normalized_terms,
+            "knowledgeCoveredTerms": [],
+            "deferredNonclosingTerms": [],
+        }
+    latest_rows = get_trace_db().list_latest_materialized_acquisition_diagnostics_for_scope(
+        "cifi-full",
+        "libil2cpp.so",
+        trace_scope,
+    )
+    latest_by_term: dict[str, dict[str, Any]] = {}
+    for row in latest_rows:
+        term = str(row.get("acquisitionTerm") or "").strip()
+        if not term:
+            continue
+        normalized_term = normalize_planner_term(term) or term.lower()
+        candidate = dict(row)
+        current = latest_by_term.get(normalized_term)
+        candidate_sort = int(re.sub(r"\D", "", str(candidate.get("builtAt") or "")) or "0")
+        current_sort = int(re.sub(r"\D", "", str((current or {}).get("builtAt") or "")) or "0")
+        if current is None or candidate_sort >= current_sort:
+            latest_by_term[normalized_term] = candidate
+    trace_terms: list[str] = []
+    knowledge_covered_terms: list[str] = []
+    deferred_nonclosing_terms: list[str] = []
+    use_fast_evidence_only = use_fast_evidence_only or str(coverage_mode or "term-shaped").strip() == "boundary-shaped"
+    if use_fast_evidence_only:
+        _prime_fast_term_evidence_summaries(normalized_terms)
+    for term in normalized_terms:
+        normalized_term = normalize_planner_term(term) or term.lower()
+        existing_evidence = (
+            _cached_fast_term_evidence_summary(term)
+            if use_fast_evidence_only
+            else _cached_contract_term_evidence(term)
+        )
+        if bool(existing_evidence.get("found")):
+            if (
+                str(trace_scope or "").strip() == "multiverse-market-save-owner-boundary"
+                and str(seam_id or "").strip() == "typed-market-field-recovery"
+                and _is_atomic_multiverse_typed_owner_term(term)
+            ):
+                knowledge_covered_terms.append(term)
+                continue
+            knowledge_covered_terms.append(term)
+            continue
+        row = latest_by_term.get(normalized_term) or {}
+        payload = dict(row.get("payload") or {})
+        status = str(payload.get("status") or "").strip()
+        payload_seam = str(payload.get("seamId") or "").strip()
+        built_at = str(row.get("builtAt") or "").strip()
+        status_matches_scope = (
+            payload_seam == seam_id
+            if seam_id
+            else payload_seam == ""
+        )
+        if status_matches_scope and status == "exact-evidence-found":
+            knowledge_covered_terms.append(term)
+            continue
+        recent_nonclosing = False
+        if status_matches_scope:
+            recent_nonclosing = _is_recent_negative_acquisition_status(status, built_at)
+        if recent_nonclosing:
+            deferred_nonclosing_terms.append(term)
+            continue
+        trace_terms.append(term)
+    return {
+        "traceTerms": unique_strings(trace_terms),
+        "knowledgeCoveredTerms": unique_strings(knowledge_covered_terms),
+        "deferredNonclosingTerms": unique_strings(deferred_nonclosing_terms),
+    }
+
+
 def _looks_like_concrete_acquisition_anchor(term: str) -> bool:
     candidate = str(term or "").strip()
     if not candidate:
+        return False
+    if len(candidate.split()) > 2:
+        return False
+    lowered = candidate.lower()
+    if " through " in lowered:
+        return False
+    if "+" in candidate:
+        return False
+    if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)+", candidate):
         return False
     if candidate.endswith("Button"):
         return True
     if candidate.startswith("Buy"):
         return True
-    if "Prefab" in candidate:
+    if " " not in candidate and "Prefab" in candidate:
         return True
     if candidate.isdigit():
+        return True
+    if re.fullmatch(r"[A-Z][a-z]+", candidate):
+        return False
+    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", candidate):
         return True
     if candidate.endswith(("Cost", "Bonus", "Fill", "FillMaxLevel", "MaxLevel", "Overlay", "Content", "Text")):
         return True
     return False
+
+
+def _looks_like_actionable_gap_term(term: str) -> bool:
+    candidate = str(term or "").strip()
+    if not candidate:
+        return False
+    if candidate.lower() in {
+        "class",
+        "method",
+        "string",
+        "path id",
+        "cost",
+        "bonus",
+        "fill",
+        "level",
+        "value",
+        "text",
+        "title",
+        "effect",
+        "content",
+        "overlay",
+        "data",
+    }:
+        return False
+    if _looks_like_concrete_acquisition_anchor(candidate):
+        return True
+    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)+", candidate):
+        return True
+    return False
+
+
+_GENERIC_ANCHOR_DOMAIN_TOKENS = {
+    "token",
+    "tokens",
+    "boost",
+    "booster",
+    "button",
+    "title",
+    "text",
+    "content",
+    "overlay",
+    "effect",
+    "family",
+    "trace",
+    "bridge",
+    "runtime",
+    "model",
+    "gap",
+    "exact",
+    "path",
+    "shell",
+    "row",
+    "rows",
+    "prefab",
+    "new",
+    "upg",
+    "bonus",
+    "buy",
+}
+
+
+def _tokenize_anchor_domain_text(value: Any) -> list[str]:
+    candidate = str(value or "").strip()
+    if not candidate:
+        return []
+    candidate = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", candidate)
+    raw_tokens = re.split(r"[^A-Za-z0-9]+", candidate)
+    output: list[str] = []
+    for token in raw_tokens:
+        normalized = str(token or "").strip().lower()
+        if not normalized or len(normalized) <= 1:
+            continue
+        if normalized.isdigit():
+            continue
+        output.append(normalized)
+    return output
+
+
+def _build_anchor_domain_tokens(
+    trace_scope: str,
+    seam_id: str,
+    subject_key: str,
+    target_id: str,
+    selected_anchors: list[str] | None = None,
+    requested_terms: list[str] | None = None,
+) -> set[str]:
+    tokens: set[str] = set()
+    for value in [
+        trace_scope,
+        seam_id,
+        subject_key,
+        target_id,
+    ]:
+        for token in _tokenize_anchor_domain_text(value):
+            if token in _GENERIC_ANCHOR_DOMAIN_TOKENS:
+                continue
+            tokens.add(token)
+    return tokens
+
+
+def _scope_anchor_relevance_score(
+    trace_scope: str,
+    seam_id: str,
+    subject_key: str,
+    target_id: str,
+    routine_id: str,
+    anchor: str,
+    *,
+    selected_anchors: list[str] | None = None,
+    requested_terms: list[str] | None = None,
+    local_bridge_terms: list[str] | None = None,
+) -> float:
+    candidate = str(anchor or "").strip()
+    if not candidate:
+        return float("-inf")
+    anchor_tokens = [
+        token
+        for token in _tokenize_anchor_domain_text(candidate)
+        if token not in _GENERIC_ANCHOR_DOMAIN_TOKENS
+    ]
+    if not anchor_tokens:
+        return float("-inf")
+    domain_tokens = _build_anchor_domain_tokens(
+        trace_scope,
+        seam_id,
+        subject_key,
+        target_id,
+        selected_anchors=selected_anchors,
+        requested_terms=requested_terms,
+    )
+    overlap = len([token for token in anchor_tokens if token in domain_tokens])
+    score = float(overlap * 12.0)
+    lowered_anchor = candidate.lower()
+    lowered_scope = str(trace_scope or "").lower()
+    lowered_routine = str(routine_id or "").lower()
+    if candidate.startswith("NewTokenUPGPrefab.") and overlap == 0:
+        score -= 20.0
+    if "family-trace" in lowered_routine and candidate.startswith("NewTokenUPGPrefab.") and overlap <= 1:
+        score -= 12.0
+    if "atu3" in lowered_scope:
+        if any(token in {"cellboost", "cells", "chest", "diamondchest", "tokenchest", "cellgains", "admanager"} for token in anchor_tokens):
+            score += 18.0
+        if candidate.startswith("NewTokenUPGPrefab.") and not any(
+            token in {"cellboost", "cells", "chest"} for token in anchor_tokens
+        ):
+            score -= 18.0
+    if local_bridge_terms:
+        local_bridge_tokens = _build_anchor_domain_tokens("", "", "", " ".join(local_bridge_terms))
+        local_overlap = len([token for token in anchor_tokens if token in local_bridge_tokens])
+        score += local_overlap * 10.0
+    return score
+
+
+def _prioritize_scope_admissible_anchors(
+    trace_scope: str,
+    seam_id: str,
+    subject_key: str,
+    target_id: str,
+    routine_id: str,
+    anchors: list[str],
+    *,
+    selected_anchors: list[str] | None = None,
+    requested_terms: list[str] | None = None,
+    local_bridge_terms: list[str] | None = None,
+) -> list[str]:
+    candidate_anchors = unique_strings([str(value).strip() for value in (anchors or []) if str(value).strip()])
+    if len(candidate_anchors) <= 1:
+        return candidate_anchors
+    scored: list[tuple[float, str]] = []
+    positive_terms: list[tuple[float, str]] = []
+    for anchor in candidate_anchors:
+        score = _scope_anchor_relevance_score(
+            trace_scope,
+            seam_id,
+            subject_key,
+            target_id,
+            routine_id,
+            anchor,
+            selected_anchors=selected_anchors,
+            requested_terms=requested_terms,
+            local_bridge_terms=local_bridge_terms,
+        )
+        scored.append((score, anchor))
+        if score > 0:
+            positive_terms.append((score, anchor))
+    chosen = positive_terms if positive_terms else scored
+    chosen.sort(key=lambda item: (-item[0], item[1]))
+    return [anchor for _, anchor in chosen]
+
+
+def _prefer_scope_specific_execution_routine(
+    trace_scope: str,
+    current_routine: str,
+    resolver_target_payload: dict[str, Any] | None = None,
+) -> str:
+    trace_scope_value = str(trace_scope or "").strip()
+    current = str(current_routine or "").strip()
+    resolver_hint = str((resolver_target_payload or {}).get("traceRoutineHint") or "").strip()
+    if not resolver_hint:
+        return current
+    if not current:
+        return resolver_hint
+    if resolver_hint == current:
+        return current
+    if "family-trace" in current and "family-trace" not in resolver_hint and trace_scope_value:
+        return resolver_hint
+    return current
+
+
+def _extract_materialized_bundle_candidate_terms(bundle: dict[str, Any] | None) -> list[str]:
+    payload = dict(bundle or {})
+    bridge_check = dict(payload.get("bridgeCheck") or {})
+    shell_window = dict(payload.get("shellWindow") or {})
+    terms = unique_strings(
+        [
+            str(shell_window.get("shellField") or "").strip(),
+            *[
+                str(value).strip()
+                for value in (bridge_check.get("candidateTerms") or [])
+                if str(value).strip()
+            ],
+            *[
+                str((entry or {}).get("term") or "").strip()
+                for entry in (bridge_check.get("bridgeHits") or [])
+                if isinstance(entry, dict) and str((entry or {}).get("term") or "").strip()
+            ],
+        ]
+    )
+    return [term for term in terms if _looks_like_actionable_gap_term(term)]
+
+
+def _scope_local_bridge_terms_exhausted(
+    trace_scope: str,
+    terms: list[str] | None,
+    latest_acquisition_status: dict[tuple[str, str, str], dict[str, Any]] | None = None,
+) -> bool:
+    candidate_terms = unique_strings([str(value).strip() for value in (terms or []) if str(value).strip()])
+    if not candidate_terms:
+        return False
+    latest_status = latest_acquisition_status or _cached_latest_acquisition_status_by_scope_term()
+    covered_or_bounded = 0
+    for term in candidate_terms:
+        normalized = normalize_planner_term(term) or term.lower()
+        term_row = _latest_term_frontier_row(term) or {}
+        if int(term_row.get("directAcquisitionCount") or 0) > 0:
+            covered_or_bounded += 1
+            continue
+        fast_evidence = _cached_fast_term_evidence_summary(term) or {}
+        if bool(fast_evidence.get("found")):
+            covered_or_bounded += 1
+            continue
+        status_payload = dict(latest_status.get((trace_scope, "", normalized)) or {})
+        status_value = str(status_payload.get("status") or "").strip()
+        if status_value == "exact-evidence-found" or _is_recent_negative_acquisition_status(
+            status_value,
+            str(status_payload.get("builtAt") or "").strip(),
+        ):
+            covered_or_bounded += 1
+    return covered_or_bounded >= len(candidate_terms)
+
+
+def _build_handoff_relation_probe(
+    trace_scope: str,
+    seam_id: str,
+    routine_id: str,
+    anchor: str,
+    local_bridge_terms: list[str] | None = None,
+) -> dict[str, Any]:
+    candidate_anchor = str(anchor or "").strip()
+    bridge_terms = unique_strings([str(value).strip() for value in (local_bridge_terms or []) if str(value).strip()])
+    expected_terms = [candidate_anchor]
+    return {
+        "probeId": f"handoff:{trace_scope}:{seam_id or 'edge'}:{normalize_planner_term(candidate_anchor) or candidate_anchor.lower()}",
+        "label": f"{seam_id or 'handoff-edge'} {candidate_anchor}",
+        "probeMode": "relation-shaped",
+        "traceScope": trace_scope,
+        "requiredCoverageSeamIds": [seam_id] if seam_id else [],
+        "requiredFactKinds": [],
+        "requiredRelationKinds": [],
+        "progressRelationKinds": [],
+        "progressEdgeTypes": [],
+        "expectedTerms": expected_terms,
+        "anchors": [candidate_anchor],
+        "routine": routine_id,
+        "contextTerms": bridge_terms[:4],
+        "whyChosen": [
+            "handoff-edge fallback",
+            f"blocked seam {seam_id or 'none'} still needs cross-surface bridge evidence",
+        ],
+    }
+
+
+def _infer_scope_row_token(*values: Any) -> str:
+    combined = " ".join(str(value or "") for value in values)
+    match = re.search(r"(atu\d+)", combined, re.IGNORECASE)
+    return match.group(1).lower() if match else ""
+
+
+def _looks_like_handoff_anchor(value: str) -> bool:
+    candidate = str(value or "").strip().lower()
+    if not candidate:
+        return False
+    return any(
+        token in candidate
+        for token in (
+            "get_",
+            "chest",
+            "bonus",
+            "gain",
+            "final",
+            "admanager",
+            "routine",
+            "setbooster",
+            "cellboost",
+        )
+    )
 
 
 def _term_evidence_score(evidence: dict[str, Any]) -> float:
@@ -1473,6 +2442,127 @@ def _summarize_acquisition_action(acquisition_plan: dict[str, Any]) -> dict[str,
         "whyChosen": [str(value) for value in (step.get("whyChosen") or acquisition_plan.get("anchorSelectionReasons") or []) if str(value).strip()],
         "coverageMode": str(step.get("coverageMode") or acquisition_plan.get("coverageMode") or ""),
         "relationProbe": relation_probe or None,
+    }
+
+
+def _describe_best_gap_actionability(
+    trace_scope: str,
+    seam_id: str,
+    acquisition_plan: dict[str, Any],
+    *,
+    requested_terms_override: list[str] | None = None,
+) -> dict[str, Any]:
+    coverage_mode = str(acquisition_plan.get("coverageMode") or "term-shaped").strip() or "term-shaped"
+    requested_terms = unique_strings(
+        [
+            *[
+                str(value).strip()
+                for value in (requested_terms_override or [])
+                if str(value).strip()
+            ],
+            *[
+                str(value).strip()
+                for value in (acquisition_plan.get("requestedTerms") or [])
+                if str(value).strip()
+            ],
+        ]
+    )
+    selected_anchors = unique_strings(
+        [str(value).strip() for value in (acquisition_plan.get("selectedAnchors") or []) if str(value).strip()]
+    )
+    candidate_terms = list(requested_terms or selected_anchors)
+    if coverage_mode == "term-shaped":
+        concrete_requested_terms = [term for term in requested_terms if _looks_like_actionable_gap_term(term)]
+        concrete_anchor_terms = [term for term in selected_anchors if _looks_like_actionable_gap_term(term)]
+        if concrete_requested_terms:
+            candidate_terms = concrete_requested_terms
+        elif concrete_anchor_terms:
+            candidate_terms = concrete_anchor_terms
+        elif candidate_terms:
+            return {
+                "candidateTerms": candidate_terms,
+                "traceTerms": [],
+                "knowledgeCoveredTerms": [],
+                "deferredTerms": [],
+                "readiness": "nonconcrete-anchor-noop",
+                "rank": 3,
+                "scoreDelta": -40.0,
+            }
+    stalled_seam = (_cached_recent_nonclosing_acquisition_seams()).get(
+        (str(trace_scope or "").strip(), str(seam_id or "").strip())
+    )
+    if stalled_seam:
+        seam_built_at = str(stalled_seam.get("builtAt") or "").strip()
+        if seam_built_at:
+            try:
+                seam_age = datetime.now() - datetime.fromisoformat(seam_built_at)
+            except ValueError:
+                seam_age = None
+            if seam_age is not None and seam_age < timedelta(minutes=ACQUISITION_NONCLOSING_RETRY_COOLDOWN_MINUTES):
+                return {
+                    "candidateTerms": candidate_terms,
+                    "traceTerms": [],
+                    "knowledgeCoveredTerms": [],
+                    "deferredTerms": candidate_terms,
+                    "readiness": "cooldown-deferred",
+                    "rank": 2,
+                    "scoreDelta": -28.0,
+                }
+    classification = _classify_incremental_native_terms(
+        trace_scope,
+        seam_id,
+        candidate_terms,
+        coverage_mode=coverage_mode,
+        force_retrace=False,
+        use_fast_evidence_only=True,
+    )
+    trace_terms = list(classification.get("traceTerms") or [])
+    knowledge_covered_terms = list(classification.get("knowledgeCoveredTerms") or [])
+    deferred_terms = list(classification.get("deferredNonclosingTerms") or [])
+    relation_probe = dict(acquisition_plan.get("selectedRelationProbe") or {})
+    required_relation_seams = unique_strings(
+        [
+            str(value).strip()
+            for value in (
+                relation_probe.get("requiredCoverageSeamIds")
+                or ([seam_id] if str(seam_id or "").strip() else [])
+            )
+            if str(value).strip()
+        ]
+    )
+    if trace_terms:
+        readiness = "traceable-new-terms"
+        rank = 0
+        score_delta = 36.0 + len(trace_terms) * 18.0
+    elif coverage_mode == "relation-shaped" and required_relation_seams and not deferred_terms:
+        readiness = "relation-probe-open"
+        rank = 1
+        score_delta = 16.0
+    elif coverage_mode == "term-shaped" and not candidate_terms:
+        readiness = "nonconcrete-anchor-noop"
+        rank = 3
+        score_delta = -36.0
+    elif candidate_terms and not knowledge_covered_terms and not deferred_terms:
+        readiness = "db-only-probe"
+        rank = 1
+        score_delta = 8.0
+    elif deferred_terms:
+        readiness = "cooldown-deferred"
+        rank = 2
+        score_delta = -18.0 - len(deferred_terms) * 4.0
+    else:
+        readiness = "knowledge-covered-noop"
+        rank = 3
+        score_delta = -32.0 - len(knowledge_covered_terms) * 2.0
+    return {
+        "coverageMode": coverage_mode,
+        "candidateTerms": candidate_terms,
+        "traceTerms": trace_terms,
+        "knowledgeCoveredTerms": knowledge_covered_terms,
+        "deferredTerms": deferred_terms,
+        "readiness": readiness,
+        "rank": rank,
+        "scoreDelta": score_delta,
     }
 
 
@@ -1498,6 +2588,7 @@ def _build_acquisition_first_best_gap_candidates(
         for row in target_rows
         if str(row.get("traceScope") or "").strip()
     }
+    registry_targets = dict(registry.get("targets") or {})
     canonical_row_subjects_by_scope: dict[str, set[str]] = {}
     for row in subject_state_rows:
         trace_scope = str(row.get("traceScope") or "").strip()
@@ -1614,9 +2705,65 @@ def _build_acquisition_first_best_gap_candidates(
 
     candidates: list[dict[str, Any]] = []
     exhausted_acquisition_terms = _cached_recent_nonclosing_acquisition_terms()
+    latest_acquisition_status = _cached_latest_acquisition_status_by_scope_term()
+    prewarm_terms = unique_strings(
+        [
+            *[
+                str(value)
+                for base in candidate_bases
+                for value in (dict(base.get("acquisitionPlan") or {}).get("requestedTerms") or [])
+                if _looks_like_actionable_gap_term(str(value).strip())
+            ],
+            *[
+                str(value)
+                for base in candidate_bases
+                for value in (base.get("selectedAnchors") or [])
+                if _looks_like_actionable_gap_term(str(value).strip())
+            ],
+            *[
+                str(value)
+                for base in candidate_bases
+                for value in (dict(dict(base.get("acquisitionPlan") or {}).get("selectedRelationProbe") or {}).get("expectedTerms") or [])
+                if _looks_like_actionable_gap_term(str(value).strip())
+            ],
+        ]
+    )
+    _prime_fast_term_evidence_summaries(prewarm_terms)
     for base in candidate_bases:
         acquisition_plan = dict(base.get("acquisitionPlan") or {})
         selected_seam_id = str(acquisition_plan.get("selectedSeamId") or "").strip()
+        subject_state = dict(base.get("subjectState") or {})
+        subject_key = str(subject_state.get("subjectKey") or subject_state.get("subjectId") or "").strip()
+        local_bundle_terms = _extract_materialized_bundle_candidate_terms(
+            load_latest_materialized_target_bundle(str(base.get("traceScope") or ""))
+        )
+        sibling_handoff_terms: list[str] = []
+        current_family_id = str((base.get("target") or {}).get("familyId") or _infer_runtime_family_id(base.get("traceScope"), base.get("targetId")) or "").strip()
+        current_row_token = _infer_scope_row_token(base.get("traceScope"), base.get("targetId"), subject_key)
+        if current_family_id and current_row_token:
+            for sibling_target_id, sibling_target in registry_targets.items():
+                sibling_scope = str((sibling_target or {}).get("traceScope") or (sibling_target or {}).get("executionTraceScope") or sibling_target_id).strip()
+                if sibling_scope == str(base.get("traceScope") or ""):
+                    continue
+                sibling_family_id = str((sibling_target or {}).get("familyId") or _infer_runtime_family_id(sibling_scope, sibling_target_id) or "").strip()
+                if sibling_family_id != current_family_id or _infer_scope_row_token(sibling_scope, sibling_target_id) != current_row_token:
+                    continue
+                sibling_handoff_terms.extend(
+                    [
+                        str(value).strip()
+                        for value in ((sibling_target or {}).get("defaultAnchors") or [])
+                        if _looks_like_actionable_gap_term(str(value).strip())
+                    ]
+                )
+                sibling_handoff_terms.extend(
+                    _extract_materialized_bundle_candidate_terms(load_latest_materialized_target_bundle(sibling_scope))
+                )
+        sibling_handoff_terms = unique_strings(sibling_handoff_terms)
+        local_bundle_terms_exhausted = _scope_local_bridge_terms_exhausted(
+            str(base.get("traceScope") or ""),
+            local_bundle_terms,
+            latest_acquisition_status,
+        )
         exhausted_terms = exhausted_acquisition_terms.get(
             (str(base.get("traceScope") or "").strip(), selected_seam_id),
             set(),
@@ -1628,6 +2775,12 @@ def _build_acquisition_first_best_gap_candidates(
                 for value in (selected_relation_probe.get("expectedTerms") or acquisition_plan.get("requestedTerms") or [])
                 if str(value).strip()
             ]
+            actionability = _describe_best_gap_actionability(
+                str(selected_relation_probe.get("traceScope") or base.get("traceScope") or ""),
+                selected_seam_id,
+                acquisition_plan,
+                requested_terms_override=relation_terms,
+            )
             evidence = _aggregate_term_evidence_summaries(relation_terms)
             evidence_frequency = {
                 "payloadHitTotal": sum(int((entry or {}).get("count") or 0) for entry in (evidence.get("payloadHits") or []) if isinstance(entry, dict)),
@@ -1640,11 +2793,17 @@ def _build_acquisition_first_best_gap_candidates(
                 + len([edge for edge in (base.get("knownEdgeTypes") or []) if str(edge).strip()]) * 6.0
                 + 48.0
                 - min(int(base.get("runCount") or 0), 8) * 1.5
+                + float(actionability.get("scoreDelta") or 0.0)
             )
-            subject_state = dict(base.get("subjectState") or {})
             action_plan = dict(acquisition_plan)
             action_plan["selectedAnchors"] = list(selected_relation_probe.get("anchors") or action_plan.get("selectedAnchors") or [])
             action_plan["requestedTerms"] = relation_terms
+            specialized_routine = _prefer_scope_specific_execution_routine(
+                str(selected_relation_probe.get("traceScope") or base.get("traceScope") or ""),
+                str(selected_relation_probe.get("routine") or ""),
+                dict(base.get("resolverTargetPayload") or {}),
+            )
+            action_plan["selectedRoutine"] = specialized_routine or action_plan.get("selectedRoutine") or ""
             candidate = {
                 "targetId": str(base.get("targetId") or ""),
                 "traceScope": str(base.get("traceScope") or ""),
@@ -1669,7 +2828,7 @@ def _build_acquisition_first_best_gap_candidates(
                 "selectedAnchors": list(action_plan.get("selectedAnchors") or []),
                 "anchorSelectionReasons": unique_strings([*list(action_plan.get("anchorSelectionReasons") or []), "relation-shaped runtime-model probe"]),
                 "selectedSeamId": str(action_plan.get("selectedSeamId") or ((subject_state.get("nextSeam") or {}).get("id")) or "").strip(),
-                "executionRoutineId": str(selected_relation_probe.get("routine") or (base.get("resolverTargetPayload") or {}).get("traceRoutineHint") or base.get("traceScope") or "generic-explore"),
+                "executionRoutineId": str(specialized_routine or (base.get("resolverTargetPayload") or {}).get("traceRoutineHint") or base.get("traceScope") or "generic-explore"),
                 "targetAliases": list(subject_state.get("targetAliases") or []),
                 "acquisitionPlan": action_plan,
                 "score": round(score, 2),
@@ -1680,6 +2839,11 @@ def _build_acquisition_first_best_gap_candidates(
                 "evidence": evidence,
                 "evidenceTerms": relation_terms,
                 "evidenceFrequency": evidence_frequency,
+                "acquisitionReadiness": str(actionability.get("readiness") or ""),
+                "acquisitionReadinessRank": int(actionability.get("rank") or 0),
+                "traceableTerms": list(actionability.get("traceTerms") or []),
+                "knowledgeCoveredTerms": list(actionability.get("knowledgeCoveredTerms") or []),
+                "deferredTerms": list(actionability.get("deferredTerms") or []),
                 "canonicalSubjectsMentioningAnchor": [
                     {
                         "subjectId": str(subject_state.get("subjectId") or ""),
@@ -1700,28 +2864,191 @@ def _build_acquisition_first_best_gap_candidates(
             for value in (acquisition_plan.get("requestedTerms") or [])
             if str(value).strip()
         ]
-        if any(_looks_like_concrete_acquisition_anchor(term) for term in requested_term_pool):
-            candidate_anchor_pool = unique_strings(requested_term_pool)
-        else:
-            candidate_anchor_pool = unique_strings(
-                [
-                    *requested_term_pool,
-                    *[
-                        str(value)
-                        for value in (base.get("selectedAnchors") or [])
-                        if str(value).strip()
-                    ],
-                ]
-            )
+        exhausted_term_keys = {
+            normalize_planner_term(str(value).strip()) or str(value).strip().lower()
+            for value in exhausted_terms
+            if str(value).strip()
+        }
+        candidate_anchor_pool = unique_strings(
+            [
+                *requested_term_pool,
+                *[
+                    str(value)
+                    for value in (base.get("selectedAnchors") or [])
+                    if str(value).strip()
+                ],
+            ]
+        )
         candidate_anchor_pool = [anchor for anchor in candidate_anchor_pool if _looks_like_concrete_acquisition_anchor(anchor)]
-        unexhausted_anchor_pool = [anchor for anchor in candidate_anchor_pool if anchor not in exhausted_terms]
+        unexhausted_anchor_pool = [
+            anchor
+            for anchor in candidate_anchor_pool
+            if (normalize_planner_term(anchor) or anchor.lower()) not in exhausted_term_keys
+        ]
         if unexhausted_anchor_pool:
             candidate_anchor_pool = unexhausted_anchor_pool
         if not candidate_anchor_pool:
-            candidate_anchor_pool = list(base.get("selectedAnchors") or [])[:1]
+            fallback_selected_anchors = [
+                str(value).strip()
+                for value in (base.get("selectedAnchors") or [])
+                if str(value).strip()
+                and (normalize_planner_term(str(value).strip()) or str(value).strip().lower())
+                not in exhausted_term_keys
+            ]
+            candidate_anchor_pool = fallback_selected_anchors[:1]
+        actionable_anchor_pool = [
+            anchor for anchor in candidate_anchor_pool
+            if _looks_like_actionable_gap_term(anchor)
+        ]
+        candidate_routine = _prefer_scope_specific_execution_routine(
+            str(base.get("traceScope") or ""),
+            str((base.get("resolverTargetPayload") or {}).get("traceRoutineHint") or base.get("traceScope") or "generic-explore"),
+            dict(base.get("resolverTargetPayload") or {}),
+        )
+        prioritized_anchor_pool = _prioritize_scope_admissible_anchors(
+            str(base.get("traceScope") or ""),
+            selected_seam_id,
+            subject_key,
+            str(base.get("targetId") or ""),
+            candidate_routine,
+            actionable_anchor_pool or candidate_anchor_pool,
+            selected_anchors=list(base.get("selectedAnchors") or []),
+            requested_terms=requested_term_pool,
+            local_bridge_terms=local_bundle_terms,
+        )
+        if prioritized_anchor_pool:
+            candidate_anchor_pool = prioritized_anchor_pool
+        uncovered_actionable_anchor_pool = [
+            anchor for anchor in actionable_anchor_pool
+            if not bool((_cached_fast_term_evidence_summary(anchor) or {}).get("found"))
+        ]
+        if uncovered_actionable_anchor_pool:
+            candidate_anchor_pool = _prioritize_scope_admissible_anchors(
+                str(base.get("traceScope") or ""),
+                selected_seam_id,
+                subject_key,
+                str(base.get("targetId") or ""),
+                candidate_routine,
+                uncovered_actionable_anchor_pool,
+                selected_anchors=list(base.get("selectedAnchors") or []),
+                requested_terms=requested_term_pool,
+                local_bridge_terms=local_bundle_terms,
+            ) or uncovered_actionable_anchor_pool
+        elif actionable_anchor_pool:
+            candidate_anchor_pool = _prioritize_scope_admissible_anchors(
+                str(base.get("traceScope") or ""),
+                selected_seam_id,
+                subject_key,
+                str(base.get("targetId") or ""),
+                candidate_routine,
+                actionable_anchor_pool,
+                selected_anchors=list(base.get("selectedAnchors") or []),
+                requested_terms=requested_term_pool,
+                local_bridge_terms=local_bundle_terms,
+            ) or actionable_anchor_pool
+        handoff_anchor_pool: list[str] = []
+        if local_bundle_terms_exhausted and local_bundle_terms:
+            preferred_sibling_handoff_terms = [
+                anchor for anchor in sibling_handoff_terms if _looks_like_handoff_anchor(anchor)
+            ]
+            handoff_anchor_pool = [
+                anchor
+                for anchor in unique_strings([*preferred_sibling_handoff_terms, *(actionable_anchor_pool or candidate_anchor_pool), *sibling_handoff_terms])
+                if _scope_anchor_relevance_score(
+                    str(base.get("traceScope") or ""),
+                    selected_seam_id,
+                    subject_key,
+                    str(base.get("targetId") or ""),
+                    candidate_routine,
+                    anchor,
+                ) > 0
+                and str(anchor).strip() not in set(local_bundle_terms)
+            ]
+            candidate_anchor_pool = [
+                anchor
+                for anchor in candidate_anchor_pool
+                if _scope_anchor_relevance_score(
+                    str(base.get("traceScope") or ""),
+                    selected_seam_id,
+                    subject_key,
+                    str(base.get("targetId") or ""),
+                    candidate_routine,
+                    anchor,
+                    local_bridge_terms=local_bundle_terms,
+                ) > 0
+            ]
+            if handoff_anchor_pool and selected_seam_id:
+                candidate_anchor_pool = handoff_anchor_pool
+        if not candidate_anchor_pool:
+            if local_bundle_terms_exhausted and handoff_anchor_pool and selected_seam_id:
+                candidate_anchor_pool = handoff_anchor_pool
+                acquisition_plan["coverageMode"] = "relation-shaped"
+            action_plan = dict(acquisition_plan)
+            actionability = _describe_best_gap_actionability(
+                str(base.get("traceScope") or ""),
+                str(action_plan.get("selectedSeamId") or ""),
+                action_plan,
+            )
+            candidate = {
+                "targetId": str(base.get("targetId") or ""),
+                "traceScope": str(base.get("traceScope") or ""),
+                "executionTraceScope": str(base.get("traceScope") or base.get("targetId") or ""),
+                "selectedSubjectKind": str(subject_state.get("subjectKind") or ""),
+                "selectedSubjectKey": str(subject_state.get("subjectKey") or subject_state.get("subjectId") or ""),
+                "selectedSubjectLabel": str(subject_state.get("subjectLabel") or subject_state.get("subjectId") or ""),
+                "label": str((base.get("target") or {}).get("label") or base.get("traceScope") or ""),
+                "familyId": str((base.get("target") or {}).get("familyId") or _infer_runtime_family_id(base.get("traceScope"), base.get("targetId")) or ""),
+                "verdict": str((base.get("decisionSummary") or {}).get("verdict") or ""),
+                "blockedEdgeTypes": list(base.get("blockedEdgeTypes") or []),
+                "baselineGap": list(base.get("baselineGap") or []),
+                "unresolvedEdgeTypes": list(base.get("unresolvedEdgeTypes") or []),
+                "knownEdgeTypes": list(base.get("knownEdgeTypes") or []),
+                "nonblockingEdgeTypes": list(base.get("nonblockingEdgeTypes") or []),
+                "provedEdgeCount": int((base.get("decisionSummary") or {}).get("provedEdgeCount") or len(base.get("knownEdgeTypes") or [])),
+                "negativeEdgeCount": int((base.get("decisionSummary") or {}).get("negativeEdgeCount") or len(base.get("blockedEdgeTypes") or [])),
+                "semanticScopeIds": list(base.get("semanticScopeIds") or []),
+                "nativeAvailable": bool(((base.get("targetPayload") or {}).get("nativeView") or {}).get("available") is True),
+                "nativeSearchTerms": list((((base.get("targetPayload") or {}).get("nativeView") or {}).get("searchTerms") or [])),
+                "anchors": list(base.get("selectedAnchors") or []),
+                "selectedAnchors": [],
+                "anchorSelectionReasons": ["all concrete anchors for this seam are currently exhausted by recent non-closing diagnostics"],
+                "selectedSeamId": str(action_plan.get("selectedSeamId") or ((subject_state.get("nextSeam") or {}).get("id")) or "").strip(),
+                "executionRoutineId": str(candidate_routine or base.get("traceScope") or "generic-explore"),
+                "targetAliases": list(subject_state.get("targetAliases") or []),
+                "acquisitionPlan": action_plan,
+                "score": round(float(base.get("runCount") or 0) * -1.0, 2),
+                "builtAt": str(base.get("builtAt") or ""),
+                "decisionSummary": dict(base.get("decisionSummary") or {}),
+                "subjectState": subject_state,
+                "runCount": int(base.get("runCount") or 0),
+                "unresolvedAnchor": "",
+                "evidence": {},
+                "evidenceFrequency": {},
+                "acquisitionReadiness": "cooldown-deferred",
+                "acquisitionReadinessRank": int(actionability.get("rank") or 0),
+                "traceableTerms": [],
+                "knowledgeCoveredTerms": list(actionability.get("knowledgeCoveredTerms") or []),
+                "deferredTerms": sorted(exhausted_terms),
+                "canonicalSubjectsMentioningAnchor": [],
+                "knownSummary": list(base.get("knownEdgeTypes") or []),
+                "unknownSummary": unique_strings([*list(base.get("blockedEdgeTypes") or []), *list(base.get("baselineGap") or [])]),
+                "plannedAction": _summarize_acquisition_action(action_plan),
+                "coverageMode": str(action_plan.get("coverageMode") or ""),
+                "selectionMode": "acquisition-first-canonical-evidence",
+                "materializedProvenance": {
+                    "traceScope": str(base.get("traceScope") or ""),
+                    "targetAliases": list(subject_state.get("targetAliases") or []),
+                    "runCount": int(base.get("runCount") or 0),
+                },
+            }
+            candidates.append(candidate)
+            continue
         for unresolved_anchor in candidate_anchor_pool[:4]:
+            normalized_unresolved_anchor = normalize_planner_term(unresolved_anchor) or unresolved_anchor.lower()
+            if normalized_unresolved_anchor in exhausted_term_keys:
+                continue
             evidence = _cached_fast_term_evidence_summary(unresolved_anchor)
-            normalized_anchor = normalize_planner_term(unresolved_anchor) or unresolved_anchor.lower()
+            normalized_anchor = normalized_unresolved_anchor
             canonical_subject_mentions = list(subject_mentions_by_anchor.get(normalized_anchor) or [])
             evidence_frequency = {
                 "payloadHitTotal": sum(int((entry or {}).get("count") or 0) for entry in (evidence.get("payloadHits") or []) if isinstance(entry, dict)),
@@ -1731,18 +3058,23 @@ def _build_acquisition_first_best_gap_candidates(
             }
             action_plan = dict(acquisition_plan)
             action_plan["selectedAnchors"] = [unresolved_anchor]
+            action_plan["selectedRoutine"] = candidate_routine or action_plan.get("selectedRoutine") or ""
             action_plan["anchorSelectionReasons"] = unique_strings(
                 [*list(action_plan.get("anchorSelectionReasons") or []), f"ranked unresolved anchor {unresolved_anchor}"]
             )
+            use_handoff_probe = bool(local_bundle_terms_exhausted and handoff_anchor_pool and unresolved_anchor in handoff_anchor_pool and selected_seam_id)
             if unresolved_anchor in {
                 str(value).strip()
                 for value in (acquisition_plan.get("requestedTerms") or [])
                 if str(value).strip()
             }:
                 action_plan["requestedTerms"] = [unresolved_anchor]
+            elif use_handoff_probe:
+                action_plan["requestedTerms"] = [unresolved_anchor]
             action_steps: list[dict[str, Any]] = []
             for step in [dict(item) for item in (acquisition_plan.get("steps") or []) if isinstance(item, dict)]:
                 narrowed_step = dict(step)
+                narrowed_step["executionRoutineId"] = candidate_routine or narrowed_step.get("executionRoutineId") or ""
                 narrowed_step["anchors"] = [unresolved_anchor]
                 if unresolved_anchor in {
                     str(value).strip()
@@ -1753,8 +3085,25 @@ def _build_acquisition_first_best_gap_candidates(
                 narrowed_step["whyChosen"] = unique_strings(
                     [*list(narrowed_step.get("whyChosen") or []), f"ranked unresolved anchor {unresolved_anchor}"]
                 )
+                if use_handoff_probe:
+                    narrowed_step["coverageMode"] = "relation-shaped"
+                    narrowed_step["expectedTerms"] = [unresolved_anchor]
                 action_steps.append(narrowed_step)
             action_plan["steps"] = action_steps
+            if use_handoff_probe:
+                action_plan["coverageMode"] = "relation-shaped"
+                action_plan["selectedRelationProbe"] = _build_handoff_relation_probe(
+                    str(base.get("traceScope") or ""),
+                    selected_seam_id,
+                    candidate_routine,
+                    unresolved_anchor,
+                    local_bundle_terms,
+                )
+            actionability = _describe_best_gap_actionability(
+                str(base.get("traceScope") or ""),
+                str(action_plan.get("selectedSeamId") or ""),
+                action_plan,
+            )
             score = (
                 _term_evidence_score(evidence)
                 + len(canonical_subject_mentions) * 18.0
@@ -1764,8 +3113,8 @@ def _build_acquisition_first_best_gap_candidates(
                 + (4.0 if "Prefab" in unresolved_anchor else 0.0)
                 - len([edge for edge in (base.get("blockedEdgeTypes") or []) if str(edge).strip()]) * 2.0
                 - min(int(base.get("runCount") or 0), 8) * 1.5
+                + float(actionability.get("scoreDelta") or 0.0)
             )
-            subject_state = dict(base.get("subjectState") or {})
             candidate = {
                 "targetId": str(base.get("targetId") or ""),
                 "traceScope": str(base.get("traceScope") or ""),
@@ -1792,7 +3141,7 @@ def _build_acquisition_first_best_gap_candidates(
                     [*list(action_plan.get("anchorSelectionReasons") or []), f"evidence-first unresolved anchor {unresolved_anchor}"]
                 ),
                 "selectedSeamId": str(action_plan.get("selectedSeamId") or ((subject_state.get("nextSeam") or {}).get("id")) or "").strip(),
-                "executionRoutineId": str((base.get("resolverTargetPayload") or {}).get("traceRoutineHint") or base.get("traceScope") or "generic-explore"),
+                "executionRoutineId": str(candidate_routine or base.get("traceScope") or "generic-explore"),
                 "targetAliases": list(subject_state.get("targetAliases") or []),
                 "acquisitionPlan": action_plan,
                 "score": round(score, 2),
@@ -1803,6 +3152,11 @@ def _build_acquisition_first_best_gap_candidates(
                 "unresolvedAnchor": unresolved_anchor,
                 "evidence": evidence,
                 "evidenceFrequency": evidence_frequency,
+                "acquisitionReadiness": str(actionability.get("readiness") or ""),
+                "acquisitionReadinessRank": int(actionability.get("rank") or 0),
+                "traceableTerms": list(actionability.get("traceTerms") or []),
+                "knowledgeCoveredTerms": list(actionability.get("knowledgeCoveredTerms") or []),
+                "deferredTerms": list(actionability.get("deferredTerms") or []),
                 "canonicalSubjectsMentioningAnchor": canonical_subject_mentions[:8],
                 "knownSummary": list(base.get("knownEdgeTypes") or []),
                 "unknownSummary": unique_strings([*list(base.get("blockedEdgeTypes") or []), *list(base.get("baselineGap") or [])]),
@@ -1816,10 +3170,623 @@ def _build_acquisition_first_best_gap_candidates(
                 },
             }
             candidates.append(candidate)
+        if selected_seam_id and sibling_handoff_terms:
+            sibling_relation_anchor_pool = _prioritize_scope_admissible_anchors(
+                str(base.get("traceScope") or ""),
+                selected_seam_id,
+                subject_key,
+                str(base.get("targetId") or ""),
+                candidate_routine,
+                sibling_handoff_terms,
+            )
+            if not sibling_relation_anchor_pool:
+                sibling_relation_anchor_pool = unique_strings(sibling_handoff_terms)
+            for sibling_anchor in sibling_relation_anchor_pool[:2]:
+                action_plan = dict(acquisition_plan)
+                action_plan["coverageMode"] = "relation-shaped"
+                action_plan["selectedAnchors"] = [sibling_anchor]
+                action_plan["selectedRoutine"] = candidate_routine or action_plan.get("selectedRoutine") or ""
+                action_plan["requestedTerms"] = unique_strings([sibling_anchor, *local_bundle_terms[:4]])
+                action_plan["requestedTerms"] = [sibling_anchor]
+                action_plan["selectedRelationProbe"] = _build_handoff_relation_probe(
+                    str(base.get("traceScope") or ""),
+                    selected_seam_id,
+                    candidate_routine,
+                    sibling_anchor,
+                    local_bundle_terms,
+                )
+                action_plan["anchorSelectionReasons"] = unique_strings(
+                    [*list(action_plan.get("anchorSelectionReasons") or []), f"sibling handoff anchor {sibling_anchor}"]
+                )
+                action_plan["steps"] = [
+                    {
+                        "traceScope": str(base.get("traceScope") or ""),
+                        "seamId": selected_seam_id,
+                        "executionRoutineId": candidate_routine,
+                        "anchors": [sibling_anchor],
+                        "expectedTerms": unique_strings([sibling_anchor, *local_bundle_terms[:4]]),
+                        "expectedTerms": [sibling_anchor],
+                        "coverageMode": "relation-shaped",
+                        "relationProbe": dict(action_plan.get("selectedRelationProbe") or {}),
+                        "whyChosen": [f"sibling handoff anchor {sibling_anchor}"],
+                    }
+                ]
+                actionability = _describe_best_gap_actionability(
+                    str(base.get("traceScope") or ""),
+                    selected_seam_id,
+                    action_plan,
+                )
+                if not _best_gap_readiness_is_actionable({"acquisitionReadiness": actionability.get("readiness")}):
+                    continue
+                sibling_evidence = _cached_fast_term_evidence_summary(sibling_anchor)
+                candidates.append(
+                    {
+                        "targetId": str(base.get("targetId") or ""),
+                        "traceScope": str(base.get("traceScope") or ""),
+                        "executionTraceScope": str(base.get("traceScope") or base.get("targetId") or ""),
+                        "selectedSubjectKind": str(subject_state.get("subjectKind") or ""),
+                        "selectedSubjectKey": str(subject_state.get("subjectKey") or subject_state.get("subjectId") or ""),
+                        "selectedSubjectLabel": str(subject_state.get("subjectLabel") or subject_state.get("subjectId") or ""),
+                        "label": str((base.get("target") or {}).get("label") or base.get("traceScope") or ""),
+                        "familyId": str((base.get("target") or {}).get("familyId") or _infer_runtime_family_id(base.get("traceScope"), base.get("targetId")) or ""),
+                        "verdict": str((base.get("decisionSummary") or {}).get("verdict") or ""),
+                        "blockedEdgeTypes": list(base.get("blockedEdgeTypes") or []),
+                        "baselineGap": list(base.get("baselineGap") or []),
+                        "unresolvedEdgeTypes": list(base.get("unresolvedEdgeTypes") or []),
+                        "knownEdgeTypes": list(base.get("knownEdgeTypes") or []),
+                        "nonblockingEdgeTypes": list(base.get("nonblockingEdgeTypes") or []),
+                        "provedEdgeCount": int((base.get("decisionSummary") or {}).get("provedEdgeCount") or len(base.get("knownEdgeTypes") or [])),
+                        "negativeEdgeCount": int((base.get("decisionSummary") or {}).get("negativeEdgeCount") or len(base.get("blockedEdgeTypes") or [])),
+                        "semanticScopeIds": list(base.get("semanticScopeIds") or []),
+                        "nativeAvailable": bool(((base.get("targetPayload") or {}).get("nativeView") or {}).get("available") is True),
+                        "nativeSearchTerms": list((((base.get("targetPayload") or {}).get("nativeView") or {}).get("searchTerms") or [])),
+                        "anchors": list(base.get("selectedAnchors") or []),
+                        "selectedAnchors": [sibling_anchor],
+                        "anchorSelectionReasons": list(action_plan.get("anchorSelectionReasons") or []),
+                        "selectedSeamId": selected_seam_id,
+                        "executionRoutineId": str(candidate_routine or base.get("traceScope") or "generic-explore"),
+                        "targetAliases": list(subject_state.get("targetAliases") or []),
+                        "acquisitionPlan": action_plan,
+                        "score": round(120.0 + float(actionability.get("scoreDelta") or 0.0) + _term_evidence_score(sibling_evidence), 2),
+                        "builtAt": str(base.get("builtAt") or ""),
+                        "decisionSummary": dict(base.get("decisionSummary") or {}),
+                        "subjectState": subject_state,
+                        "runCount": int(base.get("runCount") or 0),
+                        "unresolvedAnchor": sibling_anchor,
+                        "evidence": sibling_evidence,
+                        "evidenceFrequency": {},
+                        "acquisitionReadiness": str(actionability.get("readiness") or ""),
+                        "acquisitionReadinessRank": int(actionability.get("rank") or 0),
+                        "traceableTerms": list(actionability.get("traceTerms") or []),
+                        "knowledgeCoveredTerms": list(actionability.get("knowledgeCoveredTerms") or []),
+                        "deferredTerms": list(actionability.get("deferredTerms") or []),
+                        "canonicalSubjectsMentioningAnchor": [],
+                        "knownSummary": list(base.get("knownEdgeTypes") or []),
+                        "unknownSummary": unique_strings([*list(base.get("blockedEdgeTypes") or []), *list(base.get("baselineGap") or [])]),
+                        "plannedAction": _summarize_acquisition_action(action_plan),
+                        "coverageMode": "relation-shaped",
+                        "selectionMode": "acquisition-first-sibling-handoff",
+                        "materializedProvenance": {
+                            "traceScope": str(base.get("traceScope") or ""),
+                            "targetAliases": list(subject_state.get("targetAliases") or []),
+                            "runCount": int(base.get("runCount") or 0),
+                        },
+                    }
+                )
+        if not any(
+            str(candidate.get("traceScope") or "").strip() == str(base.get("traceScope") or "").strip()
+            and str(candidate.get("selectedSeamId") or "").strip() == str(acquisition_plan.get("selectedSeamId") or "").strip()
+            for candidate in candidates
+        ):
+            action_plan = dict(acquisition_plan)
+            actionability = _describe_best_gap_actionability(
+                str(base.get("traceScope") or ""),
+                str(action_plan.get("selectedSeamId") or ""),
+                action_plan,
+            )
+            subject_state = dict(base.get("subjectState") or {})
+            candidates.append(
+                {
+                    "targetId": str(base.get("targetId") or ""),
+                    "traceScope": str(base.get("traceScope") or ""),
+                    "executionTraceScope": str(base.get("traceScope") or base.get("targetId") or ""),
+                    "selectedSubjectKind": str(subject_state.get("subjectKind") or ""),
+                    "selectedSubjectKey": str(subject_state.get("subjectKey") or subject_state.get("subjectId") or ""),
+                    "selectedSubjectLabel": str(subject_state.get("subjectLabel") or subject_state.get("subjectId") or ""),
+                    "label": str((base.get("target") or {}).get("label") or base.get("traceScope") or ""),
+                    "familyId": str((base.get("target") or {}).get("familyId") or _infer_runtime_family_id(base.get("traceScope"), base.get("targetId")) or ""),
+                    "verdict": str((base.get("decisionSummary") or {}).get("verdict") or ""),
+                    "blockedEdgeTypes": list(base.get("blockedEdgeTypes") or []),
+                    "baselineGap": list(base.get("baselineGap") or []),
+                    "unresolvedEdgeTypes": list(base.get("unresolvedEdgeTypes") or []),
+                    "knownEdgeTypes": list(base.get("knownEdgeTypes") or []),
+                    "nonblockingEdgeTypes": list(base.get("nonblockingEdgeTypes") or []),
+                    "provedEdgeCount": int((base.get("decisionSummary") or {}).get("provedEdgeCount") or len(base.get("knownEdgeTypes") or [])),
+                    "negativeEdgeCount": int((base.get("decisionSummary") or {}).get("negativeEdgeCount") or len(base.get("blockedEdgeTypes") or [])),
+                    "semanticScopeIds": list(base.get("semanticScopeIds") or []),
+                    "nativeAvailable": bool(((base.get("targetPayload") or {}).get("nativeView") or {}).get("available") is True),
+                    "nativeSearchTerms": list((((base.get("targetPayload") or {}).get("nativeView") or {}).get("searchTerms") or [])),
+                    "anchors": list(base.get("selectedAnchors") or []),
+                    "selectedAnchors": [],
+                    "anchorSelectionReasons": [
+                        "all concrete anchors for this seam are currently exhausted by prior non-closing diagnostics"
+                    ],
+                    "selectedSeamId": str(action_plan.get("selectedSeamId") or ((subject_state.get("nextSeam") or {}).get("id")) or "").strip(),
+                    "executionRoutineId": str((base.get("resolverTargetPayload") or {}).get("traceRoutineHint") or base.get("traceScope") or "generic-explore"),
+                    "targetAliases": list(subject_state.get("targetAliases") or []),
+                    "acquisitionPlan": action_plan,
+                    "score": round(float(base.get("runCount") or 0) * -1.0, 2),
+                    "builtAt": str(base.get("builtAt") or ""),
+                    "decisionSummary": dict(base.get("decisionSummary") or {}),
+                    "subjectState": subject_state,
+                    "runCount": int(base.get("runCount") or 0),
+                    "unresolvedAnchor": "",
+                    "evidence": {},
+                    "evidenceFrequency": {},
+                    "acquisitionReadiness": "cooldown-deferred",
+                    "acquisitionReadinessRank": int(actionability.get("rank") or 0),
+                    "traceableTerms": [],
+                    "knowledgeCoveredTerms": list(actionability.get("knowledgeCoveredTerms") or []),
+                    "deferredTerms": sorted(exhausted_terms),
+                    "canonicalSubjectsMentioningAnchor": [],
+                    "knownSummary": list(base.get("knownEdgeTypes") or []),
+                    "unknownSummary": unique_strings([*list(base.get("blockedEdgeTypes") or []), *list(base.get("baselineGap") or [])]),
+                    "plannedAction": _summarize_acquisition_action(action_plan),
+                    "coverageMode": str(action_plan.get("coverageMode") or ""),
+                    "selectionMode": "acquisition-first-canonical-evidence",
+                    "materializedProvenance": {
+                        "traceScope": str(base.get("traceScope") or ""),
+                        "targetAliases": list(subject_state.get("targetAliases") or []),
+                        "runCount": int(base.get("runCount") or 0),
+                    },
+                }
+            )
+    actionable_candidates = [
+        candidate
+        for candidate in candidates
+        if str(candidate.get("acquisitionReadiness") or "") not in {"knowledge-covered-noop", "cooldown-deferred"}
+    ]
+    if actionable_candidates:
+        return actionable_candidates
     return candidates
 
 
-def choose_best_gap_plan(registry: dict[str, Any] | None = None) -> dict[str, Any]:
+def _build_registry_fallback_best_gap_candidates(
+    registry: dict[str, Any],
+    run_counts: dict[str, int],
+    subject_state_rows: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    targets = dict(registry.get("targets") or {})
+    candidates: list[dict[str, Any]] = []
+    exhausted_acquisition_terms = _cached_recent_nonclosing_acquisition_terms()
+    latest_acquisition_status = _cached_latest_acquisition_status_by_scope_term()
+    subject_state_rows_list = list(subject_state_rows or [])
+    subject_state_payloads_by_scope: dict[str, dict[str, Any]] = {}
+    for row in subject_state_rows_list:
+        trace_scope = str(row.get("traceScope") or "").strip()
+        if not trace_scope or trace_scope in subject_state_payloads_by_scope:
+            continue
+        selected_row = _pick_best_subject_state_for_trace_scope(
+            trace_scope,
+            trace_scope,
+            subject_state_rows_list,
+        )
+        if selected_row:
+            subject_state_payloads_by_scope[trace_scope] = dict(selected_row.get("payload") or {})
+    for target_id, target in targets.items():
+        target = dict(target or {})
+        trace_scope = str(target.get("traceScope") or target.get("executionTraceScope") or target_id).strip()
+        family_id = str(target.get("familyId") or _infer_runtime_family_id(trace_scope, target_id) or "").strip()
+        if not trace_scope or trace_scope == "generic-explore" or not family_id:
+            continue
+        recent_negative_shape_signatures: set[str] = set()
+        for (status_scope, status_seam, status_term), status_payload in latest_acquisition_status.items():
+            if status_scope != trace_scope or str(status_seam or "").strip():
+                continue
+            if not _is_recent_negative_acquisition_status(
+                str(status_payload.get("status") or "").strip(),
+                str(status_payload.get("builtAt") or "").strip(),
+            ):
+                continue
+            shape_signature = _planner_term_shape_signature(status_term)
+            if shape_signature:
+                recent_negative_shape_signatures.add(shape_signature)
+        subject_state_payload = dict(subject_state_payloads_by_scope.get(trace_scope) or {})
+        subject_decision_summary = dict(subject_state_payload.get("decisionSummary") or {})
+        subject_verdict = str(subject_decision_summary.get("verdict") or "").strip().lower()
+        subject_blocked_edges = [
+            str(value).strip()
+            for value in (subject_state_payload.get("blockedEdges") or subject_decision_summary.get("blockedEdgeTypes") or [])
+            if str(value).strip()
+        ]
+        subject_missing_edges = [
+            str(value).strip()
+            for value in (subject_state_payload.get("missingEdges") or subject_decision_summary.get("baselineGap") or [])
+            if str(value).strip()
+        ]
+        subject_next_seam_id = str(dict(subject_state_payload.get("nextSeam") or {}).get("id") or "").strip()
+        fallback_relation_seam_id = subject_next_seam_id or (subject_blocked_edges[0] if subject_blocked_edges else "") or (subject_missing_edges[0] if subject_missing_edges else "")
+        if subject_verdict == "wire" and not subject_blocked_edges and not subject_missing_edges and not subject_next_seam_id:
+            continue
+        materialized_bundle_terms = _extract_materialized_bundle_candidate_terms(
+            load_latest_materialized_target_bundle(trace_scope)
+        )
+        local_bundle_terms_exhausted = _scope_local_bridge_terms_exhausted(
+            trace_scope,
+            materialized_bundle_terms,
+            latest_acquisition_status,
+        )
+        default_terms = unique_strings(
+            [
+                str(value).strip()
+                for value in (target.get("defaultAnchors") or [])
+                if _looks_like_actionable_gap_term(str(value).strip())
+            ]
+            + materialized_bundle_terms
+        )
+        if not default_terms:
+            continue
+        actionable_term_rows = {
+            term: _latest_term_frontier_row(term)
+            for term in default_terms
+        }
+        unresolved_terms = []
+        covered_terms = []
+        for term in default_terms:
+            fast_evidence = _cached_fast_term_evidence_summary(term) or {}
+            term_row = actionable_term_rows.get(term) or {}
+            direct_count = int(term_row.get("directAcquisitionCount") or 0)
+            latest_scope_term_status = dict(
+                latest_acquisition_status.get((trace_scope, "", normalize_planner_term(term) or term.lower())) or {}
+            )
+            is_found = bool(fast_evidence.get("found"))
+            if not is_found:
+                if str(latest_scope_term_status.get("status") or "").strip() == "exact-evidence-found":
+                    covered_terms.append(term)
+                    continue
+                unresolved_terms.append(term)
+                continue
+            if direct_count > 0:
+                covered_terms.append(term)
+                continue
+            unresolved_terms.append(term)
+        candidate_term_pool = unresolved_terms
+        named_term_pool = [
+            term for term in candidate_term_pool
+            if not re.fullmatch(r"\d+", str(term or "").strip())
+        ]
+        if named_term_pool:
+            candidate_term_pool = named_term_pool
+        shaped_term_pool = [
+            term for term in candidate_term_pool
+            if _planner_term_shape_signature(term) not in recent_negative_shape_signatures
+        ]
+        if shaped_term_pool:
+            candidate_term_pool = shaped_term_pool
+        if not candidate_term_pool:
+            continue
+        execution_routine = str(
+            target.get("traceRoutineHint")
+            or target.get("executionRoutineHint")
+            or _default_execution_routine_for_family(family_id, trace_scope)
+        ).strip()
+        selected_subject_kind = str(target.get("selectedSubjectKind") or "trace-target")
+        selected_subject_key = str(target.get("selectedSubjectKey") or target_id)
+        selected_subject_label = str(target.get("label") or target_id)
+        if family_id == "token-shop" and "family" not in trace_scope:
+            expected_match = re.search(r"(atu\d+)", " ".join([trace_scope, target_id, selected_subject_label]), re.IGNORECASE)
+            if expected_match:
+                expected_row_field = f"{expected_match.group(1).upper()}Button"
+                selected_subject_kind = "row-local"
+                selected_subject_key = f"row:{expected_row_field}"
+                selected_subject_label = expected_row_field
+        execution_routine = _prefer_scope_specific_execution_routine(
+            trace_scope,
+            execution_routine,
+            {"traceRoutineHint": str(target.get("traceRoutineHint") or target.get("executionRoutineHint") or "")},
+        )
+        candidate_term_pool = _prioritize_scope_admissible_anchors(
+            trace_scope,
+            "",
+            selected_subject_key,
+            target_id,
+            execution_routine,
+            candidate_term_pool,
+            selected_anchors=default_terms,
+            requested_terms=default_terms,
+            local_bridge_terms=materialized_bundle_terms,
+        ) or candidate_term_pool
+        handoff_term_pool: list[str] = []
+        if local_bundle_terms_exhausted and materialized_bundle_terms:
+            handoff_term_pool = [
+                anchor
+                for anchor in unique_strings(candidate_term_pool + unresolved_terms)
+                if _scope_anchor_relevance_score(
+                    trace_scope,
+                    fallback_relation_seam_id,
+                    selected_subject_key,
+                    target_id,
+                    execution_routine,
+                    anchor,
+                ) > 0
+                and str(anchor).strip() not in set(materialized_bundle_terms)
+            ]
+            candidate_term_pool = [
+                anchor
+                for anchor in candidate_term_pool
+                if _scope_anchor_relevance_score(
+                    trace_scope,
+                    fallback_relation_seam_id,
+                    selected_subject_key,
+                    target_id,
+                    execution_routine,
+                    anchor,
+                    local_bridge_terms=materialized_bundle_terms,
+                ) > 0
+            ]
+            if not candidate_term_pool and handoff_term_pool and fallback_relation_seam_id:
+                candidate_term_pool = handoff_term_pool
+        acquisition_plan = {
+            "selectedScope": trace_scope,
+            "selectedRoutine": execution_routine,
+            "selectedSeamId": fallback_relation_seam_id,
+            "coverageMode": "term-shaped",
+            "selectedAnchors": [],
+            "requestedTerms": [],
+            "steps": [],
+            "anchorSelectionReasons": ["registry target fallback", "raw DB/registry-driven extraction"],
+        }
+        for anchor in candidate_term_pool[:4]:
+            action_plan = dict(acquisition_plan)
+            action_plan["selectedAnchors"] = [anchor]
+            use_handoff_probe = bool(local_bundle_terms_exhausted and handoff_term_pool and anchor in handoff_term_pool and fallback_relation_seam_id)
+            action_plan["requestedTerms"] = unique_strings([anchor, *materialized_bundle_terms[:4]]) if use_handoff_probe else [anchor]
+            if use_handoff_probe:
+                action_plan["coverageMode"] = "relation-shaped"
+                action_plan["selectedRelationProbe"] = _build_handoff_relation_probe(
+                    trace_scope,
+                    fallback_relation_seam_id,
+                    execution_routine,
+                    anchor,
+                    materialized_bundle_terms,
+                )
+            action_plan["steps"] = [
+                {
+                    "traceScope": trace_scope,
+                    "seamId": fallback_relation_seam_id,
+                    "executionRoutineId": execution_routine,
+                    "anchors": [anchor],
+                    "expectedTerms": unique_strings([anchor, *materialized_bundle_terms[:4]]) if use_handoff_probe else [anchor],
+                    "coverageMode": "relation-shaped" if use_handoff_probe else "term-shaped",
+                    "relationProbe": dict(action_plan.get("selectedRelationProbe") or {}) if use_handoff_probe else None,
+                    "whyChosen": ["registry target fallback", f"ranked unresolved anchor {anchor}"],
+                }
+            ]
+            selected_seam_id = fallback_relation_seam_id if use_handoff_probe else ""
+            exhausted_terms = exhausted_acquisition_terms.get((trace_scope, selected_seam_id), set())
+            normalized_anchor = normalize_planner_term(anchor) or anchor.lower()
+            if normalized_anchor in exhausted_terms:
+                continue
+            actionability = _describe_best_gap_actionability(
+                trace_scope,
+                selected_seam_id,
+                action_plan,
+            )
+            evidence = _cached_fast_term_evidence_summary(anchor)
+            term_row = actionable_term_rows.get(anchor) or {}
+            score = (
+                58.0
+                + float(actionability.get("scoreDelta") or 0.0)
+                - min(int(run_counts.get(trace_scope) or 0), 8) * 1.5
+                + _term_evidence_score(evidence)
+            )
+            candidate = {
+                "targetId": target_id,
+                "traceScope": trace_scope,
+                "executionTraceScope": trace_scope,
+                "selectedSubjectKind": selected_subject_kind,
+                "selectedSubjectKey": selected_subject_key,
+                "selectedSubjectLabel": selected_subject_label,
+                "label": str(target.get("label") or target_id),
+                "familyId": family_id,
+                "verdict": "explore",
+                "blockedEdgeTypes": [],
+                "baselineGap": [],
+                "unresolvedEdgeTypes": [],
+                "knownEdgeTypes": [],
+                "nonblockingEdgeTypes": [],
+                "provedEdgeCount": 0,
+                "negativeEdgeCount": 0,
+                "semanticScopeIds": [],
+                "nativeAvailable": False,
+                "nativeSearchTerms": [],
+                "anchors": candidate_term_pool,
+                "selectedAnchors": [anchor],
+                "anchorSelectionReasons": ["registry target fallback", f"ranked unresolved anchor {anchor}"],
+                "selectedSeamId": fallback_relation_seam_id if use_handoff_probe else "",
+                "executionRoutineId": execution_routine,
+                "targetAliases": [target_id, trace_scope],
+                "acquisitionPlan": action_plan,
+                "score": round(score, 2),
+                "builtAt": "",
+                "decisionSummary": {"verdict": "explore"},
+                "subjectState": {},
+                "runCount": int(run_counts.get(trace_scope) or 0),
+                "unresolvedAnchor": anchor,
+                "evidence": evidence,
+                "evidenceFrequency": {
+                    "payloadHitTotal": sum(int((entry or {}).get("count") or 0) for entry in (evidence.get("payloadHits") or []) if isinstance(entry, dict)),
+                    "payloadHits": [dict(entry) for entry in (evidence.get("payloadHits") or []) if isinstance(entry, dict)],
+                    "graphRefCount": len([entry for entry in (evidence.get("graphRefs") or []) if isinstance(entry, dict)]),
+                    "sourceIds": [str(source_id) for source_id in (evidence.get("sourceIds") or []) if str(source_id).strip()],
+                    "directAcquisitionCount": int(term_row.get("directAcquisitionCount") or 0),
+                },
+                "acquisitionReadiness": str(actionability.get("readiness") or ""),
+                "acquisitionReadinessRank": int(actionability.get("rank") or 0),
+                "traceableTerms": list(actionability.get("traceTerms") or []),
+                "knowledgeCoveredTerms": list(actionability.get("knowledgeCoveredTerms") or []),
+                "deferredTerms": list(actionability.get("deferredTerms") or []),
+                "canonicalSubjectsMentioningAnchor": [],
+                "knownSummary": [],
+                "unknownSummary": [],
+                "plannedAction": _summarize_acquisition_action(action_plan),
+                "coverageMode": "term-shaped",
+                "selectionMode": "registry-direct-extraction",
+            }
+            candidates.append(candidate)
+    actionable_candidates = [
+        candidate
+        for candidate in candidates
+        if _best_gap_readiness_is_actionable(candidate)
+    ]
+    if actionable_candidates:
+        return actionable_candidates
+    return candidates
+
+
+def _build_handoff_frontier_best_gap_candidates(
+    registry: dict[str, Any],
+    run_counts: dict[str, int],
+    target_rows: list[dict[str, Any]],
+    subject_state_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    target_payloads_by_scope = {
+        str(row.get("traceScope") or "").strip(): dict(row.get("payload") or {})
+        for row in target_rows
+        if str(row.get("traceScope") or "").strip()
+    }
+    registry_targets = dict(registry.get("targets") or {})
+    candidates: list[dict[str, Any]] = []
+    seen_scopes: set[str] = set()
+    for row in subject_state_rows:
+        trace_scope = str(row.get("traceScope") or "").strip()
+        if not trace_scope or trace_scope in seen_scopes:
+            continue
+        selected_row = _pick_best_subject_state_for_trace_scope(trace_scope, trace_scope, subject_state_rows)
+        if not selected_row:
+            continue
+        seen_scopes.add(trace_scope)
+        subject_state = dict(selected_row.get("payload") or {})
+        blocked_edges = [
+            str(value).strip()
+            for value in (subject_state.get("blockedEdges") or (dict(subject_state.get("decisionSummary") or {}).get("blockedEdgeTypes") or []))
+            if str(value).strip()
+        ]
+        seam_id = str(dict(subject_state.get("nextSeam") or {}).get("id") or "").strip() or (blocked_edges[0] if blocked_edges else "")
+        if not seam_id or not any(token in seam_id for token in ("handoff", "consumer", "runtime-model-gap", "read-site")):
+            continue
+        subject_key = str(subject_state.get("subjectKey") or subject_state.get("subjectId") or "").strip()
+        row_token = _infer_scope_row_token(trace_scope, subject_key)
+        current_target = dict((target_payloads_by_scope.get(trace_scope) or {}).get("target") or {})
+        family_id = str(current_target.get("familyId") or _infer_runtime_family_id(trace_scope, trace_scope) or "").strip()
+        if not row_token or not family_id:
+            continue
+        local_bridge_terms = _extract_materialized_bundle_candidate_terms(load_latest_materialized_target_bundle(trace_scope))
+        for sibling_target_id, sibling_target in registry_targets.items():
+            sibling_scope = str((sibling_target or {}).get("traceScope") or (sibling_target or {}).get("executionTraceScope") or sibling_target_id).strip()
+            if sibling_scope == trace_scope:
+                continue
+            sibling_family_id = str((sibling_target or {}).get("familyId") or _infer_runtime_family_id(sibling_scope, sibling_target_id) or "").strip()
+            if sibling_family_id != family_id or _infer_scope_row_token(sibling_scope, sibling_target_id) != row_token:
+                continue
+            routine_id = _prefer_scope_specific_execution_routine(
+                trace_scope,
+                str((sibling_target or {}).get("traceRoutineHint") or (sibling_target or {}).get("executionRoutineHint") or sibling_scope),
+                {"traceRoutineHint": str((sibling_target or {}).get("traceRoutineHint") or (sibling_target or {}).get("executionRoutineHint") or "")},
+            )
+            sibling_terms = unique_strings(
+                [
+                    str(value).strip()
+                    for value in ((sibling_target or {}).get("defaultAnchors") or [])
+                    if _looks_like_actionable_gap_term(str(value).strip()) and _looks_like_handoff_anchor(str(value).strip())
+                ]
+            )
+            for anchor in sibling_terms[:2]:
+                action_plan = {
+                    "selectedScope": trace_scope,
+                    "selectedRoutine": routine_id,
+                    "selectedSeamId": seam_id,
+                    "coverageMode": "relation-shaped",
+                    "selectedAnchors": [anchor],
+                    "requestedTerms": [anchor],
+                    "selectedRelationProbe": _build_handoff_relation_probe(trace_scope, seam_id, routine_id, anchor, local_bridge_terms),
+                    "anchorSelectionReasons": ["handoff frontier", f"sibling anchor {anchor} from {sibling_scope}"],
+                    "steps": [
+                        {
+                            "traceScope": trace_scope,
+                            "seamId": seam_id,
+                            "executionRoutineId": routine_id,
+                            "anchors": [anchor],
+                            "expectedTerms": [anchor],
+                            "coverageMode": "relation-shaped",
+                            "relationProbe": _build_handoff_relation_probe(trace_scope, seam_id, routine_id, anchor, local_bridge_terms),
+                            "whyChosen": ["handoff frontier", f"sibling anchor {anchor} from {sibling_scope}"],
+                        }
+                    ],
+                }
+                actionability = _describe_best_gap_actionability(trace_scope, seam_id, action_plan)
+                if not _best_gap_readiness_is_actionable({"acquisitionReadiness": actionability.get("readiness")}):
+                    continue
+                candidates.append(
+                    {
+                        "targetId": trace_scope,
+                        "traceScope": trace_scope,
+                        "executionTraceScope": trace_scope,
+                        "selectedSubjectKind": str(subject_state.get("subjectKind") or ""),
+                        "selectedSubjectKey": subject_key,
+                        "selectedSubjectLabel": str(subject_state.get("subjectLabel") or subject_state.get("subjectId") or ""),
+                        "label": str(current_target.get("label") or trace_scope),
+                        "familyId": family_id,
+                        "verdict": str((dict(subject_state.get("decisionSummary") or {})).get("verdict") or ""),
+                        "blockedEdgeTypes": blocked_edges,
+                        "baselineGap": list(subject_state.get("missingEdges") or []),
+                        "unresolvedEdgeTypes": unique_strings([*blocked_edges, *list(subject_state.get("missingEdges") or [])]),
+                        "knownEdgeTypes": list(subject_state.get("knownEdges") or []),
+                        "nonblockingEdgeTypes": list(subject_state.get("nonblockingEdges") or []),
+                        "provedEdgeCount": int((dict(subject_state.get("decisionSummary") or {})).get("provedEdgeCount") or 0),
+                        "negativeEdgeCount": int((dict(subject_state.get("decisionSummary") or {})).get("negativeEdgeCount") or 0),
+                        "semanticScopeIds": [],
+                        "nativeAvailable": False,
+                        "nativeSearchTerms": [],
+                        "anchors": [anchor],
+                        "selectedAnchors": [anchor],
+                        "anchorSelectionReasons": list(action_plan.get("anchorSelectionReasons") or []),
+                        "selectedSeamId": seam_id,
+                        "executionRoutineId": routine_id,
+                        "targetAliases": list(subject_state.get("targetAliases") or []),
+                        "acquisitionPlan": action_plan,
+                        "score": round(140.0 + float(actionability.get("scoreDelta") or 0.0), 2),
+                        "builtAt": str(selected_row.get("builtAt") or ""),
+                        "decisionSummary": dict(subject_state.get("decisionSummary") or {}),
+                        "subjectState": subject_state,
+                        "runCount": int(run_counts.get(trace_scope) or 0),
+                        "unresolvedAnchor": anchor,
+                        "evidence": _cached_fast_term_evidence_summary(anchor),
+                        "evidenceFrequency": {},
+                        "acquisitionReadiness": str(actionability.get("readiness") or ""),
+                        "acquisitionReadinessRank": int(actionability.get("rank") or 0),
+                        "traceableTerms": list(actionability.get("traceTerms") or []),
+                        "knowledgeCoveredTerms": list(actionability.get("knowledgeCoveredTerms") or []),
+                        "deferredTerms": list(actionability.get("deferredTerms") or []),
+                        "canonicalSubjectsMentioningAnchor": [],
+                        "knownSummary": list(subject_state.get("knownEdges") or []),
+                        "unknownSummary": unique_strings([*blocked_edges, *list(subject_state.get("missingEdges") or [])]),
+                        "plannedAction": _summarize_acquisition_action(action_plan),
+                        "coverageMode": "relation-shaped",
+                        "selectionMode": "handoff-frontier",
+                    }
+                )
+    _sort_best_gap_candidates(candidates)
+    return candidates
+
+
+def choose_best_gap_plan(
+    registry: dict[str, Any] | None = None,
+    *,
+    refresh_subject_views: bool = False,
+    excluded_signatures: set[tuple[Any, ...]] | None = None,
+    excluded_execution_signatures: set[tuple[Any, ...]] | None = None,
+) -> dict[str, Any]:
     registry = registry or load_request_catalog()
     with _trace_phase("DB reads", "phase.bestGapDbReads"):
         with _trace_profile_span("dbReads.bestGapRunCounts"):
@@ -1829,32 +3796,119 @@ def choose_best_gap_plan(registry: dict[str, Any] | None = None) -> dict[str, An
         resolver_target_rows = _materialized_resolver_target_rows()
     with _trace_phase("Candidate scoring", "phase.bestGapCandidateScoring"):
         with _trace_profile_span("candidateScoring.bestGap"):
-            candidates = _build_acquisition_first_best_gap_candidates(
+            preliminary_candidates = _build_acquisition_first_best_gap_candidates(
                 registry,
                 run_counts,
                 target_rows,
                 subject_state_rows,
                 resolver_target_rows,
             )
+            _sort_best_gap_candidates(preliminary_candidates)
+    candidates = preliminary_candidates
+    if not any(_best_gap_readiness_is_actionable(candidate) for candidate in candidates):
+        with _trace_phase("Handoff frontier scoring", "phase.bestGapHandoffFrontier"):
+            with _trace_profile_span("candidateScoring.bestGapHandoffFrontier"):
+                handoff_candidates = _build_handoff_frontier_best_gap_candidates(
+                    registry,
+                    run_counts,
+                    target_rows,
+                    subject_state_rows,
+                )
+        if handoff_candidates:
+            candidates = handoff_candidates
+        else:
+            with _trace_phase("Evidence frontier scoring", "phase.bestGapEvidenceFrontier"):
+                with _trace_profile_span("candidateScoring.bestGapEvidenceFrontier"):
+                    frontier_candidates = _build_evidence_frontier_best_gap_candidates(
+                        registry,
+                        run_counts,
+                        target_rows,
+                        resolver_target_rows,
+                    )
+            if frontier_candidates:
+                candidates = frontier_candidates
+            else:
+                with _trace_phase("Artifact frontier scoring", "phase.bestGapArtifactFrontier"):
+                    with _trace_profile_span("candidateScoring.bestGapArtifactFrontier"):
+                        artifact_candidates = _build_artifact_frontier_best_gap_candidates(
+                            registry,
+                            run_counts,
+                            target_rows,
+                            subject_state_rows,
+                            resolver_target_rows,
+                        )
+                if artifact_candidates:
+                    candidates = artifact_candidates
+                else:
+                    with _trace_phase("Registry fallback scoring", "phase.bestGapRegistryFallback"):
+                        with _trace_profile_span("candidateScoring.bestGapRegistryFallback"):
+                            fallback_candidates = _build_registry_fallback_best_gap_candidates(
+                                registry,
+                                run_counts,
+                                subject_state_rows,
+                            )
+                    if fallback_candidates:
+                        candidates = fallback_candidates
+    if refresh_subject_views:
+        preferred_scopes: set[str] = set()
+        lead_score = float(preliminary_candidates[0].get("score") or 0.0) if preliminary_candidates else 0.0
+        score_window = 2.5
+        for item in preliminary_candidates:
+            trace_scope = str(item.get("traceScope") or "").strip()
+            if not trace_scope:
+                continue
+            score = float(item.get("score") or 0.0)
+            if preferred_scopes and len(preferred_scopes) >= 3:
+                break
+            if not preferred_scopes or lead_score - score <= score_window:
+                preferred_scopes.add(trace_scope)
+            elif preferred_scopes:
+                break
+        with _trace_phase("DB refresh", "phase.bestGapRefresh"):
+            with _trace_profile_span("dbReads.bestGapPreferredScopeRefresh"):
+                _refresh_best_gap_subject_views(target_rows, preferred_scopes=preferred_scopes)
+            _trace_bundle_cache_drop("latest-subject-state-rows", "all")
+            _trace_bundle_cache_drop("materialized-resolver-target-rows", "all")
+            subject_state_rows = _latest_materialized_subject_state_rows()
+            resolver_target_rows = _materialized_resolver_target_rows()
+        with _trace_phase("Candidate scoring", "phase.bestGapCandidateScoring"):
+            with _trace_profile_span("candidateScoring.bestGap"):
+                candidates = _build_acquisition_first_best_gap_candidates(
+                    registry,
+                    run_counts,
+                    target_rows,
+                    subject_state_rows,
+                    resolver_target_rows,
+                )
     if not candidates:
         raise ValueError("No DB-backed blocked trace targets are currently available.")
-    candidates.sort(
-        key=lambda item: (
-            0 if str(item.get("coverageMode") or "") == "relation-shaped" else 1,
-            -float(item.get("score") or 0.0),
-            -int((item.get("evidenceFrequency") or {}).get("payloadHitTotal") or 0),
-            -len(item.get("canonicalSubjectsMentioningAnchor") or []),
-            -int(item.get("provedEdgeCount") or 0),
-            int(item.get("negativeEdgeCount") or 0),
-            int(len(item.get("blockedEdgeTypes") or [])),
-            str(item.get("unresolvedAnchor") or ""),
-            str(item.get("traceScope") or ""),
-        )
-    )
-    best = dict(candidates[0])
+    _sort_best_gap_candidates(candidates)
+    excluded_signatures = excluded_signatures or set()
+    excluded_execution_signatures = excluded_execution_signatures or set()
+    if excluded_signatures:
+        filtered_candidates = [
+            candidate for candidate in candidates
+            if _best_gap_progress_signature(candidate) not in excluded_signatures
+        ]
+        if not filtered_candidates:
+            raise ValueError("No DB-backed actionable alternatives remain after excluding stalled seam signatures.")
+        candidates = filtered_candidates
+    if excluded_execution_signatures:
+        filtered_candidates = [
+            candidate for candidate in candidates
+            if _best_gap_execution_signature(candidate) not in excluded_execution_signatures
+        ]
+        if not filtered_candidates:
+            raise ValueError("No DB-backed actionable alternatives remain after excluding stalled seam signatures.")
+        candidates = filtered_candidates
+    actionable_candidates = [candidate for candidate in candidates if _best_gap_readiness_is_actionable(candidate)]
+    if not actionable_candidates:
+        raise ValueError("No DB-backed actionable alternatives remain after filtering non-actionable candidates.")
+    _sort_best_gap_candidates(actionable_candidates)
+    best = dict(actionable_candidates[0])
     best["evidence"] = dict(best.get("evidence") or {})
     best["evidenceDetailMode"] = "summary-only"
-    best["rankedAlternatives"] = candidates[:5]
+    best["rankedAlternatives"] = actionable_candidates[:5]
     return best
 
 
@@ -1882,6 +3936,14 @@ def _print_best_gap_plan(best_gap_plan: dict[str, Any]) -> None:
             best_gap_plan.get("coverageMode") or "term-shaped",
             best_gap_plan.get("familyId") or "unknown",
             best_gap_plan.get("targetId") or "unknown",
+        )
+    )
+    print(
+        "  acquisitionReadiness={} traceable={} covered={} deferred={}".format(
+            best_gap_plan.get("acquisitionReadiness") or "unknown",
+            ",".join(best_gap_plan.get("traceableTerms") or []) or "none",
+            ",".join(best_gap_plan.get("knowledgeCoveredTerms") or []) or "none",
+            ",".join(best_gap_plan.get("deferredTerms") or []) or "none",
         )
     )
     if best_gap_plan.get("selectedSeamId") or best_gap_plan.get("executionRoutineId"):
@@ -1991,6 +4053,740 @@ def _print_best_gap_plan(best_gap_plan: dict[str, Any]) -> None:
         )
 
 
+def _best_gap_progress_signature(best_gap_plan: dict[str, Any]) -> tuple[Any, ...]:
+    subject_state = dict(best_gap_plan.get("subjectState") or {})
+    return (
+        str(best_gap_plan.get("traceScope") or ""),
+        str(best_gap_plan.get("selectedSeamId") or ""),
+        tuple(sorted(str(value).strip() for value in (subject_state.get("knownEdges") or []) if str(value).strip())),
+        tuple(sorted(str(value).strip() for value in (subject_state.get("blockedEdges") or []) if str(value).strip())),
+        tuple(sorted(str(value).strip() for value in (subject_state.get("missingEdges") or []) if str(value).strip())),
+        tuple(sorted(str(value).strip() for value in (subject_state.get("nonblockingEdges") or []) if str(value).strip())),
+        str(dict(subject_state.get("nextSeam") or {}).get("id") or ""),
+        str((best_gap_plan.get("decisionSummary") or {}).get("verdict") or ""),
+    )
+
+
+def _best_gap_execution_signature(best_gap_plan: dict[str, Any]) -> tuple[Any, ...]:
+    return (
+        str(best_gap_plan.get("traceScope") or ""),
+        str(best_gap_plan.get("selectedTargetId") or ""),
+        tuple(
+            sorted(
+                str(value).strip()
+                for value in (best_gap_plan.get("selectedAnchors") or best_gap_plan.get("anchors") or [])
+                if str(value).strip()
+            )
+        ),
+    )
+
+
+def _best_gap_run_made_progress(dataset: dict[str, Any]) -> bool:
+    post_run_discoveries = dict(dataset.get("postRunDiscoveries") or {})
+    exact_evidence_summary = dict(post_run_discoveries.get("exactEvidenceSummary") or {})
+    if int(exact_evidence_summary.get("newCount") or 0) > 0:
+        return True
+    native_reuse_report = dict((dataset.get("nativeTrace") or {}).get("reuseReport") or {})
+    if list(native_reuse_report.get("newlyTracedAnchors") or []):
+        return True
+    trace_knowledge = dict(dataset.get("traceKnowledge") or {})
+    trace_knowledge_baseline = dict(dataset.get("traceKnowledgeBaseline") or {})
+    if trace_knowledge_baseline:
+        current_signature = (
+            tuple(sorted(str(value).strip() for value in (trace_knowledge.get("knownEdges") or trace_knowledge.get("clearedEdgeTypes") or []) if str(value).strip())),
+            tuple(sorted(str(value).strip() for value in (trace_knowledge.get("blockedEdges") or trace_knowledge.get("blockedEdgeTypes") or []) if str(value).strip())),
+            tuple(sorted(str(value).strip() for value in (trace_knowledge.get("missingEdges") or trace_knowledge.get("missingEdgeTypes") or []) if str(value).strip())),
+            tuple(sorted(str(value).strip() for value in (trace_knowledge.get("nonblockingEdges") or []) if str(value).strip())),
+            str(dict(trace_knowledge.get("nextSeam") or {}).get("id") or ""),
+        )
+        baseline_signature = (
+            tuple(sorted(str(value).strip() for value in (trace_knowledge_baseline.get("knownEdges") or trace_knowledge_baseline.get("clearedEdgeTypes") or []) if str(value).strip())),
+            tuple(sorted(str(value).strip() for value in (trace_knowledge_baseline.get("blockedEdges") or trace_knowledge_baseline.get("blockedEdgeTypes") or []) if str(value).strip())),
+            tuple(sorted(str(value).strip() for value in (trace_knowledge_baseline.get("missingEdges") or trace_knowledge_baseline.get("missingEdgeTypes") or []) if str(value).strip())),
+            tuple(sorted(str(value).strip() for value in (trace_knowledge_baseline.get("nonblockingEdges") or []) if str(value).strip())),
+            str(dict(trace_knowledge_baseline.get("nextSeam") or {}).get("id") or ""),
+        )
+        if current_signature != baseline_signature:
+            return True
+    return False
+
+
+def _format_trace_run_progress_summary(dataset: dict[str, Any]) -> dict[str, str]:
+    post_run_discoveries = dict(dataset.get("postRunDiscoveries") or {})
+    exact_evidence_summary = dict(post_run_discoveries.get("exactEvidenceSummary") or {})
+    native_reuse_report = dict((dataset.get("nativeTrace") or {}).get("reuseReport") or {})
+    trace_knowledge = dict(dataset.get("traceKnowledge") or {})
+    trace_knowledge_baseline = dict(dataset.get("traceKnowledgeBaseline") or {})
+    discovered_new: list[str] = []
+    if trace_knowledge_baseline:
+        discovered_known = list(
+            trace_knowledge.get("knownEdges")
+            or trace_knowledge.get("clearedEdgeTypes")
+            or []
+        )
+        baseline_known = set(
+            trace_knowledge_baseline.get("knownEdges")
+            or trace_knowledge_baseline.get("clearedEdgeTypes")
+            or []
+        )
+        discovered_new = [edge for edge in discovered_known if edge not in baseline_known]
+    recovered_terms = list(exact_evidence_summary.get("newTerms") or [])
+    traced_anchors = list(native_reuse_report.get("newlyTracedAnchors") or [])
+    attempted_anchors = list(native_reuse_report.get("attemptedNewTraceAnchors") or [])
+    missing_anchors = list(native_reuse_report.get("missingAnchorsAfterExecution") or [])
+    return {
+        "recovered": ",".join(recovered_terms) or "none",
+        "traced": ",".join(traced_anchors) or "none",
+        "attempted": ",".join(attempted_anchors) or "none",
+        "missing": ",".join(missing_anchors) or "none",
+        "newEdges": ",".join(discovered_new) or "none",
+        "netProgress": "yes" if _best_gap_run_made_progress(dataset) else "no",
+    }
+
+
+def _best_gap_readiness_is_actionable(best_gap_plan: dict[str, Any]) -> bool:
+    return str(best_gap_plan.get("acquisitionReadiness") or "").strip() not in {
+        "",
+        "knowledge-covered-noop",
+        "cooldown-deferred",
+        "nonconcrete-anchor-noop",
+    }
+
+
+def _evidence_frontier_term_rows() -> list[dict[str, Any]]:
+    cached = _trace_bundle_cache_get("evidence-frontier-term-rows", "all")
+    if cached is not None:
+        return [dict(row) for row in cached]
+    with _trace_profile_span("dbReads.bestGapEvidenceFrontierRows"):
+        with get_trace_db().connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT
+                    normalized_term,
+                    term,
+                    provenance_json,
+                    updated_at
+                FROM materialized_term_views
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY updated_at DESC, term ASC
+                """,
+                ("cifi-full", "libil2cpp.so"),
+            ).fetchall()
+            diagnostic_rows = conn.execute(
+                """
+                SELECT
+                    acquisition_term,
+                    payload_json,
+                    built_at
+                FROM materialized_acquisition_diagnostics_views
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY built_at DESC, acquisition_term ASC
+                """,
+                ("cifi-full", "libil2cpp.so"),
+            ).fetchall()
+    latest_direct_diagnostics_by_term: dict[str, dict[str, Any]] = {}
+    for row in diagnostic_rows:
+        acquisition_term = str(row["acquisition_term"] or "").strip()
+        normalized_term = normalize_planner_term(acquisition_term)
+        if not normalized_term or normalized_term in latest_direct_diagnostics_by_term:
+            continue
+        payload = dict(json.loads(str(row["payload_json"] or "{}")) or {})
+        latest_direct_diagnostics_by_term[normalized_term] = {
+            "term": acquisition_term,
+            "status": str(payload.get("status") or "").strip(),
+            "outcome": str(payload.get("outcome") or "").strip(),
+            "builtAt": str(row["built_at"] or ""),
+        }
+    normalized_rows: list[dict[str, Any]] = []
+    for row in rows:
+        provenance = dict(json.loads(str(row["provenance_json"] or "{}")) or {})
+        normalized_term = str(row["normalized_term"] or "")
+        latest_direct = dict(latest_direct_diagnostics_by_term.get(normalized_term) or {})
+        normalized_rows.append(
+            {
+                "normalizedTerm": normalized_term,
+                "term": str(row["term"] or ""),
+                "updatedAt": str(row["updated_at"] or ""),
+                "aspectTotal": len(provenance),
+                "sourceJobCount": 0,
+                "directAcquisitionCount": 1 if "acquisition_exact_term" in provenance or latest_direct else 0,
+                "nativeAttemptCount": 1 if "native_search_attempt" in provenance else 0,
+                "nativeSignalCount": 1 if "native_signal_fragment" in provenance else 0,
+                "bridgePlanCount": 1 if "bridge_plan" in provenance else 0,
+                "bridgeCoreCount": 1 if "term_bridge_core" in provenance else 0,
+                "graphEdgeCount": 1 if "managed_graph_edge" in provenance else 0,
+                "graphOwnerCount": 1 if "managed_graph_owner" in provenance else 0,
+                "ownerCandidateCount": 1 if "owner_candidates" in provenance else 0,
+                "metadataCount": 1 if "metadata_neighborhoods" in provenance else 0,
+                "relatedTermCount": 1 if "related_terms" in provenance else 0,
+                "asciiTargetCount": 1 if "ascii_targets" in provenance else 0,
+                "reconstructionCount": 1 if "managed_reconstruction" in provenance else 0,
+                "graphFullCount": 1 if "managed_graph_full" in provenance else 0,
+                "latestDirectDiagnosticStatus": str(latest_direct.get("status") or ""),
+                "latestDirectDiagnosticOutcome": str(latest_direct.get("outcome") or ""),
+                "latestDirectDiagnosticBuiltAt": str(latest_direct.get("builtAt") or ""),
+            }
+        )
+    _trace_bundle_cache_put("evidence-frontier-term-rows", "all", normalized_rows)
+    return [dict(row) for row in normalized_rows]
+
+
+def _latest_term_frontier_row(term: str) -> dict[str, Any]:
+    normalized_term = normalize_planner_term(str(term or "").strip())
+    if not normalized_term:
+        return {}
+    for row in _evidence_frontier_term_rows():
+        if str(row.get("normalizedTerm") or "").strip() == normalized_term:
+            return dict(row)
+    return {}
+
+
+def _infer_family_hint_from_term(term: str) -> str:
+    normalized = str(term or "").strip()
+    normalized_lower = normalized.lower()
+    if (
+        normalized.startswith("ATU")
+        or "tokenupgprefab" in normalized_lower
+        or "diamondupgprefab" in normalized_lower
+        or "tokenboost" in normalized_lower
+        or "diamondboost" in normalized_lower
+        or "modboost" in normalized_lower
+        or normalized_lower.startswith("buylm")
+        or normalized_lower.startswith("buymod")
+        or normalized_lower.startswith("buytoken")
+        or normalized_lower.startswith("buydia")
+    ):
+        return "token-shop"
+    if (
+        normalized.startswith("IS")
+        or "multiverse" in normalized_lower
+        or "market" in normalized_lower
+        or "esoteric" in normalized_lower
+        or "inscryptionsdone" in normalized_lower
+    ):
+        return "multiverse-market-save-owner"
+    if "shard" in normalized_lower or re.match(r"^su\d+", normalized_lower):
+        return "shard-owned-state" if "unlocked" in normalized_lower or "maxlevel" in normalized_lower else "shard-cost"
+    return ""
+
+
+def _extract_token_shop_row_slot(value: str) -> str:
+    match = re.search(r"(atu\d+)", str(value or ""), re.IGNORECASE)
+    return match.group(1).lower() if match else ""
+
+
+def _collect_artifact_frontier_strings(value: Any, *, limit: int = 96) -> list[str]:
+    collected: list[str] = []
+    seen: set[str] = set()
+
+    def visit(node: Any) -> None:
+        if len(collected) >= limit:
+            return
+        if isinstance(node, str):
+            candidate = str(node).strip()
+            if not candidate or candidate in seen:
+                return
+            if _looks_like_actionable_gap_term(candidate) or _looks_like_concrete_acquisition_anchor(candidate):
+                seen.add(candidate)
+                collected.append(candidate)
+            return
+        if isinstance(node, dict):
+            for key in (
+                "candidateTerms",
+                "derivedTerms",
+                "bridgedTerms",
+                "relatedTerms",
+                "contextTerms",
+                "selectedContextTerms",
+                "selectedNativeCoreTerms",
+                "expectedTerms",
+                "requestedTerms",
+                "searchTerms",
+                "traceTerms",
+                "recoveredTerms",
+                "updateHooks",
+                "handoffTerms",
+                "primaryTerms",
+                "recoveredMethods",
+                "checkedMethods",
+                "methods",
+                "consumerMethods",
+                "routineMethods",
+                "recoveredFields",
+                "checkedFields",
+                "fields",
+                "formulaFields",
+                "valueFields",
+                "ownerFieldBlock",
+                "ownerCandidates",
+                "ownerTypes",
+                "hostTypes",
+                "typeCandidates",
+                "shellField",
+                "shellPathId",
+                "pathId",
+                "rowIds",
+                "orderedRowIds",
+                "rowModelType",
+                "runtimeShell",
+                "controllerFamily",
+                "prefabNames",
+                "prefabIds",
+                "resourceAnchors",
+                "conversionAnchors",
+                "importAnchors",
+                "overlapRows",
+                "bridgeCheck",
+                "runtimeInstanceRecovery",
+                "runtimeEvaluatorRecovery",
+                "formulaReconstruction",
+                "label",
+                "value",
+                "name",
+            ):
+                if key in node:
+                    visit(node.get(key))
+            return
+        if isinstance(node, (list, tuple, set)):
+            for item in node:
+                visit(item)
+
+    visit(value)
+    return collected[:limit]
+
+
+def _build_artifact_frontier_best_gap_candidates(
+    registry: dict[str, Any],
+    run_counts: dict[str, int],
+    target_rows: list[dict[str, Any]],
+    subject_state_rows: list[dict[str, Any]],
+    resolver_target_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    resolver_payloads_by_scope = {
+        str(row.get("traceScope") or "").strip(): dict(row.get("payload") or {})
+        for row in resolver_target_rows
+        if str(row.get("traceScope") or "").strip()
+    }
+    subject_state_payloads_by_scope = {
+        str(row.get("traceScope") or "").strip(): dict(row.get("payload") or {})
+        for row in subject_state_rows
+        if str(row.get("traceScope") or "").strip()
+    }
+    candidates: list[dict[str, Any]] = []
+    for row in target_rows:
+        trace_scope = str(row.get("traceScope") or "").strip()
+        payload = dict(row.get("payload") or {})
+        target = dict(payload.get("target") or {})
+        decision_summary = dict(payload.get("decisionSummary") or {})
+        verdict = str(decision_summary.get("verdict") or "").strip().lower()
+        subject_state_payload = dict(subject_state_payloads_by_scope.get(trace_scope) or {})
+        current_decision_summary = dict(subject_state_payload.get("decisionSummary") or {})
+        current_verdict = str(current_decision_summary.get("verdict") or "").strip().lower()
+        current_blocked_edges = [
+            str(value).strip()
+            for value in (subject_state_payload.get("blockedEdges") or current_decision_summary.get("blockedEdgeTypes") or [])
+            if str(value).strip()
+        ]
+        current_missing_edges = [
+            str(value).strip()
+            for value in (subject_state_payload.get("missingEdges") or current_decision_summary.get("baselineGap") or [])
+            if str(value).strip()
+        ]
+        next_seam_payload = dict(subject_state_payload.get("nextSeam") or {})
+        next_seam_id = str(next_seam_payload.get("id") or "").strip()
+        if current_verdict == "wire" and not current_blocked_edges and not current_missing_edges and not next_seam_id:
+            continue
+        trace_graph = dict(payload.get("traceGraph") or {})
+        negative_edges = [dict(item) for item in (trace_graph.get("negativeEdges") or []) if isinstance(item, dict)]
+        if verdict == "wire" and not negative_edges:
+            continue
+        artifact_groups = [
+            ("bridge-check", _collect_artifact_frontier_strings(payload.get("bridgeCheck"))),
+            ("shell-window", _collect_artifact_frontier_strings(payload.get("shellWindow"))),
+            ("row-recovery", _collect_artifact_frontier_strings(payload.get("rowRecovery"))),
+            ("native-reconstruction", _collect_artifact_frontier_strings(payload.get("nativeReconstruction"))),
+        ]
+        seen_terms: set[str] = set()
+        for artifact_class, terms in artifact_groups:
+            for term in terms:
+                normalized_term = normalize_planner_term(term)
+                if not normalized_term or normalized_term in seen_terms:
+                    continue
+                seen_terms.add(normalized_term)
+                evidence = _cached_fast_term_evidence_summary(term)
+                if bool(evidence.get("found")):
+                    continue
+                resolver_target_payload = dict(resolver_payloads_by_scope.get(trace_scope) or {})
+                family_id = str(target.get("familyId") or _infer_runtime_family_id(trace_scope, target.get("targetId")) or "").strip()
+                execution_routine = str(
+                    target.get("traceRoutineHint")
+                    or target.get("executionRoutineHint")
+                    or resolver_target_payload.get("traceRoutineHint")
+                    or _default_execution_routine_for_family(family_id, trace_scope)
+                ).strip()
+                acquisition_plan = {
+                    "selectedScope": trace_scope,
+                    "selectedRoutine": execution_routine,
+                    "selectedSeamId": "",
+                    "coverageMode": "term-shaped",
+                    "selectedAnchors": [term],
+                    "requestedTerms": [term],
+                    "steps": [
+                        {
+                            "traceScope": trace_scope,
+                            "seamId": "",
+                            "executionRoutineId": execution_routine,
+                            "anchors": [term],
+                            "expectedTerms": [term],
+                            "coverageMode": "term-shaped",
+                            "whyChosen": [f"artifact frontier {artifact_class}", "materialized target bundle contains unresolved structured evidence around this term"],
+                        }
+                    ],
+                    "anchorSelectionReasons": [f"artifact frontier {artifact_class}", "materialized target bundle contains unresolved structured evidence around this term"],
+                }
+                actionability = _describe_best_gap_actionability(trace_scope, "", acquisition_plan)
+                score = (
+                    34.0
+                    + (16.0 if artifact_class == "bridge-check" else 12.0)
+                    + min(len(negative_edges), 6) * 2.5
+                    - min(int(run_counts.get(trace_scope) or 0), 8) * 1.5
+                    + float(actionability.get("scoreDelta") or 0.0)
+                )
+                candidates.append(
+                    {
+                        "targetId": str(target.get("targetId") or trace_scope),
+                        "traceScope": trace_scope,
+                        "executionTraceScope": trace_scope,
+                        "selectedSubjectKind": "artifact-frontier-term",
+                        "selectedSubjectKey": normalized_term,
+                        "selectedSubjectLabel": term,
+                        "label": term,
+                        "familyId": family_id,
+                        "verdict": verdict or "explore",
+                        "blockedEdgeTypes": [],
+                        "baselineGap": [],
+                        "unresolvedEdgeTypes": [],
+                        "knownEdgeTypes": [],
+                        "nonblockingEdgeTypes": [],
+                        "provedEdgeCount": int(decision_summary.get("provedEdgeCount") or 0),
+                        "negativeEdgeCount": int(decision_summary.get("negativeEdgeCount") or len(negative_edges)),
+                        "semanticScopeIds": [],
+                        "nativeAvailable": bool(((payload.get("nativeView") or {}).get("available")) is True),
+                        "nativeSearchTerms": list((((payload.get("nativeView") or {}).get("searchTerms")) or [])),
+                        "anchors": [term],
+                        "selectedAnchors": [term],
+                        "anchorSelectionReasons": list(acquisition_plan.get("anchorSelectionReasons") or []),
+                        "selectedSeamId": "",
+                        "executionRoutineId": execution_routine,
+                        "targetAliases": [str(target.get("targetId") or trace_scope), trace_scope],
+                        "acquisitionPlan": acquisition_plan,
+                        "score": round(score, 2),
+                        "builtAt": str(row.get("builtAt") or ""),
+                        "decisionSummary": decision_summary,
+                        "subjectState": {},
+                        "runCount": int(run_counts.get(trace_scope) or 0),
+                        "unresolvedAnchor": term,
+                        "evidence": evidence,
+                        "evidenceFrequency": {
+                            "payloadHitTotal": sum(int((entry or {}).get("count") or 0) for entry in (evidence.get("payloadHits") or []) if isinstance(entry, dict)),
+                            "payloadHits": [dict(entry) for entry in (evidence.get("payloadHits") or []) if isinstance(entry, dict)],
+                            "graphRefCount": len([entry for entry in (evidence.get("graphRefs") or []) if isinstance(entry, dict)]),
+                            "sourceIds": [str(source_id) for source_id in (evidence.get("sourceIds") or []) if str(source_id).strip()],
+                        },
+                        "acquisitionReadiness": str(actionability.get("readiness") or ""),
+                        "acquisitionReadinessRank": int(actionability.get("rank") or 0),
+                        "traceableTerms": list(actionability.get("traceTerms") or []),
+                        "knowledgeCoveredTerms": list(actionability.get("knowledgeCoveredTerms") or []),
+                        "deferredTerms": list(actionability.get("deferredTerms") or []),
+                        "knownSummary": [edge.get("type") for edge in negative_edges if str(edge.get("status") or "").strip() == "present"],
+                        "unknownSummary": [edge.get("type") for edge in negative_edges if str(edge.get("status") or "").strip() != "present"],
+                        "plannedAction": _summarize_acquisition_action(acquisition_plan),
+                        "coverageMode": "artifact-frontier",
+                        "selectionMode": "artifact-frontier-direct",
+                        "materializedProvenance": {
+                            "traceScope": trace_scope,
+                            "artifactClass": artifact_class,
+                            "targetId": str(target.get("targetId") or trace_scope),
+                        },
+                    }
+                )
+    actionable_candidates = [
+        candidate
+        for candidate in candidates
+        if _best_gap_readiness_is_actionable(candidate)
+    ]
+    if actionable_candidates:
+        return actionable_candidates
+    return candidates
+
+
+def _resolve_registry_execution_target_for_term(
+    registry: dict[str, Any],
+    term: str,
+    family_hint: str = "",
+) -> dict[str, Any]:
+    term = str(term or "").strip()
+    family_hint = str(family_hint or "").strip()
+    normalized_term = normalize_planner_term(term)
+    targets = dict(registry.get("targets") or {})
+    best: dict[str, Any] | None = None
+    best_score = -1
+    for target_id, target in targets.items():
+        target = dict(target or {})
+        target_family_id = str(target.get("familyId") or "").strip()
+        if family_hint and target_family_id and target_family_id != family_hint:
+            continue
+        candidate_terms = unique_strings(
+            [
+                target_id,
+                str(target.get("traceScope") or ""),
+                str(target.get("label") or ""),
+                *[str(value) for value in (target.get("defaultAnchors") or []) if str(value).strip()],
+                *[str(value) for value in (target.get("acceptedAnchors") or []) if str(value).strip()],
+            ]
+        )
+        score = 0
+        for candidate_term in candidate_terms:
+            normalized_candidate = normalize_planner_term(candidate_term)
+            if not normalized_candidate:
+                continue
+            if normalized_candidate == normalized_term:
+                score = max(score, 100)
+            elif normalized_term and normalized_term in normalized_candidate:
+                score = max(score, 60)
+        if score <= 0:
+            continue
+        if score > best_score:
+            best_score = score
+            best = {
+                "targetId": target_id,
+                "traceScope": str(target.get("traceScope") or target_id),
+                "label": str(target.get("label") or target_id),
+                "familyId": target_family_id or family_hint,
+                "target": target,
+            }
+    return dict(best or {})
+
+
+def _build_evidence_frontier_best_gap_candidates(
+    registry: dict[str, Any],
+    run_counts: dict[str, int],
+    target_rows: list[dict[str, Any]],
+    resolver_target_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    term_rows = _evidence_frontier_term_rows()
+    exhausted_acquisition_terms = _cached_recent_nonclosing_acquisition_terms()
+    latest_acquisition_status = _cached_latest_acquisition_status_by_scope_term()
+    target_payloads_by_scope = {
+        str(row.get("traceScope") or "").strip(): dict(row.get("payload") or {})
+        for row in target_rows
+        if str(row.get("traceScope") or "").strip()
+    }
+    resolver_payloads_by_scope = {
+        str(row.get("traceScope") or "").strip(): dict(row.get("payload") or {})
+        for row in resolver_target_rows
+        if str(row.get("traceScope") or "").strip()
+    }
+    candidates: list[dict[str, Any]] = []
+    for row in term_rows:
+        term = str(row.get("term") or "").strip()
+        if not _looks_like_actionable_gap_term(term):
+            continue
+        if int(row.get("directAcquisitionCount") or 0) > 0:
+            continue
+        bridge_plan_count = int(row.get("bridgePlanCount") or 0)
+        bridge_core_count = int(row.get("bridgeCoreCount") or 0)
+        native_signal_count = int(row.get("nativeSignalCount") or 0)
+        native_attempt_count = int(row.get("nativeAttemptCount") or 0)
+        graph_edge_count = int(row.get("graphEdgeCount") or 0)
+        graph_owner_count = int(row.get("graphOwnerCount") or 0)
+        owner_candidate_count = int(row.get("ownerCandidateCount") or 0)
+        metadata_count = int(row.get("metadataCount") or 0)
+        related_term_count = int(row.get("relatedTermCount") or 0)
+        source_job_count = int(row.get("sourceJobCount") or 0)
+        contextual_signal_count = (
+            bridge_plan_count
+            + bridge_core_count
+            + native_signal_count
+            + owner_candidate_count
+            + metadata_count
+            + related_term_count
+        )
+        if contextual_signal_count <= 0:
+            continue
+        graph_edge_score = 6.0 if graph_edge_count else 0.0
+        graph_owner_score = 5.0 if graph_owner_count else 0.0
+        metadata_score = 9.0 if metadata_count else 0.0
+        related_term_score = 6.0 if related_term_count else 0.0
+        owner_candidate_score = 8.0 if owner_candidate_count else 0.0
+        bridge_plan_score = 12.0 if bridge_plan_count else 0.0
+        bridge_core_score = 12.0 if bridge_core_count else 0.0
+        native_signal_score = 10.0 if native_signal_count else 0.0
+        source_job_score = min(source_job_count, 8) * 0.75
+        contextual_signal_score = (
+            graph_edge_score
+            + graph_owner_score
+            + metadata_score
+            + related_term_score
+            + owner_candidate_score
+            + bridge_plan_score
+            + bridge_core_score
+            + native_signal_score
+            + source_job_score
+        )
+        family_hint = _infer_family_hint_from_term(term)
+        execution_target = _resolve_registry_execution_target_for_term(registry, term, family_hint)
+        if not execution_target:
+            continue
+        trace_scope = str(execution_target.get("traceScope") or "").strip()
+        target_id = str(execution_target.get("targetId") or trace_scope).strip()
+        family_id = str(execution_target.get("familyId") or family_hint).strip()
+        term_row_slot = _extract_token_shop_row_slot(term)
+        target_row_slot = _extract_token_shop_row_slot(" ".join([trace_scope, target_id]))
+        if term_row_slot and target_row_slot and term_row_slot != target_row_slot:
+            continue
+        execution_target_payload = dict(execution_target.get("target") or {})
+        resolver_target_payload = dict(resolver_payloads_by_scope.get(trace_scope) or {})
+        latest_target_payload = dict(target_payloads_by_scope.get(trace_scope) or {})
+        latest_scope_term_status = dict(
+            latest_acquisition_status.get((trace_scope, "", normalize_planner_term(term) or term.lower())) or {}
+        )
+        if str(latest_scope_term_status.get("status") or "").strip() == "exact-evidence-found":
+            continue
+        execution_routine = str(
+            execution_target_payload.get("traceRoutineHint")
+            or execution_target_payload.get("executionRoutineHint")
+            or resolver_target_payload.get("traceRoutineHint")
+            or _default_execution_routine_for_family(family_id, trace_scope)
+        ).strip()
+        acquisition_plan = {
+            "selectedScope": trace_scope,
+            "selectedRoutine": execution_routine,
+            "selectedSeamId": "",
+            "coverageMode": "term-shaped",
+            "selectedAnchors": [term],
+            "requestedTerms": [term],
+            "steps": [
+                {
+                    "traceScope": trace_scope,
+                    "seamId": "",
+                    "executionRoutineId": execution_routine,
+                    "anchors": [term],
+                    "expectedTerms": [term],
+                    "coverageMode": "term-shaped",
+                    "whyChosen": ["evidence frontier candidate", "contextual evidence exists without direct acquisition"],
+                }
+            ],
+            "anchorSelectionReasons": ["evidence frontier candidate", "contextual evidence exists without direct acquisition"],
+        }
+        if term in exhausted_acquisition_terms.get((trace_scope, ""), set()):
+            continue
+        attempt_penalty = min(native_attempt_count, 5) * 3.0
+        run_penalty = min(int(run_counts.get(trace_scope) or 0), 8) * 1.5
+        routine_penalty = 0.0
+        historical_cost_penalty = 0.0
+        source_breadth_penalty = max(
+            0,
+            len([str(value).strip() for value in (execution_target_payload.get("requiredSourceFamilies") or []) if str(value).strip()]) - 2,
+        ) * 2.5
+        latest_timing = dict(latest_target_payload.get("traceTiming") or {})
+        historical_total_ms = float(latest_timing.get("totalRunMs") or 0.0)
+        if historical_total_ms > 0.0:
+            historical_cost_penalty += min(historical_total_ms / 8000.0, 40.0)
+            dominant_bucket = str(latest_timing.get("dominantBucket") or "").strip()
+            if dominant_bucket in {"nativeTraceExecution", "nativeExtraction"}:
+                historical_cost_penalty += 10.0
+            elif dominant_bucket in {"dbWrites", "phase.dbPersistMaterialization", "reducerMaterializerRebuild"}:
+                historical_cost_penalty += 6.0
+        if resolver_target_payload.get("traceRoutineHint"):
+            routine_penalty -= 6.0
+        if execution_routine == "token-shop-family-trace":
+            routine_penalty += 42.0
+        elif execution_routine in {"generic-explore", trace_scope}:
+            routine_penalty += 14.0
+        elif "family" in execution_routine:
+            routine_penalty += 24.0
+        score = (
+            38.0
+            + contextual_signal_score
+            - attempt_penalty
+            - run_penalty
+            - routine_penalty
+            - source_breadth_penalty
+            - historical_cost_penalty
+        )
+        candidate = {
+            "targetId": target_id,
+            "traceScope": trace_scope,
+            "executionTraceScope": trace_scope,
+            "selectedSubjectKind": "evidence-frontier-term",
+            "selectedSubjectKey": str(row.get("normalizedTerm") or term),
+            "selectedSubjectLabel": term,
+            "label": term,
+            "familyId": family_id,
+            "verdict": "explore",
+            "blockedEdgeTypes": [],
+            "baselineGap": [],
+            "unresolvedEdgeTypes": [],
+            "knownEdgeTypes": [],
+            "nonblockingEdgeTypes": [],
+            "provedEdgeCount": 0,
+            "negativeEdgeCount": 0,
+            "semanticScopeIds": [],
+            "nativeAvailable": False,
+            "nativeSearchTerms": [],
+            "anchors": [term],
+            "selectedAnchors": [term],
+            "anchorSelectionReasons": ["evidence frontier candidate", "contextual evidence exists without direct acquisition"],
+            "selectedSeamId": "",
+            "executionRoutineId": execution_routine,
+            "targetAliases": [target_id, trace_scope],
+            "acquisitionPlan": acquisition_plan,
+            "score": round(score, 2),
+            "builtAt": str(row.get("updatedAt") or ""),
+            "decisionSummary": {"verdict": "explore"},
+            "subjectState": {},
+            "runCount": int(run_counts.get(trace_scope) or 0),
+            "unresolvedAnchor": term,
+            "evidence": {
+                "found": True,
+                "sourceIds": [],
+                "graphRefs": [],
+                "payloadHits": [],
+            },
+            "evidenceFrequency": {
+                "payloadHitTotal": int(row.get("aspectTotal") or 0),
+                "payloadHits": [],
+                "graphRefCount": graph_edge_count,
+                "sourceIds": [],
+                "directAcquisitionCount": int(row.get("directAcquisitionCount") or 0),
+                "nativeAttemptCount": native_attempt_count,
+                "nativeSignalCount": native_signal_count,
+                "bridgePlanCount": bridge_plan_count,
+                "bridgeCoreCount": bridge_core_count,
+                "ownerCandidateCount": owner_candidate_count,
+                "metadataCount": metadata_count,
+                "relatedTermCount": related_term_count,
+                "sourceJobCount": source_job_count,
+            },
+            "acquisitionReadiness": "traceable-new-terms",
+            "acquisitionReadinessRank": 0,
+            "traceableTerms": [term],
+            "knowledgeCoveredTerms": [],
+            "deferredTerms": [],
+            "canonicalSubjectsMentioningAnchor": [],
+            "knownSummary": [],
+            "unknownSummary": [],
+            "plannedAction": _summarize_acquisition_action(acquisition_plan),
+            "coverageMode": "term-shaped",
+            "selectionMode": "evidence-frontier-direct",
+            "directlyTracedAlready": False,
+            "contextualOnly": True,
+        }
+        candidates.append(candidate)
+    return candidates
+
+
 def _print_completed_trace_run(dataset: dict[str, Any], iteration: int | None = None, total_iterations: int | None = None) -> None:
     prefix = "Trace run completed"
     if iteration is not None and total_iterations is not None and total_iterations > 1:
@@ -2001,6 +4797,7 @@ def _print_completed_trace_run(dataset: dict[str, Any], iteration: int | None = 
     planner_resolution = dict(dataset.get("plannerResolution") or {})
     decision_summary = dict(dataset.get("decisionSummary") or {})
     trace_knowledge = dict(dataset.get("traceKnowledge") or {})
+    trace_knowledge_baseline = dict(dataset.get("traceKnowledgeBaseline") or {})
     trace_directive = dict(dataset.get("traceDirective") or {})
     post_run_discoveries = dict(dataset.get("postRunDiscoveries") or {})
     acquisition_plan = dict(trace_directive.get("acquisitionPlan") or {})
@@ -2008,6 +4805,7 @@ def _print_completed_trace_run(dataset: dict[str, Any], iteration: int | None = 
     subject_kind = str(planner_resolution.get("selectedSubjectKind") or "").strip()
     subject_key = str(planner_resolution.get("selectedSubjectKey") or "").strip()
     subject_state_fallback = dict(post_run_discoveries.get("subjectState") or {})
+    trace_directive_mode = str(trace_directive.get("mode") or "").strip()
     if not subject_state_fallback and execution_scope and subject_key:
         subject_state_row = _pick_best_subject_state_for_trace_scope(
             execution_scope,
@@ -2017,7 +4815,14 @@ def _print_completed_trace_run(dataset: dict[str, Any], iteration: int | None = 
         subject_state_fallback = dict(subject_state_row.get("payload") or {})
     if not acquisition_plan:
         acquisition_plan = dict(post_run_discoveries.get("acquisitionPlan") or {})
-    if not acquisition_plan and subject_state_fallback:
+    if (
+        not acquisition_plan
+        and subject_state_fallback
+        and not (
+            trace_directive_mode == "reuse-materialized"
+            and str(dict(subject_state_fallback.get("nextSeam") or {}).get("status") or "").strip() == "clear"
+        )
+    ):
         acquisition_plan = dict(
             get_trace_db().resolve_trace_execution_request(
                 "cifi-full",
@@ -2067,9 +4872,9 @@ def _print_completed_trace_run(dataset: dict[str, Any], iteration: int | None = 
     native_reuse_report = dict(native_trace.get("reuseReport") or {})
     if native_reuse_report:
         print(
-            "  nativeReuse reused={} skipped={} traced={} missing={}".format(
-                ",".join(native_reuse_report.get("reusedAnchors") or []) or "none",
-                ",".join(native_reuse_report.get("skippedAnchors") or []) or "none",
+            "  nativeReuse deferred={} attempted={} traced={} missing={}".format(
+                ",".join(native_reuse_report.get("deferredAnchors") or []) or "none",
+                ",".join(native_reuse_report.get("attemptedNewTraceAnchors") or []) or "none",
                 ",".join(native_reuse_report.get("newlyTracedAnchors") or []) or "none",
                 ",".join(native_reuse_report.get("missingAnchorsAfterExecution") or []) or "none",
             )
@@ -2105,15 +4910,41 @@ def _print_completed_trace_run(dataset: dict[str, Any], iteration: int | None = 
     if decision_summary.get("summary"):
         print("  summary={}".format(decision_summary["summary"]))
     discovered_known = list(trace_knowledge.get("knownEdges") or trace_knowledge.get("clearedEdgeTypes") or subject_state_fallback.get("knownEdges") or [])
-    discovered_missing = list(trace_knowledge.get("missingEdgeTypes") or trace_knowledge.get("missingEdges") or subject_state_fallback.get("missingEdges") or [])
+    baseline_known = set(trace_knowledge_baseline.get("knownEdges") or trace_knowledge_baseline.get("clearedEdgeTypes") or [])
+    exact_evidence_summary = dict(post_run_discoveries.get("exactEvidenceSummary") or {})
+    run_attempted_native_terms = [
+        *list(native_reuse_report.get("attemptedNewTraceAnchors") or []),
+        *list(native_reuse_report.get("newlyTracedAnchors") or []),
+        *list(native_reuse_report.get("missingAnchorsAfterExecution") or []),
+    ]
+    discovered_new = [edge for edge in discovered_known if edge not in baseline_known]
+    if not run_attempted_native_terms:
+        discovered_new = []
+    discovered_missing = unique_strings(
+        [
+            *list(trace_knowledge.get("missingEdgeTypes") or trace_knowledge.get("missingEdges") or subject_state_fallback.get("missingEdges") or []),
+            *list(trace_knowledge.get("blockedEdgeTypes") or trace_knowledge.get("blockedEdges") or subject_state_fallback.get("blockedEdges") or []),
+        ]
+    )
     discovered_nonblocking = list(trace_knowledge.get("nonblockingEdges") or subject_state_fallback.get("nonblockingEdges") or [])
-    discovered_next_seam = dict(trace_directive.get("nextSeam") or subject_state_fallback.get("nextSeam") or {})
+    discovered_next_seam = dict(subject_state_fallback.get("nextSeam") or trace_directive.get("nextSeam") or {})
     print(
-        "  discovered known={} missing={} nonblocking={} nextSeam={}".format(
-            ",".join(discovered_known) or "none",
+        "  discovered new={} remaining={} nonblocking={} nextSeam={}".format(
+            ",".join(discovered_new) or "none",
             ",".join(discovered_missing) or "none",
             ",".join(discovered_nonblocking) or "none",
             discovered_next_seam.get("id") or "none",
+        )
+    )
+    progress_summary = _format_trace_run_progress_summary(dataset)
+    print(
+        "  recovered={} traced={} attempted={} missing={} newEdges={} netProgress={}".format(
+            progress_summary["recovered"],
+            progress_summary["traced"],
+            progress_summary["attempted"],
+            progress_summary["missing"],
+            progress_summary["newEdges"],
+            progress_summary["netProgress"],
         )
     )
 
@@ -2156,8 +4987,22 @@ def _execute_trace_bundle_run(
         if knowledge_plan:
             profiler.set_metadata("traceDirectiveMode", knowledge_plan.get("mode"))
             profiler.set_metadata("nextSeamId", ((knowledge_plan.get("nextSeam") or {}).get("id")))
-        acquisition_plan = dict(knowledge_plan.get("acquisitionPlan") or {})
+        acquisition_plan = _shape_runtime_acquisition_plan(
+            dict(knowledge_plan.get("acquisitionPlan") or {}),
+            execution_trace_scope,
+            selected_family_id,
+        )
         next_seam_id = str((knowledge_plan.get("nextSeam") or {}).get("id") or "").strip()
+        selected_anchor_terms = [
+            str(value).strip()
+            for value in (
+                acquisition_plan.get("selectedAnchors")
+                or acquisition_plan.get("requestedTerms")
+                or list(args.anchor or [])
+                or []
+            )
+            if str(value).strip()
+        ]
         cleared_edge_types = {
             str(edge_type)
             for edge_type in ((knowledge_plan.get("knowledge") or {}).get("clearedEdgeTypes") or [])
@@ -2168,6 +5013,10 @@ def _execute_trace_bundle_run(
                 "skipUnityRawStringScan": (
                     next_seam_id == "exact-display-update-path"
                     and ("native-reconstruction" in cleared_edge_types or "exact-shell-to-prefab" in cleared_edge_types)
+                ) or (
+                    str(acquisition_plan.get("coverageMode") or "term-shaped").strip() == "term-shaped"
+                    and bool(selected_anchor_terms)
+                    and all(_looks_like_concrete_acquisition_anchor(term) for term in selected_anchor_terms)
                 ),
                 "acquisitionPlan": acquisition_plan,
             }
@@ -2205,9 +5054,37 @@ def _execute_trace_bundle_run(
             )
 
         short_circuit_existing = False
+        dataset: dict[str, Any] = {}
+        no_concrete_cached_acquisition = (
+            str(acquisition_plan.get("coverageMode") or "term-shaped").strip() == "term-shaped"
+            and bool(acquisition_plan.get("skipNativeExecution"))
+            and not list(acquisition_plan.get("requestedTerms") or [])
+            and not list(acquisition_plan.get("selectedAnchors") or [])
+            and execution_trace_scope
+        )
+        if no_concrete_cached_acquisition and not args.resume and not args.force:
+            with profiler.span("dbReads"):
+                existing_cached_bundle = get_trace_db().find_latest_materialized_target_bundle_view(
+                    "cifi-full",
+                    "libil2cpp.so",
+                    execution_trace_scope,
+                )
+            if existing_cached_bundle and trace_dataset_has_required_fragments(existing_cached_bundle.get("payload") or {}):
+                dataset = _rebind_acquisition_dataset_to_request(
+                    dict(existing_cached_bundle["payload"]),
+                    planner_resolution=planner_resolution,
+                    execution_trace_scope=execution_trace_scope,
+                    execution_target_id=execution_target_id,
+                    selected_family_id=selected_family_id,
+                    request_signature=request_signature,
+                )
+                dataset.setdefault("traceRun", {})
+                if isinstance(dataset.get("traceRun"), dict):
+                    dataset["traceRun"]["mode"] = "db-knowledge-reuse"
+                short_circuit_existing = True
         if knowledge_plan.get("mode") == "run-evidence-acquisition" and list(acquisition_plan.get("steps") or []) and not args.resume:
             acquisition_results: list[dict[str, Any]] = []
-            dataset = {}
+            acquisition_reused_existing_only = True
             requested_terms = [str(term).strip() for term in (acquisition_plan.get("requestedTerms") or []) if str(term).strip()]
             for term_diagnostic in [dict(item) for item in (acquisition_plan.get("termDiagnostics") or []) if isinstance(item, dict)]:
                 diagnostic_term = str(term_diagnostic.get("term") or "").strip()
@@ -2309,6 +5186,116 @@ def _execute_trace_bundle_run(
                 step_args = argparse.Namespace(**vars(args))
                 step_args.query = step_queries
                 step_args.anchor = step_anchors
+                step_coverage_mode = str(
+                    step.get("coverageMode") or acquisition_plan.get("coverageMode") or "term-shaped"
+                ).strip()
+                step_incremental_terms = (
+                    list(step_anchors)
+                    if step_coverage_mode == "boundary-shaped" and list(step_anchors)
+                    else list(step_queries)
+                )
+                step_term_classification = _classify_incremental_native_terms(
+                    step_trace_scope,
+                    str(step.get("seamId") or "").strip(),
+                    step_incremental_terms,
+                    coverage_mode=step_coverage_mode,
+                    force_retrace=bool(args.force),
+                )
+                step_knowledge_covered_terms = list(step_term_classification.get("knowledgeCoveredTerms") or [])
+                step_deferred_terms = list(step_term_classification.get("deferredNonclosingTerms") or [])
+                step_trace_terms = list(step_term_classification.get("traceTerms") or [])
+                if (
+                    step_coverage_mode == "boundary-shaped"
+                    and not args.force
+                    and not step_trace_terms
+                ):
+                    with profiler.span("dbReads"):
+                        existing_step = get_trace_db().find_latest_materialized_target_bundle_view(
+                            "cifi-full",
+                            "libil2cpp.so",
+                            step_trace_scope,
+                        )
+                    if existing_step and trace_dataset_has_required_fragments(existing_step["payload"]):
+                        for step_term in step_knowledge_covered_terms:
+                            evidence = _cached_fast_term_evidence_summary(step_term)
+                            _persist_acquisition_term_diagnostic(
+                                request_signature,
+                                step_trace_scope,
+                                step_term,
+                                {
+                                    "status": "knowledge-covered-skip",
+                                    "outcome": "skip-db-covered",
+                                    "selectedTraceScope": step_trace_scope,
+                                    "selectedTargetId": step_target_id,
+                                    "executionRoutineId": str(step_knowledge_plan.get("executionRoutineId") or ""),
+                                    "expectedCoverage": [step_term],
+                                    "whyChosen": list(step.get("whyChosen") or []),
+                                    "detail": "Skipped full seam rerun because DB-backed evidence already covers this boundary-shaped term.",
+                                    "evidenceHits": _diagnostic_evidence_hits(evidence),
+                                    "evidenceSourcesChecked": _diagnostic_evidence_sources_checked(evidence),
+                                    "nextRecommended": None,
+                                },
+                            )
+                        for step_term in step_deferred_terms:
+                            _persist_acquisition_term_diagnostic(
+                                request_signature,
+                                step_trace_scope,
+                                step_term,
+                                {
+                                    "status": "recent-nonclosing-skip",
+                                    "outcome": "skip-recent-nonclosing",
+                                    "selectedTraceScope": step_trace_scope,
+                                    "selectedTargetId": step_target_id,
+                                    "executionRoutineId": str(step_knowledge_plan.get("executionRoutineId") or ""),
+                                    "expectedCoverage": [step_term],
+                                    "whyChosen": list(step.get("whyChosen") or []),
+                                    "detail": "Skipped full seam rerun because the latest non-closing boundary-shaped result is still within the retry cooldown window.",
+                                    "evidenceHits": {"found": False, "graphRefs": [], "payloadHits": []},
+                                    "evidenceSourcesChecked": [],
+                                    "nextRecommended": _recommended_next_acquisition_step(step_term, step_trace_scope),
+                                },
+                            )
+                        step_dataset = _rebind_acquisition_dataset_to_request(
+                            dict(existing_step["payload"]),
+                            planner_resolution=planner_resolution,
+                            execution_trace_scope=execution_trace_scope,
+                            execution_target_id=execution_target_id,
+                            selected_family_id=selected_family_id,
+                            request_signature=request_signature,
+                        )
+                        step_dataset.setdefault("nativeTrace", {})
+                        if isinstance(step_dataset.get("nativeTrace"), dict):
+                            step_dataset["nativeTrace"]["reuseReport"] = {
+                                "selectedAnchors": list(step_anchors),
+                                "reusedAnchors": [],
+                                "skippedAnchors": [],
+                                "attemptedNewTraceAnchors": [],
+                                "newlyTracedAnchors": [],
+                                "missingAnchorsAfterExecution": [],
+                                "knowledgeCoveredAnchors": list(step_knowledge_covered_terms),
+                                "deferredAnchors": list(step_deferred_terms),
+                                "executedSearchTerms": [],
+                            }
+                        acquisition_results.append(
+                            {
+                                "traceScope": step_trace_scope,
+                                "targetId": step_target_id,
+                                "expectedTerms": step_queries,
+                                "anchors": step_anchors,
+                                "whyChosen": list(step.get("whyChosen") or []),
+                                "termStatuses": {
+                                    step_term: (
+                                        "knowledge-covered-skip"
+                                        if step_term in step_knowledge_covered_terms
+                                        else "recent-nonclosing-skip"
+                                    )
+                                    for step_term in step_queries
+                                },
+                            }
+                        )
+                        dataset = step_dataset
+                        continue
+                acquisition_reused_existing_only = False
                 profiler.progress(
                     "Acquisition step",
                     "{} seam={} routine={} anchors={}".format(
@@ -2410,6 +5397,116 @@ def _execute_trace_bundle_run(
                 "steps": acquisition_results,
                 "remainingTerms": list(acquisition_plan.get("remainingTerms") or []),
             }
+            if acquisition_reused_existing_only and dataset:
+                short_circuit_existing = True
+        elif knowledge_plan.get("mode") == "run-seam-trace" and not args.force and not args.resume:
+            seam_coverage_mode = str(acquisition_plan.get("coverageMode") or "term-shaped").strip()
+            seam_selected_anchors = [str(value).strip() for value in (acquisition_plan.get("selectedAnchors") or []) if str(value).strip()]
+            seam_requested_terms = [str(value).strip() for value in (acquisition_plan.get("requestedTerms") or []) if str(value).strip()]
+            seam_incremental_terms = (
+                list(seam_selected_anchors)
+                if seam_coverage_mode == "boundary-shaped" and seam_selected_anchors
+                else list(seam_requested_terms)
+            )
+            seam_term_classification = _classify_incremental_native_terms(
+                execution_trace_scope,
+                str(acquisition_plan.get("selectedSeamId") or "").strip(),
+                seam_incremental_terms,
+                coverage_mode=seam_coverage_mode,
+                force_retrace=bool(args.force),
+            )
+            seam_knowledge_covered_terms = list(seam_term_classification.get("knowledgeCoveredTerms") or [])
+            seam_deferred_terms = list(seam_term_classification.get("deferredNonclosingTerms") or [])
+            seam_trace_terms = list(seam_term_classification.get("traceTerms") or [])
+            if seam_coverage_mode == "boundary-shaped" and not seam_trace_terms:
+                with profiler.span("dbReads"):
+                    existing = get_trace_db().find_latest_materialized_target_bundle_view(
+                        "cifi-full",
+                        "libil2cpp.so",
+                        execution_trace_scope,
+                    )
+                if existing and trace_dataset_has_required_fragments(existing["payload"]):
+                    seam_routine_id = str(
+                        acquisition_plan.get("selectedRoutine")
+                        or knowledge_plan.get("executionRoutineId")
+                        or execution_trace_scope
+                    )
+                    seam_selection_reasons = list(acquisition_plan.get("anchorSelectionReasons") or [])
+                    for term in seam_knowledge_covered_terms:
+                        evidence = _cached_fast_term_evidence_summary(term)
+                        _persist_acquisition_term_diagnostic(
+                            request_signature,
+                            execution_trace_scope,
+                            term,
+                            {
+                                "status": "knowledge-covered-skip",
+                                "outcome": "skip-db-covered",
+                                "selectedTraceScope": execution_trace_scope,
+                                "selectedTargetId": execution_target_id,
+                                "executionRoutineId": seam_routine_id,
+                                "seamId": str(acquisition_plan.get("selectedSeamId") or "").strip(),
+                                "subjectId": str(planner_resolution.get("selectedSubjectKey") or ""),
+                                "expectedCoverage": [term],
+                                "whyChosen": seam_selection_reasons,
+                                "detail": "Skipped full seam rerun because DB-backed evidence already covers this boundary-shaped term.",
+                                "evidenceHits": _diagnostic_evidence_hits(evidence),
+                                "evidenceSourcesChecked": _diagnostic_evidence_sources_checked(evidence),
+                                "nextRecommended": None,
+                            },
+                        )
+                    for term in seam_deferred_terms:
+                        _persist_acquisition_term_diagnostic(
+                            request_signature,
+                            execution_trace_scope,
+                            term,
+                            {
+                                "status": "recent-nonclosing-skip",
+                                "outcome": "skip-recent-nonclosing",
+                                "selectedTraceScope": execution_trace_scope,
+                                "selectedTargetId": execution_target_id,
+                                "executionRoutineId": seam_routine_id,
+                                "seamId": str(acquisition_plan.get("selectedSeamId") or "").strip(),
+                                "subjectId": str(planner_resolution.get("selectedSubjectKey") or ""),
+                                "expectedCoverage": [term],
+                                "whyChosen": seam_selection_reasons,
+                                "detail": "Skipped full seam rerun because the latest non-closing boundary-shaped result is still within the retry cooldown window.",
+                                "evidenceHits": {"found": False, "graphRefs": [], "payloadHits": []},
+                                "evidenceSourcesChecked": [],
+                                "nextRecommended": _recommended_next_acquisition_step(term, execution_trace_scope),
+                            },
+                        )
+                    dataset = _rebind_acquisition_dataset_to_request(
+                        dict(existing["payload"]),
+                        planner_resolution=planner_resolution,
+                        execution_trace_scope=execution_trace_scope,
+                        execution_target_id=execution_target_id,
+                        selected_family_id=selected_family_id,
+                        request_signature=request_signature,
+                    )
+                    dataset.setdefault("nativeTrace", {})
+                    if isinstance(dataset.get("nativeTrace"), dict):
+                        dataset["nativeTrace"]["reuseReport"] = {
+                            "selectedAnchors": list(seam_selected_anchors),
+                            "reusedAnchors": [],
+                            "skippedAnchors": [],
+                            "attemptedNewTraceAnchors": [],
+                            "newlyTracedAnchors": [],
+                            "missingAnchorsAfterExecution": [],
+                            "knowledgeCoveredAnchors": list(seam_knowledge_covered_terms),
+                            "deferredAnchors": list(seam_deferred_terms),
+                            "executedSearchTerms": [],
+                        }
+                    dataset["traceAcquisitionPlan"] = {
+                        "requestedTerms": list(seam_requested_terms),
+                        "selectedSeamId": str(acquisition_plan.get("selectedSeamId") or "").strip(),
+                        "selectedAnchors": list(seam_selected_anchors),
+                        "remainingTerms": list(acquisition_plan.get("remainingTerms") or []),
+                    }
+                    short_circuit_existing = True
+                else:
+                    dataset = collect_trace_bundle_components(args, trace_plan, registry)
+            else:
+                dataset = collect_trace_bundle_components(args, trace_plan, registry)
         elif knowledge_plan.get("mode") == "reuse-materialized" and not args.force:
             with profiler.span("dbReads"):
                 existing = get_trace_db().find_latest_materialized_target_bundle_view("cifi-full", "libil2cpp.so", execution_trace_scope)
@@ -2434,10 +5531,10 @@ def _execute_trace_bundle_run(
                 dataset = dict(existing["payload"])
             else:
                 dataset = collect_trace_bundle_components(args, trace_plan, registry)
-        else:
+        elif not dataset:
             dataset = collect_trace_bundle_components(args, trace_plan, registry)
 
-        with profiler.span("finalBundleAssembly"):
+        with profiler.phase("Final bundle assembly", "phase.finalBundleAssembly"):
             export_requested = args.export or args.json_out != JSON_OUT or args.md_out != MD_OUT
             json_out, md_out, run_id = allocate_trace_run_paths(
                 dataset["traceRegistry"].get("executionTraceScope") or "generic-explore",
@@ -2459,7 +5556,15 @@ def _execute_trace_bundle_run(
                 "maxSteps": args.max_steps,
             }
             dataset["assetSet"] = asset_set
-            dataset["traceKnowledge"] = dict((knowledge_plan.get("knowledge") or {}))
+            existing_trace_knowledge = dict(dataset.get("traceKnowledge") or {})
+            planner_trace_knowledge = dict((knowledge_plan.get("knowledge") or {}))
+            dataset["traceKnowledgeBaseline"] = dict(planner_trace_knowledge)
+            dataset["traceKnowledge"] = {
+                **planner_trace_knowledge,
+                **existing_trace_knowledge,
+            }
+            if dataset.get("decisionSummary") and not dict(dataset["traceKnowledge"]).get("decisionSummary"):
+                dataset["traceKnowledge"]["decisionSummary"] = dict(dataset.get("decisionSummary") or {})
             dataset["traceDirective"] = {
                 "mode": knowledge_plan.get("mode") or "run-seam-trace",
                 "executionRoutineId": knowledge_plan.get("executionRoutineId"),
@@ -2477,18 +5582,53 @@ def _execute_trace_bundle_run(
             }
 
         if not short_circuit_existing:
+            native_reuse_report = dict((dataset.get("nativeTrace") or {}).get("reuseReport") or {})
+            no_native_execute = not list(native_reuse_report.get("executedSearchTerms") or [])
+            no_native_attempts = not list(native_reuse_report.get("attemptedNewTraceAnchors") or [])
+            no_native_resolution = not list(native_reuse_report.get("newlyTracedAnchors") or [])
+            if (
+                no_native_execute
+                and no_native_attempts
+                and no_native_resolution
+                and execution_trace_scope
+            ):
+                with profiler.span("dbReads"):
+                    existing_reuse_payload = get_trace_db().find_latest_materialized_target_bundle_view(
+                        "cifi-full",
+                        "libil2cpp.so",
+                        execution_trace_scope,
+                    )
+                if existing_reuse_payload and trace_dataset_has_required_fragments(existing_reuse_payload.get("payload") or {}):
+                    dataset = _rebind_acquisition_dataset_to_request(
+                        dict(existing_reuse_payload["payload"]),
+                        planner_resolution=planner_resolution,
+                        execution_trace_scope=execution_trace_scope,
+                        execution_target_id=execution_target_id,
+                        selected_family_id=selected_family_id,
+                        request_signature=request_signature,
+                    )
+                    dataset.setdefault("nativeTrace", {})
+                    if isinstance(dataset.get("nativeTrace"), dict):
+                        dataset["nativeTrace"]["reuseReport"] = native_reuse_report
+                    dataset.setdefault("traceRun", {})
+                    if isinstance(dataset.get("traceRun"), dict):
+                        dataset["traceRun"]["mode"] = "db-knowledge-reuse"
+                    short_circuit_existing = True
+
+        if not short_circuit_existing:
             native_trace_runtime = dict(dataset.get("nativeTrace") or {})
             native_reuse_report = dict((native_trace_runtime.get("reuseReport")) or {})
-            persist_trace_bundle_fragments(
-                dataset,
-                str(dataset["traceRegistry"].get("executionTraceScope") or "generic-explore"),
-                request_signature,
-            )
-            dataset = materialize_trace_bundle_dataset(
-                dataset,
-                str(dataset["traceRegistry"].get("executionTraceScope") or "generic-explore"),
-                request_signature,
-            )
+            with profiler.phase("DB persist / materialization", "phase.dbPersistMaterialization"):
+                persist_trace_bundle_fragments(
+                    dataset,
+                    str(dataset["traceRegistry"].get("executionTraceScope") or "generic-explore"),
+                    request_signature,
+                )
+                dataset = materialize_trace_bundle_dataset(
+                    dataset,
+                    str(dataset["traceRegistry"].get("executionTraceScope") or "generic-explore"),
+                    request_signature,
+                )
             if native_reuse_report:
                 dataset.setdefault("nativeTrace", {})
                 if isinstance(dataset.get("nativeTrace"), dict):
@@ -2506,46 +5646,95 @@ def _execute_trace_bundle_run(
                         if key in native_trace_runtime:
                             dataset["nativeTrace"][key] = native_trace_runtime.get(key)
 
-        with profiler.phase("Post-run discoveries", "phase.postRunDiscoveries"):
-            post_run_discoveries: dict[str, Any] = {}
+        skip_post_run_discoveries = (
+            short_circuit_existing
+            and str((dataset.get("traceDirective") or {}).get("mode") or "").strip() == "reuse-materialized"
+        )
+        if skip_post_run_discoveries:
+            post_run_discoveries = {}
             post_run_execution_scope = str(dataset.get("traceRegistry", {}).get("executionTraceScope") or execution_trace_scope or "").strip()
             post_run_target_id = str(dataset.get("traceRegistry", {}).get("selectedTargetId") or trace_plan.get("selectedTargetId") or post_run_execution_scope).strip()
             subject_state_rows = _latest_materialized_subject_state_rows() if post_run_execution_scope else []
-            post_run_subject_state: dict[str, Any] = {}
-            relation_coverage: dict[str, Any] = {}
-
-            def _subject_state_for_scope(trace_scope: str, target_id: str, timing_bucket: str) -> dict[str, Any]:
-                trace_scope = str(trace_scope or "").strip()
-                if not trace_scope:
-                    return {}
-                with profiler.span(timing_bucket):
-                    subject_row = _pick_best_subject_state_for_trace_scope(
-                        trace_scope,
-                        target_id,
-                        subject_state_rows,
-                    )
-                return dict(subject_row.get("payload") or {})
-
+            post_run_subject_state = {}
             if post_run_execution_scope:
-                post_run_subject_state = _subject_state_for_scope(
+                subject_row = _pick_best_subject_state_for_trace_scope(
                     post_run_execution_scope,
                     post_run_target_id,
-                    "postRunDiscoveries.subjectState",
+                    subject_state_rows,
                 )
+                post_run_subject_state = dict(subject_row.get("payload") or {})
                 if post_run_subject_state:
                     post_run_discoveries["subjectState"] = post_run_subject_state
-            if acquisition_plan:
-                post_run_discoveries["acquisitionPlan"] = acquisition_plan
-                selected_relation_probe = dict(acquisition_plan.get("selectedRelationProbe") or {})
-                requested_terms = unique_strings(
-                    [
-                    str(term).strip()
-                    for term in (acquisition_plan.get("requestedTerms") or [])
-                    if str(term).strip()
-                    ]
-                )
-                selected_seam_id = str(acquisition_plan.get("selectedSeamId") or "").strip()
-                subject_missing_edges = {
+            if post_run_discoveries:
+                dataset["postRunDiscoveries"] = post_run_discoveries
+            if post_run_subject_state:
+                dataset["traceKnowledge"] = {
+                    **dict(dataset.get("traceKnowledge") or {}),
+                    "knownEdges": list(post_run_subject_state.get("knownEdges") or []),
+                    "clearedEdgeTypes": list(post_run_subject_state.get("knownEdges") or []),
+                    "blockedEdges": list(post_run_subject_state.get("blockedEdges") or []),
+                    "blockedEdgeTypes": list(post_run_subject_state.get("blockedEdges") or []),
+                    "missingEdges": list(post_run_subject_state.get("missingEdges") or []),
+                    "missingEdgeTypes": list(post_run_subject_state.get("missingEdges") or []),
+                    "nonblockingEdges": list(post_run_subject_state.get("nonblockingEdges") or []),
+                    "nonblockingEdgeTypes": list(post_run_subject_state.get("nonblockingEdges") or []),
+                    "subjectId": str(post_run_subject_state.get("subjectId") or ""),
+                    "subjectKind": str(post_run_subject_state.get("subjectKind") or ""),
+                    "subjectLabel": str(post_run_subject_state.get("subjectLabel") or ""),
+                    "targetAliases": list(post_run_subject_state.get("targetAliases") or []),
+                }
+                post_run_decision_summary = dict(post_run_subject_state.get("decisionSummary") or {})
+                if post_run_decision_summary:
+                    dataset["decisionSummary"] = post_run_decision_summary
+                    dataset["traceKnowledge"]["decisionSummary"] = post_run_decision_summary
+        else:
+            with profiler.phase("Post-run discoveries", "phase.postRunDiscoveries"):
+                post_run_discoveries: dict[str, Any] = {}
+                post_run_execution_scope = str(dataset.get("traceRegistry", {}).get("executionTraceScope") or execution_trace_scope or "").strip()
+                post_run_target_id = str(dataset.get("traceRegistry", {}).get("selectedTargetId") or trace_plan.get("selectedTargetId") or post_run_execution_scope).strip()
+                subject_state_rows = _latest_materialized_subject_state_rows() if post_run_execution_scope else []
+                post_run_subject_state: dict[str, Any] = {}
+                relation_coverage: dict[str, Any] = {}
+
+                def _subject_state_for_scope(trace_scope: str, target_id: str, timing_bucket: str) -> dict[str, Any]:
+                    trace_scope = str(trace_scope or "").strip()
+                    if not trace_scope:
+                        return {}
+                    with profiler.span(timing_bucket):
+                        subject_row = _pick_best_subject_state_for_trace_scope(
+                            trace_scope,
+                            target_id,
+                            subject_state_rows,
+                        )
+                    return dict(subject_row.get("payload") or {})
+
+                if post_run_execution_scope:
+                    post_run_subject_state = _subject_state_for_scope(
+                        post_run_execution_scope,
+                        post_run_target_id,
+                        "postRunDiscoveries.subjectState",
+                    )
+                    if post_run_subject_state:
+                        post_run_discoveries["subjectState"] = post_run_subject_state
+                if acquisition_plan:
+                    post_run_discoveries["acquisitionPlan"] = acquisition_plan
+                    selected_relation_probe = dict(acquisition_plan.get("selectedRelationProbe") or {})
+                    native_trace_runtime = dict(dataset.get("nativeTrace") or {})
+                    native_reuse_report = dict(native_trace_runtime.get("reuseReport") or {})
+                    no_exact_trace_delta = (
+                        not list(native_reuse_report.get("attemptedNewTraceAnchors") or [])
+                        and not list(native_reuse_report.get("newlyTracedAnchors") or [])
+                        and not list(native_reuse_report.get("missingAnchorsAfterExecution") or [])
+                    )
+                    requested_terms = unique_strings(
+                        [
+                        str(term).strip()
+                        for term in (acquisition_plan.get("requestedTerms") or [])
+                        if str(term).strip()
+                        ]
+                    )
+                    selected_seam_id = str(acquisition_plan.get("selectedSeamId") or "").strip()
+                    subject_missing_edges = {
                     str(edge).strip()
                     for edge in (
                         list((post_run_subject_state or {}).get("missingEdges") or [])
@@ -2557,115 +5746,185 @@ def _execute_trace_bundle_run(
                 if selected_relation_probe:
                     with profiler.span("postRunDiscoveries.relationCoverage"):
                         relation_scope = str(selected_relation_probe.get("traceScope") or "").strip()
+                        probe_mode = str(
+                            selected_relation_probe.get("probeMode")
+                            or acquisition_plan.get("coverageMode")
+                            or "term-shaped"
+                        ).strip() or "term-shaped"
                         relation_required_seams = [
                             str(value).strip()
                             for value in (selected_relation_probe.get("requiredCoverageSeamIds") or [])
                             if str(value).strip()
                         ]
+                        relation_required_fact_kinds = [
+                            str(value).strip()
+                            for value in (selected_relation_probe.get("requiredFactKinds") or [])
+                            if str(value).strip()
+                        ]
+                        relation_required_relation_kinds = [
+                            str(value).strip()
+                            for value in (selected_relation_probe.get("requiredRelationKinds") or [])
+                            if str(value).strip()
+                        ]
+                        relation_progress_relation_kinds = [
+                            str(value).strip()
+                            for value in (selected_relation_probe.get("progressRelationKinds") or [])
+                            if str(value).strip()
+                        ]
+                        relation_progress_edge_types = [
+                            str(value).strip()
+                            for value in (selected_relation_probe.get("progressEdgeTypes") or [])
+                            if str(value).strip()
+                        ]
                         relation_subject_state = {}
+                        relation_boundary_rows: list[dict[str, Any]] = []
+                        relation_fact_rows: list[dict[str, Any]] = []
+                        relation_relation_rows: list[dict[str, Any]] = []
                         if relation_scope:
                             relation_subject_state = _subject_state_for_scope(
                                 relation_scope,
                                 relation_scope,
                                 "postRunDiscoveries.relationSubjectState",
                             )
-                        relation_open_edges = {
-                            str(edge).strip()
-                            for edge in (
-                                list(relation_subject_state.get("missingEdges") or [])
-                                + list(relation_subject_state.get("blockedEdges") or [])
+                            relation_boundary_rows = get_trace_db().list_latest_materialized_boundary_views(
+                                "cifi-full",
+                                "libil2cpp.so",
+                                trace_scope=relation_scope,
                             )
-                            if str(edge).strip()
-                        }
-                        relation_covered = bool(relation_required_seams) and all(seam_id not in relation_open_edges for seam_id in relation_required_seams)
-                        native_trace_payload = dict(dataset.get("nativeTrace") or {})
-                        relation_gap = _describe_relation_gap(
-                            trace_scope=post_run_execution_scope,
-                            request_signature=request_signature,
+                            relation_fact_rows = get_trace_db().list_latest_materialized_fact_views(
+                                "cifi-full",
+                                "libil2cpp.so",
+                                trace_scope=relation_scope,
+                            )
+                            relation_relation_rows = get_trace_db().list_latest_materialized_relation_views(
+                                "cifi-full",
+                                "libil2cpp.so",
+                                trace_scope=relation_scope,
+                            )
+                        relation_gap = _describe_contract_gap(
+                            probe_mode=probe_mode,
                             relation_scope=relation_scope,
                             required_seams=relation_required_seams,
-                            native_trace_payload=native_trace_payload,
-                            relation_covered=relation_covered,
+                            required_fact_kinds=relation_required_fact_kinds,
+                            required_relation_kinds=relation_required_relation_kinds,
+                            progress_relation_kinds=relation_progress_relation_kinds,
+                            relation_subject_state=relation_subject_state,
+                            relation_boundary_rows=relation_boundary_rows,
+                            relation_fact_rows=relation_fact_rows,
+                            relation_relation_rows=relation_relation_rows,
+                            requested_terms=requested_terms,
                         )
                         relation_coverage = {
-                            "mode": "relation-shaped",
+                            "mode": probe_mode,
                             "relationScope": relation_scope,
                             "requiredSeams": relation_required_seams,
-                            "covered": relation_covered,
+                            "requiredFactKinds": relation_required_fact_kinds,
+                            "requiredRelationKinds": relation_required_relation_kinds,
+                            "progressRelationKinds": relation_progress_relation_kinds,
+                            "progressEdgeTypes": relation_progress_edge_types,
+                            "covered": bool(relation_gap.get("covered")),
                             "cacheHitDisposition": relation_gap.get("cacheHitDisposition") or "unknown",
                             "blockerCategory": relation_gap.get("blockerCategory") or None,
                             "missingArtifacts": list(relation_gap.get("missingArtifacts") or []),
+                            "progressArtifacts": list(relation_gap.get("progressArtifacts") or []),
+                            "progressEdges": list(relation_progress_edge_types),
                             "evidenceTerms": list(relation_gap.get("evidenceTerms") or []),
                             "detail": relation_gap.get("detail") or None,
                         }
                     post_run_discoveries["relationCoverage"] = relation_coverage
                 exact_execution_routine_id = str(acquisition_plan.get("selectedRoutine") or knowledge_plan.get("executionRoutineId") or "")
                 exact_why_chosen = list(acquisition_plan.get("anchorSelectionReasons") or [])
+                exact_coverage_mode = str(acquisition_plan.get("coverageMode") or "term-shaped").strip()
+                attempted_exact_terms = list(
+                    (native_reuse_report.get("attemptedNewTraceAnchors") or [])
+                )
                 term_evidence_by_term: dict[str, dict[str, Any]] = {}
                 reusable_exact_evidence_terms: set[str] = set()
                 provenance_snapshot_by_term: dict[str, dict[str, Any]] = {}
                 provenance_audit_by_term: dict[str, dict[str, Any]] = {}
+                use_fast_post_run_evidence = False
                 if requested_terms:
-                    with profiler.span("postRunDiscoveries.termEvidenceAudit"):
-                        for requested_term in requested_terms:
-                            provenance_snapshot = _cached_exact_term_evidence_provenance_snapshot(requested_term)
-                            provenance_snapshot_by_term[requested_term] = provenance_snapshot
-                            reused = _reuse_post_run_exact_term_evidence_if_unchanged(
-                                term=requested_term,
-                                trace_scope=post_run_execution_scope,
-                                request_signature=request_signature,
-                                target_id=post_run_target_id,
-                                execution_routine_id=exact_execution_routine_id,
-                                why_chosen=exact_why_chosen,
-                                provenance_snapshot=provenance_snapshot,
-                            )
-                            if reused:
-                                reusable_exact_evidence_terms.add(requested_term)
-                                term_evidence_by_term[requested_term] = dict(reused.get("evidence") or {})
-                                provenance_audit_by_term[requested_term] = dict(reused.get("provenanceAudit") or {})
-                    uncached_requested_terms = [
-                        requested_term
-                        for requested_term in requested_terms
-                        if requested_term not in reusable_exact_evidence_terms
-                    ]
-                    if uncached_requested_terms:
+                    use_fast_post_run_evidence = no_exact_trace_delta or (
+                        exact_coverage_mode == "boundary-shaped" and not attempted_exact_terms
+                    )
+                    if use_fast_post_run_evidence:
+                        _prime_fast_term_evidence_summaries(list(requested_terms))
                         with profiler.span("postRunDiscoveries.termEvidenceLookups"):
-                            for requested_term in uncached_requested_terms:
-                                term_evidence_by_term[requested_term] = _cached_contract_term_evidence(requested_term)
-                                source_job_id = _pick_acquisition_evidence_source_job_id(
-                                    "cifi-full",
-                                    "libil2cpp.so",
-                                    request_signature,
-                                    [
-                                        requested_term,
-                                        post_run_execution_scope,
-                                        post_run_target_id,
-                                        exact_execution_routine_id,
-                                        *exact_why_chosen,
-                                    ],
+                            for requested_term in requested_terms:
+                                term_evidence_by_term[requested_term] = _cached_fast_term_evidence_summary(requested_term)
+                    else:
+                        with profiler.span("postRunDiscoveries.termEvidenceAudit"):
+                            for requested_term in requested_terms:
+                                provenance_snapshot = _cached_exact_term_evidence_provenance_snapshot(requested_term)
+                                provenance_snapshot_by_term[requested_term] = provenance_snapshot
+                                reused = _reuse_post_run_exact_term_evidence_if_unchanged(
+                                    term=requested_term,
+                                    trace_scope=post_run_execution_scope,
+                                    request_signature=request_signature,
+                                    target_id=post_run_target_id,
+                                    execution_routine_id=exact_execution_routine_id,
+                                    why_chosen=exact_why_chosen,
+                                    provenance_snapshot=provenance_snapshot,
                                 )
-                                if source_job_id:
-                                    provenance_audit_by_term[requested_term] = _build_exact_term_evidence_provenance_audit(
-                                        term=requested_term,
-                                        trace_scope=post_run_execution_scope,
-                                        request_signature=request_signature,
-                                        target_id=post_run_target_id,
-                                        execution_routine_id=exact_execution_routine_id,
-                                        why_chosen=exact_why_chosen,
-                                        source_job_id=source_job_id,
-                                        provenance_snapshot=provenance_snapshot_by_term.get(requested_term),
+                                if reused:
+                                    reusable_exact_evidence_terms.add(requested_term)
+                                    term_evidence_by_term[requested_term] = dict(reused.get("evidence") or {})
+                                    provenance_audit_by_term[requested_term] = dict(reused.get("provenanceAudit") or {})
+                        uncached_requested_terms = [
+                            requested_term
+                            for requested_term in requested_terms
+                            if requested_term not in reusable_exact_evidence_terms
+                        ]
+                        if uncached_requested_terms:
+                            with profiler.span("postRunDiscoveries.termEvidenceLookups"):
+                                for requested_term in uncached_requested_terms:
+                                    term_evidence_by_term[requested_term] = _cached_contract_term_evidence(requested_term)
+                                    source_job_id = _pick_acquisition_evidence_source_job_id(
+                                        "cifi-full",
+                                        "libil2cpp.so",
+                                        request_signature,
+                                        [
+                                            requested_term,
+                                            post_run_execution_scope,
+                                            post_run_target_id,
+                                            exact_execution_routine_id,
+                                            *exact_why_chosen,
+                                        ],
                                     )
+                                    if source_job_id:
+                                        provenance_audit_by_term[requested_term] = _build_exact_term_evidence_provenance_audit(
+                                            term=requested_term,
+                                            trace_scope=post_run_execution_scope,
+                                            request_signature=request_signature,
+                                            target_id=post_run_target_id,
+                                            execution_routine_id=exact_execution_routine_id,
+                                            why_chosen=exact_why_chosen,
+                                            source_job_id=source_job_id,
+                                            provenance_snapshot=provenance_snapshot_by_term.get(requested_term),
+                                        )
                 post_run_discoveries["exactEvidenceAudit"] = {
                     "requestedTerms": list(requested_terms),
                     "reusedTerms": [term for term in requested_terms if term in reusable_exact_evidence_terms],
                     "fallbackTerms": [term for term in requested_terms if term not in reusable_exact_evidence_terms],
+                    "fastPath": bool(use_fast_post_run_evidence),
                 }
                 exact_evidence_entries: list[dict[str, Any]] = []
                 diagnostic_entries: list[tuple[str, dict[str, Any]]] = []
                 for requested_term in requested_terms:
                     term_evidence = dict(term_evidence_by_term.get(requested_term) or {})
                     evidence_found = bool(term_evidence.get("found"))
-                    if evidence_found and requested_term not in reusable_exact_evidence_terms:
+                    promotable_exact_evidence = (
+                        evidence_found
+                        and not (
+                            relation_coverage
+                            and not bool(relation_coverage.get("covered"))
+                        )
+                    )
+                    if (
+                        promotable_exact_evidence
+                        and requested_term not in reusable_exact_evidence_terms
+                        and not use_fast_post_run_evidence
+                    ):
                         exact_evidence_entries.append(
                             {
                                 "project_name": "cifi-full",
@@ -2733,6 +5992,10 @@ def _execute_trace_bundle_run(
                 if exact_evidence_entries:
                     with profiler.span("postRunDiscoveries.persistExactEvidence"):
                         _persist_acquisition_exact_term_evidence_batch(exact_evidence_entries)
+                post_run_discoveries["exactEvidenceSummary"] = {
+                    "newTerms": [str(entry.get("term") or "").strip() for entry in exact_evidence_entries if str(entry.get("term") or "").strip()],
+                    "newCount": len(exact_evidence_entries),
+                }
                 if diagnostic_entries:
                     with profiler.span("postRunDiscoveries.persistDiagnostics"):
                         for requested_term, diagnostic_payload in diagnostic_entries:
@@ -2744,6 +6007,59 @@ def _execute_trace_bundle_run(
                             )
             if post_run_discoveries:
                 dataset["postRunDiscoveries"] = post_run_discoveries
+            if post_run_execution_scope and acquisition_plan:
+                refreshed_post_run_subject_state = {}
+                with profiler.span("postRunDiscoveries.subjectStateRefresh"):
+                    refreshed_rows = get_trace_db().list_materialized_subject_state_views(
+                        "cifi-full",
+                        "libil2cpp.so",
+                        post_run_execution_scope,
+                    )
+                    refreshed_row = _pick_best_subject_state_for_trace_scope(
+                        post_run_execution_scope,
+                        post_run_target_id,
+                        refreshed_rows,
+                    )
+                    refreshed_post_run_subject_state = dict((refreshed_row or {}).get("payload") or {})
+                    if not refreshed_post_run_subject_state:
+                        refreshed_row = get_trace_db().find_or_materialize_subject_state_view(
+                            "cifi-full",
+                            "libil2cpp.so",
+                            post_run_execution_scope,
+                            subject_kind=str(planner_resolution.get("selectedSubjectKind") or ""),
+                            subject_key=str(planner_resolution.get("selectedSubjectKey") or ""),
+                        )
+                        refreshed_post_run_subject_state = dict((refreshed_row or {}).get("payload") or {})
+                    if not refreshed_post_run_subject_state:
+                        refreshed_post_run_subject_state = _subject_state_for_scope(
+                            post_run_execution_scope,
+                            post_run_target_id,
+                            "postRunDiscoveries.subjectStateRefreshFallback",
+                        )
+                if refreshed_post_run_subject_state:
+                    post_run_subject_state = refreshed_post_run_subject_state
+                    dataset.setdefault("postRunDiscoveries", {})
+                    dataset["postRunDiscoveries"]["subjectState"] = post_run_subject_state
+            if post_run_subject_state:
+                dataset["traceKnowledge"] = {
+                    **dict(dataset.get("traceKnowledge") or {}),
+                    "knownEdges": list(post_run_subject_state.get("knownEdges") or []),
+                    "clearedEdgeTypes": list(post_run_subject_state.get("knownEdges") or []),
+                    "blockedEdges": list(post_run_subject_state.get("blockedEdges") or []),
+                    "blockedEdgeTypes": list(post_run_subject_state.get("blockedEdges") or []),
+                    "missingEdges": list(post_run_subject_state.get("missingEdges") or []),
+                    "missingEdgeTypes": list(post_run_subject_state.get("missingEdges") or []),
+                    "nonblockingEdges": list(post_run_subject_state.get("nonblockingEdges") or []),
+                    "nonblockingEdgeTypes": list(post_run_subject_state.get("nonblockingEdges") or []),
+                    "subjectId": str(post_run_subject_state.get("subjectId") or ""),
+                    "subjectKind": str(post_run_subject_state.get("subjectKind") or ""),
+                    "subjectLabel": str(post_run_subject_state.get("subjectLabel") or ""),
+                    "targetAliases": list(post_run_subject_state.get("targetAliases") or []),
+                }
+                post_run_decision_summary = dict(post_run_subject_state.get("decisionSummary") or {})
+                if post_run_decision_summary:
+                    dataset["decisionSummary"] = post_run_decision_summary
+                    dataset["traceKnowledge"]["decisionSummary"] = post_run_decision_summary
 
         with profiler.span("finalBundleAssembly"):
             if export_requested:
@@ -7254,12 +10570,24 @@ def maybe_find_surface(surfaces: list[dict[str, Any]], surface_id: str) -> dict[
     return next((surface for surface in surfaces if surface["id"] == surface_id), None)
 
 
+def get_optional_surface(surfaces: list[dict[str, Any]], surface_id: str) -> dict[str, Any]:
+    return maybe_find_surface(surfaces, surface_id) or {"id": surface_id, "sources": []}
+
+
 def find_source_entry(surface: dict[str, Any], source_id: str) -> dict[str, Any]:
     return next(source for source in surface["sources"] if source["sourceId"] == source_id)
 
 
 def maybe_find_source_entry(surface: dict[str, Any], source_id: str) -> dict[str, Any] | None:
     return next((source for source in surface["sources"] if source["sourceId"] == source_id), None)
+
+
+def get_optional_source_entry(surface: dict[str, Any], source_id: str) -> dict[str, Any]:
+    return maybe_find_source_entry(surface, source_id) or {
+        "sourceId": source_id,
+        "sourcePath": "db:missing-surface-plan",
+        "hits": [],
+    }
 
 
 def find_hit(source_entry: dict[str, Any], term: str) -> dict[str, Any]:
@@ -7540,6 +10868,14 @@ def _collect_native_trace_terms(
         )
         if relation_terms:
             return relation_terms
+    planned_terms = unique_strings(
+        [
+            *[str(value) for value in (acquisition_plan.get("requestedTerms") or []) if str(value).strip()],
+            *[str(value) for value in (acquisition_plan.get("selectedAnchors") or []) if str(value).strip()],
+        ]
+    )
+    if planned_terms:
+        return planned_terms
     trace_scope = str(target.get("id") or target.get("traceScope") or "").strip()
     support_context = load_or_synthesize_support_context(trace_scope, target) if trace_scope else {}
     if support_context.get("disableNativeTrace") is True:
@@ -9132,7 +12468,11 @@ def build_mk1_vs_blocked_diff(
             "provenanceStrength": "supporting",
             "statement": "The solved bridge preserves one checked row-specific buy hook.",
             "provedBy": [
-                cite_hit(action_source, find_hit(action_source, "BuyMK1TokenBoost"))
+                citation
+                for citation in [
+                    maybe_cite_hit(action_source, maybe_find_hit(action_source, "BuyMK1TokenBoost"))
+                ]
+                if citation is not None
             ],
         },
         {
@@ -9141,7 +12481,11 @@ def build_mk1_vs_blocked_diff(
             "provenanceStrength": "direct",
             "statement": "The solved bridge preserves one exact prefab identity on the same row family.",
             "provedBy": [
-                cite_hit(prefab_source, find_hit(prefab_source, "NewTokenUPGPrefab.T1.MK1Booster"))
+                citation
+                for citation in [
+                    maybe_cite_hit(prefab_source, maybe_find_hit(prefab_source, "NewTokenUPGPrefab.T1.MK1Booster"))
+                ]
+                if citation is not None
             ],
         },
         {
@@ -9460,30 +12804,48 @@ def build_atu3_effect_vs_split_diff(
         },
         {
             "type": "exact-shell-to-action-hook",
-            "status": "present",
-            "provenanceStrength": "supporting",
-            "statement": "The effect-driven trace now preserves one checked row-family action hook.",
-            "provedBy": [
-                cite_hit(action_source, find_hit(action_source, "BuyCellBoost")),
-            ],
+            "status": "present" if maybe_find_hit(action_source, "BuyCellBoost") else "missing",
+            "provenanceStrength": "supporting" if maybe_find_hit(action_source, "BuyCellBoost") else "negative",
+            "statement": (
+                "The effect-driven trace now preserves one checked row-family action hook."
+                if maybe_find_hit(action_source, "BuyCellBoost")
+                else "The narrowed effect-driven trace did not preserve a direct BuyCellBoost action hook in this run."
+            ),
+            "provedBy": compact_citations(
+                maybe_cite_hit(action_source, maybe_find_hit(action_source, "BuyCellBoost")),
+            ),
         },
         {
             "type": "shared-effect-system",
-            "status": "present",
-            "provenanceStrength": "direct",
-            "statement": "The effect-driven trace now preserves one shared cells-from-chests effect system surface.",
-            "provedBy": [
-                cite_hit(title_source, find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")),
-            ],
+            "status": "present" if maybe_find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>") else "missing",
+            "provenanceStrength": "direct" if maybe_find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>") else "negative",
+            "statement": (
+                "The effect-driven trace now preserves one shared cells-from-chests effect system surface."
+                if maybe_find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>")
+                else "The narrowed effect-driven trace did not preserve the shared cells-from-chests title surface in this run."
+            ),
+            "provedBy": compact_citations(
+                maybe_cite_hit(
+                    title_source,
+                    maybe_find_hit(title_source, "Cells Booster <size=\"22\"><i><color=#B5B5B5>(Chests)</i></color></size>"),
+                ),
+            ),
         },
         {
             "type": "derived-player-effect-surface",
-            "status": "present",
-            "provenanceStrength": "direct",
-            "statement": "The effect-driven trace now preserves one exact player-facing effect string for the shared chest-effect lane.",
-            "provedBy": [
-                cite_hit(text_source, find_hit(text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.")),
-            ],
+            "status": "present" if maybe_find_hit(text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.") else "missing",
+            "provenanceStrength": "direct" if maybe_find_hit(text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.") else "negative",
+            "statement": (
+                "The effect-driven trace now preserves one exact player-facing effect string for the shared chest-effect lane."
+                if maybe_find_hit(text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>.")
+                else "The narrowed effect-driven trace did not preserve the exact shared chest-effect string in this run."
+            ),
+            "provedBy": compact_citations(
+                maybe_cite_hit(
+                    text_source,
+                    maybe_find_hit(text_source, "<b>+1</b> Seconds \"timeskip\" to <color=#4DFEC4>Cells Gained</color> from <b>Token & Diamond Chests</b>."),
+                ),
+            ),
         },
         {
             "type": "parameter-surface",
@@ -11072,7 +14434,10 @@ def get_target_strategy_config(target: dict[str, Any] | None) -> dict[str, Any]:
         return {}
     trace_scope = str(target.get("id") or target.get("traceScope") or "").strip()
     support_context = load_or_synthesize_support_context(trace_scope, target) if trace_scope else {}
-    return support_context
+    return {
+        **dict(TRACE_TARGET_SUPPORT_DEFAULTS.get(trace_scope) or {}),
+        **dict(support_context or {}),
+    }
 
 
 def get_token_shop_builder_context(
@@ -11120,6 +14485,254 @@ def get_target_execution_plan(target: dict[str, Any] | None) -> dict[str, Any]:
     if not isinstance(target, dict):
         return {}
     return dict(target.get("executionPlan") or {})
+
+
+def _get_registered_seam_seed_terms(
+    family_id: str,
+    selected_seam_id: str,
+) -> list[str]:
+    seam_id = str(selected_seam_id or "").strip()
+    contract = dict(
+        (dict(RELATION_SEAM_CONTRACT_REGISTRY.get(str(family_id or "").strip()) or {})).get(seam_id) or {}
+    )
+    if not contract:
+        return []
+    resolved_terms = _resolve_relation_contract_terms_and_anchors(contract)
+    return unique_strings(
+        [
+            *[str(value).strip() for value in (resolved_terms.get("expectedTerms") or []) if str(value).strip()],
+            *[str(value).strip() for value in (resolved_terms.get("anchors") or []) if str(value).strip()],
+            *[str(value).strip() for value in (contract.get("fallbackExpectedTerms") or []) if str(value).strip()],
+            *[str(value).strip() for value in (contract.get("fallbackAnchors") or []) if str(value).strip()],
+        ]
+    )
+
+
+def _collect_relation_contract_fact_values(
+    trace_scope: str,
+    fact_kinds: list[str],
+) -> list[str]:
+    trace_scope = str(trace_scope or "").strip()
+    fact_kind_set = {str(value).strip() for value in (fact_kinds or []) if str(value).strip()}
+    if not trace_scope or not fact_kind_set:
+        return []
+    try:
+        rows = get_trace_db().list_latest_materialized_fact_views(
+            "cifi-full",
+            "libil2cpp.so",
+            trace_scope=trace_scope,
+        )
+    except Exception:
+        return []
+    return unique_strings(
+        [
+            str(row.get("factValue") or "").strip()
+            for row in rows
+            if str(row.get("factKind") or "").strip() in fact_kind_set
+            and str(row.get("factValue") or "").strip()
+        ]
+    )
+
+
+def _collect_relation_contract_relation_payload_values(
+    trace_scope: str,
+    relation_payload_keys: dict[str, list[str]] | None,
+) -> list[str]:
+    trace_scope = str(trace_scope or "").strip()
+    relation_payload_keys = {
+        str(relation_kind).strip(): [str(key).strip() for key in (keys or []) if str(key).strip()]
+        for relation_kind, keys in dict(relation_payload_keys or {}).items()
+        if str(relation_kind).strip()
+    }
+    if not trace_scope or not relation_payload_keys:
+        return []
+    try:
+        rows = get_trace_db().list_latest_materialized_relation_views(
+            "cifi-full",
+            "libil2cpp.so",
+            trace_scope=trace_scope,
+        )
+    except Exception:
+        return []
+    values: list[str] = []
+    for row in rows:
+        relation_kind = str(row.get("relationKind") or "").strip()
+        payload_keys = relation_payload_keys.get(relation_kind) or []
+        if not payload_keys:
+            continue
+        payload = dict(row.get("payload") or {})
+        for payload_key in payload_keys:
+            payload_value = str(payload.get(payload_key) or "").strip()
+            if payload_value:
+                values.append(payload_value)
+    return unique_strings(values)
+
+
+def _resolve_relation_contract_terms_and_anchors(contract: dict[str, Any]) -> dict[str, list[str]]:
+    contract = dict(contract or {})
+    trace_scope = str(contract.get("traceScope") or "").strip()
+    expected_terms = unique_strings(
+        [
+            *list(
+                _collect_relation_contract_fact_values(
+                    trace_scope,
+                    list(contract.get("expectedTermFactKinds") or []),
+                )
+            ),
+            *list(
+                _collect_relation_contract_relation_payload_values(
+                    trace_scope,
+                    dict(contract.get("expectedTermRelationPayloadKeys") or {}),
+                )
+            ),
+            *[str(value).strip() for value in (contract.get("fallbackExpectedTerms") or []) if str(value).strip()],
+        ]
+    )
+    anchors = unique_strings(
+        [
+            *list(
+                _collect_relation_contract_fact_values(
+                    trace_scope,
+                    list(contract.get("anchorFactKinds") or []),
+                )
+            ),
+            *list(
+                _collect_relation_contract_relation_payload_values(
+                    trace_scope,
+                    dict(contract.get("anchorRelationPayloadKeys") or {}),
+                )
+            ),
+            *[str(value).strip() for value in (contract.get("fallbackAnchors") or []) if str(value).strip()],
+        ]
+    )
+    return {
+        "expectedTerms": expected_terms,
+        "anchors": anchors,
+    }
+
+
+def _get_relation_seam_contract(
+    family_id: str,
+    selected_seam_id: str,
+    seam_terms: list[str],
+) -> dict[str, Any]:
+    seam_id = str(selected_seam_id or "").strip()
+    normalized_family_id = str(family_id or "").strip()
+    seam_terms = [str(term).strip() for term in (seam_terms or []) if str(term).strip()]
+    structured_claim_terms = [term for term in seam_terms if "." in term]
+    registry = dict(RELATION_SEAM_CONTRACT_REGISTRY.get(normalized_family_id) or {})
+    contract = dict(registry.get(seam_id) or {})
+    if not contract:
+        return {}
+    resolved_terms = _resolve_relation_contract_terms_and_anchors(contract)
+    contract["expectedTerms"] = list(resolved_terms.get("expectedTerms") or [])
+    contract["anchors"] = list(resolved_terms.get("anchors") or [])
+    if seam_id == "typed-market-field-recovery" and structured_claim_terms:
+        contract["expectedTerms"] = unique_strings([*structured_claim_terms, *list(contract.get("expectedTerms") or [])])
+        contract["skipNativeExecution"] = True
+    return contract
+
+
+def _find_explicit_relation_seam_query(
+    family_id: str,
+    queries: list[str] | tuple[str, ...] | None,
+) -> str:
+    registry = dict(RELATION_SEAM_CONTRACT_REGISTRY.get(str(family_id or "").strip()) or {})
+    if not registry:
+        return ""
+    normalized_queries = {
+        str(query).strip().lower()
+        for query in list(queries or [])
+        if str(query).strip()
+    }
+    for seam_id in registry.keys():
+        if str(seam_id).strip().lower() in normalized_queries:
+            return str(seam_id).strip()
+    return ""
+
+
+def _shape_runtime_acquisition_plan(
+    acquisition_plan: dict[str, Any],
+    execution_trace_scope: str,
+    selected_family_id: str,
+) -> dict[str, Any]:
+    plan = dict(acquisition_plan or {})
+    normalized_family_id = str(selected_family_id or "").strip()
+    if not normalized_family_id:
+        normalized_family_id = _infer_runtime_family_id(execution_trace_scope, selected_family_id)
+    if normalized_family_id not in RELATION_SEAM_CONTRACT_REGISTRY:
+        return plan
+    selected_seam_id = str(plan.get("selectedSeamId") or "").strip()
+    seam_terms = _get_registered_seam_seed_terms(normalized_family_id, selected_seam_id)
+    if not seam_terms:
+        return plan
+    seam_contract = _get_relation_seam_contract(normalized_family_id, selected_seam_id, seam_terms)
+    if seam_contract:
+        expected_terms = [
+            str(value).strip()
+            for value in (seam_contract.get("expectedTerms") or seam_terms)
+            if str(value).strip()
+        ]
+        selected_anchors = [
+            str(value).strip()
+            for value in (seam_contract.get("anchors") or seam_terms[:12])
+            if str(value).strip()
+        ]
+        if selected_seam_id == "typed-market-field-recovery" and not expected_terms and bool(seam_contract.get("allowFallbackTermMode")):
+            plan["requestedTerms"] = list(seam_terms)
+            plan["selectedAnchors"] = list(seam_terms[:12])
+            plan["coverageMode"] = "term-shaped"
+            plan.pop("selectedRelationProbe", None)
+            plan["skipNativeExecution"] = False
+        else:
+            plan["requestedTerms"] = list(expected_terms)
+            plan["selectedAnchors"] = list(selected_anchors)
+            plan["coverageMode"] = str(seam_contract.get("coverageMode") or "term-shaped")
+            plan["selectedRelationProbe"] = {
+                "probeId": str(seam_contract.get("probeId") or f"multiverse-{selected_seam_id}"),
+                "label": str(seam_contract.get("label") or selected_seam_id.replace("-", " ")),
+                "probeMode": str(seam_contract.get("probeMode") or plan["coverageMode"]),
+                "traceScope": str(seam_contract.get("traceScope") or execution_trace_scope),
+                "requiredCoverageSeamIds": list(seam_contract.get("requiredCoverageSeamIds") or []),
+                "requiredFactKinds": list(seam_contract.get("requiredFactKinds") or []),
+                "requiredRelationKinds": list(seam_contract.get("requiredRelationKinds") or []),
+                "progressRelationKinds": list(seam_contract.get("progressRelationKinds") or []),
+                "progressEdgeTypes": list(seam_contract.get("progressEdgeTypes") or []),
+                "expectedTerms": list(expected_terms),
+                "anchors": list(selected_anchors),
+                "routine": str(seam_contract.get("routine") or plan.get("selectedRoutine") or ""),
+            }
+            plan["skipNativeExecution"] = bool(seam_contract.get("skipNativeExecution"))
+    else:
+        plan["requestedTerms"] = list(seam_terms)
+        plan["selectedAnchors"] = list(seam_terms[:12])
+        plan["coverageMode"] = "term-shaped"
+        plan.pop("selectedRelationProbe", None)
+        plan["skipNativeExecution"] = False
+    plan["anchorSelectionReasons"] = unique_strings(
+        [
+            *[str(value) for value in (plan.get("anchorSelectionReasons") or []) if str(value).strip()],
+            f"seam-shaped multiverse acquisition for {selected_seam_id}",
+        ]
+    )
+    shaped_steps: list[dict[str, Any]] = []
+    for step in [dict(item) for item in (plan.get("steps") or []) if isinstance(item, dict)]:
+        shaped_step = dict(step)
+        shaped_step["anchors"] = list(seam_terms[:12])
+        shaped_step["expectedTerms"] = list(seam_terms)
+        if plan.get("selectedRelationProbe"):
+            shaped_step["coverageMode"] = str(plan.get("coverageMode") or "term-shaped")
+            shaped_step["relationProbe"] = dict(plan.get("selectedRelationProbe") or {})
+        shaped_step["whyChosen"] = unique_strings(
+            [
+                *[str(value) for value in (shaped_step.get("whyChosen") or []) if str(value).strip()],
+                f"seam-shaped multiverse acquisition for {selected_seam_id}",
+            ]
+        )
+        shaped_steps.append(shaped_step)
+    if shaped_steps:
+        plan["steps"] = shaped_steps
+    return plan
 
 
 def get_primary_surfaces_for_depth(config: dict[str, Any], depth_search: int) -> list[dict[str, Any]]:
@@ -11397,7 +15010,14 @@ def build_token_shop_mod_trace(target_id: str, target: dict[str, Any], anchors: 
     fallback_surface_specs = []
     shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
     builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
-    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
+    surfaces = build_surface_bundles_batched(
+        surface_specs,
+        anchors,
+        documents,
+        shell_window,
+        available_source_ids,
+        extended_search,
+    )
     provisional_payload = {
         "shellWindow": shell_window,
         "surfaces": surfaces,
@@ -11442,7 +15062,21 @@ def build_token_shop_mk1_trace(target_id: str, target: dict[str, Any], anchors: 
     fallback_surface_specs = []
     shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
     builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
-    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
+    surfaces = build_surface_bundles_batched(
+        surface_specs,
+        anchors,
+        documents,
+        shell_window,
+        available_source_ids,
+        extended_search,
+    )
+    provisional_payload = {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "bridgeCheck": {"bridgeHits": []},
+        "traceGraph": {"nodes": [], "edges": [], "negativeEdges": [], "claimLedger": []},
+    }
+    row_recovery = _build_token_shop_row_recovery(target, provisional_payload, {"summary": {}}) or {}
     comparison_seed = build_mk1_vs_blocked_diff(target_id, target, shell_window, surfaces, token_shop_extract, mk1_context)
     return {
         "shellWindow": shell_window,
@@ -11477,7 +15111,14 @@ def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], an
     fallback_surface_specs = []
     shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
     builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
-    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
+    surfaces = build_surface_bundles_batched(
+        surface_specs,
+        anchors,
+        documents,
+        shell_window,
+        available_source_ids,
+        extended_search,
+    )
     comparison_seed = build_mk3_vs_blocked_diff(target_id, target, shell_window, surfaces, token_shop_extract, mk3_context)
     return {
         "shellWindow": shell_window,
@@ -11501,6 +15142,120 @@ def build_token_shop_mk3_bridge_trace(target_id: str, target: dict[str, Any], an
     }
 
 
+def build_token_shop_shell_bridge_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
+    config = get_target_strategy_config(target)
+    token_shop_extract = documents["tokenShopExtract"]
+    fallback_shell_window = build_token_shop_fallback_shell_window(target_id, target, token_shop_extract)
+    fallback_surface_specs = []
+    shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+    builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
+    surfaces = build_surface_bundles_batched(
+        surface_specs,
+        anchors,
+        documents,
+        shell_window,
+        available_source_ids,
+        extended_search,
+    )
+    depth_expansion = build_depth_expansion(
+        surfaces,
+        documents,
+        shell_window,
+        available_source_ids,
+        depth_search,
+        anchors,
+        target,
+    )
+
+    def collect_surface_terms(surface_id: str, predicate=None) -> list[str]:
+        output: list[str] = []
+        seen: set[str] = set()
+        for surface in surfaces:
+            if str(surface.get("id") or "").strip() != surface_id:
+                continue
+            for source in surface.get("sources") or []:
+                for hit in source.get("hits") or []:
+                    term = str(hit.get("term") or "").strip()
+                    if not term or term in seen:
+                        continue
+                    if predicate is not None and not predicate(term):
+                        continue
+                    seen.add(term)
+                    output.append(term)
+        return output
+
+    action_terms = collect_surface_terms("action-lane", lambda term: "Buy" in term or "Hold" in term)
+    prefab_terms = collect_surface_terms("prefab-lane", lambda term: "NewTokenUPGPrefab" in term)
+    title_terms = (
+        collect_surface_terms("title-text-surfaces", lambda term: "Booster" in term or "Tokens Booster" in term or "GEN ENHANCEMENT" in term)
+        or collect_surface_terms("support-text-lane", lambda term: "Booster" in term or "Generator" in term)
+        or collect_surface_terms("title-roster-gap", lambda term: "Booster" in term or "Generator" in term)
+    )
+    bridge_hits = []
+    if action_terms:
+        bridge_hits.append(
+            {
+                "surfaceId": "action-lane",
+                "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]),
+                "term": action_terms[0],
+            }
+        )
+    if prefab_terms:
+        bridge_hits.append(
+            {
+                "surfaceId": "prefab-lane",
+                "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]),
+                "term": prefab_terms[0],
+            }
+        )
+    if title_terms:
+        bridge_hits.append(
+            {
+                "surfaceId": "title-text-surfaces",
+                "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["level0"]),
+                "term": title_terms[0],
+            }
+        )
+    candidate_terms = _unique_strings(
+        [
+            builder_context["shellField"],
+            *(action_terms[:1] if action_terms else []),
+            *(prefab_terms[:1] if prefab_terms else []),
+            *(title_terms[:1] if title_terms else []),
+        ]
+    )
+    bridge_result = (
+        "checked object bridge plus title-side text chain recovered"
+        if title_terms
+        else "checked object bridge recovered"
+    )
+    return {
+        "shellWindow": shell_window,
+        "surfaces": surfaces,
+        "depthExpansion": depth_expansion,
+        "traceGraph": resolve_token_shop_graph_plan(target_id) or build_mk3_bridge_trace_graph(shell_window, surfaces),
+        "bridgePromotionRule": resolve_token_shop_bridge_policy(
+            target_id,
+            "Only promote TokenShop shell-bridge rows when one exact shell-side owner block, one row-specific action hook, and one exact prefab identity converge on the same row family; title-side surfaces may strengthen the bridge but do not imply broader planner promotion by themselves.",
+        ),
+        "bridgeCheck": {
+            "candidateTerms": candidate_terms,
+            "bridgeCleared": bool(action_terms and prefab_terms),
+            "bridgeHits": bridge_hits,
+            "result": bridge_result,
+        },
+        "solvedVsBlockedDiff": {
+            "sharedPresentEdgeTypes": [],
+            "baselineOnlyPresentEdgeTypes": [],
+            "blockedMissingEdgeTypes": [],
+            "solvedVsBlockedSummary": [bridge_result],
+        },
+        "lostStructure": resolve_token_shop_lost_structure(target_id, list(builder_context["lostStructure"])),
+        "groundedConclusion": "",
+        "currentBoundary": [],
+    }
+
+
 def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
     config = get_target_strategy_config(target)
     token_shop_extract = documents["tokenShopExtract"]
@@ -11513,7 +15268,14 @@ def build_token_shop_atu3_effect_trace(target_id: str, target: dict[str, Any], a
     fallback_surface_specs = []
     shell_window, effect_surfaces = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
     builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
-    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in effect_surfaces]
+    surfaces = build_surface_bundles_batched(
+        effect_surfaces,
+        anchors,
+        documents,
+        shell_window,
+        available_source_ids,
+        extended_search,
+    )
     depth_expansion = build_depth_expansion(
         surfaces,
         documents,
@@ -11557,7 +15319,14 @@ def build_token_shop_atu3_chest_consumer_trace(target_id: str, target: dict[str,
     fallback_surface_specs = []
     shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
     builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
-    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
+    surfaces = build_surface_bundles_batched(
+        surface_specs,
+        anchors,
+        documents,
+        shell_window,
+        available_source_ids,
+        extended_search,
+    )
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
@@ -11649,7 +15418,14 @@ def build_token_shop_atu3_chest_consumer_read_trace(target_id: str, target: dict
     fallback_surface_specs = []
     shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
     builder_context = get_token_shop_builder_context(target_id, target, config, shell_window)
-    surfaces = [build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, extended_search) for surface in surface_specs]
+    surfaces = build_surface_bundles_batched(
+        surface_specs,
+        anchors,
+        documents,
+        shell_window,
+        available_source_ids,
+        extended_search,
+    )
     return {
         "shellWindow": shell_window,
         "surfaces": surfaces,
@@ -11704,7 +15480,7 @@ def _build_token_shop_family_profile_payload(
     row_recovery: dict[str, Any] = {}
     if profile_id in {"daily-tokenium-family", "t3-trio-family"}:
         with _trace_profile_span("sourceLoading.tracePayloadBuild.rowRecovery"):
-            row_recovery = _build_token_shop_row_recovery(target, provisional_payload, {"summary": {}}) or {}
+            row_recovery = _build_token_shop_family_row_recovery(profile_id) or {}
     with _trace_profile_span("sourceLoading.tracePayloadBuild.depthExpansion"):
         depth_expansion = build_depth_expansion(
             surfaces,
@@ -11808,6 +15584,22 @@ def _build_token_shop_family_profile_payload(
     }
 
 
+def _build_token_shop_family_row_recovery(profile_id: str) -> dict[str, Any]:
+    scope_id = ""
+    if profile_id == "daily-tokenium-family":
+        scope_id = "row:ATU14Button"
+    elif profile_id == "t3-trio-family":
+        scope_id = "row:ATU21Button"
+    if not scope_id:
+        return {}
+    cached_payload = load_latest_materialized_target_bundle(scope_id)
+    cached_recovery = dict(cached_payload.get("rowRecovery") or {})
+    if cached_recovery:
+        cached_recovery.setdefault("semanticScopeId", scope_id)
+        return cached_recovery
+    return {"semanticScopeId": scope_id}
+
+
 def _load_token_shop_family_context(profile_id: str) -> dict[str, Any]:
     if profile_id != "generic-structure":
         return {}
@@ -11826,13 +15618,80 @@ def _load_token_shop_family_context(profile_id: str) -> dict[str, Any]:
     }
 
 
+def _resolve_token_shop_family_profile_id(trace_scope: str, support_context: dict[str, Any]) -> str:
+    trace_scope = str(trace_scope or "").strip()
+    support_context = dict(support_context or {})
+    configured = str(support_context.get("familyTraceProfile") or "").strip()
+    if configured and configured != "generic-structure":
+        return configured
+    if trace_scope == "token-shop-daily-tokenium-family":
+        return "daily-tokenium-family"
+    if trace_scope == "token-shop-t3-trio-family":
+        return "t3-trio-family"
+    if trace_scope == "token-shop-late-atu-family":
+        return "late-atu-family"
+    return configured or "generic-structure"
+
+
+def _should_use_minimal_token_shop_family_surfaces(profile_id: str, anchors: list[str]) -> bool:
+    normalized_anchors = [str(anchor).strip() for anchor in (anchors or []) if str(anchor).strip()]
+    if len(normalized_anchors) != 1:
+        return False
+    anchor = normalized_anchors[0]
+    profile_id = str(profile_id or "").strip()
+    if profile_id not in {"generic-structure", "t3-trio-family", "late-atu-family"}:
+        return False
+    if any(token in anchor for token in ("Title", "Text", "Localized", "Academy Booster", "Campaign Fragments")):
+        return False
+    return bool(
+        anchor.startswith("NewTokenUPGPrefab.")
+        or anchor.startswith("Buy")
+        or re.fullmatch(r"ATU\d+(Button|Bonus\d*|StartCost|AdditiveCost|MaxLevel|Fill)", anchor)
+        or re.fullmatch(r"StartATU\d+Hold", anchor)
+        or re.fullmatch(r"StopATU\d+Hold", anchor)
+        or re.fullmatch(r"FinalT\d+Trio\d+MaxLevel", anchor)
+    )
+
+
+def _prune_token_shop_family_surface_specs(
+    profile_id: str,
+    anchors: list[str],
+    surface_specs: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    if not _should_use_minimal_token_shop_family_surfaces(profile_id, anchors):
+        return list(surface_specs or [])
+    anchor = next((str(item).strip() for item in (anchors or []) if str(item).strip()), "")
+    if str(profile_id or "").strip() == "generic-structure":
+        if anchor.startswith("NewTokenUPGPrefab."):
+            allowed_surface_ids = {"family-shells", "bridge-proxies", "prefab-roster"}
+        elif anchor.startswith("Buy"):
+            allowed_surface_ids = {"family-shells", "bridge-proxies"}
+        else:
+            allowed_surface_ids = {"family-shells", "bridge-proxies", "prefab-roster"}
+    else:
+        if anchor.startswith("NewTokenUPGPrefab."):
+            allowed_surface_ids = {"family-shells", "action-lane", "prefab-roster"}
+        elif anchor.startswith("Buy") or "Hold" in anchor:
+            allowed_surface_ids = {"family-shells", "action-lane"}
+        elif "MaxLevel" in anchor or "Bonus" in anchor:
+            allowed_surface_ids = {"family-shells", "effect-lane", "action-lane", "prefab-roster"}
+        else:
+            allowed_surface_ids = {"family-shells", "action-lane", "prefab-roster"}
+    pruned = [
+        dict(surface)
+        for surface in (surface_specs or [])
+        if str(surface.get("id") or "").strip() in allowed_surface_ids
+    ]
+    return pruned or list(surface_specs or [])
+
+
 def build_token_shop_family_structure_trace(target_id: str, target: dict[str, Any], anchors: list[str], documents: dict[str, Any], available_source_ids: list[str], extended_search: int, depth_search: int) -> dict[str, Any]:
     config = get_target_strategy_config(target)
     with _trace_profile_span("sourceLoading.tracePayloadBuild.supportContext"):
         support_context = load_or_synthesize_support_context(target_id, target)
     builder_context = get_token_shop_builder_context(target_id, target, config)
     token_shop_extract = documents["tokenShopExtract"]
-    profile_id = str(support_context.get("familyTraceProfile") or "generic-structure").strip()
+    profile_id = _resolve_token_shop_family_profile_id(target_id, support_context)
     with _trace_profile_span("sourceLoading.tracePayloadBuild.familyContext"):
         family_context = _load_token_shop_family_context(profile_id)
     fallback_surface_specs = []
@@ -11859,6 +15718,7 @@ def build_token_shop_family_structure_trace(target_id: str, target: dict[str, An
     fallback_surface_specs = []
     with _trace_profile_span("sourceLoading.tracePayloadBuild.surfacePlan"):
         shell_window, surface_specs = resolve_token_shop_surface_plan(target_id, fallback_shell_window, fallback_surface_specs)
+        surface_specs = _prune_token_shop_family_surface_specs(profile_id, anchors, surface_specs)
     if not shell_window.get("ownerFieldBlock") or not shell_window.get("window"):
         with _trace_profile_span("sourceLoading.tracePayloadBuild.fallbackShellWindow"):
             fallback_row_window = build_token_shop_fallback_shell_window(target_id, target, token_shop_extract)
@@ -11914,13 +15774,13 @@ def build_token_shop_daily_tokenium_family_graph(
     update_hook_candidates = list(presentation_update.get("updateHookCandidates") or [])
     title_recovered = _token_shop_title_recovered(row_recovery, row_scope)
 
-    shell_surface = find_surface(surfaces, "family-shells")
-    effect_surface = find_surface(surfaces, "effect-lane")
-    action_surface = find_surface(surfaces, "action-lane")
-    prefab_surface = find_surface(surfaces, "prefab-roster")
-    title_surface = find_surface(surfaces, "title-text-surfaces")
+    shell_surface = get_optional_surface(surfaces, "family-shells")
+    effect_surface = get_optional_surface(surfaces, "effect-lane")
+    action_surface = get_optional_surface(surfaces, "action-lane")
+    prefab_surface = get_optional_surface(surfaces, "prefab-roster")
+    title_surface = get_optional_surface(surfaces, "title-text-surfaces")
 
-    extract_source = find_source_entry(shell_surface, "tokenShopExtract")
+    extract_source = get_optional_source_entry(shell_surface, "tokenShopExtract")
     metadata_shell_source = maybe_find_source_entry(shell_surface, "metadata")
     metadata_effect_source = maybe_find_source_entry(effect_surface, "metadata")
     level0_effect_source = maybe_find_source_entry(effect_surface, "level0")
@@ -12164,13 +16024,13 @@ def build_token_shop_t3_trio_family_graph(
     update_hook_candidates = list(presentation_update.get("updateHookCandidates") or [])
     title_recovered = _token_shop_title_recovered(row_recovery, row_scope)
 
-    shell_surface = find_surface(surfaces, "family-shells")
-    effect_surface = find_surface(surfaces, "effect-lane")
-    action_surface = find_surface(surfaces, "action-lane")
-    prefab_surface = find_surface(surfaces, "prefab-roster")
-    title_surface = find_surface(surfaces, "title-text-surfaces")
+    shell_surface = get_optional_surface(surfaces, "family-shells")
+    effect_surface = get_optional_surface(surfaces, "effect-lane")
+    action_surface = get_optional_surface(surfaces, "action-lane")
+    prefab_surface = get_optional_surface(surfaces, "prefab-roster")
+    title_surface = get_optional_surface(surfaces, "title-text-surfaces")
 
-    extract_source = find_source_entry(shell_surface, "tokenShopExtract")
+    extract_source = get_optional_source_entry(shell_surface, "tokenShopExtract")
     metadata_effect_source = maybe_find_source_entry(effect_surface, "metadata")
     level0_effect_source = maybe_find_source_entry(effect_surface, "level0")
     metadata_action_source = maybe_find_source_entry(action_surface, "metadata")
@@ -12402,13 +16262,13 @@ def build_token_shop_late_atu_family_graph(
     prefab_boundary = dict(late_boundary.get("prefabRosterBoundary") or {})
     effect_boundary = dict(late_boundary.get("effectSideBoundary") or {})
 
-    shell_surface = find_surface(surfaces, "family-shells")
-    action_surface = find_surface(surfaces, "action-lane")
-    title_surface = find_surface(surfaces, "title-text-surfaces")
-    prefab_surface = find_surface(surfaces, "prefab-roster")
-    effect_surface = find_surface(surfaces, "effect-lane")
+    shell_surface = get_optional_surface(surfaces, "family-shells")
+    action_surface = get_optional_surface(surfaces, "action-lane")
+    title_surface = get_optional_surface(surfaces, "title-text-surfaces")
+    prefab_surface = get_optional_surface(surfaces, "prefab-roster")
+    effect_surface = get_optional_surface(surfaces, "effect-lane")
 
-    extract_source = find_source_entry(shell_surface, "tokenShopExtract")
+    extract_source = get_optional_source_entry(shell_surface, "tokenShopExtract")
     metadata_action_source = maybe_find_source_entry(action_surface, "metadata")
     level0_action_source = maybe_find_source_entry(action_surface, "level0")
     level0_title_source = maybe_find_source_entry(title_surface, "level0")
@@ -12615,10 +16475,14 @@ def build_shard_cost_trace(target: dict[str, Any], anchors: list[str], documents
         fallback_surface_specs,
         target,
     )
-    surfaces = [
-        build_surface_bundle(surface, anchors, documents, shell_window, ["metadata"], 0)
-        for surface in surface_specs
-    ]
+    surfaces = build_surface_bundles_batched(
+        surface_specs,
+        anchors,
+        documents,
+        shell_window,
+        ["metadata"],
+        0,
+    )
 
     return {
         "shellWindow": shell_window,
@@ -12950,10 +16814,14 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
         fallback_shell_window,
         fallback_surface_specs,
     )
-    surfaces = [
-        build_surface_bundle(surface, anchors, documents, shell_window, available_source_ids, 0)
-        for surface in surface_specs
-    ]
+    surfaces = build_surface_bundles_batched(
+        surface_specs,
+        anchors,
+        documents,
+        shell_window,
+        available_source_ids,
+        0,
+    )
     for surface in surfaces:
         surface["anchorSpecs"] = build_anchor_specs(surface["terms"], "surface-search")
 
@@ -13174,56 +17042,180 @@ def build_shard_owned_state_trace(target: dict[str, Any], anchors: list[str], do
 
 def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: list[str], documents: dict[str, Any]) -> dict[str, Any]:
     config = get_target_strategy_config(target)
+    acquisition_plan = dict(_get_active_trace_runtime_flag("acquisitionPlan") or {})
+    selected_seam_id = str(acquisition_plan.get("selectedSeamId") or "").strip()
+    selected_terms = [
+        str(value).strip()
+        for value in (acquisition_plan.get("requestedTerms") or [])
+        if str(value).strip()
+    ]
+    selected_anchor_terms = [
+        str(value).strip()
+        for value in (acquisition_plan.get("selectedAnchors") or [])
+        if str(value).strip()
+    ]
+    save_owner = str(
+        config.get("saveOwner")
+        or config.get("exactSaveOwnerLabel")
+        or "SaveData"
+    ).strip() or "SaveData"
+    accessor_bridge = str(
+        config.get("accessorBridge")
+        or config.get("canonicalHostLabel")
+        or "PlayerProfileHandler.get_Market"
+    ).strip() or "PlayerProfileHandler.get_Market"
+    typed_span = str(config.get("typedSpan") or "IS1Level through IS110Level").strip() or "IS1Level through IS110Level"
+    compatibility_import_target = str(
+        config.get("compatibilityImportTargetPath")
+        or "compatibility.unmappedSystemState.multiverseMarket"
+    ).strip() or "compatibility.unmappedSystemState.multiverseMarket"
+    canonical_import_safe_subset = str(config.get("canonicalImportSafeSubsetLabel") or "none").strip() or "none"
+    broader_row_remap_status = str(
+        config.get("broaderRowRemapStatus")
+        or "Broader row identity or remap stays blocked outside the checked 71-74 ordered overlap."
+    ).strip() or "Broader row identity or remap stays blocked outside the checked 71-74 ordered overlap."
+    blocked_structure = list(config.get("blockedStructure") or [])
+    seam_term_profiles = {
+        "typed-market-field-recovery": [
+            "PlayerProfileData",
+            "SaveData",
+            "ArcadeSaveData",
+            "MultiverseMarket",
+            "Market",
+            "PlayerProfileHandler",
+            "FillPlayerProfileData",
+            "ConvertSaveDataToProfileData",
+            "InscryptionsDone",
+            "EsotericR1Trades",
+            "IS1Level",
+            "IS71Level",
+            "IS110Level",
+        ],
+        "canonical-import-admissibility": [
+            "CloudSavePlayerProfile",
+            "GetPlayerProfileInfo",
+            "FillPlayerProfileData",
+            "ConvertSaveDataToProfileData",
+            "PlayerProfileData",
+            "SaveData",
+            "MultiverseMarket",
+            "compatibility.unmappedSystemState.multiverseMarket",
+            canonical_import_safe_subset,
+            "InscryptionsDone",
+        ],
+        "broad-row-identity-remap": [
+            "SetAllChrystosEmporiumTexts",
+            "TextHandlerMarkets",
+            "ResourceAmountText",
+            "BuyIS71",
+            "BuyIS72",
+            "BuyIS73",
+            "BuyIS74",
+            "SetIS71CostText",
+            "SetIS72CostText",
+            "SetIS73CostText",
+            "SetIS74CostText",
+            "IS59Level",
+            "IS62Level",
+            "IS71Level",
+            "IS74Level",
+        ],
+    }
+    seam_profile_terms = list(seam_term_profiles.get(selected_seam_id) or [])
+    seam_seed_terms = unique_strings([
+        *selected_terms,
+        *selected_anchor_terms,
+        *seam_profile_terms,
+        *anchors,
+    ])
+    typed_focus_terms = unique_strings([
+        "PlayerProfileHandler",
+        "PlayerProfileData",
+        "SaveData",
+        "ArcadeSaveData",
+        "MultiverseMarket",
+        "Market",
+        "FillPlayerProfileData",
+        "ConvertSaveDataToProfileData",
+        "InscryptionsDone",
+        "EsotericR1Trades",
+        "IS1Level",
+        "IS71Level",
+        "IS110Level",
+        *seam_seed_terms,
+    ])
+    import_focus_terms = unique_strings([
+        "CloudSavePlayerProfile",
+        "GetPlayerProfileInfo",
+        "FillPlayerProfileData",
+        "ConvertSaveDataToProfileData",
+        "PlayerProfileData",
+        "SaveData",
+        "MultiverseMarket",
+        compatibility_import_target,
+        canonical_import_safe_subset,
+        *seam_seed_terms,
+    ])
+    row_remap_focus_terms = unique_strings([
+        "SetAllChrystosEmporiumTexts",
+        "TextHandlerMarkets",
+        "ResourceAmountText",
+        "BuyIS71",
+        "BuyIS72",
+        "BuyIS73",
+        "BuyIS74",
+        "SetIS71CostText",
+        "SetIS72CostText",
+        "SetIS73CostText",
+        "SetIS74CostText",
+        "IS59Level",
+        "IS62Level",
+        "IS71Level",
+        "IS74Level",
+        *seam_seed_terms,
+    ])
     metadata_accessor_source = collect_source_hits(
         documents,
         "metadata",
-        build_anchor_specs(["PlayerProfileHandler", "get_Market", "MultiverseMarket", *anchors], "surface-search"),
+        build_anchor_specs(unique_strings(["PlayerProfileHandler", "get_Market", "MultiverseMarket", *typed_focus_terms]), "surface-search"),
     )
     metadata_owner_source = collect_source_hits(
         documents,
         "metadata",
-        build_anchor_specs([config["saveOwner"], "IS1Level", "IS110Level", "InscryptionsDone", *anchors], "surface-search"),
+        build_anchor_specs(unique_strings([save_owner, "IS1Level", "IS110Level", "InscryptionsDone", *typed_focus_terms]), "surface-search"),
     )
     metadata_ordered_source = collect_source_hits(
         documents,
         "metadata",
-        build_anchor_specs(
-            [
-                "SetIS71CostText",
-                "SetIS72CostText",
-                "SetIS73CostText",
-                "SetIS74CostText",
-                "IS71Level",
-                "IS72Level",
-                "IS73Level",
-                "IS74Level",
-                *anchors,
-            ],
-            "surface-search",
-        ),
+        build_anchor_specs(row_remap_focus_terms, "surface-search"),
+    )
+    metadata_import_source = collect_source_hits(
+        documents,
+        "metadata",
+        build_anchor_specs(import_focus_terms, "surface-search"),
     )
     level0_accessor_source = collect_source_hits(
         documents,
         "level0",
-        build_anchor_specs(["PlayerProfileHandler", "MultiverseMarket", config["saveOwner"], "InscryptionsDone", *anchors], "surface-search"),
+        build_anchor_specs(unique_strings(["PlayerProfileHandler", "MultiverseMarket", save_owner, "InscryptionsDone", *typed_focus_terms]), "surface-search"),
     )
     level0_action_source = collect_source_hits(
         documents,
         "level0",
-        build_anchor_specs(["BuyIS71", "BuyIS72", "BuyIS73", "BuyIS74", "MultiverseMarket", config["saveOwner"], *anchors], "surface-search"),
+        build_anchor_specs(unique_strings(["BuyIS71", "BuyIS72", "BuyIS73", "BuyIS74", "MultiverseMarket", save_owner, *row_remap_focus_terms]), "surface-search"),
     )
     fallback_shell_window = {
         "source": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]),
         "shellField": "get_Market",
         "shellPathId": "typed-accessor",
         "shellObjectOffset": None,
-        "ownerFieldBlock": [config["saveOwner"], "IS1Level", "IS110Level", "InscryptionsDone"],
+        "ownerFieldBlock": [save_owner, "IS1Level", "IS110Level", "InscryptionsDone"],
         "window": [
             {"field": "bridgeAccessor", "group": "typed-boundary", "kind": "method", "value": "get_Market"},
             {"field": "bridgeOwner", "group": "typed-boundary", "kind": "type", "value": "PlayerProfileHandler"},
             {"field": "bridgeReturnType", "group": "typed-boundary", "kind": "type", "value": "MultiverseMarket"},
-            {"field": "declaringOwner", "group": "typed-boundary", "kind": "type", "value": config["saveOwner"]},
-            {"field": "typedSpan", "group": "typed-boundary", "kind": "field-range", "value": config["typedSpan"]},
+            {"field": "declaringOwner", "group": "typed-boundary", "kind": "type", "value": save_owner},
+            {"field": "typedSpan", "group": "typed-boundary", "kind": "field-range", "value": typed_span},
         ],
     }
     fallback_surface_specs = []
@@ -13233,19 +17225,23 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
         fallback_surface_specs,
         target,
     )
-    surfaces = [
-        build_surface_bundle(surface, anchors, documents, shell_window, ["metadata", "level0"], 0)
-        for surface in surface_specs
-    ]
+    surfaces = build_surface_bundles_batched(
+        surface_specs,
+        anchors,
+        documents,
+        shell_window,
+        ["metadata", "level0"],
+        0,
+    )
     bridge_check = {
-        "candidateTerms": [config["accessorBridge"], config["saveOwner"], config["typedSpan"]],
+        "candidateTerms": unique_strings([accessor_bridge, save_owner, typed_span, *seam_seed_terms])[:12],
         "bridgeCleared": True,
         "bridgeHits": [{"surfaceId": "accessor-bridge", "sourcePath": repo_relative(SOURCE_REFERENCE_PATHS["metadata"]), "term": "get_Market"}],
         "result": "checked accessor-to-save-owner boundary recovered",
     }
     solved_vs_blocked = {
-        "baseline": {"id": "multiverse-market-save-owner-boundary", "label": "Emporium save-owner boundary", "status": "cleared", "sourcePath": "semantic:target-bridge-policy:multiverse-market-save-owner-boundary", "shellField": config["accessorBridge"], "shellPathId": "typed-accessor", "comparisonShape": [{"type": "accessor-bridge", "status": "present"}, {"type": "typed-save-owner", "status": "present"}, {"type": "compatibility-import-span", "status": "present"}], "groundedConclusion": "The Emporium accessor-to-SaveData owner boundary is grounded enough to preserve as compatibility-only truth."},
-        "blockedTarget": {"id": "multiverse-market-canonical-import", "label": "Emporium canonical import", "status": "blocked", "sourcePath": "semantic:target-bridge-comparison:multiverse-market-save-owner-boundary", "shellField": config["saveOwner"], "shellPathId": "canonical-import", "comparisonShape": [{"type": "typed-market-field-recovery", "status": "missing"}, {"type": "canonical-import-admissibility", "status": "missing"}, {"type": "broad-row-identity-remap", "status": "missing"}], "groundedConclusion": "Canonical import remains blocked even though the wider save-owner boundary is grounded."},
+        "baseline": {"id": "multiverse-market-save-owner-boundary", "label": "Emporium save-owner boundary", "status": "cleared", "sourcePath": "semantic:target-bridge-policy:multiverse-market-save-owner-boundary", "shellField": accessor_bridge, "shellPathId": "typed-accessor", "comparisonShape": [{"type": "accessor-bridge", "status": "present"}, {"type": "typed-save-owner", "status": "present"}, {"type": "compatibility-import-span", "status": "present"}], "groundedConclusion": "The Emporium accessor-to-SaveData owner boundary is grounded enough to preserve as compatibility-only truth."},
+        "blockedTarget": {"id": "multiverse-market-canonical-import", "label": "Emporium canonical import", "status": "blocked", "sourcePath": "semantic:target-bridge-comparison:multiverse-market-save-owner-boundary", "shellField": save_owner, "shellPathId": "canonical-import", "comparisonShape": [{"type": "typed-market-field-recovery", "status": "missing"}, {"type": "canonical-import-admissibility", "status": "missing"}, {"type": "broad-row-identity-remap", "status": "missing"}], "groundedConclusion": "Canonical import remains blocked even though the wider save-owner boundary is grounded."},
         "delta": {
             "sharedPresentEdgeTypes": ["accessor-bridge", "typed-save-owner"],
             "baselineOnlyPresentEdgeTypes": ["compatibility-import-span"],
@@ -13266,13 +17262,13 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
         "surfaces": surfaces,
         "traceGraph": resolve_graph_plan(str(target.get("id") or "multiverse-market-save-owner-boundary")) or {
             "nodes": [
-                make_node("market-accessor", "accessor-bridge", config["accessorBridge"], "present", "The checked PlayerProfileHandler.get_Market accessor bridge is preserved."),
-                make_node("market-owner", "declaring-owner", config["saveOwner"], "present", "SaveData remains the exact checked wider owner."),
-                make_node("market-span", "typed-span", config["typedSpan"], "present", "The exact contiguous IS1Level through IS110Level span is preserved."),
-                make_node("market-import", "compatibility-import", config["compatibilityImportTargetPath"], "present", "The compatibility-only import target is preserved."),
+                make_node("market-accessor", "accessor-bridge", accessor_bridge, "present", "The checked PlayerProfileHandler.get_Market accessor bridge is preserved."),
+                make_node("market-owner", "declaring-owner", save_owner, "present", "SaveData remains the exact checked wider owner."),
+                make_node("market-span", "typed-span", typed_span, "present", "The exact contiguous IS1Level through IS110Level span is preserved."),
+                make_node("market-import", "compatibility-import", compatibility_import_target, "present", "The compatibility-only import target is preserved."),
             ],
             "edges": [
-                make_edge("market-accessor-to-owner", "market-accessor", "market-owner", "accessor-bridge", "present", "direct", "Metadata and level0 preserve the get_Market accessor bridge, its MultiverseMarket return type, and the wider SaveData ownership boundary.", [cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "PlayerProfileHandler")), cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "get_Market")), cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "MultiverseMarket")), cite_hit(metadata_owner_source, find_hit(metadata_owner_source, config["saveOwner"]))]),
+                make_edge("market-accessor-to-owner", "market-accessor", "market-owner", "accessor-bridge", "present", "direct", "Metadata and level0 preserve the get_Market accessor bridge, its MultiverseMarket return type, and the wider SaveData ownership boundary.", [cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "PlayerProfileHandler")), cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "get_Market")), cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "MultiverseMarket")), cite_hit(metadata_owner_source, find_hit(metadata_owner_source, save_owner))]),
                 make_edge("market-owner-to-span", "market-owner", "market-span", "typed-save-owner", "present", "direct", "Metadata directly preserves the SaveData-owned Emporium span from IS1Level through IS110Level beside InscryptionsDone.", [cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS1Level")), cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS110Level")), cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "InscryptionsDone"))]),
                 make_edge(
                     "market-span-to-import",
@@ -13281,7 +17277,7 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
                     "compatibility-import-span",
                     "present",
                     "supporting",
-                    "The exact IS span is preserved as compatibility-only raw Emporium truth under {} rather than canonical PlayerProfile import.".format(config["compatibilityImportTargetPath"]),
+                    "The exact IS span is preserved as compatibility-only raw Emporium truth under {} rather than canonical PlayerProfile import.".format(compatibility_import_target),
                     [
                         cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS1Level")),
                         cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS110Level")),
@@ -13318,7 +17314,7 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
                     [
                         cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "PlayerProfileHandler")),
                         cite_hit(metadata_accessor_source, find_hit(metadata_accessor_source, "get_Market")),
-                        cite_hit(metadata_owner_source, find_hit(metadata_owner_source, config["saveOwner"])),
+                        cite_hit(metadata_owner_source, find_hit(metadata_owner_source, save_owner)),
                         cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS1Level")),
                         cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "IS110Level")),
                     ],
@@ -13330,7 +17326,7 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
                     "canonical-import-admissibility",
                     "missing",
                     "negative",
-                    "Canonical import remains explicitly {} even though the compatibility-only import target is preserved.".format(config["canonicalImportSafeSubsetLabel"]),
+                    "Canonical import remains explicitly {} even though the compatibility-only import target is preserved.".format(canonical_import_safe_subset),
                     [
                         cite_hit(metadata_owner_source, find_hit(metadata_owner_source, "InscryptionsDone")),
                         cite_hit(level0_action_source, find_hit(level0_action_source, "BuyIS74")),
@@ -13343,7 +17339,7 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
                     "broad-row-identity-remap",
                     "missing",
                     "negative",
-                    config["broaderRowRemapStatus"],
+                    broader_row_remap_status,
                     [
                         cite_hit(metadata_ordered_source, find_hit(metadata_ordered_source, "IS71Level")),
                         cite_hit(metadata_ordered_source, find_hit(metadata_ordered_source, "IS74Level")),
@@ -13356,7 +17352,7 @@ def build_multiverse_market_save_owner_trace(target: dict[str, Any], anchors: li
         },
         "bridgePromotionRule": resolve_bridge_policy(str(target.get("id") or "multiverse-market-save-owner-boundary"), "Only promote the Emporium save-owner boundary past compatibility quarantine when canonical import admissibility and broader row identity are both checked explicitly."),
         "bridgeComparisonSeed": bridge_comparison_seed,
-        "lostStructure": resolve_lost_structure(str(target.get("id") or "multiverse-market-save-owner-boundary"), list(config["blockedStructure"])),
+        "lostStructure": resolve_lost_structure(str(target.get("id") or "multiverse-market-save-owner-boundary"), blocked_structure),
         "groundedConclusion": "",
         "currentBoundary": [],
     }
@@ -13432,6 +17428,8 @@ def build_trace_payload_for_subject(
         return build_token_shop_mk1_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
     if execution_routine == "token-shop-mk3-bridge-trace":
         return build_token_shop_mk3_bridge_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
+    if execution_routine == "token-shop-shell-bridge-trace":
+        return build_token_shop_shell_bridge_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
     if execution_routine == "token-shop-atu3-effect-trace":
         return build_token_shop_atu3_effect_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
     if execution_routine == "token-shop-atu3-consumer-trace":
@@ -13440,7 +17438,10 @@ def build_trace_payload_for_subject(
         return build_token_shop_atu3_chest_consumer_read_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
     if execution_routine == "token-shop-family-trace":
         return build_token_shop_family_structure_trace(target_id, target, anchors, documents, available_source_ids, extended_search, depth_search)
-    if execution_routine == "shard-cost-trace":
+    if execution_routine in {
+        "shard-cost-trace",
+        "shard-cost-su0-structure",
+    }:
         return build_shard_cost_trace(target, anchors, documents)
     if execution_routine in {
         "shard-owned-state-trace",
@@ -13477,6 +17478,7 @@ def build_dataset(
     extended_search: int = 0,
     depth_search: int | None = 0,
     native_timeout: int = 1800,
+    force_retrace: bool = False,
 ) -> dict[str, Any]:
     if registry is None:
         with _trace_phase("Catalog load", "catalogLoad"):
@@ -13486,6 +17488,7 @@ def build_dataset(
         selected_target_id = str(trace_plan.get("selectedTargetId") or planner_resolution["selectedTargetId"])
         execution_target_id = str(trace_plan.get("executionTargetId") or selected_target_id)
         execution_trace_scope = str(trace_plan.get("executionTraceScope") or execution_target_id)
+        request_signature = str(trace_plan.get("requestSignature") or "").strip()
         knowledge_plan = dict(trace_plan.get("knowledgePlan") or {})
         execution_routine_id = str(knowledge_plan.get("executionRoutineId") or execution_trace_scope or "generic-explore")
         db_source_projection = (
@@ -13577,10 +17580,90 @@ def build_dataset(
                 )
             )
     native_anchor_values = _collect_native_trace_terms(target, planner_resolution, trace_payload)
+    unfiltered_native_anchor_values = list(native_anchor_values)
     active_acquisition_plan = dict(_get_active_trace_runtime_flag("acquisitionPlan") or {})
     relation_probe = dict(active_acquisition_plan.get("selectedRelationProbe") or {})
-    native_request_context = (
-        {
+    active_requested_terms = [
+        str(value).strip()
+        for value in (active_acquisition_plan.get("requestedTerms") or [])
+        if str(value).strip()
+    ]
+    active_selected_anchor_terms = [
+        str(value).strip()
+        for value in (active_acquisition_plan.get("selectedAnchors") or [])
+        if str(value).strip()
+    ]
+    if (
+        active_acquisition_plan
+        and str(active_acquisition_plan.get("coverageMode") or "term-shaped").strip() == "term-shaped"
+        and not active_requested_terms
+        and not active_selected_anchor_terms
+    ):
+        active_acquisition_plan = dict(active_acquisition_plan)
+        active_acquisition_plan["skipNativeExecution"] = True
+    auto_force_native_terms = (
+        bool(str(active_acquisition_plan.get("selectedSeamId") or "").strip())
+        and str(active_acquisition_plan.get("coverageMode") or "term-shaped").strip() == "term-shaped"
+        and bool(active_requested_terms)
+    )
+    native_term_classification = _classify_incremental_native_terms(
+        execution_trace_scope,
+        str(active_acquisition_plan.get("selectedSeamId") or "").strip(),
+        native_anchor_values,
+        coverage_mode=str(active_acquisition_plan.get("coverageMode") or "term-shaped").strip(),
+        force_retrace=bool(force_retrace),
+    )
+    knowledge_covered_native_terms = list(native_term_classification.get("knowledgeCoveredTerms") or [])
+    deferred_nonclosing_native_terms = list(native_term_classification.get("deferredNonclosingTerms") or [])
+    native_anchor_values = list(native_term_classification.get("traceTerms") or [])
+    if bool(active_acquisition_plan.get("skipNativeExecution")):
+        native_anchor_values = []
+    if active_acquisition_plan and str(active_acquisition_plan.get("coverageMode") or "term-shaped").strip() == "term-shaped":
+        for term in knowledge_covered_native_terms:
+            evidence = _cached_contract_term_evidence(term)
+            _persist_acquisition_term_diagnostic(
+                request_signature,
+                execution_trace_scope,
+                term,
+                {
+                    "status": "knowledge-covered",
+                    "outcome": "skip-existing-knowledge",
+                    "selectedTraceScope": execution_trace_scope,
+                    "selectedTargetId": selected_target_id,
+                    "executionRoutineId": str(active_acquisition_plan.get("selectedRoutine") or knowledge_plan.get("executionRoutineId") or ""),
+                    "seamId": str(active_acquisition_plan.get("selectedSeamId") or "").strip(),
+                    "subjectId": str(planner_resolution.get("selectedSubjectKey") or ""),
+                    "expectedCoverage": [term],
+                    "whyChosen": list(active_acquisition_plan.get("anchorSelectionReasons") or []),
+                    "evidenceHits": _diagnostic_evidence_hits(evidence),
+                    "evidenceSourcesChecked": _diagnostic_evidence_sources_checked(evidence),
+                    "detail": "Skipped native tracing because existing DB-backed evidence already covers this exact seam term.",
+                },
+            )
+        for term in deferred_nonclosing_native_terms:
+            _persist_acquisition_term_diagnostic(
+                request_signature,
+                execution_trace_scope,
+                term,
+                {
+                    "status": "recent-nonclosing-skip",
+                    "outcome": "skip-recent-nonclosing",
+                    "selectedTraceScope": execution_trace_scope,
+                    "selectedTargetId": selected_target_id,
+                    "executionRoutineId": str(active_acquisition_plan.get("selectedRoutine") or knowledge_plan.get("executionRoutineId") or ""),
+                    "seamId": str(active_acquisition_plan.get("selectedSeamId") or "").strip(),
+                    "subjectId": str(planner_resolution.get("selectedSubjectKey") or ""),
+                    "expectedCoverage": [term],
+                    "whyChosen": list(active_acquisition_plan.get("anchorSelectionReasons") or []),
+                    "evidenceHits": {"found": False, "graphRefs": [], "payloadHits": []},
+                    "evidenceSourcesChecked": [],
+                    "detail": "Skipped native retrace because this exact seam term was recently attempted and remained non-closing with no stronger upstream evidence yet.",
+                },
+            )
+    active_coverage_mode = str(active_acquisition_plan.get("coverageMode") or "").strip()
+    native_request_context = None
+    if active_coverage_mode == "relation-shaped" and relation_probe:
+        native_request_context = {
             "coverageMode": "relation-shaped",
             "relationScope": str(relation_probe.get("traceScope") or active_acquisition_plan.get("selectedScope") or "").strip(),
             "requiredCoverageSeamIds": [
@@ -13606,17 +17689,58 @@ def build_dataset(
             "seamId": str(active_acquisition_plan.get("selectedSeamId") or "").strip(),
             "executionRoutineId": str(active_acquisition_plan.get("selectedRoutine") or "").strip(),
         }
-        if str(active_acquisition_plan.get("coverageMode") or "").strip() == "relation-shaped" and relation_probe
-        else None
-    )
+    elif active_coverage_mode == "term-shaped" and active_acquisition_plan:
+        requested_term_context = list(active_requested_terms)
+        selected_anchor_context = list(active_selected_anchor_terms)
+        if requested_term_context or selected_anchor_context:
+            native_request_context = {
+                "coverageMode": "term-shaped",
+                "expectedTerms": list(requested_term_context),
+                "anchors": list(selected_anchor_context or requested_term_context),
+                "subjectId": str(active_acquisition_plan.get("subjectId") or planner_resolution.get("selectedSubjectKey") or "").strip(),
+                "seamId": str(active_acquisition_plan.get("selectedSeamId") or "").strip(),
+                "executionRoutineId": str(active_acquisition_plan.get("selectedRoutine") or "").strip(),
+                "edgeOnly": True,
+                "disableFallbackExpansion": True,
+                "maxSearchTerms": 3,
+            }
     with _trace_phase("Native / trace execution", "nativeTraceExecution"):
         with _trace_profile_span("nativeExtraction"):
-            native_trace = collect_native_trace(
-                native_anchor_values,
-                native_timeout,
-                target["familyId"],
-                request_context=native_request_context,
-            )
+            if native_anchor_values:
+                native_trace = collect_native_trace(
+                    native_anchor_values,
+                    native_timeout,
+                    target["familyId"],
+                    request_context=native_request_context,
+                    force_retrace=bool(force_retrace or auto_force_native_terms),
+                )
+            else:
+                native_trace = {
+                    "available": False,
+                    "reason": "no-native-missing-terms",
+                    "requestedTerms": list(unfiltered_native_anchor_values),
+                    "searchTerms": [],
+                    "requestContext": dict(native_request_context or {}),
+                    "reuseReport": {
+                        "selectedAnchors": [],
+                        "reusedAnchors": [],
+                        "skippedAnchors": [],
+                        "attemptedNewTraceAnchors": [],
+                        "newlyTracedAnchors": [],
+                        "missingAnchorsAfterExecution": [],
+                        "knowledgeCoveredAnchors": list(knowledge_covered_native_terms),
+                        "deferredAnchors": list(deferred_nonclosing_native_terms),
+                        "exactMaterializedReuse": False,
+                        "executedSearchTerms": [],
+                        "reusedAnchorSources": {},
+                    },
+                    "summary": {},
+                    "cacheHit": True,
+                }
+    native_trace.setdefault("reuseReport", {})
+    native_trace["reuseReport"].setdefault("knowledgeCoveredAnchors", list(knowledge_covered_native_terms))
+    native_trace["reuseReport"].setdefault("deferredAnchors", list(deferred_nonclosing_native_terms))
+    preserved_subject_knowledge = dict(knowledge_plan.get("knowledge") or {})
     promoted_native_owner = _select_promoted_native_owner(target, trace_payload, native_trace.get("summary"))
     if promoted_native_owner and isinstance(native_trace.get("summary"), dict):
         native_trace["summary"]["promotedOwner"] = promoted_native_owner["owner"]
@@ -13630,25 +17754,62 @@ def build_dataset(
         trace_payload,
         native_trace.get("summary"),
     )
+    native_reuse_report = dict(native_trace.get("reuseReport") or {})
+    no_native_execution_delta = (
+        not list(native_reuse_report.get("executedSearchTerms") or [])
+        and not list(native_reuse_report.get("attemptedNewTraceAnchors") or [])
+        and not list(native_reuse_report.get("newlyTracedAnchors") or [])
+        and not list(native_reuse_report.get("missingAnchorsAfterExecution") or [])
+    )
+    existing_materialized_payload = (
+        load_latest_materialized_target_bundle(execution_trace_scope)
+        if no_native_execution_delta and execution_trace_scope and execution_trace_scope != "generic-explore"
+        else {}
+    )
     with _trace_profile_span("finalBundleAssembly"):
-        row_recovery = _build_token_shop_row_recovery(target, trace_payload, native_trace)
+        row_recovery = dict(existing_materialized_payload.get("rowRecovery") or {})
+        if not row_recovery and not existing_materialized_payload:
+            row_recovery = _build_token_shop_row_recovery(target, trace_payload, native_trace)
     closure_status = (row_recovery or {}).get("closureStatus") or {}
     with _trace_profile_span("finalBundleAssembly"):
-        bridge_comparison_reference = (
-            build_bridge_comparison_reference_payload(execution_trace_scope)
-            if trace_payload.get("bridgeComparisonSeed")
-            else {}
-        )
-        narrative_reference = resolve_target_narrative(
-            execution_trace_scope,
-            str(trace_payload.get("groundedConclusion") or ""),
-            list(trace_payload.get("currentBoundary") or []),
-            subject_kind=str(planner_resolution.get("selectedSubjectKind") or ""),
-            subject_key=str(planner_resolution.get("selectedSubjectKey") or ""),
-            family_id=str(target.get("familyId") or ""),
-            compatibility_target_id=selected_target_id,
-            allow_fallback=is_generic_explore,
-        )
+        bridge_comparison_reference = {}
+        if existing_materialized_payload:
+            existing_bridge_check = existing_materialized_payload.get("bridgeCheck")
+            existing_diff = existing_materialized_payload.get("solvedVsBlockedDiff")
+            if existing_bridge_check or existing_diff:
+                bridge_comparison_reference = {
+                    "bridgeCheck": existing_bridge_check,
+                    "solvedVsBlockedDiff": existing_diff,
+                    "bridgeComparisonSemanticKey": existing_materialized_payload.get("bridgeComparisonSemanticKey"),
+                }
+        if not bridge_comparison_reference:
+            bridge_comparison_reference = (
+                build_bridge_comparison_reference_payload(execution_trace_scope)
+                if trace_payload.get("bridgeComparisonSeed")
+                else {}
+            )
+        existing_grounded_conclusion = str(existing_materialized_payload.get("groundedConclusion") or "").strip()
+        existing_current_boundary = list(existing_materialized_payload.get("currentBoundary") or [])
+        existing_narrative_semantic_key = str(existing_materialized_payload.get("narrativeSemanticKey") or "").strip()
+        existing_narrative_owner = str(existing_materialized_payload.get("narrativeOwner") or "").strip()
+        if existing_grounded_conclusion or existing_current_boundary:
+            narrative_reference = {
+                "groundedConclusion": existing_grounded_conclusion,
+                "currentBoundary": existing_current_boundary,
+                "narrativeSemanticKey": existing_narrative_semantic_key or f"target-narrative:{execution_trace_scope}",
+                "narrativeOwner": existing_narrative_owner or execution_trace_scope,
+            }
+        else:
+            narrative_reference = resolve_target_narrative(
+                execution_trace_scope,
+                str(trace_payload.get("groundedConclusion") or ""),
+                list(trace_payload.get("currentBoundary") or []),
+                subject_kind=str(planner_resolution.get("selectedSubjectKind") or ""),
+                subject_key=str(planner_resolution.get("selectedSubjectKey") or ""),
+                family_id=str(target.get("familyId") or ""),
+                compatibility_target_id=selected_target_id,
+                allow_fallback=is_generic_explore,
+            )
         dataset = {
         "dataset": "unity-trace-bundle",
         "generatedAt": datetime.now().isoformat(timespec="seconds"),
@@ -13757,6 +17918,40 @@ def build_dataset(
         "narrativeSemanticKey": narrative_reference["narrativeSemanticKey"],
         "narrativeOwner": narrative_reference["narrativeOwner"],
         }
+    if (
+        not native_anchor_values
+        and preserved_subject_knowledge
+        and dict(preserved_subject_knowledge.get("decisionSummary") or {})
+    ):
+        dataset["decisionSummary"] = dict(preserved_subject_knowledge.get("decisionSummary") or {})
+        dataset["traceKnowledge"] = {
+            **dict(dataset.get("traceKnowledge") or {}),
+            "knownEdges": list(preserved_subject_knowledge.get("knownEdges") or []),
+            "clearedEdgeTypes": list(
+                preserved_subject_knowledge.get("clearedEdgeTypes")
+                or preserved_subject_knowledge.get("knownEdges")
+                or []
+            ),
+            "blockedEdges": list(preserved_subject_knowledge.get("blockedEdges") or []),
+            "blockedEdgeTypes": list(
+                preserved_subject_knowledge.get("blockedEdgeTypes")
+                or preserved_subject_knowledge.get("blockedEdges")
+                or []
+            ),
+            "missingEdges": list(preserved_subject_knowledge.get("missingEdges") or []),
+            "missingEdgeTypes": list(
+                preserved_subject_knowledge.get("missingEdgeTypes")
+                or preserved_subject_knowledge.get("missingEdges")
+                or []
+            ),
+            "nonblockingEdges": list(preserved_subject_knowledge.get("nonblockingEdges") or []),
+            "nonblockingEdgeTypes": list(
+                preserved_subject_knowledge.get("nonblockingEdgeTypes")
+                or preserved_subject_knowledge.get("nonblockingEdges")
+                or []
+            ),
+            "decisionSummary": dict(preserved_subject_knowledge.get("decisionSummary") or {}),
+        }
     return dataset
 
 
@@ -13764,13 +17959,15 @@ def write_markdown(dataset: dict[str, Any]) -> None:
     def format_source_ref(source_ref: str) -> str:
         return f"`{source_ref}`" if " + " in source_ref else md_link(ROOT / source_ref)
 
+    target_id, target_label = _resolve_trace_markdown_target(dataset)
+
     if "nativeTrace" not in dataset and "nativeView" in dataset:
         lines = [
             "# Unity Trace Bundle",
             "",
             f"- Generated at: `{dataset.get('generatedAt')}`",
-            f"- Target: `{(dataset.get('target') or {}).get('id')}`",
-            f"- Label: {(dataset.get('target') or {}).get('label')}",
+            f"- Target: `{target_id}`",
+            f"- Label: {target_label}",
             f"- Status: `{dataset.get('status') or 'unknown'}`",
             f"- Semantic status: `{dataset.get('semanticStatus') or 'unknown'}`",
             f"- Literal status: `{dataset.get('literalStatus') or 'unknown'}`",
@@ -13810,19 +18007,79 @@ def write_markdown(dataset: dict[str, Any]) -> None:
         output_path.write_text("\n".join(lines), encoding="utf-8")
         return
 
+    if not dataset.get("traceWorkflow") or not dataset.get("executionAnchors") or not dataset.get("searchExpansion") or not dataset.get("depthSearch"):
+        planner_resolution = dict(dataset.get("plannerResolution") or {})
+        trace_run = dict(dataset.get("traceRun") or {})
+        trace_registry = dict(dataset.get("traceRegistry") or {})
+        native_trace = dict(dataset.get("nativeTrace") or {})
+        decision_summary = dict(dataset.get("decisionSummary") or {})
+        target = dict(dataset.get("target") or {})
+        lines = [
+            "# Unity Trace Bundle",
+            "",
+            f"- Generated at: `{dataset.get('generatedAt')}`",
+            f"- Target: `{target_id}`",
+            f"- Label: {target_label}",
+            f"- Status: `{dataset.get('status') or 'unknown'}`",
+            f"- Semantic status: `{dataset.get('semanticStatus') or 'unknown'}`",
+            f"- Literal status: `{dataset.get('literalStatus') or 'unknown'}`",
+            f"- Runtime status: `{dataset.get('runtimeStatus') or 'unknown'}`",
+            f"- Asset set fingerprint: `{((dataset.get('assetSet') or {}).get('fingerprint')) or 'unknown'}`",
+            f"- Requested queries: `{', '.join(planner_resolution.get('requestedQueries') or []) or 'none'}`",
+            f"- Requested anchors: `{', '.join(planner_resolution.get('requestedAnchors') or []) or 'none'}`",
+            f"- Join goal: {target.get('joinGoal') or 'n/a'}",
+            "",
+            "## Planner Resolution",
+            "",
+            f"- Selection mode: `{planner_resolution.get('selectionMode') or 'unknown'}`",
+            f"- Matched family: `{planner_resolution.get('matchedFamilyId') or 'unknown'}` ({planner_resolution.get('matchedFamilyLabel') or 'unknown'})",
+            f"- Subject: `{planner_resolution.get('selectedSubjectKind') or 'unknown'}` `{planner_resolution.get('selectedSubjectKey') or 'unknown'}`",
+            f"- Decision note: {planner_resolution.get('decisionNote') or 'n/a'}",
+            "",
+            "## Execution",
+            "",
+            f"- Trace scope: `{trace_run.get('traceScope') or (dataset.get('materialization') or {}).get('traceScope') or 'unknown'}`",
+            f"- Run id: `{trace_run.get('id') or 'unknown'}`",
+            f"- Request signature: `{trace_run.get('requestSignature') or (dataset.get('materialization') or {}).get('requestSignature') or 'unknown'}`",
+            f"- Accepted anchor kinds: `{', '.join(target.get('acceptedAnchors') or []) or 'none'}`",
+            f"- Catalog mode: `{trace_registry.get('catalogMode') or 'unknown'}`",
+            "",
+            "## Verdict",
+            "",
+            f"- Verdict: `{decision_summary.get('verdict') or 'unknown'}`",
+            f"- Summary: {decision_summary.get('summary') or 'n/a'}",
+            f"- Supporting edges: `{', '.join(decision_summary.get('supportingEdgeTypes') or []) or 'none'}`",
+            f"- Blocked edges: `{', '.join(decision_summary.get('blockedEdgeTypes') or []) or 'none'}`",
+            "",
+            "## Native Trace",
+            "",
+            f"- Available: `{native_trace.get('available')}`",
+            f"- Project: `{native_trace.get('project') or 'unknown'}`",
+            f"- Search terms: `{', '.join(native_trace.get('searchTerms') or []) or 'none'}`",
+        ]
+        if native_trace.get("available"):
+            lines.append(f"- Status: `{native_trace.get('status') or 'unknown'}`")
+            if native_trace.get("jobId"):
+                lines.append(f"- Job id: `{native_trace.get('jobId')}`")
+        else:
+            lines.append(f"- Reason: `{native_trace.get('reason') or 'unknown'}`")
+        output_path = Path(dataset["traceRun"]["mdOut"])
+        output_path.write_text("\n".join(lines), encoding="utf-8")
+        return
+
     lines = [
         "# Unity Trace Bundle",
         "",
         f"- Generated at: `{dataset['generatedAt']}`",
-        f"- Target: `{dataset['target']['id']}`",
-        f"- Label: {dataset['target']['label']}",
+        f"- Target: `{target_id}`",
+        f"- Label: {target_label}",
         f"- Status: `{dataset.get('status') or 'unknown'}`",
         f"- Semantic status: `{dataset.get('semanticStatus') or 'unknown'}`",
         f"- Literal status: `{dataset.get('literalStatus') or 'unknown'}`",
         f"- Runtime status: `{dataset.get('runtimeStatus') or 'unknown'}`",
         f"- Asset set fingerprint: `{dataset['assetSet']['fingerprint']}`",
-        f"- Anchors: `{', '.join(dataset['target']['anchors'])}`",
-        f"- Join goal: {dataset['target']['joinGoal']}",
+        f"- Anchors: `{', '.join((dataset.get('target') or {}).get('anchors') or [])}`",
+        f"- Join goal: {(dataset.get('target') or {}).get('joinGoal') or 'n/a'}",
         "",
         "## Planner resolution",
         "",
@@ -14296,6 +18553,30 @@ def sanitize_run_label(value: str) -> str:
     return cleaned or "trace"
 
 
+def _resolve_trace_markdown_target(dataset: dict[str, Any]) -> tuple[str, str]:
+    target = dict(dataset.get("target") or {})
+    trace_run = dict(dataset.get("traceRun") or {})
+    planner_resolution = dict(dataset.get("plannerResolution") or {})
+    materialization = dict(dataset.get("materialization") or {})
+
+    target_id = str(
+        target.get("id")
+        or target.get("targetId")
+        or planner_resolution.get("selectedTargetId")
+        or trace_run.get("traceScope")
+        or materialization.get("traceScope")
+        or trace_run.get("id")
+        or "unknown"
+    ).strip() or "unknown"
+    target_label = str(
+        target.get("label")
+        or planner_resolution.get("matchedFamilyLabel")
+        or planner_resolution.get("selectedSubjectKey")
+        or target_id
+    ).strip() or target_id
+    return target_id, target_label
+
+
 def build_trace_asset_set() -> dict[str, Any]:
     asset_paths = [
         METADATA_PATH,
@@ -14751,6 +19032,113 @@ def extract_reconstruction_note_semantic_fragments(dataset: dict[str, Any]) -> l
     ]
 
 
+def extract_native_acquisition_gap_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    target = dict(dataset.get("target") or {})
+    trace_registry = dict(dataset.get("traceRegistry") or {})
+    trace_directive = dict(dataset.get("traceDirective") or {})
+    acquisition_plan = dict(trace_directive.get("acquisitionPlan") or {})
+    reuse_report = dict((dataset.get("nativeTrace") or {}).get("reuseReport") or {})
+    trace_scope = str(
+        trace_registry.get("executionTraceScope")
+        or target.get("id")
+        or ""
+    ).strip()
+    if not trace_scope:
+        return []
+    seam_id = str(acquisition_plan.get("selectedSeamId") or ((trace_directive.get("nextSeam") or {}).get("id")) or "").strip()
+    attempted_terms = [
+        str(value).strip()
+        for value in (reuse_report.get("attemptedNewTraceAnchors") or [])
+        if str(value).strip()
+    ]
+    missing_terms = {
+        str(value).strip()
+        for value in (reuse_report.get("missingAnchorsAfterExecution") or [])
+        if str(value).strip()
+    }
+    resolved_terms = {
+        str(value).strip()
+        for value in (reuse_report.get("newlyTracedAnchors") or [])
+        if str(value).strip()
+    }
+    if not attempted_terms and not missing_terms and not resolved_terms:
+        return []
+    fragments: list[dict[str, Any]] = []
+    for term in unique_strings([*attempted_terms, *list(missing_terms), *list(resolved_terms)]):
+        status = "attempted-missing" if term in missing_terms else "attempted-resolved" if term in resolved_terms else "attempted"
+        fragment_key = _semantic_key(
+            "native-acquisition-gap",
+            target.get("familyId"),
+            trace_scope,
+            seam_id or "unscoped",
+            term,
+        )
+        fragments.append(
+            {
+                "fragment_kind": "native_acquisition_gap_fragment",
+                "fragment_key": fragment_key,
+                "payload": {
+                    "semanticKey": fragment_key,
+                    "targetId": target.get("id"),
+                    "familyId": target.get("familyId"),
+                    "traceScope": trace_scope,
+                    "seamId": seam_id,
+                    "term": term,
+                    "status": status,
+                    "coverageMode": str(acquisition_plan.get("coverageMode") or "term-shaped"),
+                    "executedSearchTerms": list(reuse_report.get("executedSearchTerms") or []),
+                    "selectedAnchors": list(acquisition_plan.get("selectedAnchors") or []),
+                    "requestedTerms": list(acquisition_plan.get("requestedTerms") or []),
+                    "requestSignature": str((dataset.get("nativeTrace") or {}).get("requestSignature") or ""),
+                },
+            }
+        )
+    return fragments
+
+
+def extract_acquisition_progress_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
+    target = dict(dataset.get("target") or {})
+    trace_registry = dict(dataset.get("traceRegistry") or {})
+    trace_directive = dict(dataset.get("traceDirective") or {})
+    acquisition_plan = dict(trace_directive.get("acquisitionPlan") or {})
+    reuse_report = dict((dataset.get("nativeTrace") or {}).get("reuseReport") or {})
+    request_signature = str((dataset.get("traceRun") or {}).get("requestSignature") or "").strip()
+    trace_scope = str(trace_registry.get("executionTraceScope") or target.get("id") or "").strip()
+    seam_id = str(acquisition_plan.get("selectedSeamId") or ((trace_directive.get("nextSeam") or {}).get("id")) or "").strip()
+    if not trace_scope or not request_signature:
+        return []
+    fragment_key = _semantic_key(
+        "acquisition-progress",
+        target.get("familyId"),
+        trace_scope,
+        seam_id or "unscoped",
+        request_signature,
+    )
+    return [
+        {
+            "fragment_kind": "acquisition_progress_fragment",
+            "fragment_key": fragment_key,
+            "payload": {
+                "semanticKey": fragment_key,
+                "targetId": target.get("id"),
+                "familyId": target.get("familyId"),
+                "traceScope": trace_scope,
+                "seamId": seam_id,
+                "requestSignature": request_signature,
+                "coverageMode": str(acquisition_plan.get("coverageMode") or "term-shaped"),
+                "requestedTerms": list(acquisition_plan.get("requestedTerms") or []),
+                "selectedAnchors": list(acquisition_plan.get("selectedAnchors") or []),
+                "knowledgeCoveredAnchors": list(reuse_report.get("knowledgeCoveredAnchors") or []),
+                "deferredAnchors": list(reuse_report.get("deferredAnchors") or []),
+                "attemptedAnchors": list(reuse_report.get("attemptedNewTraceAnchors") or []),
+                "resolvedAnchors": list(reuse_report.get("newlyTracedAnchors") or []),
+                "missingAnchors": list(reuse_report.get("missingAnchorsAfterExecution") or []),
+                "executedSearchTerms": list(reuse_report.get("executedSearchTerms") or []),
+            },
+        }
+    ]
+
+
 def collect_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
     fragments: list[dict[str, Any]] = []
     for extractor in (
@@ -14763,6 +19151,8 @@ def collect_semantic_fragments(dataset: dict[str, Any]) -> list[dict[str, Any]]:
         extract_runtime_table_semantic_fragments,
         extract_semantic_scope_semantic_fragments,
         extract_reconstruction_note_semantic_fragments,
+        extract_native_acquisition_gap_semantic_fragments,
+        extract_acquisition_progress_semantic_fragments,
     ):
         fragments.extend(extractor(dataset))
     return fragments
@@ -14894,6 +19284,279 @@ def _cached_knowledge_plan_from_best_gap_plan(best_gap_plan: dict[str, Any]) -> 
     }
 
 
+def _cached_knowledge_plan_from_materialized_dataset(dataset: dict[str, Any]) -> dict[str, Any]:
+    dataset = dict(dataset or {})
+    trace_directive = dict(dataset.get("traceDirective") or {})
+    trace_knowledge = dict(dataset.get("traceKnowledge") or {})
+    acquisition_plan = dict(
+        trace_directive.get("acquisitionPlan")
+        or trace_knowledge.get("acquisitionPlan")
+        or {}
+    )
+    execution_routine_id = str(
+        trace_directive.get("executionRoutineId")
+        or acquisition_plan.get("selectedRoutine")
+        or ""
+    ).strip()
+    next_seam = dict(trace_directive.get("nextSeam") or {})
+    if not str(next_seam.get("id") or "").strip():
+        next_seam = {
+            "id": str(acquisition_plan.get("selectedSeamId") or "").strip() or None,
+            "status": "unresolved",
+        }
+    return {
+        "mode": str(trace_directive.get("mode") or "run-seam-trace").strip() or "run-seam-trace",
+        "status": "materialized-cache",
+        "executionRoutineId": execution_routine_id,
+        "nextSeam": next_seam,
+        "acquisitionPlan": acquisition_plan,
+        "knowledge": trace_knowledge,
+    }
+
+
+def _cached_planner_resolution_from_resolver_target(
+    resolver_payload: dict[str, Any],
+    *,
+    requested_queries: list[str],
+    requested_anchors: list[str],
+    selected_target_id: str,
+    selected_family_id: str,
+) -> dict[str, Any]:
+    payload = dict(resolver_payload or {})
+    target_label = str(
+        payload.get("label")
+        or payload.get("subjectLabel")
+        or selected_target_id
+        or payload.get("traceScope")
+        or "unknown"
+    ).strip()
+    matched_inputs = unique_strings(
+        [
+            *requested_queries,
+            *requested_anchors,
+            *list(payload.get("anchorTerms") or []),
+        ]
+    )
+    return {
+        "selectionMode": "explicit-target-cached",
+        "requestedQueries": unique_strings(requested_queries),
+        "requestedAnchors": unique_strings(requested_anchors),
+        "matchedInputs": matched_inputs,
+        "matchedTerms": matched_inputs,
+        "matchedFamilyId": str(selected_family_id or "").strip(),
+        "matchedFamilyLabel": target_label,
+        "selectedSubjectKind": str(payload.get("subjectKind") or "target").strip() or "target",
+        "selectedSubjectKey": str(payload.get("subjectKey") or payload.get("subjectId") or selected_target_id).strip(),
+        "selectedSubjectLabel": str(payload.get("subjectLabel") or target_label).strip(),
+        "selectedTargetId": str(selected_target_id or payload.get("targetId") or payload.get("traceScope") or "generic-explore").strip(),
+        "selectedRunMode": "trace",
+        "selectedComparePresetId": None,
+        "synonymSetsUsed": [],
+        "expandedAnchors": matched_inputs,
+        "decisionNote": (
+            "Resolved explicit target request from cached resolver-target and subject-state views "
+            f"for {selected_target_id or payload.get('traceScope') or 'unknown'}."
+        ),
+    }
+
+
+def _preferred_cached_query_anchor_terms(
+    explicit_query: str,
+    fallback_anchor_terms: list[str] | None,
+) -> list[str]:
+    explicit_query = str(explicit_query or "").strip()
+    concrete_query_terms = [explicit_query] if explicit_query and _looks_like_concrete_acquisition_anchor(explicit_query) else []
+    return unique_strings(
+        [
+            *concrete_query_terms,
+            *[str(value).strip() for value in (fallback_anchor_terms or []) if str(value).strip()],
+        ]
+    )
+
+
+def _normalize_cached_planner_resolution(
+    planner_resolution: dict[str, Any],
+    *,
+    requested_queries: list[str],
+    requested_anchors: list[str],
+    selected_target_id: str,
+    selected_family_id: str,
+    selected_subject_kind: str,
+    selected_subject_key: str,
+    selected_subject_label: str,
+    matched_family_label: str,
+    decision_note: str,
+    fallback_anchor_terms: list[str] | None = None,
+) -> dict[str, Any]:
+    planner_resolution = dict(planner_resolution or {})
+    requested_queries = unique_strings(requested_queries)
+    requested_anchors = unique_strings(requested_anchors)
+    preferred_query_anchors = _preferred_cached_query_anchor_terms(
+        requested_queries[0] if requested_queries else "",
+        list(fallback_anchor_terms or []),
+    )
+    expanded_anchors = unique_strings(
+        [
+            *list(planner_resolution.get("expandedAnchors") or []),
+            *requested_anchors,
+            *preferred_query_anchors,
+        ]
+    )
+    matched_inputs = unique_strings(
+        [
+            *list(planner_resolution.get("matchedInputs") or []),
+            *requested_queries,
+            *requested_anchors,
+        ]
+    )
+    planner_resolution.setdefault("selectionMode", "explicit-target-cached")
+    planner_resolution["requestedQueries"] = requested_queries
+    planner_resolution["requestedAnchors"] = requested_anchors
+    planner_resolution["matchedInputs"] = matched_inputs
+    planner_resolution["matchedTerms"] = unique_strings(
+        [
+            *list(planner_resolution.get("matchedTerms") or []),
+            *matched_inputs,
+            *expanded_anchors,
+        ]
+    )
+    planner_resolution["matchedFamilyId"] = str(
+        planner_resolution.get("matchedFamilyId") or selected_family_id or ""
+    ).strip()
+    planner_resolution["matchedFamilyLabel"] = str(
+        planner_resolution.get("matchedFamilyLabel") or matched_family_label or selected_target_id or "unknown"
+    ).strip()
+    planner_resolution["selectedSubjectKind"] = str(
+        planner_resolution.get("selectedSubjectKind") or selected_subject_kind or "target"
+    ).strip() or "target"
+    planner_resolution["selectedSubjectKey"] = str(
+        planner_resolution.get("selectedSubjectKey") or selected_subject_key or selected_target_id
+    ).strip()
+    planner_resolution["selectedSubjectLabel"] = str(
+        planner_resolution.get("selectedSubjectLabel") or selected_subject_label or planner_resolution["selectedSubjectKey"]
+    ).strip()
+    planner_resolution["selectedTargetId"] = str(
+        planner_resolution.get("selectedTargetId") or selected_target_id or "generic-explore"
+    ).strip()
+    planner_resolution.setdefault("selectedRunMode", "trace")
+    planner_resolution.setdefault("selectedComparePresetId", None)
+    planner_resolution.setdefault("synonymSetsUsed", [])
+    planner_resolution["expandedAnchors"] = expanded_anchors
+    planner_resolution["decisionNote"] = str(
+        planner_resolution.get("decisionNote") or decision_note or "Resolved from cached planner state."
+    ).strip()
+    return planner_resolution
+
+
+def _cached_knowledge_plan_from_resolver_target(
+    resolver_payload: dict[str, Any],
+    subject_state_payload: dict[str, Any],
+    *,
+    explicit_query: str,
+    selected_family_id: str,
+    execution_trace_scope: str,
+) -> dict[str, Any]:
+    resolver_payload = dict(resolver_payload or {})
+    subject_state_payload = dict(subject_state_payload or {})
+    requested_query = str(explicit_query or "").strip()
+    known_edges = unique_strings([str(value) for value in (subject_state_payload.get("knownEdges") or []) if str(value).strip()])
+    blocked_edges = unique_strings([str(value) for value in (subject_state_payload.get("blockedEdges") or []) if str(value).strip()])
+    missing_edges = unique_strings([str(value) for value in (subject_state_payload.get("missingEdges") or []) if str(value).strip()])
+    nonblocking_edges = unique_strings([str(value) for value in (subject_state_payload.get("nonblockingEdges") or []) if str(value).strip()])
+    next_seam = dict(subject_state_payload.get("nextSeam") or {})
+    if not str(next_seam.get("id") or "").strip() and requested_query:
+        next_seam = {"id": requested_query, "status": "unresolved"}
+    explicit_query_known = bool(requested_query) and requested_query in set(known_edges)
+    explicit_query_nonblocking = bool(requested_query) and requested_query in set(nonblocking_edges)
+    explicit_query_blocked = bool(requested_query) and requested_query in set(blocked_edges + missing_edges)
+    selected_routine = str(
+        resolver_payload.get("traceRoutineHint")
+        or _default_execution_routine_for_family(selected_family_id, execution_trace_scope)
+    ).strip()
+    preferred_anchor_terms = _preferred_cached_query_anchor_terms(
+        requested_query,
+        list(resolver_payload.get("anchorTerms") or []),
+    )
+    acquisition_plan: dict[str, Any] = {}
+    mode = "reuse-materialized"
+    if explicit_query_blocked or (requested_query and requested_query == str(next_seam.get("id") or "").strip()):
+        mode = "run-seam-trace"
+        acquisition_plan = {
+            "selectedSeamId": requested_query,
+            "selectedRoutine": selected_routine,
+            "anchorSelectionReasons": ["requested explicit cached seam"],
+            "selectedAnchors": list(preferred_anchor_terms[:3]),
+            "requestedTerms": list(preferred_anchor_terms[:3]),
+            "skipNativeExecution": not bool(preferred_anchor_terms[:3]),
+        }
+    elif explicit_query_known or explicit_query_nonblocking:
+        mode = "reuse-materialized"
+    elif requested_query:
+        mode = "run-seam-trace"
+        acquisition_plan = {
+            "selectedSeamId": requested_query,
+            "selectedRoutine": selected_routine,
+            "anchorSelectionReasons": ["requested explicit cached query"],
+            "selectedAnchors": list(preferred_anchor_terms[:3]),
+            "requestedTerms": list(preferred_anchor_terms[:3]),
+            "skipNativeExecution": not bool(preferred_anchor_terms[:3]),
+        }
+    return {
+        "mode": mode,
+        "status": "resolver-target-cache",
+        "executionRoutineId": selected_routine,
+        "nextSeam": next_seam,
+        "acquisitionPlan": acquisition_plan,
+        "knowledge": {
+            "subjectId": str(subject_state_payload.get("subjectId") or resolver_payload.get("subjectId") or "").strip(),
+            "subjectKind": str(subject_state_payload.get("subjectKind") or resolver_payload.get("subjectKind") or "").strip(),
+            "subjectLabel": str(subject_state_payload.get("subjectLabel") or resolver_payload.get("subjectLabel") or resolver_payload.get("label") or "").strip(),
+            "targetAliases": list(subject_state_payload.get("targetAliases") or []),
+            "knownEdges": known_edges,
+            "clearedEdgeTypes": known_edges,
+            "blockedEdges": blocked_edges,
+            "blockedEdgeTypes": blocked_edges,
+            "missingEdges": missing_edges,
+            "missingEdgeTypes": missing_edges,
+            "nonblockingEdges": nonblocking_edges,
+            "nonblockingEdgeTypes": nonblocking_edges,
+            "decisionSummary": dict(subject_state_payload.get("decisionSummary") or {}),
+            "acquisitionPlan": acquisition_plan,
+        },
+    }
+
+
+def _default_execution_routine_for_family(
+    family_id: str,
+    trace_scope: str,
+) -> str:
+    family_id = str(family_id or "").strip()
+    trace_scope = str(trace_scope or "").strip()
+    if re.match(r"^token-shop-atu(?:8|9|10|11|12)-mk\d-bridge$", trace_scope):
+        return "token-shop-shell-bridge-trace"
+    if trace_scope in {"token-shop-atu13-token-t2-bridge", "token-shop-atu20-token-t3-bridge"}:
+        return "token-shop-shell-bridge-trace"
+    token_shop_scope_routines = {
+        "token-shop-atu4-mod": "token-shop-mod-trace",
+        "token-shop-atu5-mk1-title": "token-shop-mk1-title-trace",
+        "token-shop-atu7-mk3-bridge": "token-shop-mk3-bridge-trace",
+        "token-shop-atu3-cells-effect": "token-shop-atu3-effect-trace",
+        "token-shop-atu3-chest-consumer": "token-shop-atu3-consumer-trace",
+        "token-shop-atu3-chest-consumer-read": "token-shop-atu3-consumer-read-trace",
+    }
+    if trace_scope in token_shop_scope_routines:
+        return token_shop_scope_routines[trace_scope]
+    if family_id == "token-shop":
+        return "token-shop-family-trace"
+    if family_id == "shard-cost":
+        return "shard-cost-trace"
+    if family_id == "shard-owned-state":
+        return "shard-owned-state-trace"
+    if family_id == "multiverse-market-save-owner":
+        return "multiverse-market-save-owner-trace"
+    return trace_scope or "generic-explore"
+
+
 def plan_trace_bundle_request(
     args: argparse.Namespace,
     registry: dict[str, Any] | None = None,
@@ -14938,28 +19601,225 @@ def plan_trace_bundle_request(
                             subject_key=str(planner_resolution.get("selectedSubjectKey") or ""),
                             family_id=selected_family_id,
                             compatibility_target_id=selected_target_id,
-                        )
+                    )
                         or {}
                     )
     else:
-        with _trace_profile_span("subjectStateMaterialization"):
-            resolved_request = dict(
-                get_trace_db().resolve_trace_request(
-                    "cifi-full",
-                    "libil2cpp.so",
-                    explicit_target_id=str(args.target or ""),
-                    requested_queries=list(args.query or []),
-                    requested_anchors=list(args.anchor or []),
-                    family_id=str(args.family or ""),
-                    include_legacy_targets=False,
-                )
+        resolved_request: dict[str, Any] = {}
+        cached_explicit_target_payload: dict[str, Any] = {}
+        cached_explicit_resolver_payload: dict[str, Any] = {}
+        cached_explicit_subject_state_payload: dict[str, Any] = {}
+        cached_explicit_target_id = str(args.target or "").strip()
+        cached_explicit_family_id = ""
+        if cached_explicit_target_id:
+            cached_explicit_target_payload = load_latest_materialized_target_bundle(cached_explicit_target_id)
+            cached_explicit_resolver_payload = dict(
+                (
+                    get_trace_db().find_materialized_resolver_target_view(
+                        "cifi-full",
+                        "libil2cpp.so",
+                        cached_explicit_target_id,
+                    )
+                    or {}
+                ).get("payload")
                 or {}
             )
-        planner_resolution = dict(resolved_request.get("plannerResolution") or {})
-        selected_target_id = str(resolved_request.get("selectedTargetId") or planner_resolution.get("selectedTargetId") or "")
-        execution_target_id = str(resolved_request.get("executionTargetId") or selected_target_id)
-        execution_trace_scope = str(resolved_request.get("executionTraceScope") or execution_target_id)
-        selected_family_id = str(resolved_request.get("selectedFamilyId") or planner_resolution.get("matchedFamilyId") or "").strip()
+            cached_trace_registry = dict(cached_explicit_target_payload.get("traceRegistry") or {})
+            cached_explicit_family_id = str(
+                cached_trace_registry.get("selectedFamilyId")
+                or cached_explicit_resolver_payload.get("familyId")
+                or ((registry.get("targets", {}) or {}).get(cached_explicit_target_id, {}) or {}).get("familyId")
+                or args.family
+                or ""
+            ).strip()
+            if cached_explicit_resolver_payload:
+                cached_explicit_subject_state_payload = dict(
+                    (
+                        get_trace_db().find_materialized_subject_state_view(
+                            "cifi-full",
+                            "libil2cpp.so",
+                            cached_explicit_target_id,
+                            str(
+                                cached_explicit_resolver_payload.get("subjectId")
+                                or cached_explicit_resolver_payload.get("subjectKey")
+                                or cached_explicit_target_id
+                            ).strip(),
+                        )
+                        or {}
+                    ).get("payload")
+                    or {}
+                )
+        explicit_seam_id = _find_explicit_relation_seam_query(cached_explicit_family_id, list(args.query or []))
+        if (
+            cached_explicit_target_payload
+            and trace_dataset_has_required_fragments(cached_explicit_target_payload)
+            and not args.anchor
+        ):
+            cached_trace_registry = dict(cached_explicit_target_payload.get("traceRegistry") or {})
+            planner_resolution = dict(cached_explicit_target_payload.get("plannerResolution") or {})
+            selected_target_id = str(
+                cached_trace_registry.get("selectedTargetId")
+                or planner_resolution.get("selectedTargetId")
+                or cached_explicit_target_id
+            )
+            execution_target_id = str(
+                cached_trace_registry.get("executionTargetId")
+                or selected_target_id
+            )
+            execution_trace_scope = str(
+                cached_trace_registry.get("executionTraceScope")
+                or execution_target_id
+            )
+            selected_family_id = str(
+                cached_trace_registry.get("selectedFamilyId")
+                or planner_resolution.get("matchedFamilyId")
+                or cached_explicit_family_id
+            ).strip()
+            planner_resolution.setdefault("selectionMode", "explicit-target")
+            planner_resolution.setdefault("selectedRunMode", "trace")
+            planner_resolution.setdefault("selectedTargetId", selected_target_id)
+            planner_resolution.setdefault("matchedFamilyId", selected_family_id)
+            planner_resolution.setdefault(
+                "matchedFamilyLabel",
+                str(
+                    ((registry.get("targets", {}) or {}).get(selected_target_id, {}) or {}).get("label")
+                    or selected_family_id
+                    or selected_target_id
+                ),
+            )
+            planner_resolution.setdefault(
+                "selectedSubjectKind",
+                str(cached_trace_registry.get("selectedSubjectKind") or "target"),
+            )
+            planner_resolution.setdefault(
+                "selectedSubjectKey",
+                str(cached_trace_registry.get("selectedSubjectKey") or selected_target_id),
+            )
+            planner_resolution.setdefault(
+                "selectedSubjectLabel",
+                str(
+                    ((registry.get("targets", {}) or {}).get(selected_target_id, {}) or {}).get("label")
+                    or selected_target_id
+                ),
+            )
+            knowledge_plan = _cached_knowledge_plan_from_materialized_dataset(cached_explicit_target_payload)
+            explicit_query_id = str((args.query or [""])[0] or "").strip()
+            if explicit_query_id and not dict(knowledge_plan.get("acquisitionPlan") or {}):
+                cached_query_anchor_terms = _preferred_cached_query_anchor_terms(
+                    explicit_query_id,
+                    list(cached_trace_registry.get("anchorTerms") or []),
+                )
+                cached_acquisition_plan = {
+                    "selectedSeamId": explicit_query_id,
+                    "selectedRoutine": _default_execution_routine_for_family(
+                        selected_family_id,
+                        execution_trace_scope,
+                    ),
+                    "anchorSelectionReasons": [
+                        "requested explicit cached query",
+                    ],
+                    "selectedAnchors": list(cached_query_anchor_terms[:3]),
+                    "requestedTerms": list(cached_query_anchor_terms[:3]),
+                    "skipNativeExecution": not bool(cached_query_anchor_terms[:3]),
+                }
+                knowledge_plan = dict(knowledge_plan)
+                knowledge_plan["acquisitionPlan"] = cached_acquisition_plan
+                if not str(knowledge_plan.get("executionRoutineId") or "").strip():
+                    knowledge_plan["executionRoutineId"] = str(
+                        cached_acquisition_plan.get("selectedRoutine") or ""
+                    ).strip()
+                if not str(dict(knowledge_plan.get("nextSeam") or {}).get("id") or "").strip():
+                    knowledge_plan["nextSeam"] = {
+                        "id": explicit_query_id,
+                        "status": "unresolved",
+                    }
+            planner_resolution = _normalize_cached_planner_resolution(
+                planner_resolution,
+                requested_queries=list(args.query or []),
+                requested_anchors=list(args.anchor or []),
+                selected_target_id=selected_target_id,
+                selected_family_id=selected_family_id,
+                selected_subject_kind=str(planner_resolution.get("selectedSubjectKind") or "target"),
+                selected_subject_key=str(planner_resolution.get("selectedSubjectKey") or selected_target_id),
+                selected_subject_label=str(planner_resolution.get("selectedSubjectLabel") or selected_target_id),
+                matched_family_label=str(planner_resolution.get("matchedFamilyLabel") or selected_family_id or selected_target_id),
+                decision_note="Resolved explicit target request from cached materialized target bundle.",
+                fallback_anchor_terms=list(cached_trace_registry.get("anchorTerms") or []),
+            )
+        elif (
+            not args.anchor
+            and cached_explicit_resolver_payload
+            and cached_explicit_subject_state_payload
+        ):
+            selected_target_id = str(
+                cached_explicit_resolver_payload.get("targetId")
+                or cached_explicit_target_id
+            ).strip()
+            execution_target_id = selected_target_id or cached_explicit_target_id
+            execution_trace_scope = str(cached_explicit_resolver_payload.get("traceScope") or execution_target_id).strip()
+            selected_family_id = str(
+                cached_explicit_resolver_payload.get("familyId")
+                or cached_explicit_family_id
+            ).strip()
+            planner_resolution = _cached_planner_resolution_from_resolver_target(
+                cached_explicit_resolver_payload,
+                requested_queries=list(args.query or []),
+                requested_anchors=list(args.anchor or []),
+                selected_target_id=selected_target_id,
+                selected_family_id=selected_family_id,
+            )
+            planner_resolution = _normalize_cached_planner_resolution(
+                planner_resolution,
+                requested_queries=list(args.query or []),
+                requested_anchors=list(args.anchor or []),
+                selected_target_id=selected_target_id,
+                selected_family_id=selected_family_id,
+                selected_subject_kind=str(cached_explicit_resolver_payload.get("subjectKind") or "target"),
+                selected_subject_key=str(cached_explicit_resolver_payload.get("subjectKey") or cached_explicit_resolver_payload.get("subjectId") or selected_target_id),
+                selected_subject_label=str(cached_explicit_resolver_payload.get("subjectLabel") or cached_explicit_resolver_payload.get("label") or selected_target_id),
+                matched_family_label=str(cached_explicit_resolver_payload.get("label") or selected_family_id or selected_target_id),
+                decision_note="Resolved explicit target request from cached resolver-target and subject-state views.",
+                fallback_anchor_terms=list(cached_explicit_resolver_payload.get("anchorTerms") or []),
+            )
+            knowledge_plan = _cached_knowledge_plan_from_resolver_target(
+                cached_explicit_resolver_payload,
+                cached_explicit_subject_state_payload,
+                explicit_query=str((args.query or [""])[0] or "").strip(),
+                selected_family_id=selected_family_id,
+                execution_trace_scope=execution_trace_scope,
+            )
+        else:
+            with _trace_profile_span("subjectStateMaterialization"):
+                resolved_request = dict(
+                    get_trace_db().resolve_trace_request(
+                        "cifi-full",
+                        "libil2cpp.so",
+                        explicit_target_id=str(args.target or ""),
+                        requested_queries=list(args.query or []),
+                        requested_anchors=list(args.anchor or []),
+                        family_id=str(args.family or ""),
+                        include_legacy_targets=False,
+                    )
+                    or {}
+                )
+            planner_resolution = dict(resolved_request.get("plannerResolution") or {})
+            selected_target_id = str(resolved_request.get("selectedTargetId") or planner_resolution.get("selectedTargetId") or "")
+            execution_target_id = str(resolved_request.get("executionTargetId") or selected_target_id)
+            execution_trace_scope = str(resolved_request.get("executionTraceScope") or execution_target_id)
+            selected_family_id = str(resolved_request.get("selectedFamilyId") or planner_resolution.get("matchedFamilyId") or "").strip()
+            planner_resolution = _normalize_cached_planner_resolution(
+                planner_resolution,
+                requested_queries=list(args.query or []),
+                requested_anchors=list(args.anchor or []),
+                selected_target_id=selected_target_id,
+                selected_family_id=selected_family_id,
+                selected_subject_kind=str(planner_resolution.get("selectedSubjectKind") or "target"),
+                selected_subject_key=str(planner_resolution.get("selectedSubjectKey") or selected_target_id),
+                selected_subject_label=str(planner_resolution.get("selectedSubjectLabel") or selected_target_id),
+                matched_family_label=str(planner_resolution.get("matchedFamilyLabel") or selected_family_id or selected_target_id),
+                decision_note="Resolved explicit target request from trace request planner.",
+            )
+            knowledge_plan = dict(resolved_request.get("knowledgePlan") or {})
         if not selected_family_id and selected_target_id in registry.get("targets", {}):
             selected_family_id = str(registry["targets"][selected_target_id].get("familyId") or "").strip()
         if not selected_family_id:
@@ -14971,7 +19831,95 @@ def plan_trace_bundle_request(
             )
         if not selected_family_id:
             selected_family_id = str(args.family or "exploration")
-        knowledge_plan = dict(resolved_request.get("knowledgePlan") or {})
+    if knowledge_plan.get("acquisitionPlan"):
+        explicit_seam_id = _find_explicit_relation_seam_query(selected_family_id, list(args.query or []))
+        if explicit_seam_id:
+            knowledge_snapshot = dict(knowledge_plan.get("knowledge") or {})
+            if execution_trace_scope:
+                with _trace_profile_span("dbReads.bestGapSubjectStates"):
+                    fresh_subject_row = get_trace_db().find_materialized_subject_state_view(
+                        "cifi-full",
+                        "libil2cpp.so",
+                        execution_trace_scope,
+                        str(
+                            knowledge_snapshot.get("subjectId")
+                            or planner_resolution.get("selectedSubjectKey")
+                            or selected_target_id
+                            or execution_trace_scope
+                        ).strip(),
+                    )
+                fresh_subject_state = dict((fresh_subject_row or {}).get("payload") or {})
+                if fresh_subject_state:
+                    knowledge_snapshot = {
+                        **knowledge_snapshot,
+                        "knownEdges": list(fresh_subject_state.get("knownEdges") or []),
+                        "clearedEdgeTypes": list(fresh_subject_state.get("knownEdges") or []),
+                        "blockedEdges": list(fresh_subject_state.get("blockedEdges") or []),
+                        "blockedEdgeTypes": list(fresh_subject_state.get("blockedEdges") or []),
+                        "missingEdges": list(fresh_subject_state.get("missingEdges") or []),
+                        "missingEdgeTypes": list(fresh_subject_state.get("missingEdges") or []),
+                        "nonblockingEdges": list(fresh_subject_state.get("nonblockingEdges") or []),
+                        "nonblockingEdgeTypes": list(fresh_subject_state.get("nonblockingEdges") or []),
+                        "nextSeam": dict(fresh_subject_state.get("nextSeam") or {}),
+                        "decisionSummary": dict(fresh_subject_state.get("decisionSummary") or {}),
+                    }
+            known_edges = {
+                str(value).strip()
+                for value in (
+                    list(knowledge_snapshot.get("clearedEdgeTypes") or [])
+                    + list(knowledge_snapshot.get("knownEdges") or [])
+                )
+                if str(value).strip()
+            }
+            blocked_edges = {
+                str(value).strip()
+                for value in (
+                    list(knowledge_snapshot.get("blockedEdgeTypes") or [])
+                    + list(knowledge_snapshot.get("missingEdgeTypes") or [])
+                    + list(knowledge_snapshot.get("missingEdges") or [])
+                    + list(knowledge_snapshot.get("blockedEdges") or [])
+                )
+                if str(value).strip()
+            }
+            explicit_seam_already_cleared = explicit_seam_id in known_edges and explicit_seam_id not in blocked_edges
+            if explicit_seam_already_cleared:
+                knowledge_plan = {
+                    **dict(knowledge_plan),
+                    "mode": "reuse-materialized",
+                    "knowledge": {
+                        **knowledge_snapshot,
+                        "nextSeam": {"id": None, "status": "clear"},
+                    },
+                    "nextSeam": {"id": None, "status": "clear"},
+                }
+                knowledge_plan.pop("acquisitionPlan", None)
+            else:
+                overridden_acquisition_plan = dict(knowledge_plan.get("acquisitionPlan") or {})
+                overridden_acquisition_plan["selectedSeamId"] = explicit_seam_id
+                overridden_acquisition_plan["anchorSelectionReasons"] = unique_strings(
+                    [
+                        *[str(value) for value in (overridden_acquisition_plan.get("anchorSelectionReasons") or []) if str(value).strip()],
+                        f"explicit seam query bound to {explicit_seam_id}",
+                    ]
+                )
+                knowledge_plan = dict(knowledge_plan)
+                knowledge_plan["acquisitionPlan"] = overridden_acquisition_plan
+        shaped_acquisition_plan = _shape_runtime_acquisition_plan(
+            dict(knowledge_plan.get("acquisitionPlan") or {}),
+            execution_trace_scope,
+            selected_family_id,
+        )
+        knowledge_plan = dict(knowledge_plan)
+        knowledge_plan["acquisitionPlan"] = shaped_acquisition_plan
+    if not str(knowledge_plan.get("executionRoutineId") or "").strip():
+        shaped_runtime_plan = dict(knowledge_plan.get("acquisitionPlan") or {})
+        fallback_execution_routine_id = str(
+            shaped_runtime_plan.get("selectedRoutine")
+            or _default_execution_routine_for_family(selected_family_id, execution_trace_scope)
+        ).strip()
+        if fallback_execution_routine_id:
+            knowledge_plan = dict(knowledge_plan)
+            knowledge_plan["executionRoutineId"] = fallback_execution_routine_id
     with _trace_profile_span("dbReads.assetFingerprint"):
         asset_set = build_trace_asset_set()
     request_signature = build_trace_request_signature(
@@ -15013,8 +19961,47 @@ def collect_trace_bundle_components(
         args.extended_search,
         args.depth_search,
         args.native_timeout,
+        args.force,
     )
-    with _trace_profile_span("finalBundleAssembly"):
+    native_trace_payload = dict(dataset.get("nativeTrace") or {})
+    native_reuse_report = dict(native_trace_payload.get("reuseReport") or {})
+    native_had_active_request = bool(
+        list(native_trace_payload.get("requestedTerms") or [])
+        or list(native_trace_payload.get("searchTerms") or [])
+        or native_trace_payload.get("jobId")
+        or native_trace_payload.get("result") not in (None, {})
+    )
+    if (
+        not list(native_reuse_report.get("executedSearchTerms") or [])
+        and not list(native_reuse_report.get("attemptedNewTraceAnchors") or [])
+        and not list(native_reuse_report.get("newlyTracedAnchors") or [])
+        and not native_had_active_request
+    ):
+        execution_trace_scope = str(trace_plan.get("executionTraceScope") or "").strip()
+        if execution_trace_scope:
+            with _trace_profile_span("dbReads"):
+                existing_reuse_payload = get_trace_db().find_latest_materialized_target_bundle_view(
+                    "cifi-full",
+                    "libil2cpp.so",
+                    execution_trace_scope,
+                )
+            if existing_reuse_payload and trace_dataset_has_required_fragments(existing_reuse_payload.get("payload") or {}):
+                rebound = _rebind_acquisition_dataset_to_request(
+                    dict(existing_reuse_payload["payload"]),
+                    planner_resolution=dict(trace_plan.get("plannerResolution") or {}),
+                    execution_trace_scope=execution_trace_scope,
+                    execution_target_id=str(trace_plan.get("executionTargetId") or trace_plan.get("selectedTargetId") or execution_trace_scope),
+                    selected_family_id=str(trace_plan.get("selectedFamilyId") or ""),
+                    request_signature=str(trace_plan.get("requestSignature") or ""),
+                )
+                rebound.setdefault("nativeTrace", {})
+                if isinstance(rebound.get("nativeTrace"), dict):
+                    rebound["nativeTrace"]["reuseReport"] = native_reuse_report
+                rebound.setdefault("traceRun", {})
+                if isinstance(rebound.get("traceRun"), dict):
+                    rebound["traceRun"]["mode"] = "db-knowledge-reuse"
+                return rebound
+    with _trace_phase("Semantic fragment assembly", "phase.semanticFragmentAssembly"):
         dataset["semanticFragments"] = collect_semantic_fragments(dataset)
     return dataset
 
@@ -15026,7 +20013,11 @@ def persist_trace_bundle_fragments(
 ) -> None:
     db = get_trace_db()
     with _trace_profile_span("dbWrites"):
-        db.upsert_trace_dataset("cifi-full", "libil2cpp.so", trace_scope, request_signature, dataset)
+        trace_dataset_changed = db.upsert_trace_dataset("cifi-full", "libil2cpp.so", trace_scope, request_signature, dataset)
+    dataset.setdefault("traceRun", {})
+    if isinstance(dataset.get("traceRun"), dict):
+        dataset["traceRun"]["dbPersistedChanged"] = bool(trace_dataset_changed)
+    _invalidate_best_gap_evidence_caches(list(dataset.get("nativeSearchTerms") or []))
 
 
 def materialize_trace_bundle_dataset(
@@ -15035,11 +20026,16 @@ def materialize_trace_bundle_dataset(
     request_signature: str,
 ) -> dict[str, Any]:
     current_trace_run = dict(dataset.get("traceRun", {}) or {})
+    current_trace_knowledge = dict(dataset.get("traceKnowledge") or {})
+    current_decision_summary = dict(dataset.get("decisionSummary") or {})
+    current_native_trace = dict(dataset.get("nativeTrace") or {})
     db = get_trace_db()
     with _trace_profile_span("dbReads"):
         materialized = db.find_materialized_target_bundle_view("cifi-full", "libil2cpp.so", trace_scope, request_signature)
         if materialized is None:
             materialized = db.find_materialized_trace_view("cifi-full", "libil2cpp.so", trace_scope, request_signature)
+        if materialized is None:
+            materialized = db.find_latest_materialized_target_bundle_view("cifi-full", "libil2cpp.so", trace_scope)
     if materialized:
         with _trace_profile_span("reducerMaterializerRebuild"):
             payload = dict(materialized["payload"])
@@ -15051,21 +20047,39 @@ def materialize_trace_bundle_dataset(
             trace_run["reducerVersion"] = materialized.get("reducerVersion")
             payload["traceRun"] = trace_run
             payload["traceProvenance"] = materialized.get("provenance", {})
-            materialized_native_trace = get_trace_db().find_materialized_native_trace_view("cifi-full", "libil2cpp.so", request_signature)
-            if materialized_native_trace:
+            if str(current_native_trace.get("reason") or "").strip() != "no-native-missing-terms":
+                materialized_native_trace = get_trace_db().find_materialized_native_trace_view("cifi-full", "libil2cpp.so", request_signature)
+                if materialized_native_trace:
+                    payload.setdefault("nativeTrace", {})
+                    if isinstance(payload.get("nativeTrace"), dict):
+                        native_trace_payload = dict(materialized_native_trace.get("payload") or {})
+                        if native_trace_payload.get("result") is not None:
+                            native_trace_payload["summary"] = _summarize_native_result(
+                                native_trace_payload.get("result"),
+                                list(native_trace_payload.get("requestedTerms") or []),
+                                str(payload.get("traceRegistry", {}).get("selectedFamilyId") or "").strip() or None,
+                                dict(native_trace_payload.get("requestContext") or {}),
+                            )
+                        for key, value in native_trace_payload.items():
+                            if payload["nativeTrace"].get(key) in (None, "", [], {}) and value not in (None, "", [], {}):
+                                payload["nativeTrace"][key] = value
+            if current_trace_knowledge:
+                payload["traceKnowledge"] = {
+                    **dict(payload.get("traceKnowledge") or {}),
+                    **current_trace_knowledge,
+                }
+            if current_decision_summary:
+                payload["decisionSummary"] = dict(current_decision_summary)
+                payload.setdefault("traceKnowledge", {})
+                if isinstance(payload.get("traceKnowledge"), dict):
+                    payload["traceKnowledge"]["decisionSummary"] = dict(current_decision_summary)
+            if current_native_trace:
                 payload.setdefault("nativeTrace", {})
                 if isinstance(payload.get("nativeTrace"), dict):
-                    native_trace_payload = dict(materialized_native_trace.get("payload") or {})
-                    if native_trace_payload.get("result") is not None:
-                        native_trace_payload["summary"] = _summarize_native_result(
-                            native_trace_payload.get("result"),
-                            list(native_trace_payload.get("requestedTerms") or []),
-                            str(payload.get("traceRegistry", {}).get("selectedFamilyId") or "").strip() or None,
-                            dict(native_trace_payload.get("requestContext") or {}),
-                        )
-                    for key, value in native_trace_payload.items():
-                        if payload["nativeTrace"].get(key) in (None, "", [], {}) and value not in (None, "", [], {}):
-                            payload["nativeTrace"][key] = value
+                    payload["nativeTrace"] = {
+                        **dict(payload.get("nativeTrace") or {}),
+                        **current_native_trace,
+                    }
         return payload
     dataset["traceRun"] = dict(current_trace_run)
     dataset["traceRun"]["dbBacked"] = True
@@ -15178,11 +20192,44 @@ def main() -> None:
             dry_run_args = argparse.Namespace(**vars(args))
             best_gap_plan: dict[str, Any] | None = None
             if auto_best_gap_mode:
-                with cli_profiler.phase("DB reads / best-gap selection", "phase.bestGapSelection"):
-                    best_gap_plan = choose_best_gap_plan(registry)
+                try:
+                    with cli_profiler.phase("DB reads / best-gap selection", "phase.bestGapSelection"):
+                        best_gap_plan = choose_best_gap_plan(registry)
+                except ValueError:
+                    print("No actionable DB-backed best-gap candidate is currently available. Waiting for new evidence or a new reducer/materializer lane.")
+                    if cli_profiler.enabled:
+                        timing_report = cli_profiler.report_payload()
+                        print("Trace timing (ms):")
+                        for bucket, elapsed_ms in sorted(
+                            timing_report.get("bucketsMs", {}).items(),
+                            key=lambda item: item[1],
+                            reverse=True,
+                        ):
+                            count = timing_report.get("bucketCounts", {}).get(bucket, 0)
+                            print(f"  {bucket}={elapsed_ms:.3f} ({count} span{'s' if count != 1 else ''})")
+                        print(f"  totalRunMs={timing_report.get('totalRunMs', 0.0):.3f}")
+                        if timing_report.get("dominantBucket"):
+                            print(f"  dominantBucket={timing_report['dominantBucket']}")
+                    return
                 dry_run_args.anchor = list(best_gap_plan.get("selectedAnchors") or best_gap_plan.get("anchors") or [])
                 dry_run_args.best_gap_plan = best_gap_plan
                 _print_best_gap_plan(best_gap_plan)
+                if not _best_gap_readiness_is_actionable(best_gap_plan):
+                    print("No actionable DB-backed best-gap candidate is currently available. Waiting for new evidence or a new reducer/materializer lane.")
+                    if cli_profiler.enabled:
+                        timing_report = cli_profiler.report_payload()
+                        print("Trace timing (ms):")
+                        for bucket, elapsed_ms in sorted(
+                            timing_report.get("bucketsMs", {}).items(),
+                            key=lambda item: item[1],
+                            reverse=True,
+                        ):
+                            count = timing_report.get("bucketCounts", {}).get(bucket, 0)
+                            print(f"  {bucket}={elapsed_ms:.3f} ({count} span{'s' if count != 1 else ''})")
+                        print(f"  totalRunMs={timing_report.get('totalRunMs', 0.0):.3f}")
+                        if timing_report.get("dominantBucket"):
+                            print(f"  dominantBucket={timing_report['dominantBucket']}")
+                    return
                 cli_profiler.progress(
                     "Best-gap selected",
                     "{} seam={} routine={}".format(
@@ -15292,14 +20339,58 @@ def main() -> None:
             output_mode = "both"
         
         total_iterations = args.repeat if auto_best_gap_mode else 1
+        stalled_best_gap_signatures: set[tuple[Any, ...]] = set()
+        stalled_best_gap_execution_signatures: set[tuple[Any, ...]] = set()
+        prefetched_best_gap_plan: dict[str, Any] | None = None
         for iteration in range(1, total_iterations + 1):
             run_args = argparse.Namespace(**vars(args))
             if auto_best_gap_mode:
-                with cli_profiler.phase("DB reads / best-gap selection", "phase.bestGapSelection"):
-                    best_gap_plan = choose_best_gap_plan(registry)
+                if prefetched_best_gap_plan is not None:
+                    best_gap_plan = prefetched_best_gap_plan
+                    prefetched_best_gap_plan = None
+                else:
+                    try:
+                        with cli_profiler.phase("DB reads / best-gap selection", "phase.bestGapSelection"):
+                            best_gap_plan = choose_best_gap_plan(
+                                registry,
+                                excluded_signatures=stalled_best_gap_signatures,
+                                excluded_execution_signatures=stalled_best_gap_execution_signatures,
+                            )
+                    except ValueError:
+                        print("No actionable DB-backed best-gap candidate is currently available. Waiting for new evidence or a new reducer/materializer lane.")
+                        if cli_profiler.enabled:
+                            timing_report = cli_profiler.report_payload()
+                            print("Trace timing (ms):")
+                            for bucket, elapsed_ms in sorted(
+                                timing_report.get("bucketsMs", {}).items(),
+                                key=lambda item: item[1],
+                                reverse=True,
+                            ):
+                                count = timing_report.get("bucketCounts", {}).get(bucket, 0)
+                                print(f"  {bucket}={elapsed_ms:.3f} ({count} span{'s' if count != 1 else ''})")
+                            print(f"  totalRunMs={timing_report.get('totalRunMs', 0.0):.3f}")
+                            if timing_report.get("dominantBucket"):
+                                print(f"  dominantBucket={timing_report['dominantBucket']}")
+                        break
                 run_args.anchor = list(best_gap_plan.get("selectedAnchors") or best_gap_plan.get("anchors") or [])
                 run_args.best_gap_plan = best_gap_plan
                 _print_best_gap_plan(best_gap_plan)
+                if not _best_gap_readiness_is_actionable(best_gap_plan):
+                    print("No actionable DB-backed best-gap candidate is currently available. Waiting for new evidence or a new reducer/materializer lane.")
+                    if cli_profiler.enabled:
+                        timing_report = cli_profiler.report_payload()
+                        print("Trace timing (ms):")
+                        for bucket, elapsed_ms in sorted(
+                            timing_report.get("bucketsMs", {}).items(),
+                            key=lambda item: item[1],
+                            reverse=True,
+                        ):
+                            count = timing_report.get("bucketCounts", {}).get(bucket, 0)
+                            print(f"  {bucket}={elapsed_ms:.3f} ({count} span{'s' if count != 1 else ''})")
+                        print(f"  totalRunMs={timing_report.get('totalRunMs', 0.0):.3f}")
+                        if timing_report.get("dominantBucket"):
+                            print(f"  dominantBucket={timing_report['dominantBucket']}")
+                    break
                 cli_profiler.progress(
                     "Best-gap selected",
                     "{} seam={} routine={}".format(
@@ -15312,6 +20403,34 @@ def main() -> None:
             _print_completed_trace_run(dataset, iteration, total_iterations)
             if auto_best_gap_mode and iteration < total_iterations:
                 print("Refreshing best-gap selection from DB-backed materialized state before the next run...")
+                try:
+                    with cli_profiler.phase("DB reads / best-gap selection", "phase.bestGapSelection"):
+                        next_best_gap_plan = choose_best_gap_plan(
+                            registry,
+                            excluded_signatures=stalled_best_gap_signatures,
+                            excluded_execution_signatures=stalled_best_gap_execution_signatures,
+                        )
+                except ValueError:
+                    print("Best-gap selection is unchanged after the latest DB-backed run. No more actionable alternatives remain.")
+                    break
+                if not _best_gap_run_made_progress(dataset):
+                    stalled_best_gap_execution_signatures.add(_best_gap_execution_signature(best_gap_plan))
+                if (
+                    _best_gap_progress_signature(next_best_gap_plan) == _best_gap_progress_signature(best_gap_plan)
+                    or _best_gap_execution_signature(next_best_gap_plan) == _best_gap_execution_signature(best_gap_plan)
+                ):
+                    stalled_best_gap_signatures.add(_best_gap_progress_signature(best_gap_plan))
+                    try:
+                        with cli_profiler.phase("DB reads / best-gap selection", "phase.bestGapSelection"):
+                            next_best_gap_plan = choose_best_gap_plan(
+                                registry,
+                                excluded_signatures=stalled_best_gap_signatures,
+                                excluded_execution_signatures=stalled_best_gap_execution_signatures,
+                            )
+                    except ValueError:
+                        print("Best-gap selection is unchanged after the latest DB-backed run. No more actionable alternatives remain.")
+                        break
+                prefetched_best_gap_plan = next_best_gap_plan
     finally:
         ACTIVE_TRACE_PROFILER = None
 

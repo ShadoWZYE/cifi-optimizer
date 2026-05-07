@@ -144,9 +144,10 @@ The current app-facing TokenShop slice should stay narrower than a recommendatio
   - known max-level status
   - current-vs-next extracted bonus-step change
 - Current user-facing home:
-  - the first checked-row TokenShop slice now lives on the Progression page as a local editor for the checked subset
-  - `planning.tokenShop.checkedSubsetLevels.*` is the local non-canonical editor path
-  - `compatibility.unmappedSystemState.tokenShop.*` stays available as prefill only, not as the only live UI state
+  - the first checked-row TokenShop slice now lives on the Progression page as a read-only storefront for the checked subset
+  - `planning.tokenShop.checkedSubsetPlayerState.*` is the active player-state path for manual TokenShop levels
+  - `planning.tokenShop.checkedSubsetLevels.*` remains legacy compatibility/editor storage only and is no longer part of the live storefront path
+  - `compatibility.unmappedSystemState.tokenShop.*` stays fallback-only when checked player state is missing
 - Explicit non-goals:
   - best buy
   - ROI

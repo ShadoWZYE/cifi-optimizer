@@ -466,18 +466,18 @@
       "id": "progression-token-shop-editor-first-slice",
       "title": "Progression TokenShop editor first slice",
       "status": "archived",
-      "goal": "Move the checked TokenShop subset out of the Overview evidence panel and into the first real Progression-side TokenShop editor slice.",
-      "currentSlice": "Ship a dedicated TokenShop category under the Progression selector that reads local non-canonical levels under `planning.tokenShop.checkedSubsetLevels.*` for the already checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, and `ATU9Level` subset, treats `compatibility.unmappedSystemState.tokenShop.*` as prefill only, and shows each grounded row's identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change in fixed grounded slot order.",
-      "exitCondition": "The first real TokenShop-facing editor slice lives under Progression, keeps checked-row local levels separate from compatibility import, preserves quarantine language for the checked subset, and avoids best-buy, ROI, ranking, next-purchase logic, or canonical `ATU*Level` promotion claims.",
+      "goal": "Move the checked TokenShop subset out of the Overview evidence panel and into the first real Progression-side TokenShop storefront slice.",
+      "currentSlice": "Ship a dedicated TokenShop category under the Progression selector that reads active checked player-state levels under `planning.tokenShop.checkedSubsetPlayerState.*` for the already checked `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, and `ATU9Level` subset, treats `compatibility.unmappedSystemState.tokenShop.*` as fallback only, and shows each grounded row's identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect step change in fixed grounded slot order.",
+      "exitCondition": "The first real TokenShop-facing storefront slice lives under Progression, reads checked player-state levels first, keeps compatibility import as fallback only, preserves quarantine language for the checked subset, and avoids best-buy, ROI, ranking, next-purchase logic, or canonical `ATU*Level` promotion claims.",
       "blockedBy": "Archived after ship. Broader planner-safe spend behavior remains blocked on separate lanes for additional TokenShop row remap coverage and a true next-purchase rule set, while token-bank, Daily Tokenium, and Emporium state remain separate non-consumed blockers.",
-      "smallestShippableSlice": "A dedicated TokenShop category under the Progression selector that keeps row order fixed to `ATU1`, `ATU2`, `ATU3`, `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, persists local checked-row levels under a non-canonical planning path, uses compatibility import as prefill only, shows grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect bonus-step change, and leaves all unresolved rows and systems outside the module.",
+      "smallestShippableSlice": "A dedicated TokenShop category under the Progression selector that keeps row order fixed to `ATU1`, `ATU2`, `ATU3`, `ATU4`, `ATU5`, `ATU6`, `ATU7`, `ATU8`, reads checked player-state levels from the live planning path, uses compatibility import as fallback only, shows grounded identity, current level, next known cost, known max-level status, and current-vs-next extracted or checked-effect bonus-step change, and leaves all unresolved rows and systems outside the module.",
       "completedSteps": [
         "Move the checked TokenShop subset UI out of the Overview-bound spend boundary panel and into its own TokenShop category under the Progression selector.",
         "Keep the checked row subset fixed to `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, and `ATU9Level` instead of widening the consumed-input contract.",
-        "Persist local checked-row editor values under `planning.tokenShop.checkedSubsetLevels.*` as non-canonical progression state.",
-        "Treat `compatibility.unmappedSystemState.tokenShop.*` as prefill only instead of as the only live UI state for the checked subset.",
-        "Keep level-1 and other locally entered checked-row values visible in the row-detail render path instead of hiding them behind missing-import behavior.",
-        "Keep unresolved TokenShop rows, token-bank state, Daily Tokenium state, Emporium state, and unresolved `ATU*` remap work outside the shipped editor."
+        "Use `planning.tokenShop.checkedSubsetPlayerState.*` as the live checked-row path instead of local override state.",
+        "Treat `compatibility.unmappedSystemState.tokenShop.*` as fallback only instead of as the only live UI state for the checked subset.",
+        "Keep level-1 and other checked player-state row values visible in the storefront render path instead of hiding them behind missing-import behavior.",
+        "Keep unresolved TokenShop rows, token-bank state, Daily Tokenium state, Emporium state, and unresolved `ATU*` remap work outside the shipped storefront."
       ],
       "nextSteps": [
         "Expand TokenShop row coverage only when another user-facing slice actually consumes more grounded rows.",
@@ -498,8 +498,8 @@
       ],
       "verified": [
         "The checked TokenShop row-remap boundary still limits this slice to `ATU1Level`, `ATU2Level`, `ATU3Level`, `ATU4Level`, `ATU5Level`, `ATU6Level`, `ATU7Level`, `ATU8Level`, `ATU9Level`, `ATU10Level`, `ATU12Level`, `ATU13Level`, and `ATU20Level`.",
-        "The first real TokenShop-facing checked-row editor slice can live under Progression without promoting unresolved row levels into canonical player state.",
-        "Local checked-row levels under `planning.tokenShop.checkedSubsetLevels.*` stay non-canonical while compatibility TokenShop import remains available as prefill only.",
+        "The first real TokenShop-facing checked-row storefront slice can live under Progression without promoting unresolved row levels into canonical player state.",
+        "Checked player-state levels under `planning.tokenShop.checkedSubsetPlayerState.*` now drive the live storefront while compatibility TokenShop import remains fallback only.",
         "The shipped TokenShop values data already preserves the checked `StartCost`, `AdditiveCost`, `Bonus`, and known-cap fields needed by this slice for the same subset rows.",
         "Broader planner-safe spend behavior remains separately blocked on row identity coverage and a true next-purchase rule set rather than on the checked editor-state handoff itself."
       ],
@@ -689,7 +689,8 @@
         "Narrow the current owner conclusion so TokenShop methods, BigStatisticPrefab.TokenBankCap, and FinalTokenBank-derived outputs are treated as non-owner surfaces while the remaining save-side search stays on the broader PlayerProfile persistence-family boundary.",
         "Recover exact typed `SaveData.BankedTokens` ownership for the current token-bank stored amount without promoting cap or claimable state into canonical planner inputs.",
         "Check the broader PlayerProfile persistence neighborhood and preserve the exact typed `PlayerProfileHandler.saveInfoCache` plus `ConvertSaveDataToProfileData(...) -> PlayerProfileData` bridge while confirming that the direct `PlayerProfileData` wrapper still only exposes generic `Tokens` and `Tokenium` strings for this lane.",
-        "Record exact `SaveData.ClaimableTokenium` only as a broader generic Tokenium-cluster claimable field and narrow `CloudSavePlayerProfile` to a metadata-only cloud save/load shell so neither is promoted as a token-bank-specific owner."
+        "Record exact `SaveData.ClaimableTokenium` only as a broader generic Tokenium-cluster claimable field and narrow `CloudSavePlayerProfile` to a metadata-only cloud save/load shell so neither is promoted as a token-bank-specific owner.",
+        "Surface the narrowed token-bank save boundary through the DB-backed token-bank state summary so the active app lane reads exact `SaveData.BankedTokens` ownership, the broader `SaveData.ClaimableTokenium` negative, and the checked PlayerProfile bridge from one runtime surface."
       ],
       "nextSteps": [
         "Inspect the broader PlayerProfile persistence neighborhood for token-bank or banked-token field clues before assuming any FinalTokenBank output is the saved value owner.",
@@ -931,5 +932,3 @@
     }
   ]
 }
-
-

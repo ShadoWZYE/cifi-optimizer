@@ -45,7 +45,13 @@ function markLegacyTokenShopFallback(summary, coverageSource) {
 }
 
 export function getTokenShopCostLaneSummary(clues) {
-  const contracts = normalizeTokenShopContracts(clues);
+  const genericSummary = getTokenShopGenericCostLaneSummary(
+    getTokenShopDbGenericScopes(clues)
+  );
+  const contracts = normalizeTokenShopSubjectMetadata(clues);
+  if (genericSummary) {
+    return genericSummary;
+  }
   if (contracts.length) {
     const rowLocal =
       contracts.find((contract) => {
@@ -74,7 +80,7 @@ export function getTokenShopCostLaneSummary(clues) {
 
     return {
       hasLaneSplit: Boolean(rowLocal?.subjectId) && Boolean(rangeFamily?.subjectId),
-      coverageSource: "subject-contracts",
+      coverageSource: getTokenShopDbCoverageSource(clues, contracts.length > 0),
       keepsDailyTokeniumSeparate: Boolean(rangeFamily?.subjectId),
       tokenLaneLabel: rowLocal?.subjectId || "row-local display subject",
       diamondLaneLabel: rowLocal?.subjectKind || "row-local",
@@ -109,8 +115,8 @@ export function getTokenShopCostLaneSummary(clues) {
       ? clues.tracePresentation
       : {};
 
-  // Compatibility-only fallback: active UI reads should use canonical subject contracts when
-  // they are present. This branch remains only for export/debug views or when subject contracts
+  // Compatibility-only fallback: active UI reads should use DB-backed TokenShop mechanics when
+  // they are present. This branch remains only for export/debug views or when DB-backed surfaces
   // are absent from the caller payload.
   return markLegacyTokenShopFallback(
     {
@@ -136,7 +142,13 @@ export function getTokenShopCostLaneSummary(clues) {
 }
 
 export function getSpendActionLaneSummary(tokenShop) {
-  const contracts = normalizeTokenShopContracts(tokenShop);
+  const genericSummary = getTokenShopGenericActionLaneSummary(
+    getTokenShopDbGenericScopes(tokenShop)
+  );
+  const contracts = normalizeTokenShopSubjectMetadata(tokenShop);
+  if (genericSummary) {
+    return genericSummary;
+  }
   if (contracts.length) {
     const rowLocal =
       contracts.find((contract) => {
@@ -174,7 +186,7 @@ export function getSpendActionLaneSummary(tokenShop) {
 
     return {
       hasActionSplit: Boolean(rowLocal?.subjectId) && Boolean(rangeFamily?.subjectId),
-      coverageSource: "subject-contracts",
+      coverageSource: getTokenShopDbCoverageSource(tokenShop, contracts.length > 0),
       keepsDailyDirectHooksUnrecovered: rangeFamilyNonblockingEdges.includes(
         "exact-shell-to-action-hook"
       ),
@@ -217,8 +229,8 @@ export function getSpendActionLaneSummary(tokenShop) {
       ? clues.searchResults.level0
       : {};
 
-  // Compatibility-only fallback: active UI reads should use canonical subject contracts when
-  // they are present. This branch remains only for export/debug views or when subject contracts
+  // Compatibility-only fallback: active UI reads should use DB-backed TokenShop mechanics when
+  // they are present. This branch remains only for export/debug views or when DB-backed surfaces
   // are absent from the caller payload.
   return markLegacyTokenShopFallback(
     {
@@ -244,7 +256,13 @@ export function getSpendActionLaneSummary(tokenShop) {
 }
 
 export function getTokenBankStateSummary(clues) {
-  const contracts = normalizeTokenShopContracts(clues);
+  const genericSummary = getTokenShopGenericTokenBankStateSummary(
+    getTokenShopDbGenericScopes(clues)
+  );
+  const contracts = normalizeTokenShopSubjectMetadata(clues);
+  if (genericSummary) {
+    return genericSummary;
+  }
   if (contracts.length) {
     const rowLocal =
       contracts.find(
@@ -284,13 +302,35 @@ export function getTokenBankStateSummary(clues) {
     if (canUseContract) {
       return {
         hasControllerSplit: true,
+        hasExactStoredAmountOwner:
+          typeof stateFields.exactSaveOwnerType === "string" &&
+          typeof stateFields.storedAmountField === "string",
+        hasGenericClaimableBoundary:
+          typeof stateFields.genericClaimableFieldOwner === "string" &&
+          typeof stateFields.genericClaimableField === "string",
+        hasPlayerProfileBridgeBoundary:
+          typeof stateFields.profileBridgeOwner === "string" &&
+          typeof stateFields.profileBridgeMethod === "string" &&
+          typeof stateFields.profileBridgeReturnType === "string" &&
+          typeof stateFields.profileCacheField === "string",
         hasCloudSaveShellBoundary: true,
-        coverageSource: "subject-contracts",
+        coverageSource: getTokenShopDbCoverageSource(clues, contracts.length > 0),
         claimMethod: stateFields.claimMethod,
         capMethod: stateFields.capMethod,
         displayShell: stateFields.displayShell,
         loopHandler: stateFields.loopHandler || "TextHandlerLoopMods",
         loopHook: stateFields.loopHook,
+        exactSaveOwnerType: stateFields.exactSaveOwnerType || "SaveData",
+        storedAmountField: stateFields.storedAmountField || "BankedTokens",
+        exactSaveOwnerLabel: `${stateFields.exactSaveOwnerType || "SaveData"}.${stateFields.storedAmountField || "BankedTokens"}`,
+        genericClaimableFieldOwner: stateFields.genericClaimableFieldOwner || "SaveData",
+        genericClaimableField: stateFields.genericClaimableField || "ClaimableTokenium",
+        genericClaimableLabel: `${stateFields.genericClaimableFieldOwner || "SaveData"}.${stateFields.genericClaimableField || "ClaimableTokenium"}`,
+        profileBridgeOwner: stateFields.profileBridgeOwner || "PlayerProfileHandler",
+        profileBridgeMethod: stateFields.profileBridgeMethod || "ConvertSaveDataToProfileData",
+        profileBridgeReturnType: stateFields.profileBridgeReturnType || "PlayerProfileData",
+        profileCacheField: stateFields.profileCacheField || "saveInfoCache",
+        profileBridgeLabel: `${stateFields.profileBridgeOwner || "PlayerProfileHandler"}.${stateFields.profileCacheField || "saveInfoCache"} + ${stateFields.profileBridgeMethod || "ConvertSaveDataToProfileData"}(...) -> ${stateFields.profileBridgeReturnType || "PlayerProfileData"}`,
         cloudSaveShell: stateFields.cloudSaveShell,
         cloudSaveInfoRoutine: stateFields.cloudSaveInfoRoutine,
         cloudSaveProfileRoutine: stateFields.cloudSaveProfileRoutine,
@@ -319,6 +359,20 @@ export function getTokenBankStateSummary(clues) {
   const cloudSaveStateMachines = Array.isArray(cloudSaveBoundary.metadataStateMachines)
     ? cloudSaveBoundary.metadataStateMachines
     : [];
+  const exactSaveOwnerRecovery =
+    typeof clues?.exactSaveOwnerRecovery === "object" && clues.exactSaveOwnerRecovery
+      ? clues.exactSaveOwnerRecovery
+      : {};
+  const genericClaimableBoundary =
+    typeof clues?.genericTokeniumClaimableBoundary === "object" &&
+    clues.genericTokeniumClaimableBoundary
+      ? clues.genericTokeniumClaimableBoundary
+      : {};
+  const playerProfilePersistenceBoundary =
+    typeof clues?.playerProfilePersistenceBoundary === "object" &&
+    clues.playerProfilePersistenceBoundary
+      ? clues.playerProfilePersistenceBoundary
+      : {};
 
   // Required compatibility fallback: keep this path until tokenBankState contracts are both
   // present and unblocked. Blocked cases are expected to fall back rather than presenting partial
@@ -330,6 +384,17 @@ export function getTokenBankStateSummary(clues) {
         tokenShopMethods.includes("get_TokenBankCap") &&
         displayOrHandlerClues.includes("BigStatisticPrefab.TokenBankCap") &&
         displayOrHandlerClues.includes("SetLM244BonusText"),
+      hasExactStoredAmountOwner:
+        exactSaveOwnerRecovery.declaringType === "SaveData" &&
+        exactSaveOwnerRecovery.storedAmountField === "BankedTokens",
+      hasGenericClaimableBoundary:
+        genericClaimableBoundary.declaringType === "SaveData" &&
+        genericClaimableBoundary.field === "ClaimableTokenium",
+      hasPlayerProfileBridgeBoundary:
+        playerProfilePersistenceBoundary.bridgeOwner === "PlayerProfileHandler" &&
+        playerProfilePersistenceBoundary.bridgeMethod === "ConvertSaveDataToProfileData" &&
+        playerProfilePersistenceBoundary.bridgeReturnType === "PlayerProfileData" &&
+        playerProfilePersistenceBoundary.handlerField === "saveInfoCache",
       hasCloudSaveShellBoundary:
         cloudSaveBoundary.scriptName === "CloudSavePlayerProfile" &&
         cloudSaveBoundary.typedTargetFound === false &&
@@ -342,6 +407,18 @@ export function getTokenBankStateSummary(clues) {
       displayShell: "BigStatisticPrefab.TokenBankCap",
       loopHandler: "TextHandlerLoopMods",
       loopHook: "SetLM244BonusText",
+      exactSaveOwnerType: "SaveData",
+      storedAmountField: "BankedTokens",
+      exactSaveOwnerLabel: "SaveData.BankedTokens",
+      genericClaimableFieldOwner: "SaveData",
+      genericClaimableField: "ClaimableTokenium",
+      genericClaimableLabel: "SaveData.ClaimableTokenium",
+      profileBridgeOwner: "PlayerProfileHandler",
+      profileBridgeMethod: "ConvertSaveDataToProfileData",
+      profileBridgeReturnType: "PlayerProfileData",
+      profileCacheField: "saveInfoCache",
+      profileBridgeLabel:
+        "PlayerProfileHandler.saveInfoCache + ConvertSaveDataToProfileData(...) -> PlayerProfileData",
       cloudSaveShell: "CloudSavePlayerProfile",
       cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
       cloudSaveProfileRoutine: "GetPlayerProfileInfo",
@@ -352,7 +429,13 @@ export function getTokenBankStateSummary(clues) {
 }
 
 export function getDailyTokeniumLaneSummary(clues) {
-  const contracts = normalizeTokenShopContracts(clues);
+  const genericSummary = getTokenShopGenericDailyTokeniumLaneSummary(
+    getTokenShopDbGenericScopes(clues)
+  );
+  const contracts = normalizeTokenShopSubjectMetadata(clues);
+  if (genericSummary) {
+    return genericSummary;
+  }
   if (contracts.length) {
     const rowLocal =
       contracts.find(
@@ -398,7 +481,7 @@ export function getDailyTokeniumLaneSummary(clues) {
         typeof laneFields.progressString === "string" &&
         typeof laneFields.capDescriptionString === "string" &&
         typeof laneFields.collectorPackDescriptionString === "string",
-      coverageSource: "subject-contracts",
+      coverageSource: getTokenShopDbCoverageSource(clues, contracts.length > 0),
       ownerFamilyLabel: laneFields.ownerFamilyLabel || "SpaceAcademy",
       missionFamilyLabel: laneFields.missionFamilyLabel || "FarmMissions",
       academyController: laneFields.academyController || "SpaceAcademyMain",
@@ -438,8 +521,8 @@ export function getDailyTokeniumLaneSummary(clues) {
     ? laneClues.playerFacingStrings
     : [];
 
-  // Compatibility-only fallback: active UI reads should use canonical subject contracts when
-  // they are present. This branch remains only for export/debug views or when subject contracts
+  // Compatibility-only fallback: active UI reads should use DB-backed TokenShop mechanics when
+  // they are present. This branch remains only for export/debug views or when DB-backed surfaces
   // are absent from the caller payload.
   return markLegacyTokenShopFallback(
     {
@@ -477,7 +560,7 @@ export function getDailyTokeniumLaneSummary(clues) {
 }
 
 export function getTokenBankFormulaBoundarySummary(clues) {
-  const contracts = normalizeTokenShopContracts(clues);
+  const contracts = normalizeTokenShopSubjectMetadata(clues);
   if (contracts.length) {
     const rowLocal =
       contracts.find(
@@ -518,7 +601,7 @@ export function getTokenBankFormulaBoundarySummary(clues) {
       return {
         hasDerivedOutputBoundary: true,
         hasNoSaveJoinInDerivedContext: true,
-        coverageSource: "subject-contracts",
+        coverageSource: getTokenShopDbCoverageSource(clues, contracts.length > 0),
         capAccessor: formulaFields.capAccessor || "get_FinalTokenBankCap",
         fillAccessor: formulaFields.fillAccessor || "get_FinalTokenBankFillSpeed",
         capField: formulaFields.capField || "<FinalTokenBankCap>k__BackingField",
@@ -591,13 +674,29 @@ export function calculateDailyTokeniumCap(tierUnlocks, upgradeLevels = {}) {
   return totalCap;
 }
 
-export function getMultiverseMarketRangeBoundarySummary(boundary) {
-  const validatedRowRanges = Array.isArray(boundary?.validatedRowRanges)
-    ? boundary.validatedRowRanges
-    : [];
-  const overlapIds = Array.isArray(boundary?.overlapIds) ? boundary.overlapIds : [];
+export function getMultiverseMarketRangeBoundarySummary(boundary, multiverseMarket = null) {
+  const fallbackBoundary =
+    boundary ??
+    multiverseMarket?.rowIdentity?.compatibilityBoundaries?.rangeBoundary ??
+    null;
+  const genericBoundary = getMultiverseMarketGenericBoundarySummary(multiverseMarket);
+  const validatedCoverage = getMultiverseMarketValidatedCoverage(
+    multiverseMarket?.saveOwner?.extract ?? multiverseMarket
+  );
+  const validatedRowRanges = Array.isArray(fallbackBoundary?.validatedRowRanges)
+    ? fallbackBoundary.validatedRowRanges
+    : validatedCoverage.hasValidatedRows
+      ? [validatedCoverage.rangeLabel]
+      : [];
+  const overlapIds = Array.isArray(fallbackBoundary?.overlapIds)
+    ? fallbackBoundary.overlapIds
+    : Array.isArray(genericBoundary?.factsByKind?.["ordered-overlap-row-id"])
+      ? genericBoundary.factsByKind["ordered-overlap-row-id"]
+      : [];
   const metadataIsRangeLabel =
-    typeof boundary?.metadataIsRangeLabel === "string" ? boundary.metadataIsRangeLabel : "";
+    typeof fallbackBoundary?.metadataIsRangeLabel === "string"
+      ? fallbackBoundary.metadataIsRangeLabel
+      : String(genericBoundary?.factsByKind?.["typed-span"]?.[0] || "");
 
   return {
     hasRangeBoundary: validatedRowRanges.length > 0 && metadataIsRangeLabel.length > 0,
@@ -611,14 +710,63 @@ export function getMultiverseMarketRangeBoundarySummary(boundary) {
   };
 }
 
-export function getMultiverseMarketRowTextCoverageSummary(coverage) {
-  const textHandlerAnchors = Array.isArray(coverage?.textHandlerAnchors)
-    ? coverage.textHandlerAnchors
+export function getMultiverseMarketRowTextCoverageSummary(coverage, multiverseMarket = null) {
+  const genericSummary = getDbSystemGenericSubjectSummary(
+    multiverseMarket,
+    "family-graph:multiverse-market-row-text"
+  );
+  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
+    includeSubjectMetadata: false,
+    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-row-text"
+  });
+  if (genericSummary) {
+    const textHandlerAnchors = genericSummary.factsByKind?.["owner-anchor"] || [];
+    const validatedRowCostTexts = genericSummary.factsByKind?.["cost-text-sample"] || [];
+    const sampleBuyHooks = genericSummary.factsByKind?.["buy-hook-sample"] || [];
+    const costTextRowIds = (genericSummary.factsByKind?.["cost-text-row-id"] || [])
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+    const validatedCoverage = getMultiverseMarketValidatedCoverage(
+      multiverseMarket?.saveOwner?.extract ?? multiverseMarket
+    );
+    const validatedIds = Array.isArray(multiverseMarket?.saveOwner?.extract?.source?.validated_ids)
+      ? multiverseMarket.saveOwner.extract.source.validated_ids
+      : [];
+    const validatedTextIds = costTextRowIds.filter((value) => validatedIds.includes(value));
+    return {
+      hasValidatedTextCoverage:
+        textHandlerAnchors.includes("TextHandlerMarkets") &&
+        textHandlerAnchors.includes("SetAllChrystosEmporiumTexts") &&
+        validatedTextIds.length > 0,
+      hasBuyHookSamples: sampleBuyHooks.length > 0,
+      coverageSource: coverageSummary.coverageSource,
+      coveredCount: validatedRowCostTexts.length,
+      validatedRangeLabel:
+        validatedTextIds.length > 0
+          ? formatNumericRanges(validatedTextIds)
+          : validatedCoverage.rangeLabel || "",
+      textHandler: "TextHandlerMarkets",
+      textBatcher: "SetAllChrystosEmporiumTexts",
+      firstBuyHook: sampleBuyHooks[0] || "",
+      lastBuyHook: sampleBuyHooks[sampleBuyHooks.length - 1] || "",
+      subjectCount: coverageSummary.subjectCount,
+      genericFactCount: coverageSummary.genericFactCount,
+      genericGapCount: coverageSummary.genericGapCount
+    };
+  }
+  const fallbackCoverage =
+    coverage ??
+    multiverseMarket?.rowIdentity?.compatibilityBoundaries?.rowTextCoverage ??
+    null;
+  const textHandlerAnchors = Array.isArray(fallbackCoverage?.textHandlerAnchors)
+    ? fallbackCoverage.textHandlerAnchors
     : [];
-  const validatedRowCostTexts = Array.isArray(coverage?.validatedRowCostTexts)
-    ? coverage.validatedRowCostTexts
+  const validatedRowCostTexts = Array.isArray(fallbackCoverage?.validatedRowCostTexts)
+    ? fallbackCoverage.validatedRowCostTexts
     : [];
-  const sampleBuyHooks = Array.isArray(coverage?.sampleBuyHooks) ? coverage.sampleBuyHooks : [];
+  const sampleBuyHooks = Array.isArray(fallbackCoverage?.sampleBuyHooks)
+    ? fallbackCoverage.sampleBuyHooks
+    : [];
 
   return {
     hasValidatedTextCoverage:
@@ -637,19 +785,63 @@ export function getMultiverseMarketRowTextCoverageSummary(coverage) {
   };
 }
 
-export function getMultiverseMarketActionShellSummary(shell) {
-  const textHandlerAnchors = Array.isArray(shell?.textHandlerAnchors)
-    ? shell.textHandlerAnchors
+export function getMultiverseMarketActionShellSummary(shell, multiverseMarket = null) {
+  const genericSummary = getDbSystemGenericSubjectSummary(
+    multiverseMarket,
+    "family-graph:multiverse-market-action-shell"
+  );
+  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
+    includeSubjectMetadata: false,
+    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-action-shell"
+  });
+  if (genericSummary) {
+    const textHandlerAnchors = genericSummary.factsByKind?.["owner-anchor"] || [];
+    const validatedBuyHooks = genericSummary.factsByKind?.["buy-hook-sample"] || [];
+    const validatedCostTexts = genericSummary.factsByKind?.["cost-text-sample"] || [];
+    const buyHookRowIds = (genericSummary.factsByKind?.["buy-hook-row-id"] || [])
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+    const costTextRowIds = (genericSummary.factsByKind?.["cost-text-row-id"] || [])
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+    return {
+      hasActionShell:
+        textHandlerAnchors.includes("TextHandlerMarkets") &&
+        textHandlerAnchors.includes("SetAllChrystosEmporiumTexts") &&
+        buyHookRowIds.length > 0 &&
+        costTextRowIds.length > 0,
+      coverageSource: coverageSummary.coverageSource,
+      buyRangeLabel: buyHookRowIds.length ? `BuyIS${formatNumericRanges(buyHookRowIds)}` : "",
+      costTextRangeLabel: costTextRowIds.length
+        ? `SetIS${formatNumericRanges(costTextRowIds)}CostText`
+        : "",
+      validatedRangeLabel: buyHookRowIds.length ? formatNumericRanges(buyHookRowIds) : "",
+      subjectCount: coverageSummary.subjectCount,
+      genericFactCount: coverageSummary.genericFactCount,
+      genericGapCount: coverageSummary.genericGapCount,
+      firstBuyHook: validatedBuyHooks[0] || "",
+      lastBuyHook: validatedBuyHooks[validatedBuyHooks.length - 1] || "",
+      coveredCount: validatedCostTexts.length
+    };
+  }
+  const fallbackShell =
+    shell ??
+    multiverseMarket?.uiShell?.compatibilityBoundaries?.actionShell ??
+    null;
+  const textHandlerAnchors = Array.isArray(fallbackShell?.textHandlerAnchors)
+    ? fallbackShell.textHandlerAnchors
     : [];
-  const validatedBuyHookRanges = Array.isArray(shell?.validatedBuyHookRanges)
-    ? shell.validatedBuyHookRanges
+  const validatedBuyHookRanges = Array.isArray(fallbackShell?.validatedBuyHookRanges)
+    ? fallbackShell.validatedBuyHookRanges
     : [];
-  const validatedBuyHooks = Array.isArray(shell?.validatedBuyHooks) ? shell.validatedBuyHooks : [];
-  const validatedCostTexts = Array.isArray(shell?.validatedCostTexts)
-    ? shell.validatedCostTexts
+  const validatedBuyHooks = Array.isArray(fallbackShell?.validatedBuyHooks)
+    ? fallbackShell.validatedBuyHooks
     : [];
-  const buyRange = shell?.contextDerivedBuyHookRange ?? {};
-  const costTextRange = shell?.contextDerivedCostTextRange ?? {};
+  const validatedCostTexts = Array.isArray(fallbackShell?.validatedCostTexts)
+    ? fallbackShell.validatedCostTexts
+    : [];
+  const buyRange = fallbackShell?.contextDerivedBuyHookRange ?? {};
+  const costTextRange = fallbackShell?.contextDerivedCostTextRange ?? {};
 
   return {
     hasActionShell:
@@ -670,17 +862,54 @@ export function getMultiverseMarketActionShellSummary(shell) {
   };
 }
 
-export function getMultiverseMarketPrefabRemapBoundarySummary(boundary) {
-  const directPrefabNumberMatches = Array.isArray(boundary?.directPrefabNumberMatches)
-    ? boundary.directPrefabNumberMatches
+export function getMultiverseMarketPrefabRemapBoundarySummary(boundary, multiverseMarket = null) {
+  const genericSummary = getDbSystemGenericSubjectSummary(
+    multiverseMarket,
+    "family-graph:multiverse-market-prefab-remap"
+  );
+  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
+    includeSubjectMetadata: false,
+    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-prefab-remap"
+  });
+  if (genericSummary) {
+    const prefabRowIds = (genericSummary.factsByKind?.["prefab-row-id"] || [])
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+    const serializedIds = (genericSummary.factsByKind?.["serialized-id-row-id"] || [])
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+    const prefabSamples = genericSummary.factsByKind?.["prefab-sample"] || [];
+    const overridePairs = genericSummary.factsByKind?.["prefab-override-pair"] || [];
+    return {
+      hasDirectMatchBand: false,
+      hasOverrideBoundary: prefabRowIds.length > 0 && serializedIds.length > 0,
+      coverageSource: coverageSummary.coverageSource,
+      lastDirectPrefab: "",
+      firstOverride: prefabSamples[0] || "",
+      lastOverride: prefabSamples[prefabSamples.length - 1] || "",
+      validatedMismatchLabel: prefabRowIds.length ? formatNumericRanges(prefabRowIds) : "",
+      firstSerializedId: serializedIds.length ? `ID${serializedIds[0]}` : "",
+      lastSerializedId: serializedIds.length ? `ID${serializedIds[serializedIds.length - 1]}` : "",
+      overridePairs,
+      subjectCount: coverageSummary.subjectCount,
+      genericFactCount: coverageSummary.genericFactCount,
+      genericGapCount: coverageSummary.genericGapCount
+    };
+  }
+  const fallbackBoundary =
+    boundary ??
+    multiverseMarket?.rowIdentity?.compatibilityBoundaries?.prefabRemapBoundary ??
+    null;
+  const directPrefabNumberMatches = Array.isArray(fallbackBoundary?.directPrefabNumberMatches)
+    ? fallbackBoundary.directPrefabNumberMatches
     : [];
-  const explicitPrefabIdOverrides = Array.isArray(boundary?.explicitPrefabIdOverrides)
-    ? boundary.explicitPrefabIdOverrides
+  const explicitPrefabIdOverrides = Array.isArray(fallbackBoundary?.explicitPrefabIdOverrides)
+    ? fallbackBoundary.explicitPrefabIdOverrides
     : [];
   const validatedIdsWithoutDirectPrefabName = Array.isArray(
-    boundary?.validatedIdsWithoutDirectPrefabName
+    fallbackBoundary?.validatedIdsWithoutDirectPrefabName
   )
-    ? boundary.validatedIdsWithoutDirectPrefabName
+    ? fallbackBoundary.validatedIdsWithoutDirectPrefabName
     : [];
 
   return {
@@ -698,16 +927,58 @@ export function getMultiverseMarketPrefabRemapBoundarySummary(boundary) {
   };
 }
 
-export function getMultiverseMarketOwnerFamilySummary(family) {
-  const ownerAnchors = Array.isArray(family?.ownerAnchors) ? family.ownerAnchors : [];
-  const costLaneAnchors = Array.isArray(family?.costLaneAnchors) ? family.costLaneAnchors : [];
-  const validatedCurrencyBoxes = Array.isArray(family?.validatedCurrencyBoxes)
-    ? family.validatedCurrencyBoxes
+export function getMultiverseMarketOwnerFamilySummary(family, multiverseMarket = null) {
+  const genericSummary = getDbSystemGenericSubjectSummary(
+    multiverseMarket,
+    "family-graph:multiverse-market-owner-family"
+  );
+  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
+    includeSubjectMetadata: false,
+    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-owner-family"
+  });
+  if (genericSummary) {
+    const ownerAnchors = genericSummary.factsByKind?.["owner-anchor"] || [];
+    const resourceAnchors = genericSummary.factsByKind?.["resource-anchor"] || [];
+    const wrapperField = String(
+      genericSummary.factsByKind?.["wrapper-only-field-label"]?.[0] || "InscryptionsDone"
+    );
+    return {
+      hasOwnerFamily:
+        ownerAnchors.includes("MultiverseMarket") &&
+        ownerAnchors.includes("TextHandlerMarkets") &&
+        ownerAnchors.includes("SetAllChrystosEmporiumTexts"),
+      hasCurrencyShell: false,
+      coverageSource: coverageSummary.coverageSource,
+      ownerAnchor: "MultiverseMarket",
+      inscryptionsLabel: wrapperField,
+      textHandler: "TextHandlerMarkets",
+      batcher: "SetAllChrystosEmporiumTexts",
+      resourceText: resourceAnchors[0] || "ResourceAmountText",
+      achievementBar: "",
+      costBox: "",
+      currencyRangeLabel: "",
+      firstValidatedCurrencyBox: "",
+      lastValidatedCurrencyBox: "",
+      subjectCount: coverageSummary.subjectCount,
+      genericFactCount: coverageSummary.genericFactCount,
+      genericGapCount: coverageSummary.genericGapCount
+    };
+  }
+  const fallbackFamily =
+    family ??
+    multiverseMarket?.uiShell?.compatibilityBoundaries?.ownerFamily ??
+    null;
+  const ownerAnchors = Array.isArray(fallbackFamily?.ownerAnchors) ? fallbackFamily.ownerAnchors : [];
+  const costLaneAnchors = Array.isArray(fallbackFamily?.costLaneAnchors)
+    ? fallbackFamily.costLaneAnchors
     : [];
-  const sampleBuyHooks = Array.isArray(family?.sampleBuyHooks) ? family.sampleBuyHooks : [];
+  const validatedCurrencyBoxes = Array.isArray(fallbackFamily?.validatedCurrencyBoxes)
+    ? fallbackFamily.validatedCurrencyBoxes
+    : [];
+  const sampleBuyHooks = Array.isArray(fallbackFamily?.sampleBuyHooks) ? fallbackFamily.sampleBuyHooks : [];
   const currencyBoxRange =
-    typeof family?.currencyBoxRange === "object" && family.currencyBoxRange
-      ? family.currencyBoxRange
+    typeof fallbackFamily?.currencyBoxRange === "object" && fallbackFamily.currencyBoxRange
+      ? fallbackFamily.currencyBoxRange
       : {};
 
   return {
@@ -742,7 +1013,13 @@ export function getMultiverseMarketOwnerFamilySummary(family) {
 }
 
 export function getTokenShopOwnerShellSummary(shell) {
-  const contracts = normalizeTokenShopContracts(shell);
+  const genericSummary = getTokenShopGenericOwnerShellSummary(
+    getTokenShopDbGenericScopes(shell)
+  );
+  const contracts = normalizeTokenShopSubjectMetadata(shell);
+  if (genericSummary) {
+    return genericSummary;
+  }
   if (contracts.length) {
     const rowLocal = contracts.find((contract) => contract?.subjectKind === "row-local") ?? null;
     const rangeFamily =
@@ -769,7 +1046,7 @@ export function getTokenShopOwnerShellSummary(shell) {
     if (canUseContract) {
       return {
         hasOwnerShell: true,
-        coverageSource: "subject-contracts",
+        coverageSource: getTokenShopDbCoverageSource(shell, contracts.length > 0),
         ownerAnchor: rowLocal?.subjectId || "row-local subject",
         bankMethod: rowLocalActionMethods[0] || "action-method-unavailable",
         notificationHook: rowLocal?.nextSeam?.id || "next-seam-unavailable",
@@ -813,7 +1090,13 @@ export function getTokenShopOwnerShellSummary(shell) {
 }
 
 export function getTokenShopSaveBoundarySummary(boundary) {
-  const contracts = normalizeTokenShopContracts(boundary);
+  const genericSummary = getTokenShopGenericSaveBoundarySummary(
+    getTokenShopDbGenericScopes(boundary)
+  );
+  const contracts = normalizeTokenShopSubjectMetadata(boundary);
+  if (genericSummary) {
+    return genericSummary;
+  }
   if (contracts.length) {
     const rowLocal = contracts.find((contract) => contract?.subjectKind === "row-local") ?? null;
     const rangeFamily =
@@ -832,10 +1115,10 @@ export function getTokenShopSaveBoundarySummary(boundary) {
     if (canUseContract) {
       return {
         hasSeparationBoundary: true,
-        coverageSource: "subject-contracts",
+        coverageSource: getTokenShopDbCoverageSource(boundary, contracts.length > 0),
         ownerAnchor: rowLocal?.subjectId || "row-local subject",
         saveAnchor: rangeFamily?.subjectId || "range-family subject",
-        overlapLabel: "canonical subject-state separation",
+        overlapLabel: "db-backed subject-state separation",
         rowLocalSubjectId: rowLocal?.subjectId || null,
         rangeFamilySubjectId: rangeFamily?.subjectId || null,
         rowLocalSubjectKind: rowLocal?.subjectKind || null,
@@ -860,8 +1143,8 @@ export function getTokenShopSaveBoundarySummary(boundary) {
       ? boundary.boundaryEvidence
       : {};
 
-  // Compatibility-only fallback: active UI reads should use canonical subject contracts when
-  // they are present. This branch remains only for export/debug views or when subject contracts
+  // Compatibility-only fallback: active UI reads should use DB-backed TokenShop mechanics when
+  // they are present. This branch remains only for export/debug views or when DB-backed surfaces
   // are absent from the caller payload.
   return markLegacyTokenShopFallback(
     {
@@ -881,7 +1164,13 @@ export function getTokenShopSaveBoundarySummary(boundary) {
 }
 
 export function getTokenBankControllerShellSummary(shell) {
-  const contracts = normalizeTokenShopContracts(shell);
+  const genericSummary = getTokenShopGenericTokenBankControllerShellSummary(
+    getTokenShopDbGenericScopes(shell)
+  );
+  const contracts = normalizeTokenShopSubjectMetadata(shell);
+  if (genericSummary) {
+    return genericSummary;
+  }
   if (contracts.length) {
     const rowLocal =
       contracts.find(
@@ -927,7 +1216,7 @@ export function getTokenBankControllerShellSummary(shell) {
     if (canUseContract) {
       return {
         hasControllerShell: true,
-        coverageSource: "subject-contracts",
+        coverageSource: getTokenShopDbCoverageSource(shell, contracts.length > 0),
         claimMethod: controllerFields.claimMethod || "ClaimBankedTokens",
         fillMethod: controllerFields.fillMethod || "SetBankFill",
         fillField: controllerFields.fillField || "BankFill",
@@ -973,15 +1262,87 @@ export function getTokenBankControllerShellSummary(shell) {
 }
 
 export function getMultiverseMarketSaveBoundarySummary(boundary) {
-  const actionShellTermsChecked = Array.isArray(boundary?.actionShellTermsChecked)
-    ? boundary.actionShellTermsChecked
+  const compatibilityBoundary =
+    boundary?.saveOwner?.compatibilityBoundaries?.saveBoundary ??
+    boundary?.saveOwner?.saveBoundary ??
+    boundary;
+  const genericBoundary = getMultiverseMarketGenericBoundarySummary(boundary);
+  const inferredBoundary =
+    getDbSystemBoundaryEntry(boundary, "multiverse-market-save-owner-boundary", "subject-boundary") ||
+    getDbSystemBoundaryEntry(boundary, "family-graph:multiverse-market-save-owner", "subject-boundary");
+  const saveOwnerMetadata =
+    getDbSystemSubjectMetadataEntry(boundary, "multiverse-market-save-owner-boundary") ||
+    getDbSystemSubjectMetadataEntry(boundary, "family-graph:multiverse-market-save-owner");
+  const useMetadataFallback = !inferredBoundary && !genericBoundary && Boolean(saveOwnerMetadata);
+  if (inferredBoundary || genericBoundary || useMetadataFallback) {
+    const knownEdges = Array.isArray(inferredBoundary?.knownEdges)
+      ? inferredBoundary.knownEdges
+      : useMetadataFallback && Array.isArray(saveOwnerMetadata?.knownEdges)
+        ? saveOwnerMetadata.knownEdges
+        : [];
+    const missingEdges = Array.isArray(inferredBoundary?.missingEdges)
+      ? inferredBoundary.missingEdges
+      : useMetadataFallback && Array.isArray(saveOwnerMetadata?.missingEdges)
+        ? saveOwnerMetadata.missingEdges
+        : [];
+    const actionAnchor = String(
+      genericBoundary?.factsByKind?.["accessor-bridge"]?.[0] || "get_Market"
+    ).trim();
+    const saveAnchor = String(
+      genericBoundary?.factsByKind?.["save-owner"]?.[0] || "SaveData"
+    ).trim();
+    const typedSpanLabel = String(
+      genericBoundary?.factsByKind?.["typed-span"]?.[0] || ""
+    ).trim();
+    return {
+      hasSeparationBoundary:
+        knownEdges.includes("accessor-bridge") && knownEdges.includes("typed-save-owner"),
+      coverageSource: composeDbCoverageSource({
+        hasGenericMechanics: Boolean(genericBoundary),
+        hasBoundaryModel: Boolean(inferredBoundary),
+        hasSubjectMetadata: useMetadataFallback
+      }),
+      boundaryVerdict: String(inferredBoundary?.verdict || "").trim() || null,
+      actionAnchor,
+      saveAnchor,
+      typedSpanLabel: typedSpanLabel || null,
+      overlapLabel: knownEdges.includes("ordered-row-overlap")
+        ? "ordered overlap only"
+        : "overlap-unavailable",
+      subjectId: inferredBoundary?.subjectId || (useMetadataFallback ? saveOwnerMetadata?.subjectId : null) || null,
+      subjectKind:
+        inferredBoundary?.subjectKind || (useMetadataFallback ? saveOwnerMetadata?.subjectKind : null) || null,
+      knownEdges,
+      missingEdges,
+      blockedInputReason:
+        typeof inferredBoundary?.blockedInputReason === "string"
+          ? inferredBoundary.blockedInputReason
+          : useMetadataFallback && typeof saveOwnerMetadata?.blockedInputReason === "string"
+          ? saveOwnerMetadata.blockedInputReason
+          : null,
+      nextSeamId:
+        (typeof inferredBoundary?.nextSeamId === "string"
+          ? inferredBoundary.nextSeamId
+          : useMetadataFallback && typeof saveOwnerMetadata?.nextSeam?.id === "string"
+          ? saveOwnerMetadata.nextSeam.id
+          : null) ||
+        genericBoundary?.nextSeamIds?.[0] ||
+        null,
+      genericFactCount:
+        Number(inferredBoundary?.genericFactCount || 0) || genericBoundary?.factCount || 0,
+      genericGapCount:
+        Number(inferredBoundary?.genericGapCount || 0) || genericBoundary?.gapCount || 0
+    };
+  }
+  const actionShellTermsChecked = Array.isArray(compatibilityBoundary?.actionShellTermsChecked)
+    ? compatibilityBoundary.actionShellTermsChecked
     : [];
-  const saveFamilyTermsChecked = Array.isArray(boundary?.saveFamilyTermsChecked)
-    ? boundary.saveFamilyTermsChecked
+  const saveFamilyTermsChecked = Array.isArray(compatibilityBoundary?.saveFamilyTermsChecked)
+    ? compatibilityBoundary.saveFamilyTermsChecked
     : [];
   const boundaryEvidence =
-    typeof boundary?.boundaryEvidence === "object" && boundary.boundaryEvidence
-      ? boundary.boundaryEvidence
+    typeof compatibilityBoundary?.boundaryEvidence === "object" && compatibilityBoundary.boundaryEvidence
+      ? compatibilityBoundary.boundaryEvidence
       : {};
 
   return {
@@ -1000,65 +1361,151 @@ export function getMultiverseMarketSaveBoundarySummary(boundary) {
 }
 
 export function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
-  const accessorClues = Array.isArray(boundary?.playerProfileAccessorClues)
-    ? boundary.playerProfileAccessorClues
+  const compatibilityBoundary =
+    boundary?.saveOwner?.compatibilityBoundaries?.marketMemberBoundary ??
+    boundary?.saveOwner?.marketMemberBoundary ??
+    boundary;
+  const genericBoundary = getMultiverseMarketGenericBoundarySummary(boundary);
+  const inferredBoundary =
+    getDbSystemBoundaryEntry(boundary, "multiverse-market-save-owner-boundary", "subject-boundary") ||
+    getDbSystemBoundaryEntry(boundary, "family-graph:multiverse-market-save-owner", "subject-boundary");
+  const saveOwnerMetadata =
+    getDbSystemSubjectMetadataEntry(boundary, "multiverse-market-save-owner-boundary") ||
+    getDbSystemSubjectMetadataEntry(boundary, "family-graph:multiverse-market-save-owner");
+  const typedOwnerSummary = getMultiverseMarketTypedOwnerSummary(boundary);
+  const useMetadataFallback = !inferredBoundary && !genericBoundary && Boolean(saveOwnerMetadata);
+  if (inferredBoundary || genericBoundary || useMetadataFallback) {
+    const knownEdges = Array.isArray(inferredBoundary?.knownEdges)
+      ? inferredBoundary.knownEdges
+      : useMetadataFallback && Array.isArray(saveOwnerMetadata?.knownEdges)
+        ? saveOwnerMetadata.knownEdges
+        : [];
+    const missingEdges = Array.isArray(inferredBoundary?.missingEdges)
+      ? inferredBoundary.missingEdges
+      : useMetadataFallback && Array.isArray(saveOwnerMetadata?.missingEdges)
+        ? saveOwnerMetadata.missingEdges
+        : [];
+    const accessorLabel = String(
+      genericBoundary?.factsByKind?.["accessor-bridge"]?.[0] || "get_Market"
+    ).trim();
+    const exactSaveOwnerLabel = String(
+      genericBoundary?.factsByKind?.["save-owner"]?.[0] || "SaveData"
+    ).trim();
+    const compatibilityImportTargetPath = String(
+      genericBoundary?.factsByKind?.["compatibility-import-target-path"]?.[0] || ""
+    ).trim();
+    return {
+      coverageSource: composeDbCoverageSource({
+        hasGenericMechanics: Boolean(genericBoundary),
+        hasBoundaryModel: Boolean(inferredBoundary),
+        hasSubjectMetadata: useMetadataFallback
+      }),
+      boundaryVerdict: String(inferredBoundary?.verdict || "").trim() || null,
+      hasSiblingAccessorCluster: knownEdges.includes("accessor-bridge"),
+      favorsPlayerProfileMemberHost:
+        knownEdges.includes("accessor-bridge") && knownEdges.includes("typed-save-owner"),
+      favorsDirectMemberBoundary:
+        knownEdges.includes("typed-save-owner") && knownEdges.includes("ordered-row-overlap"),
+      hasCloudBridge:
+        knownEdges.includes("compatibility-import-span") || Boolean(compatibilityImportTargetPath),
+      hasExactSaveDataProgressionOwner: knownEdges.includes("typed-save-owner"),
+      accessorLabel,
+      memberLabel: "Market",
+      canonicalHostLabel: `${accessorLabel} accessor bridge`,
+      siblingAccessorLabel: "the adjacent PlayerProfile-side accessor cluster",
+      exactSaveOwnerLabel,
+      compatibilityImportTargetPath: compatibilityImportTargetPath || null,
+      negativeMultiverseFieldLabel:
+        typedOwnerSummary.coverageSource !== "compatibility-boundary-export"
+          ? typedOwnerSummary.negativeTypedOwnerLabel
+          : missingEdges.includes("typed-market-field-recovery")
+          ? "typed-market-field-recovery remains open"
+          : "typed market field recovery status unavailable",
+      subjectId: inferredBoundary?.subjectId || (useMetadataFallback ? saveOwnerMetadata?.subjectId : null) || null,
+      subjectKind:
+        inferredBoundary?.subjectKind || (useMetadataFallback ? saveOwnerMetadata?.subjectKind : null) || null,
+      knownEdges,
+      missingEdges,
+      blockedInputReason:
+        typeof inferredBoundary?.blockedInputReason === "string"
+          ? inferredBoundary.blockedInputReason
+          : useMetadataFallback && typeof saveOwnerMetadata?.blockedInputReason === "string"
+          ? saveOwnerMetadata.blockedInputReason
+          : null,
+      nextSeamId:
+        typedOwnerSummary.nextSeamId ||
+        (typeof inferredBoundary?.nextSeamId === "string"
+          ? inferredBoundary.nextSeamId
+          : useMetadataFallback && typeof saveOwnerMetadata?.nextSeam?.id === "string"
+          ? saveOwnerMetadata.nextSeam.id
+          : null) ||
+        genericBoundary?.nextSeamIds?.[0] ||
+        null,
+      genericFactCount:
+        Number(inferredBoundary?.genericFactCount || 0) || genericBoundary?.factCount || 0,
+      genericGapCount:
+        Number(inferredBoundary?.genericGapCount || 0) || genericBoundary?.gapCount || 0
+    };
+  }
+  const accessorClues = Array.isArray(compatibilityBoundary?.playerProfileAccessorClues)
+    ? compatibilityBoundary.playerProfileAccessorClues
     : [];
-  const memberShellClues = Array.isArray(boundary?.playerProfileMemberShellClues)
-    ? boundary.playerProfileMemberShellClues
+  const memberShellClues = Array.isArray(compatibilityBoundary?.playerProfileMemberShellClues)
+    ? compatibilityBoundary.playerProfileMemberShellClues
     : [];
-  const handlerBridgeClues = Array.isArray(boundary?.playerProfileHandlerBridgeClues)
-    ? boundary.playerProfileHandlerBridgeClues
+  const handlerBridgeClues = Array.isArray(compatibilityBoundary?.playerProfileHandlerBridgeClues)
+    ? compatibilityBoundary.playerProfileHandlerBridgeClues
     : [];
-  const directMemberHandoffClues = Array.isArray(boundary?.directMemberHandoffClues)
-    ? boundary.directMemberHandoffClues
+  const directMemberHandoffClues = Array.isArray(compatibilityBoundary?.directMemberHandoffClues)
+    ? compatibilityBoundary.directMemberHandoffClues
     : [];
-  const typedSiblingContrastClues = Array.isArray(boundary?.typedSiblingContrastClues)
-    ? boundary.typedSiblingContrastClues
+  const typedSiblingContrastClues = Array.isArray(compatibilityBoundary?.typedSiblingContrastClues)
+    ? compatibilityBoundary.typedSiblingContrastClues
     : [];
-  const progressionPayloadFieldClues = Array.isArray(boundary?.progressionPayloadFieldClues)
-    ? boundary.progressionPayloadFieldClues
+  const progressionPayloadFieldClues = Array.isArray(compatibilityBoundary?.progressionPayloadFieldClues)
+    ? compatibilityBoundary.progressionPayloadFieldClues
     : [];
-  const cloudSaveBridgeClues = Array.isArray(boundary?.cloudSaveBridgeClues)
-    ? boundary.cloudSaveBridgeClues
+  const cloudSaveBridgeClues = Array.isArray(compatibilityBoundary?.cloudSaveBridgeClues)
+    ? compatibilityBoundary.cloudSaveBridgeClues
     : [];
-  const missingDirectTypeMapClues = Array.isArray(boundary?.missingDirectTypeMapClues)
-    ? boundary.missingDirectTypeMapClues
+  const missingDirectTypeMapClues = Array.isArray(compatibilityBoundary?.missingDirectTypeMapClues)
+    ? compatibilityBoundary.missingDirectTypeMapClues
     : [];
   const negativeTypedDirectPlayerProfileProgressionChecks = Array.isArray(
-    boundary?.negativeTypedDirectPlayerProfileProgressionChecks
+    compatibilityBoundary?.negativeTypedDirectPlayerProfileProgressionChecks
   )
-    ? boundary.negativeTypedDirectPlayerProfileProgressionChecks
+    ? compatibilityBoundary.negativeTypedDirectPlayerProfileProgressionChecks
     : [];
-  const negativeTypedDirectMemberChecks = Array.isArray(boundary?.negativeTypedDirectMemberChecks)
-    ? boundary.negativeTypedDirectMemberChecks
+  const negativeTypedDirectMemberChecks = Array.isArray(compatibilityBoundary?.negativeTypedDirectMemberChecks)
+    ? compatibilityBoundary.negativeTypedDirectMemberChecks
     : [];
   const negativeTypedSaveDataMarketChecks = Array.isArray(
-    boundary?.negativeTypedSaveDataMarketChecks
+    compatibilityBoundary?.negativeTypedSaveDataMarketChecks
   )
-    ? boundary.negativeTypedSaveDataMarketChecks
+    ? compatibilityBoundary.negativeTypedSaveDataMarketChecks
     : [];
   const typedBridgeRecovery =
-    typeof boundary?.typedBridgeRecovery === "object" && boundary.typedBridgeRecovery
-      ? boundary.typedBridgeRecovery
+    typeof compatibilityBoundary?.typedBridgeRecovery === "object" && compatibilityBoundary.typedBridgeRecovery
+      ? compatibilityBoundary.typedBridgeRecovery
       : {};
   const typedHandlerFieldRecovery =
-    typeof boundary?.typedHandlerFieldRecovery === "object" && boundary.typedHandlerFieldRecovery
-      ? boundary.typedHandlerFieldRecovery
+    typeof compatibilityBoundary?.typedHandlerFieldRecovery === "object" && compatibilityBoundary.typedHandlerFieldRecovery
+      ? compatibilityBoundary.typedHandlerFieldRecovery
       : {};
   const typedPlayerProfileFieldTableRecovery =
-    typeof boundary?.typedPlayerProfileFieldTableRecovery === "object" &&
-    boundary?.typedPlayerProfileFieldTableRecovery
-      ? boundary.typedPlayerProfileFieldTableRecovery
+    typeof compatibilityBoundary?.typedPlayerProfileFieldTableRecovery === "object" &&
+    compatibilityBoundary?.typedPlayerProfileFieldTableRecovery
+      ? compatibilityBoundary.typedPlayerProfileFieldTableRecovery
       : {};
   const typedSaveDataFieldTableRecovery =
-    typeof boundary?.typedSaveDataFieldTableRecovery === "object" &&
-    boundary?.typedSaveDataFieldTableRecovery
-      ? boundary.typedSaveDataFieldTableRecovery
+    typeof compatibilityBoundary?.typedSaveDataFieldTableRecovery === "object" &&
+    compatibilityBoundary?.typedSaveDataFieldTableRecovery
+      ? compatibilityBoundary.typedSaveDataFieldTableRecovery
       : {};
   const typedSaveDataProgressionOwnerSamples = Array.isArray(
-    boundary?.typedSaveDataProgressionOwnerSamples
+    compatibilityBoundary?.typedSaveDataProgressionOwnerSamples
   )
-    ? boundary.typedSaveDataProgressionOwnerSamples
+    ? compatibilityBoundary.typedSaveDataProgressionOwnerSamples
     : [];
   const siblingAccessorClues = [
     "get_Market",
@@ -1277,8 +1724,53 @@ export function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
   };
 }
 
-export function getMultiverseMarketMetadataSummary(neighborhood) {
-  const results = Array.isArray(neighborhood?.results) ? neighborhood.results : [];
+export function getMultiverseMarketMetadataSummary(neighborhood, multiverseMarket = null) {
+  const genericSummary = getDbSystemGenericSubjectSummary(
+    multiverseMarket,
+    "family-graph:multiverse-market-metadata-neighborhood"
+  );
+  const typedOwnerSummary = getDbSystemGenericSubjectSummary(
+    multiverseMarket,
+    "family-graph:multiverse-market-typed-owner"
+  );
+  if (genericSummary || typedOwnerSummary) {
+    const metadataAnchors = genericSummary?.factsByKind?.["metadata-anchor"] || [];
+    const typedHostAnchors = typedOwnerSummary?.factsByKind?.["typed-host-anchor"] || [];
+    const typedConversionAnchors = typedOwnerSummary?.factsByKind?.["typed-conversion-anchor"] || [];
+    const typedFieldSamples = typedOwnerSummary?.factsByKind?.["typed-field-sample"] || [];
+    const typedSpan =
+      String(typedOwnerSummary?.factsByKind?.["typed-span"]?.[0] || "") ||
+      String(genericSummary?.factsByKind?.["typed-span"]?.[0] || "");
+    return {
+      hasCloudSavePathClues:
+        metadataAnchors.includes("CloudSavePlayerProfile") &&
+        metadataAnchors.includes("GetPlayerProfileInfo"),
+      hasSaveFamilyClues:
+        (typedHostAnchors.includes("PlayerProfileData") ||
+          metadataAnchors.includes("PlayerProfileData")) &&
+        (typedConversionAnchors.includes("FillPlayerProfileData") ||
+          typedConversionAnchors.includes("ConvertSaveDataToProfileData") ||
+          metadataAnchors.includes("FillPlayerProfileData") ||
+          metadataAnchors.includes("ConvertSaveDataToProfileData")),
+      hasProgressionFieldCluster:
+        (typedFieldSamples.includes("InscryptionsDone") ||
+          metadataAnchors.includes("InscryptionsDone")) &&
+        (typedFieldSamples.includes("EsotericR1Trades") ||
+          metadataAnchors.includes("EsotericR1Trades")),
+      recoveredIsRangeLabel: typedSpan,
+      coverageSource: getDbSystemCoverageSummary(multiverseMarket, {
+        includeSubjectMetadata: false,
+        subjectFilter: (subjectId) =>
+          subjectId === "family-graph:multiverse-market-metadata-neighborhood" ||
+          subjectId === "family-graph:multiverse-market-typed-owner"
+      }).coverageSource
+    };
+  }
+  const fallbackNeighborhood =
+    neighborhood ??
+    multiverseMarket?.rowIdentity?.compatibilityBoundaries?.metadataNeighborhood ??
+    null;
+  const results = Array.isArray(fallbackNeighborhood?.results) ? fallbackNeighborhood.results : [];
   const findAnchor = (anchor) => results.find((entry) => entry.anchor === anchor);
   const flattenStrings = (matches = []) =>
     matches.flatMap((entry) => [
@@ -1316,6 +1808,310 @@ export function getMultiverseMarketMetadataSummary(neighborhood) {
   };
 }
 
+export function getMultiverseMarketTypedOwnerSummary(multiverseMarket = null) {
+  const genericSummary = getDbSystemGenericSubjectSummary(
+    multiverseMarket,
+    "family-graph:multiverse-market-typed-owner"
+  );
+  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
+    includeSubjectMetadata: false,
+    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-typed-owner"
+  });
+  if (genericSummary) {
+    const hostAnchors = genericSummary.factsByKind?.["typed-host-anchor"] || [];
+    const conversionAnchors = genericSummary.factsByKind?.["typed-conversion-anchor"] || [];
+    const fieldSamples = genericSummary.factsByKind?.["typed-field-sample"] || [];
+    const typedSpan = String(genericSummary.factsByKind?.["typed-span"]?.[0] || "");
+    const missingEdges = Array.isArray(genericSummary.missingEdges) ? genericSummary.missingEdges : [];
+    const nextSeamId = genericSummary.nextSeamIds?.[0] || null;
+    return {
+      hasTypedOwnerAnchors: hostAnchors.length > 0,
+      hasTypedConversionAnchors: conversionAnchors.length > 0,
+      hasTypedFieldSamples: fieldSamples.length > 0,
+      coverageSource: coverageSummary.coverageSource,
+      typedHostLabel: hostAnchors.join(", "),
+      typedConversionLabel: conversionAnchors.join(", "),
+      typedFieldSampleLabel: fieldSamples.slice(0, 6).join(", "),
+      recoveredIsRangeLabel: typedSpan,
+      nextSeamId,
+      negativeTypedOwnerLabel:
+        missingEdges.includes("typed-market-field-recovery") || nextSeamId === "typed-market-field-recovery"
+        ? "exact typed Market or MultiverseMarket field host remains unrecovered"
+        : "typed market field recovery status unavailable",
+      genericFactCount: genericSummary.factCount || 0,
+      genericGapCount: genericSummary.gapCount || 0
+    };
+  }
+  return {
+    hasTypedOwnerAnchors: false,
+    hasTypedConversionAnchors: false,
+    hasTypedFieldSamples: false,
+    coverageSource: "compatibility-boundary-export",
+    typedHostLabel: "",
+    typedConversionLabel: "",
+    typedFieldSampleLabel: "",
+    recoveredIsRangeLabel: "",
+    nextSeamId: null,
+    negativeTypedOwnerLabel: "typed owner DB coverage unavailable",
+    genericFactCount: 0,
+    genericGapCount: 0
+  };
+}
+
+export function getMultiverseMarketCanonicalImportSummary(multiverseMarket = null) {
+  const genericSummary = getDbSystemGenericSubjectSummary(
+    multiverseMarket,
+    "family-graph:multiverse-market-canonical-import"
+  );
+  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
+    includeSubjectMetadata: false,
+    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-canonical-import"
+  });
+  if (genericSummary) {
+    const compatibilityImportTargetPath = String(
+      genericSummary.factsByKind?.["compatibility-import-target-path"]?.[0] || ""
+    ).trim();
+    const safeSubsetLabel = String(
+      genericSummary.factsByKind?.["canonical-import-safe-subset-label"]?.[0] || ""
+    ).trim();
+    const overlapIds = (genericSummary.factsByKind?.["ordered-overlap-row-id"] || [])
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+    const importTargetRelations = Array.isArray(
+      genericSummary.relationsByKind?.["candidate-canonical-import-target"]
+    )
+      ? genericSummary.relationsByKind["candidate-canonical-import-target"]
+      : [];
+    const importAnchorRelations = Array.isArray(
+      genericSummary.relationsByKind?.["candidate-import-anchor"]
+    )
+      ? genericSummary.relationsByKind["candidate-import-anchor"]
+      : [];
+    const canonicalHostFieldRelations = Array.isArray(
+      genericSummary.relationsByKind?.["candidate-canonical-host-field"]
+    )
+      ? genericSummary.relationsByKind["candidate-canonical-host-field"]
+      : [];
+    const importLaneRelations = Array.isArray(
+      genericSummary.relationsByKind?.["candidate-import-preserves-lane"]
+    )
+      ? genericSummary.relationsByKind["candidate-import-preserves-lane"]
+      : [];
+    const importOverlapRelations = Array.isArray(
+      genericSummary.relationsByKind?.["candidate-import-overlap-row"]
+    )
+      ? genericSummary.relationsByKind["candidate-import-overlap-row"]
+      : [];
+    const supportedCanonicalHostFieldRelations = Array.isArray(
+      genericSummary.relationsByKind?.["supports-canonical-import-host-field"]
+    )
+      ? genericSummary.relationsByKind["supports-canonical-import-host-field"]
+      : [];
+    const supportedCanonicalLaneRelations = Array.isArray(
+      genericSummary.relationsByKind?.["supports-canonical-import-lane"]
+    )
+      ? genericSummary.relationsByKind["supports-canonical-import-lane"]
+      : [];
+    const supportedCanonicalOverlapRelations = Array.isArray(
+      genericSummary.relationsByKind?.["supports-canonical-import-overlap-row"]
+    )
+      ? genericSummary.relationsByKind["supports-canonical-import-overlap-row"]
+      : [];
+    const boundedImportOverlapRelations = Array.isArray(
+      genericSummary.relationsByKind?.["bounded-import-overlap-row"]
+    )
+      ? genericSummary.relationsByKind["bounded-import-overlap-row"]
+      : [];
+    const boundedImportLaneRelations = Array.isArray(
+      genericSummary.relationsByKind?.["bounded-import-lane"]
+    )
+      ? genericSummary.relationsByKind["bounded-import-lane"]
+      : [];
+    const missingEdges = Array.isArray(genericSummary.missingEdges) ? genericSummary.missingEdges : [];
+    const nextSeamId = genericSummary.nextSeamIds?.[0] || null;
+    return {
+      hasCanonicalImportBoundary: true,
+      coverageSource: coverageSummary.coverageSource,
+      compatibilityImportTargetPath: compatibilityImportTargetPath || null,
+      safeSubsetLabel: safeSubsetLabel || "none",
+      overlapLabel: formatNumericRanges(overlapIds),
+      candidateImportTargetCount: importTargetRelations.length,
+      candidateImportAnchorCount: importAnchorRelations.length,
+      candidateImportAnchorLabel: importAnchorRelations
+        .map((entry) => String(entry?.payload?.anchor || "").trim())
+        .filter(Boolean)
+        .join(", "),
+      candidateCanonicalHostFieldCount: canonicalHostFieldRelations.length,
+      candidateCanonicalHostFieldLabel: canonicalHostFieldRelations
+        .map((entry) => String(entry?.payload?.claim || "").trim())
+        .filter(Boolean)
+        .join(", "),
+      supportCanonicalHostFieldCount: supportedCanonicalHostFieldRelations.length,
+      supportCanonicalLaneCount: supportedCanonicalLaneRelations.length,
+      supportCanonicalOverlapCount: supportedCanonicalOverlapRelations.length,
+      boundedImportLaneCount: boundedImportLaneRelations.length,
+      boundedImportOverlapCount: boundedImportOverlapRelations.length,
+      candidateImportLaneCount: importLaneRelations.length,
+      candidateImportOverlapCount: importOverlapRelations.length,
+      nextSeamId,
+      negativeCanonicalImportLabel:
+        missingEdges.includes("canonical-import-admissibility") ||
+        nextSeamId === "canonical-import-admissibility"
+          ? "canonical import admissibility remains unrecovered"
+          : "canonical import boundary status unavailable",
+      genericFactCount: genericSummary.factCount || 0,
+      genericRelationCount: genericSummary.relationCount || 0,
+      genericGapCount: genericSummary.gapCount || 0
+    };
+  }
+  return {
+    hasCanonicalImportBoundary: false,
+    coverageSource: "compatibility-boundary-export",
+    compatibilityImportTargetPath: null,
+    safeSubsetLabel: "none",
+    overlapLabel: "",
+    candidateImportTargetCount: 0,
+    candidateImportAnchorCount: 0,
+    candidateImportAnchorLabel: "",
+    candidateCanonicalHostFieldCount: 0,
+    candidateCanonicalHostFieldLabel: "",
+    candidateImportLaneCount: 0,
+    candidateImportOverlapCount: 0,
+    nextSeamId: null,
+    negativeCanonicalImportLabel: "canonical import DB coverage unavailable",
+    genericFactCount: 0,
+    genericRelationCount: 0,
+    genericGapCount: 0
+  };
+}
+
+export function getMultiverseMarketBroadRowRemapSummary(multiverseMarket = null) {
+  const genericSummary = getDbSystemGenericSubjectSummary(
+    multiverseMarket,
+    "family-graph:multiverse-market-broad-row-remap"
+  );
+  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
+    includeSubjectMetadata: false,
+    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-broad-row-remap"
+  });
+  if (genericSummary) {
+    const buyHooks = genericSummary.factsByKind?.["buy-hook-sample"] || [];
+    const costTexts = genericSummary.factsByKind?.["cost-text-sample"] || [];
+    const remapStatus = String(
+      genericSummary.factsByKind?.["broader-row-remap-status"]?.[0] || ""
+    ).trim();
+    const overlapIds = (genericSummary.factsByKind?.["ordered-overlap-row-id"] || [])
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+    const candidateRowRemaps = Array.isArray(genericSummary.relationsByKind?.["candidate-row-remap"])
+      ? genericSummary.relationsByKind["candidate-row-remap"]
+      : [];
+    const supportRowRemaps = Array.isArray(genericSummary.relationsByKind?.["supports-row-remap"])
+      ? genericSummary.relationsByKind["supports-row-remap"]
+      : [];
+    const supportRowTextLanes = Array.isArray(genericSummary.relationsByKind?.["supports-row-text-lane"])
+      ? genericSummary.relationsByKind["supports-row-text-lane"]
+      : [];
+    const overrideIdRemaps = Array.isArray(genericSummary.relationsByKind?.["candidate-override-id-remap"])
+      ? genericSummary.relationsByKind["candidate-override-id-remap"]
+      : [];
+    const boundedRowRemapSupport = Array.isArray(genericSummary.relationsByKind?.["supports-bounded-row-remap"])
+      ? genericSummary.relationsByKind["supports-bounded-row-remap"]
+      : [];
+    const boundedRowRemaps = Array.isArray(genericSummary.relationsByKind?.["bounded-row-remap"])
+      ? genericSummary.relationsByKind["bounded-row-remap"]
+      : [];
+    const boundedRowTextLanes = Array.isArray(genericSummary.relationsByKind?.["bounded-row-text-lane"])
+      ? genericSummary.relationsByKind["bounded-row-text-lane"]
+      : [];
+    const missingEdges = Array.isArray(genericSummary.missingEdges) ? genericSummary.missingEdges : [];
+    const nextSeamId = genericSummary.nextSeamIds?.[0] || null;
+    return {
+      hasBroadRowRemapBoundary: true,
+      coverageSource: coverageSummary.coverageSource,
+      overlapLabel: formatNumericRanges(overlapIds),
+      buyRangeLabel: formatNumericRanges(
+        buyHooks
+          .map((value) => Number(String(value).replace(/\D+/g, "")))
+          .filter((value) => Number.isFinite(value))
+      ),
+      costTextRangeLabel: formatNumericRanges(
+        costTexts
+          .map((value) => Number(String(value).replace(/\D+/g, "")))
+          .filter((value) => Number.isFinite(value))
+      ),
+      remapStatusLabel: remapStatus || "broader row remap status unavailable",
+      candidateRowRemapCount: candidateRowRemaps.length,
+      supportRowRemapCount: supportRowRemaps.length,
+      supportRowTextLaneCount: supportRowTextLanes.length,
+      candidateOverrideIdRemapCount: overrideIdRemaps.length,
+      supportBoundedRowRemapCount: boundedRowRemapSupport.length,
+      boundedRowRemapCount: boundedRowRemaps.length,
+      boundedRowTextLaneCount: boundedRowTextLanes.length,
+      candidateOverrideIdRemapLabel: overrideIdRemaps
+        .map((entry) => String(entry?.payload?.pair || "").trim())
+        .filter(Boolean)
+        .join(", "),
+      candidateRowRemapLabel: formatNumericRanges(
+        candidateRowRemaps
+          .map((entry) => Number(entry?.payload?.rowId))
+          .filter((value) => Number.isFinite(value))
+      ),
+      nextSeamId,
+      negativeBroadRemapLabel:
+        missingEdges.includes("broad-row-identity-remap") ||
+        nextSeamId === "broad-row-identity-remap"
+          ? "broader row identity remap remains unrecovered outside the checked overlap"
+          : "broad row remap status unavailable",
+      genericFactCount: genericSummary.factCount || 0,
+      genericRelationCount: genericSummary.relationCount || 0,
+      genericGapCount: genericSummary.gapCount || 0
+    };
+  }
+  return {
+    hasBroadRowRemapBoundary: false,
+    coverageSource: "compatibility-boundary-export",
+    overlapLabel: "",
+    buyRangeLabel: "",
+    costTextRangeLabel: "",
+    remapStatusLabel: "broader row remap DB coverage unavailable",
+    candidateRowRemapCount: 0,
+    supportRowRemapCount: 0,
+    supportRowTextLaneCount: 0,
+    candidateOverrideIdRemapCount: 0,
+    candidateOverrideIdRemapLabel: "",
+    candidateRowRemapLabel: "",
+    nextSeamId: null,
+    negativeBroadRemapLabel: "broader row remap DB coverage unavailable",
+    genericFactCount: 0,
+    genericRelationCount: 0,
+    genericGapCount: 0
+  };
+}
+
+import {
+  getTokenShopGenericActionLaneSummary,
+  getTokenShopGenericCostLaneSummary,
+  getTokenShopGenericCoverageSummary,
+  getTokenShopGenericDailyTokeniumLaneSummary,
+  getTokenShopGenericOwnerShellSummary,
+  getTokenShopGenericSaveBoundarySummary,
+  getTokenShopGenericTokenBankControllerShellSummary,
+  getTokenShopGenericTokenBankStateSummary,
+  getTokenShopGenericTokeniumNamingSummary
+} from "./token-shop-generic-mechanics.js";
+import {
+  composeDbCoverageSource,
+  getDbSystemBoundaryEntry,
+  getDbSystemCoverageSummary,
+  getDbSystemGenericSubjectSummary,
+  getDbSystemSubjectMetadataEntry,
+  getDbSystemSubjectMetadataEntries
+} from "./db-system-bundle.js";
+import {
+  getTokenShopDbGenericScopes,
+  getTokenShopDbSubjectMetadata,
+} from "./token-shop-db-bundle.js";
 import { getQuarantinedMultiverseMarketImportedState } from "../player-profile.js";
 
 export function getMultiverseMarketValidatedCoverage(multiverseMarket) {
@@ -1338,7 +2134,13 @@ export function getMultiverseMarketValidatedCoverage(multiverseMarket) {
 }
 
 export function getTokeniumNamingSummary(clues) {
-  const contracts = normalizeTokenShopContracts(clues);
+  const genericSummary = getTokenShopGenericTokeniumNamingSummary(
+    getTokenShopDbGenericScopes(clues)
+  );
+  const contracts = normalizeTokenShopSubjectMetadata(clues);
+  if (genericSummary) {
+    return genericSummary;
+  }
   if (contracts.length) {
     const rowLocal =
       contracts.find(
@@ -1374,7 +2176,7 @@ export function getTokeniumNamingSummary(clues) {
     if (canUseContract) {
       return {
         hasNamingClues: true,
-        coverageSource: "subject-contracts",
+        coverageSource: getTokenShopDbCoverageSource(clues, contracts.length > 0),
         resourceLabel: namingFields.resourceLabel,
         academyLabel: namingFields.academyLabel,
         tokenShellLabel: namingFields.tokenShellLabel,
@@ -1416,47 +2218,87 @@ export function getTokeniumNamingSummary(clues) {
   );
 }
 
-function normalizeTokenShopContracts(tokenShop) {
-  const contracts = tokenShop?.subjectContracts;
+function normalizeTokenShopSubjectMetadata(tokenShop) {
+  const contracts = getTokenShopDbSubjectMetadata(tokenShop);
   if (contracts && typeof contracts === "object" && !Array.isArray(contracts)) {
     return Object.values(contracts).filter(Boolean);
   }
   return [];
 }
 
+function getMultiverseMarketSubjectMetadata(multiverseMarket) {
+  return getDbSystemSubjectMetadataEntries(multiverseMarket);
+}
+
+function getMultiverseMarketGenericBoundarySummary(multiverseMarket) {
+  return getDbSystemGenericSubjectSummary(
+    multiverseMarket,
+    "multiverse-market-save-owner-boundary"
+  );
+}
+
+export function getMultiverseMarketDbCoverageSummary(multiverseMarket) {
+  return getDbSystemCoverageSummary(multiverseMarket, {
+    subjectFilter: (subjectId) =>
+      String(subjectId || "").startsWith("multiverse-market-") ||
+      String(subjectId || "").startsWith("family-graph:multiverse-market-")
+  });
+}
+
+function hasTokenShopGenericMechanics(tokenShop) {
+  const scopes = getTokenShopDbGenericScopes(tokenShop);
+  return Boolean(scopes && typeof scopes === "object" && Object.keys(scopes).length > 0);
+}
+
+function getTokenShopDbCoverageSource(tokenShop, hasSubjectMetadata = true) {
+  const hasGeneric = hasTokenShopGenericMechanics(tokenShop);
+  return composeDbCoverageSource({
+    hasGenericMechanics: hasGeneric,
+    hasSubjectMetadata
+  });
+}
+
 export function getTokenShopCoverageSummary(tokenShop) {
-  const contracts = normalizeTokenShopContracts(tokenShop);
-  const rowLocalContracts = contracts.filter((contract) => contract?.subjectKind === "row-local");
-  const rangeFamilyContracts = contracts.filter(
+  const subjectMetadataEntries = normalizeTokenShopSubjectMetadata(tokenShop);
+  const genericCoverage = getTokenShopGenericCoverageSummary(
+    getTokenShopDbGenericScopes(tokenShop)
+  );
+  if (genericCoverage.hasCoverage) {
+    return genericCoverage;
+  }
+  const rowLocalEntries = subjectMetadataEntries.filter((contract) => contract?.subjectKind === "row-local");
+  const rangeFamilyEntries = subjectMetadataEntries.filter(
     (contract) => contract?.subjectKind === "range-family"
   );
-  const blockedContracts = contracts.filter(
+  const blockedEntries = subjectMetadataEntries.filter(
     (contract) => Array.isArray(contract?.blockedEdges) && contract.blockedEdges.length > 0
   );
-  const namedContracts = contracts.filter(
+  const namedEntries = subjectMetadataEntries.filter(
     (contract) =>
       typeof contract?.subjectId === "string" &&
       contract.subjectId &&
       (Array.isArray(contract?.knownEdges) || Array.isArray(contract?.blockedEdges))
   );
 
-  if (contracts.length) {
-    const subjectIds = namedContracts.map((contract) => contract.subjectId);
+  if (subjectMetadataEntries.length) {
+    const subjectIds = namedEntries.map((contract) => contract.subjectId);
     return {
       hasCoverage: true,
-      coverageSource: "subject-contracts",
-      numericGroupCount: contracts.length,
-      hasNamedLanes: rowLocalContracts.length > 0 && rangeFamilyContracts.length > 0,
+      coverageSource: getTokenShopDbCoverageSource(tokenShop, subjectMetadataEntries.length > 0),
+      numericGroupCount: subjectMetadataEntries.length,
+      hasNamedLanes: rowLocalEntries.length > 0 && rangeFamilyEntries.length > 0,
       namedLaneLabel: subjectIds.slice(0, 4).join(", "),
-      tierLabel: `${rowLocalContracts.length} row-local and ${rangeFamilyContracts.length} range-family canonical subjects`,
-      hasControllerAnchors: rowLocalContracts.some((contract) =>
+      tierLabel: `${rowLocalEntries.length} row-local and ${rangeFamilyEntries.length} range-family DB-backed subjects`,
+      hasControllerAnchors: rowLocalEntries.some((contract) =>
         Array.isArray(contract?.groundedFields?.actionMethods)
       ),
-      subjectCount: contracts.length,
-      rowLocalCount: rowLocalContracts.length,
-      rangeFamilyCount: rangeFamilyContracts.length,
-      blockedCount: blockedContracts.length,
-      subjectLabels: subjectIds
+      subjectCount: subjectMetadataEntries.length,
+      rowLocalCount: rowLocalEntries.length,
+      rangeFamilyCount: rangeFamilyEntries.length,
+      blockedCount: blockedEntries.length,
+      subjectLabels: subjectIds,
+      genericScopeCount: genericCoverage.genericScopeCount || 0,
+      unresolvedRowFieldCount: genericCoverage.unresolvedRowFieldCount || 0
     };
   }
 
@@ -1478,8 +2320,8 @@ export function getTokenShopCoverageSummary(tokenShop) {
     (key) => key in numericTable
   );
 
-  // Compatibility-only fallback: active UI reads should use canonical subject contracts when
-  // they are present. This branch remains only for export/debug views or when subject contracts
+  // Compatibility-only fallback: active UI reads should use DB-backed TokenShop mechanics when
+  // they are present. This branch remains only for export/debug views or when DB-backed surfaces
   // are absent from the caller payload.
   return markLegacyTokenShopFallback(
     {
@@ -1501,19 +2343,25 @@ export function getImportedMultiverseMarketPreview(
   multiverseMarketRangeBoundary,
   { formatBoundaryValue, formatShardNumber, isBoundaryValuePresent }
 ) {
-  void multiverseMarket;
   void formatBoundaryValue;
   void isBoundaryValuePresent;
-  const overlapIds = Array.isArray(multiverseMarketRangeBoundary?.overlapIds)
-    ? [
-        ...new Set(
-          multiverseMarketRangeBoundary.overlapIds
-            .map((value) => Number(value))
-            .filter((value) => Number.isFinite(value))
-            .sort((left, right) => left - right)
-        )
-      ]
-    : [];
+  const saveBoundarySummary = getMultiverseMarketSaveBoundarySummary(multiverseMarket);
+  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(multiverseMarket);
+  const multiverseDbCoverage = getMultiverseMarketDbCoverageSummary(multiverseMarket);
+  const genericBoundary = getMultiverseMarketGenericBoundarySummary(multiverseMarket);
+  const getGenericBoundaryFact = (factKind, fallback = "") =>
+    String(genericBoundary?.factsByKind?.[factKind]?.[0] || fallback).trim() || fallback;
+  const overlapIdSource = Array.isArray(multiverseMarketRangeBoundary?.overlapIds)
+    ? multiverseMarketRangeBoundary.overlapIds
+    : genericBoundary?.factsByKind?.["ordered-overlap-row-id"] || [];
+  const overlapIds = [
+    ...new Set(
+      overlapIdSource
+        .map((value) => Number(value))
+        .filter((value) => Number.isFinite(value))
+        .sort((left, right) => left - right)
+    )
+  ];
   const importedState = getQuarantinedMultiverseMarketImportedState(importedMarketState) ?? {};
   const overlapIdSet = new Set(overlapIds);
   const importedSpanRows = Object.entries(importedState)
@@ -1547,10 +2395,25 @@ export function getImportedMultiverseMarketPreview(
   const previewRows = importedSpanRows.slice(0, 12);
   const trailingPreviewRows = importedSpanRows.slice(-4);
   const supportedTextModel = {
-    effectLabelLane: "BonusDescriptionText",
-    baseBonusLane: "PerLevelBonusText",
-    idLane: "IDText",
-    quarantinedCurrentValueLane: "CurrentBonusText"
+    effectLabelLane: getGenericBoundaryFact("grounded-text-lane-effect-label", "BonusDescriptionText"),
+    effectLabelSourceLane: getGenericBoundaryFact(
+      "grounded-text-lane-effect-source",
+      "SetAllBonusTexts -> SetISNBonusText"
+    ),
+    baseBonusLane: getGenericBoundaryFact("grounded-text-lane-base-bonus", "PerLevelBonusText"),
+    baseBonusSourceLane: getGenericBoundaryFact(
+      "grounded-text-lane-base-bonus-source",
+      "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText"
+    ),
+    idLane: getGenericBoundaryFact("grounded-text-lane-row-id", "IDText"),
+    idSourceLane: getGenericBoundaryFact(
+      "grounded-text-lane-row-id-source",
+      "SetIS1IDText through SetIS110IDText"
+    ),
+    quarantinedCurrentValueLane: getGenericBoundaryFact(
+      "quarantined-text-lane-current-value",
+      "CurrentBonusText"
+    )
   };
   const rowSummaryShape = {
     shapeId: "multiverse-market-row-local-text-summary",
@@ -1558,17 +2421,17 @@ export function getImportedMultiverseMarketPreview(
       {
         key: "effectLabel",
         slotAlias: supportedTextModel.effectLabelLane,
-        sourceLane: "SetAllBonusTexts -> SetISNBonusText"
+        sourceLane: supportedTextModel.effectLabelSourceLane
       },
       {
         key: "baseBonus",
         slotAlias: supportedTextModel.baseBonusLane,
-        sourceLane: "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText"
+        sourceLane: supportedTextModel.baseBonusSourceLane
       },
       {
         key: "rowIdLabel",
         slotAlias: supportedTextModel.idLane,
-        sourceLane: "SetIS1IDText through SetIS110IDText"
+        sourceLane: supportedTextModel.idSourceLane
       }
     ],
     quarantinedFields: [
@@ -1597,9 +2460,20 @@ export function getImportedMultiverseMarketPreview(
   return {
     hasImportedCompatibilityPreview: importedSpanRows.length > 0,
     hasImportedSpanPreview: importedSpanRows.length > 0,
-    importTargetPath: "compatibility.unmappedSystemState.multiverseMarket",
-    wrapperOnlyFieldLabel: "InscryptionsDone",
-    typedSpanLabel: "IS1Level through IS110Level",
+    saveAnchor: saveBoundarySummary.saveAnchor || "SaveData",
+    importTargetPath:
+      marketMemberSummary.compatibilityImportTargetPath ||
+      "compatibility.unmappedSystemState.multiverseMarket",
+    wrapperOnlyFieldLabel: getGenericBoundaryFact("wrapper-only-field-label", "InscryptionsDone"),
+    typedSpanLabel: saveBoundarySummary.typedSpanLabel || "IS1Level through IS110Level",
+    coverageSource: multiverseDbCoverage.coverageSource || null,
+    nextSeamLabel: multiverseDbCoverage.nextSeamLabel || "",
+    canonicalImportSafeSubsetLabel:
+      String(
+        genericBoundary?.factsByKind?.["canonical-import-safe-subset-label"]?.[0] || "none"
+      ).trim() || "none",
+    broaderRowRemapStatus:
+      String(genericBoundary?.factsByKind?.["broader-row-remap-status"]?.[0] || "").trim() || "",
     importedSpanRowCount: importedSpanRows.length,
     totalSpanRowCount: 110,
     importedRangeLabel: importedSpanRows.length

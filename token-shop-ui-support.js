@@ -1,3 +1,5 @@
+import { getTokenShopRowMeta } from "./support/token-shop-row-meta.js";
+
 export function createTokenShopUiSupport({ formatValue }) {
   function formatTokenShopBonusStep(row, bonusValue) {
     if (typeof bonusValue !== "number" || !Number.isFinite(bonusValue)) {
@@ -80,6 +82,10 @@ export function createTokenShopUiSupport({ formatValue }) {
   }
 
   function formatTokenShopEffectLine(row) {
+    const rowMeta = getTokenShopRowMeta(row?.field);
+    if (typeof rowMeta?.storeEffectText === "string" && rowMeta.storeEffectText.trim()) {
+      return rowMeta.storeEffectText.trim();
+    }
     if (row?.rowType === "effect-driven" && row?.effectText) {
       return sanitizeTokenShopRichText(row.effectText);
     }
@@ -128,10 +134,6 @@ export function createTokenShopUiSupport({ formatValue }) {
     return /[.!?]$/u.test(text) ? text : `${text}.`;
   }
 
-  function getTokenShopActionLabel(row) {
-    return row?.isMaxed ? "MAXED" : "BUY";
-  }
-
   function getTokenShopContractMetaLine(row) {
     if (!row?.subjectId) {
       return "";
@@ -160,6 +162,7 @@ export function createTokenShopUiSupport({ formatValue }) {
   }
 
   function getTokenShopBonusStripEntries(row) {
+    const rowMeta = getTokenShopRowMeta(row?.field);
     const currentLevel =
       typeof row?.currentLevel === "number" && Number.isFinite(row.currentLevel)
         ? row.currentLevel
@@ -175,17 +178,28 @@ export function createTokenShopUiSupport({ formatValue }) {
       : row?.bonusStepMode === "multiplier"
         ? Math.pow(bonusValue || 1, currentLevel + 1)
         : bonusValue * (currentLevel + 1);
+    const currentLabel = formatTokenShopBonusMagnitude(currentMagnitude, row?.bonusStepMode);
+    const nextLabel =
+      nextMagnitude === null
+        ? "MAX"
+        : formatTokenShopBonusMagnitude(nextMagnitude, row?.bonusStepMode);
+    const buffTargets = Array.isArray(rowMeta?.storeBuffTargets) && rowMeta.storeBuffTargets.length
+      ? rowMeta.storeBuffTargets
+      : [{ label: row?.bonusStepLabel || "Bonus", tone: "neutral" }];
 
-    return [
-      {
-        label: row?.bonusStepLabel || "Bonus",
-        currentLabel: formatTokenShopBonusMagnitude(currentMagnitude, row?.bonusStepMode),
-        nextLabel:
-          nextMagnitude === null
-            ? "MAX"
-            : formatTokenShopBonusMagnitude(nextMagnitude, row?.bonusStepMode)
-      }
-    ];
+    return buffTargets.map((target, index) => ({
+      label: String(target?.label || row?.bonusStepLabel || "Bonus").trim(),
+      tone: String(target?.tone || "neutral").trim(),
+      currentLabel:
+        rowMeta?.unresolvedBuffLane === true
+          ? "Pending exact lane"
+          : currentLabel,
+      nextLabel:
+        rowMeta?.unresolvedBuffLane === true
+          ? "Research"
+          : nextLabel,
+      isPrimary: index === 0
+    }));
   }
 
   return Object.freeze({
@@ -199,7 +213,6 @@ export function createTokenShopUiSupport({ formatValue }) {
     getTokenShopRowGroundingSummary,
     getTokenShopContractMetaLine,
     formatTokenShopSentence,
-    getTokenShopActionLabel,
     getTokenShopBonusStripEntries
   });
 }

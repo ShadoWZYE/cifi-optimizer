@@ -64,4 +64,4 @@ Current grounded conclusion:
 - no indirect catalog/relation join is recovered from the checked repo-local evidence
 - it does not help rows `69-74` join back to the settled ordered mapping as final player-facing identities
 - rows `69-74` already keep their ordered identity through the same-number chain; this serialized-export lane still does not recover a repo-local player-facing effect or label text source for them
-- the canonical import-safe subset stays empty
+- the root import gate is already clear; this serialized-export lane still does not recover the narrower player-facing effect or label text source

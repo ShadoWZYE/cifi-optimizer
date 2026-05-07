@@ -56,13 +56,13 @@ import {
   buildSpendSystemView
 } from "./support/system-unit-projections.js";
 import { loadSystemUnits } from "./support/system-unit-provider.js";
+import { hasTokenShopDbBundle } from "./support/token-shop-db-bundle.js";
+import { MULTIVERSE_MARKET_SCOPE_IDS } from "./support/multiverse-market-scope-map.js";
+import { SHARD_SCOPE_IDS } from "./support/shard-scope-map.js";
+import { TOKEN_SHOP_SCOPE_IDS } from "./support/token-shop-scope-map.js";
+import { buildTokenShopDbRowDetailResolver } from "./support/token-shop-db-row-detail.js";
 import {
-  applyTokenShopSubjectContractToRow,
-  buildTokenShopSubjectContractIndex,
-  getTokenShopSubjectContractForField,
-  TOKEN_SHOP_CONTRACT_SCOPE_IDS
-} from "./support/token-shop-subject-contracts.js";
-import {
+  getShardDbCoverageSummary,
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
   getShardFinalSuBonusBoundarySummary,
@@ -80,6 +80,9 @@ import {
   getDailyTokeniumLaneSummary,
   getImportedMultiverseMarketPreview,
   getMultiverseMarketActionShellSummary,
+  getMultiverseMarketBroadRowRemapSummary,
+  getMultiverseMarketCanonicalImportSummary,
+  getMultiverseMarketDbCoverageSummary,
   getMultiverseMarketMarketMemberBoundarySummary,
   getMultiverseMarketMetadataSummary,
   getMultiverseMarketOwnerFamilySummary,
@@ -87,6 +90,7 @@ import {
   getMultiverseMarketRangeBoundarySummary,
   getMultiverseMarketRowTextCoverageSummary,
   getMultiverseMarketSaveBoundarySummary,
+  getMultiverseMarketTypedOwnerSummary,
   getMultiverseMarketValidatedCoverage,
   getSpendActionLaneSummary,
   getTokenBankControllerShellSummary,
@@ -99,15 +103,18 @@ import {
   getTokenShopSaveBoundarySummary
 } from "./support/spend-boundary-summary.js";
 import { createShipPlannerSupport } from "./support/ship-planner-support.js";
+import { getFullUpgradeAnalysis } from "./support/token-shop-optimizer.js";
+import { getTokenShopRowMeta, getTokenShopRowTitle } from "./support/token-shop-row-meta.js";
 import { buildTokenShopProgressionModel } from "./token-shop-progression-model.js";
 import { createTokenShopUiSupport } from "./token-shop-ui-support.js";
-import { createTokenShopOptimizer } from "./support/spend-planner-optimizer.js";
 
 const STORAGE_KEYS = {
   playerProfile: "cifi-suite.player-profile",
   shipConfig: "cifi-suite.ship-config",
   snapshot: "cifi-suite.snapshot",
-  snapshots: "cifi-suite.profile-snapshots"
+  snapshots: "cifi-suite.profile-snapshots",
+  route: "cifi-suite.route",
+  traceGapUi: "cifi-suite.trace-gap-ui"
 };
 
 const LEGACY_STORAGE_KEYS = {
@@ -126,34 +133,42 @@ const DEFAULT_SERVER_CAPABILITIES = Object.freeze({
   sessionApi: false,
   launcherMode: false,
   systemUnitApi: false,
-  subjectContractApi: false
+  systemDbBundleApi: false,
+  traceGapApi: false,
+  serverControlApi: false
 });
+
+
+function hasDbCoverage(summary) {
+  const coverageSource = String(summary?.coverageSource || "").trim();
+  return coverageSource === "db-subject-metadata" ||
+    coverageSource.includes("boundary-model") ||
+    coverageSource.includes("generic-mechanics");
+}
+
+function hasTokenShopDbCoverage(summary) {
+  return hasDbCoverage(summary);
+}
+
+function hasTokenShopDbSurface(tokenShop) {
+  return hasTokenShopDbBundle(tokenShop);
+}
+
 const SERVER_SESSION_ENDPOINTS = {
   open: "/api/client/open",
   heartbeat: "/api/client/heartbeat",
   close: "/api/client/close",
   events: "/api/client/events"
 };
+const TRACE_GAP_EVENTS_ENDPOINT = "/api/trace-gap/events";
 const tokenShopUi = createTokenShopUiSupport({
   formatValue: formatBoundaryValue
 });
-
-let tokenShopOptimizer = null;
-
-function getTokenShopOptimizer() {
-  if (tokenShopOptimizer) return tokenShopOptimizer;
-
-  const getModel = () => getTokenShopProgressionModel();
-  const getTokens = () => state.playerProfile?.player?.resources?.tokens ?? 0;
-  const getDiamonds = () => state.playerProfile?.player?.resources?.diamonds ?? 0;
-
-  tokenShopOptimizer = createTokenShopOptimizer(getModel, getTokens, getDiamonds);
-  return tokenShopOptimizer;
-}
 const shardEvidence = createShardEvidenceSupport({
   formatShardNumber,
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
+  getShardSaveBoundarySummary,
   getShardSystemView: () => getCurrentShardSystemView(),
   getShardMilestoneRowModelBoundarySummary,
   getShardMilestoneTitleEffectBoundarySummary,
@@ -220,34 +235,34 @@ const ACTIVE_PROFILE_FORM_FIELD_PATHS = {
   shards: CANONICAL_PROFILE_FIELD_PATHS.shards,
   notes: CANONICAL_PROFILE_FIELD_PATHS.notes,
   totalShardMilestoneLevels: ["planning", "shards", "totalMilestoneLevels"],
-  ATU1Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU1Level"],
-  ATU2Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU2Level"],
-  ATU3Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU3Level"],
-  ATU4Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU4Level"],
-  ATU5Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU5Level"],
-  ATU6Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU6Level"],
-  ATU7Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU7Level"],
-  ATU8Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU8Level"],
-  ATU9Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU9Level"],
-  ATU10Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU10Level"],
-  ATU11Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU11Level"],
-  ATU12Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU12Level"],
-  ATU13Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU13Level"],
-  ATU14Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU14Level"],
-  ATU15Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU15Level"],
-  ATU16Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU16Level"],
-  ATU17Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU17Level"],
-  ATU18Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU18Level"],
-  ATU19Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU19Level"],
-  ATU20Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU20Level"],
-  ATU21Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU21Level"],
-  ATU22Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU22Level"],
-  ATU23Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU23Level"],
-  ATU24Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU24Level"],
-  ATU25Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU25Level"],
-  ATU26Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU26Level"],
-  ATU27Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU27Level"],
-  ATU28Level: ["planning", "tokenShop", "checkedSubsetLevels", "ATU28Level"]
+  ATU1Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU1Level"],
+  ATU2Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU2Level"],
+  ATU3Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU3Level"],
+  ATU4Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU4Level"],
+  ATU5Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU5Level"],
+  ATU6Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU6Level"],
+  ATU7Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU7Level"],
+  ATU8Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU8Level"],
+  ATU9Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU9Level"],
+  ATU10Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU10Level"],
+  ATU11Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU11Level"],
+  ATU12Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU12Level"],
+  ATU13Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU13Level"],
+  ATU14Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU14Level"],
+  ATU15Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU15Level"],
+  ATU16Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU16Level"],
+  ATU17Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU17Level"],
+  ATU18Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU18Level"],
+  ATU19Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU19Level"],
+  ATU20Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU20Level"],
+  ATU21Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU21Level"],
+  ATU22Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU22Level"],
+  ATU23Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU23Level"],
+  ATU24Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU24Level"],
+  ATU25Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU25Level"],
+  ATU26Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU26Level"],
+  ATU27Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU27Level"],
+  ATU28Level: ["planning", "tokenShop", "checkedSubsetPlayerState", "ATU28Level"]
 };
 
 const TOKEN_SHOP_TIER_CONFIG = Object.freeze({
@@ -269,13 +284,56 @@ const TOKEN_SHOP_TIER_CONFIG = Object.freeze({
     label: "T1"
   },
   t2: {
-    rows: ["ATU13Level", "ATU14Level", "ATU15Level", "ATU16Level", "ATU17Level", "ATU18Level"],
+    rows: [
+      "ATU13Level",
+      "ATU14Level",
+      "ATU15Level",
+      "ATU16Level",
+      "ATU17Level",
+      "ATU18Level",
+      "ATU19Level"
+    ],
     label: "T2"
   },
-  t3: { rows: ["ATU19Level", "ATU20Level", "ATU21Level", "ATU22Level", "ATU23Level"], label: "T3" },
-  t4: { rows: ["ATU24Level", "ATU25Level"], label: "T4" },
-  t5: { rows: ["ATU26Level", "ATU27Level", "ATU28Level"], label: "T5" }
+  t3: { rows: ["ATU20Level", "ATU21Level", "ATU22Level", "ATU23Level"], label: "T3" },
+  t4: { rows: ["ATU24Level", "ATU25Level", "ATU26Level", "ATU27Level", "ATU28Level"], label: "T4" }
 });
+
+const TOKEN_SHOP_TIER_SEQUENCE = Object.freeze(["t1", "t2", "t3", "t4"]);
+
+function getTokenShopTierForField(field) {
+  for (const [tierKey, tierConfig] of Object.entries(TOKEN_SHOP_TIER_CONFIG)) {
+    if (tierConfig.rows.includes(field)) {
+      return tierKey;
+    }
+  }
+  return "t1";
+}
+
+function getTokenShopRowLabel(row) {
+  return getTokenShopRowTitle(row?.field, tokenShopUi.getTokenShopRowDisplayTitle(row));
+}
+
+function calculateTokenShopTierUnlockStates(thresholds, levelMap = {}) {
+  const levelForField = (field) => {
+    const value = levelMap?.[field];
+    return typeof value === "number" && Number.isFinite(value) ? value : 0;
+  };
+
+  const totalForTier = (tierKey) =>
+    (TOKEN_SHOP_TIER_CONFIG[tierKey]?.rows || []).reduce((sum, field) => sum + levelForField(field), 0);
+
+  const t1Total = totalForTier("t1");
+  const t2Total = totalForTier("t2");
+  const t3Total = totalForTier("t3");
+
+  return {
+    t1: true,
+    t2: t1Total >= (thresholds.t2?.min_levels || 25),
+    t3: t1Total + t2Total >= (thresholds.t3?.min_levels || 50),
+    t4: t1Total + t2Total + t3Total >= (thresholds.t4?.min_levels || 100)
+  };
+}
 
 const SUPPORT_SURFACE_VALIDATION_MODULES = new Set(["gem"]);
 
@@ -618,6 +676,13 @@ const ROUTE_METADATA = {
       "Review grounded findings, open blockers, and future lanes before anything graduates into a product surface.",
     badge: "Reference lane"
   },
+  traceGap: {
+    section: "Reference and exploration",
+    title: "Trace Gap Deck",
+    summary:
+      "Launch DB-backed best-gap preflights and execution runs with visible diagnostics instead of a blind shell window.",
+    badge: "Dev trace"
+  },
   gem: {
     section: "Reference and exploration",
     title: "Gem Node Lab",
@@ -655,12 +720,25 @@ const state = {
   generatorOcrImages: [],
   generatorOcrParsed: null,
   generatorOcrBusy: false,
-  subjectContracts: null,
+  systemDb: null,
+  traceGapRun: null,
+  traceGapOverview: null,
+  traceGapPollId: null,
+  traceGapEvents: null,
+  traceGapRepeat: 1,
+  traceGapOverviewScope: "",
+  traceGapOverviewFetchedAt: 0,
+  traceGapUi: {
+    diagnosticsOpen: true,
+    commandOpen: false
+  },
   sourceRegistry: [],
   researchView: "active",
   progressionView: "shards",
   shardMilestoneCardOpenIds: [],
-  route: "overview"
+  route: "overview",
+  tokenShopStorefrontTier: "t1",
+  serverRestartBusy: false
 };
 
 let profileAutoSaveTimer = null;
@@ -682,8 +760,10 @@ async function bootstrap() {
       origin: window.location.origin,
       serverCapabilities: SERVER_CAPABILITIES,
       allowStaticFallback: false,
-      subjectContractScopes: {
-        tokenShop: TOKEN_SHOP_CONTRACT_SCOPE_IDS
+      systemDbScopes: {
+        shards: SHARD_SCOPE_IDS,
+        tokenShop: TOKEN_SHOP_SCOPE_IDS,
+        multiverseMarket: MULTIVERSE_MARKET_SCOPE_IDS
       }
     })
   ]);
@@ -696,7 +776,7 @@ async function bootstrap() {
       multiverseMarket: multiverseMarketSystemUnit
     },
     mode: systemUnitSource,
-    subjectContracts
+    systemDb
   } = loadedSystemUnits;
   const appMetaView = buildAppMetaSystemView(appMetaSystemUnit);
 
@@ -721,7 +801,7 @@ async function bootstrap() {
     tokenShop: tokenShopSystemUnit,
     multiverseMarket: multiverseMarketSystemUnit
   };
-  state.subjectContracts = subjectContracts ?? null;
+  state.systemDb = systemDb ?? null;
   state.systemUnitSource = systemUnitSource;
   state.playerProfile = normalizePlayerProfile(
     storedPlayerProfile ?? legacyProfile ?? playerProfileDefaults,
@@ -735,19 +815,39 @@ async function bootstrap() {
   state.shipConfig = buildShipConfig(legacyShipConfig);
   persistPlayerProfile();
   localStorage.removeItem(LEGACY_STORAGE_KEYS.profile);
+  state.route = getStoredRoute();
+  state.traceGapUi = {
+    ...state.traceGapUi,
+    ...loadStoredJson(STORAGE_KEYS.traceGapUi, state.traceGapUi)
+  };
+  await probeTraceGapApiAvailability();
 
   bindNavigation();
   bindProfileActions();
   bindDataActions();
   bindOptimizerActions();
+  bindTraceGapActions();
 
   fillProfileForm();
   renderAll();
   initServerSession();
+  startTraceGapPolling();
 
   if (state.pendingLaunchRefresh) {
     refreshFromPersistentState();
   }
+}
+
+async function probeTraceGapApiAvailability() {
+  if (SERVER_CAPABILITIES.traceGapApi || !window.location.origin.startsWith("http")) {
+    return;
+  }
+  try {
+    const response = await fetch("/api/trace-gap/status", { cache: "no-store" });
+    if (response.ok) {
+      SERVER_CAPABILITIES.traceGapApi = true;
+    }
+  } catch {}
 }
 
 function fetchJson(url) {
@@ -771,12 +871,12 @@ function getCurrentSpendSystemView() {
   return buildSpendSystemView({
     tokenShopSystemUnit: state.systemUnits?.tokenShop,
     multiverseMarketSystemUnit: state.systemUnits?.multiverseMarket,
-    tokenShopSubjectContracts: state.subjectContracts?.tokenShop
+    systemDb: state.systemDb
   });
 }
 
 function getCurrentShardSystemView() {
-  return buildShardSystemView(state.systemUnits?.shards);
+  return buildShardSystemView(state.systemUnits?.shards, state.systemDb?.shards);
 }
 
 function loadStoredJson(key, fallback) {
@@ -845,43 +945,25 @@ function initLaunchCoordinator() {
 }
 
 function initTokenShopTierTabs() {
+  const helper = $("#tokenShopHelper");
   const grid = $("#tokenshopLevelsGrid");
-  if (!grid) return;
+  if (!helper || !grid) return;
+  const tabButtons = [...helper.querySelectorAll("[data-token-shop-helper-tier]")];
 
-  const tierLabels = {
-    ATU1Level: "Tokens Booster",
-    ATU2Level: "Diamonds Booster",
-    ATU3Level: "Cells Booster (Chests)",
-    ATU4Level: "Mod Points Booster",
-    ATU5Level: "Mk1 Generator Output",
-    ATU6Level: "Mk2 Generator Booster",
-    ATU7Level: "Mk3 Generator Booster",
-    ATU8Level: "Mk4 Generator Booster",
-    ATU9Level: "Mk5 Generator Booster",
-    ATU10Level: "Mk6 Generator Booster",
-    ATU11Level: "Mk7 Generator Booster",
-    ATU12Level: "Mk8 Generator Booster",
-    ATU13Level: "Duo Booster One",
-    ATU14Level: "Duo Booster Two",
-    ATU15Level: "Duo Booster Three",
-    ATU16Level: "Duo Booster Four",
-    ATU17Level: "Duo Booster Five",
-    ATU18Level: "Duo Booster Six",
-    ATU19Level: "Trio Booster One",
-    ATU20Level: "Tokens Booster T3",
-    ATU21Level: "Daily Tokens T3",
-    ATU22Level: "Trinity Booster Two",
-    ATU23Level: "Trinity Booster Three",
-    ATU24Level: "Ultima Shards",
-    ATU25Level: "Ultima",
-    ATU26Level: "Campaign Fragments",
-    ATU27Level: "Ultima RP",
-    ATU28Level: "Ultima MP"
-  };
+  function getTierLabels() {
+    const remapBoundary = getCurrentSpendSystemView()?.tokenShop?.rows?.boundaries?.remap;
+    return Object.fromEntries(
+      getTokenShopGroundedSubsetDefinitions(remapBoundary).map((row) => [
+        row.field,
+        getTokenShopRowLabel(row)
+      ])
+    );
+  }
 
   function renderTier(tier) {
     const tierConfig = TOKEN_SHOP_TIER_CONFIG[tier];
     if (!tierConfig) return;
+    const tierLabels = getTierLabels();
 
     const tierUnlocks =
       getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
@@ -909,99 +991,27 @@ function initTokenShopTierTabs() {
       })
       .join("");
 
-    document.querySelectorAll(".tier-tab").forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.tier === tier);
-      const tabTier = btn.dataset.tier;
+    tabButtons.forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.tokenShopHelperTier === tier);
+      const tabTier = btn.dataset.tokenShopHelperTier;
       btn.classList.toggle("disabled", tabTier !== "t1" && !tierUnlockStates[tabTier]);
     });
   }
 
   function calculateTierUnlockStates(thresholds) {
-    const profile = state.playerProfile?.planning?.tokenShop?.checkedSubsetLevels || {};
-    const levelForField = (field) => {
-      const val = profile[field];
-      return typeof val === "number" ? val : 0;
-    };
-
-    const t1Total = [
-      "ATU1Level",
-      "ATU2Level",
-      "ATU3Level",
-      "ATU4Level",
-      "ATU5Level",
-      "ATU6Level",
-      "ATU7Level",
-      "ATU8Level",
-      "ATU9Level",
-      "ATU10Level",
-      "ATU11Level",
-      "ATU12Level"
-    ].reduce((sum, f) => sum + levelForField(f), 0);
-
-    const t2Total = [
-      "ATU13Level",
-      "ATU14Level",
-      "ATU15Level",
-      "ATU16Level",
-      "ATU17Level",
-      "ATU18Level"
-    ].reduce((sum, f) => sum + levelForField(f), 0);
-
-    const t3Total = ["ATU19Level", "ATU20Level", "ATU21Level", "ATU22Level", "ATU23Level"].reduce(
-      (sum, f) => sum + levelForField(f),
-      0
-    );
-
-    const t4Total = ["ATU24Level", "ATU25Level"].reduce((sum, f) => sum + levelForField(f), 0);
-
-    return {
-      t1: true,
-      t2: t1Total >= (thresholds.t2?.min_levels || 25),
-      t3: t1Total + t2Total >= (thresholds.t3?.min_levels || 50),
-      t4: t1Total + t2Total + t3Total >= (thresholds.t4?.min_levels || 100),
-      t5: t1Total + t2Total + t3Total + t4Total >= (thresholds.t5?.min_levels || 150)
-    };
+    const profile = state.playerProfile?.planning?.tokenShop?.checkedSubsetPlayerState || {};
+    return calculateTokenShopTierUnlockStates(thresholds, profile);
   }
 
   function getTierForField(field) {
-    const tierMap = {
-      ATU1Level: "t1",
-      ATU2Level: "t1",
-      ATU3Level: "t1",
-      ATU4Level: "t1",
-      ATU5Level: "t1",
-      ATU6Level: "t1",
-      ATU7Level: "t1",
-      ATU8Level: "t1",
-      ATU9Level: "t1",
-      ATU10Level: "t1",
-      ATU11Level: "t1",
-      ATU12Level: "t1",
-      ATU13Level: "t2",
-      ATU14Level: "t2",
-      ATU15Level: "t2",
-      ATU16Level: "t2",
-      ATU17Level: "t2",
-      ATU18Level: "t2",
-      ATU19Level: "t3",
-      ATU20Level: "t3",
-      ATU21Level: "t3",
-      ATU22Level: "t3",
-      ATU23Level: "t3",
-      ATU24Level: "t4",
-      ATU25Level: "t4",
-      ATU26Level: "t5",
-      ATU27Level: "t5",
-      ATU28Level: "t5"
-    };
-    return tierMap[field] || "t1";
+    return getTokenShopTierForField(field);
   }
 
   renderTier("t1");
 
-  document.querySelectorAll(".tier-tab").forEach((btn) => {
+  tabButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      renderTier(btn.dataset.tier);
+      renderTier(btn.dataset.tokenShopHelperTier);
     });
   });
 }
@@ -1119,6 +1129,19 @@ function closeServerSession(session = state.serverSession) {
   }).catch(() => {});
 }
 
+function getStoredRoute() {
+  const candidate = loadStoredJson(STORAGE_KEYS.route, "overview");
+  return ROUTE_METADATA[candidate] ? candidate : "overview";
+}
+
+function persistRoute() {
+  saveStoredJson(STORAGE_KEYS.route, state.route);
+}
+
+function persistTraceGapUiState() {
+  saveStoredJson(STORAGE_KEYS.traceGapUi, state.traceGapUi);
+}
+
 function getServerCapabilities() {
   const raw = window.__CIFI_SERVER_CAPABILITIES__;
   if (!raw || typeof raw !== "object") {
@@ -1129,7 +1152,9 @@ function getServerCapabilities() {
     sessionApi: raw.sessionApi === true,
     launcherMode: raw.launcherMode === true,
     systemUnitApi: raw.systemUnitApi === true,
-    subjectContractApi: raw.subjectContractApi === true
+    systemDbBundleApi: raw.systemDbBundleApi === true,
+    traceGapApi: raw.traceGapApi === true,
+    serverControlApi: raw.serverControlApi === true
   };
 }
 
@@ -1446,6 +1471,7 @@ function bindNavigation() {
       return;
     }
     state.route = button.dataset.page;
+    persistRoute();
     renderNavigation();
   });
 
@@ -1459,6 +1485,7 @@ function bindNavigation() {
       return;
     }
     state.route = target;
+    persistRoute();
     renderNavigation();
   });
 }
@@ -1554,26 +1581,18 @@ function bindOptimizerActions() {
     renderProgressionResults(runProgressionOptimization());
   });
   $("#progressionResults").addEventListener("click", (event) => {
-    const prefillButton = event.target.closest("[data-token-shop-prefill]");
-    if (prefillButton) {
-      prefillTokenShopProgressionEditorFromCompatibility();
+    const tokenShopTierButton = event.target.closest("[data-token-shop-tier]");
+    if (tokenShopTierButton) {
+      const nextTier = tokenShopTierButton.dataset.tokenShopTier;
+      if (TOKEN_SHOP_TIER_CONFIG[nextTier] && state.tokenShopStorefrontTier !== nextTier) {
+        state.tokenShopStorefrontTier = nextTier;
+        renderProgressionResults(runProgressionOptimization());
+      }
       return;
     }
-    const clearButton = event.target.closest("[data-token-shop-clear-local]");
-    if (clearButton) {
-      clearTokenShopProgressionEditorLevels();
-      return;
-    }
-    const tokenShopBuyButton = event.target.closest("[data-token-shop-buy-field]");
-    if (tokenShopBuyButton) {
-      const fieldName = tokenShopBuyButton.dataset.tokenShopBuyField;
-      const levelField = tokenShopBuyButton
-        .closest(".token-shop-buy-panel")
-        ?.querySelector("[data-token-shop-level-field]");
-      const currentLevel = coerceInputValue(
-        levelField?.value ?? tokenShopBuyButton.dataset.tokenShopCurrentLevel ?? "0"
-      );
-      saveTokenShopProgressionLevel(fieldName, currentLevel + 1);
+    const tokenShopApplyButton = event.target.closest("[data-token-shop-apply-row]");
+    if (tokenShopApplyButton) {
+      applyTokenShopRecommendedPurchase(tokenShopApplyButton.dataset.tokenShopApplyRow);
       return;
     }
     const focusButton = event.target.closest("[data-shard-focus-id]");
@@ -1597,14 +1616,6 @@ function bindOptimizerActions() {
     true
   );
   $("#progressionResults").addEventListener("change", (event) => {
-    const tokenShopLevelField = event.target.closest("[data-token-shop-level-field]");
-    if (tokenShopLevelField) {
-      saveTokenShopProgressionLevel(
-        tokenShopLevelField.dataset.tokenShopLevelField,
-        coerceInputValue(tokenShopLevelField.value ?? "")
-      );
-      return;
-    }
     const levelField = event.target.closest("[data-shard-focus-level]");
     if (!levelField) {
       return;
@@ -1614,8 +1625,27 @@ function bindOptimizerActions() {
       saveShardPlannerInputs(milestoneId, coerceInputValue(levelField.value ?? ""));
     }
   });
+  $("#progressionResults").addEventListener("keydown", (event) => {
+    const tokenShopActionSurface = event.target.closest("[data-token-shop-apply-row]");
+    if (!tokenShopActionSurface) {
+      return;
+    }
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      tokenShopActionSurface.click();
+    }
+  });
   $("#runGemOptimizer").addEventListener("click", () => renderGemResults(runGemOptimization()));
   $("#runValidationSuite").addEventListener("click", renderValidationResults);
+}
+
+function bindTraceGapActions() {
+  $("#traceGapRepeat")?.addEventListener("input", (event) => {
+    state.traceGapRepeat = clampNumber(event.target.value || 1, 1, 9);
+  });
+  $("#traceGapDryRunBtn")?.addEventListener("click", () => runTraceGap("dry-run"));
+  $("#traceGapRunBtn")?.addEventListener("click", () => runTraceGap("execute"));
+  $("#traceGapRestartServerBtn")?.addEventListener("click", () => restartLocalServer());
 }
 
 function renderAll() {
@@ -1631,6 +1661,7 @@ function renderAll() {
   renderGemResults(runGemOptimization());
   renderValidationResults();
   renderResearch();
+  renderTraceGapPanel();
 }
 
 function renderNavigation() {
@@ -2084,8 +2115,7 @@ function renderProgressionResults(results) {
   const selectedLabels = {
     shards: "Shard Mining keeps milestone and owned-state guidance together.",
     loop: "Loop Prestige keeps warning-oriented pacing and anti-bricking notes separate from reset optimization.",
-    tokenShop:
-      "TokenShop keeps its checked-row editor and saved-state seam separate from shard and loop guidance."
+    tokenShop: ""
   };
   const sectionMarkup = {
     shards: renderShardSubsystemSection(subsystemFeed.shards),
@@ -2105,17 +2135,19 @@ function renderProgressionResults(results) {
       ${renderRecommendationFeedSummary(recommendationFeed, "progression")}
       ${renderRecommendationFeedSupportNotice(recommendationFeedSupport, "progression")}
     `;
-  $("#progressionResults").innerHTML = `
+  const subsystemLead =
+    selectedSubsystem === "tokenShop"
+      ? ""
+      : `
     <article class="preview-card">
       <strong>${escapeHtml(
-        selectedSubsystem === "tokenShop"
-          ? "TokenShop surface"
-          : selectedSubsystem === "loop"
-            ? "Loop Prestige surface"
-            : "Shard Mining surface"
+        selectedSubsystem === "loop" ? "Loop Prestige surface" : "Shard Mining surface"
       )}</strong>
       <p class="meta">${escapeHtml(selectedLabels[selectedSubsystem])}</p>
     </article>
+  `;
+  $("#progressionResults").innerHTML = `
+    ${subsystemLead}
     ${subsystemHeader}
     ${sectionMarkup[selectedSubsystem]}
   `;
@@ -2189,6 +2221,527 @@ function renderValidationResults() {
   $("#validationSupportResults").innerHTML = renderValidationCards(supportResults);
 }
 
+function startTraceGapPolling() {
+  if (!SERVER_CAPABILITIES.traceGapApi) {
+    return;
+  }
+  if (!state.traceGapEvents && window.location.origin.startsWith("http")) {
+    const events = new EventSource(TRACE_GAP_EVENTS_ENDPOINT);
+    events.addEventListener("ready", (event) => {
+      const payload = parseServerEvent(event);
+      if (!payload) {
+        return;
+      }
+      state.traceGapRun = payload.run ?? state.traceGapRun;
+      renderTraceGapPanel();
+    });
+    events.addEventListener("run", (event) => {
+      const payload = parseServerEvent(event);
+      if (!payload) {
+        return;
+      }
+      state.traceGapRun = payload.run ?? state.traceGapRun;
+      renderTraceGapPanel();
+    });
+    state.traceGapEvents = events;
+  }
+  if (state.traceGapPollId) {
+    window.clearInterval(state.traceGapPollId);
+  }
+  fetchTraceGapStatus({ silent: true });
+  fetchTraceGapOverview({ silent: true });
+  state.traceGapPollId = window.setInterval(() => {
+    const isRunning = state.traceGapRun?.status === "running";
+    if (isRunning || state.route === "traceGap") {
+      fetchTraceGapStatus({ silent: true });
+      const scope = state.traceGapRun?.executionScope || state.traceGapRun?.selectedTarget || "";
+      const scopeChanged = scope !== (state.traceGapOverviewScope || "");
+      const now = Date.now();
+      const refreshIntervalMs = isRunning ? 10000 : 1500;
+      const staleOverview = now - Number(state.traceGapOverviewFetchedAt || 0) >= refreshIntervalMs;
+      if (scopeChanged || staleOverview || state.route === "traceGap") {
+        fetchTraceGapOverview({ silent: true });
+      }
+    }
+  }, 1500);
+}
+
+async function fetchTraceGapStatus({ silent = false } = {}) {
+  if (!SERVER_CAPABILITIES.traceGapApi) {
+    return null;
+  }
+  try {
+    const response = await fetch("/api/trace-gap/status", { cache: "no-store" });
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error || "Trace-gap status request failed.");
+    }
+    state.traceGapRun = payload.run ?? null;
+    renderTraceGapPanel();
+    return state.traceGapRun;
+  } catch (error) {
+    if (!silent) {
+      setStatus("traceGapStatus", `Trace-gap status failed: ${error.message}`, "warning");
+    }
+    return null;
+  }
+}
+
+async function fetchTraceGapOverview({ silent = false } = {}) {
+  if (!SERVER_CAPABILITIES.traceGapApi) {
+    return null;
+  }
+  try {
+    const scope = state.traceGapRun?.executionScope || state.traceGapRun?.selectedTarget || "";
+    const url = scope
+      ? `/api/trace-gap/overview?scope=${encodeURIComponent(scope)}`
+      : "/api/trace-gap/overview";
+    const response = await fetch(url, { cache: "no-store" });
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error || "Trace-gap overview request failed.");
+    }
+    state.traceGapOverview = payload;
+    state.traceGapOverviewScope = scope;
+    state.traceGapOverviewFetchedAt = Date.now();
+    renderTraceGapPanel();
+    return payload;
+  } catch (error) {
+    if (!silent) {
+      setStatus("traceGapStatus", `Trace-gap DB overview failed: ${error.message}`, "warning");
+    }
+    return null;
+  }
+}
+
+async function runTraceGap(mode = "execute") {
+  if (!SERVER_CAPABILITIES.traceGapApi) {
+    setStatus("traceGapStatus", "Trace-gap API is unavailable on this app launch.", "warning");
+    return;
+  }
+  const repeat = clampNumber($("#traceGapRepeat")?.value || state.traceGapRepeat || 1, 1, 9);
+  state.traceGapRepeat = repeat;
+  setStatus(
+    "traceGapStatus",
+    mode === "dry-run"
+      ? "Starting DB-backed best-gap preflight..."
+      : "Starting DB-backed best-gap execution...",
+    ""
+  );
+  renderTraceGapPanel();
+  try {
+    const response = await fetch("/api/trace-gap/run", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ mode, repeat })
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error || "Trace-gap launch failed.");
+    }
+    state.traceGapRun = payload.run ?? null;
+    setStatus(
+      "traceGapStatus",
+      mode === "dry-run"
+        ? "Best-gap preflight is running. Open diagnostics for live output."
+        : "Best-gap execution is running. Diagnostics update automatically.",
+      "success"
+    );
+    renderTraceGapPanel();
+    fetchTraceGapStatus({ silent: true });
+    fetchTraceGapOverview({ silent: true });
+  } catch (error) {
+    setStatus("traceGapStatus", `Trace-gap launch failed: ${error.message}`, "warning");
+  }
+}
+
+async function restartLocalServer() {
+  if (!SERVER_CAPABILITIES.serverControlApi) {
+    setStatus(
+      "traceGapStatus",
+      "Server restart control is unavailable on this app launch. Restart the local dev server manually once, then this control will work on future runs.",
+      "warning"
+    );
+    return;
+  }
+  if (state.serverRestartBusy) {
+    return;
+  }
+  state.serverRestartBusy = true;
+  persistRoute();
+  setStatus("traceGapStatus", "Restarting local server and waiting for it to come back...", "");
+  renderTraceGapPanel();
+  try {
+    const response = await fetch("/api/server/restart", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    if (!response.ok) {
+      const payload = await response.json().catch(() => ({}));
+      throw new Error(payload.error || "Server restart request failed.");
+    }
+  } catch (error) {
+    state.serverRestartBusy = false;
+    setStatus("traceGapStatus", `Server restart failed: ${error.message}`, "warning");
+    renderTraceGapPanel();
+    return;
+  }
+
+  const startedAt = Date.now();
+  const maxWaitMs = 20000;
+  const pollDelayMs = 500;
+  while (Date.now() - startedAt < maxWaitMs) {
+    await new Promise((resolve) => window.setTimeout(resolve, pollDelayMs));
+    try {
+      const health = await fetch("/api/healthz", { cache: "no-store" });
+      if (health.ok) {
+        window.location.reload();
+        return;
+      }
+    } catch {}
+  }
+  state.serverRestartBusy = false;
+  setStatus(
+    "traceGapStatus",
+    "The server restart was requested, but the app did not reconnect within 20 seconds. Reload this tab manually.",
+    "warning"
+  );
+  renderTraceGapPanel();
+}
+
+function renderTraceGapPanel() {
+  const repeatInput = $("#traceGapRepeat");
+  const dryRunBtn = $("#traceGapDryRunBtn");
+  const runBtn = $("#traceGapRunBtn");
+  const restartServerBtn = $("#traceGapRestartServerBtn");
+  const pills = $("#traceGapPills");
+  const summary = $("#traceGapSummary");
+  const dbOverview = $("#traceGapDbOverview");
+  const diagnostics = $("#traceGapDiagnostics");
+  if (!repeatInput || !dryRunBtn || !runBtn || !restartServerBtn || !pills || !summary || !dbOverview || !diagnostics) {
+    return;
+  }
+
+  repeatInput.value = String(clampNumber(state.traceGapRepeat || 1, 1, 9));
+
+  if (!SERVER_CAPABILITIES.traceGapApi) {
+    dryRunBtn.disabled = true;
+    runBtn.disabled = true;
+    restartServerBtn.disabled = state.serverRestartBusy;
+    pills.innerHTML = `<span class="pill pill-neutral">trace-gap API unavailable</span>`;
+    const launchHint = window.location.origin.startsWith("http")
+      ? `Current origin: ${window.location.origin}. Refresh this tab if the local dev server was restarted after the page opened.`
+      : "This page is not running from the local server. Open `launch-cifi.vbs` or browse to `http://localhost:4173`.";
+    summary.innerHTML = `<article class="preview-card"><p class="meta">This app launch is not connected to the local trace-gap API.</p><p class="meta">${escapeHtml(launchHint)}</p></article>`;
+    dbOverview.innerHTML = "";
+    diagnostics.innerHTML = "";
+    return;
+  }
+
+  const run = state.traceGapRun;
+  const isRunning = run?.status === "running";
+  dryRunBtn.disabled = isRunning;
+  runBtn.disabled = isRunning;
+  restartServerBtn.disabled = state.serverRestartBusy || isRunning;
+
+  if (!run) {
+    pills.innerHTML = `
+      <span class="pill pill-neutral">idle</span>
+      <span class="pill pill-neutral">repeat ${escapeHtml(String(state.traceGapRepeat || 1))}</span>
+    `;
+    summary.innerHTML = `
+      <article class="preview-card">
+        <strong>No trace-gap run started yet.</strong>
+        <p class="meta">Use Plan best gap for a DB-backed dry run, or Run best gap for a structured execution pass.</p>
+      </article>
+    `;
+    dbOverview.innerHTML = renderTraceGapDbOverview();
+    diagnostics.innerHTML = "";
+    return;
+  }
+
+  const statusTone =
+    run.status === "failed" ? "warning" : run.status === "completed" ? "success" : "";
+  setStatus(
+    "traceGapStatus",
+    run.activityLabel || (run.status === "running" ? "Trace-gap run active." : "Trace-gap ready."),
+    statusTone
+  );
+  pills.innerHTML = [
+    `<span class="pill ${run.status === "running" ? "" : "pill-neutral"}">${escapeHtml(run.status || "idle")}</span>`,
+    `<span class="pill pill-neutral">${escapeHtml(run.mode || "execute")}</span>`,
+    `<span class="pill pill-neutral">repeat ${escapeHtml(String(run.repeat || 1))}</span>`,
+    run.selectedSeam ? `<span class="pill pill-neutral">${escapeHtml(run.selectedSeam)}</span>` : "",
+    run.verdict ? `<span class="pill pill-neutral">${escapeHtml(run.verdict)}</span>` : ""
+  ]
+    .filter(Boolean)
+    .join("");
+
+  const lastOutputNote =
+    run.status === "running" && !run.lastOutputAt
+      ? "No line output yet. The DB-backed refresh may still be materializing subject views before the first planner summary prints."
+      : run.lastOutputAt
+        ? `Last output ${escapeHtml(formatUiDateTime(run.lastOutputAt))}.`
+        : "No diagnostic output captured yet.";
+  summary.innerHTML = `
+    <article class="preview-card trace-gap-summary-card">
+      <div class="recommendation-head">
+        <div>
+          <strong>${escapeHtml(run.selectedLabel || run.selectedTarget || "Current trace-gap run")}</strong>
+          <p class="meta">${escapeHtml(run.activityLabel || "Trace-gap run state")}</p>
+        </div>
+        <span class="score">${escapeHtml(run.status || "idle")}</span>
+      </div>
+      <div class="pill-row">
+        ${run.selectedTarget ? `<span class="pill pill-neutral">${escapeHtml(run.selectedTarget)}</span>` : ""}
+        ${run.executionScope ? `<span class="pill pill-neutral">${escapeHtml(run.executionScope)}</span>` : ""}
+        ${run.family ? `<span class="pill pill-neutral">${escapeHtml(run.family)}</span>` : ""}
+      </div>
+      <p class="meta">${escapeHtml(run.summary || "No planner summary captured yet.")}</p>
+      <div class="validation-grid">
+        ${makeTraceGapInfoCard("Selected seam", run.selectedSeam || "Pending planner seam")}
+        ${makeTraceGapInfoCard("Subject", run.subjectLabel || run.subject || "Pending subject selection")}
+        ${makeTraceGapInfoCard("Blocked edges", run.blockedEdges || "none")}
+        ${makeTraceGapInfoCard("Unresolved anchor", run.unresolvedAnchor || "none")}
+        ${makeTraceGapInfoCard("Recovered", run.recoveredSummary || "none")}
+        ${makeTraceGapInfoCard("Traced", run.tracedSummary || "none")}
+        ${makeTraceGapInfoCard("Net progress", run.progressSummary || "unknown")}
+        ${makeTraceGapInfoCard("Started", formatUiDateTime(run.startedAt))}
+        ${makeTraceGapInfoCard("Finished", formatUiDateTime(run.finishedAt))}
+      </div>
+      <p class="meta">${lastOutputNote}</p>
+    </article>
+  `;
+  dbOverview.innerHTML = renderTraceGapDbOverview();
+
+  const commandText = Array.isArray(run.command) ? run.command.join(" ") : "";
+  renderTraceGapDiagnostics(diagnostics, run, commandText);
+}
+
+function renderTraceGapDiagnostics(container, run, commandText) {
+  if (!container) {
+    return;
+  }
+  const existingDiagnostics = container.querySelector('details[data-trace-gap-section="diagnostics"]');
+  const existingCommand = container.querySelector('details[data-trace-gap-section="command"]');
+  if (existingDiagnostics) {
+    state.traceGapUi.diagnosticsOpen = existingDiagnostics.open;
+  }
+  if (existingCommand) {
+    state.traceGapUi.commandOpen = existingCommand.open;
+  }
+  if (!existingDiagnostics || !existingCommand) {
+    const logMarkup = Array.isArray(run.logEntries) && run.logEntries.length
+      ? run.logEntries
+          .map(
+            (entry) =>
+              `<div class="trace-gap-log-line ${entry.stream === "stderr" ? "is-stderr" : ""}"><span class="trace-gap-log-meta">${escapeHtml(String(entry.index))} ${escapeHtml(entry.stream)}</span><span>${escapeHtml(entry.text)}</span></div>`
+          )
+          .join("")
+      : `<p class="meta">No diagnostic lines captured yet.</p>`;
+    container.innerHTML = `
+      <details class="field-collapse" data-trace-gap-section="diagnostics" ${state.traceGapUi.diagnosticsOpen ? "open" : ""}>
+        <summary>Open live diagnostics</summary>
+        <p class="meta">The output below is the live local process stream for this DB-backed best-gap run.</p>
+        <div class="trace-gap-log">${logMarkup}</div>
+      </details>
+      <details class="field-collapse" data-trace-gap-section="command" ${state.traceGapUi.commandOpen ? "open" : ""}>
+        <summary>Open command and run metadata</summary>
+        <div class="preview-card">
+          <p class="meta">Run id: <code>${escapeHtml(run.runId || "unknown")}</code></p>
+          <p class="meta">Command:</p>
+          <pre>${escapeHtml(commandText || "Unavailable")}</pre>
+          <p class="meta">Captured lines: ${escapeHtml(String(run.lineCount || 0))}</p>
+          <p class="meta">Best-gap reranks observed: ${escapeHtml(String(run.rerankCount || 0))}</p>
+          <p class="meta">Current iteration: ${escapeHtml(String(run.currentIteration || 0))}</p>
+          <p class="meta">Recovered: ${escapeHtml(run.recoveredSummary || "none")}</p>
+          <p class="meta">Traced: ${escapeHtml(run.tracedSummary || "none")}</p>
+          <p class="meta">Net progress: ${escapeHtml(run.progressSummary || "unknown")}</p>
+          <p class="meta">Exit code: ${escapeHtml(run.exitCode === null || run.exitCode === undefined ? "running" : String(run.exitCode))}</p>
+        </div>
+      </details>
+    `;
+    bindTraceGapDiagnosticsUi(container);
+    return;
+  }
+
+  const logContainer = existingDiagnostics.querySelector(".trace-gap-log");
+  if (logContainer) {
+    const wasNearBottom =
+      logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight < 24;
+    const nextMarkup = Array.isArray(run.logEntries) && run.logEntries.length
+      ? run.logEntries
+          .map(
+            (entry) =>
+              `<div class="trace-gap-log-line ${entry.stream === "stderr" ? "is-stderr" : ""}"><span class="trace-gap-log-meta">${escapeHtml(String(entry.index))} ${escapeHtml(entry.stream)}</span><span>${escapeHtml(entry.text)}</span></div>`
+          )
+          .join("")
+      : `<p class="meta">No diagnostic lines captured yet.</p>`;
+    if (logContainer.innerHTML !== nextMarkup) {
+      logContainer.innerHTML = nextMarkup;
+      if (wasNearBottom) {
+        logContainer.scrollTop = logContainer.scrollHeight;
+      }
+    }
+  }
+
+  const commandCard = existingCommand.querySelector(".preview-card");
+  if (commandCard) {
+    commandCard.innerHTML = `
+      <p class="meta">Run id: <code>${escapeHtml(run.runId || "unknown")}</code></p>
+      <p class="meta">Command:</p>
+      <pre>${escapeHtml(commandText || "Unavailable")}</pre>
+      <p class="meta">Captured lines: ${escapeHtml(String(run.lineCount || 0))}</p>
+      <p class="meta">Best-gap reranks observed: ${escapeHtml(String(run.rerankCount || 0))}</p>
+      <p class="meta">Current iteration: ${escapeHtml(String(run.currentIteration || 0))}</p>
+      <p class="meta">Recovered: ${escapeHtml(run.recoveredSummary || "none")}</p>
+      <p class="meta">Traced: ${escapeHtml(run.tracedSummary || "none")}</p>
+      <p class="meta">Net progress: ${escapeHtml(run.progressSummary || "unknown")}</p>
+      <p class="meta">Exit code: ${escapeHtml(run.exitCode === null || run.exitCode === undefined ? "running" : String(run.exitCode))}</p>
+    `;
+  }
+  bindTraceGapDiagnosticsUi(container);
+}
+
+function bindTraceGapDiagnosticsUi(container) {
+  if (!container) {
+    return;
+  }
+  container
+    .querySelectorAll("details[data-trace-gap-section]")
+    .forEach((details) => {
+      if (details.dataset.traceGapBound === "true") {
+        return;
+      }
+      details.addEventListener("toggle", () => {
+        const section = details.dataset.traceGapSection;
+        if (section === "diagnostics") {
+          state.traceGapUi.diagnosticsOpen = details.open;
+        } else if (section === "command") {
+          state.traceGapUi.commandOpen = details.open;
+        } else {
+          return;
+        }
+        persistTraceGapUiState();
+      });
+      details.dataset.traceGapBound = "true";
+    });
+}
+
+function renderTraceGapDbOverview() {
+  const overview = state.traceGapOverview;
+  if (!overview?.tables) {
+    return `<article class="validation-card"><strong>DB overview pending</strong><p class="meta">Refresh status or start a run to load materializer health.</p></article>`;
+  }
+  const scopeStageSummary = overview.scopeStageSummary;
+  const summaryCard = scopeStageSummary
+    ? `
+        <article class="validation-card">
+          <strong>${escapeHtml(`Scope materialization: ${scopeStageSummary.traceScope || "unknown"}`)}</strong>
+          <p class="meta">Latest subject: ${escapeHtml(String(scopeStageSummary.latestSubjectId || "n/a"))}</p>
+          <p class="meta">Latest write: ${escapeHtml(formatUiDateTime(scopeStageSummary.latestBuiltAt))}</p>
+          <p class="meta">Stages: ${escapeHtml(
+            Object.entries(scopeStageSummary.stages || {})
+              .map(([stageKind, stageStatus]) => `${stageKind}=${stageStatus}`)
+              .join(" | ") || "none"
+          )}</p>
+        </article>
+      `
+    : "";
+  const tableCards = Object.values(overview.tables)
+    .map((table) => {
+      const scopeLabel =
+        table.scopeHint && table.scopeCount !== null
+          ? `Scope ${table.scopeHint}: ${table.scopeCount} row${table.scopeCount === 1 ? "" : "s"}`
+          : "No active scope filter";
+      const latestScope = table.latestTraceScope || table.latestSubjectId || table.latestRequestSignature || "n/a";
+      return `
+        <article class="validation-card">
+          <strong>${escapeHtml(table.label || "Trace table")}</strong>
+          <p class="meta">Total rows: ${escapeHtml(String(table.count ?? 0))}</p>
+          <p class="meta">Latest write: ${escapeHtml(formatUiDateTime(table.latestBuiltAt))}</p>
+          <p class="meta">Latest scope or key: ${escapeHtml(String(latestScope))}</p>
+          <p class="meta">${escapeHtml(scopeLabel)}</p>
+          <p class="meta">Scope latest write: ${escapeHtml(formatUiDateTime(table.scopeLatestBuiltAt))}</p>
+        </article>
+      `;
+    })
+    .join("");
+  const stageCards = Object.values(overview.stages?.latestByStage || {})
+    .map((stage) => {
+      return `
+        <article class="validation-card">
+          <strong>${escapeHtml(`Stage: ${stage.stageKind || "unknown"}`)}</strong>
+          <p class="meta">Status: ${escapeHtml(String(stage.stageStatus || "unknown"))}</p>
+          <p class="meta">Scope: ${escapeHtml(String(stage.traceScope || "n/a"))}</p>
+          <p class="meta">Subject: ${escapeHtml(String(stage.subjectId || "n/a"))}</p>
+          <p class="meta">Latest write: ${escapeHtml(formatUiDateTime(stage.builtAt))}</p>
+        </article>
+      `;
+    })
+    .join("");
+  const genericMechanics = overview.genericMechanics || {};
+  const genericCounts = genericMechanics.counts || {};
+  const genericGapKinds = Array.isArray(genericMechanics.gapKindCounts)
+    ? genericMechanics.gapKindCounts
+    : [];
+  const genericGapRows = Array.isArray(genericMechanics.latestGapRows)
+    ? genericMechanics.latestGapRows
+    : [];
+  const genericFactRows = Array.isArray(genericMechanics.latestFactRows)
+    ? genericMechanics.latestFactRows
+    : [];
+  const genericCard =
+    Object.keys(genericCounts).length || genericGapRows.length || genericFactRows.length
+      ? `
+          <article class="validation-card">
+            <strong>Generic mechanics model</strong>
+            <p class="meta">Entities: ${escapeHtml(String(genericCounts.entities ?? 0))} | Facts: ${escapeHtml(String(genericCounts.facts ?? 0))} | Relations: ${escapeHtml(String(genericCounts.relations ?? 0))} | Gaps: ${escapeHtml(String(genericCounts.gaps ?? 0))}</p>
+            <p class="meta">Gap kinds: ${escapeHtml(
+              genericGapKinds.map((item) => `${item.gapKind}=${item.count}`).join(" | ") || "none"
+            )}</p>
+            <p class="meta">Latest gaps: ${escapeHtml(
+              genericGapRows
+                .slice(0, 5)
+                .map((item) => `${item.fieldKey || item.entityId}:${item.gapKind}`)
+                .join(" | ") || "none"
+            )}</p>
+            <p class="meta">Latest facts: ${escapeHtml(
+              genericFactRows
+                .slice(0, 5)
+                .map((item) => `${item.fieldKey || item.entityId}:${item.factKind}=${item.factValue}`)
+                .join(" | ") || "none"
+            )}</p>
+          </article>
+        `
+      : "";
+  return `${summaryCard}${genericCard}${tableCards}${stageCards}`;
+}
+
+function makeTraceGapInfoCard(title, value) {
+  return `
+    <article class="validation-card">
+      <strong>${escapeHtml(title)}</strong>
+      <p class="meta">${escapeHtml(value || "n/a")}</p>
+    </article>
+  `;
+}
+
+function formatUiDateTime(value) {
+  if (!value) {
+    return "n/a";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+  return date.toLocaleString();
+}
+
 function renderSpendSaveSideBoundary() {
   const spendSystem = getCurrentSpendSystemView();
   const tokenShop = spendSystem?.tokenShop;
@@ -2204,25 +2757,31 @@ function renderSpendSaveSideBoundary() {
     return "";
   }
 
-  const summary = getMultiverseMarketMetadataSummary(multiverseMarketMetadataNeighborhood);
+  const summary = getMultiverseMarketMetadataSummary(multiverseMarketMetadataNeighborhood, market);
+  const typedOwnerSummary = getMultiverseMarketTypedOwnerSummary(market);
   const validatedCoverage = getMultiverseMarketValidatedCoverage(multiverseMarket);
   const dailyTokeniumSummary = getDailyTokeniumLaneSummary(tokenShop);
   const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenShop);
   const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(
-    multiverseMarketRangeBoundary
+    multiverseMarketRangeBoundary,
+    market
   );
   const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(
-    multiverseMarketRowTextCoverage
+    multiverseMarketRowTextCoverage,
+    market
   );
   const multiverseMarketPrefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(
-    multiverseMarketPrefabRemapBoundary
+    multiverseMarketPrefabRemapBoundary,
+    market
   );
+  const multiverseCanonicalImportSummary = getMultiverseMarketCanonicalImportSummary(market);
+  const multiverseBroadRowRemapSummary = getMultiverseMarketBroadRowRemapSummary(market);
   const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(
-    market?.uiShell?.ownerFamily
+    market?.uiShell?.ownerFamily,
+    market
   );
-  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
-    market?.saveOwner?.marketMemberBoundary
-  );
+  const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(market);
+  const multiverseDbCoverage = getMultiverseMarketDbCoverageSummary(market);
   return `
     <section class="meta-stack">
       <div class="panel-header">
@@ -2232,10 +2791,16 @@ function renderSpendSaveSideBoundary() {
         </div>
       </div>
       <p class="meta">Repo-local metadata now narrows MultiverseMarket saved-state work toward the broader PlayerProfileData persistence family instead of treating MultiverseMarket itself as the recovered save owner.</p>
+      <p class="meta">${multiverseDbCoverage.hasCoverage ? `DB-backed multiverse coverage now tracks ${multiverseDbCoverage.subjectCount} subject${multiverseDbCoverage.subjectCount === 1 ? "" : "s"} via ${multiverseDbCoverage.coverageSource}, with next seams ${multiverseDbCoverage.nextSeamLabel || "unrecorded"}.` : "DB-backed multiverse coverage is not available in this build."}</p>
       <div class="validation-grid">
         <article class="validation-card ${summary.hasSaveFamilyClues ? "pass" : "warn"}">
           <strong>Likely persistence family</strong>
           <p class="meta">${summary.hasSaveFamilyClues ? "PlayerProfileData.cs, GetPlayerProfileData, and FillPlayerProfileData are all present in the checked-in metadata neighborhood." : "PlayerProfileData persistence clues are incomplete in the checked-in metadata neighborhood."}</p>
+        </article>
+        <article class="validation-card ${typedOwnerSummary.hasTypedOwnerAnchors ? "pass" : "warn"}">
+          <strong>Typed owner lane</strong>
+          <p class="meta">${typedOwnerSummary.hasTypedOwnerAnchors ? `The DB-backed typed-owner slice now preserves host anchors ${typedOwnerSummary.typedHostLabel || "n/a"}${typedOwnerSummary.recoveredIsRangeLabel ? ` across ${typedOwnerSummary.recoveredIsRangeLabel}` : ""}.` : "Typed owner host anchors are not yet present in the DB-backed multiverse slice."}</p>
+          <p class="meta">${typedOwnerSummary.hasTypedConversionAnchors ? `Conversion anchors ${typedOwnerSummary.typedConversionLabel || "n/a"} and field samples such as ${typedOwnerSummary.typedFieldSampleLabel || "n/a"} are present, but ${typedOwnerSummary.negativeTypedOwnerLabel}.` : typedOwnerSummary.negativeTypedOwnerLabel}</p>
         </article>
         <article class="validation-card ${summary.hasCloudSavePathClues ? "pass" : "warn"}">
           <strong>Cloud-save profile path</strong>
@@ -2245,6 +2810,7 @@ function renderSpendSaveSideBoundary() {
           <strong>Likely canonical host</strong>
           <p class="meta">${marketMemberSummary.hasSiblingAccessorCluster ? `${marketMemberSummary.accessorLabel} now sits in the same PlayerProfile-side accessor run as ${marketMemberSummary.siblingAccessorLabel}.` : "The checked-in metadata neighborhood does not yet preserve the expected PlayerProfile-side sibling accessor run for Market."}</p>
           <p class="meta">${marketMemberSummary.favorsPlayerProfileMemberHost ? `That makes ${marketMemberSummary.canonicalHostLabel} the strongest current repo-local host for future canonical Emporium state, instead of direct MultiverseMarket ownership or loose top-level fields on PlayerProfileData.` : "The current build does not yet preserve a strong enough sibling-member pattern to narrow the future canonical host."}</p>
+          <p class="meta">${hasDbCoverage(marketMemberSummary) && (marketMemberSummary.genericFactCount || marketMemberSummary.genericGapCount) ? `The DB-backed multiverse bundle currently preserves ${marketMemberSummary.genericFactCount || 0} generic fact row${marketMemberSummary.genericFactCount === 1 ? "" : "s"} and ${marketMemberSummary.genericGapCount || 0} generic gap row${marketMemberSummary.genericGapCount === 1 ? "" : "s"} for this save-owner slice.` : "Generic multiverse fact/gap coverage is not yet materialized for this save-owner slice."}</p>
         </article>
         <article class="validation-card ${summary.hasProgressionFieldCluster ? "pass" : "warn"}">
           <strong>Grounded field-cluster clues</strong>
@@ -2268,22 +2834,34 @@ function renderSpendSaveSideBoundary() {
         <article class="validation-card ${multiverseMarketPrefabRemapSummary.hasOverrideBoundary ? "pass" : "warn"}">
           <strong>Prefab remap boundary</strong>
           <p class="meta">${multiverseMarketPrefabRemapSummary.hasDirectMatchBand ? `The checked prefab shell now keeps direct ChrystosEmporiumUpgrade names through ${multiverseMarketPrefabRemapSummary.lastDirectPrefab}.` : "Direct ChrystosEmporiumUpgrade name coverage is incomplete in the checked-in prefab-remap bundle."}</p>
-          <p class="meta">${multiverseMarketPrefabRemapSummary.hasOverrideBoundary ? `The same asset then switches to ${multiverseMarketPrefabRemapSummary.firstOverride} through ${multiverseMarketPrefabRemapSummary.lastOverride}, so validated ids ${multiverseMarketPrefabRemapSummary.validatedMismatchLabel} still do not have direct prefab-number label matches.` : "The checked prefab-remap bundle no longer preserves the expected 69-74 override band."}</p>
+          <p class="meta">${multiverseMarketPrefabRemapSummary.hasOverrideBoundary ? multiverseMarketPrefabRemapSummary.overridePairs?.length ? `The DB-backed remap slice now preserves bounded override pairs ${multiverseMarketPrefabRemapSummary.overridePairs.join(", ")}, so validated ids ${multiverseMarketPrefabRemapSummary.validatedMismatchLabel} stay explicitly quarantined instead of implied from archived remap notes.` : `The same asset then switches to ${multiverseMarketPrefabRemapSummary.firstOverride} through ${multiverseMarketPrefabRemapSummary.lastOverride}, so validated ids ${multiverseMarketPrefabRemapSummary.validatedMismatchLabel} still do not have direct prefab-number label matches.` : "The checked prefab-remap bundle no longer preserves the expected 69-74 override band."}</p>
+        </article>
+        <article class="validation-card ${multiverseCanonicalImportSummary.hasCanonicalImportBoundary ? "pass" : "warn"}">
+          <strong>Canonical import admissibility</strong>
+          <p class="meta">${multiverseCanonicalImportSummary.hasCanonicalImportBoundary ? `The DB-backed canonical-import slice keeps compatibility import quarantined at ${multiverseCanonicalImportSummary.compatibilityImportTargetPath || "n/a"} with safe subset ${multiverseCanonicalImportSummary.safeSubsetLabel}.` : "Canonical import admissibility is not yet surfaced on the DB-backed multiverse bundle."}</p>
+          <p class="meta">${multiverseCanonicalImportSummary.overlapLabel ? `The remaining ordered overlap is still ${multiverseCanonicalImportSummary.overlapLabel}, and ${multiverseCanonicalImportSummary.negativeCanonicalImportLabel}.` : multiverseCanonicalImportSummary.negativeCanonicalImportLabel}</p>
+          <p class="meta">${multiverseCanonicalImportSummary.candidateImportAnchorCount ? `The live DB now preserves ${multiverseCanonicalImportSummary.candidateImportAnchorCount} candidate import-anchor relation${multiverseCanonicalImportSummary.candidateImportAnchorCount === 1 ? "" : "s"}${multiverseCanonicalImportSummary.candidateImportAnchorLabel ? ` via ${multiverseCanonicalImportSummary.candidateImportAnchorLabel}` : ""}, ${multiverseCanonicalImportSummary.candidateCanonicalHostFieldCount || 0} candidate canonical host-field relation${multiverseCanonicalImportSummary.candidateCanonicalHostFieldCount === 1 ? "" : "s"}${multiverseCanonicalImportSummary.candidateCanonicalHostFieldLabel ? ` across ${multiverseCanonicalImportSummary.candidateCanonicalHostFieldLabel}` : ""}, ${multiverseCanonicalImportSummary.candidateImportLaneCount || 0} candidate import-lane relation${multiverseCanonicalImportSummary.candidateImportLaneCount === 1 ? "" : "s"}, and ${multiverseCanonicalImportSummary.candidateImportOverlapCount || 0} overlap-row relation${multiverseCanonicalImportSummary.candidateImportOverlapCount === 1 ? "" : "s"}. It also now carries ${multiverseCanonicalImportSummary.supportCanonicalHostFieldCount || 0} host-field support relation${multiverseCanonicalImportSummary.supportCanonicalHostFieldCount === 1 ? "" : "s"}, ${multiverseCanonicalImportSummary.supportCanonicalLaneCount || 0} lane-support relation${multiverseCanonicalImportSummary.supportCanonicalLaneCount === 1 ? "" : "s"}, ${multiverseCanonicalImportSummary.supportCanonicalOverlapCount || 0} overlap-row support relation${multiverseCanonicalImportSummary.supportCanonicalOverlapCount === 1 ? "" : "s"}, ${multiverseCanonicalImportSummary.boundedImportLaneCount || 0} exact bounded-lane relation${multiverseCanonicalImportSummary.boundedImportLaneCount === 1 ? "" : "s"}, and ${multiverseCanonicalImportSummary.boundedImportOverlapCount || 0} exact bounded-overlap relation${multiverseCanonicalImportSummary.boundedImportOverlapCount === 1 ? "" : "s"}, but no admissible canonical import bridge yet.` : "Candidate import-anchor relations are not yet materialized for this multiverse boundary."}</p>
+        </article>
+        <article class="validation-card ${multiverseBroadRowRemapSummary.hasBroadRowRemapBoundary ? "pass" : "warn"}">
+          <strong>Broader row identity remap</strong>
+          <p class="meta">${multiverseBroadRowRemapSummary.hasBroadRowRemapBoundary ? `${multiverseBroadRowRemapSummary.remapStatusLabel}` : "Broader row remap boundary is not yet surfaced on the DB-backed multiverse bundle."}</p>
+          <p class="meta">${multiverseBroadRowRemapSummary.overlapLabel ? `Current checked overlap is ${multiverseBroadRowRemapSummary.overlapLabel}; buy hooks cover ${multiverseBroadRowRemapSummary.buyRangeLabel || "n/a"} and cost text covers ${multiverseBroadRowRemapSummary.costTextRangeLabel || "n/a"}, but ${multiverseBroadRowRemapSummary.negativeBroadRemapLabel}.` : multiverseBroadRowRemapSummary.negativeBroadRemapLabel}</p>
+          <p class="meta">${multiverseBroadRowRemapSummary.candidateRowRemapCount ? `The live DB now preserves ${multiverseBroadRowRemapSummary.candidateRowRemapCount} candidate row-remap relation${multiverseBroadRowRemapSummary.candidateRowRemapCount === 1 ? "" : "s"} across rows ${multiverseBroadRowRemapSummary.candidateRowRemapLabel || "n/a"}, ${multiverseBroadRowRemapSummary.candidateOverrideIdRemapCount || 0} override-id remap relation${multiverseBroadRowRemapSummary.candidateOverrideIdRemapCount === 1 ? "" : "s"}${multiverseBroadRowRemapSummary.candidateOverrideIdRemapLabel ? ` via ${multiverseBroadRowRemapSummary.candidateOverrideIdRemapLabel}` : ""}, plus ${multiverseBroadRowRemapSummary.supportRowRemapCount || 0} row-side support relation${multiverseBroadRowRemapSummary.supportRowRemapCount === 1 ? "" : "s"}, ${multiverseBroadRowRemapSummary.supportRowTextLaneCount || 0} text-lane support relation${multiverseBroadRowRemapSummary.supportRowTextLaneCount === 1 ? "" : "s"}, ${multiverseBroadRowRemapSummary.supportBoundedRowRemapCount || 0} bounded override support relation${multiverseBroadRowRemapSummary.supportBoundedRowRemapCount === 1 ? "" : "s"}, ${multiverseBroadRowRemapSummary.boundedRowTextLaneCount || 0} exact bounded text-lane relation${multiverseBroadRowRemapSummary.boundedRowTextLaneCount === 1 ? "" : "s"}, and ${multiverseBroadRowRemapSummary.boundedRowRemapCount || 0} exact bounded remap relation${multiverseBroadRowRemapSummary.boundedRowRemapCount === 1 ? "" : "s"}.` : "Candidate row-remap relations are not yet materialized for this multiverse boundary."}</p>
         </article>
         <article class="validation-card ${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? "pass" : "warn"}">
           <strong>MultiverseMarket owner family</strong>
           <p class="meta">${multiverseMarketOwnerFamilySummary.hasOwnerFamily ? `${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, ${multiverseMarketOwnerFamilySummary.textHandler}, and ${multiverseMarketOwnerFamilySummary.batcher} now appear in one checked owner-family shell.` : "MultiverseMarket owner-family clues are incomplete in the checked-in shell bundle."}</p>
-          <p class="meta">${multiverseMarketOwnerFamilySummary.hasCurrencyShell ? `The same shell also preserves ${multiverseMarketOwnerFamilySummary.resourceText}, ${multiverseMarketOwnerFamilySummary.achievementBar}, ${multiverseMarketOwnerFamilySummary.costBox}, and ${multiverseMarketOwnerFamilySummary.currencyRangeLabel}.` : "The checked owner-family shell does not yet preserve the expected Inscryptions cost-lane UI anchors."}</p>
+          <p class="meta">${multiverseMarketOwnerFamilySummary.hasCurrencyShell ? `The same shell also preserves ${multiverseMarketOwnerFamilySummary.resourceText}, ${multiverseMarketOwnerFamilySummary.achievementBar}, ${multiverseMarketOwnerFamilySummary.costBox}, and ${multiverseMarketOwnerFamilySummary.currencyRangeLabel}.` : multiverseMarketOwnerFamilySummary.resourceText ? `The DB-backed owner-family slice already preserves ${multiverseMarketOwnerFamilySummary.resourceText}${multiverseMarketOwnerFamilySummary.inscryptionsLabel ? ` with wrapper field ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}` : ""}, but the broader currency-shell range is still unrecovered.` : "The checked owner-family shell does not yet preserve the expected Inscryptions cost-lane UI anchors."}</p>
         </article>
         <article class="validation-card ${dailyTokeniumSummary.hasOwnerFamilyClues ? "pass" : "warn"}">
           <strong>Daily Tokenium owner family</strong>
-          <p class="meta">${dailyTokeniumSummary.hasOwnerFamilyClues ? (dailyTokeniumSummary.coverageSource === "subject-contracts" ? `Canonical TokenShop contracts now preserve ${dailyTokeniumSummary.rangeFamilySubjectId || dailyTokeniumSummary.rowLocalSubjectId || "the Daily Tokenium lane"} with ${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.academyController}, ${dailyTokeniumSummary.textHandler}, and ${dailyTokeniumSummary.missionFamilyLabel}.` : "SpaceAcademy, SpaceAcademyMain, TextHandlerSpaceAcademy, and FarmMissions now appear in a checked-in lane clue bundle.") : "Daily Tokenium owner-family clues are incomplete in the checked-in lane clue bundle."}</p>
-          <p class="meta">${dailyTokeniumSummary.hasModifierBoundary ? (dailyTokeniumSummary.coverageSource === "subject-contracts" ? `${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, ${dailyTokeniumSummary.finalBonusHook}, ${dailyTokeniumSummary.purchaseOwner}, and collector-pack copy are now grounded on the canonical Daily Tokenium lane contract rather than read from legacy clue bundles.` : "LM244 hooks, BuyLM244, FinalDailyTokenBonus, and Collector-pack copy still behave like modifier-family clues around the lane, not recovered saved-state owners.") : "Daily Tokenium modifier-family clues are incomplete in the checked-in lane clue bundle."}</p>
+          <p class="meta">${dailyTokeniumSummary.hasOwnerFamilyClues ? (hasTokenShopDbCoverage(dailyTokeniumSummary) ? `DB-backed TokenShop mechanics now preserve ${dailyTokeniumSummary.rangeFamilySubjectId || dailyTokeniumSummary.rowLocalSubjectId || "the Daily Tokenium lane"} with ${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.academyController}, ${dailyTokeniumSummary.textHandler}, and ${dailyTokeniumSummary.missionFamilyLabel}.` : "SpaceAcademy, SpaceAcademyMain, TextHandlerSpaceAcademy, and FarmMissions now appear in a checked-in lane clue bundle.") : "Daily Tokenium owner-family clues are incomplete in the checked-in lane clue bundle."}</p>
+          <p class="meta">${dailyTokeniumSummary.hasModifierBoundary ? (hasTokenShopDbCoverage(dailyTokeniumSummary) ? `${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, ${dailyTokeniumSummary.finalBonusHook}, ${dailyTokeniumSummary.purchaseOwner}, and collector-pack copy are now grounded on the canonical Daily Tokenium lane contract rather than read from legacy clue bundles.` : "LM244 hooks, BuyLM244, FinalDailyTokenBonus, and Collector-pack copy still behave like modifier-family clues around the lane, not recovered saved-state owners.") : "Daily Tokenium modifier-family clues are incomplete in the checked-in lane clue bundle."}</p>
         </article>
         <article class="validation-card ${tokenBankFormulaSummary.hasDerivedOutputBoundary ? "pass" : "warn"}">
           <strong>Token-bank derived output boundary</strong>
-          <p class="meta">${tokenBankFormulaSummary.hasDerivedOutputBoundary ? (tokenBankFormulaSummary.coverageSource === "subject-contracts" ? `${tokenBankFormulaSummary.rowLocalSubjectId || tokenBankFormulaSummary.rangeFamilySubjectId || "Canonical TokenShop subject"} now preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} on the subject contract.` : "FinalTokenBankCap and FinalTokenBankFillSpeed now appear in a checked-in accessor and backing-field cluster.") : "Token-bank derived-output clues are incomplete in the checked-in boundary bundle."}</p>
-          <p class="meta">${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? (tokenBankFormulaSummary.coverageSource === "subject-contracts" ? "The contract-backed derived-output lane still records no save-family overlap in the grounded context." : "The same checked local context still does not expose PlayerProfileData or CloudSavePlayerProfile beside those outputs.") : "The checked derived-output context now overlaps a broader save-family clue and needs review."}</p>
+          <p class="meta">${tokenBankFormulaSummary.hasDerivedOutputBoundary ? (hasTokenShopDbCoverage(tokenBankFormulaSummary) ? `${tokenBankFormulaSummary.rowLocalSubjectId || tokenBankFormulaSummary.rangeFamilySubjectId || "DB-backed TokenShop subject"} now preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} on the DB-backed mechanics surface.` : "FinalTokenBankCap and FinalTokenBankFillSpeed now appear in a checked-in accessor and backing-field cluster.") : "Token-bank derived-output clues are incomplete in the checked-in boundary bundle."}</p>
+          <p class="meta">${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? (hasTokenShopDbCoverage(tokenBankFormulaSummary) ? "The DB-backed derived-output lane still records no save-family overlap in the grounded context." : "The same checked local context still does not expose PlayerProfileData or CloudSavePlayerProfile beside those outputs.") : "The checked derived-output context now overlaps a broader save-family clue and needs review."}</p>
         </article>
         <article class="validation-card warn">
           <strong>Still blocked for planner wiring</strong>
@@ -2466,7 +3044,7 @@ function renderSpendPlannerBoundary() {
     {
       label: "TokenShop row levels and recommendation math",
       reason:
-        "This panel intentionally does not read checked TokenShop row levels, compatibility-backed ATU imports, or the Progression-side editor seam. The checked subset tools stay separate, non-canonical, and blocked from planner behavior until broader row remap coverage and a truthful next-purchase rule set clear."
+        "This panel intentionally does not read checked TokenShop row levels, compatibility-backed ATU imports, or the Progression-side storefront lane. The checked subset tools stay separate, non-canonical, and blocked from planner behavior until broader row remap coverage and a truthful next-purchase rule set clear."
     },
     {
       label: "Token-bank state",
@@ -2564,13 +3142,6 @@ function renderSpendPlannerResearchForkNote() {
 function renderTokenShopSubsystemSection() {
   return `
     <section class="meta-stack">
-      <div class="panel-header">
-        <div>
-          <p class="eyebrow">TokenShop</p>
-          <h3>TokenShop</h3>
-        </div>
-      </div>
-      <p class="meta">TokenShop keeps its own Progression category so it does not get mixed into the Shard Mining surface or force an endlessly scrolling page.</p>
       ${renderTokenShopSavedStateSnapshot()}
       ${renderTokenShopProgressionEditor()}
     </section>
@@ -2743,47 +3314,38 @@ function renderResearchTrackSupport(track) {
     track.id === "shard-milestone-payload-recovery"
   ) {
     const shardSystem = getCurrentShardSystemView();
-    const ownerBoundary = getShardOwnerFamilyBoundarySummary(
-      shardSystem?.family?.boundaries?.ownerFamily
-    );
-    const finalSuBoundary = getShardFinalSuBonusBoundarySummary(
-      shardSystem?.family?.boundaries?.finalSuBonus
-    );
-    const payloadBoundary = getShardMilestonePayloadBoundarySummary(
-      shardSystem?.family?.boundaries?.milestonePayload
-    );
-    const costModelBoundary = getShardCostModelBoundarySummary(
-      shardSystem?.cost?.costModelBoundary
-    );
-    const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
-      shardSystem?.family?.boundaries?.rowModel
-    );
-    const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(
-      shardSystem?.family?.boundaries?.titleEffect
-    );
-    const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
-      shardSystem?.family?.boundaries?.effectTextHandler
-    );
-    const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(
-      shardSystem?.family?.boundaries?.rowShell
-    );
-    const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(
-      shardSystem?.family?.boundaries?.rowAlignment
-    );
-    const saveBoundary = getShardSaveBoundarySummary(shardSystem?.ownedState?.saveBoundary);
+    const shardDbCoverage = getShardDbCoverageSummary(shardSystem);
+    const ownerBoundary = getShardOwnerFamilyBoundarySummary(shardSystem);
+    const finalSuBoundary = getShardFinalSuBonusBoundarySummary(shardSystem);
+    const payloadBoundary = getShardMilestonePayloadBoundarySummary(shardSystem);
+    const costModelBoundary = getShardCostModelBoundarySummary(shardSystem);
+    const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(shardSystem);
+    const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(shardSystem);
+    const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(shardSystem);
+    const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(shardSystem);
+    const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(shardSystem);
+    const saveBoundary = getShardSaveBoundarySummary(shardSystem);
     const shardOwnerNotes = [
+      shardDbCoverage.hasCoverage
+        ? `DB-backed shard boundary coverage currently exposes ${shardDbCoverage.subjectLabels.join(", ")}, with next seams ${shardDbCoverage.nextSeamLabel || "unrecorded"}.`
+        : "DB-backed shard boundary coverage is not available in this build.",
       ownerBoundary.hasBoundary
-        ? `Owner-family boundary keeps ${ownerBoundary.screenController} as the strongest screen-controller family and ${ownerBoundary.dataCarrier} as the strongest shard-specific carrier trail.`
+        ? hasDbCoverage(ownerBoundary)
+          ? `DB-backed shard owner-family coverage now preserves ${ownerBoundary.subjectId || "family-graph:shards-owner-family"} through ${ownerBoundary.runtimeShell || ownerBoundary.dataCarrier}${ownerBoundary.boundaryVerdict ? ` under ${ownerBoundary.boundaryVerdict} verdict` : ""}.`
+          : `Owner-family boundary keeps ${ownerBoundary.screenController} as the strongest screen-controller family and ${ownerBoundary.dataCarrier} as the strongest shard-specific carrier trail.`
         : "Shard owner-family boundary clues are not available in this build.",
-      ownerBoundary.hasFastBuyHooks
-        ? `Fast-buy and first-open hooks such as ${ownerBoundary.fastBuyHooksLabel} stay attached to that shard-specific controller shell.`
-        : "Expected shard-specific fast-buy hooks are incomplete in this build.",
-      ownerBoundary.hasBonusAnchors
-        ? `Bonus-field anchors such as ${ownerBoundary.bonusAnchorLabel} keep FinalSU-style fields tied to the shard-specific carrier candidate.`
-        : "Expected FinalSU bonus-field anchors are incomplete in this build.",
-      ownerBoundary.hasDowngradedGenericLead
-        ? `${ownerBoundary.genericLead} stays downgraded to a nearby generic milestone family because ${ownerBoundary.genericLeadReason}.`
-        : "The generic ConstructionMilestones comparison lead is incomplete in this build."
+      ownerBoundary.hasStructure
+        ? `Live shard structure now keeps ${ownerBoundary.ownerField || "the owner field"} on ${ownerBoundary.rowModelType || ownerBoundary.dataCarrier}, with row-state fields ${ownerBoundary.rowStateFieldLabel || "still unrecorded"}.`
+        : "Expected shard owner-family structure is incomplete in this build.",
+      ownerBoundary.sourceTraceScope || ownerBoundary.sourceSubjectId
+        ? `This owner-family view is currently derived from ${ownerBoundary.sourceTraceScope || "a live trace scope"}${ownerBoundary.sourceSubjectId ? ` via ${ownerBoundary.sourceSubjectId}` : ""}.`
+        : "The current build does not yet expose the live source trace for shard owner-family.",
+      ownerBoundary.hasSupportingEdges
+        ? `Supporting edges such as ${ownerBoundary.supportingEdgeLabel} are grounded, while blocked seams remain ${ownerBoundary.blockedEdgeLabel || ownerBoundary.nextSeamId || "unrecorded"}.`
+        : ownerBoundary.outcomeStatement || "The shard owner-family blocker surface is incomplete in this build.",
+      ownerBoundary.groundedConclusion
+        ? ownerBoundary.groundedConclusion
+        : ownerBoundary.outcomeStatement || "The current build still lacks a grounded shard owner-family conclusion."
     ];
     const shardBoundaryNotes = [
       finalSuBoundary.hasBoundary
@@ -2793,7 +3355,9 @@ function renderResearchTrackSupport(track) {
         ? `Payload-watch boundary keeps ${payloadBoundary.milestoneStateLabel} attached to ${payloadBoundary.dataCarrier}, with cost-list hooks such as ${payloadBoundary.costAccessorLabel}.`
         : "Shard milestone payload-watch boundary clues are not available in this build.",
       costModelBoundary.hasBoundary
-        ? `Cost-model boundary keeps sampled shard cost windows ${costModelBoundary.costWindowLabel} attached to ${costModelBoundary.dataCarrier}.`
+        ? hasDbCoverage(costModelBoundary)
+          ? `DB-backed shard cost subject ${costModelBoundary.subjectId || "shard-cost-su0-structure"} keeps ${costModelBoundary.costWindowLabel} on ${costModelBoundary.dataCarrier}, with next seam ${costModelBoundary.nextSeamId || "unrecorded"}.`
+          : `Cost-model boundary keeps sampled shard cost windows ${costModelBoundary.costWindowLabel} attached to ${costModelBoundary.dataCarrier}.`
         : "Shard cost-model boundary clues are not available in this build.",
       rowModelBoundary.hasBoundary
         ? `Row-model boundary keeps text-checker rows on ${rowModelBoundary.textCheckerRangeLabel} and unlock rows on ${rowModelBoundary.unlockRangeLabel}.`
@@ -2810,7 +3374,9 @@ function renderResearchTrackSupport(track) {
         ? `The strongest current shard bonus text handler is ${effectTextHandlerBoundary.textHandlerLabel}, not the generic ${effectTextHandlerBoundary.genericWriterLabel}.`
         : "Shard effect-text handler boundary clues are not available in this build.",
       saveBoundary.hasSeparationBoundary
-        ? `Shard save boundary keeps ${saveBoundary.ownerAnchor} separate from ${saveBoundary.saveAnchor} and ${saveBoundary.cloudSaveAnchor}, with ${saveBoundary.overlapLabel}.`
+        ? hasDbCoverage(saveBoundary)
+          ? `DB-backed shard owned-state subject ${saveBoundary.subjectId || "shard-owned-state-upgradeinfolist-population"} keeps ${saveBoundary.ownerAnchor} separate from ${saveBoundary.saveAnchor}, but still stops at ${saveBoundary.nextSeamId || "an unrecorded seam"}.`
+          : `Shard save boundary keeps ${saveBoundary.ownerAnchor} separate from ${saveBoundary.saveAnchor} and ${saveBoundary.cloudSaveAnchor}, with ${saveBoundary.overlapLabel}.`
         : "Shard save-boundary clues are not available in this build.",
       "This improves the shard mapping gate, but it still does not recover player-owned shard milestone rows, player-facing labels, or planner-safe affordability inputs."
     ];
@@ -2840,76 +3406,81 @@ function renderResearchTrackSupport(track) {
     const tokenShopCoverage = getTokenShopCoverageSummary(tokenShop);
     const validatedCoverage = getMultiverseMarketValidatedCoverage(market?.saveOwner?.extract);
     const metadataSummary = getMultiverseMarketMetadataSummary(
-      market?.rowIdentity?.metadataNeighborhood
+      market?.rowIdentity?.metadataNeighborhood,
+      market
     );
-    const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
-      market?.saveOwner?.marketMemberBoundary
-    );
+    const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(market);
     const tokeniumNamingSummary = getTokeniumNamingSummary(tokenShop);
     const tokenBankStateSummary = getTokenBankStateSummary(tokenShop);
     const dailyTokeniumSummary = getDailyTokeniumLaneSummary(tokenShop);
     const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenShop);
     const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(
-      market?.rowIdentity?.rangeBoundary
+      market?.rowIdentity?.rangeBoundary,
+      market
     );
     const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(
-      market?.rowIdentity?.rowTextCoverage
+      market?.rowIdentity?.rowTextCoverage,
+      market
     );
     const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShop);
     const spendActionLaneSummary = getSpendActionLaneSummary(tokenShop);
     const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(
-      market?.uiShell?.actionShell
+      market?.uiShell?.actionShell,
+      market
     );
     const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(
-      market?.uiShell?.ownerFamily
+      market?.uiShell?.ownerFamily,
+      market
     );
+    const multiverseDbCoverage = getMultiverseMarketDbCoverageSummary(market);
     const tokenShopOwnerShellSummary = getTokenShopOwnerShellSummary(tokenShop);
     const tokenShopSaveBoundarySummary = getTokenShopSaveBoundarySummary(tokenShop);
-    const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(
-      market?.saveOwner?.saveBoundary
-    );
+    const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(market);
     const tokenBankControllerShellSummary = getTokenBankControllerShellSummary(tokenShop);
     const spendInputNotes = [
       tokenShopCoverage.hasCoverage
-        ? tokenShopCoverage.coverageSource === "subject-contracts"
-          ? `TokenShop currently exposes ${tokenShopCoverage.subjectCount} canonical subject contracts across ${tokenShopCoverage.tierLabel}, including ${tokenShopCoverage.namedLaneLabel}.`
+        ? hasTokenShopDbCoverage(tokenShopCoverage)
+          ? `TokenShop currently exposes ${tokenShopCoverage.subjectCount} DB-backed subjects across ${tokenShopCoverage.tierLabel}, including ${tokenShopCoverage.namedLaneLabel}.`
           : `TokenShop currently exposes ${tokenShopCoverage.numericGroupCount} extracted numeric families across ${tokenShopCoverage.tierLabel}, including ${tokenShopCoverage.namedLaneLabel}.`
         : "TokenShop extracted family coverage is not available in this build.",
       tokenShopCostLaneSummary.hasLaneSplit
-        ? tokenShopCostLaneSummary.coverageSource === "subject-contracts"
-          ? `Canonical TokenShop subjects now preserve ${tokenShopCostLaneSummary.rowLocalSubjectId} plus ${tokenShopCostLaneSummary.rangeFamilySubjectId}, with blocked input ${tokenShopCostLaneSummary.blockedInputReason || "explicitly recorded"}.`
+        ? hasTokenShopDbCoverage(tokenShopCostLaneSummary)
+          ? `DB-backed TokenShop subjects now preserve ${tokenShopCostLaneSummary.rowLocalSubjectId} plus ${tokenShopCostLaneSummary.rangeFamilySubjectId}, with blocked input ${tokenShopCostLaneSummary.blockedInputReason || "explicitly recorded"}.`
           : `Cost-lane support preserves ${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel}.`
         : "TokenShop trace-produced cost-lane support is not available in this build.",
       spendActionLaneSummary.hasActionSplit
-        ? spendActionLaneSummary.coverageSource === "subject-contracts"
+        ? hasTokenShopDbCoverage(spendActionLaneSummary)
           ? `Canonical TokenShop action coverage now preserves ${spendActionLaneSummary.rowLocalSubjectId} via ${spendActionLaneSummary.loopModifierHook}, while ${spendActionLaneSummary.rangeFamilySubjectId} keeps ${spendActionLaneSummary.dailyHookT2} recorded with blocked input ${spendActionLaneSummary.blockedInputReason || "explicitly de-scoped"}.`
           : `Action-lane clues preserve ${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, and ${spendActionLaneSummary.premiumModifierHook}.`
         : "Spend action-lane clues are not available in this build.",
       validatedCoverage.hasValidatedRows
         ? `MultiverseMarket currently has ${validatedCoverage.count} validated rows across ids ${validatedCoverage.rangeLabel}.`
-        : "MultiverseMarket validated row coverage is not available in this build."
+        : "MultiverseMarket validated row coverage is not available in this build.",
+      multiverseDbCoverage.hasCoverage
+        ? `DB-backed multiverse coverage now tracks ${multiverseDbCoverage.subjectCount} subject${multiverseDbCoverage.subjectCount === 1 ? "" : "s"} via ${multiverseDbCoverage.coverageSource}, with next seams ${multiverseDbCoverage.nextSeamLabel || "unrecorded"}.`
+        : "DB-backed multiverse coverage is not available in this build."
     ];
     const spendBoundaryNotes = [
       tokenShopOwnerShellSummary.hasOwnerShell
-        ? tokenShopOwnerShellSummary.coverageSource === "subject-contracts"
-          ? `TokenShop canonical subjects now preserve ${tokenShopOwnerShellSummary.rowLocalSubjectId} plus ${tokenShopOwnerShellSummary.rangeFamilySubjectId}, with row-local action hook ${tokenShopOwnerShellSummary.bankMethod}.`
+        ? hasTokenShopDbCoverage(tokenShopOwnerShellSummary)
+          ? `DB-backed TokenShop subjects now preserve ${tokenShopOwnerShellSummary.rowLocalSubjectId} plus ${tokenShopOwnerShellSummary.rangeFamilySubjectId}, with row-local action hook ${tokenShopOwnerShellSummary.bankMethod}.`
           : `TokenShop owner-shell clues preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook}.`
         : "TokenShop owner-shell clues are not available in this build.",
       tokenShopSaveBoundarySummary.hasSeparationBoundary
-        ? tokenShopSaveBoundarySummary.coverageSource === "subject-contracts"
-          ? `TokenShop canonical subject-state keeps ${tokenShopSaveBoundarySummary.rowLocalSubjectId} separate from ${tokenShopSaveBoundarySummary.rangeFamilySubjectId}, with blocked input ${tokenShopSaveBoundarySummary.blockedInputReason}.`
+        ? hasTokenShopDbCoverage(tokenShopSaveBoundarySummary)
+          ? `DB-backed TokenShop subject-state keeps ${tokenShopSaveBoundarySummary.rowLocalSubjectId} separate from ${tokenShopSaveBoundarySummary.rangeFamilySubjectId}, with blocked input ${tokenShopSaveBoundarySummary.blockedInputReason}.`
           : `TokenShop save boundary keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.`
         : "TokenShop save-boundary clues are not available in this build.",
       multiverseMarketOwnerFamilySummary.hasOwnerFamily
-        ? `MultiverseMarket owner-family clues preserve ${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, ${multiverseMarketOwnerFamilySummary.textHandler}, ${multiverseMarketOwnerFamilySummary.batcher}, and ${multiverseMarketOwnerFamilySummary.costBox}.`
+        ? `MultiverseMarket owner-family clues preserve ${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, ${multiverseMarketOwnerFamilySummary.textHandler}, and ${multiverseMarketOwnerFamilySummary.batcher}${multiverseMarketOwnerFamilySummary.costBox ? `, with ${multiverseMarketOwnerFamilySummary.costBox}` : ""}.`
         : "MultiverseMarket owner-family clues are not available in this build.",
       multiverseMarketSaveBoundarySummary.hasSeparationBoundary
-        ? `MultiverseMarket save boundary keeps ${multiverseMarketSaveBoundarySummary.actionAnchor} separate from ${multiverseMarketSaveBoundarySummary.saveAnchor}, with ${multiverseMarketSaveBoundarySummary.overlapLabel}.`
+        ? `MultiverseMarket save boundary keeps ${multiverseMarketSaveBoundarySummary.actionAnchor} separate from ${multiverseMarketSaveBoundarySummary.saveAnchor}, with ${multiverseMarketSaveBoundarySummary.overlapLabel}${multiverseMarketSaveBoundarySummary.typedSpanLabel ? ` across ${multiverseMarketSaveBoundarySummary.typedSpanLabel}` : ""}${multiverseMarketSaveBoundarySummary.boundaryVerdict ? ` under ${multiverseMarketSaveBoundarySummary.boundaryVerdict} verdict` : ""}${hasDbCoverage(multiverseMarketSaveBoundarySummary) && (multiverseMarketSaveBoundarySummary.genericFactCount || multiverseMarketSaveBoundarySummary.genericGapCount) ? `, plus ${multiverseMarketSaveBoundarySummary.genericFactCount || 0} generic fact row${multiverseMarketSaveBoundarySummary.genericFactCount === 1 ? "" : "s"} and ${multiverseMarketSaveBoundarySummary.genericGapCount || 0} generic gap row${multiverseMarketSaveBoundarySummary.genericGapCount === 1 ? "" : "s"}` : ""}.`
         : "MultiverseMarket save-boundary clues are not available in this build."
     ];
     const spendOpenIssues = [
       marketMemberSummary.hasExactSaveDataProgressionOwner
-        ? `Save-side owner narrows to ${marketMemberSummary.exactSaveOwnerLabel}, but planner-ready owned-state inputs and canonical row-level imports remain blocked.`
+        ? `Save-side owner narrows to ${marketMemberSummary.exactSaveOwnerLabel}${marketMemberSummary.compatibilityImportTargetPath ? `, with compatibility import still quarantined at ${marketMemberSummary.compatibilityImportTargetPath}` : ""}, but planner-ready owned-state inputs and canonical row-level imports remain blocked.`
         : "Exact save-side owner recovery is still incomplete for the wider Emporium progression run.",
       multiverseMarketRangeSummary.hasOverlap
         ? `Validated rows ${multiverseMarketRangeSummary.validatedRangeLabel} only overlap the recovered metadata run ${multiverseMarketRangeSummary.metadataRangeLabel} at ${multiverseMarketRangeSummary.overlapLabel}.`
@@ -2947,40 +3518,56 @@ function renderResearchTrackSupport(track) {
     const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenShop);
     const tokenBankOwnerNotes = [
       tokenShopOwnerShellSummary.hasOwnerShell
-        ? tokenShopOwnerShellSummary.coverageSource === "subject-contracts"
-          ? `TokenShop canonical subjects now preserve ${tokenShopOwnerShellSummary.rowLocalSubjectId} plus ${tokenShopOwnerShellSummary.rangeFamilySubjectId}, while the remaining blocked input stays ${tokenShopOwnerShellSummary.blockedInputReason || "explicitly recorded"}.`
+        ? hasTokenShopDbCoverage(tokenShopOwnerShellSummary)
+          ? `DB-backed TokenShop subjects now preserve ${tokenShopOwnerShellSummary.rowLocalSubjectId} plus ${tokenShopOwnerShellSummary.rangeFamilySubjectId}, while the remaining blocked input stays ${tokenShopOwnerShellSummary.blockedInputReason || "explicitly recorded"}.`
           : `TokenShop owner-shell clues preserve ${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook} as one local controller cluster.`
         : "TokenShop owner-shell clues are not available in this build.",
       tokenShopSaveBoundarySummary.hasSeparationBoundary
-        ? tokenShopSaveBoundarySummary.coverageSource === "subject-contracts"
+        ? hasTokenShopDbCoverage(tokenShopSaveBoundarySummary)
           ? `Canonical subject-state keeps ${tokenShopSaveBoundarySummary.rowLocalSubjectId} separate from ${tokenShopSaveBoundarySummary.rangeFamilySubjectId}, while blocked input stays ${tokenShopSaveBoundarySummary.blockedInputReason}.`
           : `The checked save boundary keeps ${tokenShopSaveBoundarySummary.ownerAnchor} separate from ${tokenShopSaveBoundarySummary.saveAnchor}, with ${tokenShopSaveBoundarySummary.overlapLabel}.`
         : "TokenShop save-boundary clues are not available in this build.",
       tokenBankControllerShellSummary.hasControllerShell
-        ? tokenBankControllerShellSummary.coverageSource === "subject-contracts"
-          ? `Canonical TokenShop contracts now preserve token-bank controller shell on ${tokenBankControllerShellSummary.rowLocalSubjectId}, with ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.`
+        ? hasTokenShopDbCoverage(tokenBankControllerShellSummary)
+          ? `DB-backed TokenShop mechanics now preserve token-bank controller shell on ${tokenBankControllerShellSummary.rowLocalSubjectId}, with ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.`
           : `The token-bank controller shell preserves ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}.`
         : "Token-bank controller-shell clues are not available in this build.",
       tokenBankStateSummary.hasControllerSplit
-        ? tokenBankStateSummary.coverageSource === "subject-contracts"
-          ? `Canonical TokenShop contracts now preserve token-bank state on ${tokenBankStateSummary.rowLocalSubjectId || tokenBankStateSummary.rangeFamilySubjectId || "the current TokenShop subject"}, with ${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook}.`
+        ? hasTokenShopDbCoverage(tokenBankStateSummary)
+          ? `DB-backed TokenShop mechanics now preserve token-bank state on ${tokenBankStateSummary.rowLocalSubjectId || tokenBankStateSummary.rangeFamilySubjectId || "the current TokenShop subject"}, with ${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook}.`
           : `Display clues such as ${tokenBankStateSummary.displayShell} and ${tokenBankStateSummary.loopHook} stay beside controller methods like ${tokenBankStateSummary.capMethod}.`
         : "Token-bank controller or display split clues are not available in this build."
+      ,
+      tokenBankStateSummary.hasExactStoredAmountOwner
+        ? hasTokenShopDbCoverage(tokenBankStateSummary)
+          ? `DB-backed TokenShop state now keeps ${tokenBankStateSummary.exactSaveOwnerLabel} as the exact stored-amount owner for this lane without promoting cap or ready-state ownership.`
+          : `Exact typed recovery keeps ${tokenBankStateSummary.exactSaveOwnerLabel} as the current stored-amount owner for this lane.`
+        : "The exact stored-amount owner is not available in this build.",
+      tokenBankStateSummary.hasPlayerProfileBridgeBoundary
+        ? hasTokenShopDbCoverage(tokenBankStateSummary)
+          ? `The checked save bridge still narrows through ${tokenBankStateSummary.profileBridgeLabel}, which keeps the search past the generic PlayerProfile export wrapper instead of treating it as a recovered bank-cap owner.`
+          : `The checked PlayerProfile bridge still narrows through ${tokenBankStateSummary.profileBridgeLabel}.`
+        : "The checked PlayerProfile save bridge is not available in this build."
     ];
     const tokenBankBlockedNotes = [
+      tokenBankStateSummary.hasGenericClaimableBoundary
+        ? hasTokenShopDbCoverage(tokenBankStateSummary)
+          ? `${tokenBankStateSummary.genericClaimableLabel} is still only preserved as a broader generic Tokenium-cluster claimable field, not as token-bank claimable or ready-state ownership.`
+          : `${tokenBankStateSummary.genericClaimableLabel} remains a broader generic Tokenium-cluster claimable clue, not a token-bank-specific owner.`
+        : "No broader generic Tokenium-cluster claimable clue is preserved in this build.",
       tokenBankFormulaSummary.hasDerivedOutputBoundary
-        ? tokenBankFormulaSummary.coverageSource === "subject-contracts"
-          ? `${tokenBankFormulaSummary.rowLocalSubjectId || tokenBankFormulaSummary.rangeFamilySubjectId || "Canonical TokenShop subject"} preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} on the subject contract.`
+        ? hasTokenShopDbCoverage(tokenBankFormulaSummary)
+          ? `${tokenBankFormulaSummary.rowLocalSubjectId || tokenBankFormulaSummary.rangeFamilySubjectId || "DB-backed TokenShop subject"} preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} on the DB-backed mechanics surface.`
           : `Derived-output cluster preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField}.`
         : "Token-bank derived-output clues are not available in this build.",
       tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext
-        ? tokenBankFormulaSummary.coverageSource === "subject-contracts"
-          ? "The contract-backed derived-output lane still records no save-family overlap in the grounded context."
+        ? hasTokenShopDbCoverage(tokenBankFormulaSummary)
+          ? "The DB-backed derived-output lane still records no save-family overlap in the grounded context."
           : "FinalTokenBank outputs remain non-owner clues rather than recovered saved-state fields."
         : "The checked derived-output cluster now overlaps the broader save-family search and needs review.",
       tokenBankStateSummary.hasCloudSaveShellBoundary
-        ? tokenBankStateSummary.coverageSource === "subject-contracts"
-          ? `Canonical TokenShop contracts still keep the CloudSavePlayerProfile shell narrowed through ${tokenBankStateSummary.cloudSaveInfoRoutine}, ${tokenBankStateSummary.cloudSaveProfileRoutine}, and ${tokenBankStateSummary.cloudSaveStateMachine}.`
+        ? hasTokenShopDbCoverage(tokenBankStateSummary)
+          ? `DB-backed TokenShop mechanics still keep the CloudSavePlayerProfile shell narrowed through ${tokenBankStateSummary.cloudSaveInfoRoutine}, ${tokenBankStateSummary.cloudSaveProfileRoutine}, and ${tokenBankStateSummary.cloudSaveStateMachine}.`
           : `Remaining CloudSavePlayerProfile evidence only preserves a metadata-side shell through ${tokenBankStateSummary.cloudSaveInfoRoutine}, ${tokenBankStateSummary.cloudSaveProfileRoutine}, and ${tokenBankStateSummary.cloudSaveStateMachine}.`
         : "The narrowed CloudSavePlayerProfile shell boundary is not available in this build.",
       "This is enough to narrow future recovery work, but not enough to identify the exact declaring save model or a narrower PlayerProfile-side wrapper path for token-bank state."
@@ -3742,6 +4329,7 @@ function renderShardPlannerControls() {
 }
 
 function renderShardWorkflowSnapshot() {
+  const shardDbCoverage = getShardDbCoverageSummary(getCurrentShardSystemView());
   const mechanicsBundle =
     getCurrentShardSystemView()?.family?.grounded?.milestones?.canonicalMechanics ?? {};
   const milestones = getGroundedShardMilestones();
@@ -3759,6 +4347,7 @@ function renderShardWorkflowSnapshot() {
           <p class="meta">${escapeHtml(mechanicsBundle.shards?.unlock_condition?.description || "Shard unlock condition unavailable.")}</p>
           <p class="meta">${escapeHtml(mechanicsBundle.shards?.how_acquired?.description || "Shard acquisition note unavailable.")}</p>
           <p class="meta">${escapeHtml(mechanicsBundle.shards?.reset_behavior?.description || "Loop-reset behavior note unavailable.")}</p>
+          <p class="meta">${shardDbCoverage.hasCoverage ? `DB-backed shard coverage now tracks ${escapeHtml(String(shardDbCoverage.subjectCount || 0))} subject${shardDbCoverage.subjectCount === 1 ? "" : "s"} via ${escapeHtml(shardDbCoverage.coverageSource || "db coverage")}, with next seams ${escapeHtml(shardDbCoverage.nextSeamLabel || "unrecorded")}.` : "DB-backed shard coverage has not been materialized yet in this build."}</p>
         </div>
       </article>
       <article class="snapshot-card">
@@ -3778,25 +4367,18 @@ function renderShardWorkflowSnapshot() {
 
 function renderShardGroundingBoundary() {
   const shardSystem = getCurrentShardSystemView();
+  const shardDbCoverage = getShardDbCoverageSummary(shardSystem);
   const provenance = shardSystem?.family?.grounded?.provenance;
   const uncertaintyLog = provenance?.uncertaintyLog ?? [];
   const conflictCount = uncertaintyLog.filter((item) => item.status === "conflict_detected").length;
   const missingCount = uncertaintyLog.filter((item) => item.status !== "conflict_detected").length;
   const assetGrounding = shardSystem?.family?.grounded?.assetGrounding;
-  const ownerBoundary = getShardOwnerFamilyBoundarySummary(
-    shardSystem?.family?.boundaries?.ownerFamily
-  );
-  const costModelBoundary = getShardCostModelBoundarySummary(shardSystem?.cost?.costModelBoundary);
-  const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
-    shardSystem?.family?.boundaries?.rowModel
-  );
-  const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(
-    shardSystem?.family?.boundaries?.titleEffect
-  );
-  const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
-    shardSystem?.family?.boundaries?.effectTextHandler
-  );
-  const saveBoundary = getShardSaveBoundarySummary(shardSystem?.ownedState?.saveBoundary);
+  const ownerBoundary = getShardOwnerFamilyBoundarySummary(shardSystem);
+  const costModelBoundary = getShardCostModelBoundarySummary(shardSystem);
+  const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(shardSystem);
+  const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(shardSystem);
+  const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(shardSystem);
+  const saveBoundary = getShardSaveBoundarySummary(shardSystem);
   const identifiers = Array.isArray(assetGrounding?.groundedShellIdentifiers)
     ? assetGrounding.groundedShellIdentifiers.slice(0, 5)
     : [];
@@ -3826,6 +4408,8 @@ function renderShardGroundingBoundary() {
         </div>
         <strong>Safe shard truths already shown in the app</strong>
         <div class="meta-stack">
+          <p class="meta">${shardDbCoverage.hasCoverage ? `DB-backed shard boundary coverage now includes ${shardDbCoverage.subjectLabels.join(", ")}.` : "DB-backed shard boundary coverage has not been materialized yet in this build."}</p>
+          <p class="meta">${shardDbCoverage.hasCoverage && (shardDbCoverage.genericFactCount || shardDbCoverage.genericGapCount) ? `Current generic shard mechanics preserve ${escapeHtml(String(shardDbCoverage.genericFactCount || 0))} fact row${shardDbCoverage.genericFactCount === 1 ? "" : "s"} and ${escapeHtml(String(shardDbCoverage.genericGapCount || 0))} gap row${shardDbCoverage.genericGapCount === 1 ? "" : "s"} for the active shard bundle.` : "Generic shard fact/gap rows are not yet available for this build."}</p>
           <p class="meta">Shards are a real CIFI resource tied to Operations and the Shard Mining Menu.</p>
           <p class="meta">Shards reset on Loop Prestige, so warning-oriented reset guardrails are safe to show.</p>
           <p class="meta">The app can safely show unlock-watch cards, threshold-watch cards, and loop warnings around those anchors.</p>
@@ -3840,7 +4424,7 @@ function renderShardGroundingBoundary() {
         </div>
         <strong>Definition family is grounded; owned state stays blocked</strong>
         <div class="meta-stack">
-          <p class="meta">Direct ShardMining payload now grounds the reachable shard row-definition family as product data: title-side evidence, unlock requirements, bonus-package shape, and row-local cost shell all belong in the tool.</p>
+          <p class="meta">Direct ${escapeHtml(saveBoundary.directPayloadAnchor || ownerBoundary.screenController || "shard")} payload now grounds the reachable shard row-definition family as product data: title-side evidence, unlock requirements, bonus-package shape, and row-local cost shell all belong in the tool.</p>
           <p class="meta">What the grounded app can safely show today: definition-side shard rows, loop warnings, threshold wording, and evidence-status notes sourced from the shared shard-family contract.</p>
           <p class="meta">Player-owned shard state, import mapping, affordability, planner math, ROI, ETA, and best-buy claims stay blocked outside this contract.</p>
           <p class="meta">${escapeHtml(blockedUses.length ? `${blockedUses.join(", ")} remain blocked until player-owned shard ownership and planner-safe cost validation are recovered.` : "Ranking, ROI, ETA, affordability, and best-upgrade claims remain blocked until player-owned shard ownership and planner-safe cost validation are recovered.")}</p>
@@ -3853,11 +4437,12 @@ function renderShardGroundingBoundary() {
           <span class="snapshot-title">Definition carrier</span>
           <span class="shard-status-pill ${ownerBoundaryStatus.pillClass}">${escapeHtml(ownerBoundaryStatus.label)}</span>
         </div>
-        <strong>ShardMining owns the reachable definition family</strong>
+        <strong>${escapeHtml(ownerBoundary.screenController || "Shard owner-family")} owns the reachable definition family</strong>
         <div class="meta-stack">
           <p class="meta">${ownerBoundary.hasBoundary ? "Recovered ownership clues consistently point at a shard-specific family instead of the generic milestone shell." : "The current build still lacks enough shard-specific ownership evidence to map milestone rows safely."}</p>
-          <p class="meta">${ownerBoundary.hasBoundary ? "That closes the row-definition carrier at the shard side instead of leaving the family on a generic academy milestone path." : "Until ownership mapping is resolved, row-level shard cost recovery stays descriptive only."}</p>
-          <p class="meta">${ownerBoundary.hasDowngradedGenericLead ? "The generic milestone path is still intentionally downgraded so the app does not over-read shared UI structure as shard truth." : "Generic milestone overlap still needs more comparison work."}</p>
+          <p class="meta">${ownerBoundary.hasBoundary ? hasDbCoverage(ownerBoundary) ? `DB-backed shard owner-family coverage now preserves ${escapeHtml(ownerBoundary.subjectId || "family-graph:shards-owner-family")} through ${escapeHtml(ownerBoundary.runtimeShell || ownerBoundary.dataCarrier || "its runtime shell")}, with next seam ${escapeHtml(ownerBoundary.nextSeamId || "unrecorded")}${ownerBoundary.boundaryVerdict ? ` under ${escapeHtml(ownerBoundary.boundaryVerdict)} verdict` : ""}.` : "That closes the row-definition carrier at the shard side instead of leaving the family on a generic academy milestone path." : "Until ownership mapping is resolved, row-level shard cost recovery stays descriptive only."}</p>
+          <p class="meta">${ownerBoundary.hasStructure ? `The live fragment structure keeps ${escapeHtml(ownerBoundary.ownerField || "the owner field")} attached to ${escapeHtml(ownerBoundary.rowModelType || ownerBoundary.dataCarrier || "the shard row model")}, with ${escapeHtml(ownerBoundary.rowStateFieldLabel || "unrecorded row-state fields")} preserved for future owner binding.` : ownerBoundary.outcomeStatement ? escapeHtml(ownerBoundary.outcomeStatement) : "Shard owner-family structure still needs deeper recovery."}</p>
+          <p class="meta">${ownerBoundary.sourceTraceScope || ownerBoundary.sourceSubjectId ? `This owner-family model is derived from ${escapeHtml(ownerBoundary.sourceTraceScope || "a live trace scope")}${ownerBoundary.sourceSubjectId ? ` via ${escapeHtml(ownerBoundary.sourceSubjectId)}` : ""}, rather than from the archived shard boundary artifact.` : "The current build does not yet expose the live source trace for shard owner-family."}</p>
         </div>
       </article>
       <article class="snapshot-card shard-status-card ${costBoundaryStatus.cardClass}">
@@ -3867,9 +4452,9 @@ function renderShardGroundingBoundary() {
         </div>
         <strong>Recovered cost data now supports evidence cards</strong>
         <div class="meta-stack">
-          <p class="meta">${costModelBoundary.hasSampledCostWindows ? "Recovered cost samples now show that shard costs follow row-local runtime data instead of a generic UI-only path." : "The current build does not yet recover enough row-local cost evidence to describe shard costs beyond generic breakpoint notes."}</p>
-          <p class="meta">${costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell ? "That is enough to show row evidence and status per milestone card without claiming exact affordability or formula certainty." : "Until that recovery exists, player-facing cost views should remain blocked."}</p>
-          <p class="meta">${costModelBoundary.hasSampledCostWindows ? "The app still does not claim exact next-cost math, best-buy order, or recommendation-grade certainty from this contract." : "No recommendation-grade shard cost behavior is enabled from this path."}</p>
+          <p class="meta">${costModelBoundary.hasSampledCostWindows ? hasDbCoverage(costModelBoundary) ? `DB-backed shard boundary coverage now preserves ${costModelBoundary.subjectId || "the shard cost boundary"} with ${costModelBoundary.costWindowLabel}${costModelBoundary.boundaryVerdict ? ` under ${costModelBoundary.boundaryVerdict} verdict` : ""}.` : "Recovered cost samples now show that shard costs follow row-local runtime data instead of a generic UI-only path." : "The current build does not yet recover enough row-local cost evidence to describe shard costs beyond generic breakpoint notes."}</p>
+          <p class="meta">${costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell ? hasDbCoverage(costModelBoundary) ? `The same shard DB surface keeps ${costModelBoundary.row0FieldLabel} attached to ${costModelBoundary.dataCarrier}, with next seam ${costModelBoundary.nextSeamId || "unrecorded"}${costModelBoundary.genericGapCount ? ` and ${costModelBoundary.genericGapCount} explicit generic gap row${costModelBoundary.genericGapCount === 1 ? "" : "s"}` : ""}.` : "That is enough to show row evidence and status per milestone card without claiming exact affordability or formula certainty." : "Until that recovery exists, player-facing cost views should remain blocked."}</p>
+          <p class="meta">${costModelBoundary.hasSampledCostWindows ? hasDbCoverage(costModelBoundary) ? `Planner-safe shard cost output remains blocked at ${costModelBoundary.blockedOptimizerLabel || "an explicit metadata seam"}, so the app still does not claim exact next-cost math or best-buy order.` : "The app still does not claim exact next-cost math, best-buy order, or recommendation-grade certainty from this contract." : "No recommendation-grade shard cost behavior is enabled from this path."}</p>
         </div>
       </article>
       <article class="snapshot-card shard-status-card ${rowEvidenceStatus.cardClass}">
@@ -3891,8 +4476,8 @@ function renderShardGroundingBoundary() {
         </div>
         <strong>Player-owned shard state is still not recovered</strong>
         <div class="meta-stack">
-          <p class="meta">${saveBoundary.hasSeparationBoundary ? "Recovered shard-local evidence still separates direct row definitions from unresolved PlayerProfile save ownership." : "The current build does not yet preserve a clean shard-to-save separation result."}</p>
-          <p class="meta">${saveBoundary.hasSeparationBoundary && saveBoundary.hasDirectRowDefinitionPayload && saveBoundary.hasRuntimeOwnedStateShell ? "Direct ShardMining payload names the reachable row family, but player-owned row state still stops at the upgradeInfoList runtime shell." : "The current split between shard row definitions and owned-state recovery is not yet preserved in this build."}</p>
+          <p class="meta">${saveBoundary.hasSeparationBoundary ? hasDbCoverage(saveBoundary) ? `DB-backed shard boundary coverage now preserves ${saveBoundary.subjectId || "the shard owned-state boundary"} and still separates ${saveBoundary.ownerAnchor} from ${saveBoundary.saveAnchor}${saveBoundary.boundaryVerdict ? ` under ${saveBoundary.boundaryVerdict} verdict` : ""}.` : "Recovered shard-local evidence still separates direct row definitions from unresolved PlayerProfile save ownership." : "The current build does not yet preserve a clean shard-to-save separation result."}</p>
+          <p class="meta">${saveBoundary.hasSeparationBoundary && saveBoundary.hasDirectRowDefinitionPayload && saveBoundary.hasRuntimeOwnedStateShell ? hasDbCoverage(saveBoundary) ? `Direct ${saveBoundary.directPayloadAnchor} payload reaches ${saveBoundary.runtimeShellAnchor}, but the owned-state bridge is still blocked at ${saveBoundary.nextSeamId || "an unrecorded seam"}${saveBoundary.genericGapCount ? ` with ${saveBoundary.genericGapCount} explicit generic gap row${saveBoundary.genericGapCount === 1 ? "" : "s"}` : ""}.` : `Direct ${saveBoundary.directPayloadAnchor || "shard"} payload names the reachable row family, but player-owned row state still stops at ${saveBoundary.runtimeShellAnchor || "the runtime shell"}.` : "The current split between shard row definitions and owned-state recovery is not yet preserved in this build."}</p>
           <p class="meta">${saveBoundary.hasSeparationBoundary ? escapeHtml(saveBoundary.ownedStateStatusLabel) : "The current build does not yet preserve a shard owned-state population boundary."}</p>
           <p class="meta">${saveBoundary.hasSeparationBoundary ? "That is useful because it blocks the UI from implying imported shard milestone ownership that the contract does not support." : "Until separation is verified, shard evidence should be treated as even more provisional."}</p>
           <p class="meta">Manual inputs can guide descriptive watch cards, but they do not turn this flow into recovered save-state truth or a grounded import path.</p>
@@ -3961,11 +4546,13 @@ function renderShardWorkflowReference() {
       <article class="snapshot-card">
         <span class="snapshot-title">Reference limits</span>
         <div class="meta-stack">
+          <p class="meta">${shardDbCoverage.hasCoverage ? `DB-backed shard boundary coverage currently exposes ${shardDbCoverage.subjectCount} subject${shardDbCoverage.subjectCount === 1 ? "" : "s"}: ${shardDbCoverage.subjectLabels.join(", ")}.` : "DB-backed shard boundary coverage is not available in this build."}</p>
           <p class="meta">Base max level before Workers Badge: ${formatOptionalNumber(levelCaps.base_max_level_before_workers_badge)}</p>
           <p class="meta">Max level after Workers Badge: ${formatOptionalNumber(levelCaps.max_level_after_workers_badge)}</p>
           <p class="meta">${escapeHtml(levelCaps.research_note || "Research max-level note unavailable.")}</p>
           <p class="meta">${escapeHtml(levelCaps.ultima_loop_mod_note || "Ultima Loop Mod note unavailable.")}</p>
           <p class="meta">${escapeHtml(mechanics.cost_breakpoints_observed?.breakpoints_statement || "Cost breakpoint note unavailable.")}</p>
+          <p class="meta">${shardDbCoverage.hasCoverage && shardDbCoverage.nextSeamLabel ? `Current DB next seams: ${shardDbCoverage.nextSeamLabel}.` : "No DB next-seam coverage is currently available for shard boundaries."}</p>
         </div>
         <div class="meta-stack">
           <p class="snapshot-title">Preserved uncertainty</p>
@@ -4054,18 +4641,24 @@ function renderShardMilestoneDirectory() {
   const mechanics = getGroundedShardMechanics();
   const milestones = getMilestonesForDisplay();
   const evidenceCounts = getShardMilestoneEvidenceCounts();
-  const familyEvidence = getCurrentShardSystemView()?.family?.familyEvidence;
+  const shardSystem = getCurrentShardSystemView();
+  const shardDbCoverage = getShardDbCoverageSummary(shardSystem);
+  const ownerBoundary = getShardOwnerFamilyBoundarySummary(shardSystem);
+  const saveBoundary = getShardSaveBoundarySummary(shardSystem);
+  const familyEvidence = shardSystem?.family?.familyEvidence;
   const sharedEvidence = familyEvidence?.sharedEvidence ?? {};
   const ownedStateBlocker = getShardOwnedStateBlockerSummary();
   return `
     <div class="meta-stack">
       <p class="eyebrow">Shard Mining family evidence</p>
       <h3>Shard milestone rows</h3>
-      <p class="meta">These rows render from one shared shard-family evidence table for the reachable ShardMining family. The table now acts as a finished definition-side contract: row definitions are grounded product data, while player-owned shard state remains explicitly blocked.</p>
+      <p class="meta">These rows render from one shared shard-family evidence table for the reachable ${escapeHtml(ownerBoundary.screenController || "shard")} family. The table now acts as a finished definition-side contract: row definitions are grounded product data, while player-owned shard state remains explicitly blocked.</p>
       <div class="page-grid">
         <article class="snapshot-card">
           <span class="snapshot-title">Grounded definition family</span>
-          <p class="meta">Reachable family: rows 0-29 via <strong>ShardMining.upgradeInfoList</strong> -> <strong>ShardMining+ShardUpgradeInfo</strong>.</p>
+          <p class="meta">Reachable family: rows 0-29 via <strong>${escapeHtml(saveBoundary.runtimeShellAnchor || "ShardMining.upgradeInfoList")}</strong> with <strong>${escapeHtml(saveBoundary.ownerAnchor || "ShardMining / ShardUpgradeInfo")}</strong>.</p>
+          <p class="meta">${shardDbCoverage.hasCoverage ? `DB-backed shard boundary coverage now tracks ${shardDbCoverage.subjectLabels.join(", ")}.` : "DB-backed shard boundary coverage is not available in this build."}</p>
+          <p class="meta">${shardDbCoverage.hasCoverage && (shardDbCoverage.genericFactCount || shardDbCoverage.genericGapCount) ? `Generic shard mechanics currently preserve ${escapeHtml(String(shardDbCoverage.genericFactCount || 0))} fact row${shardDbCoverage.genericFactCount === 1 ? "" : "s"} and ${escapeHtml(String(shardDbCoverage.genericGapCount || 0))} gap row${shardDbCoverage.genericGapCount === 1 ? "" : "s"} across that shard bundle.` : "Generic shard mechanics are not yet exposing fact/gap rows for this build."}</p>
           <p class="meta">Definition status counts: ${escapeHtml(`${evidenceCounts.verified} verified | ${evidenceCounts.partial} partial | ${evidenceCounts.blocked} blocked`)}</p>
           <p class="meta">${escapeHtml(sharedEvidence.rowModel?.summary || "Row-model summary unavailable.")}</p>
           <p class="meta">${escapeHtml(sharedEvidence.payloadWatch?.summary || "Payload-watch summary unavailable.")}</p>
@@ -4074,6 +4667,7 @@ function renderShardMilestoneDirectory() {
         <article class="snapshot-card">
           <span class="snapshot-title">Owned-state blocker</span>
           <p class="meta">${escapeHtml(sharedEvidence.saveBoundary?.summary || "Save-boundary summary unavailable.")}</p>
+          <p class="meta">${shardDbCoverage.hasCoverage && shardDbCoverage.nextSeamLabel ? `Current DB next seams: ${escapeHtml(shardDbCoverage.nextSeamLabel)}.` : "No DB next-seam coverage is currently available for shard boundaries."}</p>
           <p class="meta">${escapeHtml(ownedStateBlocker.ownerLine)}</p>
           <p class="meta">${escapeHtml(ownedStateBlocker.traceLine)}</p>
           <p class="meta">${escapeHtml(ownedStateBlocker.importLine)}</p>
@@ -4222,9 +4816,7 @@ function buildApkGroundingValidationCases() {
   const shardSystem = getCurrentShardSystemView();
   const tokenShop = spendSystem?.tokenShop;
   const market = spendSystem?.multiverseMarket;
-  const hasTokenShopSubjectContracts = Boolean(
-    tokenShop?.subjectContracts && Object.keys(tokenShop.subjectContracts).length
-  );
+  const hasTokenShopDbRead = hasTokenShopDbSurface(tokenShop);
   const multiverseMarket = market?.saveOwner?.extract;
   const multiverseMarketMetadataNeighborhood = market?.rowIdentity?.metadataNeighborhood;
   const multiverseMarketRangeBoundary = market?.rowIdentity?.rangeBoundary;
@@ -4236,15 +4828,7 @@ function buildApkGroundingValidationCases() {
   const multiverseMarketMarketMemberBoundary = market?.saveOwner?.marketMemberBoundary;
   const shardMilestones = shardSystem?.family?.grounded?.milestones;
   const shardAssetGrounding = shardSystem?.family?.grounded?.assetGrounding;
-  const shardOwnerFamilyBoundary = shardSystem?.family?.boundaries?.ownerFamily;
-  const shardFinalSuBonusBoundary = shardSystem?.family?.boundaries?.finalSuBonus;
-  const shardMilestonePayloadBoundary = shardSystem?.family?.boundaries?.milestonePayload;
   const shardCostModelBoundary = shardSystem?.cost?.costModelBoundary;
-  const shardMilestoneRowModelBoundary = shardSystem?.family?.boundaries?.rowModel;
-  const shardMilestoneTitleEffectBoundary = shardSystem?.family?.boundaries?.titleEffect;
-  const shardEffectTextHandlerBoundary = shardSystem?.family?.boundaries?.effectTextHandler;
-  const shardMilestoneRowShellBoundary = shardSystem?.family?.boundaries?.rowShell;
-  const shardMilestoneRowAlignmentBoundary = shardSystem?.family?.boundaries?.rowAlignment;
   const shardSaveBoundary = shardSystem?.ownedState?.saveBoundary;
   const tokeniumNamingSummary = getTokeniumNamingSummary(tokenShop);
   const tokenShopCostLaneSummary = getTokenShopCostLaneSummary(tokenShop);
@@ -4256,23 +4840,23 @@ function buildApkGroundingValidationCases() {
   const dailyTokeniumSummary = getDailyTokeniumLaneSummary(tokenShop);
   const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenShop);
   const hasTokeniumNamingRead =
-    hasTokenShopSubjectContracts || Boolean(tokenShop?.tokenBank?.namingClues);
+    hasTokenShopDbRead || Boolean(tokenShop?.tokenBank?.namingClues);
   const hasTokenShopCostLaneRead =
-    hasTokenShopSubjectContracts || Boolean(tokenShop?.spendLanes?.costLanes);
+    hasTokenShopDbRead || Boolean(tokenShop?.spendLanes?.costLanes);
   const hasSpendActionLaneRead =
-    hasTokenShopSubjectContracts || Boolean(tokenShop?.spendLanes?.actionLaneClues);
+    hasTokenShopDbRead || Boolean(tokenShop?.spendLanes?.actionLaneClues);
   const hasTokenShopOwnerShellRead =
-    hasTokenShopSubjectContracts || Boolean(tokenShop?.tokenBank?.ownerShell);
+    hasTokenShopDbRead || Boolean(tokenShop?.tokenBank?.ownerShell);
   const hasTokenShopSaveBoundaryRead =
-    hasTokenShopSubjectContracts || Boolean(tokenShop?.rows?.boundaries?.save);
+    hasTokenShopDbRead || Boolean(tokenShop?.rows?.boundaries?.save);
   const hasTokenBankControllerShellRead =
-    hasTokenShopSubjectContracts || Boolean(tokenShop?.tokenBank?.controllerShell);
+    hasTokenShopDbRead || Boolean(tokenShop?.tokenBank?.controllerShell);
   const hasTokenBankStateRead =
-    hasTokenShopSubjectContracts || Boolean(tokenShop?.tokenBank?.stateClues);
+    hasTokenShopDbRead || Boolean(tokenShop?.tokenBank?.stateClues);
   const hasDailyTokeniumLaneRead =
-    hasTokenShopSubjectContracts || Boolean(tokenShop?.dailyTokenium?.laneClues);
+    hasTokenShopDbRead || Boolean(tokenShop?.dailyTokenium?.laneClues);
   const hasTokenBankFormulaRead =
-    hasTokenShopSubjectContracts || Boolean(tokenShop?.tokenBank?.formulaBoundary);
+    hasTokenShopDbRead || Boolean(tokenShop?.tokenBank?.formulaBoundary);
   const cases = [];
 
   if (shardAssetGrounding) {
@@ -4301,45 +4885,45 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
-  if (shardOwnerFamilyBoundary) {
-    const ownerBoundary = getShardOwnerFamilyBoundarySummary(shardOwnerFamilyBoundary);
+  if (shardSystem) {
+    const ownerBoundary = getShardOwnerFamilyBoundarySummary(shardSystem);
     cases.push({
       title: "Shard owner-family boundary",
       expected:
-        "ShardMining and ShardUpgradeInfo stay narrowed while ConstructionMilestones remains downgraded",
+        `${ownerBoundary.screenController} keeps ${ownerBoundary.ownerField || "the owner field"} attached to ${ownerBoundary.rowModelType || ownerBoundary.dataCarrier} while ${ownerBoundary.nextSeamId || ownerBoundary.blockedEdgeLabel || "the current owner seam"} remains blocked`,
       actual:
-        ownerBoundary.hasBoundary && ownerBoundary.hasDowngradedGenericLead
-          ? "ShardMining and ShardUpgradeInfo stay narrowed while ConstructionMilestones remains downgraded"
+        ownerBoundary.hasBoundary && ownerBoundary.hasStructure
+          ? `${ownerBoundary.screenController} keeps ${ownerBoundary.ownerField || "the owner field"} attached to ${ownerBoundary.rowModelType || ownerBoundary.dataCarrier} while ${ownerBoundary.nextSeamId || ownerBoundary.blockedEdgeLabel || "the current owner seam"} remains blocked`
           : "Shard owner-family boundary drifted",
-      pass: ownerBoundary.hasBoundary && ownerBoundary.hasDowngradedGenericLead,
+      pass: ownerBoundary.hasBoundary && ownerBoundary.hasStructure,
       scope: "APK"
     });
   }
-  if (shardFinalSuBonusBoundary) {
-    const finalSuBoundary = getShardFinalSuBonusBoundarySummary(shardFinalSuBonusBoundary);
+  if (shardSystem) {
+    const finalSuBoundary = getShardFinalSuBonusBoundarySummary(shardSystem);
     cases.push({
       title: "Shard FinalSU bonus boundary",
       expected:
-        "ShardUpgradeInfo preserves SU final-unlock and FinalSU bonus-field families without row mapping claims",
+        `${finalSuBoundary.dataCarrier} preserves SU final-unlock and FinalSU bonus-field families without row mapping claims`,
       actual: finalSuBoundary.hasBoundary
-        ? `ShardUpgradeInfo preserves ${finalSuBoundary.unlockRangeLabel} plus ${finalSuBoundary.bonusFieldLabel}`
+        ? `${finalSuBoundary.dataCarrier} preserves ${finalSuBoundary.unlockRangeLabel} plus ${finalSuBoundary.bonusFieldLabel}`
         : "Shard FinalSU bonus-field boundary drifted",
       pass: finalSuBoundary.hasBoundary && finalSuBoundary.hasAdjacentFields,
       scope: "APK"
     });
   }
-  if (shardMilestonePayloadBoundary) {
-    const payloadBoundary = getShardMilestonePayloadBoundarySummary(shardMilestonePayloadBoundary);
+  if (shardSystem) {
+    const payloadBoundary = getShardMilestonePayloadBoundarySummary(shardSystem);
     cases.push({
       title: "Shard milestone payload boundary",
       expected:
-        "ShardUpgradeInfo preserves milestone-total, cost-list, progress-fill, and phase-tick hooks without claiming saved player rows",
+        `${payloadBoundary.dataCarrier} preserves milestone-total, cost-list, progress-fill, and phase-tick hooks without claiming saved player rows`,
       actual:
         payloadBoundary.hasBoundary &&
         payloadBoundary.hasCostAndListHooks &&
         payloadBoundary.hasProgressFillHooks &&
         payloadBoundary.hasTickFields
-          ? `ShardUpgradeInfo preserves ${payloadBoundary.milestoneStateLabel} plus ${payloadBoundary.costAccessorLabel}`
+          ? `${payloadBoundary.dataCarrier} preserves ${payloadBoundary.milestoneStateLabel} plus ${payloadBoundary.costAccessorLabel}`
           : "Shard milestone payload-watch boundary drifted",
       pass:
         payloadBoundary.hasBoundary &&
@@ -4350,17 +4934,17 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
-  if (shardCostModelBoundary) {
-    const costModelBoundary = getShardCostModelBoundarySummary(shardCostModelBoundary);
+  if (shardSystem?.db?.hasAny || shardCostModelBoundary) {
+    const costModelBoundary = getShardCostModelBoundarySummary(shardSystem);
     cases.push({
       title: "Shard cost-model boundary",
       expected:
-        "ShardUpgradeInfo preserves sampled SU cost accessors plus a row-local SU0 cost parameter shell without formula claims",
+        `${costModelBoundary.dataCarrier} preserves sampled SU cost accessors plus a row-local SU0 cost parameter shell without formula claims`,
       actual:
         costModelBoundary.hasBoundary &&
         costModelBoundary.hasSampledCostWindows &&
         costModelBoundary.hasRow0FormulaShell
-          ? `ShardUpgradeInfo preserves ${costModelBoundary.costWindowLabel} plus ${costModelBoundary.row0FieldLabel}`
+          ? `${costModelBoundary.dataCarrier} preserves ${costModelBoundary.costWindowLabel} plus ${costModelBoundary.row0FieldLabel}`
           : "Shard cost-model boundary drifted",
       pass:
         costModelBoundary.hasBoundary &&
@@ -4369,10 +4953,8 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
-  if (shardMilestoneRowModelBoundary) {
-    const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(
-      shardMilestoneRowModelBoundary
-    );
+  if (shardSystem) {
+    const rowModelBoundary = getShardMilestoneRowModelBoundarySummary(shardSystem);
     cases.push({
       title: "Shard milestone row model",
       expected:
@@ -4390,10 +4972,8 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
-  if (shardMilestoneTitleEffectBoundary) {
-    const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(
-      shardMilestoneTitleEffectBoundary
-    );
+  if (shardSystem) {
+    const titleEffectBoundary = getShardMilestoneTitleEffectBoundarySummary(shardSystem);
     cases.push({
       title: "Shard milestone titles and effect shell",
       expected:
@@ -4411,10 +4991,8 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
-  if (shardEffectTextHandlerBoundary) {
-    const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(
-      shardEffectTextHandlerBoundary
-    );
+  if (shardSystem) {
+    const effectTextHandlerBoundary = getShardEffectTextHandlerBoundarySummary(shardSystem);
     cases.push({
       title: "Shard effect-text handler boundary",
       expected:
@@ -4434,20 +5012,18 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
-  if (shardMilestoneRowShellBoundary) {
-    const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(
-      shardMilestoneRowShellBoundary
-    );
+  if (shardSystem) {
+    const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(shardSystem);
     cases.push({
       title: "Shard milestone row shell",
       expected:
-        "ShardMining preserves partial UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell without row-owner claims",
+        `${rowShellBoundary.screenController} preserves partial UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell without row-owner claims`,
       actual:
         rowShellBoundary.hasBoundary &&
         rowShellBoundary.hasUnlockHookSamples &&
         rowShellBoundary.hasBuyHookSamples &&
         rowShellBoundary.hasTextCheckerSamples
-          ? `ShardMining preserves ${rowShellBoundary.unlockHookLabel} plus ${rowShellBoundary.buyHookLabel} and ${rowShellBoundary.textCheckerLabel}`
+          ? `${rowShellBoundary.screenController} preserves ${rowShellBoundary.unlockHookLabel} plus ${rowShellBoundary.buyHookLabel} and ${rowShellBoundary.textCheckerLabel}`
           : "Shard milestone row-shell boundary drifted",
       pass:
         rowShellBoundary.hasBoundary &&
@@ -4457,10 +5033,8 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
-  if (shardMilestoneRowAlignmentBoundary) {
-    const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(
-      shardMilestoneRowAlignmentBoundary
-    );
+  if (shardSystem) {
+    const rowAlignmentBoundary = getShardMilestoneRowAlignmentBoundarySummary(shardSystem);
     cases.push({
       title: "Shard milestone row alignment",
       expected:
@@ -4503,8 +5077,8 @@ function buildApkGroundingValidationCases() {
       scope: "APK"
     });
   }
-  if (shardSaveBoundary) {
-    const saveBoundary = getShardSaveBoundarySummary(shardSaveBoundary);
+  if (shardSystem?.db?.hasAny || shardSaveBoundary) {
+    const saveBoundary = getShardSaveBoundarySummary(shardSystem);
     cases.push({
       title: "Shard save-side separation",
       expected:
@@ -4537,14 +5111,14 @@ function buildApkGroundingValidationCases() {
     cases.push({
       title: "TokenShop extracted family coverage",
       expected:
-        "Canonical TokenShop subject coverage or extracted family coverage remains available with token-bank controller anchors",
+        "DB-backed TokenShop subject coverage or extracted family coverage remains available with token-bank controller anchors",
       actual: tokenShopCoverage.hasCoverage
-        ? tokenShopCoverage.coverageSource === "subject-contracts"
-          ? `${tokenShopCoverage.subjectCount} canonical subjects with ${tokenShopCoverage.rowLocalCount} row-local / ${tokenShopCoverage.rangeFamilyCount} range-family entries${tokenShopCoverage.hasControllerAnchors ? " plus contract-grounded action/controller anchors" : " but missing contract-grounded action/controller anchors"}`
+        ? hasTokenShopDbCoverage(tokenShopCoverage)
+          ? `${tokenShopCoverage.subjectCount} DB-backed subjects with ${tokenShopCoverage.rowLocalCount} row-local / ${tokenShopCoverage.rangeFamilyCount} range-family entries${tokenShopCoverage.hasControllerAnchors ? " plus DB-grounded action/controller anchors" : " but missing DB-grounded action/controller anchors"}`
           : `${tokenShopCoverage.numericGroupCount} numeric groups with ${tokenShopCoverage.namedLaneLabel}${tokenShopCoverage.hasControllerAnchors ? " plus token-bank controller anchors" : " but missing token-bank controller anchors"}`
         : "Missing TokenShop extracted family coverage",
       pass:
-        tokenShopCoverage.coverageSource === "subject-contracts"
+        hasTokenShopDbCoverage(tokenShopCoverage)
           ? tokenShopCoverage.subjectCount >= 2 &&
             tokenShopCoverage.rowLocalCount >= 1 &&
             tokenShopCoverage.rangeFamilyCount >= 1
@@ -4616,9 +5190,9 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (multiverseMarketMetadataNeighborhood) {
+  if (market?.db?.hasAny || multiverseMarketMetadataNeighborhood) {
     const { hasCloudSavePathClues, hasSaveFamilyClues, hasProgressionFieldCluster } =
-      getMultiverseMarketMetadataSummary(multiverseMarketMetadataNeighborhood);
+      getMultiverseMarketMetadataSummary(multiverseMarketMetadataNeighborhood, market);
     cases.push({
       title: "MultiverseMarket save-family clues",
       expected: "PlayerProfileData persistence clues available",
@@ -4654,8 +5228,8 @@ function buildApkGroundingValidationCases() {
       expected:
         "Resource_Tokenium, Aca.Tokenium553, CostBox-Tokens, and CostBox-Tokenium available",
       actual: tokeniumNamingSummary.hasNamingClues
-        ? tokeniumNamingSummary.coverageSource === "subject-contracts"
-          ? `${tokeniumNamingSummary.rangeFamilySubjectId || tokeniumNamingSummary.rowLocalSubjectId || "canonical TokenShop subject"} preserves ${tokeniumNamingSummary.resourceLabel}, ${tokeniumNamingSummary.academyLabel}, ${tokeniumNamingSummary.tokenShellLabel}, and ${tokeniumNamingSummary.tokeniumShellLabel}`
+        ? hasTokenShopDbCoverage(tokeniumNamingSummary)
+          ? `${tokeniumNamingSummary.rangeFamilySubjectId || tokeniumNamingSummary.rowLocalSubjectId || "DB-backed TokenShop subject"} preserves ${tokeniumNamingSummary.resourceLabel}, ${tokeniumNamingSummary.academyLabel}, ${tokeniumNamingSummary.tokenShellLabel}, and ${tokeniumNamingSummary.tokeniumShellLabel}`
           : `${tokeniumNamingSummary.resourceLabel}, ${tokeniumNamingSummary.academyLabel}, ${tokeniumNamingSummary.tokenShellLabel}, and ${tokeniumNamingSummary.tokeniumShellLabel} available`
         : "Missing token or tokenium naming clues",
       pass: tokeniumNamingSummary.hasNamingClues,
@@ -4667,10 +5241,10 @@ function buildApkGroundingValidationCases() {
     cases.push({
       title: "TokenShop cost-lane split",
       expected:
-        "Canonical TokenShop subject display coverage or legacy cost-lane coverage remains available",
+        "DB-backed TokenShop display coverage or legacy cost-lane coverage remains available",
       actual: tokenShopCostLaneSummary.hasLaneSplit
-        ? tokenShopCostLaneSummary.coverageSource === "subject-contracts"
-          ? `${tokenShopCostLaneSummary.rowLocalSubjectId} plus ${tokenShopCostLaneSummary.rangeFamilySubjectId} preserve canonical display coverage`
+        ? hasTokenShopDbCoverage(tokenShopCostLaneSummary)
+          ? `${tokenShopCostLaneSummary.rowLocalSubjectId} plus ${tokenShopCostLaneSummary.rangeFamilySubjectId} preserve DB-backed display coverage`
           : `${tokenShopCostLaneSummary.tokenLaneLabel}, ${tokenShopCostLaneSummary.diamondLaneLabel}, ${tokenShopCostLaneSummary.dailyLaneLabel}, ${tokenShopCostLaneSummary.costShellLabel}, and ${tokenShopCostLaneSummary.descriptionRenderLabel} available`
         : "Missing TokenShop trace-produced cost-lane support",
       pass:
@@ -4683,9 +5257,9 @@ function buildApkGroundingValidationCases() {
   if (hasSpendActionLaneRead) {
     cases.push({
       title: "Spend action-lane split",
-      expected: "Canonical TokenShop action coverage or legacy spend action-lane clues preserved",
+      expected: "DB-backed TokenShop action coverage or legacy spend action-lane clues preserved",
       actual: spendActionLaneSummary.hasActionSplit
-        ? spendActionLaneSummary.coverageSource === "subject-contracts"
+        ? hasTokenShopDbCoverage(spendActionLaneSummary)
           ? `${spendActionLaneSummary.rowLocalSubjectId} preserves ${spendActionLaneSummary.loopModifierHook} while ${spendActionLaneSummary.rangeFamilySubjectId} keeps ${spendActionLaneSummary.dailyHookT2}`
           : `${spendActionLaneSummary.tokenHook}, ${spendActionLaneSummary.diamondHook}, ${spendActionLaneSummary.loopModifierHook}, ${spendActionLaneSummary.premiumModifierHook}, and zero ${spendActionLaneSummary.dailyHookT2} or ${spendActionLaneSummary.dailyHookT3} hooks preserved`
         : "Missing spend action-lane clues",
@@ -4699,10 +5273,10 @@ function buildApkGroundingValidationCases() {
   if (hasTokenShopOwnerShellRead) {
     cases.push({
       title: "TokenShop owner shell",
-      expected: "Canonical TokenShop subject owner shell or legacy local owner shell preserved",
+      expected: "DB-backed TokenShop owner shell or legacy local owner shell preserved",
       actual: tokenShopOwnerShellSummary.hasOwnerShell
-        ? tokenShopOwnerShellSummary.coverageSource === "subject-contracts"
-          ? `${tokenShopOwnerShellSummary.rowLocalSubjectId} plus ${tokenShopOwnerShellSummary.rangeFamilySubjectId} preserved as canonical TokenShop subject coverage`
+        ? hasTokenShopDbCoverage(tokenShopOwnerShellSummary)
+          ? `${tokenShopOwnerShellSummary.rowLocalSubjectId} plus ${tokenShopOwnerShellSummary.rangeFamilySubjectId} preserved as DB-backed TokenShop subject coverage`
           : `${tokenShopOwnerShellSummary.ownerAnchor}, ${tokenShopOwnerShellSummary.bankMethod}, ${tokenShopOwnerShellSummary.notificationHook}, and ${tokenShopOwnerShellSummary.deviceHook} preserved as one local owner shell`
         : "Missing TokenShop owner-shell clues",
       pass: tokenShopOwnerShellSummary.hasOwnerShell,
@@ -4714,9 +5288,9 @@ function buildApkGroundingValidationCases() {
     cases.push({
       title: "TokenShop save boundary",
       expected:
-        "Canonical TokenShop subject-state separation or legacy save-boundary separation remains available",
+        "DB-backed TokenShop subject-state separation or legacy save-boundary separation remains available",
       actual: tokenShopSaveBoundarySummary.hasSeparationBoundary
-        ? tokenShopSaveBoundarySummary.coverageSource === "subject-contracts"
+        ? hasTokenShopDbCoverage(tokenShopSaveBoundarySummary)
           ? `${tokenShopSaveBoundarySummary.rowLocalSubjectId} and ${tokenShopSaveBoundarySummary.rangeFamilySubjectId} stay separate with blocked input ${tokenShopSaveBoundarySummary.blockedInputReason}`
           : `${tokenShopSaveBoundarySummary.ownerAnchor} and ${tokenShopSaveBoundarySummary.saveAnchor} stay separate with ${tokenShopSaveBoundarySummary.overlapLabel}`
         : "Missing TokenShop save-boundary clues",
@@ -4729,9 +5303,9 @@ function buildApkGroundingValidationCases() {
     cases.push({
       title: "Token-bank controller shell",
       expected:
-        "Canonical TokenShop controller shell or legacy token-bank controller shell preserved",
+        "DB-backed TokenShop controller shell or legacy token-bank controller shell preserved",
       actual: tokenBankControllerShellSummary.hasControllerShell
-        ? tokenBankControllerShellSummary.coverageSource === "subject-contracts"
+        ? hasTokenShopDbCoverage(tokenBankControllerShellSummary)
           ? `${tokenBankControllerShellSummary.rowLocalSubjectId} preserves ${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook}`
           : `${tokenBankControllerShellSummary.claimMethod}, ${tokenBankControllerShellSummary.fillMethod}, ${tokenBankControllerShellSummary.fillField}, ${tokenBankControllerShellSummary.descriptionShell}, and ${tokenBankControllerShellSummary.notificationHook} preserved`
         : "Missing token-bank controller-shell clues",
@@ -4746,8 +5320,8 @@ function buildApkGroundingValidationCases() {
       expected:
         "ClaimBankedTokens, get_TokenBankCap, BigStatisticPrefab.TokenBankCap, and SetLM244BonusText available",
       actual: tokenBankStateSummary.hasControllerSplit
-        ? tokenBankStateSummary.coverageSource === "subject-contracts"
-          ? `${tokenBankStateSummary.rowLocalSubjectId || tokenBankStateSummary.rangeFamilySubjectId || "canonical TokenShop subject"} preserves ${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook}`
+        ? hasTokenShopDbCoverage(tokenBankStateSummary)
+          ? `${tokenBankStateSummary.rowLocalSubjectId || tokenBankStateSummary.rangeFamilySubjectId || "DB-backed TokenShop subject"} preserves ${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook}`
           : `${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook} available`
         : "Missing token-bank controller split clues",
       pass: tokenBankStateSummary.hasControllerSplit,
@@ -4761,8 +5335,8 @@ function buildApkGroundingValidationCases() {
       expected:
         "SpaceAcademy, FarmMissions, SetLM244BonusText, BuyLM244, and BuyCollectorDevice available",
       actual: dailyTokeniumSummary.hasOwnerFamilyClues
-        ? dailyTokeniumSummary.coverageSource === "subject-contracts"
-          ? `${dailyTokeniumSummary.rangeFamilySubjectId || dailyTokeniumSummary.rowLocalSubjectId || "canonical TokenShop subject"} preserves ${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.missionFamilyLabel}, ${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, and ${dailyTokeniumSummary.purchaseOwner}`
+        ? hasTokenShopDbCoverage(dailyTokeniumSummary)
+          ? `${dailyTokeniumSummary.rangeFamilySubjectId || dailyTokeniumSummary.rowLocalSubjectId || "DB-backed TokenShop subject"} preserves ${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.missionFamilyLabel}, ${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, and ${dailyTokeniumSummary.purchaseOwner}`
           : `${dailyTokeniumSummary.ownerFamilyLabel}, ${dailyTokeniumSummary.missionFamilyLabel}, ${dailyTokeniumSummary.loopHook}, ${dailyTokeniumSummary.purchaseHook}, and ${dailyTokeniumSummary.purchaseOwner} available`
         : "Missing Daily Tokenium owner-family clues",
       pass: dailyTokeniumSummary.hasOwnerFamilyClues && dailyTokeniumSummary.hasModifierBoundary,
@@ -4776,8 +5350,8 @@ function buildApkGroundingValidationCases() {
       expected:
         "FinalTokenBankCap and FinalTokenBankFillSpeed cluster without PlayerProfileData or CloudSavePlayerProfile joins",
       actual: tokenBankFormulaSummary.hasDerivedOutputBoundary
-        ? tokenBankFormulaSummary.coverageSource === "subject-contracts"
-          ? `${tokenBankFormulaSummary.rowLocalSubjectId || tokenBankFormulaSummary.rangeFamilySubjectId || "canonical TokenShop subject"} preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField}${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? " without save-family joins" : " with save-family overlap"}.`
+        ? hasTokenShopDbCoverage(tokenBankFormulaSummary)
+          ? `${tokenBankFormulaSummary.rowLocalSubjectId || tokenBankFormulaSummary.rangeFamilySubjectId || "DB-backed TokenShop subject"} preserves ${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField}${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? " without save-family joins" : " with save-family overlap"}.`
           : `${tokenBankFormulaSummary.capAccessor}, ${tokenBankFormulaSummary.fillAccessor}, ${tokenBankFormulaSummary.capField}, and ${tokenBankFormulaSummary.fillField} cluster${tokenBankFormulaSummary.hasNoSaveJoinInDerivedContext ? " without save-family joins" : " with save-family overlap"}.`
         : "Missing token-bank derived output boundary clues",
       pass:
@@ -4787,9 +5361,10 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (multiverseMarketRangeBoundary) {
+  if (market?.db?.hasAny || multiverseMarketRangeBoundary) {
     const multiverseMarketRangeSummary = getMultiverseMarketRangeBoundarySummary(
-      multiverseMarketRangeBoundary
+      multiverseMarketRangeBoundary,
+      market
     );
     cases.push({
       title: "MultiverseMarket row-range boundary",
@@ -4803,9 +5378,10 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (multiverseMarketRowTextCoverage) {
+  if (market?.db?.hasAny || multiverseMarketRowTextCoverage) {
     const multiverseMarketRowTextSummary = getMultiverseMarketRowTextCoverageSummary(
-      multiverseMarketRowTextCoverage
+      multiverseMarketRowTextCoverage,
+      market
     );
     cases.push({
       title: "MultiverseMarket validated row text coverage",
@@ -4821,25 +5397,29 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (multiverseMarketPrefabRemapBoundary) {
+  if (market?.db?.hasAny || multiverseMarketPrefabRemapBoundary) {
     const multiverseMarketPrefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(
-      multiverseMarketPrefabRemapBoundary
+      multiverseMarketPrefabRemapBoundary,
+      market
     );
     cases.push({
       title: "MultiverseMarket prefab remap boundary",
       expected:
         "Validated ids 69-74 still do not have direct ChrystosEmporiumUpgrade number matches",
       actual: multiverseMarketPrefabRemapSummary.hasOverrideBoundary
-        ? `${multiverseMarketPrefabRemapSummary.lastDirectPrefab} is the last direct band before ${multiverseMarketPrefabRemapSummary.firstOverride} through ${multiverseMarketPrefabRemapSummary.lastOverride}`
+        ? multiverseMarketPrefabRemapSummary.overridePairs?.length
+          ? `Bounded override pairs ${multiverseMarketPrefabRemapSummary.overridePairs.join(", ")} preserved from the live multiverse fragment lane`
+          : `${multiverseMarketPrefabRemapSummary.lastDirectPrefab} is the last direct band before ${multiverseMarketPrefabRemapSummary.firstOverride} through ${multiverseMarketPrefabRemapSummary.lastOverride}`
         : "Missing MultiverseMarket prefab-remap boundary",
       pass: multiverseMarketPrefabRemapSummary.hasOverrideBoundary,
       scope: "APK"
     });
   }
 
-  if (multiverseMarketActionShell) {
+  if (market?.db?.hasAny || multiverseMarketActionShell) {
     const multiverseMarketActionShellSummary = getMultiverseMarketActionShellSummary(
-      multiverseMarketActionShell
+      multiverseMarketActionShell,
+      market
     );
     cases.push({
       title: "MultiverseMarket action shell",
@@ -4853,50 +5433,46 @@ function buildApkGroundingValidationCases() {
     });
   }
 
-  if (multiverseMarketOwnerFamily) {
+  if (market?.db?.hasAny || multiverseMarketOwnerFamily) {
     const multiverseMarketOwnerFamilySummary = getMultiverseMarketOwnerFamilySummary(
-      multiverseMarketOwnerFamily
+      multiverseMarketOwnerFamily,
+      market
     );
     cases.push({
       title: "MultiverseMarket owner family",
       expected:
         "MultiverseMarket, Inscryptions, and IS1-110 CurrencyBox shell preserved without implying saved-state ownership",
       actual: multiverseMarketOwnerFamilySummary.hasOwnerFamily
-        ? `${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, and ${multiverseMarketOwnerFamilySummary.currencyRangeLabel} preserved with ${multiverseMarketOwnerFamilySummary.firstValidatedCurrencyBox} through ${multiverseMarketOwnerFamilySummary.lastValidatedCurrencyBox} samples`
+        ? `${multiverseMarketOwnerFamilySummary.ownerAnchor}, ${multiverseMarketOwnerFamilySummary.inscryptionsLabel}, and ${multiverseMarketOwnerFamilySummary.textHandler} preserved${multiverseMarketOwnerFamilySummary.currencyRangeLabel ? ` with ${multiverseMarketOwnerFamilySummary.currencyRangeLabel}` : ""}`
         : "Missing MultiverseMarket owner-family shell",
-      pass:
-        multiverseMarketOwnerFamilySummary.hasOwnerFamily &&
-        multiverseMarketOwnerFamilySummary.hasCurrencyShell,
+      pass: multiverseMarketOwnerFamilySummary.hasOwnerFamily,
       scope: "APK"
     });
   }
 
-  if (multiverseMarketSaveBoundary) {
-    const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(
-      multiverseMarketSaveBoundary
-    );
+  if (market?.db?.hasAny || multiverseMarketSaveBoundary) {
+    const multiverseDbCoverage = getMultiverseMarketDbCoverageSummary(market);
+    const multiverseMarketSaveBoundarySummary = getMultiverseMarketSaveBoundarySummary(market);
     cases.push({
       title: "MultiverseMarket save boundary",
       expected:
         "MultiverseMarket action shell and PlayerProfileData save-family clues stay separate with zero overlap",
       actual: multiverseMarketSaveBoundarySummary.hasSeparationBoundary
-        ? `${multiverseMarketSaveBoundarySummary.actionAnchor} and ${multiverseMarketSaveBoundarySummary.saveAnchor} stay separate with ${multiverseMarketSaveBoundarySummary.overlapLabel}`
+        ? `${multiverseMarketSaveBoundarySummary.actionAnchor} and ${multiverseMarketSaveBoundarySummary.saveAnchor} stay separate with ${multiverseMarketSaveBoundarySummary.overlapLabel}${multiverseDbCoverage.hasCoverage ? ` while ${multiverseDbCoverage.coverageSource} keeps ${multiverseDbCoverage.subjectCount} subject${multiverseDbCoverage.subjectCount === 1 ? "" : "s"}` : ""}`
         : "Missing MultiverseMarket save-boundary clues",
       pass: multiverseMarketSaveBoundarySummary.hasSeparationBoundary,
       scope: "APK"
     });
   }
 
-  if (multiverseMarketMarketMemberBoundary) {
-    const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(
-      multiverseMarketMarketMemberBoundary
-    );
+  if (market?.db?.hasAny || multiverseMarketMarketMemberBoundary) {
+    const marketMemberSummary = getMultiverseMarketMarketMemberBoundarySummary(market);
     cases.push({
       title: "MultiverseMarket canonical host narrowing",
       expected:
         "PlayerProfileHandler get_Market accessor bridge is checked while direct MultiverseMarket ownership of the broader progression run is ruled out",
       actual: marketMemberSummary.favorsDirectMemberBoundary
-        ? `${marketMemberSummary.canonicalHostLabel} is checked, ${marketMemberSummary.negativeMultiverseFieldLabel}, and the broader declaring payload stays unresolved`
+        ? `${marketMemberSummary.canonicalHostLabel} is checked, ${marketMemberSummary.negativeMultiverseFieldLabel}${marketMemberSummary.compatibilityImportTargetPath ? `, and compatibility import remains quarantined at ${marketMemberSummary.compatibilityImportTargetPath}` : ""}`
         : "Missing checked PlayerProfileHandler-to-MultiverseMarket accessor narrowing",
       pass: marketMemberSummary.favorsDirectMemberBoundary && marketMemberSummary.hasCloudBridge,
       scope: "APK"
@@ -4920,9 +5496,8 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
   const atu3EffectChain = boundary?.atu3CrossSystemEffectTrace?.recoveredActionEffectChain;
   const atu3SupportingConsumerShell =
     boundary?.atu3ChestConsumerReadTrace?.recoveredInternalReadShell;
-  const contractIndex = buildTokenShopSubjectContractIndex(
-    getCurrentSpendSystemView()?.tokenShop?.subjectContracts
-  );
+  const spendView = getCurrentSpendSystemView()?.tokenShop;
+  const dbRowDetailResolver = buildTokenShopDbRowDetailResolver(spendView?.db);
   const rows = [
     {
       field: "ATU1Level",
@@ -5170,28 +5745,6 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       note: "Checked shell-to-prefab bridge only. This row stays compatibility-only until a final player-facing title join is recovered."
     },
     {
-      field: "ATU12Level",
-      slot: "ATU12",
-      identity:
-        boundary?.atu12BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
-        boundary?.atu12BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
-        "Mk8 Generator Booster",
-      identitySource: boundary?.atu12BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle
-        ? "Checked title-side text chain"
-        : "Checked prefab identity",
-      rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven checked row",
-      startCostField: "MK8TokenBoostStartCost",
-      additiveCostField: "MK8TokenBoostAdditiveCost",
-      bonusField: "MK8TokenBoostBonus",
-      maxLevelField: "MK8TokenBoostFillMaxLevel",
-      bonusStepLabel: "Mk8 Output",
-      bonusStepMode: "multiplier",
-      playerFacingSupportText:
-        boundary?.atu12BridgeFollowUp?.verifiedTitleTextChain?.titleProbeSupportText ?? [],
-      note: "Checked shell-to-prefab-to-title-side-text chain. This row is still boundary-backed non-canonical evidence only and does not unlock planner logic or canonical promotion."
-    },
-    {
       field: "ATU13Level",
       slot: "ATU13",
       identity:
@@ -5375,85 +5928,80 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU24Level",
       slot: "ATU24",
-      identity: "NewTokenUPGPrefab.T4.Ultima",
-      identitySource: "Compatibility-mapped prefab identity",
+      identity: "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
+      identitySource: "Late-shelf prefab clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "Late-shelf compatibility row",
       startCostField: "ATU24StartCost",
       additiveCostField: "T4UltimaShardsAdditiveCost",
       bonusField: "ATU24Bonus3",
       maxLevelField: "T4UltimaShardsMaxLevel",
-      bonusStepLabel: "T4 Ultima Shards Bonus",
+      bonusStepLabel: "Late shelf shard bonus",
       bonusStepMode: "multiplier",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
+      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; the visible shelf title roster suggests Tier 3 Max Level Increaser, but the exact shell-to-title join is still unresolved."
     },
     {
       field: "ATU25Level",
       slot: "ATU25",
       identity: "NewTokenUPGPrefab.T4.Ultima",
-      identitySource: "Compatibility-mapped prefab identity",
+      identitySource: "Late-shelf prefab clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "Late-shelf compatibility row",
       startCostField: "ATU25StartCost",
       additiveCostField: "ATU25AdditiveCost",
       bonusField: "ATU25Bonus",
       maxLevelField: "ATU25MaxLevel",
-      bonusStepLabel: "T4 Ultima Bonus",
+      bonusStepLabel: "Late shelf academy bonus",
       bonusStepMode: "multiplier",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
+      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; Academy Booster survives as a title-side clue, but the exact shell-to-title join is still unresolved."
     },
     {
       field: "ATU26Level",
       slot: "ATU26",
       identity: "NewTokenUPGPrefab.T5.CampaignFragments",
-      identitySource: "Compatibility-mapped prefab identity",
+      identitySource: "Late-shelf effect-side prefab clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "Late-shelf compatibility row",
       startCostField: "ATU26StartCost",
       additiveCostField: "ATU26AdditiveCost",
       bonusField: "ATU26Bonus",
       maxLevelField: "ATU26MaxLevel",
-      bonusStepLabel: "T5 Campaign Fragments Bonus",
+      bonusStepLabel: "Late shelf campaign bonus",
       bonusStepMode: "additive",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
+      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; Campaign Fragments survives on a narrower effect-side clue surface, but the exact shell-to-title join is still unresolved."
     },
     {
       field: "ATU27Level",
       slot: "ATU27",
-      identity: "NewTokenUPGPrefab.T5.UltimaRP",
-      identitySource: "Compatibility-mapped prefab identity",
+      identity: "NewTokenUPGPrefab.T5.TrinityOomBooster",
+      identitySource: "Late-shelf prefab clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "Late-shelf compatibility row",
       startCostField: "ATU27StartCost",
       additiveCostField: "ATU27AdditiveCost",
       bonusField: "ATU27Bonus",
       maxLevelField: "ATU27MaxLevel",
-      bonusStepLabel: "T5 Ultima RP Bonus",
+      bonusStepLabel: "Late shelf OOM bonus",
       bonusStepMode: "additive",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
+      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; Trinity Oom Booster survives as a local prefab/title clue, but the exact shell-to-title join is still unresolved."
     },
     {
       field: "ATU28Level",
       slot: "ATU28",
-      identity: "NewTokenUPGPrefab.T5.UltimaMP",
-      identitySource: "Compatibility-mapped prefab identity",
+      identity: "NewTokenUPGPrefab.T5.UltimaCells",
+      identitySource: "Late-shelf token-side prefab clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "Late-shelf compatibility row",
       startCostField: "ATU28StartCost",
       additiveCostField: "ATU28AdditiveCost",
       bonusField: "ATU28Bonus",
       maxLevelField: "ATU28MaxLevel",
-      bonusStepLabel: "T5 Ultima MP Bonus",
+      bonusStepLabel: "Late shelf ultima cells bonus",
       bonusStepMode: "additive",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; late-tier identity remains unresolved."
+      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; Token Ultima: Cells survives on a separate token-side clue surface, but the exact shell-to-title join is still unresolved."
     }
   ];
-  return rows.map((row) =>
-    applyTokenShopSubjectContractToRow(
-      row,
-      getTokenShopSubjectContractForField(contractIndex, row.field)
-    )
-  );
+  return rows.map((row) => dbRowDetailResolver.apply(row));
 }
 
 function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
@@ -5461,8 +6009,8 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
     tokenShopState && typeof tokenShopState === "object" ? tokenShopState : {};
   const rows = getTokenShopGroundedSubsetDefinitions(boundary).map((row) => ({
     label:
-      row?.subjectId && row?.rowDetail?.isGrounded
-        ? `Contract-backed row detail with compatibility level import: ${row.identity} (${row.slot})`
+      row?.rowDetail?.isGrounded
+        ? `${row.dbMetadataSourceLabel || row.contractSourceLabel || "DB-backed TokenShop mechanics"} with compatibility level import: ${row.identity} (${row.slot})`
         : `Compatibility-only subset level: ${row.identity} (${row.slot})`,
     value: resolvedTokenShopState[row.field],
     path: `compatibility.unmappedSystemState.tokenShop.${row.field}`,
@@ -5473,7 +6021,7 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
     rows,
     importedCount: rows.filter((row) => isBoundaryValuePresent(row.value)).length,
     quarantineNote:
-      "Compatibility imports remain the level source here, but rows with grounded subject contracts now render canonical row detail first. Remaining `ATU*Level` rows stay quarantined under `compatibility.unmappedSystemState.tokenShop` until more grounded row identities clear."
+      "Compatibility imports remain the level source here, but generic mechanics now render grounded TokenShop row detail first and contracts only add DB-backed subject metadata when present. Remaining `ATU*Level` rows stay quarantined under `compatibility.unmappedSystemState.tokenShop` until more grounded row identities clear."
   };
 }
 
@@ -5492,210 +6040,488 @@ function getTokenShopProgressionModel() {
   });
 }
 
-function saveTokenShopProgressionLevel(fieldName, value) {
-  if (!fieldName) {
+function getTokenShopTierUnlockSummary(summary) {
+  const tierUnlocks =
+    getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
+  const thresholds = tierUnlocks?.tier_thresholds || {};
+  const levelMap = Object.fromEntries(summary.rows.map((row) => [row.field, row.currentLevel]));
+  return {
+    thresholds,
+    states: calculateTokenShopTierUnlockStates(thresholds, levelMap)
+  };
+}
+
+function getTokenShopTierThresholdLabel(tierKey, thresholds) {
+  if (tierKey === "t1") {
+    return "Available from the first TokenShop tier.";
+  }
+  const fallbackThresholds = {
+    t2: 25,
+    t3: 50,
+    t4: 100,
+    t5: 150
+  };
+  const threshold = thresholds?.[tierKey]?.min_levels || fallbackThresholds[tierKey] || 0;
+  return `Heuristic unlock threshold: ${formatBoundaryValue(threshold)} total prior-tier levels.`;
+}
+
+function getTokenShopRowCoverageSummary(rows) {
+  const normalizedRows = Array.isArray(rows) ? rows : [];
+  const isCompatibilityMapped = (row) =>
+    /compatibility-mapped/i.test(String(row?.identitySource || "").trim()) ||
+    /compatibility row/i.test(String(row?.rowTypeLabel || "").trim()) ||
+    /compatibility-mapped/i.test(String(row?.note || "").trim());
+
+  const exactCount = normalizedRows.filter(
+    (row) => row?.rowDetail?.isGrounded === true && !row?.blockedInputReason && !isCompatibilityMapped(row)
+  ).length;
+  const boundedCount = normalizedRows.filter((row) => {
+    if (isCompatibilityMapped(row)) {
+      return false;
+    }
+    if (row?.rowDetail?.isGrounded === true && row?.blockedInputReason) {
+      return true;
+    }
+    return Boolean(row?.subjectId);
+  }).length - exactCount;
+  const compatibilityCount = normalizedRows.filter(isCompatibilityMapped).length;
+
+  return {
+    exactCount,
+    boundedCount: Math.max(0, boundedCount),
+    compatibilityCount
+  };
+}
+
+function getTokenShopTierRecommendationModel(summary, tierRows, tierUnlocked) {
+  const spendSystem = getCurrentSpendSystemView();
+  const progressionModel = spendSystem?.progressionModel || null;
+  const activeObjective =
+    progressionModel?.objectiveModes?.find((mode) => mode.id === "objective:token-shop-short-run") ||
+    null;
+  const { states, thresholds } = getTokenShopTierUnlockSummary(summary);
+  if (!tierUnlocked) {
+    return {
+      blockedReason: "Tier is still gated by the current checked threshold policy.",
+      nextBest: null,
+      ranked: []
+    };
+  }
+  if (typeof summary?.currentTokens !== "number" || !Number.isFinite(summary.currentTokens)) {
+    return {
+      blockedReason: "Tokens are missing from the profile, so no grounded purchase can be applied.",
+      nextBest: null,
+      ranked: []
+    };
+  }
+  const upgradeList = (Array.isArray(tierRows) ? tierRows : [])
+    .filter((row) => !row?.isMaxed && typeof row?.currentLevel === "number")
+    .map((row) => ({
+      row: {
+        ...row,
+        storeTier: getTokenShopTierForField(row.field)
+      },
+      currentLevel: row.currentLevel
+    }));
+  const analysis = getFullUpgradeAnalysis(upgradeList, summary.currentTokens, {
+    progressionModel,
+    objectiveId: "objective:token-shop-short-run",
+    tierStates: states,
+    tierThresholds: thresholds,
+    tierLevelsRemaining: getTokenShopTierLevelsRemaining(summary, thresholds)
+  });
+  const ranked = (analysis?.ranked || []).map((entry) => ({
+    ...entry,
+    row: tierRows.find((row) => row.field === entry.rowId) || null
+  }));
+  return {
+    activeObjective,
+    blockedReason: ranked.length ? "" : "No affordable grounded next level is currently available in this tier.",
+    nextBest: ranked[0] || null,
+    ranked
+  };
+}
+
+function getTokenShopTierLevelsRemaining(summary, thresholds) {
+  const levelByField = Object.fromEntries((summary?.rows || []).map((row) => [row.field, row.currentLevel]));
+  const totalForTier = (tierKey) =>
+    (TOKEN_SHOP_TIER_CONFIG[tierKey]?.rows || []).reduce((sum, field) => {
+      const value = levelByField[field];
+      return sum + (typeof value === "number" && Number.isFinite(value) ? value : 0);
+    }, 0);
+  const t1Total = totalForTier("t1");
+  const t2Total = totalForTier("t2");
+  const t3Total = totalForTier("t3");
+  return {
+    t2: Math.max(0, (thresholds?.t2?.min_levels || 25) - t1Total),
+    t3: Math.max(0, (thresholds?.t3?.min_levels || 50) - (t1Total + t2Total)),
+    t4: Math.max(0, (thresholds?.t4?.min_levels || 100) - (t1Total + t2Total + t3Total))
+  };
+}
+
+function getTokenShopStorefrontRecommendationModel(summary) {
+  const spendSystem = getCurrentSpendSystemView();
+  const progressionModel = spendSystem?.progressionModel || null;
+  const activeObjective =
+    progressionModel?.objectiveModes?.find((mode) => mode.id === "objective:token-shop-short-run") ||
+    null;
+  const { states, thresholds } = getTokenShopTierUnlockSummary(summary);
+  if (typeof summary?.currentTokens !== "number" || !Number.isFinite(summary.currentTokens)) {
+    return {
+      blockedReason: "Tokens are missing from the profile, so no grounded recommendation can be applied.",
+      nextBest: null,
+      ranked: [],
+      states
+    };
+  }
+  const unlockedRows = (summary?.rows || []).filter((row) => {
+    const tierKey = getTokenShopTierForField(row?.field);
+    return tierKey === "t1" || states[tierKey];
+  });
+  const upgradeList = unlockedRows
+    .filter((row) => !row?.isMaxed && typeof row?.currentLevel === "number")
+    .map((row) => ({
+      row: {
+        ...row,
+        storeTier: getTokenShopTierForField(row.field)
+      },
+      currentLevel: row.currentLevel
+    }));
+  const analysis = getFullUpgradeAnalysis(upgradeList, summary.currentTokens, {
+    progressionModel,
+    objectiveId: "objective:token-shop-short-run",
+    tierStates: states,
+    tierThresholds: thresholds,
+    tierLevelsRemaining: getTokenShopTierLevelsRemaining(summary, thresholds)
+  });
+  const ranked = (analysis?.ranked || []).map((entry) => ({
+    ...entry,
+    row: unlockedRows.find((row) => row.field === entry.rowId) || null
+  }));
+  return {
+    activeObjective,
+    blockedReason: ranked.length ? "" : "No affordable grounded next level is currently available in the visible unlocked store tiers.",
+    nextBest: ranked[0] || null,
+    ranked,
+    states
+  };
+}
+
+function formatTokenShopRecommendationScore(value) {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "n/a";
+  }
+  return value >= 0.1 ? value.toFixed(2) : value.toFixed(4);
+}
+
+function applyTokenShopRecommendedPurchase(rowField) {
+  const summary = getTokenShopProgressionModel();
+  const { states } = getTokenShopTierUnlockSummary(summary);
+  const row = summary.rows.find((entry) => entry.field === rowField);
+  if (!row) {
     return;
   }
+  const tierKey = getTokenShopTierForField(rowField);
+  if (tierKey !== "t1" && !states[tierKey]) {
+    setStatus("profileStatus", `${TOKEN_SHOP_TIER_CONFIG[tierKey].label} is still gated.`, "warning");
+    return;
+  }
+  if (row.isMaxed) {
+    setStatus("profileStatus", `${getTokenShopRowLabel(row)} is already at its known cap.`, "warning");
+    return;
+  }
+  if (typeof row.nextKnownCost !== "number" || !Number.isFinite(row.nextKnownCost)) {
+    setStatus("profileStatus", `No grounded next cost is available for ${getTokenShopRowLabel(row)}.`, "warning");
+    return;
+  }
+  const currentTokens = summary.currentTokens;
+  if (typeof currentTokens !== "number" || currentTokens < row.nextKnownCost) {
+    setStatus("profileStatus", `${getTokenShopRowLabel(row)} needs ${formatBoundaryValue(row.nextKnownCost)} Tokens.`, "warning");
+    return;
+  }
+
   setProfileValue(
-    ["planning", "tokenShop", "checkedSubsetLevels", fieldName],
-    value,
+    ["planning", "tokenShop", "checkedSubsetPlayerState", row.field],
+    row.currentLevel + 1,
     state.playerProfile
   );
+  setProfileValue(["player", "resources", "tokens"], currentTokens - row.nextKnownCost, state.playerProfile);
   persistPlayerProfile();
+  fillProfileForm();
+  renderAll();
   setStatus(
-    "tokenShopProgressionStatus",
-    `Saved ${fieldName} for the checked TokenShop subset editor.`,
+    "profileStatus",
+    `Applied ${getTokenShopRowLabel(row)} -> level ${formatBoundaryValue(row.currentLevel + 1)} for ${formatBoundaryValue(row.nextKnownCost)} Tokens.`,
     "success"
   );
-  renderProgressionResults(runProgressionOptimization());
 }
 
-function prefillTokenShopProgressionEditorFromCompatibility() {
-  const compatibilityLevels = getCompatibilityProfileState().unmappedSystems?.tokenShop ?? {};
-  const tokenShopBoundary = getCurrentSpendSystemView()?.tokenShop?.rows?.boundaries?.remap;
-  const subsetFields = getTokenShopGroundedSubsetDefinitions(tokenShopBoundary).map(
-    (row) => row.field
+function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recommendation) {
+  const displayTitle = getTokenShopRowLabel(row);
+  const rowMeta = getTokenShopRowMeta(row?.field);
+  const isLateShelfRow = rowMeta?.storeShell === "late-shelf";
+  const currentLevelLabel = formatBoundaryValue(row.currentLevel);
+  const capLabel =
+    typeof row.maxLevel === "number" && Number.isFinite(row.maxLevel)
+      ? formatBoundaryValue(row.maxLevel)
+      : "n/a";
+  const effectLine = tokenShopUi.formatTokenShopSentence(
+    tokenShopUi.formatTokenShopEffectLine(row)
   );
-  let importedCount = 0;
-  subsetFields.forEach((fieldName) => {
-    const importedValue = compatibilityLevels?.[fieldName];
-    if (typeof importedValue === "number" && Number.isFinite(importedValue)) {
-      setProfileValue(
-        ["planning", "tokenShop", "checkedSubsetLevels", fieldName],
-        importedValue,
-        state.playerProfile
-      );
-      importedCount += 1;
-    }
-  });
-  persistPlayerProfile();
-  setStatus(
-    "tokenShopProgressionStatus",
-    importedCount
-      ? `Prefilled ${importedCount} checked TokenShop row level${importedCount === 1 ? "" : "s"} from compatibility import state.`
-      : "No imported checked TokenShop subset levels were available to prefill.",
-    importedCount ? "success" : "warning"
-  );
-  renderProgressionResults(runProgressionOptimization());
+  const playerFacingSupportText = tokenShopUi.getTokenShopPlayerFacingSupportText(row);
+  const bonusStripEntries = tokenShopUi.getTokenShopBonusStripEntries(row);
+  const groundingSummary = tokenShopUi.getTokenShopRowGroundingSummary(row);
+  const contractMetaLine = tokenShopUi.getTokenShopContractMetaLine(row);
+  const nextKnownCostLabel = row.isMaxed
+    ? "No next cost within known cap"
+    : typeof row.nextKnownCost === "number"
+      ? formatBoundaryValue(row.nextKnownCost)
+      : "Research";
+  const affordabilityLine = row.isMaxed
+    ? "No next purchase within known cap."
+    : row.isAffordable === true
+      ? "Affordable from current Tokens."
+      : row.isAffordable === false &&
+          typeof row.nextKnownCost === "number" &&
+          typeof summary.currentTokens === "number"
+        ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
+        : "Waiting on grounded runtime cost coverage.";
+  const costFormulaLine =
+    typeof row.startCost === "number" && typeof row.additiveCost === "number"
+      ? `Known cost inputs: start ${formatBoundaryValue(row.startCost)} + additive ${formatBoundaryValue(row.additiveCost)} x current level.`
+      : "Known cost inputs are incomplete in this build.";
+  const actionLabel = tierUnlocked
+    ? (row.isMaxed ? "MAXED" : typeof row.nextKnownCost === "number" ? "NEXT" : "RESEARCH")
+    : "LOCKED";
+  const tierGateLine = tierUnlocked
+    ? `${TOKEN_SHOP_TIER_CONFIG[tierKey]?.label || tierKey.toUpperCase()} is currently available under the checked tier policy.`
+    : `${TOKEN_SHOP_TIER_CONFIG[tierKey]?.label || tierKey.toUpperCase()} remains gated by the checked heuristic tier policy.`;
+  const isRecommended = recommendation?.nextBest?.rowId === row.field;
+  const canPurchase = tierUnlocked && !row.isMaxed && row.isAffordable && typeof row.nextKnownCost === "number";
+  const buyPanelAttrs = canPurchase
+    ? ` data-token-shop-apply-row="${escapeHtml(row.field)}" role="button" tabindex="0" aria-label="${escapeHtml(`Buy ${displayTitle} next level`) }"`
+    : "";
+  const requirementOverlay = !tierUnlocked
+    ? `<div class="token-shop-overlay-ribbon"><span class="token-shop-overlay-label">LOCKED</span><p>${escapeHtml(getTokenShopTierThresholdLabel(tierKey, getTokenShopTierUnlockSummary(summary).thresholds))}</p></div>`
+    : row.isMaxed
+      ? `<div class="token-shop-overlay-ribbon maxed"><span class="token-shop-overlay-label">MAXED</span><p>${escapeHtml(row.maxStatus.label)}</p></div>`
+      : "";
+  const buffStrip = bonusStripEntries.length
+    ? `
+      <div class="token-shop-buff-strip" aria-label="Current upgrade buffs" style="grid-template-columns:repeat(${Math.max(1, bonusStripEntries.length)}, minmax(0, 1fr));">
+        ${bonusStripEntries
+          .map(
+            (entry) => `
+              <div class="token-shop-buff-plate" data-tone="${escapeHtml(entry.tone || "neutral")}">
+                <strong class="token-shop-buff-value">${escapeHtml(entry.currentLabel)}</strong>
+                <span class="token-shop-buff-label">${escapeHtml(entry.label)}</span>
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+    `
+    : "";
+  const buyPanelBody = `
+      <span class="token-shop-buy-label">${escapeHtml(row.isMaxed ? "MAXED" : canPurchase ? "BUY" : actionLabel)}</span>
+      <strong>${escapeHtml(nextKnownCostLabel)}</strong>
+      ${canPurchase ? `<span class="token-shop-buy-cta">${escapeHtml(isRecommended ? "BEST PICK" : "AVAILABLE")}</span>` : `<span class="token-shop-buy-hint">${escapeHtml(row.isMaxed ? "Known cap reached" : tierUnlocked ? affordabilityLine : tierGateLine)}</span>`}
+    `;
+
+  return `
+    <article class="preview-card token-shop-affordability-card${isRecommended ? " recommended" : ""}${isLateShelfRow ? " late-shelf" : ""}">
+      <div class="token-shop-shell-card">
+        ${requirementOverlay}
+        <div class="token-shop-title-box">
+          <strong>${escapeHtml(displayTitle)}</strong>
+        </div>
+        <div class="token-shop-shell-content">
+          <p class="token-shop-effect-line">${escapeHtml(effectLine)}</p>
+          ${buffStrip}
+        </div>
+        <div class="token-shop-progress-cluster">
+          <div class="token-shop-level-ring">
+            <span class="token-shop-level-caption">LV</span>
+            <span class="token-shop-level-value">${escapeHtml(currentLevelLabel)}</span>
+            <span class="token-shop-level-divider">/</span>
+            <span class="token-shop-level-cap">${escapeHtml(capLabel)}</span>
+          </div>
+          <div class="token-shop-fill-track">
+            <div class="token-shop-fill-track-rail"></div>
+            <div class="token-shop-fill-track-core" style="width:${escapeHtml(String(Math.max(8, Math.min(100, typeof row.maxLevel === "number" && row.maxLevel > 0 ? (row.currentLevel / row.maxLevel) * 100 : row.currentLevel > 0 ? 18 : 8))))}%"></div>
+          </div>
+        </div>
+        <div class="token-shop-buy-panel${canPurchase ? " actionable" : ""}${isRecommended ? " recommended" : ""}"${buyPanelAttrs}>
+          ${buyPanelBody}
+        </div>
+        <details class="token-shop-evidence-note">
+          <summary>Details</summary>
+          <div class="token-shop-support-strip">
+            <span class="token-shop-row-tag">${escapeHtml(row.currentLevelSourceLabel)}</span>
+            ${row.identitySource ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.identitySource)}</span>` : ""}
+            ${isLateShelfRow ? `<span class="token-shop-row-tag token-shop-row-tag-muted">Late shelf clue lane</span>` : ""}
+          </div>
+          <p class="meta">${escapeHtml(groundingSummary)}</p>
+          <p class="meta">${escapeHtml(costFormulaLine)}</p>
+          <p class="meta">${escapeHtml(row.note)}</p>
+          ${contractMetaLine ? `<p class="meta">${escapeHtml(contractMetaLine)}</p>` : ""}
+          ${playerFacingSupportText ? `<p class="meta">${escapeHtml(tokenShopUi.formatTokenShopSentence(playerFacingSupportText))}</p>` : ""}
+          ${row.supportingEvidenceNote ? `<p class="meta">${escapeHtml(row.supportingEvidenceNote)}</p>` : ""}
+          ${row.blockedInputReason ? `<p class="meta">Blocked input: ${escapeHtml(row.blockedInputReason)}</p>` : ""}
+          ${row.dbMetadataSupportLabel || row.contractSupportLabel ? `<p class="meta">Support surfaces: ${escapeHtml(row.dbMetadataSupportLabel || row.contractSupportLabel)}</p>` : ""}
+        </details>
+      </div>
+    </article>
+  `;
 }
 
-function clearTokenShopProgressionEditorLevels() {
-  const tokenShopBoundary = getCurrentSpendSystemView()?.tokenShop?.rows?.boundaries?.remap;
-  getTokenShopGroundedSubsetDefinitions(tokenShopBoundary).forEach((row) => {
-    setProfileValue(
-      ["planning", "tokenShop", "checkedSubsetLevels", row.field],
-      null,
-      state.playerProfile
-    );
-  });
-  persistPlayerProfile();
-  setStatus(
-    "tokenShopProgressionStatus",
-    "Cleared local TokenShop editor levels. Compatibility imports remain available as prefill only.",
-    "success"
-  );
-  renderProgressionResults(runProgressionOptimization());
+function renderTokenShopTierSection(tierKey, tierRows, tierUnlocked, thresholds, summary, storefrontRecommendation) {
+  const tierRecommendation = getTokenShopTierRecommendationModel(summary, tierRows, tierUnlocked);
+  const nextBestTitle = storefrontRecommendation?.nextBest?.row ? getTokenShopRowLabel(storefrontRecommendation.nextBest.row) : "";
+  const bestBuyTierKey = storefrontRecommendation?.nextBest?.row
+    ? getTokenShopTierForField(storefrontRecommendation.nextBest.row.field)
+    : "";
+  const recommendationNote = storefrontRecommendation?.nextBest?.row
+    ? bestBuyTierKey === tierKey
+      ? ""
+      : `Best next purchase currently lives in ${TOKEN_SHOP_TIER_CONFIG[bestBuyTierKey]?.label || "another tier"}: ${nextBestTitle}.`
+    : tierRecommendation.blockedReason;
+  const tierGateNote = tierUnlocked
+    ? ""
+    : getTokenShopTierThresholdLabel(tierKey, thresholds);
+  const tierLead = recommendationNote || tierGateNote;
+
+  return `
+    <section class="token-shop-shelf-section${tierUnlocked ? "" : " locked"}">
+      ${tierLead ? `<div class="token-shop-shelf-status"><p class="meta">${escapeHtml(tierLead)}</p></div>` : ""}
+      <div class="token-shop-shelf-grid">
+        ${tierRows.map((row) => renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, storefrontRecommendation)).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function getSelectedTokenShopStorefrontTier(states) {
+  const requestedTier = TOKEN_SHOP_TIER_CONFIG[state.tokenShopStorefrontTier]
+    ? state.tokenShopStorefrontTier
+    : "t1";
+  if (requestedTier === "t1" || states?.[requestedTier]) {
+    return requestedTier;
+  }
+  return "t1";
+}
+
+function renderTokenShopStorefrontTierTabs(states, tierRows) {
+  const selectedTier = getSelectedTokenShopStorefrontTier(states);
+  return `
+    <div class="tier-tabs token-shop-storefront-tabs" role="tablist" aria-label="TokenShop tiers">
+      ${TOKEN_SHOP_TIER_SEQUENCE.map((tierKey) => {
+        const tierConfig = TOKEN_SHOP_TIER_CONFIG[tierKey];
+        const isActive = selectedTier === tierKey;
+        const isLocked = tierKey !== "t1" && !states?.[tierKey];
+        const tierOrdinal = tierConfig.label.replace(/[^0-9]/g, "") || tierConfig.label;
+        const tabLabel = `${tierConfig.label}${isLocked ? " locked" : ""}, ${tierConfig.rows.length} visible rows`;
+        return `
+          <button
+            type="button"
+            class="tier-tab${isActive ? " active" : ""}${isLocked ? " disabled" : ""}"
+            data-token-shop-tier="${escapeHtml(tierKey)}"
+            role="tab"
+            aria-selected="${isActive}"
+            aria-disabled="${isLocked}"
+            aria-label="${escapeHtml(tabLabel)}"
+            ${isLocked ? 'title="Locked by current heuristic tier threshold"' : ""}
+          >
+            <span class="token-shop-tier-index">${escapeHtml(tierOrdinal)}</span>
+            <span class="token-shop-tier-count">${escapeHtml(String(tierConfig.rows.length))}</span>
+          </button>
+        `;
+      }).join("")}
+    </div>
+  `;
 }
 
 function renderTokenShopProgressionEditor() {
   const summary = getTokenShopProgressionModel();
+  const { thresholds, states } = getTokenShopTierUnlockSummary(summary);
+  const storefrontRecommendation = getTokenShopStorefrontRecommendationModel(summary);
+  const coverageSummary = getTokenShopRowCoverageSummary(summary.rows);
+  const recommendedCost = storefrontRecommendation.nextBest?.cost;
+  const currentTokens = typeof summary.currentTokens === "number" ? summary.currentTokens : null;
+  const bankProgressPercent =
+    typeof currentTokens === "number" && typeof recommendedCost === "number" && recommendedCost > 0
+      ? Math.max(0, Math.min(100, (currentTokens / recommendedCost) * 100))
+      : typeof currentTokens === "number" && currentTokens > 0
+        ? 100
+        : 0;
+  const bankMeterMeta =
+    typeof currentTokens === "number" && typeof recommendedCost === "number"
+      ? `${formatBoundaryValue(currentTokens)} / ${formatBoundaryValue(recommendedCost)} Tokens toward the current recommendation`
+      : typeof currentTokens === "number"
+        ? `${formatBoundaryValue(currentTokens)} Tokens available in the checked profile`
+        : "Tokens unavailable in the checked profile";
+  const tierRows = Object.fromEntries(
+    TOKEN_SHOP_TIER_SEQUENCE.map((tierKey) => [
+      tierKey,
+      summary.rows.filter((row) => getTokenShopTierForField(row.field) === tierKey)
+    ])
+  );
+  const selectedTier = getSelectedTokenShopStorefrontTier(states);
 
   return `
-    <article class="validation-card warn">
-      <strong>Grounded TokenShop checked-row editor</strong>
-      <p class="meta">Checked subset only. This progression seam resolves current level from checked player state first, compatibility fallback second, and local override when you edit inside this tool.</p>
-      <p class="meta">This module is explicitly non-optimizer and stays fixed to the grounded ATU subset: all 28 rows grouped by tier (T1: ATU1-12, T2: ATU13-18, T3: ATU19-23, T4: ATU24-25, T5: ATU26-28).</p>
-      <p class="meta">Prefab-driven checked rows and effect-driven checked rows are shown inside the tier-grouped subset. T1 has prefab-driven checked rows plus one effect-driven row (ATU3). The remaining higher-tier rows use DB-derived TokenShop extract numerics with compatibility-mapped identities until stronger row-local grounding clears. Tier unlock thresholds remain an explicitly heuristic policy based on total levels in prior tiers.</p>
-      <div class="profile-actions">
-        <button class="button" type="button" data-token-shop-prefill>Prefill local rows from compatibility import</button>
-        <button class="button button-ghost" type="button" data-token-shop-clear-local>Clear local row levels</button>
+    <section class="token-shop-bank-shell">
+      <header class="token-shop-bank-header">
+        <div class="token-shop-bank-title">
+          <strong>THE TOKEN BANK</strong>
+          <div class="token-shop-bank-meter" aria-label="Current bank progress toward the recommended purchase">
+            <div class="token-shop-bank-meter-track">
+              <div class="token-shop-bank-meter-fill" style="width:${escapeHtml(String(bankProgressPercent))}%"></div>
+            </div>
+            <p class="meta">${escapeHtml(bankMeterMeta)}</p>
+          </div>
+        </div>
+        <div class="token-shop-bank-hero">
+          <span class="token-shop-bank-hero-label">Best Buy</span>
+          <strong>${escapeHtml(storefrontRecommendation.nextBest?.row ? getTokenShopRowLabel(storefrontRecommendation.nextBest.row) : "No grounded next buy")}</strong>
+          <p class="meta">${escapeHtml(storefrontRecommendation.nextBest?.row ? `${formatBoundaryValue(storefrontRecommendation.nextBest.cost)} Tokens` : storefrontRecommendation.blockedReason)}</p>
+        </div>
+      </header>
+      <div class="token-shop-bank-status">
+        <span class="pill">${typeof summary.currentTokens === "number" ? `${formatBoundaryValue(summary.currentTokens)} Tokens` : "Tokens unavailable"}</span>
+        <span class="pill">${summary.playerStateCount}/${summary.rows.length} active • ${coverageSummary.boundedCount}/${summary.rows.length} bounded</span>
       </div>
-      <div class="pill-row">
-        <span class="pill">${summary.localCount}/${summary.rows.length} local overrides active</span>
-        <span class="pill">${summary.playerStateCount}/${summary.rows.length} checked player-state rows active</span>
-        <span class="pill">${summary.compatibilityCount}/${summary.rows.length} compatibility fallback rows active</span>
-        <span class="pill">${summary.defaultCount}/${summary.rows.length} defaulted to level 0</span>
-        <span class="pill">${typeof summary.currentTokens === "number" ? `${summary.affordableCount}/${summary.rows.length} affordable from ${formatBoundaryValue(summary.currentTokens)} Tokens` : "Affordability gated by missing Tokens"}</span>
-        <span class="pill">${summary.knownCapCount} at or above known cap</span>
-        <span class="pill">${escapeHtml(summary.displayRule)}</span>
-        <span class="pill">No canonical ATU promotion</span>
+      ${renderTokenShopStorefrontTierTabs(states, tierRows)}
+      <div class="token-shop-store-list">
+        ${renderTokenShopTierSection(
+          selectedTier,
+          tierRows[selectedTier],
+          states[selectedTier],
+          thresholds,
+          summary,
+          storefrontRecommendation
+        )}
       </div>
-      <div class="preview-stack">
-        ${summary.rows
-          .map((row) => {
-            const displayTitle = tokenShopUi.getTokenShopRowDisplayTitle(row);
-            const currentLevelLabel = formatBoundaryValue(row.currentLevel);
-            const effectLine = tokenShopUi.formatTokenShopSentence(
-              tokenShopUi.formatTokenShopEffectLine(row)
-            );
-            const playerFacingSupportText = tokenShopUi.getTokenShopPlayerFacingSupportText(row);
-            const actionLabel = tokenShopUi.getTokenShopActionLabel(row);
-            const bonusStripEntries = tokenShopUi.getTokenShopBonusStripEntries(row);
-            const groundingSummary = tokenShopUi.getTokenShopRowGroundingSummary(row);
-            const contractMetaLine = tokenShopUi.getTokenShopContractMetaLine(row);
-            const nextKnownCostLabel = row.isMaxed
-              ? "No next cost within known cap"
-              : typeof row.nextKnownCost === "number"
-                ? formatBoundaryValue(row.nextKnownCost)
-                : "No known next cost";
-            const affordabilityLine = row.isMaxed
-              ? "No next purchase within known cap."
-              : row.isAffordable === true
-                ? "Affordable from current Tokens."
-                : row.isAffordable === false &&
-                    typeof row.nextKnownCost === "number" &&
-                    typeof summary.currentTokens === "number"
-                  ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
-                  : "Affordability unavailable until Tokens are entered.";
-            const costFormulaLine =
-              typeof row.startCost === "number" && typeof row.additiveCost === "number"
-                ? `Known cost inputs: start ${formatBoundaryValue(row.startCost)} + additive ${formatBoundaryValue(row.additiveCost)} x current level.`
-                : "Known cost inputs are incomplete in this build.";
-
-            return `
-            <article class="preview-card token-shop-affordability-card">
-              <div class="token-shop-game-row">
-                <div class="token-shop-level-ring">
-                  <span class="token-shop-level-value">${escapeHtml(currentLevelLabel)}</span>
-                  <span class="token-shop-level-divider">/</span>
-                  <span class="token-shop-level-cap">${typeof row.maxLevel === "number" && Number.isFinite(row.maxLevel) ? escapeHtml(formatBoundaryValue(row.maxLevel)) : "?"}</span>
-                </div>
-                <div class="token-shop-main-lane">
-                  <div class="token-shop-top-band">
-                    <div class="token-shop-affordability-head">
-                      <div class="meta-stack">
-                        <strong>${escapeHtml(displayTitle)}</strong>
-                        <div class="token-shop-row-tags">
-                          <span class="token-shop-row-tag">${escapeHtml(row.rowTypeLabel || "Checked row")}</span>
-                          ${row.identitySource ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.identitySource)}</span>` : ""}
-                          ${row.subjectId ? `<span class="token-shop-row-tag token-shop-row-tag-muted">${escapeHtml(row.subjectId)}</span>` : ""}
-                        </div>
-                        <p class="meta token-shop-effect-line">${escapeHtml(effectLine)}</p>
-                        ${contractMetaLine ? `<p class="meta">${escapeHtml(contractMetaLine)}</p>` : ""}
-                        ${playerFacingSupportText ? `<p class="meta">${escapeHtml(tokenShopUi.formatTokenShopSentence(playerFacingSupportText))}</p>` : ""}
-                      </div>
-                    </div>
-                  </div>
-                  <div class="token-shop-stat-strip">
-                    ${bonusStripEntries
-                      .map(
-                        (entry) => `
-                      <div class="validation-card warn token-shop-stat-card">
-                        <span class="snapshot-title">Current vs next bonus • ${escapeHtml(entry.label)}</span>
-                        <strong>${escapeHtml(entry.currentLabel)}</strong>
-                        <p class="meta">Next ${escapeHtml(entry.nextLabel)}</p>
-                      </div>
-                    `
-                      )
-                      .join("")}
-                  </div>
-                  <div class="token-shop-editor-strip">
-                    <div class="token-shop-editor-meta">
-                      <p class="meta">Level ${escapeHtml(currentLevelLabel)} • ${escapeHtml(row.currentLevelSourceLabel)}</p>
-                      <p class="meta">${escapeHtml(costFormulaLine)}</p>
-                      <p class="meta">${escapeHtml(groundingSummary)}</p>
-                      <details class="token-shop-evidence-note">
-                        <summary>Grounding note</summary>
-                        <p class="meta">${escapeHtml(row.note)}</p>
-                        ${row.supportingEvidenceNote ? `<p class="meta">${escapeHtml(row.supportingEvidenceNote)}</p>` : ""}
-                        ${row.blockedInputReason ? `<p class="meta">Blocked input: ${escapeHtml(row.blockedInputReason)}</p>` : ""}
-                        ${row.contractSupportLabel ? `<p class="meta">Support surfaces: ${escapeHtml(row.contractSupportLabel)}</p>` : ""}
-                      </details>
-                    </div>
-                  </div>
-                </div>
-                <div class="token-shop-buy-panel">
-                  <span class="token-shop-buy-label">${escapeHtml(actionLabel)}</span>
-                  <strong>${escapeHtml(nextKnownCostLabel)}</strong>
-                  <p class="meta">${escapeHtml(row.maxStatus.label)}</p>
-                  <p class="meta">${escapeHtml(affordabilityLine)}</p>
-                  <label class="mini-field token-shop-level-editor token-shop-level-editor-buy">
-                    <span>Set current level</span>
-                    <input
-                      data-token-shop-level-field="${escapeHtml(row.field)}"
-                      type="number"
-                      min="0"
-                      step="1"
-                      value="${escapeHtml(String(row.currentLevel))}"
-                      placeholder="0"
-                    >
-                  </label>
-                  <button
-                    type="button"
-                    class="token-shop-buy-button"
-                    data-token-shop-buy-field="${escapeHtml(row.field)}"
-                    data-token-shop-current-level="${escapeHtml(String(row.currentLevel))}"
-                    ${row.isMaxed ? "disabled" : ""}
-                  >Buy +1 lvl</button>
-                </div>
-              </div>
-            </article>
-          `;
-          })
-          .join("")}
-      </div>
-      <p class="meta">Non-canonical checked-row progression seam only. Broader TokenShop remap, token-bank, Daily Tokenium, Emporium, and ROI or ranking logic stay outside this surface.</p>
-    </article>
+      <details class="token-shop-store-details">
+        <summary>Optimizer and grounding detail</summary>
+        <p class="meta">Checked subset only. This TokenShop lane resolves current level from checked player state first and compatibility fallback second. Local override rows are removed from the active storefront path.</p>
+        <p class="meta">The surface stays fixed to the grounded ATU subset: T1: ATU1-12, T2: ATU13-19, T3: ATU20-23, T4: ATU24-28.</p>
+        <div class="pill-row">
+          <span class="pill">${summary.defaultCount}/${summary.rows.length} defaulted to level 0</span>
+          <span class="pill">${coverageSummary.compatibilityCount}/${summary.rows.length} compatibility-mapped lanes</span>
+          <span class="pill">${summary.knownCapCount} at or above known cap</span>
+          ${storefrontRecommendation.activeObjective?.label ? `<span class="pill">Objective: ${escapeHtml(storefrontRecommendation.activeObjective.label)}</span>` : ""}
+          ${storefrontRecommendation.nextBest?.progressionConfidenceLabel ? `<span class="pill">${escapeHtml(storefrontRecommendation.nextBest.progressionConfidenceLabel)} recommendation</span>` : ""}
+          <span class="pill">${escapeHtml(summary.displayRule)}</span>
+          <span class="pill">Manual levels live under checked player state</span>
+          <span class="pill">Recommended buys stay helper-only, not canonical truth</span>
+          ${storefrontRecommendation.nextBest?.row ? `<span class="pill">Weighted helper score ${escapeHtml(formatTokenShopRecommendationScore(storefrontRecommendation.nextBest.value))}</span>` : ""}
+        </div>
+        <p class="meta">${escapeHtml(storefrontRecommendation.nextBest?.recommendationReason || "Grounded helper weighting prefers the strongest visible progression lane per Token cost.")}</p>
+        ${storefrontRecommendation.nextBest?.progressionCarrierLabel ? `<p class="meta">Current recommendation primarily targets <strong>${escapeHtml(storefrontRecommendation.nextBest.progressionCarrierLabel)}</strong> under the active spend objective.</p>` : ""}
+        ${Array.isArray(storefrontRecommendation.nextBest?.progressionNotes) && storefrontRecommendation.nextBest.progressionNotes.length ? `<p class="meta">${escapeHtml(storefrontRecommendation.nextBest.progressionNotes[0])}</p>` : ""}
+        <p class="meta">Prefab-driven checked rows and effect-driven checked rows are rendered as one storefront lane. The purchase plates write back into checked player state and deduct Tokens from the profile, so this behaves like a mechanics-backed optimizer without reviving the old local override editor.</p>
+      </details>
+    </section>
   `;
 }
 
@@ -5708,7 +6534,8 @@ function renderImportedMultiverseMarketPreviewCard(preview) {
   return `
     <article class="preview-card">
       <strong>Emporium compatibility preview</strong>
-      <p class="meta">This is a descriptive preview of compatibility-only Emporium import state under <code>${escapeHtml(preview.importTargetPath)}</code>. It preserves only the checked raw <code>${escapeHtml(preview.typedSpanLabel)}</code> span as non-canonical evidence, while broader SaveData progression neighbors stay outside the admitted Emporium import slice.</p>
+      <p class="meta">This is a descriptive preview of quarantined Emporium import state under <code>${escapeHtml(preview.importTargetPath)}</code>. It preserves only the checked raw <code>${escapeHtml(preview.typedSpanLabel)}</code> span from <code>${escapeHtml(preview.saveAnchor || "SaveData")}</code> as non-canonical evidence, while broader progression neighbors past <code>${escapeHtml(preview.wrapperOnlyFieldLabel || "InscryptionsDone")}</code> stay outside the admitted import slice.</p>
+      <p class="meta">${preview.coverageSource ? `DB-backed multiverse coverage currently reports ${escapeHtml(preview.coverageSource)}${preview.nextSeamLabel ? ` with next seams ${escapeHtml(preview.nextSeamLabel)}` : ""}.` : "DB-backed multiverse coverage is not available for this preview."}</p>
       <div class="pill-row">
         ${model.pillLabels.map((label) => `<span class="pill">${escapeHtml(label)}</span>`).join("")}
       </div>

@@ -5,6 +5,7 @@ import hashlib
 import json
 import re
 import sqlite3
+import time
 from contextlib import contextmanager, nullcontext
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -18,6 +19,7 @@ SCHEMA_VERSION_FLOOR = 7
 SQLITE_CACHE_SIZE_KIB = 262144
 SQLITE_MMAP_SIZE_BYTES = 268435456
 SQLITE_WAL_AUTOCHECKPOINT_PAGES = 20000
+JOBS_DIR_SCAN_CACHE_SECONDS = 1.0
 TRACE_SUPERSEDED_HISTORY_LIMIT = 32
 TRACE_CANONICAL_CACHE_HISTORY_LIMIT = 8
 TRACE_MATERIALIZED_SCOPE_HISTORY_LIMIT = 8
@@ -198,6 +200,25 @@ def _unique_strings(values: list[str]) -> list[str]:
     return result
 
 
+def _bounded_evidence_term_sort_key(term: str) -> tuple[int, str]:
+    normalized = str(term or "").strip()
+    if not normalized:
+        return (99, "")
+    if normalized.endswith("Button"):
+        return (0, normalized)
+    if normalized.startswith("Buy"):
+        return (1, normalized)
+    if normalized.startswith("ATU") and "Bonus" in normalized:
+        return (2, normalized)
+    if normalized == "Tier 3 Max Level Increaser":
+        return (3, normalized)
+    if normalized == "Campaign Fragments":
+        return (4, normalized)
+    if normalized.startswith("NewTokenUPGPrefab."):
+        return (5, normalized)
+    return (6, normalized)
+
+
 def _collect_semantic_scope_subject_terms(scope_payload: dict[str, Any]) -> list[str]:
     return _unique_strings(
         [
@@ -284,14 +305,22 @@ def _subject_state_quality_tuple(payload: dict[str, Any], built_at: str = "") ->
     }.get(verdict, 0)
     identity_owner = str(payload.get("identityOwner") or "").strip()
     identity_rank = 1 if identity_owner.startswith("db-") else 0
+    subject_id = str(payload.get("subjectId") or "").strip()
+    canonical_id_rank = 0 if " through " in subject_id else 1
+    proof_count = len([item for item in (payload.get("proofs") or []) if isinstance(item, dict)])
+    signal_count = len(blocked_edges) + len(missing_edges) + len(known_edges) + len(nonblocking_edges) + proof_count
+    clear_rank = 1 if next_status == "clear" and signal_count > 0 else 0
     return (
-        1 if next_status == "clear" else 0,
         verdict_rank,
+        1 if blocked_edges or missing_edges else 0,
+        clear_rank,
+        signal_count,
         -len(blocked_edges),
         -len(missing_edges),
         len(known_edges),
         len(nonblocking_edges),
         identity_rank,
+        canonical_id_rank,
         str(built_at or ""),
     )
 
@@ -1558,6 +1587,29 @@ def _load_latest_trace_fragment_payload(
     return _json_loads(row["payload_json"], None)
 
 
+def _collect_string_terms(payload: Any) -> list[str]:
+    collected: list[str] = []
+    seen: set[str] = set()
+
+    def visit(value: Any) -> None:
+        if isinstance(value, str):
+            text = value.strip()
+            if text and text not in seen:
+                seen.add(text)
+                collected.append(text)
+            return
+        if isinstance(value, dict):
+            for nested in value.values():
+                visit(nested)
+            return
+        if isinstance(value, list):
+            for nested in value:
+                visit(nested)
+
+    visit(payload)
+    return collected
+
+
 def _count_literal_candidates(literal_text_recovery: dict[str, Any]) -> int:
     count = 0
     for key, value in literal_text_recovery.items():
@@ -1974,7 +2026,13 @@ def _derive_token_shop_reconstruction_fragment(
     runtime_table_fragment = dict(payload.get("runtime_table_fragment") or {})
     target_id = str(target.get("id") or trace_scope).strip()
     row_recovery = _sanitize_row_recovery_for_persistence(dict(payload.get("rowRecovery") or {}))
-    row_scope_id = str(row_recovery.get("semanticScopeId") or "").strip()
+    row_scope_id = _normalize_token_shop_row_scope_id(
+        trace_scope,
+        str(row_recovery.get("semanticScopeId") or "").strip(),
+        target_id,
+        str(target.get("label") or ""),
+        str(target.get("joinGoal") or ""),
+    )
     row_scope = dict(token_shop_scope or {})
     if not row_scope and row_scope_id:
         row_scope = _load_canonical_semantic_fragment_payload(conn, "semantic_scope_fragment", row_scope_id)
@@ -2026,6 +2084,14 @@ def _derive_token_shop_reconstruction_fragment(
         or shell_window.get("shellField")
         or ""
     ).strip()
+    expected_row_field = _expected_token_shop_row_field(
+        trace_scope,
+        target_id,
+        str(target.get("label") or ""),
+        str(target.get("joinGoal") or ""),
+    )
+    if expected_row_field:
+        row_shell_field = expected_row_field
 
     slot_roles = sorted(
         {
@@ -2391,6 +2457,412 @@ BOOTSTRAP_OUTPUT_SUMMARY_RULES = {
     },
 }
 
+RELATION_SEAM_CONTRACT_REGISTRY: dict[str, dict[str, dict[str, Any]]] = {
+    "multiverse-market-save-owner": {
+        "typed-market-field-recovery": {
+            "coverageMode": "relation-shaped",
+            "probeMode": "relation-shaped",
+            "traceScope": "multiverse-market-typed-owner-boundary",
+            "requiredCoverageSeamIds": ["typed-market-field-recovery"],
+            "requiredRelationKinds": ["owns-field"],
+            "expectedTermFactKinds": ["typed-claim", "typed-claim-candidate"],
+            "fallbackExpectedTerms": [
+                "PlayerProfileHandler",
+                "PlayerProfileData",
+                "SaveData",
+                "ArcadeSaveData",
+                "MultiverseMarket",
+                "Market",
+                "FillPlayerProfileData",
+                "ConvertSaveDataToProfileData",
+                "InscryptionsDone",
+                "EsotericR1Trades",
+                "IS1Level",
+                "IS71Level",
+                "IS110Level",
+            ],
+            "anchorFactKinds": ["typed-host-anchor", "typed-conversion-anchor"],
+            "fallbackAnchors": [
+                "PlayerProfileHandler",
+                "PlayerProfileData",
+                "SaveData",
+                "MultiverseMarket",
+                "Market",
+                "FillPlayerProfileData",
+                "ConvertSaveDataToProfileData",
+            ],
+            "routine": "typed-owner-claim-relation-probe",
+            "skipNativeExecution": False,
+            "allowFallbackTermMode": True,
+        },
+        "canonical-import-admissibility": {
+            "coverageMode": "boundary-shaped",
+            "probeMode": "boundary-shaped",
+            "traceScope": "multiverse-market-canonical-import-boundary",
+            "requiredCoverageSeamIds": ["canonical-import-admissibility"],
+            "requiredFactKinds": ["accessor-bridge", "typed-span", "ordered-overlap-row-id", "owner-anchor", "compatibility-import-target-path"],
+            "requiredRelationKinds": ["candidate-canonical-import-target", "candidate-import-anchor"],
+            "progressRelationKinds": [
+                "supports-canonical-import-host-field",
+                "supports-canonical-import-lane",
+                "supports-canonical-import-overlap-row",
+                "bounded-import-lane",
+                "bounded-import-overlap-row",
+            ],
+            "progressEdgeTypes": [
+                "bounded-import-support-structure",
+                "bounded-import-lane",
+                "bounded-import-overlap",
+            ],
+            "expectedTermFactKinds": [
+                "metadata-anchor",
+                "compatibility-import-target-path",
+                "typed-span",
+                "ordered-overlap-row-id",
+            ],
+            "expectedTermRelationPayloadKeys": {
+                "candidate-import-anchor": ["anchor"],
+                "candidate-canonical-host-field": ["claim"],
+            },
+            "fallbackExpectedTerms": [
+                "CloudSavePlayerProfile",
+                "GetPlayerProfileInfo",
+                "FillPlayerProfileData",
+                "ConvertSaveDataToProfileData",
+                "PlayerProfileData",
+                "SaveData",
+                "MultiverseMarket",
+                "compatibility.unmappedSystemState.multiverseMarket",
+                "InscryptionsDone",
+                "EsotericR1Trades",
+                "IS1Level",
+                "IS110Level",
+            ],
+            "anchorFactKinds": ["metadata-anchor", "owner-anchor", "compatibility-import-target-path"],
+            "anchorRelationPayloadKeys": {
+                "candidate-import-anchor": ["anchor"],
+            },
+            "fallbackAnchors": [
+                "CloudSavePlayerProfile",
+                "GetPlayerProfileInfo",
+                "FillPlayerProfileData",
+                "ConvertSaveDataToProfileData",
+                "PlayerProfileData",
+                "SaveData",
+                "MultiverseMarket",
+                "compatibility.unmappedSystemState.multiverseMarket",
+            ],
+            "routine": "canonical-import-boundary-probe",
+            "skipNativeExecution": False,
+        },
+        "broad-row-identity-remap": {
+            "coverageMode": "boundary-shaped",
+            "probeMode": "boundary-shaped",
+            "traceScope": "multiverse-market-broad-row-remap-boundary",
+            "requiredCoverageSeamIds": ["broad-row-identity-remap"],
+            "requiredFactKinds": ["buy-hook-sample", "cost-text-sample", "ordered-overlap-row-id", "typed-span"],
+            "requiredRelationKinds": ["candidate-row-remap", "supports-row-remap"],
+            "progressRelationKinds": [
+                "supports-row-text-lane",
+                "bounded-row-text-lane",
+                "supports-bounded-row-remap",
+                "bounded-row-remap",
+            ],
+            "progressEdgeTypes": [
+                "bounded-row-remap-support",
+                "bounded-row-text-lane",
+                "bounded-row-remap",
+            ],
+            "expectedTermFactKinds": [
+                "buy-hook-sample",
+                "cost-text-sample",
+                "ordered-overlap-row-id",
+            ],
+            "expectedTermRelationPayloadKeys": {
+                "candidate-override-id-remap": ["pair"],
+            },
+            "fallbackExpectedTerms": [
+                "SetAllChrystosEmporiumTexts",
+                "TextHandlerMarkets",
+                "ResourceAmountText",
+                "BuyIS71",
+                "BuyIS72",
+                "BuyIS73",
+                "BuyIS74",
+                "SetIS71CostText",
+                "SetIS72CostText",
+                "SetIS73CostText",
+                "SetIS74CostText",
+                "IS59Level",
+                "IS62Level",
+                "IS71Level",
+                "IS74Level",
+            ],
+            "anchorFactKinds": ["buy-hook-sample", "cost-text-sample", "owner-anchor"],
+            "anchorRelationPayloadKeys": {
+                "candidate-override-id-remap": ["pair"],
+            },
+            "fallbackAnchors": [
+                "SetAllChrystosEmporiumTexts",
+                "TextHandlerMarkets",
+                "ResourceAmountText",
+                "BuyIS71",
+                "BuyIS72",
+                "BuyIS73",
+                "BuyIS74",
+                "SetIS71CostText",
+                "SetIS72CostText",
+                "SetIS73CostText",
+                "SetIS74CostText",
+                "IS59Level",
+            ],
+            "routine": "broad-row-remap-boundary-probe",
+            "skipNativeExecution": True,
+        },
+    },
+}
+
+MULTIVERSE_CLUSTER_SEAM_IDS = {
+    "typed-owner": "typed-market-field-recovery",
+    "canonical-import": "canonical-import-admissibility",
+    "broad-row-remap": "broad-row-identity-remap",
+}
+
+MULTIVERSE_CLUSTER_RELATION_EDGE_RULES: dict[str, list[dict[str, Any]]] = {
+    "canonical-import": [
+        {
+            "edgeType": "bounded-import-support-structure",
+            "relationKinds": [
+                "supports-canonical-import-host-field",
+                "supports-canonical-import-lane",
+                "supports-canonical-import-overlap-row",
+            ],
+            "nonblocking": True,
+        },
+        {
+            "edgeType": "bounded-import-lane",
+            "relationKinds": ["bounded-import-lane"],
+            "nonblocking": True,
+        },
+        {
+            "edgeType": "bounded-import-overlap",
+            "relationKinds": ["bounded-import-overlap-row"],
+            "nonblocking": True,
+        },
+    ],
+    "broad-row-remap": [
+        {
+            "edgeType": "bounded-row-remap-support",
+            "relationKinds": ["supports-bounded-row-remap"],
+            "nonblocking": True,
+        },
+        {
+            "edgeType": "bounded-row-remap",
+            "relationKinds": ["bounded-row-remap"],
+            "nonblocking": True,
+        },
+        {
+            "edgeType": "bounded-row-text-lane",
+            "relationKinds": ["bounded-row-text-lane"],
+            "nonblocking": True,
+        },
+    ],
+}
+
+
+def _resolve_multiverse_cluster_contract_clear_edge(
+    cluster_kind: str,
+    fact_kinds_present: set[str],
+    relation_kind_counts: dict[str, int],
+) -> str:
+    seam_id = str(MULTIVERSE_CLUSTER_SEAM_IDS.get(str(cluster_kind or "").strip()) or "").strip()
+    if not seam_id:
+        return ""
+    contract = dict(
+        (dict(RELATION_SEAM_CONTRACT_REGISTRY.get("multiverse-market-save-owner") or {})).get(seam_id) or {}
+    )
+    if not contract:
+        return ""
+    required_fact_kinds = {
+        str(value).strip()
+        for value in (contract.get("requiredFactKinds") or [])
+        if str(value).strip()
+    }
+    required_relation_kinds = {
+        str(value).strip()
+        for value in (contract.get("requiredRelationKinds") or [])
+        if str(value).strip()
+    }
+    relation_kinds_present = {
+        str(kind).strip()
+        for kind, count in dict(relation_kind_counts or {}).items()
+        if str(kind).strip() and int(count or 0) > 0
+    }
+    if required_fact_kinds and not required_fact_kinds.issubset(set(fact_kinds_present or set())):
+        return ""
+    if required_relation_kinds and not required_relation_kinds.issubset(relation_kinds_present):
+        return ""
+    return seam_id
+
+MULTIVERSE_CLUSTER_RELATION_BUNDLE_SPECS: dict[str, Any] = {
+    "canonical-import": {
+        "hostField": [
+            {"relationKind": "candidate-canonical-host-field"},
+            {"relationKind": "supports-canonical-import-host-field", "payload": {"supportType": "typed-owner-claim"}},
+        ],
+        "lane": [
+            {"relationKind": "candidate-import-preserves-lane"},
+            {"relationKind": "supports-canonical-import-lane", "payload": {"supportType": "grounded-text-lane"}},
+            {"relationKind": "bounded-import-lane", "payload": {"supportType": "checked-grounded-text-lane"}},
+        ],
+        "overlapRow": [
+            {"relationKind": "candidate-import-overlap-row"},
+            {"relationKind": "supports-canonical-import-overlap-row", "payload": {"supportType": "ordered-overlap"}},
+            {"relationKind": "bounded-import-overlap-row", "payload": {"supportType": "checked-ordered-overlap"}},
+        ],
+    },
+    "broad-row-remap": {
+        "candidateRow": [
+            {"relationKind": "candidate-row-remap"},
+        ],
+        "sourceSupport": [
+            {"relationKind": "supports-row-remap"},
+        ],
+        "lane": [
+            {"relationKind": "supports-row-text-lane"},
+            {"relationKind": "bounded-row-text-lane", "payload": {"supportType": "checked-grounded-text-lane"}},
+        ],
+        "overrideCandidate": [
+            {"relationKind": "candidate-override-id-remap"},
+        ],
+        "overrideBounded": [
+            {"relationKind": "supports-bounded-row-remap", "payload": {"supportType": "checked-overlap-override-pair"}},
+            {"relationKind": "bounded-row-remap", "payload": {"supportType": "checked-overlap-override-pair"}},
+        ],
+    },
+}
+
+MULTIVERSE_BROAD_ROW_SOURCE_SPECS = [
+    {"sourceKind": "buy-hook", "labelTemplate": "BuyIS{rowId}"},
+    {"sourceKind": "cost-text", "labelTemplate": "SetIS{rowId}CostText"},
+]
+
+MULTIVERSE_TYPED_OWNER_CLAIM_CANDIDATES = [
+    "PlayerProfileHandler.Market",
+    "PlayerProfileHandler.MultiverseMarket",
+    "PlayerProfileData.Market",
+    "PlayerProfileData.MultiverseMarket",
+    "SaveData.Market",
+    "SaveData.MultiverseMarket",
+    "MultiverseMarket.InscryptionsDone",
+    "MultiverseMarket.IS71Level",
+    "MultiverseMarket.IS110Level",
+    "MultiverseMarket.EsotericR1Trades",
+]
+
+MULTIVERSE_TYPED_HOST_CANDIDATES = [
+    "PlayerProfileHandler",
+    "PlayerProfileData",
+    "SaveData",
+    "MultiverseMarket",
+    "Market",
+]
+
+MULTIVERSE_TYPED_CONVERSION_CANDIDATES = [
+    "FillPlayerProfileData",
+    "ConvertSaveDataToProfileData",
+]
+
+MULTIVERSE_TYPED_FIELD_CANDIDATES = [
+    "InscryptionsDone",
+    "EsotericR1Trades",
+    "NecrumR1Trades",
+    "Mech1Unlocked",
+    "Mech1MissionsCompleted",
+]
+
+MULTIVERSE_OWNER_ANCHOR_CANDIDATES = [
+    "MultiverseMarket",
+    "TextHandlerMarkets",
+    "SetAllChrystosEmporiumTexts",
+    "InscryptionsDone",
+    "ResourceAmountText",
+]
+
+MULTIVERSE_METADATA_TERM_CANDIDATES = [
+    "PlayerProfileData",
+    "FillPlayerProfileData",
+    "ConvertSaveDataToProfileData",
+    "CloudSavePlayerProfile",
+    "GetPlayerProfileInfo",
+    "InscryptionsDone",
+    "EsotericR1Trades",
+]
+
+MULTIVERSE_RESOURCE_ANCHOR_CANDIDATES = [
+    "ResourceAmountText",
+    "InscryptionsDone",
+]
+
+MULTIVERSE_TYPED_FIELD_REGEX_PATTERNS = [
+    r"IS\d+Level",
+]
+
+MULTIVERSE_PRESENT_TERM_GROUP_SPECS = {
+    "typedHostTerms": MULTIVERSE_TYPED_HOST_CANDIDATES,
+    "typedConversionTerms": MULTIVERSE_TYPED_CONVERSION_CANDIDATES,
+    "ownerAnchors": MULTIVERSE_OWNER_ANCHOR_CANDIDATES,
+    "metadataTerms": MULTIVERSE_METADATA_TERM_CANDIDATES,
+    "resourceAnchors": MULTIVERSE_RESOURCE_ANCHOR_CANDIDATES,
+}
+
+MULTIVERSE_REGEX_TERM_SPECS = {
+    "buyHookTerms": r"BuyIS\d+",
+    "costTextTerms": r"SetIS\d+CostText",
+    "prefabTerms": r"ChrystosEmporiumUpgrade\d+",
+    "serializedIdTerms": r"\bID\d+\b",
+    "prefabOverridePairs": r"ChrystosEmporiumUpgrade\d+-ID\d+",
+}
+
+MULTIVERSE_REGEX_ROW_ID_SPECS = {
+    "buyHookRowIds": r"BuyIS(\d+)",
+    "costTextRowIds": r"SetIS(\d+)CostText",
+    "prefabRowIds": r"ChrystosEmporiumUpgrade(\d+)",
+    "serializedIds": r"\bID(\d+)\b",
+}
+
+MULTIVERSE_SAVE_OWNER_FACT_FIELD_SPECS = {
+    "compatibilityImportTargetPath": "compatibility-import-target-path",
+    "canonicalImportSafeSubsetLabel": "canonical-import-safe-subset-label",
+    "broaderRowRemapStatus": "broader-row-remap-status",
+    "typedSpan": "typed-span",
+    "accessorBridge": "accessor-bridge",
+    "wrapperOnlyFieldLabel": "wrapper-only-field-label",
+    "groundedTextLaneRowId": "grounded-text-lane-row-id",
+    "groundedTextLaneRowIdSource": "grounded-text-lane-row-id-source",
+    "groundedTextLaneBaseBonus": "grounded-text-lane-base-bonus",
+    "groundedTextLaneBaseBonusSource": "grounded-text-lane-base-bonus-source",
+    "groundedTextLaneEffectLabel": "grounded-text-lane-effect-label",
+    "groundedTextLaneEffectSource": "grounded-text-lane-effect-source",
+    "quarantinedCurrentValueLane": "quarantined-current-value-lane",
+}
+
+MULTIVERSE_DERIVED_TERM_GROUP_SPECS = {
+    "typedFieldTerms": {
+        "candidateTerms": MULTIVERSE_TYPED_FIELD_CANDIDATES,
+        "regexPatterns": MULTIVERSE_TYPED_FIELD_REGEX_PATTERNS,
+    },
+}
+
+MULTIVERSE_FACT_ROW_ID_SPECS = {
+    "orderedOverlapRowIds": "ordered-overlap-row-id",
+}
+
+MULTIVERSE_STATIC_SOURCE_FIELDS = {
+    "sourceTraceScopes": ["multiverse-market-save-owner-boundary"],
+    "sourceSubjectIds": ["multiverse-market-save-owner-boundary"],
+}
+
 BOOTSTRAP_SUPPORT_CONTEXTS = {
     "token-shop-atu4-mod": {
         "shellField": "ATU4Button",
@@ -2507,7 +2979,18 @@ BOOTSTRAP_SUPPORT_CONTEXTS = {
         "shellWindowRadius": 5,
         "familyTraceProfile": "late-atu-family",
         "traceRoutineHint": "token-shop-family-trace",
-        "disableNativeTrace": True,
+        "nativeTraceTerms": [
+            "ATU24Button",
+            "15797",
+            "ATU28Button",
+            "15813",
+            "BuyATU24",
+            "BuyATU28",
+            "ATU24Bonus3Shards",
+            "Tier 3 Max Level Increaser",
+            "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
+            "Campaign Fragments"
+        ],
         "resolutionAliases": [
             "late atu family",
             "late atu24-atu28 family",
@@ -2630,6 +3113,14 @@ BOOTSTRAP_SUPPORT_CONTEXTS = {
         "compatibilityImportTargetPath": "compatibility.unmappedSystemState.multiverseMarket",
         "canonicalImportSafeSubsetLabel": "none",
         "broaderRowRemapStatus": "Broader row identity or remap stays blocked outside the checked 71-74 ordered overlap.",
+        "wrapperOnlyFieldLabel": "InscryptionsDone",
+        "effectLabelLane": "BonusDescriptionText",
+        "effectLabelSourceLane": "SetAllBonusTexts -> SetISNBonusText",
+        "baseBonusLane": "PerLevelBonusText",
+        "baseBonusSourceLane": "SetAllChrystosEmporiumTexts -> SetAllBaseBonusTexts -> SetISNBaseBonusText",
+        "idLane": "IDText",
+        "idSourceLane": "SetIS1IDText through SetIS110IDText",
+        "quarantinedCurrentValueLane": "CurrentBonusText",
         "blockedStructure": [
             "The wider inscription ordering outside rows 71-74 is not yet grounded enough from checked repo-local evidence to promote broader IS*Level row mappings.",
             "The checked repo-local evidence still does not recover player-facing row labels for rows 71-74, only their ordered row positions inside the larger inscription set.",
@@ -3050,6 +3541,72 @@ def _derive_execution_context_fragment(
         "updatedAt": datetime.now().isoformat(timespec="seconds"),
         "support": support,
     }
+
+
+def _expected_token_shop_row_field(
+    trace_scope: str,
+    *values: str,
+) -> str:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope or "family" in trace_scope:
+        return ""
+    match = re.search(
+        r"(atu\d+)",
+        " ".join([trace_scope, *[str(value or "") for value in values]]),
+        re.IGNORECASE,
+    )
+    if not match:
+        return ""
+    return f"{match.group(1).upper()}Button"
+
+
+def _normalize_token_shop_execution_context_payload(
+    trace_scope: str,
+    payload: dict[str, Any] | None,
+) -> dict[str, Any]:
+    normalized = dict(payload or {})
+    family_id = str(normalized.get("familyId") or "").strip()
+    if family_id != "token-shop":
+        return normalized
+    expected_row_field = _expected_token_shop_row_field(
+        trace_scope,
+        str(normalized.get("targetId") or ""),
+        str(normalized.get("label") or ""),
+        str(normalized.get("joinGoal") or ""),
+    )
+    if not expected_row_field:
+        return normalized
+    normalized["selectedSubjectKind"] = "row-local"
+    normalized["selectedSubjectKey"] = f"row:{expected_row_field}"
+    return normalized
+
+
+def _normalize_token_shop_row_scope_id(
+    trace_scope: str,
+    row_scope_id: str,
+    *values: str,
+) -> str:
+    expected_row_field = _expected_token_shop_row_field(trace_scope, *values)
+    if not expected_row_field:
+        return str(row_scope_id or "").strip()
+    return f"row:{expected_row_field}"
+
+
+def _normalize_token_shop_support_rows(
+    trace_scope: str,
+    support_rows: list[dict[str, Any]] | None,
+    *values: str,
+) -> list[dict[str, Any]]:
+    rows = [dict(item) for item in (support_rows or []) if isinstance(item, dict)]
+    expected_row_field = _expected_token_shop_row_field(trace_scope, *values)
+    if not expected_row_field:
+        return rows
+    filtered_rows = [
+        row
+        for row in rows
+        if str(row.get("field") or row.get("shellField") or "").strip() == expected_row_field
+    ]
+    return filtered_rows or rows
 
 
 def _derive_token_shop_execution_plan_fragment(
@@ -3768,6 +4325,3033 @@ def _dependency_hash_payload(value: Any) -> str:
     return hashlib.sha1(_json_dumps(value).encode("utf-8")).hexdigest()[:16]
 
 
+def _dependency_descriptor(view: Any) -> dict[str, Any]:
+    if isinstance(view, dict):
+        provenance = dict(view.get("provenance") or {})
+        payload = view.get("payload")
+        return {
+            "builtAt": str(view.get("builtAt") or view.get("updatedAt") or "").strip() or None,
+            "reducerVersion": str(view.get("reducerVersion") or "").strip() or None,
+            "payloadHash": str(provenance.get("payloadHash") or "").strip() or _dependency_hash_payload(payload),
+        }
+    return {
+        "builtAt": None,
+        "reducerVersion": None,
+        "payloadHash": _dependency_hash_payload(view),
+    }
+
+
+def _build_materialization_dependency_signature(inputs: dict[str, Any]) -> str:
+    normalized = {
+        key: _dependency_descriptor(value)
+        for key, value in sorted(inputs.items())
+    }
+    return _dependency_hash_payload(normalized)
+
+
+def _contract_core_view(payload: dict[str, Any]) -> dict[str, Any]:
+    payload = dict(payload or {})
+    grounded_fields = dict(payload.get("groundedFields") or {})
+    support_summary = dict(payload.get("supportSummary") or {})
+    row_detail = dict(grounded_fields.get("rowDetail") or {})
+    row_details_by_field = dict(grounded_fields.get("rowDetailsByField") or {})
+    shared_lanes = dict(support_summary.get("sharedLanes") or {})
+    return {
+        "semanticKey": str(payload.get("semanticKey") or ""),
+        "traceScope": str(payload.get("traceScope") or ""),
+        "subjectId": str(payload.get("subjectId") or ""),
+        "subjectKind": str(payload.get("subjectKind") or ""),
+        "subjectKey": str(payload.get("subjectKey") or ""),
+        "subjectLabel": str(payload.get("subjectLabel") or ""),
+        "targetAliases": list(payload.get("targetAliases") or []),
+        "identityOwner": str(payload.get("identityOwner") or ""),
+        "identityReason": payload.get("identityReason"),
+        "knownEdges": list(payload.get("knownEdges") or []),
+        "missingEdges": list(payload.get("missingEdges") or []),
+        "blockedEdges": list(payload.get("blockedEdges") or []),
+        "nonblockingEdges": list(payload.get("nonblockingEdges") or []),
+        "nextSeam": dict(payload.get("nextSeam") or {}),
+        "groundedFields": {
+            "rowShellField": grounded_fields.get("rowShellField"),
+            "rowShellPathId": grounded_fields.get("rowShellPathId"),
+            "actionMethods": list(grounded_fields.get("actionMethods") or []),
+            "prefabCandidates": list(grounded_fields.get("prefabCandidates") or []),
+            "displayUpdateHooks": list(grounded_fields.get("displayUpdateHooks") or []),
+            "literalTitleRecovered": bool(grounded_fields.get("literalTitleRecovered")),
+            "literalTitleText": grounded_fields.get("literalTitleText"),
+            "rowDetail": row_detail,
+            "rowDetailsByField": row_details_by_field,
+        },
+        "supportSummary": {
+            "supportRowCount": int(support_summary.get("supportRowCount") or 0),
+            "supportSurfaceIds": list(support_summary.get("supportSurfaceIds") or []),
+            "supportSurfaceLabels": list(support_summary.get("supportSurfaceLabels") or []),
+            "proofCount": int(support_summary.get("proofCount") or 0),
+            "sharedLanes": shared_lanes,
+        },
+        "blockedInputReason": payload.get("blockedInputReason"),
+        "blockedInputReasons": dict(payload.get("blockedInputReasons") or {}),
+    }
+
+
+def _contract_enriched_view(payload: dict[str, Any]) -> dict[str, Any]:
+    payload = dict(payload or {})
+    grounded_fields = dict(payload.get("groundedFields") or {})
+    support_summary = dict(payload.get("supportSummary") or {})
+    return {
+        "groundedFields": {
+            key: value
+            for key, value in grounded_fields.items()
+            if key not in {
+                "rowShellField",
+                "rowShellPathId",
+                "actionMethods",
+                "prefabCandidates",
+                "displayUpdateHooks",
+                "literalTitleRecovered",
+                "literalTitleText",
+                "rowDetail",
+                "rowDetailsByField",
+            }
+        },
+        "supportSummary": {
+            "supportRows": list(support_summary.get("supportRows") or []),
+        },
+        "provenanceSummary": dict(payload.get("provenanceSummary") or {}),
+    }
+
+
+def _contract_stage_payloads(payload: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    payload = dict(payload or {})
+    core = dict(payload.get("core") or {})
+    enriched = dict(payload.get("enriched") or {})
+    aggregate_stage = {
+        "semanticKey": str(payload.get("semanticKey") or ""),
+        "knownEdges": len(list(payload.get("knownEdges") or [])),
+        "missingEdges": len(list(payload.get("missingEdges") or [])),
+        "blockedEdges": len(list(payload.get("blockedEdges") or [])),
+    }
+    core_stage = {
+        "semanticKey": str(core.get("semanticKey") or ""),
+        "knownEdges": len(list(core.get("knownEdges") or [])),
+        "missingEdges": len(list(core.get("missingEdges") or [])),
+        "blockedEdges": len(list(core.get("blockedEdges") or [])),
+    }
+    enriched_stage = {
+        "semanticKey": str(payload.get("semanticKey") or ""),
+        "enrichedFieldCount": len(dict(enriched.get("groundedFields") or {})),
+        "supportRowCount": len(list(dict(enriched.get("supportSummary") or {}).get("supportRows") or [])),
+    }
+    return aggregate_stage, core_stage, enriched_stage
+
+
+def _group_generic_fact_values(fact_rows: list[dict[str, Any]]) -> dict[str, list[str]]:
+    fact_values_by_kind: dict[str, list[str]] = {}
+    for row in list(fact_rows or []):
+        fact_kind = str(row.get("factKind") or "").strip()
+        fact_value = str(row.get("factValue") or "").strip()
+        if not fact_kind or not fact_value:
+            continue
+        existing = fact_values_by_kind.setdefault(fact_kind, [])
+        if fact_value not in existing:
+            existing.append(fact_value)
+    return fact_values_by_kind
+
+
+def _group_generic_gap_payloads(gap_rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    gap_payloads_by_kind: dict[str, list[dict[str, Any]]] = {}
+    for row in list(gap_rows or []):
+        gap_kind = str(row.get("gapKind") or "").strip()
+        if not gap_kind:
+            continue
+        gap_payloads_by_kind.setdefault(gap_kind, []).append(dict(row.get("payload") or {}))
+    return gap_payloads_by_kind
+
+
+def _infer_boundary_verdict(
+    *,
+    known_edges: list[str],
+    missing_edges: list[str],
+    blocked_edges: list[str],
+    blocked_input_reason: str,
+    next_seam_status: str,
+    generic_fact_count: int,
+) -> str:
+    if known_edges and not missing_edges and not blocked_edges and not blocked_input_reason:
+        return "wire"
+    if known_edges or generic_fact_count > 0 or next_seam_status == "blocked":
+        return "quarantine"
+    return "research"
+
+
+def _derive_boundary_views_from_subject_payload(
+    trace_scope: str,
+    subject_payload: dict[str, Any],
+    generic_views: dict[str, list[dict[str, Any]]],
+) -> list[dict[str, Any]]:
+    trace_scope = str(trace_scope or "").strip()
+    subject_payload = dict(subject_payload or {})
+    subject_id = str(subject_payload.get("subjectId") or "").strip()
+    if not trace_scope or not subject_id:
+        return []
+
+    known_edges = _unique_strings([str(edge).strip() for edge in list(subject_payload.get("knownEdges") or []) if str(edge).strip()])
+    missing_edges = _unique_strings([str(edge).strip() for edge in list(subject_payload.get("missingEdges") or []) if str(edge).strip()])
+    blocked_edges = _unique_strings([str(edge).strip() for edge in list(subject_payload.get("blockedEdges") or []) if str(edge).strip()])
+    nonblocking_edges = _unique_strings([str(edge).strip() for edge in list(subject_payload.get("nonblockingEdges") or []) if str(edge).strip()])
+    blocked_input_reason = str(subject_payload.get("blockedInputReason") or "").strip()
+    next_seam = dict(subject_payload.get("nextSeam") or {})
+    next_seam_id = str(next_seam.get("id") or "").strip()
+    next_seam_status = str(next_seam.get("status") or "").strip()
+    fact_rows = list(generic_views.get("facts") or [])
+    gap_rows = list(generic_views.get("gaps") or [])
+    fact_values_by_kind = _group_generic_fact_values(fact_rows)
+    gap_payloads_by_kind = _group_generic_gap_payloads(gap_rows)
+    source_trace_scope = (
+        str(subject_payload.get("sourceTraceScope") or "").strip()
+        or str((fact_values_by_kind.get("source-trace-scope") or [None])[0] or "").strip()
+    )
+    source_subject_id = (
+        str(subject_payload.get("sourceSubjectId") or "").strip()
+        or str((fact_values_by_kind.get("source-subject-id") or [None])[0] or "").strip()
+    )
+    verdict = _infer_boundary_verdict(
+        known_edges=known_edges,
+        missing_edges=missing_edges,
+        blocked_edges=blocked_edges,
+        blocked_input_reason=blocked_input_reason,
+        next_seam_status=next_seam_status,
+        generic_fact_count=len(fact_rows),
+    )
+    return [
+        {
+            "subjectId": subject_id,
+            "traceScope": trace_scope,
+            "boundaryKind": "subject-boundary",
+            "verdict": verdict,
+            "payload": {
+                "subjectId": subject_id,
+                "subjectKind": str(subject_payload.get("subjectKind") or "").strip() or None,
+                "subjectKey": str(subject_payload.get("subjectKey") or "").strip() or None,
+                "subjectLabel": str(subject_payload.get("subjectLabel") or subject_id).strip() or subject_id,
+                "targetAliases": list(subject_payload.get("targetAliases") or []),
+                "knownEdges": known_edges,
+                "missingEdges": missing_edges,
+                "blockedEdges": blocked_edges,
+                "nonblockingEdges": nonblocking_edges,
+                "blockedInputReason": blocked_input_reason or None,
+                "nextSeamId": next_seam_id or None,
+                "nextSeamStatus": next_seam_status or None,
+                "sourceTraceScope": source_trace_scope or None,
+                "sourceSubjectId": source_subject_id or None,
+                "genericFactCount": len(fact_rows),
+                "genericGapCount": len(gap_rows),
+                "factKinds": sorted(fact_values_by_kind.keys()),
+                "gapKinds": sorted(gap_payloads_by_kind.keys()),
+                "factsByKind": fact_values_by_kind,
+                "gapPayloadsByKind": gap_payloads_by_kind,
+            },
+        }
+    ]
+
+
+def _derive_boundary_views_from_subject_inputs(
+    trace_scope: str,
+    subject_state: dict[str, Any],
+    generic_views: dict[str, list[dict[str, Any]]],
+) -> list[dict[str, Any]]:
+    return _derive_boundary_views_from_subject_payload(
+        trace_scope,
+        subject_state,
+        generic_views,
+    )
+
+
+def _derive_generic_mechanics_views_from_subject_contract(payload: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+    payload = dict(payload or {})
+    trace_scope = str(payload.get("traceScope") or "").strip()
+    subject_id = str(payload.get("subjectId") or "").strip()
+    subject_kind = str(payload.get("subjectKind") or "").strip()
+    subject_label = str(payload.get("subjectLabel") or subject_id).strip() or subject_id
+    grounded_fields = dict(payload.get("groundedFields") or {})
+    row_details_by_field = dict(grounded_fields.get("rowDetailsByField") or {})
+    next_seam = dict(payload.get("nextSeam") or {})
+    support_summary = dict(payload.get("supportSummary") or {})
+    provenance_summary = dict(payload.get("provenanceSummary") or {})
+
+    entities: list[dict[str, Any]] = []
+    facts: list[dict[str, Any]] = []
+    relations: list[dict[str, Any]] = []
+    gaps: list[dict[str, Any]] = []
+
+    if not subject_id:
+        return {
+            "entities": entities,
+            "facts": facts,
+            "relations": relations,
+            "gaps": gaps,
+        }
+
+    subject_entity_id = subject_id
+    entities.append(
+        {
+            "entityId": subject_entity_id,
+            "entityKind": subject_kind or "subject",
+            "traceScope": trace_scope,
+            "payload": {
+                "label": subject_label,
+                "targetAliases": list(payload.get("targetAliases") or []),
+                "identityOwner": payload.get("identityOwner"),
+                "identityReason": payload.get("identityReason"),
+            },
+        }
+    )
+    for fact_kind, fact_value in (
+        ("row-shell-field", grounded_fields.get("rowShellField")),
+        ("row-shell-path-id", grounded_fields.get("rowShellPathId")),
+        ("literal-title-text", grounded_fields.get("literalTitleText")),
+    ):
+        value = str(fact_value or "").strip()
+        if not value:
+            continue
+        facts.append(
+            {
+                "entityId": subject_entity_id,
+                "traceScope": trace_scope,
+                "fieldKey": None,
+                "factKind": fact_kind,
+                "factValue": value,
+                "payload": {"subjectId": subject_id},
+            }
+        )
+    for value in list(grounded_fields.get("actionMethods") or []):
+        if str(value).strip():
+            facts.append(
+                {
+                    "entityId": subject_entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": None,
+                    "factKind": "action-method",
+                    "factValue": str(value).strip(),
+                    "payload": {"subjectId": subject_id},
+                }
+            )
+    for value in list(grounded_fields.get("prefabCandidates") or []):
+        if str(value).strip():
+            facts.append(
+                {
+                    "entityId": subject_entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": None,
+                    "factKind": "prefab-candidate",
+                    "factValue": str(value).strip(),
+                    "payload": {"subjectId": subject_id},
+                }
+            )
+    for value in list(grounded_fields.get("displayUpdateHooks") or []):
+        if str(value).strip():
+            facts.append(
+                {
+                    "entityId": subject_entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": None,
+                    "factKind": "display-update-hook",
+                    "factValue": str(value).strip(),
+                    "payload": {"subjectId": subject_id},
+                }
+            )
+    for lane_id, lane_fields in sorted(grounded_fields.items()):
+        if lane_id in {"rowDetailsByField"} or not isinstance(lane_fields, dict):
+            continue
+        _append_grounded_lane_facts(
+            facts,
+            entity_id=subject_entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            lane_id=lane_id,
+            lane_fields=lane_fields,
+        )
+    _append_bootstrap_subject_facts(
+        facts,
+        entity_id=subject_entity_id,
+        trace_scope=trace_scope,
+        subject_id=subject_id,
+    )
+
+    if str(next_seam.get("id") or "").strip():
+        gaps.append(
+            {
+                "entityId": subject_entity_id,
+                "traceScope": trace_scope,
+                "fieldKey": "next-seam",
+                "gapKind": "next-seam",
+                "payload": {
+                    "status": str(next_seam.get("status") or "").strip() or None,
+                    "seamId": str(next_seam.get("id") or "").strip(),
+                    "reason": str(next_seam.get("reason") or "").strip() or None,
+                    "terms": list(next_seam.get("terms") or []),
+                },
+            }
+        )
+    for edge_type in list(payload.get("missingEdges") or []):
+        if str(edge_type).strip():
+            gaps.append(
+                {
+                    "entityId": subject_entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": f"edge:{str(edge_type).strip()}",
+                    "gapKind": "missing-edge",
+                    "payload": {"edgeType": str(edge_type).strip()},
+                }
+            )
+    for edge_type in list(payload.get("blockedEdges") or []):
+        if str(edge_type).strip():
+            gaps.append(
+                {
+                    "entityId": subject_entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": f"edge:{str(edge_type).strip()}",
+                    "gapKind": "blocked-edge",
+                    "payload": {"edgeType": str(edge_type).strip()},
+                }
+            )
+    for edge_type in list(payload.get("nonblockingEdges") or []):
+        if str(edge_type).strip():
+            gaps.append(
+                {
+                    "entityId": subject_entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": f"edge:{str(edge_type).strip()}",
+                    "gapKind": "nonblocking-edge",
+                    "payload": {"edgeType": str(edge_type).strip()},
+                }
+            )
+    blocked_input_reasons = dict(payload.get("blockedInputReasons") or {})
+    for lane_id, blocked_reason in sorted(blocked_input_reasons.items()):
+        if not str(blocked_reason).strip():
+            continue
+        gaps.append(
+            {
+                "entityId": subject_entity_id,
+                "traceScope": trace_scope,
+                "fieldKey": lane_id,
+                "gapKind": "blocked-lane",
+                "payload": {
+                    "laneId": lane_id,
+                    "reason": str(blocked_reason).strip(),
+                },
+            }
+        )
+    _append_bootstrap_subject_gaps(
+        gaps,
+        entity_id=subject_entity_id,
+        trace_scope=trace_scope,
+        subject_id=subject_id,
+    )
+
+    shared_lane_summary = dict(support_summary.get("sharedLanes") or {})
+    for lane_id, lane_payload in shared_lane_summary.items():
+        if not isinstance(lane_payload, dict):
+            continue
+        selected_subject_id = str(lane_payload.get("selectedSubjectId") or "").strip()
+        if selected_subject_id and selected_subject_id != subject_entity_id:
+            relations.append(
+                {
+                    "sourceEntityId": subject_entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": None,
+                    "relationKind": "shares-lane-with",
+                    "targetEntityId": selected_subject_id,
+                    "payload": {
+                        "laneId": str(lane_id),
+                        "selectionSource": lane_payload.get("selectionSource"),
+                    },
+                }
+            )
+
+    for field_key, row_detail in sorted(row_details_by_field.items()):
+        if not isinstance(row_detail, dict):
+            continue
+        row_entity_id = f"{subject_entity_id}#{field_key}"
+        entities.append(
+            {
+                "entityId": row_entity_id,
+                "entityKind": "row-field",
+                "traceScope": trace_scope,
+                "payload": {
+                    "fieldKey": field_key,
+                    "label": field_key,
+                    "subjectId": subject_id,
+                },
+            }
+        )
+        relations.append(
+            {
+                "sourceEntityId": row_entity_id,
+                "traceScope": trace_scope,
+                "fieldKey": field_key,
+                "relationKind": "belongs-to-subject",
+                "targetEntityId": subject_entity_id,
+                "payload": {"subjectKind": subject_kind or None},
+            }
+        )
+        shell_field = field_key.replace("Level", "Button") if field_key.endswith("Level") else ""
+        if shell_field:
+            facts.append(
+                {
+                    "entityId": row_entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": field_key,
+                    "factKind": "shell-field",
+                    "factValue": shell_field,
+                    "payload": {"subjectId": subject_id},
+                }
+            )
+        for fact_kind, fact_value in (
+            ("identity", row_detail.get("identity")),
+            ("identity-source", row_detail.get("identitySource")),
+            ("row-type", row_detail.get("rowType")),
+            ("row-type-label", row_detail.get("rowTypeLabel")),
+            ("detail-note", row_detail.get("detailNote")),
+        ):
+            value = str(fact_value or "").strip()
+            if not value:
+                continue
+            facts.append(
+                {
+                    "entityId": row_entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": field_key,
+                    "factKind": fact_kind,
+                    "factValue": value,
+                    "payload": {"subjectId": subject_id},
+                }
+            )
+        for term in list(row_detail.get("boundedEvidenceTerms") or []):
+            if str(term).strip():
+                facts.append(
+                    {
+                        "entityId": row_entity_id,
+                        "traceScope": trace_scope,
+                        "fieldKey": field_key,
+                        "factKind": "bounded-evidence-term",
+                        "factValue": str(term).strip(),
+                        "payload": {"subjectId": subject_id},
+                    }
+                )
+        blocked_fields = dict(row_detail.get("blockedFields") or {})
+        for blocked_field, blocked_reason in blocked_fields.items():
+            if str(blocked_reason).strip():
+                gaps.append(
+                    {
+                        "entityId": row_entity_id,
+                        "traceScope": trace_scope,
+                        "fieldKey": field_key,
+                        "gapKind": str(blocked_field).strip() or "row-detail",
+                        "payload": {
+                            "reason": str(blocked_reason).strip(),
+                            "isGrounded": bool(row_detail.get("isGrounded")),
+                        },
+                    }
+                )
+        if not bool(row_detail.get("isGrounded")) and not blocked_fields:
+            gaps.append(
+                {
+                    "entityId": row_entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": field_key,
+                    "gapKind": "row-detail",
+                    "payload": {
+                        "reason": "missing-db-row-detail-evidence:ungrounded-row-detail",
+                        "isGrounded": False,
+                    },
+                }
+            )
+
+    return {
+        "entities": entities,
+        "facts": facts,
+        "relations": relations,
+        "gaps": gaps,
+    }
+
+
+def _to_kebab_case(value: str) -> str:
+    text = re.sub(r"([a-z0-9])([A-Z])", r"\1-\2", str(value or "").strip())
+    text = re.sub(r"[^a-zA-Z0-9]+", "-", text)
+    return text.strip("-").lower()
+
+
+def _append_grounded_lane_facts(
+    facts: list[dict[str, Any]],
+    *,
+    entity_id: str,
+    trace_scope: str,
+    subject_id: str,
+    lane_id: str,
+    lane_fields: dict[str, Any],
+) -> None:
+    lane_prefix = _to_kebab_case(lane_id)
+    payload = {"subjectId": subject_id, "laneId": lane_id}
+    for field_name, field_value in sorted(dict(lane_fields or {}).items()):
+        if field_name == "rowDetailsByField":
+            continue
+        fact_prefix = f"{lane_prefix}-{_to_kebab_case(field_name)}"
+        if isinstance(field_value, list):
+            for item in field_value:
+                value = str(item or "").strip()
+                if not value:
+                    continue
+                facts.append(
+                    {
+                        "entityId": entity_id,
+                        "traceScope": trace_scope,
+                        "fieldKey": lane_id,
+                        "factKind": fact_prefix,
+                        "factValue": value,
+                        "payload": payload,
+                    }
+                )
+            continue
+        if isinstance(field_value, bool):
+            facts.append(
+                {
+                    "entityId": entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": lane_id,
+                    "factKind": fact_prefix,
+                    "factValue": "true" if field_value else "false",
+                    "payload": payload,
+                }
+            )
+            continue
+        if isinstance(field_value, (int, float)) and not isinstance(field_value, bool):
+            facts.append(
+                {
+                    "entityId": entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": lane_id,
+                    "factKind": fact_prefix,
+                    "factValue": str(field_value),
+                    "payload": payload,
+                }
+            )
+            continue
+        value = str(field_value or "").strip()
+        if not value:
+            continue
+        facts.append(
+            {
+                "entityId": entity_id,
+                "traceScope": trace_scope,
+                "fieldKey": lane_id,
+                "factKind": fact_prefix,
+                "factValue": value,
+                "payload": payload,
+            }
+        )
+
+
+def _append_generic_fact(
+    facts: list[dict[str, Any]],
+    *,
+    entity_id: str,
+    trace_scope: str,
+    subject_id: str,
+    fact_kind: str,
+    fact_value: str,
+    field_key: str | None = None,
+    payload: dict[str, Any] | None = None,
+) -> None:
+    value = str(fact_value or "").strip()
+    kind = str(fact_kind or "").strip()
+    if not value or not kind:
+        return
+    fact_payload = {"subjectId": subject_id}
+    if isinstance(payload, dict):
+        fact_payload.update(payload)
+    facts.append(
+        {
+            "entityId": entity_id,
+            "traceScope": trace_scope,
+            "fieldKey": field_key,
+            "factKind": kind,
+            "factValue": value,
+            "payload": fact_payload,
+        }
+    )
+
+
+def _append_generic_relation(
+    relations: list[dict[str, Any]],
+    *,
+    source_entity_id: str,
+    trace_scope: str,
+    relation_kind: str,
+    target_entity_id: str,
+    payload: dict[str, Any] | None = None,
+    field_key: str | None = None,
+) -> None:
+    source_entity_id = str(source_entity_id or "").strip()
+    trace_scope = str(trace_scope or "").strip()
+    relation_kind = str(relation_kind or "").strip()
+    target_entity_id = str(target_entity_id or "").strip()
+    if not source_entity_id or not trace_scope or not relation_kind or not target_entity_id:
+        return
+    relations.append(
+        {
+            "sourceEntityId": source_entity_id,
+            "traceScope": trace_scope,
+            "fieldKey": field_key,
+            "relationKind": relation_kind,
+            "targetEntityId": target_entity_id,
+            "payload": dict(payload or {}),
+        }
+    )
+
+
+def _augment_fragment_inputs_with_structured_claim_facts(
+    fragment_inputs: dict[str, Any],
+    fact_rows: list[dict[str, Any]],
+    *,
+    exact_fact_kind: str,
+    candidate_fact_kind: str,
+    exact_key: str,
+    candidate_key: str,
+) -> dict[str, Any]:
+    fragment_inputs = dict(fragment_inputs or {})
+    existing_exact = _unique_strings([str(value) for value in (fragment_inputs.get(exact_key) or []) if str(value).strip()])
+    existing_candidates = _unique_strings([str(value) for value in (fragment_inputs.get(candidate_key) or []) if str(value).strip()])
+    exact_values = _unique_strings(
+        [
+            str(row.get("factValue") or "").strip()
+            for row in (fact_rows or [])
+            if str(row.get("factKind") or "").strip() == str(exact_fact_kind or "").strip()
+            and str(row.get("factValue") or "").strip()
+        ]
+    )
+    candidate_values = _unique_strings(
+        [
+            str(row.get("factValue") or "").strip()
+            for row in (fact_rows or [])
+            if str(row.get("factKind") or "").strip() == str(candidate_fact_kind or "").strip()
+            and str(row.get("factValue") or "").strip()
+        ]
+    )
+    fragment_inputs[exact_key] = _unique_strings([*existing_exact, *exact_values])
+    fragment_inputs[candidate_key] = _unique_strings([*existing_candidates, *candidate_values])
+    return fragment_inputs
+
+
+def _append_structured_claim_relations(
+    entities: list[dict[str, Any]],
+    relations: list[dict[str, Any]],
+    *,
+    trace_scope: str,
+    subject_id: str,
+    claim_values: list[str],
+    relation_kind: str,
+    entity_kind_prefix: str,
+) -> None:
+    seen_entities = {
+        str(entity.get("entityId") or "").strip()
+        for entity in entities
+        if isinstance(entity, dict) and str(entity.get("entityId") or "").strip()
+    }
+    seen_relations: set[tuple[str, str, str]] = set()
+    for relation_row in relations:
+        if not isinstance(relation_row, dict):
+            continue
+        seen_relations.add(
+            (
+                str(relation_row.get("sourceEntityId") or "").strip(),
+                str(relation_row.get("relationKind") or "").strip(),
+                str(relation_row.get("targetEntityId") or "").strip(),
+            )
+        )
+    for claim_value in [str(value).strip() for value in (claim_values or []) if str(value).strip()]:
+        if "." not in claim_value:
+            continue
+        host_name, field_name = [segment.strip() for segment in claim_value.split(".", 1)]
+        if not host_name or not field_name:
+            continue
+        host_entity_id = f"{entity_kind_prefix}:type:{host_name}"
+        field_entity_id = f"{entity_kind_prefix}:field:{host_name}.{field_name}"
+        if host_entity_id not in seen_entities:
+            entities.append(
+                {
+                    "entityId": host_entity_id,
+                    "entityKind": "type",
+                    "traceScope": trace_scope,
+                    "payload": {
+                        "subjectId": subject_id,
+                        "label": host_name,
+                    },
+                }
+            )
+            seen_entities.add(host_entity_id)
+        if field_entity_id not in seen_entities:
+            entities.append(
+                {
+                    "entityId": field_entity_id,
+                    "entityKind": "field",
+                    "traceScope": trace_scope,
+                    "payload": {
+                        "subjectId": subject_id,
+                        "label": field_name,
+                        "declaringType": host_name,
+                        "claim": claim_value,
+                    },
+                }
+            )
+            seen_entities.add(field_entity_id)
+        relation_key = (host_entity_id, relation_kind, field_entity_id)
+        if relation_key in seen_relations:
+            continue
+        seen_relations.add(relation_key)
+        _append_generic_relation(
+            relations,
+            source_entity_id=host_entity_id,
+            trace_scope=trace_scope,
+            relation_kind=relation_kind,
+            target_entity_id=field_entity_id,
+            payload={
+                "subjectId": subject_id,
+                "hostName": host_name,
+                "fieldName": field_name,
+                "claim": claim_value,
+            },
+        )
+
+
+def _count_relation_kinds(relations: list[dict[str, Any]]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for relation in relations:
+        relation_kind = str(relation.get("relationKind") or "").strip()
+        if not relation_kind:
+            continue
+        counts[relation_kind] = int(counts.get(relation_kind) or 0) + 1
+    return counts
+
+
+def _derive_relation_rule_edges(
+    cluster_kind: str,
+    relation_kind_counts: dict[str, int],
+) -> tuple[list[str], list[str]]:
+    known_edges: list[str] = []
+    nonblocking_edges: list[str] = []
+    for rule in list(MULTIVERSE_CLUSTER_RELATION_EDGE_RULES.get(str(cluster_kind or "").strip()) or []):
+        edge_type = str(rule.get("edgeType") or "").strip()
+        relation_kinds = [
+            str(value).strip()
+            for value in (rule.get("relationKinds") or [])
+            if str(value).strip()
+        ]
+        if not edge_type or not relation_kinds:
+            continue
+        if not any(int(relation_kind_counts.get(relation_kind) or 0) > 0 for relation_kind in relation_kinds):
+            continue
+        known_edges.append(edge_type)
+        if bool(rule.get("nonblocking")):
+            nonblocking_edges.append(edge_type)
+    return _unique_strings(known_edges), _unique_strings(nonblocking_edges)
+
+
+def _iter_multiverse_grounded_text_lanes(fragment_inputs: dict[str, Any]) -> list[dict[str, str | None]]:
+    return [
+        {
+            "laneKind": "row-id-lane",
+            "laneLabel": str(fragment_inputs.get("groundedTextLaneRowId") or "").strip(),
+            "source": str(fragment_inputs.get("groundedTextLaneRowIdSource") or "").strip() or None,
+        },
+        {
+            "laneKind": "base-bonus-lane",
+            "laneLabel": str(fragment_inputs.get("groundedTextLaneBaseBonus") or "").strip(),
+            "source": str(fragment_inputs.get("groundedTextLaneBaseBonusSource") or "").strip() or None,
+        },
+        {
+            "laneKind": "effect-label-lane",
+            "laneLabel": str(fragment_inputs.get("groundedTextLaneEffectLabel") or "").strip(),
+            "source": str(fragment_inputs.get("groundedTextLaneEffectSource") or "").strip() or None,
+        },
+        {
+            "laneKind": "current-value-lane",
+            "laneLabel": str(fragment_inputs.get("quarantinedCurrentValueLane") or "").strip(),
+            "source": None,
+        },
+    ]
+
+
+def _collect_present_multiverse_terms(
+    candidate_terms: list[str],
+    contains_term,
+) -> list[str]:
+    return _unique_strings(
+        [
+            value
+            for value in [str(candidate).strip() for candidate in (candidate_terms or []) if str(candidate).strip()]
+            if contains_term(value)
+        ]
+    )
+
+
+def _collect_structured_claim_hits(
+    claim_candidates: list[str],
+    has_structured_claim,
+) -> list[str]:
+    return _unique_strings(
+        [
+            claim
+            for claim in [str(value).strip() for value in (claim_candidates or []) if str(value).strip()]
+            if "." in claim and has_structured_claim(*claim.split(".", 1))
+        ]
+    )
+
+
+def _collect_regex_term_groups(
+    normalized_terms: list[str],
+    regex_specs: dict[str, str],
+) -> dict[str, list[str]]:
+    combined = "\n".join(str(term or "") for term in (normalized_terms or []))
+    return {
+        str(field_name): _unique_strings(re.findall(pattern, combined))
+        for field_name, pattern in dict(regex_specs or {}).items()
+        if str(field_name).strip() and str(pattern).strip()
+    }
+
+
+def _collect_multiverse_fact_field_values(
+    save_owner_facts: dict[str, list[Any]],
+    field_specs: dict[str, str],
+) -> dict[str, str]:
+    values: dict[str, str] = {}
+    for output_key, fact_kind in dict(field_specs or {}).items():
+        value = str(((save_owner_facts.get(str(fact_kind)) or [None])[0]) or "").strip()
+        values[str(output_key)] = value
+    return values
+
+
+def _collect_multiverse_derived_term_groups(
+    normalized_terms: list[str],
+    contains_term,
+    group_specs: dict[str, dict[str, Any]],
+) -> dict[str, list[str]]:
+    trace_text = "\n".join(str(term or "") for term in (normalized_terms or []))
+    values: dict[str, list[str]] = {}
+    for output_key, spec in dict(group_specs or {}).items():
+        candidate_values = _collect_present_multiverse_terms(
+            list(dict(spec or {}).get("candidateTerms") or []),
+            contains_term,
+        )
+        regex_values: list[str] = []
+        for pattern in list(dict(spec or {}).get("regexPatterns") or []):
+            regex_values.extend(re.findall(str(pattern), trace_text))
+        values[str(output_key)] = _unique_strings(
+            [str(value).strip() for value in [*candidate_values, *regex_values] if str(value).strip()]
+        )
+    return values
+
+
+def _collect_multiverse_fact_row_id_values(
+    save_owner_facts: dict[str, list[Any]],
+    field_specs: dict[str, str],
+) -> dict[str, list[int]]:
+    values: dict[str, list[int]] = {}
+    for output_key, fact_kind in dict(field_specs or {}).items():
+        row_values = []
+        for value in list(save_owner_facts.get(str(fact_kind)) or []):
+            text = str(value).strip()
+            if text.isdigit():
+                row_values.append(int(text))
+        values[str(output_key)] = sorted(set(row_values))
+    return values
+
+
+def _collect_multiverse_present_term_groups(
+    contains_term,
+    group_specs: dict[str, list[str]],
+) -> dict[str, list[str]]:
+    return {
+        str(output_key): _collect_present_multiverse_terms(candidate_terms, contains_term)
+        for output_key, candidate_terms in dict(group_specs or {}).items()
+        if str(output_key).strip()
+    }
+
+
+def _derive_multiverse_broad_row_candidate_ids(fragment_inputs: dict[str, Any]) -> list[int]:
+    buy_rows = {int(value) for value in list(fragment_inputs.get("buyHookRowIds") or []) if str(value).strip()}
+    cost_rows = {int(value) for value in list(fragment_inputs.get("costTextRowIds") or []) if str(value).strip()}
+    overlap_rows = {int(value) for value in list(fragment_inputs.get("orderedOverlapRowIds") or []) if str(value).strip()}
+    return sorted(buy_rows & cost_rows & overlap_rows)
+
+
+def _iter_multiverse_prefab_override_pairs(fragment_inputs: dict[str, Any]):
+    for override_pair in [str(value).strip() for value in list(fragment_inputs.get("prefabOverridePairs") or []) if str(value).strip()]:
+        match = re.match(r"ChrystosEmporiumUpgrade(\d+)-ID(\d+)", override_pair)
+        if not match:
+            continue
+        yield {
+            "pair": override_pair,
+            "sourceRowId": int(match.group(1)),
+            "targetRowId": int(match.group(2)),
+        }
+
+
+def _append_multiverse_relation_bundle(
+    relations: list[dict[str, Any]],
+    *,
+    source_entity_id: str,
+    target_entity_id: str,
+    trace_scope: str,
+    relation_specs: list[dict[str, Any]],
+    payload_base: dict[str, Any],
+) -> None:
+    for relation_spec in list(relation_specs or []):
+        relation_kind = str(relation_spec.get("relationKind") or "").strip()
+        if not relation_kind:
+            continue
+        payload = dict(payload_base)
+        if isinstance(relation_spec.get("payload"), dict):
+            payload.update(dict(relation_spec.get("payload") or {}))
+        _append_generic_relation(
+            relations,
+            source_entity_id=source_entity_id,
+            trace_scope=trace_scope,
+            relation_kind=relation_kind,
+            target_entity_id=target_entity_id,
+            payload=payload,
+        )
+
+
+def _promote_graph_backed_structured_claim_terms(
+    claim_candidates: list[str],
+    graph_hits_by_term: dict[str, list[dict[str, str]]],
+) -> list[str]:
+    promoted: list[str] = []
+    exact_kinds = {"managed_graph_edge", "managed_graph_owner", "owner_candidates"}
+    for claim_value in [str(value).strip() for value in (claim_candidates or []) if str(value).strip()]:
+        if "." not in claim_value:
+            continue
+        host_name, field_name = [segment.strip() for segment in claim_value.split(".", 1)]
+        if not host_name or not field_name:
+            continue
+        host_key = host_name.lower()
+        field_key = field_name.lower()
+        field_hits = list(graph_hits_by_term.get(field_key) or [])
+        host_hits = list(graph_hits_by_term.get(host_key) or [])
+        field_backed = any(
+            str(hit.get("sourceTerm") or "").strip().lower() == host_key
+            and str(hit.get("kind") or "").strip() in exact_kinds
+            for hit in field_hits
+        )
+        host_backed = any(
+            str(hit.get("sourceTerm") or "").strip().lower() == field_key
+            and str(hit.get("kind") or "").strip() in exact_kinds
+            for hit in host_hits
+        )
+        if field_backed or host_backed:
+            promoted.append(claim_value)
+    return _unique_strings(promoted)
+
+
+def _append_bootstrap_subject_facts(
+    facts: list[dict[str, Any]],
+    *,
+    entity_id: str,
+    trace_scope: str,
+    subject_id: str,
+) -> None:
+    strategy_config = dict(BOOTSTRAP_SUPPORT_CONTEXTS.get(trace_scope) or {})
+    if trace_scope == "shard-cost-su0-structure":
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="owner-type",
+            fact_value=str(strategy_config.get("ownerType") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="cost-accessor",
+            fact_value=str(strategy_config.get("accessor") or ""),
+        )
+        for field_name in list(strategy_config.get("parameterShell") or []):
+            _append_generic_fact(
+                facts,
+                entity_id=entity_id,
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                fact_kind="parameter-shell-field",
+                fact_value=str(field_name or ""),
+            )
+        return
+    if trace_scope == "shard-owned-state-upgradeinfolist-population":
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="scene-owner",
+            fact_value=str(strategy_config.get("sceneOwner") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="runtime-shell",
+            fact_value=str(strategy_config.get("runtimeShell") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="generic-lead",
+            fact_value=str(strategy_config.get("genericLead") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="save-candidate",
+            fact_value=str(strategy_config.get("saveCandidate") or ""),
+        )
+        return
+    if trace_scope == "multiverse-market-save-owner-boundary":
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="accessor-bridge",
+            fact_value=str(strategy_config.get("accessorBridge") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="save-owner",
+            fact_value=str(strategy_config.get("saveOwner") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="typed-span",
+            fact_value=str(strategy_config.get("typedSpan") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="compatibility-import-target-path",
+            fact_value=str(strategy_config.get("compatibilityImportTargetPath") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="canonical-import-safe-subset-label",
+            fact_value=str(strategy_config.get("canonicalImportSafeSubsetLabel") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="broader-row-remap-status",
+            fact_value=str(strategy_config.get("broaderRowRemapStatus") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="wrapper-only-field-label",
+            fact_value=str(strategy_config.get("wrapperOnlyFieldLabel") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="grounded-text-lane-effect-label",
+            fact_value=str(strategy_config.get("effectLabelLane") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="grounded-text-lane-effect-source",
+            fact_value=str(strategy_config.get("effectLabelSourceLane") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="grounded-text-lane-base-bonus",
+            fact_value=str(strategy_config.get("baseBonusLane") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="grounded-text-lane-base-bonus-source",
+            fact_value=str(strategy_config.get("baseBonusSourceLane") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="grounded-text-lane-row-id",
+            fact_value=str(strategy_config.get("idLane") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="grounded-text-lane-row-id-source",
+            fact_value=str(strategy_config.get("idSourceLane") or ""),
+        )
+        _append_generic_fact(
+            facts,
+            entity_id=entity_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="quarantined-current-value-lane",
+            fact_value=str(strategy_config.get("quarantinedCurrentValueLane") or ""),
+        )
+        for row_id in list(strategy_config.get("orderedOverlap") or []):
+            _append_generic_fact(
+                facts,
+                entity_id=entity_id,
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                fact_kind="ordered-overlap-row-id",
+                fact_value=str(row_id),
+            )
+
+
+def _append_bootstrap_subject_gaps(
+    gaps: list[dict[str, Any]],
+    *,
+    entity_id: str,
+    trace_scope: str,
+    subject_id: str,
+) -> None:
+    strategy_config = dict(BOOTSTRAP_SUPPORT_CONTEXTS.get(trace_scope) or {})
+    if trace_scope != "multiverse-market-save-owner-boundary":
+        return
+    blocked_reason = ". ".join(
+        [
+            str(value).strip()
+            for value in (strategy_config.get("blockedStructure") or [])
+            if str(value).strip()
+        ]
+    ).strip() or "The wider multiverse owner boundary remains quarantined to three explicit seams."
+    missing_edges = [
+        "typed-market-field-recovery",
+        "canonical-import-admissibility",
+        "broad-row-identity-remap",
+    ]
+    if not any(
+        str((gap.get("payload") or {}).get("edgeType") or (gap.get("payload") or {}).get("edgeId") or "").strip()
+        in set(missing_edges)
+        for gap in gaps
+        if isinstance(gap, dict) and str(gap.get("gapKind") or "").strip() == "missing-edge"
+    ):
+        for edge_id in missing_edges:
+            gaps.append(
+                {
+                    "entityId": entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": f"edge:{edge_id}",
+                    "gapKind": "missing-edge",
+                    "payload": {
+                        "subjectId": subject_id,
+                        "edgeId": edge_id,
+                        "reason": blocked_reason,
+                    },
+                }
+            )
+    if not any(
+        isinstance(gap, dict)
+        and str(gap.get("gapKind") or "").strip() == "blocked-lane"
+        and str((gap.get("payload") or {}).get("laneId") or "").strip() == "save-owner-boundary"
+        for gap in gaps
+    ):
+        gaps.append(
+            {
+                "entityId": entity_id,
+                "traceScope": trace_scope,
+                "fieldKey": "save-owner-boundary",
+                "gapKind": "blocked-lane",
+                "payload": {
+                    "subjectId": subject_id,
+                    "laneId": "save-owner-boundary",
+                    "reason": blocked_reason,
+                },
+            }
+        )
+
+
+def _derive_shard_owner_family_live_fragment_inputs(
+    *,
+    semantic_scope_payload: dict[str, Any],
+    family_graph_payload: dict[str, Any],
+    execution_plan_payload: dict[str, Any],
+) -> dict[str, Any]:
+    semantic_scope_payload = dict(semantic_scope_payload or {})
+    family_graph_payload = dict(family_graph_payload or {})
+    execution_plan_payload = dict(execution_plan_payload or {})
+
+    scene_owner = dict(semantic_scope_payload.get("sceneOwner") or {})
+    runtime_shell = dict(semantic_scope_payload.get("runtimeShell") or {})
+    declaring_field = dict(runtime_shell.get("declaringField") or {})
+    row_model_type = dict(runtime_shell.get("rowModelType") or {})
+    assessment = dict(family_graph_payload.get("assessment") or {})
+    outcome = dict(semantic_scope_payload.get("outcome") or {})
+
+    owner_type = str(runtime_shell.get("ownerType") or scene_owner.get("name") or "").strip()
+    declaring_name = str(declaring_field.get("name") or "").strip()
+    row_model_full_name = str(row_model_type.get("fullName") or "").strip()
+    short_row_model_name = (
+        row_model_full_name.split("+", 1)[1].strip()
+        if "+" in row_model_full_name
+        else row_model_full_name
+    )
+    runtime_shell_label = str(runtime_shell.get("label") or "").strip()
+
+    blocked_edge_types = _unique_strings(list(assessment.get("blockedEdgeTypes") or []))
+    claim_stage_missing_seams = _unique_strings(
+        [
+            str(seam_id).strip()
+            for claim_stage in list(execution_plan_payload.get("claimStages") or [])
+            if isinstance(claim_stage, dict)
+            for seam_id in list(claim_stage.get("missingSeamIds") or [])
+            if str(seam_id).strip()
+        ]
+    )
+
+    return {
+        "screenControllerFamilies": _unique_strings([owner_type, str(scene_owner.get("name") or "").strip()]),
+        "dataCarrierCandidates": _unique_strings(
+            [
+                f"{owner_type}|{short_row_model_name}" if owner_type and short_row_model_name else "",
+                row_model_full_name,
+                short_row_model_name,
+            ]
+        ),
+        "runtimeShell": runtime_shell_label,
+        "ownerField": declaring_name,
+        "rowModelType": row_model_full_name,
+        "rowStateFields": _unique_strings(
+            [
+                str(field.get("name") or "").strip()
+                for field in list(runtime_shell.get("rowStateFields") or [])
+                if isinstance(field, dict) and str(field.get("name") or "").strip()
+            ]
+        ),
+        "ownerListFields": _unique_strings(
+            [str(value).strip() for value in list(semantic_scope_payload.get("ownerListFields") or []) if str(value).strip()]
+        ),
+        "familyCoreTerms": _unique_strings(
+            [str(value).strip() for value in list(family_graph_payload.get("coreTerms") or []) if str(value).strip()]
+        ),
+        "supportingEdgeTypes": _unique_strings(
+            [str(value).strip() for value in list(family_graph_payload.get("supportingEdgeTypes") or []) if str(value).strip()]
+        ),
+        "blockedEdgeTypes": blocked_edge_types,
+        "followUpTerms": _unique_strings(
+            [str(value).strip() for value in list(execution_plan_payload.get("followUpTerms") or []) if str(value).strip()]
+        ),
+        "claimStageMissingSeams": claim_stage_missing_seams,
+        "groundedConclusion": str(family_graph_payload.get("groundedConclusion") or "").strip(),
+        "outcomeKind": str(outcome.get("kind") or "").strip(),
+        "outcomeStatement": str(outcome.get("statement") or outcome.get("summary") or "").strip(),
+        "sourceTraceScope": str(family_graph_payload.get("traceScope") or semantic_scope_payload.get("traceScope") or "").strip(),
+        "sourceSubjectId": str(family_graph_payload.get("targetId") or semantic_scope_payload.get("scopeId") or "").strip(),
+    }
+
+
+def _derive_shard_owner_family_generic_views(
+    *,
+    trace_scope: str,
+    subject_id: str,
+    fragment_inputs: dict[str, Any],
+    next_seam_id: str,
+    blocked_input_reason: str,
+) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
+    entities: list[dict[str, Any]] = [
+        {
+            "entityId": subject_id,
+            "entityKind": "family-graph",
+            "traceScope": trace_scope,
+            "payload": {
+                "subjectId": subject_id,
+                "label": "Shard owner-family",
+                "systemId": "shards",
+            },
+        }
+    ]
+    facts: list[dict[str, Any]] = []
+    relations: list[dict[str, Any]] = []
+    gaps: list[dict[str, Any]] = []
+    for value in list(fragment_inputs.get("screenControllerFamilies") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="screen-controller-family", fact_value=str(value))
+    for value in list(fragment_inputs.get("dataCarrierCandidates") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="data-carrier-candidate", fact_value=str(value))
+    runtime_shell = str(fragment_inputs.get("runtimeShell") or "").strip()
+    if runtime_shell:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="runtime-shell", fact_value=runtime_shell)
+    owner_field = str(fragment_inputs.get("ownerField") or "").strip()
+    if owner_field:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="owner-field", fact_value=owner_field)
+    row_model_type = str(fragment_inputs.get("rowModelType") or "").strip()
+    if row_model_type:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="row-model-type", fact_value=row_model_type)
+    for value in list(fragment_inputs.get("rowStateFields") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="row-state-field", fact_value=str(value))
+    for value in list(fragment_inputs.get("ownerListFields") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="owner-list-field", fact_value=str(value))
+    for value in list(fragment_inputs.get("familyCoreTerms") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="family-core-term", fact_value=str(value))
+    for value in list(fragment_inputs.get("supportingEdgeTypes") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="supporting-edge-type", fact_value=str(value))
+    for value in list(fragment_inputs.get("blockedEdgeTypes") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="blocked-edge-type", fact_value=str(value))
+    for value in list(fragment_inputs.get("followUpTerms") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="follow-up-term", fact_value=str(value))
+    grounded_conclusion = str(fragment_inputs.get("groundedConclusion") or "").strip()
+    if grounded_conclusion:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="grounded-conclusion", fact_value=grounded_conclusion)
+    outcome_kind = str(fragment_inputs.get("outcomeKind") or "").strip()
+    if outcome_kind:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="outcome-kind", fact_value=outcome_kind)
+    outcome_statement = str(fragment_inputs.get("outcomeStatement") or "").strip()
+    if outcome_statement:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="outcome-statement", fact_value=outcome_statement)
+    source_subject_id = str(fragment_inputs.get("sourceSubjectId") or "").strip()
+    source_trace_scope = str(fragment_inputs.get("sourceTraceScope") or "").strip()
+    if source_trace_scope:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="source-trace-scope", fact_value=source_trace_scope)
+    if source_subject_id:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="source-subject-id", fact_value=source_subject_id)
+    if source_subject_id:
+        relations.append(
+            {
+                "sourceEntityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "relationKind": "derived-from-subject",
+                "targetEntityId": source_subject_id,
+                "payload": {
+                    "subjectId": subject_id,
+                    "sourceTraceScope": source_trace_scope or None,
+                },
+            }
+        )
+    if next_seam_id:
+        gaps.append(
+            {
+                "entityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "gapKind": "next-seam",
+                "payload": {"subjectId": subject_id, "seamId": next_seam_id},
+            }
+        )
+    for blocked_edge_type in list(fragment_inputs.get("blockedEdgeTypes") or []):
+        gaps.append(
+            {
+                "entityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "gapKind": "blocked-edge",
+                "payload": {
+                    "subjectId": subject_id,
+                    "edgeType": str(blocked_edge_type),
+                },
+            }
+        )
+    gaps.append(
+        {
+            "entityId": subject_id,
+            "traceScope": trace_scope,
+            "fieldKey": "",
+            "gapKind": "missing-edge",
+            "payload": {
+                "subjectId": subject_id,
+                "edgeId": "player-owned-state-owner",
+                "reason": blocked_input_reason or "player-owned milestone save-state inputs remain unresolved",
+            },
+        }
+    )
+    blocked_lane_reason = blocked_input_reason or outcome_statement or "player-owned milestone save-state inputs remain unresolved"
+    if blocked_lane_reason:
+        gaps.append(
+            {
+                "entityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "gapKind": "blocked-lane",
+                "payload": {
+                    "subjectId": subject_id,
+                    "laneId": "owner-family-structure",
+                    "reason": blocked_lane_reason,
+                },
+            }
+        )
+    generic_views = {
+        "entities": entities,
+        "facts": facts,
+        "relations": relations,
+        "gaps": gaps,
+    }
+    boundary_rows = [
+        {
+            "traceScope": trace_scope,
+            "subjectId": subject_id,
+            "boundaryKind": "subject-boundary",
+            "verdict": "quarantine",
+            "payload": {
+                "subjectId": subject_id,
+                "knownEdges": list(fragment_inputs.get("supportingEdgeTypes") or []),
+                "missingEdges": list(fragment_inputs.get("blockedEdgeTypes") or []) or ["player-owned-state-owner"],
+                "blockedInputReason": blocked_input_reason or outcome_statement or "player-owned milestone save-state inputs remain unresolved",
+                "nextSeamId": next_seam_id or "local-runtime-population-bridge",
+                "sourceTraceScope": source_trace_scope or None,
+                "sourceSubjectId": source_subject_id or None,
+                "genericFactCount": len(facts),
+                "genericGapCount": len(gaps),
+            },
+            "provenance": {
+                "reducer": "derived-shard-owner-family-v1",
+            },
+            "reducerVersion": "derived-shard-owner-family-v1",
+        }
+    ]
+    return generic_views, boundary_rows
+
+
+def _derive_shard_milestone_cluster_live_inputs(
+    *,
+    owner_family_fact_rows: list[dict[str, Any]],
+    owned_state_fact_rows: list[dict[str, Any]],
+    cost_fact_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    owner_facts = _group_generic_fact_values(owner_family_fact_rows)
+    owned_state_facts = _group_generic_fact_values(owned_state_fact_rows)
+    cost_facts = _group_generic_fact_values(cost_fact_rows)
+    payload_hook_terms = {
+        "CheckAllMilestoneLevelFills",
+        "InitializeMaxLevelBools",
+        "InitializeShards",
+        "MaxedMilestonesList",
+        "MilestoneCostList",
+        "UnlockedMilestonesList",
+        "UpdateMaxedMilestonesList",
+        "UpdateShardCostList",
+        "UpdateUnlockedMilestonesList",
+    }
+    progress_hook_terms = {"CheckAllMilestoneLevelFills"}
+    return {
+        "screenControllerFamilies": _unique_strings(list(owner_facts.get("screen-controller-family") or [])),
+        "dataCarrierCandidates": _unique_strings(list(owner_facts.get("data-carrier-candidate") or [])),
+        "runtimeShell": str((owner_facts.get("runtime-shell") or [None])[0] or "").strip(),
+        "ownerField": str((owner_facts.get("owner-field") or [None])[0] or "").strip(),
+        "rowModelType": str((owner_facts.get("row-model-type") or [None])[0] or "").strip(),
+        "rowStateFields": _unique_strings(list(owner_facts.get("row-state-field") or [])),
+        "ownerListFields": _unique_strings(list(owner_facts.get("owner-list-field") or [])),
+        "supportingEdgeTypes": _unique_strings(list(owner_facts.get("supporting-edge-type") or [])),
+        "blockedEdgeTypes": _unique_strings(list(owner_facts.get("blocked-edge-type") or [])),
+        "payloadHookTerms": _unique_strings(
+            [
+                value
+                for value in list(owner_facts.get("follow-up-term") or [])
+                if str(value).strip() in payload_hook_terms
+            ]
+        ),
+        "progressHookTerms": _unique_strings(
+            [
+                value
+                for value in list(owner_facts.get("follow-up-term") or [])
+                if str(value).strip() in progress_hook_terms
+            ]
+        ),
+        "costAccessors": _unique_strings(list(cost_facts.get("cost-accessor") or [])),
+        "parameterShellFields": _unique_strings(list(cost_facts.get("parameter-shell-field") or [])),
+        "saveCandidates": _unique_strings(list(owned_state_facts.get("save-candidate") or [])),
+        "genericLeadFamilies": _unique_strings(list(owned_state_facts.get("generic-lead") or [])),
+        "sourceTraceScopes": _unique_strings(
+            list(owner_facts.get("source-trace-scope") or []) + ["shard-cost-su0-structure"]
+        ),
+        "sourceSubjectIds": _unique_strings(
+            list(owner_facts.get("source-subject-id") or []) + ["shard-cost-su0-structure"]
+        ),
+    }
+
+
+def _derive_shard_bonus_trace_inputs(
+    *,
+    native_terms: list[str],
+    cost_terms: list[str],
+    owner_family_fact_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    owner_facts = _group_generic_fact_values(owner_family_fact_rows)
+    combined_terms = _unique_strings(list(native_terms or []) + list(cost_terms or []))
+    return {
+        "screenControllerFamilies": _unique_strings(list(owner_facts.get("screen-controller-family") or [])),
+        "dataCarrierCandidates": _unique_strings(list(owner_facts.get("data-carrier-candidate") or [])),
+        "runtimeShell": str((owner_facts.get("runtime-shell") or [None])[0] or "").strip(),
+        "ownerField": str((owner_facts.get("owner-field") or [None])[0] or "").strip(),
+        "rowModelType": str((owner_facts.get("row-model-type") or [None])[0] or "").strip(),
+        "nativeTerms": combined_terms,
+        "sourceTraceScopes": ["shard-owned-state-upgradeinfolist-population", "shard-cost-su0-structure"],
+        "sourceSubjectIds": ["shard-owned-state-upgradeinfolist-population", "shard-cost-su0-structure"],
+    }
+
+
+def _derive_shard_milestone_cluster_generic_views(
+    *,
+    trace_scope: str,
+    subject_id: str,
+    subject_label: str,
+    cluster_kind: str,
+    fragment_inputs: dict[str, Any],
+    next_seam_id: str,
+    blocked_input_reason: str,
+) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
+    entities: list[dict[str, Any]] = [
+        {
+            "entityId": subject_id,
+            "entityKind": "family-graph",
+            "traceScope": trace_scope,
+            "payload": {
+                "subjectId": subject_id,
+                "label": subject_label,
+                "systemId": "shards",
+            },
+        }
+    ]
+    facts: list[dict[str, Any]] = []
+    relations: list[dict[str, Any]] = []
+    gaps: list[dict[str, Any]] = []
+    for value in list(fragment_inputs.get("screenControllerFamilies") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="screen-controller-family", fact_value=str(value))
+    for value in list(fragment_inputs.get("dataCarrierCandidates") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="data-carrier-candidate", fact_value=str(value))
+    runtime_shell = str(fragment_inputs.get("runtimeShell") or "").strip()
+    if runtime_shell:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="runtime-shell", fact_value=runtime_shell)
+    owner_field = str(fragment_inputs.get("ownerField") or "").strip()
+    if owner_field:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="owner-field", fact_value=owner_field)
+    row_model_type = str(fragment_inputs.get("rowModelType") or "").strip()
+    if row_model_type:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="row-model-type", fact_value=row_model_type)
+    for value in list(fragment_inputs.get("rowStateFields") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="row-state-field", fact_value=str(value))
+    for value in list(fragment_inputs.get("ownerListFields") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="owner-list-field", fact_value=str(value))
+    for value in list(fragment_inputs.get("payloadHookTerms") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="milestone-payload-hook", fact_value=str(value))
+    for value in list(fragment_inputs.get("progressHookTerms") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="progress-hook", fact_value=str(value))
+    for value in list(fragment_inputs.get("costAccessors") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="cost-accessor", fact_value=str(value))
+    for value in list(fragment_inputs.get("parameterShellFields") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="parameter-shell-field", fact_value=str(value))
+    for value in list(fragment_inputs.get("saveCandidates") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="save-candidate", fact_value=str(value))
+    for value in list(fragment_inputs.get("genericLeadFamilies") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="generic-buy-family", fact_value=str(value))
+    for value in list(fragment_inputs.get("supportingEdgeTypes") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="supporting-edge-type", fact_value=str(value))
+    for value in list(fragment_inputs.get("blockedEdgeTypes") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="blocked-edge-type", fact_value=str(value))
+    for source_trace_scope in list(fragment_inputs.get("sourceTraceScopes") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="source-trace-scope", fact_value=str(source_trace_scope))
+    for source_subject_id in list(fragment_inputs.get("sourceSubjectIds") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="source-subject-id", fact_value=str(source_subject_id))
+    source_trace_scopes = _unique_strings(list(fragment_inputs.get("sourceTraceScopes") or []))
+    source_subject_ids = _unique_strings(list(fragment_inputs.get("sourceSubjectIds") or []))
+    for index, source_subject_id in enumerate(source_subject_ids):
+        relations.append(
+            {
+                "sourceEntityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "relationKind": "derived-from-subject",
+                "targetEntityId": source_subject_id,
+                "payload": {
+                    "subjectId": subject_id,
+                    "sourceTraceScope": source_trace_scopes[index] if index < len(source_trace_scopes) else None,
+                },
+            }
+        )
+    if next_seam_id:
+        gaps.append(
+            {
+                "entityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "gapKind": "next-seam",
+                "payload": {"subjectId": subject_id, "seamId": next_seam_id},
+            }
+        )
+    for blocked_edge_type in list(fragment_inputs.get("blockedEdgeTypes") or []):
+        gaps.append(
+            {
+                "entityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "gapKind": "blocked-edge",
+                "payload": {
+                    "subjectId": subject_id,
+                    "edgeType": str(blocked_edge_type),
+                },
+            }
+        )
+    missing_edges_by_cluster = {
+        "milestone-payload": ["row-local-progress-hook-range", "dedicated-milestone-payload-trace"],
+        "row-model": ["row-local-buy-hook-samples", "text-checker-range", "unlock-requirement-range"],
+        "row-shell": ["unlock-hook-samples", "text-checker-samples", "direct-row-shell-buy-hook-samples"],
+        "row-alignment": ["unlock-text-overlap-range", "buy-text-overlap-range", "row-alignment-samples"],
+    }
+    for edge_id in list(missing_edges_by_cluster.get(cluster_kind) or []):
+        gaps.append(
+            {
+                "entityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "gapKind": "missing-edge",
+                "payload": {
+                    "subjectId": subject_id,
+                    "edgeId": edge_id,
+                    "reason": blocked_input_reason or f"{subject_label} still lacks dedicated row-local trace coverage",
+                },
+            }
+        )
+    blocked_lane_reason = blocked_input_reason or f"{subject_label} still lacks dedicated row-local trace coverage"
+    gaps.append(
+        {
+            "entityId": subject_id,
+            "traceScope": trace_scope,
+            "fieldKey": "",
+            "gapKind": "blocked-lane",
+            "payload": {
+                "subjectId": subject_id,
+                "laneId": cluster_kind,
+                "reason": blocked_lane_reason,
+            },
+        }
+    )
+    generic_views = {
+        "entities": entities,
+        "facts": facts,
+        "relations": relations,
+        "gaps": gaps,
+    }
+    known_edges: list[str] = []
+    if list(fragment_inputs.get("dataCarrierCandidates") or []):
+        known_edges.append("data-carrier-structure")
+    if runtime_shell:
+        known_edges.append("runtime-shell")
+    if row_model_type:
+        known_edges.append("row-model-type")
+    if list(fragment_inputs.get("rowStateFields") or []):
+        known_edges.append("row-state-fields")
+    if list(fragment_inputs.get("costAccessors") or []):
+        known_edges.append("cost-accessor-family")
+    if list(fragment_inputs.get("parameterShellFields") or []):
+        known_edges.append("cost-parameter-shell")
+    if list(fragment_inputs.get("saveCandidates") or []):
+        known_edges.append("save-candidate")
+    if list(fragment_inputs.get("payloadHookTerms") or []) and cluster_kind == "milestone-payload":
+        known_edges.append("payload-hook-family")
+    if list(fragment_inputs.get("genericLeadFamilies") or []) and cluster_kind in {"row-model", "row-shell", "row-alignment"}:
+        known_edges.append("generic-buy-family")
+    subject_payload = {
+        "subjectId": subject_id,
+        "subjectKind": "family-graph",
+        "subjectLabel": subject_label,
+        "knownEdges": known_edges,
+        "missingEdges": list(missing_edges_by_cluster.get(cluster_kind) or []),
+        "blockedEdges": _unique_strings(list(fragment_inputs.get("blockedEdgeTypes") or [])),
+        "blockedInputReason": blocked_lane_reason,
+        "nextSeam": {
+            "id": next_seam_id or "local-runtime-population-bridge",
+            "status": "blocked",
+        },
+        "sourceTraceScope": (source_trace_scopes[0] if source_trace_scopes else ""),
+        "sourceSubjectId": (source_subject_ids[0] if source_subject_ids else ""),
+    }
+    boundary_rows = _derive_boundary_views_from_subject_payload(
+        trace_scope,
+        subject_payload,
+        generic_views,
+    )
+    for row in boundary_rows:
+        row["provenance"] = {"reducer": "derived-shard-milestone-cluster-v1"}
+        row["reducerVersion"] = "derived-shard-milestone-cluster-v1"
+    return generic_views, boundary_rows
+
+
+def _derive_shard_bonus_cluster_generic_views(
+    *,
+    trace_scope: str,
+    subject_id: str,
+    subject_label: str,
+    cluster_kind: str,
+    fragment_inputs: dict[str, Any],
+    next_seam_id: str,
+    blocked_input_reason: str,
+) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
+    entities: list[dict[str, Any]] = [
+        {
+            "entityId": subject_id,
+            "entityKind": "family-graph",
+            "traceScope": trace_scope,
+            "payload": {
+                "subjectId": subject_id,
+                "label": subject_label,
+                "systemId": "shards",
+            },
+        }
+    ]
+    facts: list[dict[str, Any]] = []
+    relations: list[dict[str, Any]] = []
+    gaps: list[dict[str, Any]] = []
+    native_terms = _unique_strings(list(fragment_inputs.get("nativeTerms") or []))
+    for value in list(fragment_inputs.get("screenControllerFamilies") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="screen-controller-family", fact_value=str(value))
+    for value in list(fragment_inputs.get("dataCarrierCandidates") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="data-carrier-candidate", fact_value=str(value))
+    runtime_shell = str(fragment_inputs.get("runtimeShell") or "").strip()
+    if runtime_shell:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="runtime-shell", fact_value=runtime_shell)
+    owner_field = str(fragment_inputs.get("ownerField") or "").strip()
+    if owner_field:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="owner-field", fact_value=owner_field)
+    row_model_type = str(fragment_inputs.get("rowModelType") or "").strip()
+    if row_model_type:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="row-model-type", fact_value=row_model_type)
+    unlock_requirement_accessors = [term for term in native_terms if re.match(r"^get_SU\d+FinalUnlockReq$", term)]
+    final_su_bonus_fields = [term for term in native_terms if re.match(r"^FinalSU\d+Bonus\d+$", term)]
+    final_su_bonus_accessors = [term for term in native_terms if re.match(r"^get_FinalSU\d+Bonus\d+$", term)]
+    bonus_calc_accessors = [term for term in native_terms if re.match(r"^get_SU\d+Bonus\d+Calc$", term)]
+    ui_context_anchors = [term for term in native_terms if term in {"LevelText", "DescText", "ValueText", "DescriptionText"}]
+    title_asset_candidates = [term for term in native_terms if re.match(r"^SMilestone-\d+$", term)]
+    presentation_family = [term for term in native_terms if re.match(r"^ShardMilestoneBonus\d+$", term)]
+    generic_writer_terms = [term for term in native_terms if term == "SetAllMilestoneTexts"]
+    text_handler_terms = [term for term in native_terms if "TextHandlerShardMilestoneBonusesPerLevel" in term]
+    adjacent_fields = [
+        term
+        for term in native_terms
+        if term in {
+            "TotalMilestoneLevels",
+            "get_IsUnlocked",
+            "OverLevel100Exponent",
+            "OverLevel200Exponent",
+            "OverLevel300Exponent",
+            "OverLevel400Exponent",
+            "<FastBuyEnum>d__1429",
+        }
+    ]
+    fact_specs_by_cluster = {
+        "finalsu-bonus": [
+            ("unlock-requirement-accessor", unlock_requirement_accessors),
+            ("bonus-field-sample", final_su_bonus_fields),
+            ("bonus-accessor-sample", final_su_bonus_accessors),
+            ("adjacent-field", adjacent_fields),
+        ],
+        "title-effect": [
+            ("title-asset-candidate", title_asset_candidates),
+            ("effect-presentation-slot", presentation_family),
+            ("bonus-calc-accessor", bonus_calc_accessors),
+        ],
+        "effect-text-handler": [
+            ("text-handler-term", text_handler_terms),
+            ("generic-milestone-writer", generic_writer_terms),
+            ("bonus-calc-accessor", bonus_calc_accessors),
+            ("ui-context-anchor", ui_context_anchors),
+            ("effect-presentation-slot", presentation_family),
+        ],
+    }
+    for fact_kind, values in list(fact_specs_by_cluster.get(cluster_kind) or []):
+        for value in values:
+            _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind=fact_kind, fact_value=str(value))
+    for source_trace_scope in list(fragment_inputs.get("sourceTraceScopes") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="source-trace-scope", fact_value=str(source_trace_scope))
+    for source_subject_id in list(fragment_inputs.get("sourceSubjectIds") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="source-subject-id", fact_value=str(source_subject_id))
+    for index, source_subject_id in enumerate(list(fragment_inputs.get("sourceSubjectIds") or [])):
+        relations.append(
+            {
+                "sourceEntityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "relationKind": "derived-from-subject",
+                "targetEntityId": source_subject_id,
+                "payload": {
+                    "subjectId": subject_id,
+                    "sourceTraceScope": (list(fragment_inputs.get("sourceTraceScopes") or [None])[index] if index < len(list(fragment_inputs.get("sourceTraceScopes") or [])) else None),
+                },
+            }
+        )
+    if next_seam_id:
+        gaps.append(
+            {
+                "entityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "gapKind": "next-seam",
+                "payload": {"subjectId": subject_id, "seamId": next_seam_id},
+            }
+        )
+    missing_edges_by_cluster = {
+        "finalsu-bonus": ["player-facing-row-identity", "exact-finalsu-row-remap"],
+        "title-effect": ["title-asset-range", "presentation-slot-family"],
+        "effect-text-handler": ["exact-text-handler-token", "presentation-slot-family"],
+    }
+    blockers = missing_edges_by_cluster.get(cluster_kind) or []
+    for edge_id in blockers:
+        gaps.append(
+            {
+                "entityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "gapKind": "missing-edge",
+                "payload": {
+                    "subjectId": subject_id,
+                    "edgeId": edge_id,
+                    "reason": blocked_input_reason or f"{subject_label} still lacks one exact shard-side evidence bridge",
+                },
+            }
+        )
+    gaps.append(
+        {
+            "entityId": subject_id,
+            "traceScope": trace_scope,
+            "fieldKey": "",
+            "gapKind": "blocked-lane",
+            "payload": {
+                "subjectId": subject_id,
+                "laneId": cluster_kind,
+                "reason": blocked_input_reason or f"{subject_label} remains quarantined to one explicit shard-side seam",
+            },
+        }
+    )
+    generic_views = {
+        "entities": entities,
+        "facts": facts,
+        "relations": relations,
+        "gaps": gaps,
+    }
+    known_edges: list[str] = []
+    if data := list(fragment_inputs.get("dataCarrierCandidates") or []):
+        known_edges.append("data-carrier-structure")
+    if runtime_shell:
+        known_edges.append("runtime-shell")
+    if unlock_requirement_accessors and cluster_kind == "finalsu-bonus":
+        known_edges.append("unlock-requirement-family")
+    if final_su_bonus_fields and cluster_kind == "finalsu-bonus":
+        known_edges.append("finalsu-bonus-field-family")
+    if final_su_bonus_accessors and cluster_kind == "finalsu-bonus":
+        known_edges.append("finalsu-bonus-accessor-family")
+    if bonus_calc_accessors and cluster_kind in {"title-effect", "effect-text-handler"}:
+        known_edges.append("bonus-calc-family")
+    if generic_writer_terms and cluster_kind == "effect-text-handler":
+        known_edges.append("generic-milestone-writer")
+    if ui_context_anchors and cluster_kind == "effect-text-handler":
+        known_edges.append("ui-context-anchor-family")
+    if title_asset_candidates and cluster_kind == "title-effect":
+        known_edges.append("title-asset-range")
+    if presentation_family and cluster_kind in {"title-effect", "effect-text-handler"}:
+        known_edges.append("presentation-slot-family")
+    subject_payload = {
+        "subjectId": subject_id,
+        "subjectKind": "family-graph",
+        "subjectLabel": subject_label,
+        "knownEdges": known_edges,
+        "missingEdges": blockers,
+        "blockedEdges": [],
+        "blockedInputReason": blocked_input_reason or f"{subject_label} remains quarantined to one explicit shard-side seam",
+        "nextSeam": {
+            "id": next_seam_id or "local-runtime-population-bridge",
+            "status": "blocked",
+        },
+        "sourceTraceScope": str((fragment_inputs.get("sourceTraceScopes") or [""])[0] or ""),
+        "sourceSubjectId": str((fragment_inputs.get("sourceSubjectIds") or [""])[0] or ""),
+    }
+    boundary_rows = _derive_boundary_views_from_subject_payload(trace_scope, subject_payload, generic_views)
+    for row in boundary_rows:
+        row["provenance"] = {"reducer": "derived-shard-bonus-cluster-v1"}
+        row["reducerVersion"] = "derived-shard-bonus-cluster-v1"
+    return generic_views, boundary_rows
+
+
+def _extract_multiverse_row_numbers(terms: list[str], pattern: str) -> list[int]:
+    combined = "\n".join(str(term or "") for term in (terms or []))
+    return sorted(
+        {
+            int(match)
+            for match in re.findall(pattern, combined)
+            if str(match).isdigit()
+        }
+    )
+
+
+def _derive_multiverse_ui_cluster_live_inputs(
+    *,
+    trace_terms: list[str],
+    raw_trace_text: str,
+    save_owner_fact_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    save_owner_facts = _group_generic_fact_values(save_owner_fact_rows)
+    normalized_terms = _unique_strings([str(term) for term in (trace_terms or []) if str(term).strip()])
+    trace_blob = f"{str(raw_trace_text or '').strip()}\n" + "\n".join(normalized_terms)
+
+    def contains_term(term: str) -> bool:
+        return term in trace_blob or any(term in str(value) for value in normalized_terms)
+
+    def has_structured_claim(host: str, field: str) -> bool:
+        host = str(host or "").strip()
+        field = str(field or "").strip()
+        if not host or not field:
+            return False
+        patterns = [
+            rf"\b{re.escape(host)}\s*\.\s*{re.escape(field)}\b",
+            rf"\b{re.escape(host)}\s*\|\s*{re.escape(field)}\b",
+            rf"\b{re.escape(host)}::\s*{re.escape(field)}\b",
+            rf"\b{re.escape(host)}\s*->\s*{re.escape(field)}\b",
+        ]
+        return any(re.search(pattern, trace_blob) for pattern in patterns)
+
+    typed_owner_claim_candidates = _unique_strings(MULTIVERSE_TYPED_OWNER_CLAIM_CANDIDATES)
+    typed_owner_claim_terms = _collect_structured_claim_hits(
+        typed_owner_claim_candidates,
+        has_structured_claim,
+    )
+    present_term_groups = _collect_multiverse_present_term_groups(
+        contains_term,
+        MULTIVERSE_PRESENT_TERM_GROUP_SPECS,
+    )
+    derived_term_groups = _collect_multiverse_derived_term_groups(
+        normalized_terms,
+        contains_term,
+        MULTIVERSE_DERIVED_TERM_GROUP_SPECS,
+    )
+    regex_term_groups = _collect_regex_term_groups(normalized_terms, MULTIVERSE_REGEX_TERM_SPECS)
+    regex_row_id_groups = {
+        field_name: _extract_multiverse_row_numbers(normalized_terms, pattern)
+        for field_name, pattern in dict(MULTIVERSE_REGEX_ROW_ID_SPECS).items()
+    }
+    save_owner_field_values = _collect_multiverse_fact_field_values(
+        save_owner_facts,
+        MULTIVERSE_SAVE_OWNER_FACT_FIELD_SPECS,
+    )
+    fact_row_id_values = _collect_multiverse_fact_row_id_values(
+        save_owner_facts,
+        MULTIVERSE_FACT_ROW_ID_SPECS,
+    )
+
+    return {
+        **present_term_groups,
+        **derived_term_groups,
+        "typedOwnerClaimCandidates": typed_owner_claim_candidates,
+        "typedOwnerClaimTerms": typed_owner_claim_terms,
+        **regex_term_groups,
+        **regex_row_id_groups,
+        **fact_row_id_values,
+        **save_owner_field_values,
+        **MULTIVERSE_STATIC_SOURCE_FIELDS,
+    }
+
+
+def _derive_multiverse_ui_cluster_generic_views(
+    *,
+    trace_scope: str,
+    subject_id: str,
+    subject_label: str,
+    cluster_kind: str,
+    fragment_inputs: dict[str, Any],
+    next_seam_id: str,
+    blocked_input_reason: str,
+) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
+    entities: list[dict[str, Any]] = [
+        {
+            "entityId": subject_id,
+            "entityKind": "family-graph",
+            "traceScope": trace_scope,
+            "payload": {
+                "subjectId": subject_id,
+                "label": subject_label,
+                "systemId": "multiverse-market",
+            },
+        }
+    ]
+    facts: list[dict[str, Any]] = []
+    relations: list[dict[str, Any]] = []
+    gaps: list[dict[str, Any]] = []
+    def ensure_entity(entity_id: str, entity_kind: str, label: str, **payload: Any) -> None:
+        normalized_entity_id = str(entity_id or "").strip()
+        if not normalized_entity_id:
+            return
+        if any(str(entity.get("entityId") or "").strip() == normalized_entity_id for entity in entities):
+            return
+        entity_payload = {
+            "subjectId": subject_id,
+            "label": str(label or normalized_entity_id).strip() or normalized_entity_id,
+            **{key: value for key, value in payload.items() if value is not None},
+        }
+        entities.append(
+            {
+                "entityId": normalized_entity_id,
+                "entityKind": str(entity_kind or "node").strip() or "node",
+                "traceScope": trace_scope,
+                "payload": entity_payload,
+            }
+        )
+
+    for value in list(fragment_inputs.get("ownerAnchors") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="owner-anchor", fact_value=str(value))
+    for value in list(fragment_inputs.get("resourceAnchors") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="resource-anchor", fact_value=str(value))
+    typed_span = str(fragment_inputs.get("typedSpan") or "").strip()
+    if typed_span:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="typed-span", fact_value=typed_span)
+    accessor_bridge = str(fragment_inputs.get("accessorBridge") or "").strip()
+    if accessor_bridge:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="accessor-bridge", fact_value=accessor_bridge)
+    wrapper_only_field = str(fragment_inputs.get("wrapperOnlyFieldLabel") or "").strip()
+    if wrapper_only_field:
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="wrapper-only-field-label", fact_value=wrapper_only_field)
+    compatibility_import_target_path = str(fragment_inputs.get("compatibilityImportTargetPath") or "").strip()
+    if compatibility_import_target_path:
+        _append_generic_fact(
+            facts,
+            entity_id=subject_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="compatibility-import-target-path",
+            fact_value=compatibility_import_target_path,
+        )
+    canonical_import_safe_subset_label = str(fragment_inputs.get("canonicalImportSafeSubsetLabel") or "").strip()
+    if canonical_import_safe_subset_label:
+        _append_generic_fact(
+            facts,
+            entity_id=subject_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="canonical-import-safe-subset-label",
+            fact_value=canonical_import_safe_subset_label,
+        )
+    broader_row_remap_status = str(fragment_inputs.get("broaderRowRemapStatus") or "").strip()
+    if broader_row_remap_status:
+        _append_generic_fact(
+            facts,
+            entity_id=subject_id,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fact_kind="broader-row-remap-status",
+            fact_value=broader_row_remap_status,
+        )
+    grounded_text_lane_specs = [
+        (
+            f"grounded-text-lane-{str(lane_entry.get('laneKind') or '').replace('-lane', '')}",
+            str(lane_entry.get("laneLabel") or "").strip(),
+            str(lane_entry.get("source") or "").strip(),
+        )
+        for lane_entry in _iter_multiverse_grounded_text_lanes(fragment_inputs)
+    ]
+    for fact_kind, fact_value, fact_source in grounded_text_lane_specs:
+        if fact_value:
+            _append_generic_fact(
+                facts,
+                entity_id=subject_id,
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                fact_kind=fact_kind,
+                fact_value=fact_value,
+            )
+        if fact_source:
+            _append_generic_fact(
+                facts,
+                entity_id=subject_id,
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                fact_kind=f"{fact_kind}-source",
+                fact_value=fact_source,
+            )
+    if cluster_kind == "typed-owner":
+        for value in list(fragment_inputs.get("typedHostTerms") or []):
+            _append_generic_fact(
+                facts,
+                entity_id=subject_id,
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                fact_kind="typed-host-anchor",
+                fact_value=str(value),
+            )
+        for value in list(fragment_inputs.get("typedConversionTerms") or []):
+            _append_generic_fact(
+                facts,
+                entity_id=subject_id,
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                fact_kind="typed-conversion-anchor",
+                fact_value=str(value),
+            )
+        for value in list(fragment_inputs.get("typedFieldTerms") or []):
+            _append_generic_fact(
+                facts,
+                entity_id=subject_id,
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                fact_kind="typed-field-sample",
+                fact_value=str(value),
+            )
+        for value in list(fragment_inputs.get("typedOwnerClaimCandidates") or []):
+            _append_generic_fact(
+                facts,
+                entity_id=subject_id,
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                fact_kind="typed-claim-candidate",
+                fact_value=str(value),
+            )
+        for value in list(fragment_inputs.get("typedOwnerClaimTerms") or []):
+            _append_generic_fact(
+                facts,
+                entity_id=subject_id,
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                fact_kind="typed-claim",
+                fact_value=str(value),
+            )
+        _append_structured_claim_relations(
+            entities,
+            relations,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            claim_values=list(fragment_inputs.get("typedOwnerClaimCandidates") or []),
+            relation_kind="candidate-owns-field",
+            entity_kind_prefix="typed-owner",
+        )
+        _append_structured_claim_relations(
+            entities,
+            relations,
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            claim_values=list(fragment_inputs.get("typedOwnerClaimTerms") or []),
+            relation_kind="owns-field",
+            entity_kind_prefix="typed-owner",
+        )
+    for value in list(fragment_inputs.get("buyHookTerms") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="buy-hook-sample", fact_value=str(value))
+    for value in list(fragment_inputs.get("costTextTerms") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="cost-text-sample", fact_value=str(value))
+    for value in list(fragment_inputs.get("prefabTerms") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="prefab-sample", fact_value=str(value))
+    for value in list(fragment_inputs.get("serializedIdTerms") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="serialized-id-sample", fact_value=str(value))
+    for value in list(fragment_inputs.get("prefabOverridePairs") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="prefab-override-pair", fact_value=str(value))
+    for value in list(fragment_inputs.get("buyHookRowIds") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="buy-hook-row-id", fact_value=str(value))
+    for value in list(fragment_inputs.get("costTextRowIds") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="cost-text-row-id", fact_value=str(value))
+    for value in list(fragment_inputs.get("prefabRowIds") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="prefab-row-id", fact_value=str(value))
+    for value in list(fragment_inputs.get("serializedIds") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="serialized-id-row-id", fact_value=str(value))
+    for value in list(fragment_inputs.get("orderedOverlapRowIds") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="ordered-overlap-row-id", fact_value=str(value))
+    for value in list(fragment_inputs.get("metadataTerms") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="metadata-anchor", fact_value=str(value))
+    for value in list(fragment_inputs.get("sourceTraceScopes") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="source-trace-scope", fact_value=str(value))
+    for value in list(fragment_inputs.get("sourceSubjectIds") or []):
+        _append_generic_fact(facts, entity_id=subject_id, trace_scope=trace_scope, subject_id=subject_id, fact_kind="source-subject-id", fact_value=str(value))
+
+    if cluster_kind == "canonical-import" and compatibility_import_target_path:
+        import_entity_id = "multiverse:compatibility-import-target"
+        ensure_entity(
+            import_entity_id,
+            "import-target",
+            compatibility_import_target_path,
+            path=compatibility_import_target_path,
+        )
+        _append_generic_relation(
+            relations,
+            source_entity_id=subject_id,
+            trace_scope=trace_scope,
+            relation_kind="candidate-canonical-import-target",
+            target_entity_id=import_entity_id,
+            payload={
+                "subjectId": subject_id,
+                "targetPath": compatibility_import_target_path,
+                "safeSubset": canonical_import_safe_subset_label or None,
+            },
+        )
+        for anchor_value in [
+            value
+            for value in list(fragment_inputs.get("metadataTerms") or [])
+            if value in {"CloudSavePlayerProfile", "GetPlayerProfileInfo", "FillPlayerProfileData", "ConvertSaveDataToProfileData"}
+        ]:
+            anchor_entity_id = f"multiverse:metadata-anchor:{anchor_value}"
+            ensure_entity(anchor_entity_id, "metadata-anchor", anchor_value)
+            _append_generic_relation(
+                relations,
+                source_entity_id=anchor_entity_id,
+                trace_scope=trace_scope,
+                relation_kind="candidate-import-anchor",
+                target_entity_id=import_entity_id,
+                payload={
+                    "subjectId": subject_id,
+                    "anchor": anchor_value,
+                    "targetPath": compatibility_import_target_path,
+                },
+            )
+        for claim_value in [str(value).strip() for value in list(fragment_inputs.get("typedOwnerClaimTerms") or []) if str(value).strip()]:
+            if "." not in claim_value:
+                continue
+            host_name, field_name = [segment.strip() for segment in claim_value.split(".", 1)]
+            if host_name not in {"PlayerProfileData", "SaveData", "PlayerProfileHandler"}:
+                continue
+            host_field_entity_id = f"typed-owner:field:{host_name}.{field_name}"
+            ensure_entity(
+                host_field_entity_id,
+                "host-field",
+                f"{host_name}.{field_name}",
+                claim=claim_value,
+            )
+            _append_multiverse_relation_bundle(
+                relations,
+                source_entity_id=import_entity_id,
+                target_entity_id=host_field_entity_id,
+                trace_scope=trace_scope,
+                relation_specs=list(
+                    (dict(MULTIVERSE_CLUSTER_RELATION_BUNDLE_SPECS.get("canonical-import") or {})).get("hostField") or []
+                ),
+                payload_base={
+                    "subjectId": subject_id,
+                    "claim": claim_value,
+                    "hostName": host_name,
+                    "fieldName": field_name,
+                },
+            )
+        for lane_entry in _iter_multiverse_grounded_text_lanes(fragment_inputs):
+            lane_kind = str(lane_entry.get("laneKind") or "").strip()
+            lane_value = str(lane_entry.get("laneLabel") or "").strip()
+            lane_source = str(lane_entry.get("source") or "").strip() or None
+            if not lane_value:
+                continue
+            lane_entity_id = f"multiverse:import-lane:{lane_kind}"
+            ensure_entity(lane_entity_id, "import-lane", lane_value, source=lane_source or None)
+            _append_multiverse_relation_bundle(
+                relations,
+                source_entity_id=import_entity_id,
+                target_entity_id=lane_entity_id,
+                trace_scope=trace_scope,
+                relation_specs=list(
+                    (dict(MULTIVERSE_CLUSTER_RELATION_BUNDLE_SPECS.get("canonical-import") or {})).get("lane") or []
+                ),
+                payload_base={
+                    "subjectId": subject_id,
+                    "laneKind": lane_kind,
+                    "laneLabel": lane_value,
+                    "source": lane_source or None,
+                },
+            )
+        for row_id in sorted({int(value) for value in list(fragment_inputs.get("orderedOverlapRowIds") or []) if str(value).strip()}):
+            row_entity_id = f"multiverse:row:{row_id}"
+            ensure_entity(row_entity_id, "row", f"Row {row_id}", rowId=row_id)
+            _append_multiverse_relation_bundle(
+                relations,
+                source_entity_id=import_entity_id,
+                target_entity_id=row_entity_id,
+                trace_scope=trace_scope,
+                relation_specs=list(
+                    (dict(MULTIVERSE_CLUSTER_RELATION_BUNDLE_SPECS.get("canonical-import") or {})).get("overlapRow") or []
+                ),
+                payload_base={
+                    "subjectId": subject_id,
+                    "rowId": row_id,
+                    "targetPath": compatibility_import_target_path,
+                },
+            )
+
+    if cluster_kind == "broad-row-remap":
+        candidate_rows = _derive_multiverse_broad_row_candidate_ids(fragment_inputs)
+        for row_id in candidate_rows:
+            row_entity_id = f"multiverse:row:{row_id}"
+            ensure_entity(row_entity_id, "row", f"Row {row_id}", rowId=row_id)
+            _append_multiverse_relation_bundle(
+                relations,
+                source_entity_id=subject_id,
+                target_entity_id=row_entity_id,
+                trace_scope=trace_scope,
+                relation_specs=list(
+                    (dict(MULTIVERSE_CLUSTER_RELATION_BUNDLE_SPECS.get("broad-row-remap") or {})).get("candidateRow") or []
+                ),
+                payload_base={
+                    "subjectId": subject_id,
+                    "rowId": row_id,
+                    "buyHook": f"BuyIS{row_id}",
+                    "costText": f"SetIS{row_id}CostText",
+                    "orderedOverlap": True,
+                },
+            )
+            for source_spec in list(MULTIVERSE_BROAD_ROW_SOURCE_SPECS):
+                source_kind = str(source_spec.get("sourceKind") or "").strip()
+                source_label = str(source_spec.get("labelTemplate") or "").format(rowId=row_id)
+                if not source_kind or not source_label:
+                    continue
+                source_entity_id = f"multiverse:{source_kind}:{row_id}"
+                ensure_entity(source_entity_id, source_kind, source_label, rowId=row_id)
+                _append_multiverse_relation_bundle(
+                    relations,
+                    source_entity_id=source_entity_id,
+                    target_entity_id=row_entity_id,
+                    trace_scope=trace_scope,
+                    relation_specs=list(
+                        (dict(MULTIVERSE_CLUSTER_RELATION_BUNDLE_SPECS.get("broad-row-remap") or {})).get("sourceSupport") or []
+                    ),
+                    payload_base={
+                        "subjectId": subject_id,
+                        "rowId": row_id,
+                        "sourceKind": source_kind,
+                    },
+                )
+            for lane_entry in _iter_multiverse_grounded_text_lanes(fragment_inputs):
+                lane_kind = str(lane_entry.get("laneKind") or "").strip()
+                lane_value = str(lane_entry.get("laneLabel") or "").strip()
+                lane_source = str(lane_entry.get("source") or "").strip() or None
+                if not lane_value:
+                    continue
+                lane_entity_id = f"multiverse:text-lane:{lane_kind}"
+                ensure_entity(lane_entity_id, "text-lane", lane_value, source=lane_source or None)
+                _append_multiverse_relation_bundle(
+                    relations,
+                    source_entity_id=lane_entity_id,
+                    target_entity_id=row_entity_id,
+                    trace_scope=trace_scope,
+                    relation_specs=list(
+                        (dict(MULTIVERSE_CLUSTER_RELATION_BUNDLE_SPECS.get("broad-row-remap") or {})).get("lane") or []
+                    ),
+                    payload_base={
+                        "subjectId": subject_id,
+                        "rowId": row_id,
+                        "laneKind": lane_kind,
+                        "source": lane_source or None,
+                        },
+                    )
+        for override_entry in _iter_multiverse_prefab_override_pairs(fragment_inputs):
+            override_pair = str(override_entry.get("pair") or "").strip()
+            source_row_id = int(override_entry.get("sourceRowId") or 0)
+            target_row_id = int(override_entry.get("targetRowId") or 0)
+            if not override_pair or source_row_id <= 0 or target_row_id <= 0:
+                continue
+            source_row_entity_id = f"multiverse:row:{source_row_id}"
+            target_serialized_entity_id = f"multiverse:serialized-row:{target_row_id}"
+            ensure_entity(source_row_entity_id, "row", f"Row {source_row_id}", rowId=source_row_id)
+            ensure_entity(target_serialized_entity_id, "serialized-row", f"ID {target_row_id}", rowId=target_row_id)
+            _append_multiverse_relation_bundle(
+                relations,
+                source_entity_id=source_row_entity_id,
+                target_entity_id=target_serialized_entity_id,
+                trace_scope=trace_scope,
+                relation_specs=list(
+                    (dict(MULTIVERSE_CLUSTER_RELATION_BUNDLE_SPECS.get("broad-row-remap") or {})).get("overrideCandidate") or []
+                ),
+                payload_base={
+                    "subjectId": subject_id,
+                    "sourceRowId": source_row_id,
+                    "targetRowId": target_row_id,
+                    "pair": override_pair,
+                },
+            )
+            if source_row_id in candidate_rows:
+                _append_multiverse_relation_bundle(
+                    relations,
+                    source_entity_id=source_row_entity_id,
+                    target_entity_id=target_serialized_entity_id,
+                    trace_scope=trace_scope,
+                    relation_specs=list(
+                        (dict(MULTIVERSE_CLUSTER_RELATION_BUNDLE_SPECS.get("broad-row-remap") or {})).get("overrideBounded") or []
+                    ),
+                    payload_base={
+                        "subjectId": subject_id,
+                        "sourceRowId": source_row_id,
+                        "targetRowId": target_row_id,
+                        "pair": override_pair,
+                    },
+                )
+
+    relation_kind_counts = _count_relation_kinds(relations)
+    fact_kinds_present = {
+        str(entry.get("factKind") or "").strip()
+        for entry in list(facts or [])
+        if str(entry.get("factKind") or "").strip()
+    }
+    metadata_terms = set(str(value) for value in list(fragment_inputs.get("metadataTerms") or []))
+    blockers: list[str]
+    if cluster_kind == "metadata-neighborhood":
+        blockers = []
+        if not {"CloudSavePlayerProfile", "GetPlayerProfileInfo"}.issubset(metadata_terms):
+            blockers.append("cloud-save-path-recovery")
+    else:
+        missing_edges_by_cluster = {
+            "typed-owner": [] if list(fragment_inputs.get("typedOwnerClaimTerms") or []) else ["typed-market-field-recovery"],
+            "row-text": ["player-facing-text-lane-recovery"],
+            "action-shell": ["broad-row-identity-remap"],
+            "owner-family": ["currency-shell-range-recovery"],
+            "prefab-remap": ["explicit-prefab-override-mapping"],
+            "canonical-import": ["canonical-import-admissibility"],
+            "broad-row-remap": ["broad-row-identity-remap"],
+        }
+        blockers = list(missing_edges_by_cluster.get(cluster_kind) or [])
+    cleared_contract_edge = _resolve_multiverse_cluster_contract_clear_edge(
+        cluster_kind,
+        fact_kinds_present,
+        relation_kind_counts,
+    )
+    if cleared_contract_edge:
+        blockers = [edge_id for edge_id in blockers if str(edge_id).strip() != cleared_contract_edge]
+    for edge_id in blockers:
+        gaps.append(
+            {
+                "entityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "gapKind": "missing-edge",
+                "payload": {
+                    "subjectId": subject_id,
+                    "edgeId": edge_id,
+                    "reason": blocked_input_reason or f"{subject_label} remains bounded by one multiverse UI-side seam",
+                },
+            }
+        )
+    if next_seam_id:
+        gaps.append(
+            {
+                "entityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "gapKind": "next-seam",
+                "payload": {"subjectId": subject_id, "seamId": next_seam_id},
+            }
+        )
+    generic_views = {
+        "entities": entities,
+        "facts": facts,
+        "relations": relations,
+        "gaps": gaps,
+    }
+    known_edges: list[str] = []
+    if list(fragment_inputs.get("ownerAnchors") or []):
+        known_edges.append("live-ui-fragment-recovery")
+    if list(fragment_inputs.get("typedHostTerms") or []) and cluster_kind == "typed-owner":
+        known_edges.append("typed-host-anchor-recovery")
+    if list(fragment_inputs.get("typedConversionTerms") or []) and cluster_kind == "typed-owner":
+        known_edges.append("profile-conversion-anchor-recovery")
+    if list(fragment_inputs.get("typedFieldTerms") or []) and cluster_kind == "typed-owner":
+        known_edges.append("typed-field-sample-recovery")
+    if list(fragment_inputs.get("typedOwnerClaimTerms") or []) and cluster_kind == "typed-owner":
+        known_edges.append("typed-market-field-recovery")
+    if list(fragment_inputs.get("buyHookTerms") or []) and cluster_kind in {"row-text", "action-shell"}:
+        known_edges.append("buy-hook-recovery")
+    if list(fragment_inputs.get("costTextTerms") or []) and cluster_kind in {"row-text", "action-shell"}:
+        known_edges.append("cost-text-recovery")
+    if list(fragment_inputs.get("resourceAnchors") or []) and cluster_kind == "owner-family":
+        known_edges.append("resource-anchor-recovery")
+    if list(fragment_inputs.get("prefabTerms") or []) and cluster_kind == "prefab-remap":
+        known_edges.append("prefab-sample-recovery")
+    if list(fragment_inputs.get("serializedIdTerms") or []) and cluster_kind == "prefab-remap":
+        known_edges.append("serialized-id-sample-recovery")
+    if list(fragment_inputs.get("prefabOverridePairs") or []) and cluster_kind == "prefab-remap":
+        known_edges.append("prefab-override-pair-recovery")
+    if list(fragment_inputs.get("metadataTerms") or []) and cluster_kind == "metadata-neighborhood":
+        known_edges.append("metadata-neighborhood-recovery")
+    if {"CloudSavePlayerProfile", "GetPlayerProfileInfo"}.issubset(metadata_terms) and cluster_kind == "metadata-neighborhood":
+        known_edges.append("cloud-save-path-recovery")
+    if accessor_bridge and cluster_kind == "canonical-import":
+        known_edges.append("accessor-bridge")
+    if typed_span and cluster_kind == "canonical-import":
+        known_edges.append("typed-save-owner-span")
+    if list(fragment_inputs.get("orderedOverlapRowIds") or []) and cluster_kind == "canonical-import":
+        known_edges.append("ordered-row-overlap")
+    if list(fragment_inputs.get("orderedOverlapRowIds") or []) and cluster_kind == "broad-row-remap":
+        known_edges.append("ordered-row-overlap")
+    if list(fragment_inputs.get("buyHookTerms") or []) and cluster_kind == "broad-row-remap":
+        known_edges.append("buy-hook-recovery")
+    if list(fragment_inputs.get("costTextTerms") or []) and cluster_kind == "broad-row-remap":
+        known_edges.append("cost-text-recovery")
+    derived_rule_known_edges, derived_rule_nonblocking_edges = _derive_relation_rule_edges(
+        cluster_kind,
+        relation_kind_counts,
+    )
+    known_edges = _unique_strings([*known_edges, *derived_rule_known_edges])
+    if typed_span:
+        known_edges.append("typed-save-owner-span")
+    if cleared_contract_edge:
+        known_edges.append(cleared_contract_edge)
+    known_edges = _unique_strings(known_edges)
+    nonblocking_edges = _unique_strings(
+        [
+            *[edge for edge in known_edges if str(edge).startswith("bounded-")],
+            *derived_rule_nonblocking_edges,
+        ]
+    )
+    subject_payload = {
+        "subjectId": subject_id,
+        "subjectKind": "family-graph",
+        "subjectLabel": subject_label,
+        "knownEdges": known_edges,
+        "nonblockingEdges": nonblocking_edges,
+        "missingEdges": blockers,
+        "blockedEdges": [],
+        "blockedInputReason": blocked_input_reason or f"{subject_label} remains quarantined to one explicit multiverse seam",
+        "nextSeam": {
+            "id": (next_seam_id or "broad-row-identity-remap") if blockers else None,
+            "status": "blocked" if blockers else "clear",
+        },
+        "sourceTraceScope": str((fragment_inputs.get("sourceTraceScopes") or [""])[0] or ""),
+        "sourceSubjectId": str((fragment_inputs.get("sourceSubjectIds") or [""])[0] or ""),
+    }
+    boundary_rows = _derive_boundary_views_from_subject_payload(trace_scope, subject_payload, generic_views)
+    for row in boundary_rows:
+        row["provenance"] = {"reducer": "derived-multiverse-ui-cluster-v1"}
+        row["reducerVersion"] = "derived-multiverse-ui-cluster-v1"
+    return generic_views, boundary_rows
+
+
+def _derive_token_shop_range_row_details_from_support_surfaces(
+    subject_id: str,
+    support_surfaces: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    subject_id = str(subject_id or "").strip()
+    if not subject_id:
+        return {}
+
+    if subject_id == "range:token-shop:ATU1Button-ATU28Button":
+        family_shell_terms = [
+            str(term).strip()
+            for surface in support_surfaces
+            if str(surface.get("id") or "").strip() == "family-shells"
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        family_proxy_terms = [
+            str(term).strip()
+            for surface in support_surfaces
+            if str(surface.get("id") or "").strip() == "bridge-proxies"
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        family_prefab_terms = [
+            str(term).strip()
+            for surface in support_surfaces
+            if str(surface.get("id") or "").strip() == "prefab-roster"
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        family_title_terms = [
+            str(term).strip()
+            for surface in support_surfaces
+            if str(surface.get("id") or "").strip() == "title-text-surfaces"
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        mk_chain_note = (
+            "Canonical range-family contract is active here; the MK chain row identity is grounded through the Token Shop family shell, proxy, prefab, and title surfaces."
+        )
+        atu6_grounded = all(
+            [
+                "ATU6Button" in family_shell_terms,
+                "BuyMK2TokenBoost" in family_proxy_terms,
+                "NewTokenUPGPrefab.T1.MK2Booster" in family_prefab_terms,
+                "Mk2 Generator Booster" in family_title_terms,
+            ]
+        )
+        mk_chain_blocked_rows = {
+            field: {
+                "isGrounded": False,
+                "identity": None,
+                "identitySource": None,
+                "rowType": None,
+                "rowTypeLabel": None,
+                "detailNote": None,
+                "blockedFields": {
+                    "rowDetail": f"missing-db-row-detail-evidence:mk-chain-field-specific-support:{field}"
+                },
+            }
+            for field in (
+                "ATU8Level",
+                "ATU9Level",
+                "ATU10Level",
+                "ATU11Level",
+                "ATU12Level",
+            )
+        }
+        return {
+            "ATU6Level": {
+                "isGrounded": atu6_grounded,
+                "identity": "Mk2 Generator Booster" if atu6_grounded else None,
+                "identitySource": (
+                    "Canonical Token Shop family title surface" if atu6_grounded else None
+                ),
+                "rowType": "prefab-driven" if atu6_grounded else None,
+                "rowTypeLabel": "Canonical range family contract row" if atu6_grounded else None,
+                "detailNote": mk_chain_note if atu6_grounded else None,
+                "blockedFields": {
+                    "playerFacingSupportText": "missing-db-row-detail-evidence:player-facing-support-text",
+                    "effectText": "not-applicable:row-detail-effect-text",
+                },
+            },
+            **mk_chain_blocked_rows,
+        }
+
+    if subject_id == "range:token-shop:ATU21Button-ATU23Button":
+        trio_title_terms = [
+            str(term).strip()
+            for surface in support_surfaces
+            if str(surface.get("id") or "").strip() == "title-text-surfaces"
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        trio_prefab_terms = [
+            str(term).strip()
+            for surface in support_surfaces
+            if str(surface.get("id") or "").strip() == "prefab-roster"
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        trio_note = (
+            "Canonical range-family contract is active here; row identity is grounded through the T3 trio shell range and title or prefab surfaces."
+        )
+        atu21_identity = "Trinity Booster One" if "Trinity Booster One" in trio_title_terms else (
+            trio_prefab_terms[0] if len(trio_prefab_terms) > 0 else None
+        )
+        atu21_identity_source = (
+            "Canonical range-family title surface"
+            if "Trinity Booster One" in trio_title_terms
+            else ("Canonical range-family prefab roster" if atu21_identity else None)
+        )
+        atu22_identity = "Trinity Oom Booster" if "Trinity Oom Booster" in trio_title_terms else (
+            trio_prefab_terms[1] if len(trio_prefab_terms) > 1 else None
+        )
+        atu22_identity_source = (
+            "Canonical range-family title surface"
+            if "Trinity Oom Booster" in trio_title_terms
+            else ("Canonical range-family prefab roster" if atu22_identity else None)
+        )
+        return {
+            "ATU21Level": {
+                "isGrounded": bool(atu21_identity),
+                "identity": atu21_identity,
+                "identitySource": atu21_identity_source,
+                "rowType": "prefab-driven" if atu21_identity else None,
+                "rowTypeLabel": "Canonical range family contract row" if atu21_identity else None,
+                "detailNote": trio_note if atu21_identity else None,
+                "blockedFields": {
+                    "playerFacingSupportText": "missing-db-row-detail-evidence:player-facing-support-text",
+                    "effectText": "not-applicable:row-detail-effect-text",
+                },
+            },
+            "ATU22Level": {
+                "isGrounded": bool(atu22_identity),
+                "identity": atu22_identity,
+                "identitySource": atu22_identity_source,
+                "rowType": "prefab-driven" if atu22_identity else None,
+                "rowTypeLabel": "Canonical range family contract row" if atu22_identity else None,
+                "detailNote": trio_note if atu22_identity else None,
+                "blockedFields": {
+                    "playerFacingSupportText": "missing-db-row-detail-evidence:player-facing-support-text",
+                    "effectText": "not-applicable:row-detail-effect-text",
+                },
+            },
+            "ATU23Level": {
+                "isGrounded": False,
+                "identity": None,
+                "identitySource": None,
+                "rowType": None,
+                "rowTypeLabel": None,
+                "detailNote": None,
+                "blockedFields": {
+                    "rowDetail": "missing-db-row-detail-evidence:t3-trio-third-row-identity"
+                },
+            },
+        }
+
+    if subject_id == "range:token-shop:ATU24Button-ATU28Button":
+        late_title_terms = [
+            str(term).strip()
+            for surface in support_surfaces
+            if str(surface.get("id") or "").strip() == "title-text-surfaces"
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        late_prefab_terms = [
+            str(term).strip()
+            for surface in support_surfaces
+            if str(surface.get("id") or "").strip() == "prefab-roster"
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        late_effect_terms = [
+            str(term).strip()
+            for surface in support_surfaces
+            if str(surface.get("id") or "").strip() == "effect-lane"
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        late_action_terms = [
+            str(term).strip()
+            for surface in support_surfaces
+            if str(surface.get("id") or "").strip() == "action-lane"
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        late_range_note = (
+            "Canonical range-family contract is active here, but this row still sits inside the unresolved ATU24-ATU28 remap band."
+        )
+        late_field_evidence = {
+            "ATU24Level": {
+                "actionHook": "BuyATU24" if "BuyATU24" in late_action_terms else None,
+                "effectTerm": "ATU24Bonus3Shards" if "ATU24Bonus3Shards" in late_effect_terms else None,
+            },
+            "ATU25Level": {
+                "actionHook": "BuyATU25" if "BuyATU25" in late_action_terms else None,
+            },
+            "ATU26Level": {
+                "actionHook": "BuyATU26" if "BuyATU26" in late_action_terms else None,
+            },
+            "ATU27Level": {
+                "actionHook": "BuyATU27" if "BuyATU27" in late_action_terms else None,
+            },
+            "ATU28Level": {
+                "actionHook": "BuyATU28" if "BuyATU28" in late_action_terms else None,
+            },
+        }
+        row_details_by_field: dict[str, dict[str, Any]] = {}
+        for field, evidence in late_field_evidence.items():
+            evidence_terms = _unique_strings(
+                [
+                    field.replace("Level", "Button"),
+                    str(evidence.get("actionHook") or "").strip(),
+                    str(evidence.get("effectTerm") or "").strip(),
+                    "Tier 3 Max Level Increaser" if "Tier 3 Max Level Increaser" in late_title_terms else "",
+                    "Campaign Fragments" if "Campaign Fragments" in late_effect_terms else "",
+                    "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"
+                    if "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser" in late_prefab_terms
+                    else "",
+                ]
+            )
+            row_details_by_field[field] = {
+                "isGrounded": False,
+                "identity": None,
+                "identitySource": None,
+                "rowType": None,
+                "rowTypeLabel": None,
+                "detailNote": late_range_note,
+                "blockedFields": {
+                    "rowDetail": f"missing-db-row-detail-evidence:late-atu-row-identity:{field}"
+                },
+                "boundedEvidenceTerms": evidence_terms,
+            }
+        return row_details_by_field
+
+    return {}
+
+
+def _derive_generic_mechanics_views_from_subject_inputs(
+    trace_scope: str,
+    subject_state: dict[str, Any],
+    resolver_payload: dict[str, Any],
+    reconstruction_payload: dict[str, Any],
+    shared_lane_contract: dict[str, Any],
+) -> dict[str, list[dict[str, Any]]]:
+    trace_scope = str(trace_scope or "").strip()
+    subject_state = dict(subject_state or {})
+    resolver_payload = dict(resolver_payload or {})
+    reconstruction_payload = dict(reconstruction_payload or {})
+    shared_lane_contract = dict(shared_lane_contract or {})
+    subject_id = str(subject_state.get("subjectId") or trace_scope).strip()
+    row_shell = dict(reconstruction_payload.get("rowShell") or {})
+    row_local_graph = dict(reconstruction_payload.get("rowLocalGraph") or {})
+    support_rows = [dict(item) for item in (resolver_payload.get("supportRows") or []) if isinstance(item, dict)]
+    support_surfaces = [dict(item) for item in (resolver_payload.get("supportSurfaces") or []) if isinstance(item, dict)]
+    shared_grounded_fields = dict(shared_lane_contract.get("groundedFields") or {})
+    shared_support_summary = dict(shared_lane_contract.get("supportSummary") or {})
+    shared_provenance_summary = dict(shared_lane_contract.get("provenanceSummary") or {})
+    shared_blocked_reasons = dict(shared_lane_contract.get("blockedInputReasons") or {})
+    known_edges = _unique_strings([str(value) for value in (subject_state.get("knownEdges") or []) if str(value).strip()])
+    missing_edges = _unique_strings([str(value) for value in (subject_state.get("missingEdges") or []) if str(value).strip()])
+    blocked_edges = _unique_strings([str(value) for value in (subject_state.get("blockedEdges") or []) if str(value).strip()])
+    nonblocking_edges = _unique_strings([str(value) for value in (subject_state.get("nonblockingEdges") or []) if str(value).strip()])
+
+    payload = {
+        "traceScope": trace_scope,
+        "subjectId": subject_id,
+        "subjectKind": str(subject_state.get("subjectKind") or ""),
+        "subjectLabel": str(subject_state.get("subjectLabel") or subject_id),
+        "targetAliases": list(subject_state.get("targetAliases") or []),
+        "identityOwner": str(subject_state.get("identityOwner") or ""),
+        "identityReason": str(subject_state.get("identityReason") or "") or None,
+        "knownEdges": known_edges,
+        "missingEdges": missing_edges,
+        "blockedEdges": blocked_edges,
+        "nonblockingEdges": nonblocking_edges,
+        "nextSeam": dict(subject_state.get("nextSeam") or {}),
+        "groundedFields": {
+            "rowShellField": str(row_shell.get("field") or support_rows[0].get("shellField") if support_rows else ""),
+            "rowShellPathId": str(row_shell.get("pathId") or support_rows[0].get("shellPathId") if support_rows else ""),
+            "actionMethods": list(row_local_graph.get("actionMethods") or []) if "exact-shell-to-action-hook" in known_edges else [],
+            "prefabCandidates": list(row_local_graph.get("prefabCandidates") or []) if "exact-shell-to-prefab" in known_edges else [],
+            "displayUpdateHooks": list(row_local_graph.get("updateHooks") or []) if "exact-display-update-path" in known_edges else [],
+            "literalTitleRecovered": bool(row_local_graph.get("literalTitleRecovered")) if "exact-shell-to-title" in known_edges else False,
+            **shared_grounded_fields,
+            "rowDetailsByField": _derive_token_shop_range_row_details_from_support_surfaces(subject_id, support_surfaces),
+        },
+        "supportSummary": {
+            "sharedLanes": shared_support_summary,
+        },
+        "provenanceSummary": {
+            "sharedLanes": shared_provenance_summary,
+        },
+        "blockedInputReasons": shared_blocked_reasons,
+    }
+    return _derive_generic_mechanics_views_from_subject_contract(payload)
+
+
+def _reconstruct_row_details_from_generic_mechanics(
+    subject_id: str,
+    entity_rows: list[dict[str, Any]],
+    fact_rows: list[dict[str, Any]],
+    relation_rows: list[dict[str, Any]],
+    gap_rows: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    subject_id = str(subject_id or "").strip()
+    if not subject_id:
+        return {}
+
+    row_entity_meta: dict[str, dict[str, Any]] = {}
+    for entity_row in entity_rows:
+        entity_id = str(entity_row.get("entityId") or "").strip()
+        if not entity_id:
+            continue
+        payload = dict(entity_row.get("payload") or {})
+        entity_kind = str(entity_row.get("entityKind") or "").strip()
+        if entity_kind != "row-field":
+            continue
+        relation_bound = False
+        for relation_row in relation_rows:
+            if (
+                str(relation_row.get("sourceEntityId") or "").strip() == entity_id
+                and str(relation_row.get("relationKind") or "").strip() == "belongs-to-subject"
+                and str(relation_row.get("targetEntityId") or "").strip() == subject_id
+            ):
+                relation_bound = True
+                break
+        if not relation_bound and str(payload.get("subjectId") or "").strip() != subject_id:
+            continue
+        field_key = str(payload.get("fieldKey") or "").strip()
+        if not field_key:
+            continue
+        row_entity_meta[entity_id] = {
+            "fieldKey": field_key,
+            "payload": payload,
+        }
+
+    facts_by_entity: dict[str, list[dict[str, Any]]] = {}
+    for fact_row in fact_rows:
+        entity_id = str(fact_row.get("entityId") or "").strip()
+        if entity_id in row_entity_meta:
+            facts_by_entity.setdefault(entity_id, []).append(dict(fact_row))
+
+    gaps_by_entity: dict[str, list[dict[str, Any]]] = {}
+    for gap_row in gap_rows:
+        entity_id = str(gap_row.get("entityId") or "").strip()
+        if entity_id in row_entity_meta:
+            gaps_by_entity.setdefault(entity_id, []).append(dict(gap_row))
+
+    row_details_by_field: dict[str, dict[str, Any]] = {}
+    for entity_id, meta in sorted(row_entity_meta.items(), key=lambda item: item[1].get("fieldKey") or item[0]):
+        field_key = str(meta.get("fieldKey") or "").strip()
+        fact_bucket = facts_by_entity.get(entity_id, [])
+        gap_bucket = gaps_by_entity.get(entity_id, [])
+
+        values_by_kind: dict[str, list[str]] = {}
+        for fact_row in fact_bucket:
+            fact_kind = str(fact_row.get("factKind") or "").strip()
+            fact_value = str(fact_row.get("factValue") or "").strip()
+            if not fact_kind or not fact_value:
+                continue
+            values_by_kind.setdefault(fact_kind, []).append(fact_value)
+
+        blocked_fields: dict[str, str] = {}
+        is_grounded_from_gap: bool | None = None
+        for gap_row in gap_bucket:
+            gap_kind = str(gap_row.get("gapKind") or "").strip()
+            gap_payload = dict(gap_row.get("payload") or {})
+            reason = str(gap_payload.get("reason") or "").strip()
+            if gap_kind == "row-detail":
+                gap_kind = "rowDetail"
+            if gap_kind and reason:
+                blocked_fields[gap_kind] = reason
+            if isinstance(gap_payload.get("isGrounded"), bool):
+                is_grounded_from_gap = bool(gap_payload.get("isGrounded"))
+
+        identity = next(iter(values_by_kind.get("identity") or []), "")
+        identity_source = next(iter(values_by_kind.get("identity-source") or []), "")
+        row_type = next(iter(values_by_kind.get("row-type") or []), "")
+        row_type_label = next(iter(values_by_kind.get("row-type-label") or []), "")
+        detail_note = next(iter(values_by_kind.get("detail-note") or []), "")
+        bounded_evidence_terms = sorted(
+            _unique_strings(list(values_by_kind.get("bounded-evidence-term") or [])),
+            key=_bounded_evidence_term_sort_key,
+        )
+
+        if is_grounded_from_gap is None:
+            is_grounded = bool(identity and row_type_label)
+        else:
+            is_grounded = is_grounded_from_gap
+
+        row_detail: dict[str, Any] = {
+            "isGrounded": is_grounded,
+            "identity": identity or None,
+            "identitySource": identity_source or None,
+            "rowType": row_type or None,
+            "rowTypeLabel": row_type_label or None,
+            "detailNote": detail_note or None,
+            "blockedFields": blocked_fields,
+        }
+        if bounded_evidence_terms:
+            row_detail["boundedEvidenceTerms"] = bounded_evidence_terms
+        row_details_by_field[field_key] = row_detail
+
+    return row_details_by_field
+
+
 def _collect_trace_edge_proofs(trace_payload: dict[str, Any]) -> list[dict[str, Any]]:
     trace_graph = dict(trace_payload.get("traceGraph") or {})
     bridge_hits = list((trace_payload.get("bridgeCheck") or {}).get("bridgeHits") or [])
@@ -4443,6 +8027,18 @@ def _derive_subject_identity(
         expected_row_field = f"{match.group(1).upper()}Button"
 
     if effective_family_id == "token-shop" and "family" in trace_scope:
+        def collect_range_button_fields(values: list[str]) -> list[str]:
+            normalized_fields: list[str] = []
+            seen_fields: set[str] = set()
+            for value in values:
+                for button_match in re.finditer(r"\b(ATU\d+Button)\b", str(value or ""), re.IGNORECASE):
+                    field = f"{button_match.group(1)[:-6].upper()}Button"
+                    if field in seen_fields:
+                        continue
+                    seen_fields.add(field)
+                    normalized_fields.append(field)
+            return normalized_fields
+
         row_fields = _unique_strings(
             [
                 str(item.get("shellField") or item.get("field") or "").strip()
@@ -4458,6 +8054,7 @@ def _derive_subject_identity(
                     if isinstance(item, dict) and str(item.get("field") or "").strip()
                 ]
             )
+        row_fields = collect_range_button_fields(row_fields)
         if row_fields:
             first_field = row_fields[0]
             last_field = row_fields[-1]
@@ -4938,7 +8535,6 @@ def _derive_resolver_trace_workflow_policy(
             trace_routine_hint = "token-shop-family-trace"
             if target_class == "range-family-audit" and {"title-text-surfaces", "prefab-roster", "effect-lane"} <= support_surface_ids:
                 family_trace_profile = "late-atu-family"
-                disable_native_trace = True
             elif {"title-text-surfaces", "prefab-roster", "action-lane"} <= support_surface_ids:
                 family_trace_profile = "generic-structure"
         else:
@@ -4948,6 +8544,12 @@ def _derive_resolver_trace_workflow_policy(
                 trace_routine_hint = "token-shop-mod-trace"
             elif {"prefab-lane", "action-lane"} <= support_surface_ids and "metadata-neighborhood" in support_surface_ids:
                 trace_routine_hint = "token-shop-mk3-bridge-trace"
+            elif {"prefab-roster", "action-lane"} <= support_surface_ids and (
+                "title-text-surfaces" in support_surface_ids
+                or "effect-lane" in support_surface_ids
+                or "family-shells" in support_surface_ids
+            ):
+                trace_routine_hint = "token-shop-shell-bridge-trace"
             elif {"shared-effect-title", "shared-effect-text", "detached-identity-surfaces"} <= support_surface_ids:
                 trace_routine_hint = "token-shop-atu3-effect-trace"
             elif {"consumer-family", "consumer-routines", "chest-objects"} <= support_surface_ids:
@@ -4956,7 +8558,23 @@ def _derive_resolver_trace_workflow_policy(
                 trace_routine_hint = "token-shop-atu3-consumer-read-trace"
             if "exact-display-update-path" in blocked_edge_type_set:
                 default_presentation_update_hook = "SetCostRelatedAttributes"
-        if not disable_native_trace:
+        if family_trace_profile == "late-atu-family":
+            native_trace_terms = _unique_strings(
+                [
+                    *list(anchor_terms or []),
+                    "ATU24Button",
+                    "15797",
+                    "ATU28Button",
+                    "15813",
+                    "BuyATU24",
+                    "BuyATU28",
+                    "ATU24Bonus3Shards",
+                    "Tier 3 Max Level Increaser",
+                    "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
+                    "Campaign Fragments",
+                ][:12]
+            )
+        elif not disable_native_trace:
             native_trace_terms = _unique_strings(list(anchor_terms or [])[:12])
 
     return {
@@ -5078,6 +8696,13 @@ def _build_materialized_trace_dependency_proof(
             },
         }
     )
+
+
+def _stable_trace_fragment_compare_payload(fragment_kind: str, payload: Any) -> Any:
+    stable = _stable_proof_value(payload)
+    if str(fragment_kind or "").strip() == "traceRun" and isinstance(stable, dict):
+        stable.pop("materializedAt", None)
+    return stable
 
 
 def _build_canonical_system_trace_dependency_proof(
@@ -5863,9 +9488,19 @@ class GhidraCacheDB:
         self.db_path = db_path
         self.jobs_dir = jobs_dir
         self.timing_span_factory = None
+        self._last_jobs_scan_checked_at = 0.0
+        self._last_jobs_scan_latest_fs = ""
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.jobs_dir.mkdir(parents=True, exist_ok=True)
-        self._init_db()
+        init_attempts = 4
+        for attempt in range(init_attempts):
+            try:
+                self._init_db()
+                break
+            except sqlite3.OperationalError as exc:
+                if "database is locked" not in str(exc).lower() or attempt >= init_attempts - 1:
+                    raise
+                time.sleep(0.25 * (attempt + 1))
 
     @contextmanager
     def connect(self) -> Iterator[sqlite3.Connection]:
@@ -5873,7 +9508,6 @@ class GhidraCacheDB:
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys=ON")
         conn.execute("PRAGMA busy_timeout=30000")
-        conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
         conn.execute("PRAGMA temp_store=MEMORY")
         conn.execute(f"PRAGMA cache_size={-int(SQLITE_CACHE_SIZE_KIB)}")
@@ -5890,6 +9524,7 @@ class GhidraCacheDB:
 
     def _init_db(self) -> None:
         with self.connect() as conn:
+            conn.execute("PRAGMA journal_mode=WAL")
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS meta (
@@ -6255,6 +9890,104 @@ class GhidraCacheDB:
                 CREATE INDEX IF NOT EXISTS idx_materialized_subject_contract_views_scope
                     ON materialized_subject_contract_views(project_name, project_file, trace_scope, subject_id, built_at DESC);
 
+                CREATE TABLE IF NOT EXISTS materialized_entity_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    entity_id TEXT NOT NULL,
+                    entity_kind TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT,
+                    built_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, entity_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_materialized_entity_views_scope
+                    ON materialized_entity_views(project_name, project_file, trace_scope, entity_kind, built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS materialized_fact_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    entity_id TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    field_key TEXT NOT NULL,
+                    fact_kind TEXT NOT NULL,
+                    fact_value TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT,
+                    built_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, entity_id, field_key, fact_kind, fact_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_materialized_fact_views_scope
+                    ON materialized_fact_views(project_name, project_file, trace_scope, field_key, fact_kind, built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS materialized_relation_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    source_entity_id TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    field_key TEXT NOT NULL,
+                    relation_kind TEXT NOT NULL,
+                    target_entity_id TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT,
+                    built_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, source_entity_id, field_key, relation_kind, target_entity_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_materialized_relation_views_scope
+                    ON materialized_relation_views(project_name, project_file, trace_scope, field_key, relation_kind, built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS materialized_gap_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    entity_id TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    field_key TEXT NOT NULL,
+                    gap_kind TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT,
+                    built_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, entity_id, field_key, gap_kind)
+                );
+                CREATE INDEX IF NOT EXISTS idx_materialized_gap_views_scope
+                    ON materialized_gap_views(project_name, project_file, trace_scope, field_key, gap_kind, built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS materialized_boundary_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    boundary_kind TEXT NOT NULL,
+                    verdict TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT,
+                    built_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, boundary_kind)
+                );
+                CREATE INDEX IF NOT EXISTS idx_materialized_boundary_views_scope
+                    ON materialized_boundary_views(project_name, project_file, trace_scope, subject_id, boundary_kind, built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS materialization_stage_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    stage_kind TEXT NOT NULL,
+                    stage_status TEXT NOT NULL,
+                    upstream_signature TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT,
+                    built_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, stage_kind)
+                );
+                CREATE INDEX IF NOT EXISTS idx_materialization_stage_views_scope
+                    ON materialization_stage_views(project_name, project_file, trace_scope, subject_id, stage_kind, built_at DESC);
+
                 CREATE TABLE IF NOT EXISTS materialized_acquisition_diagnostics_views (
                     project_name TEXT NOT NULL,
                     project_file TEXT NOT NULL,
@@ -6282,10 +10015,14 @@ class GhidraCacheDB:
                 );
                 """
             )
-            conn.execute("INSERT OR REPLACE INTO meta(key, value) VALUES('schema_version', ?)", (str(DB_SCHEMA_VERSION),))
-            conn.execute(
-                "INSERT OR REPLACE INTO meta(key, value) VALUES('last_seen_jobs_scan', COALESCE((SELECT value FROM meta WHERE key='last_seen_jobs_scan'), ''))"
-            )
+            if current_version != DB_SCHEMA_VERSION:
+                conn.execute(
+                    """
+                    INSERT INTO meta(key, value) VALUES('schema_version', ?)
+                    ON CONFLICT(key) DO UPDATE SET value=excluded.value
+                    """,
+                    (str(DB_SCHEMA_VERSION),),
+                )
 
     def _job_row_to_dict(self, row: sqlite3.Row | None) -> dict[str, Any] | None:
         if row is None:
@@ -6424,13 +10161,20 @@ class GhidraCacheDB:
     def sync_from_jobs_if_needed(self) -> None:
         if not self.jobs_dir.exists():
             return
+        now = time.monotonic()
+        if now - self._last_jobs_scan_checked_at < JOBS_DIR_SCAN_CACHE_SECONDS:
+            return
+        self._last_jobs_scan_checked_at = now
         latest_fs = ""
         for job_dir in self.jobs_dir.iterdir():
             if job_dir.is_dir():
                 latest_fs = max(latest_fs, str(job_dir.stat().st_mtime_ns))
+        if latest_fs == self._last_jobs_scan_latest_fs:
+            return
         with self.connect() as conn:
             row = conn.execute("SELECT value FROM meta WHERE key = 'last_seen_jobs_scan'").fetchone()
             last_seen = row["value"] if row else ""
+        self._last_jobs_scan_latest_fs = latest_fs
         if latest_fs != last_seen:
             self.import_all_job_dirs()
 
@@ -6695,12 +10439,20 @@ class GhidraCacheDB:
             self._prune_evidence_retention(conn)
         return affected_terms
 
-    def upsert_custom_evidence_rows(self, evidence_rows: list[dict[str, Any]], rebuild_materialized: bool = True) -> None:
+    def upsert_custom_evidence_rows(
+        self,
+        evidence_rows: list[dict[str, Any]],
+        rebuild_materialized: bool = True,
+        *,
+        rebuild_job_views: bool = True,
+    ) -> bool:
         affected_terms = self._upsert_evidence_rows(evidence_rows)
         if rebuild_materialized and affected_terms:
             self._rebuild_canonical_and_materialized(
-                affected_terms=affected_terms
+                affected_terms=affected_terms,
+                rebuild_job_views=rebuild_job_views,
             )
+        return bool(affected_terms)
 
     def _reduce_rows(self, rows: list[sqlite3.Row], aspect_kind: str) -> tuple[Any, list[str], list[dict[str, Any]], dict[str, Any]]:
         ordered = sorted(rows, key=_rank_row, reverse=True)
@@ -6735,6 +10487,8 @@ class GhidraCacheDB:
     def _rebuild_canonical_and_materialized(
         self,
         affected_terms: set[tuple[str, str, str]] | None = None,
+        *,
+        rebuild_job_views: bool = True,
     ) -> None:
         with self.connect() as conn:
             normalized_terms = sorted(
@@ -7005,7 +10759,7 @@ class GhidraCacheDB:
                             ),
                         )
 
-            if scoped_refresh:
+            if scoped_refresh and rebuild_job_views:
                 valid_jobs = conn.execute(
                     """
                     SELECT DISTINCT jobs.*
@@ -7049,7 +10803,7 @@ class GhidraCacheDB:
                             str(row["signature"] or ""),
                         ),
                     )
-            else:
+            elif not scoped_refresh:
                 valid_jobs = conn.execute(
                     """
                     SELECT * FROM jobs
@@ -7059,100 +10813,101 @@ class GhidraCacheDB:
                     ORDER BY start_time ASC
                     """
                 ).fetchall()
-            terms_by_signature: dict[tuple[str, str, str], list[str]] = {}
-            for row in valid_jobs:
-                job = self._job_row_to_dict(row)
-                if not job:
-                    continue
-                signature = str(job.get("signature") or "")
-                if not signature:
-                    continue
-                terms_by_signature[(str(job.get("project_name", "")), str(job.get("project_file", "")), signature)] = list(job.get("search_strings", []))
-                conn.execute(
-                    """
-                    INSERT INTO process_exact_index(project_name, project_file, signature, job_id, start_time)
-                    VALUES(?,?,?,?,?)
-                    ON CONFLICT(project_name, project_file, signature) DO UPDATE SET
-                        job_id = excluded.job_id,
-                        start_time = excluded.start_time
-                    WHERE excluded.start_time >= process_exact_index.start_time
-                    """,
-                    (
-                        str(job.get("project_name", "")),
-                        str(job.get("project_file", "")),
-                        signature,
-                        str(job.get("job_id", "")),
-                        str(job.get("start_time", "")),
-                    ),
-                )
-
-            for (project_name, project_file, signature), wanted_terms in terms_by_signature.items():
-                term_views: list[dict[str, Any]] = []
-                provenance = {"terms": {}, "sourceJobIds": []}
-                for term in wanted_terms:
-                    term_row = conn.execute(
-                        """
-                        SELECT * FROM materialized_term_views
-                        WHERE project_name = ? AND project_file = ? AND normalized_term = ?
-                        """,
-                        (project_name, project_file, term.lower()),
-                    ).fetchone()
-                    if not term_row:
+            if rebuild_job_views:
+                terms_by_signature: dict[tuple[str, str, str], list[str]] = {}
+                for row in valid_jobs:
+                    job = self._job_row_to_dict(row)
+                    if not job:
                         continue
-                    term_payload = _json_loads(term_row["payload_json"], {})
-                    term_provenance = _json_loads(term_row["provenance_json"], {})
-                    term_views.append(term_payload)
-                    provenance["terms"][term] = term_provenance
-                    for aspect_provenance in term_provenance.values():
-                        for job_id in aspect_provenance.get("sourceJobIds", []) or []:
-                            if job_id not in provenance["sourceJobIds"]:
-                                provenance["sourceJobIds"].append(job_id)
-                if not term_views:
-                    continue
-                combined_result = {
-                    "binary": project_file,
-                    "timestamp": datetime.now().isoformat(),
-                    "functions": {},
-                    "fuzzyFunctions": {},
-                    "referenceFunctions": {},
-                    "ascii_targets": {},
-                    "metadataNeighborhoods": {},
-                    "termBridges": {},
-                    "errors": [],
-                    "schemaVersion": SCHEMA_VERSION_FLOOR,
-                }
-                reconstructions: list[dict[str, Any]] = []
-                graphs: list[dict[str, Any]] = []
-                for term_payload in term_views:
-                    combined_result["functions"].update(term_payload.get("functions", {}) or {})
-                    combined_result["fuzzyFunctions"].update(term_payload.get("fuzzyFunctions", {}) or {})
-                    combined_result["referenceFunctions"].update(term_payload.get("referenceFunctions", {}) or {})
-                    combined_result["ascii_targets"].update(term_payload.get("ascii_targets", {}) or {})
-                    combined_result["metadataNeighborhoods"].update(term_payload.get("metadataNeighborhoods", {}) or {})
-                    combined_result["termBridges"].update(term_payload.get("termBridges", {}) or {})
-                    if term_payload.get("managedReconstruction"):
-                        reconstructions.append(term_payload["managedReconstruction"])
-                    if term_payload.get("managedGraph"):
-                        graphs.append(term_payload["managedGraph"])
-                    combined_result["schemaVersion"] = max(int(combined_result["schemaVersion"]), int(term_payload.get("schemaVersion", 0) or 0))
-                combined_result["managedReconstruction"] = _merge_managed_reconstructions(reconstructions)
-                combined_result["managedGraph"] = _merge_managed_graphs(graphs)
-                conn.execute(
-                    """
-                    INSERT INTO materialized_job_views(
-                        project_name, project_file, signature, wanted_terms_json, payload_json, provenance_json, updated_at
-                    ) VALUES(?,?,?,?,?,?,?)
-                    """,
-                    (
-                        project_name,
-                        project_file,
-                        signature,
-                        _json_dumps(wanted_terms),
-                        _json_dumps(combined_result),
-                        _json_dumps(provenance),
-                        datetime.now().isoformat(),
-                    ),
-                )
+                    signature = str(job.get("signature") or "")
+                    if not signature:
+                        continue
+                    terms_by_signature[(str(job.get("project_name", "")), str(job.get("project_file", "")), signature)] = list(job.get("search_strings", []))
+                    conn.execute(
+                        """
+                        INSERT INTO process_exact_index(project_name, project_file, signature, job_id, start_time)
+                        VALUES(?,?,?,?,?)
+                        ON CONFLICT(project_name, project_file, signature) DO UPDATE SET
+                            job_id = excluded.job_id,
+                            start_time = excluded.start_time
+                        WHERE excluded.start_time >= process_exact_index.start_time
+                        """,
+                        (
+                            str(job.get("project_name", "")),
+                            str(job.get("project_file", "")),
+                            signature,
+                            str(job.get("job_id", "")),
+                            str(job.get("start_time", "")),
+                        ),
+                    )
+
+                for (project_name, project_file, signature), wanted_terms in terms_by_signature.items():
+                    term_views: list[dict[str, Any]] = []
+                    provenance = {"terms": {}, "sourceJobIds": []}
+                    for term in wanted_terms:
+                        term_row = conn.execute(
+                            """
+                            SELECT * FROM materialized_term_views
+                            WHERE project_name = ? AND project_file = ? AND normalized_term = ?
+                            """,
+                            (project_name, project_file, term.lower()),
+                        ).fetchone()
+                        if not term_row:
+                            continue
+                        term_payload = _json_loads(term_row["payload_json"], {})
+                        term_provenance = _json_loads(term_row["provenance_json"], {})
+                        term_views.append(term_payload)
+                        provenance["terms"][term] = term_provenance
+                        for aspect_provenance in term_provenance.values():
+                            for job_id in aspect_provenance.get("sourceJobIds", []) or []:
+                                if job_id not in provenance["sourceJobIds"]:
+                                    provenance["sourceJobIds"].append(job_id)
+                    if not term_views:
+                        continue
+                    combined_result = {
+                        "binary": project_file,
+                        "timestamp": datetime.now().isoformat(),
+                        "functions": {},
+                        "fuzzyFunctions": {},
+                        "referenceFunctions": {},
+                        "ascii_targets": {},
+                        "metadataNeighborhoods": {},
+                        "termBridges": {},
+                        "errors": [],
+                        "schemaVersion": SCHEMA_VERSION_FLOOR,
+                    }
+                    reconstructions: list[dict[str, Any]] = []
+                    graphs: list[dict[str, Any]] = []
+                    for term_payload in term_views:
+                        combined_result["functions"].update(term_payload.get("functions", {}) or {})
+                        combined_result["fuzzyFunctions"].update(term_payload.get("fuzzyFunctions", {}) or {})
+                        combined_result["referenceFunctions"].update(term_payload.get("referenceFunctions", {}) or {})
+                        combined_result["ascii_targets"].update(term_payload.get("ascii_targets", {}) or {})
+                        combined_result["metadataNeighborhoods"].update(term_payload.get("metadataNeighborhoods", {}) or {})
+                        combined_result["termBridges"].update(term_payload.get("termBridges", {}) or {})
+                        if term_payload.get("managedReconstruction"):
+                            reconstructions.append(term_payload["managedReconstruction"])
+                        if term_payload.get("managedGraph"):
+                            graphs.append(term_payload["managedGraph"])
+                        combined_result["schemaVersion"] = max(int(combined_result["schemaVersion"]), int(term_payload.get("schemaVersion", 0) or 0))
+                    combined_result["managedReconstruction"] = _merge_managed_reconstructions(reconstructions)
+                    combined_result["managedGraph"] = _merge_managed_graphs(graphs)
+                    conn.execute(
+                        """
+                        INSERT INTO materialized_job_views(
+                            project_name, project_file, signature, wanted_terms_json, payload_json, provenance_json, updated_at
+                        ) VALUES(?,?,?,?,?,?,?)
+                        """,
+                        (
+                            project_name,
+                            project_file,
+                            signature,
+                            _json_dumps(wanted_terms),
+                            _json_dumps(combined_result),
+                            _json_dumps(provenance),
+                            datetime.now().isoformat(),
+                        ),
+                    )
 
     def rebuild_indices(self, result_loader, stale_check) -> None:
         self.import_all_job_dirs()
@@ -7240,8 +10995,16 @@ class GhidraCacheDB:
             "terms": _json_loads(row["wanted_terms_json"], []),
         }
 
-    def find_canonical_term_view(self, project_name: str, project_file: str, term: str) -> dict[str, Any] | None:
-        self.sync_from_jobs_if_needed()
+    def find_canonical_term_view(
+        self,
+        project_name: str,
+        project_file: str,
+        term: str,
+        *,
+        sync_jobs: bool = True,
+    ) -> dict[str, Any] | None:
+        if sync_jobs:
+            self.sync_from_jobs_if_needed()
         normalized = term.lower()
         with self.connect() as conn:
             row = conn.execute(
@@ -7269,6 +11032,86 @@ class GhidraCacheDB:
             "result": payload,
             "terms": [str(row["term"])],
         }
+
+    def find_fast_term_evidence_summaries(
+        self,
+        project_name: str,
+        project_file: str,
+        terms: list[str],
+        *,
+        sync_jobs: bool = True,
+    ) -> dict[str, dict[str, Any]]:
+        if sync_jobs:
+            self.sync_from_jobs_if_needed()
+        normalized_terms = _unique_strings(
+            [str(term or "").strip().lower() for term in terms if str(term or "").strip()]
+        )
+        if not normalized_terms:
+            return {}
+        placeholders = ",".join("?" for _ in normalized_terms)
+        with self.connect() as conn:
+            term_rows = conn.execute(
+                f"""
+                SELECT normalized_term, term, payload_json, provenance_json, updated_at
+                FROM materialized_term_views
+                WHERE project_name = ? AND project_file = ? AND normalized_term IN ({placeholders})
+                """,
+                (project_name, project_file, *normalized_terms),
+            ).fetchall()
+            graph_rows = conn.execute(
+                f"""
+                SELECT target_term, source_term, kind, source_ref
+                FROM graph_links
+                WHERE project_name = ? AND project_file = ? AND target_term IN ({placeholders})
+                ORDER BY start_time DESC
+                """,
+                (project_name, project_file, *normalized_terms),
+            ).fetchall()
+        term_lookup = {
+            str(row["normalized_term"] or ""): {
+                "job": {
+                    "job_id": "canonical-term:" + str(row["normalized_term"] or ""),
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "status": "completed",
+                    "start_time": str(row["updated_at"]),
+                    "output_file": None,
+                    "cache_mode": "canonical-term",
+                    "provenance": _json_loads(row["provenance_json"], {}),
+                },
+                "result": _json_loads(row["payload_json"], {}),
+                "terms": [str(row["term"])],
+            }
+            for row in term_rows
+        }
+        graph_lookup: dict[str, list[dict[str, str]]] = {term: [] for term in normalized_terms}
+        for row in graph_rows:
+            target_term = str(row["target_term"] or "")
+            graph_lookup.setdefault(target_term, []).append(
+                {
+                    "value": target_term,
+                    "sourceTerm": str(row["source_term"]),
+                    "kind": str(row["kind"]),
+                    "sourceRef": str(row["source_ref"]),
+                }
+            )
+        summaries: dict[str, dict[str, Any]] = {}
+        for normalized in normalized_terms:
+            term_view = term_lookup.get(normalized)
+            graph_refs = list(graph_lookup.get(normalized) or [])[:6]
+            summaries[normalized] = {
+                "term": normalized,
+                "found": bool(term_view) or bool(graph_refs),
+                "sourceIds": _unique_strings(
+                    [
+                        "canonical-term-view" if term_view else "",
+                        "graph-links" if graph_refs else "",
+                    ]
+                ),
+                "graphRefs": graph_refs,
+                "payloadHits": [],
+            }
+        return summaries
 
     def find_live_evidence_row(
         self,
@@ -7341,7 +11184,15 @@ class GhidraCacheDB:
         }
 
     def record_extraction_job(self, job_info: dict[str, Any]) -> None:
-        self.upsert_job(job_info)
+        attempts = 12
+        for attempt in range(attempts):
+            try:
+                self.upsert_job(job_info)
+                return
+            except sqlite3.OperationalError as exc:
+                if "database is locked" not in str(exc).lower() or attempt >= attempts - 1:
+                    raise
+                time.sleep(0.5 * (attempt + 1))
 
     def materialize_native_trace_view(
         self,
@@ -7516,33 +11367,41 @@ class GhidraCacheDB:
             "result": combined_result,
         }
 
-        with self.connect() as conn:
-            conn.execute(
-                """
-                INSERT INTO materialized_native_trace_views(
-                    project_name, project_file, request_signature, requested_terms_json, search_terms_json,
-                    payload_json, provenance_json, reducer_version, built_at
-                ) VALUES(?,?,?,?,?,?,?,?,?)
-                ON CONFLICT(project_name, project_file, request_signature) DO UPDATE SET
-                    requested_terms_json=excluded.requested_terms_json,
-                    search_terms_json=excluded.search_terms_json,
-                    payload_json=excluded.payload_json,
-                    provenance_json=excluded.provenance_json,
-                    reducer_version=excluded.reducer_version,
-                    built_at=excluded.built_at
-                """,
-                (
-                    project_name,
-                    project_file,
-                    request_signature,
-                    _json_dumps(requested_terms),
-                    _json_dumps(search_terms),
-                    _json_dumps(payload),
-                    _json_dumps(provenance),
-                    "db-native-trace-v1",
-                    datetime.now().isoformat(),
-                ),
-            )
+        attempts = 12
+        for attempt in range(attempts):
+            try:
+                with self.connect() as conn:
+                    conn.execute(
+                        """
+                        INSERT INTO materialized_native_trace_views(
+                            project_name, project_file, request_signature, requested_terms_json, search_terms_json,
+                            payload_json, provenance_json, reducer_version, built_at
+                        ) VALUES(?,?,?,?,?,?,?,?,?)
+                        ON CONFLICT(project_name, project_file, request_signature) DO UPDATE SET
+                            requested_terms_json=excluded.requested_terms_json,
+                            search_terms_json=excluded.search_terms_json,
+                            payload_json=excluded.payload_json,
+                            provenance_json=excluded.provenance_json,
+                            reducer_version=excluded.reducer_version,
+                            built_at=excluded.built_at
+                        """,
+                        (
+                            project_name,
+                            project_file,
+                            request_signature,
+                            _json_dumps(requested_terms),
+                            _json_dumps(search_terms),
+                            _json_dumps(payload),
+                            _json_dumps(provenance),
+                            "db-native-trace-v1",
+                            datetime.now().isoformat(),
+                        ),
+                    )
+                break
+            except sqlite3.OperationalError as exc:
+                if "database is locked" not in str(exc).lower() or attempt >= attempts - 1:
+                    raise
+                time.sleep(0.5 * (attempt + 1))
         return payload
 
     def find_materialized_native_trace_view(self, project_name: str, project_file: str, request_signature: str) -> dict[str, Any] | None:
@@ -7616,8 +11475,16 @@ class GhidraCacheDB:
             }
         return None
 
-    def find_graph_backfill(self, project_name: str, project_file: str, term: str) -> list[dict[str, str]]:
-        self.sync_from_jobs_if_needed()
+    def find_graph_backfill(
+        self,
+        project_name: str,
+        project_file: str,
+        term: str,
+        *,
+        sync_jobs: bool = True,
+    ) -> list[dict[str, str]]:
+        if sync_jobs:
+            self.sync_from_jobs_if_needed()
         with self.connect() as conn:
             rows = conn.execute(
                 """
@@ -7644,10 +11511,22 @@ class GhidraCacheDB:
         project_name: str,
         project_file: str,
         term: str,
+        *,
+        sync_jobs: bool = True,
     ) -> dict[str, Any]:
         normalized_term = str(term or "").strip()
-        term_view = self.find_canonical_term_view(project_name, project_file, normalized_term)
-        graph_refs = self.find_graph_backfill(project_name, project_file, normalized_term)
+        term_view = self.find_canonical_term_view(
+            project_name,
+            project_file,
+            normalized_term,
+            sync_jobs=sync_jobs,
+        )
+        graph_refs = self.find_graph_backfill(
+            project_name,
+            project_file,
+            normalized_term,
+            sync_jobs=sync_jobs,
+        )
         payload_hits: list[dict[str, Any]] = []
         literal_sources: list[str] = []
         literal_pattern = f"%{normalized_term}%"
@@ -7881,6 +11760,14 @@ class GhidraCacheDB:
                     "displayShell": "BigStatisticPrefab.TokenBankCap",
                     "loopHandler": "TextHandlerLoopMods",
                     "loopHook": "SetLM244BonusText",
+                    "exactSaveOwnerType": "SaveData",
+                    "storedAmountField": "BankedTokens",
+                    "genericClaimableFieldOwner": "SaveData",
+                    "genericClaimableField": "ClaimableTokenium",
+                    "profileBridgeOwner": "PlayerProfileHandler",
+                    "profileBridgeMethod": "ConvertSaveDataToProfileData",
+                    "profileBridgeReturnType": "PlayerProfileData",
+                    "profileCacheField": "saveInfoCache",
                     "cloudSaveShell": "CloudSavePlayerProfile",
                     "cloudSaveInfoRoutine": "GetCurrentSaveFileInfo",
                     "cloudSaveProfileRoutine": "GetPlayerProfileInfo",
@@ -8247,19 +12134,21 @@ class GhidraCacheDB:
             )
         for contract_row in self.list_latest_materialized_subject_contract_views(project_name, project_file):
             payload = dict(contract_row.get("payload") or {})
-            subject_id = str(payload.get("subjectId") or "").strip()
+            core_payload = dict(payload.get("core") or payload)
+            enriched_payload = dict(payload.get("enriched") or {})
+            subject_id = str(core_payload.get("subjectId") or payload.get("subjectId") or "").strip()
             if not subject_id.startswith(("row:", "range:token-shop:")):
                 continue
-            lane_grounded_fields = dict((((payload.get("groundedFields") or {}).get(lane_id)) or {}))
-            lane_support_summary = dict((((payload.get("supportSummary") or {}).get("sharedLanes") or {}).get(lane_id)) or {})
-            lane_provenance_summary = list((((payload.get("provenanceSummary") or {}).get("sharedLanes") or {}).get(lane_id)) or [])
-            lane_blocked_reason = str((((payload.get("blockedInputReasons") or {}).get(lane_id)) or "")).strip() or None
+            lane_grounded_fields = dict((((enriched_payload.get("groundedFields") or {}).get(lane_id)) or {}))
+            lane_support_summary = dict((((core_payload.get("supportSummary") or {}).get("sharedLanes") or {}).get(lane_id)) or {})
+            lane_provenance_summary = list((((enriched_payload.get("provenanceSummary") or {}).get("sharedLanes") or {}).get(lane_id)) or [])
+            lane_blocked_reason = str((((core_payload.get("blockedInputReasons") or {}).get(lane_id)) or "")).strip() or None
             if not lane_grounded_fields and not lane_support_summary and not lane_provenance_summary and lane_blocked_reason is None:
                 continue
             candidates.append(
                 {
                     "subjectId": subject_id,
-                    "subjectKind": str(payload.get("subjectKind") or "").strip(),
+                    "subjectKind": str(core_payload.get("subjectKind") or payload.get("subjectKind") or "").strip(),
                     "nextSeam": {},
                     "knownEdges": [],
                     "missingEdges": [],
@@ -8600,12 +12489,13 @@ class GhidraCacheDB:
         trace_scope: str,
         request_signature: str,
         dataset: dict[str, Any],
-    ) -> None:
+    ) -> bool:
         now = datetime.now().isoformat()
         native_trace = dataset.get("nativeTrace") or {}
         source_job_id = str(native_trace.get("jobId") or "")
         source_terms = list(native_trace.get("searchTerms", []) or [])
-        producer_version = str(dataset.get("assetSet", {}).get("fingerprint", "") or "")
+        asset_set = dict(dataset.get("assetSet") or {})
+        producer_version = str(asset_set.get("fingerprint", "") or "")
         fragment_rows: list[dict[str, Any]] = []
 
         row_recovery = dataset.get("rowRecovery") or {}
@@ -8754,9 +12644,120 @@ class GhidraCacheDB:
             )
         write_span = self.timing_span_factory("dbWrites") if callable(self.timing_span_factory) else nullcontext()
         with write_span, self.connect() as conn:
+            incoming_fragment_map: dict[tuple[str, str, str, str], tuple[str, float, int, int, str, str]] = {}
             for row in fragment_rows:
                 payload_json = _json_dumps(row["payload"])
-                conn.execute(
+                compare_payload_json = _json_dumps(
+                    _stable_trace_fragment_compare_payload(
+                        str(row["fragment_kind"] or ""),
+                        row["payload"],
+                    )
+                )
+                row["_payload_json"] = payload_json
+                incoming_fragment_map[
+                    (
+                        str(row["fragment_kind"]),
+                        str(row["fragment_key"]),
+                        str(row["source_job_id"]),
+                        str(row["source_term"]),
+                    )
+                ] = (
+                    compare_payload_json,
+                    float(row["confidence"]),
+                    int(row["reducer_priority"]),
+                    int(row["schema_version"]),
+                    str(row["script_name"]),
+                    str(row["producer_version"]),
+                )
+            existing_request_rows = conn.execute(
+                """
+                SELECT fragment_kind, fragment_key, source_job_id, source_term,
+                       payload_json, confidence, reducer_priority, schema_version,
+                       script_name, producer_version
+                FROM trace_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                  AND request_signature = ?
+                """,
+                (project_name, project_file, trace_scope, request_signature),
+            ).fetchall()
+            existing_request_map: dict[tuple[str, str, str, str], tuple[str, float, int, int, str, str]] = {}
+            for row in existing_request_rows:
+                existing_request_map[
+                    (
+                        str(row["fragment_kind"]),
+                        str(row["fragment_key"]),
+                        str(row["source_job_id"] or ""),
+                        str(row["source_term"] or ""),
+                    )
+                ] = (
+                    _json_dumps(
+                        _stable_trace_fragment_compare_payload(
+                            str(row["fragment_kind"] or ""),
+                            _json_loads(row["payload_json"], None),
+                        )
+                    ),
+                    float(row["confidence"] or 0.0),
+                    int(row["reducer_priority"] or 0),
+                    int(row["schema_version"] or 0),
+                        str(row["script_name"] or ""),
+                        str(row["producer_version"] or ""),
+                    )
+            if existing_request_map == incoming_fragment_map:
+                return False
+            try:
+                existing_active_rows = conn.execute(
+                    """
+                    SELECT fragment_kind, fragment_key, source_job_id, source_term,
+                           payload_json, confidence, reducer_priority, schema_version,
+                           script_name, producer_version
+                    FROM trace_fragments
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                      AND is_active = 1 AND is_valid = 1
+                    """,
+                    (project_name, project_file, trace_scope),
+                ).fetchall()
+            except sqlite3.OperationalError as exc:
+                if "no such column: is_active" not in str(exc).lower():
+                    raise
+                existing_active_rows = conn.execute(
+                    """
+                    SELECT fragment_kind, fragment_key, source_job_id, source_term,
+                           payload_json, confidence, reducer_priority, schema_version,
+                           script_name, producer_version
+                    FROM trace_fragments
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                      AND is_valid = 1 AND invalidated_at IS NULL
+                    """,
+                    (project_name, project_file, trace_scope),
+                ).fetchall()
+            existing_active_map: dict[tuple[str, str, str, str], tuple[str, float, int, int, str, str]] = {}
+            for row in existing_active_rows:
+                existing_active_map[
+                    (
+                        str(row["fragment_kind"]),
+                        str(row["fragment_key"]),
+                        str(row["source_job_id"] or ""),
+                        str(row["source_term"] or ""),
+                    )
+                ] = (
+                    _json_dumps(
+                        _stable_trace_fragment_compare_payload(
+                            str(row["fragment_kind"] or ""),
+                            _json_loads(row["payload_json"], None),
+                        )
+                    ),
+                    float(row["confidence"] or 0.0),
+                    int(row["reducer_priority"] or 0),
+                    int(row["schema_version"] or 0),
+                    str(row["script_name"] or ""),
+                    str(row["producer_version"] or ""),
+                )
+            if existing_active_map == incoming_fragment_map:
+                return False
+            trace_dataset_changed = False
+            for row in fragment_rows:
+                payload_json = str(row.get("_payload_json") or _json_dumps(row["payload"]))
+                invalidated = conn.execute(
                     """
                     UPDATE trace_fragments
                     SET is_valid = 0,
@@ -8786,6 +12787,8 @@ class GhidraCacheDB:
                         row["source_term"],
                     ),
                 )
+                if int(getattr(invalidated, "rowcount", 0) or 0) > 0:
+                    trace_dataset_changed = True
                 existing = conn.execute(
                     """
                     SELECT is_valid, invalidated_at, invalidation_reason, superseded_by,
@@ -8812,8 +12815,20 @@ class GhidraCacheDB:
                 superseded_by = existing["superseded_by"] if existing else None
                 if existing is not None:
                     existing_payload_json = str(existing["payload_json"] or "")
+                    existing_compare_payload_json = _json_dumps(
+                        _stable_trace_fragment_compare_payload(
+                            str(row["fragment_kind"] or ""),
+                            _json_loads(existing_payload_json, None),
+                        )
+                    )
+                    incoming_compare_payload_json = _json_dumps(
+                        _stable_trace_fragment_compare_payload(
+                            str(row["fragment_kind"] or ""),
+                            row["payload"],
+                        )
+                    )
                     if (
-                        existing_payload_json == payload_json
+                        existing_compare_payload_json == incoming_compare_payload_json
                         and float(existing["confidence"] or 0.0) == float(row["confidence"])
                         and int(existing["reducer_priority"] or 0) == int(row["reducer_priority"])
                         and int(existing["schema_version"] or 0) == int(row["schema_version"])
@@ -8870,15 +12885,20 @@ class GhidraCacheDB:
                         now,
                     ),
                 )
+                trace_dataset_changed = True
             self._prune_trace_retention(
                 conn,
                 trace_scopes=[trace_scope],
             )
+        if not trace_dataset_changed:
+            return False
         rebuild_span = self.timing_span_factory("reducerMaterializerRebuild") if callable(self.timing_span_factory) else nullcontext()
         with rebuild_span:
             self.rebuild_trace_views(trace_scopes=[trace_scope])
+        return True
 
     def rebuild_trace_views(self, trace_scopes: list[str] | None = None) -> None:
+        post_materialization_scopes: set[tuple[str, str, str]] = set()
         with self.connect() as conn:
             _normalize_live_trace_fragment_payloads(conn)
             requested_scopes = sorted({str(scope or "").strip() for scope in (trace_scopes or []) if str(scope or "").strip()})
@@ -9586,6 +13606,7 @@ class GhidraCacheDB:
                         datetime.now().isoformat(),
                     ),
                 )
+                post_materialization_scopes.add((project_name, project_file, trace_scope))
 
             if scoped_refresh:
                 current_trace_group_keys = set(trace_groups.keys())
@@ -9605,7 +13626,12 @@ class GhidraCacheDB:
                         """,
                         key,
                     )
-            self._prune_trace_retention(conn, trace_scopes=requested_scopes if scoped_refresh else None)
+                self._prune_trace_retention(conn, trace_scopes=requested_scopes if scoped_refresh else None)
+        for project_name, project_file, trace_scope in sorted(post_materialization_scopes):
+            try:
+                self.refresh_scope_materializations(project_name, project_file, trace_scope)
+            except Exception:
+                continue
 
     def _prune_trace_retention(
         self,
@@ -10062,13 +14088,78 @@ class GhidraCacheDB:
             )
         return results
 
+    def list_latest_materialized_acquisition_diagnostics_for_scope(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        *,
+        request_signature: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        request_signature = str(request_signature or "").strip()
+        query = """
+            SELECT *
+            FROM materialized_acquisition_diagnostics_views
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+        """
+        params: list[Any] = [project_name, project_file, trace_scope]
+        if request_signature:
+            query += " AND request_signature = ?"
+            params.append(request_signature)
+        query += " ORDER BY built_at DESC, acquisition_term ASC"
+        with self.connect() as conn:
+            rows = conn.execute(query, tuple(params)).fetchall()
+        results: list[dict[str, Any]] = []
+        stale_updates: list[tuple[str, str, str, dict[str, Any]]] = []
+        for row in rows:
+            payload = dict(_json_loads(row["payload_json"], {}))
+            payload, changed = self._normalize_acquisition_diagnostic_payload(payload, str(row["built_at"] or ""))
+            if changed:
+                stale_updates.append(
+                    (
+                        str(row["request_signature"] or ""),
+                        str(row["trace_scope"] or ""),
+                        str(row["acquisition_term"] or ""),
+                        payload,
+                    )
+                )
+            results.append(
+                {
+                    "requestSignature": str(row["request_signature"] or ""),
+                    "traceScope": str(row["trace_scope"] or ""),
+                    "acquisitionTerm": str(row["acquisition_term"] or ""),
+                    "payload": payload,
+                    "provenance": _json_loads(row["provenance_json"], {}),
+                    "reducerVersion": str(row["reducer_version"] or ""),
+                    "builtAt": str(row["built_at"] or ""),
+                }
+            )
+        for stale_request_signature, stale_trace_scope, stale_term, stale_payload in stale_updates:
+            self.upsert_materialized_acquisition_diagnostic_view(
+                project_name,
+                project_file,
+                stale_request_signature,
+                stale_trace_scope,
+                stale_term,
+                stale_payload,
+            )
+        return results
+
     def find_contract_term_evidence(
         self,
         project_name: str,
         project_file: str,
         term: str,
+        *,
+        sync_jobs: bool = True,
     ) -> dict[str, Any]:
-        return self._find_contract_term_evidence(project_name, project_file, term)
+        return self._find_contract_term_evidence(
+            project_name,
+            project_file,
+            term,
+            sync_jobs=sync_jobs,
+        )
 
     @staticmethod
     def _parse_missing_db_term_blocker(reason: str) -> tuple[str, list[str]]:
@@ -10667,7 +14758,8 @@ class GhidraCacheDB:
         selected_blockers: list[dict[str, Any]] = []
         for row in contract_rows:
             payload = dict(row.get("payload") or {})
-            blocked_reasons = dict(payload.get("blockedInputReasons") or {})
+            core_payload = dict(payload.get("core") or payload)
+            blocked_reasons = dict(core_payload.get("blockedInputReasons") or {})
             for lane_id, reason in blocked_reasons.items():
                 parsed_lane_id, missing_terms = self._parse_missing_db_term_blocker(str(reason or ""))
                 if not missing_terms:
@@ -10678,9 +14770,9 @@ class GhidraCacheDB:
                     [
                         str(parsed_lane_id or lane_id),
                         *missing_terms,
-                        str(payload.get("subjectId") or ""),
-                        str(payload.get("subjectLabel") or ""),
-                        *[str(value) for value in (payload.get("targetAliases") or []) if str(value).strip()],
+                        str(core_payload.get("subjectId") or payload.get("subjectId") or ""),
+                        str(core_payload.get("subjectLabel") or payload.get("subjectLabel") or ""),
+                        *[str(value) for value in (core_payload.get("targetAliases") or payload.get("targetAliases") or []) if str(value).strip()],
                     ]
                 )
                 normalized_blocker_terms = {
@@ -10706,9 +14798,9 @@ class GhidraCacheDB:
                 selected_blockers.append(
                     {
                         "traceScope": str(row.get("traceScope") or ""),
-                        "subjectId": str(row.get("subjectId") or payload.get("subjectId") or ""),
-                        "subjectKind": str(payload.get("subjectKind") or ""),
-                        "subjectLabel": str(payload.get("subjectLabel") or payload.get("subjectId") or ""),
+                        "subjectId": str(row.get("subjectId") or core_payload.get("subjectId") or payload.get("subjectId") or ""),
+                        "subjectKind": str(core_payload.get("subjectKind") or payload.get("subjectKind") or ""),
+                        "subjectLabel": str(core_payload.get("subjectLabel") or payload.get("subjectLabel") or payload.get("subjectId") or ""),
                         "laneId": str(parsed_lane_id or lane_id),
                         "missingTerms": missing_terms,
                         "requestedTerms": matched_missing_terms or missing_terms,
@@ -11198,6 +15290,47 @@ class GhidraCacheDB:
             for row in rows
         ]
 
+    def list_latest_materialized_subject_contract_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        query = """
+            SELECT mscv.*
+            FROM materialized_subject_contract_views AS mscv
+            INNER JOIN (
+                SELECT trace_scope, subject_id, MAX(built_at) AS max_built_at
+                FROM materialized_subject_contract_views
+                WHERE project_name = ? AND project_file = ?
+                GROUP BY trace_scope, subject_id
+            ) AS latest
+              ON latest.trace_scope = mscv.trace_scope
+             AND latest.subject_id = mscv.subject_id
+             AND latest.max_built_at = mscv.built_at
+            WHERE mscv.project_name = ? AND mscv.project_file = ?
+        """
+        params: list[Any] = [project_name, project_file, project_name, project_file]
+        if trace_scope:
+            query += " AND mscv.trace_scope = ?"
+            params.append(trace_scope)
+        query += " ORDER BY mscv.trace_scope ASC, mscv.subject_id ASC"
+        with self.connect() as conn:
+            rows = conn.execute(query, tuple(params)).fetchall()
+        return [
+            {
+                "traceScope": str(row["trace_scope"]),
+                "subjectId": str(row["subject_id"]),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"]),
+                "builtAt": str(row["built_at"]),
+            }
+            for row in rows
+        ]
+
     def find_materialized_subject_contract_view(
         self,
         project_name: str,
@@ -11223,6 +15356,1585 @@ class GhidraCacheDB:
             "reducerVersion": str(row["reducer_version"]),
             "builtAt": str(row["built_at"]),
         }
+
+    def list_latest_materialized_entity_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        query = """
+            SELECT *
+            FROM materialized_entity_views
+            WHERE project_name = ? AND project_file = ?
+        """
+        params: list[Any] = [project_name, project_file]
+        if trace_scope:
+            query += " AND trace_scope = ?"
+            params.append(trace_scope)
+        query += " ORDER BY trace_scope ASC, entity_kind ASC, entity_id ASC"
+        with self.connect() as conn:
+            rows = conn.execute(query, tuple(params)).fetchall()
+        return [
+            {
+                "entityId": str(row["entity_id"]),
+                "entityKind": str(row["entity_kind"]),
+                "traceScope": str(row["trace_scope"]),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"]),
+                "builtAt": str(row["built_at"]),
+            }
+            for row in rows
+        ]
+
+    def upsert_materialized_entity_view(
+        self,
+        project_name: str,
+        project_file: str,
+        entity_id: str,
+        *,
+        entity_kind: str,
+        trace_scope: str,
+        payload: dict[str, Any] | None = None,
+        provenance: dict[str, Any] | None = None,
+        reducer_version: str = "materialized-entity-view-v1",
+    ) -> None:
+        built_at = datetime.now().isoformat(timespec="microseconds")
+        normalized_payload = dict(payload or {})
+        normalized_provenance = dict(provenance or {})
+        normalized_provenance.setdefault("payloadHash", _dependency_hash_payload(normalized_payload))
+        with self.connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO materialized_entity_views(
+                    project_name, project_file, entity_id, entity_kind, trace_scope,
+                    payload_json, provenance_json, reducer_version, built_at
+                ) VALUES(?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(project_name, project_file, entity_id) DO UPDATE SET
+                    entity_kind=excluded.entity_kind,
+                    trace_scope=excluded.trace_scope,
+                    payload_json=excluded.payload_json,
+                    provenance_json=excluded.provenance_json,
+                    reducer_version=excluded.reducer_version,
+                    built_at=excluded.built_at
+                """,
+                (
+                    project_name,
+                    project_file,
+                    str(entity_id or "").strip(),
+                    str(entity_kind or "").strip(),
+                    str(trace_scope or "").strip(),
+                    _json_dumps(normalized_payload),
+                    _json_dumps(normalized_provenance),
+                    reducer_version,
+                    built_at,
+                    ),
+                )
+
+    def list_latest_materialized_fact_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        query = """
+            SELECT *
+            FROM materialized_fact_views
+            WHERE project_name = ? AND project_file = ?
+        """
+        params: list[Any] = [project_name, project_file]
+        if trace_scope:
+            query += " AND trace_scope = ?"
+            params.append(trace_scope)
+        query += " ORDER BY trace_scope ASC, entity_id ASC, field_key ASC, fact_kind ASC, fact_value ASC"
+        with self.connect() as conn:
+            rows = conn.execute(query, tuple(params)).fetchall()
+        return [
+            {
+                "entityId": str(row["entity_id"]),
+                "traceScope": str(row["trace_scope"]),
+                "fieldKey": str(row["field_key"]),
+                "factKind": str(row["fact_kind"]),
+                "factValue": str(row["fact_value"]),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"]),
+                "builtAt": str(row["built_at"]),
+            }
+            for row in rows
+        ]
+
+    def replace_materialized_fact_views(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        fact_rows: list[dict[str, Any]],
+        *,
+        reducer_version: str = "materialized-fact-view-v1",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        built_at = datetime.now().isoformat(timespec="microseconds")
+        deduped_rows: list[dict[str, Any]] = []
+        seen_keys: set[tuple[str, str, str, str]] = set()
+        for row in fact_rows:
+            key = (
+                str(row.get("entityId") or "").strip(),
+                str(row.get("fieldKey") or "").strip(),
+                str(row.get("factKind") or "").strip(),
+                str(row.get("factValue") or "").strip(),
+            )
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+            deduped_rows.append(dict(row))
+        with self.connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM materialized_fact_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                """,
+                (project_name, project_file, trace_scope),
+            )
+            for row in deduped_rows:
+                payload = dict(row.get("payload") or {})
+                provenance = {
+                    "payloadHash": _dependency_hash_payload(payload),
+                    "traceScope": trace_scope,
+                    "entityId": str(row.get("entityId") or "").strip(),
+                    "fieldKey": str(row.get("fieldKey") or "").strip(),
+                    "factKind": str(row.get("factKind") or "").strip(),
+                }
+                conn.execute(
+                    """
+                    INSERT INTO materialized_fact_views(
+                        project_name, project_file, entity_id, trace_scope, field_key, fact_kind, fact_value,
+                        payload_json, provenance_json, reducer_version, built_at
+                    ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                    """,
+                    (
+                        project_name,
+                        project_file,
+                        str(row.get("entityId") or "").strip(),
+                        trace_scope,
+                        str(row.get("fieldKey") or "").strip(),
+                        str(row.get("factKind") or "").strip(),
+                        str(row.get("factValue") or "").strip(),
+                        _json_dumps(payload),
+                        _json_dumps(provenance),
+                        reducer_version,
+                        built_at,
+                    ),
+                )
+
+    def replace_materialized_relation_views(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        relation_rows: list[dict[str, Any]],
+        *,
+        reducer_version: str = "materialized-relation-view-v1",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        built_at = datetime.now().isoformat(timespec="microseconds")
+        deduped_rows: list[dict[str, Any]] = []
+        seen_keys: set[tuple[str, str, str, str]] = set()
+        for row in relation_rows:
+            key = (
+                str(row.get("sourceEntityId") or "").strip(),
+                str(row.get("fieldKey") or "").strip(),
+                str(row.get("relationKind") or "").strip(),
+                str(row.get("targetEntityId") or "").strip(),
+            )
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+            deduped_rows.append(dict(row))
+        with self.connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM materialized_relation_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                """,
+                (project_name, project_file, trace_scope),
+            )
+            for row in deduped_rows:
+                payload = dict(row.get("payload") or {})
+                provenance = {
+                    "payloadHash": _dependency_hash_payload(payload),
+                    "traceScope": trace_scope,
+                    "sourceEntityId": str(row.get("sourceEntityId") or "").strip(),
+                    "relationKind": str(row.get("relationKind") or "").strip(),
+                    "targetEntityId": str(row.get("targetEntityId") or "").strip(),
+                }
+                conn.execute(
+                    """
+                    INSERT INTO materialized_relation_views(
+                        project_name, project_file, source_entity_id, trace_scope, field_key, relation_kind, target_entity_id,
+                        payload_json, provenance_json, reducer_version, built_at
+                    ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                    """,
+                    (
+                        project_name,
+                        project_file,
+                        str(row.get("sourceEntityId") or "").strip(),
+                        trace_scope,
+                        str(row.get("fieldKey") or "").strip(),
+                        str(row.get("relationKind") or "").strip(),
+                        str(row.get("targetEntityId") or "").strip(),
+                        _json_dumps(payload),
+                        _json_dumps(provenance),
+                        reducer_version,
+                        built_at,
+                    ),
+                )
+
+    def list_latest_materialized_relation_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        query = """
+            SELECT *
+            FROM materialized_relation_views
+            WHERE project_name = ? AND project_file = ?
+        """
+        params: list[Any] = [project_name, project_file]
+        if trace_scope:
+            query += " AND trace_scope = ?"
+            params.append(trace_scope)
+        query += " ORDER BY trace_scope ASC, source_entity_id ASC, field_key ASC, relation_kind ASC, target_entity_id ASC"
+        with self.connect() as conn:
+            rows = conn.execute(query, tuple(params)).fetchall()
+        return [
+            {
+                "sourceEntityId": str(row["source_entity_id"]),
+                "traceScope": str(row["trace_scope"]),
+                "fieldKey": str(row["field_key"]),
+                "relationKind": str(row["relation_kind"]),
+                "targetEntityId": str(row["target_entity_id"]),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"]),
+                "builtAt": str(row["built_at"]),
+            }
+            for row in rows
+        ]
+
+    def replace_materialized_gap_views(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        gap_rows: list[dict[str, Any]],
+        *,
+        reducer_version: str = "materialized-gap-view-v1",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        built_at = datetime.now().isoformat(timespec="microseconds")
+        deduped_rows: list[dict[str, Any]] = []
+        seen_keys: set[tuple[str, str, str]] = set()
+        for row in gap_rows:
+            key = (
+                str(row.get("entityId") or "").strip(),
+                str(row.get("fieldKey") or "").strip(),
+                str(row.get("gapKind") or "").strip(),
+            )
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+            deduped_rows.append(dict(row))
+        with self.connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM materialized_gap_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                """,
+                (project_name, project_file, trace_scope),
+            )
+            for row in deduped_rows:
+                payload = dict(row.get("payload") or {})
+                provenance = {
+                    "payloadHash": _dependency_hash_payload(payload),
+                    "traceScope": trace_scope,
+                    "entityId": str(row.get("entityId") or "").strip(),
+                    "fieldKey": str(row.get("fieldKey") or "").strip(),
+                    "gapKind": str(row.get("gapKind") or "").strip(),
+                }
+                conn.execute(
+                    """
+                    INSERT INTO materialized_gap_views(
+                        project_name, project_file, entity_id, trace_scope, field_key, gap_kind,
+                        payload_json, provenance_json, reducer_version, built_at
+                    ) VALUES(?,?,?,?,?,?,?,?,?,?)
+                    """,
+                    (
+                        project_name,
+                        project_file,
+                        str(row.get("entityId") or "").strip(),
+                        trace_scope,
+                        str(row.get("fieldKey") or "").strip(),
+                        str(row.get("gapKind") or "").strip(),
+                        _json_dumps(payload),
+                        _json_dumps(provenance),
+                        reducer_version,
+                        built_at,
+                    ),
+                )
+
+    def list_latest_materialized_gap_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        query = """
+            SELECT *
+            FROM materialized_gap_views
+            WHERE project_name = ? AND project_file = ?
+        """
+        params: list[Any] = [project_name, project_file]
+        if trace_scope:
+            query += " AND trace_scope = ?"
+            params.append(trace_scope)
+        query += " ORDER BY trace_scope ASC, entity_id ASC, field_key ASC, gap_kind ASC"
+        with self.connect() as conn:
+            rows = conn.execute(query, tuple(params)).fetchall()
+        return [
+            {
+                "entityId": str(row["entity_id"]),
+                "traceScope": str(row["trace_scope"]),
+                "fieldKey": str(row["field_key"]),
+                "gapKind": str(row["gap_kind"]),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"]),
+                "builtAt": str(row["built_at"]),
+            }
+            for row in rows
+        ]
+
+    def replace_materialized_boundary_views(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        boundary_rows: list[dict[str, Any]],
+        *,
+        reducer_version: str = "materialized-boundary-view-v1",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        built_at = datetime.now().isoformat(timespec="microseconds")
+        deduped_rows: list[dict[str, Any]] = []
+        seen_keys: set[tuple[str, str]] = set()
+        for row in boundary_rows:
+            key = (
+                str(row.get("subjectId") or "").strip(),
+                str(row.get("boundaryKind") or "").strip(),
+            )
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+            deduped_rows.append(dict(row))
+        with self.connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM materialized_boundary_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                """,
+                (project_name, project_file, trace_scope),
+            )
+            for row in deduped_rows:
+                payload = dict(row.get("payload") or {})
+                provenance = {
+                    "payloadHash": _dependency_hash_payload(payload),
+                    "traceScope": trace_scope,
+                    "subjectId": str(row.get("subjectId") or "").strip(),
+                    "boundaryKind": str(row.get("boundaryKind") or "").strip(),
+                    "verdict": str(row.get("verdict") or "").strip(),
+                }
+                conn.execute(
+                    """
+                    INSERT INTO materialized_boundary_views(
+                        project_name, project_file, trace_scope, subject_id, boundary_kind, verdict,
+                        payload_json, provenance_json, reducer_version, built_at
+                    ) VALUES(?,?,?,?,?,?,?,?,?,?)
+                    """,
+                    (
+                        project_name,
+                        project_file,
+                        trace_scope,
+                        str(row.get("subjectId") or "").strip(),
+                        str(row.get("boundaryKind") or "").strip(),
+                        str(row.get("verdict") or "").strip(),
+                        _json_dumps(payload),
+                        _json_dumps(provenance),
+                        reducer_version,
+                        built_at,
+                    ),
+                )
+
+    def list_latest_materialized_boundary_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        query = """
+            SELECT *
+            FROM materialized_boundary_views
+            WHERE project_name = ? AND project_file = ?
+        """
+        params: list[Any] = [project_name, project_file]
+        if trace_scope:
+            query += " AND trace_scope = ?"
+            params.append(trace_scope)
+        query += " ORDER BY trace_scope ASC, subject_id ASC, boundary_kind ASC"
+        with self.connect() as conn:
+            rows = conn.execute(query, tuple(params)).fetchall()
+        return [
+            {
+                "traceScope": str(row["trace_scope"]),
+                "subjectId": str(row["subject_id"]),
+                "boundaryKind": str(row["boundary_kind"]),
+                "verdict": str(row["verdict"]),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"]),
+                "builtAt": str(row["built_at"]),
+            }
+            for row in rows
+        ]
+
+    def publish_inferred_boundary_views(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        *,
+        upstream_signature: str,
+        boundary_rows: list[dict[str, Any]],
+    ) -> None:
+        self.replace_materialized_boundary_views(
+            project_name,
+            project_file,
+            trace_scope,
+            boundary_rows,
+        )
+        verdicts = _unique_strings(
+            [str(row.get("verdict") or "").strip() for row in list(boundary_rows or []) if str(row.get("verdict") or "").strip()]
+        )
+        self.upsert_materialization_stage_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            "boundary-model",
+            stage_status="materialized",
+            upstream_signature=upstream_signature,
+            payload={
+                "boundaryCount": len(list(boundary_rows or [])),
+                "verdicts": verdicts,
+            },
+            provenance={
+                "payloadHash": _dependency_hash_payload(
+                    {
+                        "boundaryCount": len(list(boundary_rows or [])),
+                        "verdicts": verdicts,
+                    }
+                ),
+                "reducer": "boundary-model-v1",
+            },
+            reducer_version="boundary-model-v1",
+        )
+
+    def publish_generic_mechanics_views(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        *,
+        upstream_signature: str,
+        generic_views: dict[str, list[dict[str, Any]]],
+    ) -> None:
+        for entity_row in list(generic_views.get("entities") or []):
+            self.upsert_materialized_entity_view(
+                project_name,
+                project_file,
+                str(entity_row.get("entityId") or "").strip(),
+                entity_kind=str(entity_row.get("entityKind") or "").strip(),
+                trace_scope=str(entity_row.get("traceScope") or trace_scope).strip(),
+                payload=dict(entity_row.get("payload") or {}),
+                provenance={
+                    "payloadHash": _dependency_hash_payload(dict(entity_row.get("payload") or {})),
+                    "subjectId": subject_id,
+                },
+            )
+        self.replace_materialized_fact_views(
+            project_name,
+            project_file,
+            trace_scope,
+            list(generic_views.get("facts") or []),
+        )
+        self.replace_materialized_relation_views(
+            project_name,
+            project_file,
+            trace_scope,
+            list(generic_views.get("relations") or []),
+        )
+        self.replace_materialized_gap_views(
+            project_name,
+            project_file,
+            trace_scope,
+            list(generic_views.get("gaps") or []),
+        )
+        self.upsert_materialization_stage_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            "generic-mechanics-model",
+            stage_status="materialized",
+            upstream_signature=upstream_signature,
+            payload={
+                "entityCount": len(list(generic_views.get("entities") or [])),
+                "factCount": len(list(generic_views.get("facts") or [])),
+                "relationCount": len(list(generic_views.get("relations") or [])),
+                "gapCount": len(list(generic_views.get("gaps") or [])),
+            },
+            provenance={
+                "payloadHash": _dependency_hash_payload(generic_views),
+                "reducer": "generic-mechanics-model-v1",
+            },
+            reducer_version="generic-mechanics-model-v1",
+        )
+
+    def backfill_generic_mechanics_views_from_subject_contracts(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        contract_rows = self.list_latest_materialized_subject_contract_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+        refreshed: list[dict[str, Any]] = []
+        for row in contract_rows:
+            scope = str(row.get("traceScope") or "").strip()
+            subject_id = str(row.get("subjectId") or "").strip()
+            payload = dict(row.get("payload") or {})
+            provenance = dict(row.get("provenance") or {})
+            inputs = dict(provenance.get("inputs") or {})
+            upstream_signature = str(inputs.get("dependencySignature") or "").strip()
+            stage = self.find_materialization_stage_view(
+                project_name,
+                project_file,
+                scope,
+                subject_id,
+                "generic-mechanics-model",
+            )
+            if stage and upstream_signature and str(stage.get("upstreamSignature") or "").strip() == upstream_signature:
+                continue
+            generic_views = _derive_generic_mechanics_views_from_subject_contract(payload)
+            self.publish_generic_mechanics_views(
+                project_name,
+                project_file,
+                scope,
+                subject_id,
+                upstream_signature=upstream_signature or f"legacy-contract-backfill:{str(row.get('builtAt') or '')}",
+                generic_views=generic_views,
+            )
+            refreshed.append(
+                {
+                    "traceScope": scope,
+                    "subjectId": subject_id,
+                    "entityCount": len(list(generic_views.get("entities") or [])),
+                    "factCount": len(list(generic_views.get("facts") or [])),
+                    "relationCount": len(list(generic_views.get("relations") or [])),
+                    "gapCount": len(list(generic_views.get("gaps") or [])),
+                }
+            )
+        return refreshed
+
+    def backfill_shard_owner_family_views_from_live_fragments(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> dict[str, Any] | None:
+        trace_scope = "shard-owner-family-boundary"
+        subject_id = "family-graph:shards-owner-family"
+        semantic_scope_fragment = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "semantic_scope_fragment",
+            "shard-owned-state:upgradeinfolist-population",
+        ) or {}
+        family_graph_fragment = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "family_graph_fragment",
+            "family-graph:shard-owned-state",
+        ) or {}
+        execution_plan_fragment = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "execution_plan_fragment",
+            "target-execution-plan:shard-owned-state-upgradeinfolist-population",
+        ) or {}
+        semantic_scope_payload = dict(semantic_scope_fragment.get("payload") or {})
+        family_graph_payload = dict(family_graph_fragment.get("payload") or {})
+        execution_plan_payload = dict(execution_plan_fragment.get("payload") or {})
+        fragment_inputs = _derive_shard_owner_family_live_fragment_inputs(
+            semantic_scope_payload=semantic_scope_payload,
+            family_graph_payload=family_graph_payload,
+            execution_plan_payload=execution_plan_payload,
+        )
+        if not fragment_inputs:
+            return None
+        owned_state_boundary = next(
+            (
+                row
+                for row in self.list_latest_materialized_boundary_views(
+                    project_name,
+                    project_file,
+                    trace_scope="shard-owned-state-upgradeinfolist-population",
+                )
+                if str(row.get("subjectId") or "").strip() == "shard-owned-state-upgradeinfolist-population"
+                and str(row.get("boundaryKind") or "").strip() == "subject-boundary"
+            ),
+            None,
+        )
+        owned_state_metadata = self.find_materialized_subject_contract_view(
+            project_name,
+            project_file,
+            "shard-owned-state-upgradeinfolist-population",
+            "shard-owned-state-upgradeinfolist-population",
+        )
+        next_seam_id = ""
+        blocked_input_reason = ""
+        if isinstance(owned_state_boundary, dict):
+            payload = dict(owned_state_boundary.get("payload") or {})
+            next_seam_id = str(payload.get("nextSeamId") or "").strip()
+            blocked_input_reason = str(payload.get("blockedInputReason") or "").strip()
+        if not next_seam_id and isinstance(owned_state_metadata, dict):
+            next_seam = dict((owned_state_metadata.get("nextSeam") or {}))
+            next_seam_id = str(next_seam.get("id") or "").strip()
+            blocked_input_reason = blocked_input_reason or str(owned_state_metadata.get("blockedInputReason") or "").strip()
+        generic_views, boundary_rows = _derive_shard_owner_family_generic_views(
+            trace_scope=trace_scope,
+            subject_id=subject_id,
+            fragment_inputs=fragment_inputs,
+            next_seam_id=next_seam_id or "local-runtime-population-bridge",
+            blocked_input_reason=blocked_input_reason,
+        )
+        upstream_signature = _dependency_hash_payload(
+            {
+                "semanticScope": semantic_scope_fragment,
+                "familyGraph": family_graph_fragment,
+                "executionPlan": execution_plan_fragment,
+                "fragmentInputs": fragment_inputs,
+                "nextSeamId": next_seam_id,
+                "blockedInputReason": blocked_input_reason,
+            }
+        )
+        self.publish_generic_mechanics_views(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            upstream_signature=upstream_signature,
+            generic_views=generic_views,
+        )
+        self.publish_inferred_boundary_views(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            upstream_signature=upstream_signature,
+            boundary_rows=boundary_rows,
+        )
+        return {
+            "traceScope": trace_scope,
+            "subjectId": subject_id,
+            "factCount": len(list(generic_views.get("facts") or [])),
+            "gapCount": len(list(generic_views.get("gaps") or [])),
+            "boundaryCount": len(boundary_rows),
+            "nextSeamId": next_seam_id or "local-runtime-population-bridge",
+        }
+
+    def backfill_shard_milestone_cluster_views_from_live_fragments(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> list[dict[str, Any]]:
+        owner_family_fact_rows = self.list_latest_materialized_fact_views(
+            project_name,
+            project_file,
+            trace_scope="shard-owner-family-boundary",
+        )
+        owned_state_fact_rows = self.list_latest_materialized_fact_views(
+            project_name,
+            project_file,
+            trace_scope="shard-owned-state-upgradeinfolist-population",
+        )
+        cost_fact_rows = self.list_latest_materialized_fact_views(
+            project_name,
+            project_file,
+            trace_scope="shard-cost-su0-structure",
+        )
+        if not owner_family_fact_rows or not cost_fact_rows:
+            return []
+        fragment_inputs = _derive_shard_milestone_cluster_live_inputs(
+            owner_family_fact_rows=owner_family_fact_rows,
+            owned_state_fact_rows=owned_state_fact_rows,
+            cost_fact_rows=cost_fact_rows,
+        )
+        owner_family_boundary = next(
+            (
+                row
+                for row in self.list_latest_materialized_boundary_views(
+                    project_name,
+                    project_file,
+                    trace_scope="shard-owner-family-boundary",
+                )
+                if str(row.get("subjectId") or "").strip() == "family-graph:shards-owner-family"
+                and str(row.get("boundaryKind") or "").strip() == "subject-boundary"
+            ),
+            None,
+        )
+        owner_family_boundary_payload = dict((owner_family_boundary or {}).get("payload") or {})
+        next_seam_id = str(owner_family_boundary_payload.get("nextSeamId") or "").strip()
+        blocked_input_reason = str(owner_family_boundary_payload.get("blockedInputReason") or "").strip()
+        if not next_seam_id:
+            owned_state_boundary = next(
+                (
+                    row
+                    for row in self.list_latest_materialized_boundary_views(
+                        project_name,
+                        project_file,
+                        trace_scope="shard-owned-state-upgradeinfolist-population",
+                    )
+                    if str(row.get("subjectId") or "").strip() == "shard-owned-state-upgradeinfolist-population"
+                    and str(row.get("boundaryKind") or "").strip() == "subject-boundary"
+                ),
+                None,
+            )
+            owned_state_boundary_payload = dict((owned_state_boundary or {}).get("payload") or {})
+            next_seam_id = str(owned_state_boundary_payload.get("nextSeamId") or "").strip()
+            blocked_input_reason = blocked_input_reason or str(owned_state_boundary_payload.get("blockedInputReason") or "").strip()
+        subject_specs = [
+            (
+                "shard-milestone-payload-boundary",
+                "family-graph:shards-milestone-payload",
+                "Shard milestone payload",
+                "milestone-payload",
+            ),
+            (
+                "shard-milestone-row-model-boundary",
+                "family-graph:shards-milestone-row-model",
+                "Shard milestone row model",
+                "row-model",
+            ),
+            (
+                "shard-milestone-row-shell-boundary",
+                "family-graph:shards-milestone-row-shell",
+                "Shard milestone row shell",
+                "row-shell",
+            ),
+            (
+                "shard-milestone-row-alignment-boundary",
+                "family-graph:shards-milestone-row-alignment",
+                "Shard milestone row alignment",
+                "row-alignment",
+            ),
+        ]
+        refreshed: list[dict[str, Any]] = []
+        for trace_scope, subject_id, subject_label, cluster_kind in subject_specs:
+            generic_views, boundary_rows = _derive_shard_milestone_cluster_generic_views(
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                subject_label=subject_label,
+                cluster_kind=cluster_kind,
+                fragment_inputs=fragment_inputs,
+                next_seam_id=next_seam_id or "local-runtime-population-bridge",
+                blocked_input_reason=blocked_input_reason,
+            )
+            upstream_signature = _dependency_hash_payload(
+                {
+                    "ownerFamilyFacts": owner_family_fact_rows,
+                    "ownedStateFacts": owned_state_fact_rows,
+                    "costFacts": cost_fact_rows,
+                    "fragmentInputs": fragment_inputs,
+                    "nextSeamId": next_seam_id,
+                    "blockedInputReason": blocked_input_reason,
+                    "clusterKind": cluster_kind,
+                }
+            )
+            self.publish_generic_mechanics_views(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                upstream_signature=upstream_signature,
+                generic_views=generic_views,
+            )
+            self.publish_inferred_boundary_views(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                upstream_signature=upstream_signature,
+                boundary_rows=boundary_rows,
+            )
+            refreshed.append(
+                {
+                    "traceScope": trace_scope,
+                    "subjectId": subject_id,
+                    "factCount": len(list(generic_views.get("facts") or [])),
+                    "gapCount": len(list(generic_views.get("gaps") or [])),
+                    "boundaryCount": len(boundary_rows),
+                    "nextSeamId": next_seam_id or "local-runtime-population-bridge",
+                }
+            )
+        return refreshed
+
+    def backfill_shard_bonus_cluster_views_from_live_fragments(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> list[dict[str, Any]]:
+        owner_family_fact_rows = self.list_latest_materialized_fact_views(
+            project_name,
+            project_file,
+            trace_scope="shard-owner-family-boundary",
+        )
+        if not owner_family_fact_rows:
+            return []
+        with self.connect() as conn:
+            native_trace_payload = _load_latest_trace_fragment_payload(
+                conn,
+                "shard-owned-state-upgradeinfolist-population",
+                "nativeTrace",
+            ) or {}
+            cost_surfaces_payload = _load_latest_trace_fragment_payload(
+                conn,
+                "shard-cost-su0-structure",
+                "surfaces",
+            ) or {}
+            cost_ui_payload = _load_latest_trace_fragment_payload(
+                conn,
+                "shard-cost-su0-structure",
+                "ui_binding_fragment",
+            ) or {}
+        native_terms = _collect_string_terms(native_trace_payload)
+        cost_terms = _collect_string_terms(cost_surfaces_payload) + _collect_string_terms(cost_ui_payload)
+        if not native_terms and not cost_terms:
+            return []
+        fragment_inputs = _derive_shard_bonus_trace_inputs(
+            native_terms=native_terms,
+            cost_terms=cost_terms,
+            owner_family_fact_rows=owner_family_fact_rows,
+        )
+        owner_family_boundary = next(
+            (
+                row
+                for row in self.list_latest_materialized_boundary_views(
+                    project_name,
+                    project_file,
+                    trace_scope="shard-owner-family-boundary",
+                )
+                if str(row.get("subjectId") or "").strip() == "family-graph:shards-owner-family"
+                and str(row.get("boundaryKind") or "").strip() == "subject-boundary"
+            ),
+            None,
+        )
+        owner_family_boundary_payload = dict((owner_family_boundary or {}).get("payload") or {})
+        next_seam_id = str(owner_family_boundary_payload.get("nextSeamId") or "").strip() or "local-runtime-population-bridge"
+        blocked_input_reason = str(owner_family_boundary_payload.get("blockedInputReason") or "").strip()
+        subject_specs = [
+            (
+                "shard-finalsu-bonus-boundary",
+                "family-graph:shards-finalsu-bonus",
+                "Shard FinalSU bonus",
+                "finalsu-bonus",
+            ),
+            (
+                "shard-milestone-title-effect-boundary",
+                "family-graph:shards-milestone-title-effect",
+                "Shard milestone title effect",
+                "title-effect",
+            ),
+            (
+                "shard-effect-text-handler-boundary",
+                "family-graph:shards-effect-text-handler",
+                "Shard effect text handler",
+                "effect-text-handler",
+            ),
+        ]
+        refreshed: list[dict[str, Any]] = []
+        for trace_scope, subject_id, subject_label, cluster_kind in subject_specs:
+            generic_views, boundary_rows = _derive_shard_bonus_cluster_generic_views(
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                subject_label=subject_label,
+                cluster_kind=cluster_kind,
+                fragment_inputs=fragment_inputs,
+                next_seam_id=next_seam_id,
+                blocked_input_reason=blocked_input_reason,
+            )
+            upstream_signature = _dependency_hash_payload(
+                {
+                    "ownerFamilyFacts": owner_family_fact_rows,
+                    "nativeTraceTerms": native_terms,
+                    "costTerms": cost_terms,
+                    "fragmentInputs": fragment_inputs,
+                    "nextSeamId": next_seam_id,
+                    "blockedInputReason": blocked_input_reason,
+                    "clusterKind": cluster_kind,
+                }
+            )
+            self.publish_generic_mechanics_views(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                upstream_signature=upstream_signature,
+                generic_views=generic_views,
+            )
+            self.publish_inferred_boundary_views(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                upstream_signature=upstream_signature,
+                boundary_rows=boundary_rows,
+            )
+            refreshed.append(
+                {
+                    "traceScope": trace_scope,
+                    "subjectId": subject_id,
+                    "factCount": len(list(generic_views.get("facts") or [])),
+                    "gapCount": len(list(generic_views.get("gaps") or [])),
+                    "boundaryCount": len(boundary_rows),
+                    "nextSeamId": next_seam_id,
+                }
+            )
+        return refreshed
+
+    def backfill_multiverse_ui_cluster_views_from_live_fragments(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> list[dict[str, Any]]:
+        save_owner_fact_rows = self.list_latest_materialized_fact_views(
+            project_name,
+            project_file,
+            trace_scope="multiverse-market-save-owner-boundary",
+        )
+        if not save_owner_fact_rows:
+            return []
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT payload_json
+                FROM trace_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND is_valid = 1
+                ORDER BY created_at DESC
+                """,
+                (project_name, project_file, "multiverse-market-save-owner-boundary"),
+            ).fetchall()
+        trace_payloads = [_json_loads(str(row["payload_json"] or ""), {}) for row in rows]
+        raw_trace_text = "\n".join(str(row["payload_json"] or "") for row in rows)
+        trace_terms = _unique_strings(
+            [
+                term
+                for payload in trace_payloads
+                for term in _collect_string_terms(payload)
+            ]
+        )
+        if not trace_terms:
+            return []
+        existing_typed_owner_fact_rows = self.list_latest_materialized_fact_views(
+            project_name,
+            project_file,
+            trace_scope="multiverse-market-typed-owner-boundary",
+        )
+        fragment_inputs = _derive_multiverse_ui_cluster_live_inputs(
+            trace_terms=trace_terms,
+            raw_trace_text=raw_trace_text,
+            save_owner_fact_rows=save_owner_fact_rows,
+        )
+        fragment_inputs = _augment_fragment_inputs_with_structured_claim_facts(
+            fragment_inputs,
+            existing_typed_owner_fact_rows,
+            exact_fact_kind="typed-claim",
+            candidate_fact_kind="typed-claim-candidate",
+            exact_key="typedOwnerClaimTerms",
+            candidate_key="typedOwnerClaimCandidates",
+        )
+        graph_terms: list[str] = []
+        for claim_value in list(fragment_inputs.get("typedOwnerClaimCandidates") or []):
+            claim_text = str(claim_value or "").strip()
+            if "." not in claim_text:
+                continue
+            host_name, field_name = [segment.strip() for segment in claim_text.split(".", 1)]
+            if host_name:
+                graph_terms.append(host_name)
+            if field_name:
+                graph_terms.append(field_name)
+        graph_hits_by_term = {
+            str(term).strip().lower(): self.find_graph_backfill(project_name, project_file, str(term).strip())
+            for term in _unique_strings(graph_terms)
+            if str(term).strip()
+        }
+        graph_backed_claim_terms = _promote_graph_backed_structured_claim_terms(
+            list(fragment_inputs.get("typedOwnerClaimCandidates") or []),
+            graph_hits_by_term,
+        )
+        fragment_inputs["typedOwnerClaimTerms"] = _unique_strings(
+            [
+                *[str(value) for value in (fragment_inputs.get("typedOwnerClaimTerms") or []) if str(value).strip()],
+                *graph_backed_claim_terms,
+            ]
+        )
+        save_owner_boundary = next(
+            (
+                row
+                for row in self.list_latest_materialized_boundary_views(
+                    project_name,
+                    project_file,
+                    trace_scope="multiverse-market-save-owner-boundary",
+                )
+                if str(row.get("subjectId") or "").strip() == "multiverse-market-save-owner-boundary"
+                and str(row.get("boundaryKind") or "").strip() == "subject-boundary"
+            ),
+            None,
+        )
+        save_owner_boundary_payload = dict((save_owner_boundary or {}).get("payload") or {})
+        next_seam_id = str(save_owner_boundary_payload.get("nextSeamId") or "").strip() or "typed-market-field-recovery"
+        blocked_input_reason = str(save_owner_boundary_payload.get("blockedInputReason") or "").strip()
+        subject_specs = [
+            (
+                "multiverse-market-metadata-neighborhood",
+                "family-graph:multiverse-market-metadata-neighborhood",
+                "Multiverse market metadata neighborhood",
+                "metadata-neighborhood",
+            ),
+            (
+                "multiverse-market-typed-owner-boundary",
+                "family-graph:multiverse-market-typed-owner",
+                "Multiverse market typed owner",
+                "typed-owner",
+            ),
+            (
+                "multiverse-market-row-text-boundary",
+                "family-graph:multiverse-market-row-text",
+                "Multiverse market row text",
+                "row-text",
+            ),
+            (
+                "multiverse-market-action-shell-boundary",
+                "family-graph:multiverse-market-action-shell",
+                "Multiverse market action shell",
+                "action-shell",
+            ),
+            (
+                "multiverse-market-owner-family-boundary",
+                "family-graph:multiverse-market-owner-family",
+                "Multiverse market owner family",
+                "owner-family",
+            ),
+            (
+                "multiverse-market-prefab-remap-boundary",
+                "family-graph:multiverse-market-prefab-remap",
+                "Multiverse market prefab remap",
+                "prefab-remap",
+            ),
+            (
+                "multiverse-market-canonical-import-boundary",
+                "family-graph:multiverse-market-canonical-import",
+                "Multiverse market canonical import",
+                "canonical-import",
+            ),
+            (
+                "multiverse-market-broad-row-remap-boundary",
+                "family-graph:multiverse-market-broad-row-remap",
+                "Multiverse market broad row remap",
+                "broad-row-remap",
+            ),
+        ]
+        refreshed: list[dict[str, Any]] = []
+        for trace_scope, subject_id, subject_label, cluster_kind in subject_specs:
+            generic_views, boundary_rows = _derive_multiverse_ui_cluster_generic_views(
+                trace_scope=trace_scope,
+                subject_id=subject_id,
+                subject_label=subject_label,
+                cluster_kind=cluster_kind,
+                fragment_inputs=fragment_inputs,
+                next_seam_id=next_seam_id,
+                blocked_input_reason=blocked_input_reason,
+            )
+            upstream_signature = _dependency_hash_payload(
+                {
+                    "saveOwnerFacts": save_owner_fact_rows,
+                    "traceTerms": trace_terms,
+                    "fragmentInputs": fragment_inputs,
+                    "nextSeamId": next_seam_id,
+                    "blockedInputReason": blocked_input_reason,
+                    "clusterKind": cluster_kind,
+                }
+            )
+            self.publish_generic_mechanics_views(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                upstream_signature=upstream_signature,
+                generic_views=generic_views,
+            )
+            self.publish_inferred_boundary_views(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                upstream_signature=upstream_signature,
+                boundary_rows=boundary_rows,
+            )
+            refreshed.append(
+                {
+                    "traceScope": trace_scope,
+                    "subjectId": subject_id,
+                    "factCount": len(list(generic_views.get("facts") or [])),
+                    "gapCount": len(list(generic_views.get("gaps") or [])),
+                    "boundaryCount": len(boundary_rows),
+                    "nextSeamId": next_seam_id,
+                }
+            )
+        return refreshed
+
+    def backfill_inferred_boundary_views_from_subject_contracts(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        contract_rows = self.list_latest_materialized_subject_contract_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+        refreshed: list[dict[str, Any]] = []
+        for row in contract_rows:
+            scope = str(row.get("traceScope") or "").strip()
+            subject_id = str(row.get("subjectId") or "").strip()
+            payload = dict(row.get("payload") or {})
+            if not scope or not subject_id:
+                continue
+            generic_views = {
+                "facts": self.list_latest_materialized_fact_views(project_name, project_file, trace_scope=scope),
+                "gaps": self.list_latest_materialized_gap_views(project_name, project_file, trace_scope=scope),
+            }
+            boundary_rows = _derive_boundary_views_from_subject_payload(
+                scope,
+                payload,
+                generic_views,
+            )
+            if not boundary_rows:
+                continue
+            provenance = dict(row.get("provenance") or {})
+            inputs = dict(provenance.get("inputs") or {})
+            upstream_signature = str(inputs.get("dependencySignature") or "").strip() or f"legacy-boundary-backfill:{str(row.get('builtAt') or '')}"
+            self.publish_inferred_boundary_views(
+                project_name,
+                project_file,
+                scope,
+                subject_id,
+                upstream_signature=upstream_signature,
+                boundary_rows=boundary_rows,
+            )
+            refreshed.append(
+                {
+                    "traceScope": scope,
+                    "subjectId": subject_id,
+                    "boundaryCount": len(boundary_rows),
+                    "verdicts": _unique_strings([str(item.get("verdict") or "").strip() for item in boundary_rows]),
+                }
+            )
+        return refreshed
+
+    def reconstruct_subject_row_details_from_generic_views(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        *,
+        upstream_signature: str = "",
+    ) -> dict[str, dict[str, Any]]:
+        subject_id = str(subject_id or "").strip()
+        trace_scope = str(trace_scope or "").strip()
+        if not subject_id or not trace_scope:
+            return {}
+        if upstream_signature:
+            generic_stage = self.find_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "generic-mechanics-model",
+            )
+            if not generic_stage or str(generic_stage.get("upstreamSignature") or "").strip() != str(upstream_signature).strip():
+                return {}
+        return _reconstruct_row_details_from_generic_mechanics(
+            subject_id,
+            self.list_latest_materialized_entity_views(project_name, project_file, trace_scope=trace_scope),
+            self.list_latest_materialized_fact_views(project_name, project_file, trace_scope=trace_scope),
+            self.list_latest_materialized_relation_views(project_name, project_file, trace_scope=trace_scope),
+            self.list_latest_materialized_gap_views(project_name, project_file, trace_scope=trace_scope),
+        )
+
+    def find_materialization_stage_view(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        stage_kind: str,
+    ) -> dict[str, Any] | None:
+        with self.connect() as conn:
+            row = conn.execute(
+                """
+                SELECT * FROM materialization_stage_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ? AND stage_kind = ?
+                """,
+                (project_name, project_file, trace_scope, subject_id, stage_kind),
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "traceScope": str(row["trace_scope"]),
+            "subjectId": str(row["subject_id"]),
+            "stageKind": str(row["stage_kind"]),
+            "stageStatus": str(row["stage_status"]),
+            "upstreamSignature": str(row["upstream_signature"]),
+            "payload": _json_loads(row["payload_json"], {}),
+            "provenance": _json_loads(row["provenance_json"], {}),
+            "reducerVersion": str(row["reducer_version"]),
+            "builtAt": str(row["built_at"]),
+        }
+
+    def list_latest_materialization_stage_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        query = """
+            SELECT *
+            FROM materialization_stage_views
+            WHERE project_name = ? AND project_file = ?
+        """
+        params: list[Any] = [project_name, project_file]
+        if trace_scope:
+            query += " AND trace_scope = ?"
+            params.append(trace_scope)
+        query += " ORDER BY built_at DESC, trace_scope ASC, subject_id ASC, stage_kind ASC"
+        with self.connect() as conn:
+            rows = conn.execute(query, tuple(params)).fetchall()
+        return [
+            {
+                "traceScope": str(row["trace_scope"]),
+                "subjectId": str(row["subject_id"]),
+                "stageKind": str(row["stage_kind"]),
+                "stageStatus": str(row["stage_status"]),
+                "upstreamSignature": str(row["upstream_signature"]),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"]),
+                "builtAt": str(row["built_at"]),
+            }
+            for row in rows
+        ]
+
+    def upsert_materialization_stage_view(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        stage_kind: str,
+        *,
+        stage_status: str,
+        upstream_signature: str,
+        payload: dict[str, Any] | None = None,
+        provenance: dict[str, Any] | None = None,
+        reducer_version: str = "",
+    ) -> None:
+        built_at = datetime.now().isoformat(timespec="microseconds")
+        with self.connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO materialization_stage_views(
+                    project_name, project_file, trace_scope, subject_id, stage_kind, stage_status,
+                    upstream_signature, payload_json, provenance_json, reducer_version, built_at
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(project_name, project_file, trace_scope, subject_id, stage_kind) DO UPDATE SET
+                    stage_status=excluded.stage_status,
+                    upstream_signature=excluded.upstream_signature,
+                    payload_json=excluded.payload_json,
+                    provenance_json=excluded.provenance_json,
+                    reducer_version=excluded.reducer_version,
+                    built_at=excluded.built_at
+                """,
+                (
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_id,
+                    stage_kind,
+                    stage_status,
+                    upstream_signature,
+                    _json_dumps(payload or {}),
+                    _json_dumps(provenance or {}),
+                    reducer_version,
+                    built_at,
+                ),
+            )
+
+    def _resolve_scope_subject_materialization_args(
+        self,
+        trace_scope: str,
+        target_bundle: dict[str, Any] | None = None,
+    ) -> dict[str, str]:
+        payload = dict((target_bundle or {}).get("payload") or {})
+        planner_resolution = dict(payload.get("plannerResolution") or {})
+        target_payload = dict(payload.get("target") or {})
+        trace_registry = dict(payload.get("traceRegistry") or {})
+        return {
+            "subject_kind": str(planner_resolution.get("selectedSubjectKind") or "").strip(),
+            "subject_key": str(planner_resolution.get("selectedSubjectKey") or "").strip(),
+            "family_id": str(
+                target_payload.get("familyId")
+                or trace_registry.get("selectedFamilyId")
+                or ""
+            ).strip(),
+            "compatibility_target_id": str(target_payload.get("id") or trace_scope or "").strip(),
+        }
+
+    def refresh_scope_materializations(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> dict[str, Any]:
+        trace_scope = str(trace_scope or "").strip()
+        if not trace_scope:
+            return {}
+        if trace_scope == "shard-owner-family-boundary":
+            owner_family = self.backfill_shard_owner_family_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            milestone_cluster = self.backfill_shard_milestone_cluster_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            bonus_cluster = self.backfill_shard_bonus_cluster_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            refreshed: dict[str, Any] = {}
+            if owner_family:
+                refreshed["ownerFamily"] = owner_family
+            if milestone_cluster:
+                refreshed["milestoneCluster"] = milestone_cluster
+            if bonus_cluster:
+                refreshed["bonusCluster"] = bonus_cluster
+            return refreshed
+        if trace_scope in {
+            "shard-milestone-payload-boundary",
+            "shard-milestone-row-model-boundary",
+            "shard-milestone-row-shell-boundary",
+            "shard-milestone-row-alignment-boundary",
+            "shard-finalsu-bonus-boundary",
+            "shard-milestone-title-effect-boundary",
+            "shard-effect-text-handler-boundary",
+        }:
+            milestone_cluster = self.backfill_shard_milestone_cluster_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            bonus_cluster = self.backfill_shard_bonus_cluster_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            refreshed: dict[str, Any] = {}
+            if milestone_cluster:
+                refreshed["milestoneCluster"] = milestone_cluster
+            if bonus_cluster:
+                refreshed["bonusCluster"] = bonus_cluster
+            return refreshed
+        if trace_scope in {
+            "multiverse-market-metadata-neighborhood",
+            "multiverse-market-typed-owner-boundary",
+            "multiverse-market-row-text-boundary",
+            "multiverse-market-action-shell-boundary",
+            "multiverse-market-owner-family-boundary",
+            "multiverse-market-prefab-remap-boundary",
+            "multiverse-market-canonical-import-boundary",
+            "multiverse-market-broad-row-remap-boundary",
+        }:
+            multiverse_cluster = self.backfill_multiverse_ui_cluster_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            return {"multiverseUiCluster": multiverse_cluster} if multiverse_cluster else {}
+        latest_bundle = self.find_latest_materialized_target_bundle_view(project_name, project_file, trace_scope) or {}
+        if not latest_bundle:
+            return {}
+        materialization_args = self._resolve_scope_subject_materialization_args(trace_scope, latest_bundle)
+        subject_state = self.find_or_materialize_subject_state_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_kind=materialization_args["subject_kind"],
+            subject_key=materialization_args["subject_key"],
+            family_id=materialization_args["family_id"],
+            compatibility_target_id=materialization_args["compatibility_target_id"],
+        ) or {}
+        resolver_target = self.find_or_materialize_resolver_target_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_kind=materialization_args["subject_kind"],
+            subject_key=materialization_args["subject_key"],
+            family_id=materialization_args["family_id"],
+            compatibility_target_id=materialization_args["compatibility_target_id"],
+        ) or {}
+        subject_state = self.find_or_materialize_subject_state_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_kind=materialization_args["subject_kind"],
+            subject_key=materialization_args["subject_key"],
+            family_id=materialization_args["family_id"],
+            compatibility_target_id=materialization_args["compatibility_target_id"],
+        ) or {}
+        subject_contract = self.find_or_materialize_subject_contract_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_kind=materialization_args["subject_kind"],
+            subject_key=materialization_args["subject_key"],
+            family_id=materialization_args["family_id"],
+            compatibility_target_id=materialization_args["compatibility_target_id"],
+        ) or {}
+        subject_id = str(subject_state.get("subjectId") or materialization_args["compatibility_target_id"] or trace_scope).strip()
+        planner_payload = {
+            "traceScope": trace_scope,
+            "subjectId": subject_id,
+            "subjectKind": str(subject_state.get("subjectKind") or materialization_args["subject_kind"] or ""),
+            "targetId": materialization_args["compatibility_target_id"],
+            "familyId": materialization_args["family_id"] or None,
+            "hasSubjectState": bool(subject_state),
+            "hasResolverTarget": bool(resolver_target),
+            "hasSubjectContract": bool(subject_contract),
+            "nextSeam": dict(subject_state.get("nextSeam") or {}),
+            "blockedEdges": list(subject_state.get("blockedEdges") or []),
+            "missingEdges": list(subject_state.get("missingEdges") or []),
+            "knownEdges": list(subject_state.get("knownEdges") or []),
+            "eligible": bool(subject_state) and bool(resolver_target),
+        }
+        planner_signature = _build_materialization_dependency_signature(
+            {
+                "targetBundle": latest_bundle,
+                "subjectState": subject_state,
+                "resolverTarget": resolver_target,
+                "subjectContract": subject_contract,
+            }
+        )
+        self.upsert_materialization_stage_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            "planner-eligibility",
+            stage_status="ready" if bool(planner_payload["eligible"]) else "blocked",
+            upstream_signature=planner_signature,
+            payload=planner_payload,
+            provenance={
+                "payloadHash": _dependency_hash_payload(planner_payload),
+                "reducer": "planner-eligibility-view-v1",
+            },
+            reducer_version="planner-eligibility-view-v1",
+        )
+        refreshed = {
+            "subjectState": subject_state,
+            "resolverTarget": resolver_target,
+            "subjectContract": subject_contract,
+            "plannerEligibility": planner_payload,
+        }
+        if trace_scope == "shard-owned-state-upgradeinfolist-population":
+            owner_family = self.backfill_shard_owner_family_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            if owner_family:
+                refreshed["ownerFamily"] = owner_family
+            milestone_cluster = self.backfill_shard_milestone_cluster_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            if milestone_cluster:
+                refreshed["milestoneCluster"] = milestone_cluster
+            bonus_cluster = self.backfill_shard_bonus_cluster_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            if bonus_cluster:
+                refreshed["bonusCluster"] = bonus_cluster
+        if trace_scope == "shard-cost-su0-structure":
+            milestone_cluster = self.backfill_shard_milestone_cluster_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            if milestone_cluster:
+                refreshed["milestoneCluster"] = milestone_cluster
+            bonus_cluster = self.backfill_shard_bonus_cluster_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            if bonus_cluster:
+                refreshed["bonusCluster"] = bonus_cluster
+        if trace_scope == "multiverse-market-save-owner-boundary":
+            multiverse_cluster = self.backfill_multiverse_ui_cluster_views_from_live_fragments(
+                project_name,
+                project_file,
+            )
+            if multiverse_cluster:
+                refreshed["multiverseUiCluster"] = multiverse_cluster
+        return refreshed
 
     def find_or_materialize_subject_state_view(
         self,
@@ -11253,60 +16965,59 @@ class GhidraCacheDB:
         )
         resolver_target = self.find_materialized_resolver_target_view(project_name, project_file, trace_scope) or {}
         resolver_payload = dict((resolver_target or {}).get("payload") or {})
-        execution_plan = dict(
-            (
-                self.find_canonical_semantic_fragment(
-                    project_name,
-                    project_file,
-                    "execution_plan_fragment",
-                    f"target-execution-plan:{trace_scope}",
-                )
-                or {}
-            ).get("payload")
-            or {}
-        )
-        reconstruction_payload = dict(
-            (
-                self.find_canonical_semantic_fragment(
-                    project_name,
-                    project_file,
-                    "token_shop_reconstruction_fragment",
-                    f"token-shop-reconstruction:{compatibility_target_id or trace_scope}",
-                )
-                or {}
-            ).get("payload")
-            or {}
-        )
+        execution_plan_fragment = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "execution_plan_fragment",
+            f"target-execution-plan:{trace_scope}",
+        ) or {}
+        execution_plan = dict(execution_plan_fragment.get("payload") or {})
+        reconstruction_fragment = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "token_shop_reconstruction_fragment",
+            f"token-shop-reconstruction:{compatibility_target_id or trace_scope}",
+        ) or {}
+        reconstruction_payload = dict(reconstruction_fragment.get("payload") or {})
         family_graph_payload: dict[str, Any] = {}
+        family_graph_fragment: dict[str, Any] = {}
         effective_family_id = str(execution_context.get("familyId") or family_id or "").strip()
         if effective_family_id:
-            family_graph_payload = dict(
-                (
-                    self.find_canonical_semantic_fragment(
-                        project_name,
-                        project_file,
-                        "family_graph_fragment",
-                        f"family-graph:{effective_family_id}",
-                    )
-                    or {}
-                ).get("payload")
-                or {}
-            )
+            family_graph_fragment = self.find_canonical_semantic_fragment(
+                project_name,
+                project_file,
+                "family_graph_fragment",
+                f"family-graph:{effective_family_id}",
+            ) or {}
+            family_graph_payload = dict(family_graph_fragment.get("payload") or {})
         semantic_scope_payload: dict[str, Any] = {}
+        semantic_scope_fragment: dict[str, Any] = {}
         if subject_kind == "semantic-scope" and subject_key:
-            semantic_scope_payload = dict(
-                (
-                    self.find_canonical_semantic_fragment(
-                        project_name,
-                        project_file,
-                        "semantic_scope_fragment",
-                        subject_key,
-                    )
-                    or {}
-                ).get("payload")
-                or {}
-            )
+            semantic_scope_fragment = self.find_canonical_semantic_fragment(
+                project_name,
+                project_file,
+                "semantic_scope_fragment",
+                subject_key,
+            ) or {}
+            semantic_scope_payload = dict(semantic_scope_fragment.get("payload") or {})
         if not semantic_scope_payload:
+            reconstruction_row_recovery = dict(reconstruction_payload.get("rowRecovery") or {})
+            reconstruction_scope_id = _normalize_token_shop_row_scope_id(
+                trace_scope,
+                str(reconstruction_row_recovery.get("semanticScopeId") or "").strip(),
+                compatibility_target_id,
+                str(execution_context.get("label") or ""),
+                str(execution_context.get("joinGoal") or ""),
+            )
+            if reconstruction_scope_id:
+                semantic_scope_fragment = self.find_canonical_semantic_fragment(
+                    project_name,
+                    project_file,
+                    "semantic_scope_fragment",
+                    reconstruction_scope_id,
+                ) or {}
+                semantic_scope_payload = dict(semantic_scope_fragment.get("payload") or {})
+        if not semantic_scope_payload and subject_class != "range-family" and "family" not in trace_scope:
             with self.connect() as conn:
                 semantic_rows = conn.execute(
                     """
@@ -11325,6 +17036,23 @@ class GhidraCacheDB:
                 if str(candidate_row_shell.get("field") or "").strip():
                     semantic_scope_payload = candidate
                     break
+        expected_row_field = _expected_token_shop_row_field(
+            trace_scope,
+            compatibility_target_id,
+            str(execution_context.get("label") or ""),
+            str(execution_context.get("joinGoal") or ""),
+        )
+        if expected_row_field and str((dict(semantic_scope_payload.get("rowShell") or {})).get("field") or "").strip() != expected_row_field:
+            expected_scope_fragment = self.find_canonical_semantic_fragment(
+                project_name,
+                project_file,
+                "semantic_scope_fragment",
+                f"row:{expected_row_field}",
+            ) or {}
+            expected_scope_payload = dict(expected_scope_fragment.get("payload") or {})
+            if expected_scope_payload:
+                semantic_scope_fragment = expected_scope_fragment
+                semantic_scope_payload = expected_scope_payload
         support_rows_for_identity = _resolver_support_rows_from_surface_plan(
             trace_scope,
             self.find_or_synthesize_surface_plan(
@@ -11335,6 +17063,13 @@ class GhidraCacheDB:
                 compatibility_target_id=compatibility_target_id,
             ) or {},
             reconstruction_payload,
+        )
+        support_rows_for_identity = _normalize_token_shop_support_rows(
+            trace_scope,
+            support_rows_for_identity,
+            compatibility_target_id,
+            str(execution_context.get("label") or ""),
+            str(execution_context.get("joinGoal") or ""),
         )
         subject_identity = _derive_subject_identity(
             trace_scope,
@@ -11355,9 +17090,11 @@ class GhidraCacheDB:
         latest_native_trace = dict(latest_payload.get("nativeTrace") or {})
         if not dict(latest_native_trace.get("requestContext") or {}):
             relation_backfill_view = None
-            for diagnostic_row in self.list_latest_materialized_acquisition_diagnostics_views(project_name, project_file):
-                if str(diagnostic_row.get("traceScope") or "").strip() != trace_scope:
-                    continue
+            for diagnostic_row in self.list_latest_materialized_acquisition_diagnostics_for_scope(
+                project_name,
+                project_file,
+                trace_scope,
+            ):
                 diagnostic_payload = dict(diagnostic_row.get("payload") or {})
                 if str(diagnostic_payload.get("subjectId") or "").strip() != subject_id:
                     continue
@@ -11388,18 +17125,13 @@ class GhidraCacheDB:
                     **dict(relation_backfill_view.get("payload") or {}),
                 }
                 latest_payload["nativeTrace"] = latest_native_trace
-        assessment_payload = dict(
-            (
-                self.find_canonical_semantic_fragment(
-                    project_name,
-                    project_file,
-                    "assessment_fragment",
-                    f"target-assessment:{trace_scope}",
-                )
-                or {}
-            ).get("payload")
-            or {}
-        )
+        assessment_fragment = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "assessment_fragment",
+            f"target-assessment:{trace_scope}",
+        ) or {}
+        assessment_payload = dict(assessment_fragment.get("payload") or {})
         decision_summary = dict(latest_payload.get("decisionSummary") or assessment_payload.get("decisionSummary") or {})
         surface_plan = self.find_or_synthesize_surface_plan(
             project_name,
@@ -11408,6 +17140,67 @@ class GhidraCacheDB:
             family_id=str(execution_context.get("familyId") or family_id or ""),
             compatibility_target_id=compatibility_target_id,
         ) or {}
+        state_dependency_signature = _build_materialization_dependency_signature(
+            {
+                "executionContext": execution_context,
+                "resolverTarget": resolver_target,
+                "executionPlan": execution_plan_fragment,
+                "reconstruction": reconstruction_fragment,
+                "familyGraph": family_graph_fragment,
+                "semanticScope": semantic_scope_fragment or semantic_scope_payload,
+                "latestBundle": latest_bundle,
+                "assessment": assessment_fragment,
+                "surfacePlan": surface_plan,
+                "subjectIdentity": subject_identity,
+                "nativeTrace": latest_native_trace,
+            }
+        )
+        existing_provenance = dict((existing or {}).get("provenance") or {})
+        existing_inputs = dict(existing_provenance.get("inputs") or {})
+        existing_payload = dict((existing or {}).get("payload") or {})
+        stale_multiverse_save_owner_state = (
+            trace_scope == "multiverse-market-save-owner-boundary"
+            and not [str(value).strip() for value in (existing_payload.get("missingEdges") or []) if str(value).strip()]
+            and not [str(value).strip() for value in (existing_payload.get("blockedEdges") or []) if str(value).strip()]
+            and "typed-save-owner" in [str(value).strip() for value in (existing_payload.get("knownEdges") or []) if str(value).strip()]
+        )
+        if (
+            existing
+            and str(existing_inputs.get("dependencySignature") or "").strip() == state_dependency_signature
+            and not stale_multiverse_save_owner_state
+        ):
+            existing_payload = {
+                **existing_payload,
+                "subjectId": str(subject_identity.get("subjectId") or existing_payload.get("subjectId") or ""),
+                "subjectKind": str(subject_identity.get("subjectKind") or existing_payload.get("subjectKind") or ""),
+                "subjectKey": str(subject_identity.get("subjectKey") or existing_payload.get("subjectKey") or ""),
+                "subjectLabel": str(subject_identity.get("subjectLabel") or existing_payload.get("subjectLabel") or ""),
+                "identityOwner": str(subject_identity.get("identityOwner") or existing_payload.get("identityOwner") or ""),
+                "identityReason": str(subject_identity.get("identityReason") or existing_payload.get("identityReason") or ""),
+                "subjectPathId": str(subject_identity.get("subjectPathId") or existing_payload.get("subjectPathId") or ""),
+            }
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "subject-state",
+                stage_status="materialized",
+                upstream_signature=state_dependency_signature,
+                payload={
+                    "semanticKey": str(existing_payload.get("semanticKey") or ""),
+                    "knownEdges": len(list(existing_payload.get("knownEdges") or [])),
+                    "missingEdges": len(list(existing_payload.get("missingEdges") or [])),
+                    "blockedEdges": len(list(existing_payload.get("blockedEdges") or [])),
+                    "nextSeam": dict(existing_payload.get("nextSeam") or {}),
+                },
+                provenance={
+                    "payloadHash": str(existing_provenance.get("payloadHash") or ""),
+                    "reducer": "materialized-subject-state-view-v1",
+                },
+                reducer_version="materialized-subject-state-view-v1",
+            )
+            return existing_payload
         support_surface_terms = [
             str(term)
             for surface in (_resolver_support_surfaces_from_surface_plan(surface_plan) if surface_plan else [])
@@ -11484,6 +17277,78 @@ class GhidraCacheDB:
                             "sourceIds": ["materialized-edge-facts"],
                             "proofs": []
                         })
+        relation_progress_edge_facts: list[dict[str, Any]] = []
+        relation_required_seam_edge_facts: list[dict[str, Any]] = []
+        for diagnostic_row in self.list_latest_materialized_acquisition_diagnostics_for_scope(
+            project_name,
+            project_file,
+            trace_scope,
+        ):
+            diagnostic_payload = dict(diagnostic_row.get("payload") or {})
+            if str(diagnostic_payload.get("subjectId") or "").strip() != subject_id:
+                continue
+            relation_coverage = dict(diagnostic_payload.get("relationCoverage") or {})
+            required_seams = _unique_strings(
+                [str(value).strip() for value in (relation_coverage.get("requiredSeams") or []) if str(value).strip()]
+            )
+            progress_edges = _unique_strings(
+                [str(value).strip() for value in (relation_coverage.get("progressEdges") or []) if str(value).strip()]
+            )
+            relation_scope = str(relation_coverage.get("relationScope") or "").strip()
+            relation_covered = bool(relation_coverage.get("covered"))
+            if required_seams:
+                for seam_index, seam_id in enumerate(required_seams):
+                    relation_required_seam_edge_facts.append(
+                        {
+                            "edgeType": seam_id,
+                            "status": "known" if relation_covered else "blocked",
+                            "priority": (500 + seam_index) if relation_covered else (1100 + seam_index),
+                            "reason": "relation-contract-coverage",
+                            "terms": list(support_terms)[:12],
+                            "sourceIds": [relation_scope or trace_scope, "materialized-acquisition-diagnostics"],
+                            "goal": str(execution_context.get("joinGoal") or "").strip() or None,
+                            "proofs": [],
+                        }
+                    )
+            if not progress_edges:
+                continue
+            for edge_index, edge_type in enumerate(progress_edges):
+                relation_progress_edge_facts.append(
+                    {
+                        "edgeType": edge_type,
+                        "status": "nonblocking",
+                        "priority": 900 + edge_index,
+                        "reason": "relation-contract-progress",
+                        "terms": list(support_terms)[:12],
+                        "sourceIds": [relation_scope or trace_scope, "materialized-acquisition-diagnostics"],
+                        "goal": str(execution_context.get("joinGoal") or "").strip() or None,
+                        "proofs": [],
+                    }
+                )
+        if relation_progress_edge_facts:
+            existing_nonblocking_by_type = {
+                str(item.get("edgeType") or "").strip()
+                for item in edge_facts
+                if str(item.get("status") or "").strip() == "nonblocking"
+            }
+            for progress_fact in relation_progress_edge_facts:
+                edge_type = str(progress_fact.get("edgeType") or "").strip()
+                if not edge_type or edge_type in existing_nonblocking_by_type:
+                    continue
+                edge_facts.append(progress_fact)
+                existing_nonblocking_by_type.add(edge_type)
+        if relation_required_seam_edge_facts:
+            required_edge_types = {
+                str(item.get("edgeType") or "").strip()
+                for item in relation_required_seam_edge_facts
+                if str(item.get("edgeType") or "").strip()
+            }
+            edge_facts = [
+                item
+                for item in edge_facts
+                if str(item.get("edgeType") or "").strip() not in required_edge_types
+            ]
+            edge_facts.extend(relation_required_seam_edge_facts)
         state_payload = _derive_subject_state_from_edge_facts(
             trace_scope,
             subject_id,
@@ -11497,6 +17362,127 @@ class GhidraCacheDB:
             identity_reason=str(subject_identity.get("identityReason") or ""),
             subject_path_id=str(subject_identity.get("subjectPathId") or ""),
         )
+        required_coverage_seam_ids = _unique_strings(
+            [str(item.get("edgeType") or "").strip() for item in relation_required_seam_edge_facts if str(item.get("edgeType") or "").strip()]
+        )
+        unresolved_required_seam_ids = _unique_strings(
+            [
+                str(value).strip()
+                for value in (state_payload.get("missingEdges") or []) + (state_payload.get("blockedEdges") or [])
+                if str(value).strip() in required_coverage_seam_ids
+            ]
+        )
+        covered_required_seam_ids = [
+            seam_id for seam_id in required_coverage_seam_ids
+            if seam_id not in set(unresolved_required_seam_ids)
+        ]
+        if covered_required_seam_ids:
+            state_payload["missingEdges"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (state_payload.get("missingEdges") or [])
+                    if str(value).strip() and str(value).strip() not in set(covered_required_seam_ids)
+                ]
+            )
+            state_payload["blockedEdges"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (state_payload.get("blockedEdges") or [])
+                    if str(value).strip() and str(value).strip() not in set(covered_required_seam_ids)
+                ]
+            )
+            state_payload["knownEdges"] = _unique_strings(
+                [
+                    *[str(value).strip() for value in (state_payload.get("knownEdges") or []) if str(value).strip()],
+                    *covered_required_seam_ids,
+                ]
+            )
+            next_seam_payload = dict(state_payload.get("nextSeam") or {})
+            if str(next_seam_payload.get("id") or "").strip() in set(covered_required_seam_ids):
+                remaining_open_edges = _unique_strings(
+                    [
+                        *[str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()],
+                        *[str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()],
+                    ]
+                )
+                state_payload["nextSeam"] = {
+                    **next_seam_payload,
+                    "id": remaining_open_edges[0] if remaining_open_edges else None,
+                    "status": "open" if remaining_open_edges else "clear",
+                }
+        if unresolved_required_seam_ids:
+            decision_summary["baselineGap"] = list(unresolved_required_seam_ids)
+            decision_summary["blockedEdgeTypes"] = list(unresolved_required_seam_ids)
+        elif covered_required_seam_ids:
+            covered_required_seam_id_set = set(covered_required_seam_ids)
+            decision_summary["baselineGap"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (decision_summary.get("baselineGap") or [])
+                    if str(value).strip() and str(value).strip() not in covered_required_seam_id_set
+                ]
+            )
+            decision_summary["blockedEdgeTypes"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (decision_summary.get("blockedEdgeTypes") or [])
+                    if str(value).strip() and str(value).strip() not in covered_required_seam_id_set
+                ]
+            )
+        for claim_stage in [stage for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]:
+            if str(claim_stage.get("id") or "").strip() == "family-subject":
+                claim_stage["missingSeamIds"] = list(unresolved_required_seam_ids)
+        if trace_scope == "multiverse-market-save-owner-boundary":
+            bounded_multiverse_negative_edges = _unique_strings(
+                [
+                    *[str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()],
+                    *[str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()],
+                ]
+            )
+            summary_rules = dict(BOOTSTRAP_OUTPUT_SUMMARY_RULES.get(trace_scope) or {})
+            summary_messages = dict(summary_rules.get("messages") or {})
+            if bounded_multiverse_negative_edges:
+                decision_summary = {
+                    **decision_summary,
+                    "verdict": "quarantine",
+                    "summary": str(summary_messages.get("quarantine") or "").strip()
+                    or "The save-owner boundary is grounded enough to preserve as quarantined compatibility truth, but not to wire canonical import or planner behavior.",
+                    "provedEdgeCount": len(list(state_payload.get("knownEdges") or [])),
+                    "negativeEdgeCount": len(bounded_multiverse_negative_edges),
+                    "baselineGap": list(bounded_multiverse_negative_edges),
+                    "supportingEdgeTypes": list(state_payload.get("knownEdges") or []),
+                    "blockedEdgeTypes": list(bounded_multiverse_negative_edges),
+                }
+            else:
+                known_edge_types = _unique_strings(
+                    [str(value).strip() for value in (state_payload.get("knownEdges") or []) if str(value).strip()]
+                )
+                wire_rules = dict(summary_rules.get("wire") or {})
+                wire_min_present_edges = int(wire_rules.get("minPresentEdges") or 0)
+                if len(known_edge_types) >= wire_min_present_edges:
+                    decision_summary = {
+                        **decision_summary,
+                        "verdict": "wire",
+                        "summary": str(summary_messages.get("wire") or "").strip()
+                        or "The save-owner trace is complete enough to wire canonical import behavior.",
+                        "provedEdgeCount": len(known_edge_types),
+                        "negativeEdgeCount": 0,
+                        "baselineGap": [],
+                        "supportingEdgeTypes": list(known_edge_types),
+                        "blockedEdgeTypes": [],
+                    }
+                else:
+                    decision_summary = {
+                        **decision_summary,
+                        "verdict": "keep researching",
+                        "summary": str(summary_messages.get("research") or "").strip()
+                        or "The save-owner trace still lacks enough checked owner-boundary recovery to preserve even a quarantined verdict.",
+                        "provedEdgeCount": len(known_edge_types),
+                        "negativeEdgeCount": 0,
+                        "baselineGap": [],
+                        "supportingEdgeTypes": list(known_edge_types),
+                        "blockedEdgeTypes": [],
+                    }
         state_payload["decisionSummary"] = decision_summary
         state_payload["claimStages"] = list(execution_plan.get("claimStages") or [])
         state_payload["depthPlan"] = list(execution_plan.get("depthPlan") or [])
@@ -11605,6 +17591,7 @@ class GhidraCacheDB:
             "traceScope": trace_scope,
             "subjectId": subject_id,
             "inputs": {
+                "dependencySignature": state_dependency_signature,
                 "executionContextSemanticKey": f"target-execution-context:{trace_scope}",
                 "executionPlanSemanticKey": f"target-execution-plan:{trace_scope}",
                 "assessmentSemanticKey": f"target-assessment:{trace_scope}",
@@ -11615,7 +17602,7 @@ class GhidraCacheDB:
         }
         historical_states = self.list_materialized_subject_state_views(project_name, project_file, trace_scope)
         preferred_historical = None
-        if historical_states:
+        if historical_states and trace_scope != "multiverse-market-save-owner-boundary":
             preferred_historical = max(
                 historical_states,
                 key=lambda item: _subject_state_quality_tuple(
@@ -11627,6 +17614,30 @@ class GhidraCacheDB:
                 dict(preferred_historical.get("payload") or {}),
                 str(preferred_historical.get("builtAt") or ""),
             ) > _subject_state_quality_tuple(state_payload, ""):
+                preferred_payload = dict(preferred_historical.get("payload") or {})
+                preferred_provenance = dict(preferred_historical.get("provenance") or {})
+                self.upsert_materialization_stage_view(
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_id,
+                    "subject-state",
+                    stage_status="materialized",
+                    upstream_signature=state_dependency_signature,
+                    payload={
+                        "semanticKey": str(preferred_payload.get("semanticKey") or ""),
+                        "knownEdges": len(list(preferred_payload.get("knownEdges") or [])),
+                        "missingEdges": len(list(preferred_payload.get("missingEdges") or [])),
+                        "blockedEdges": len(list(preferred_payload.get("blockedEdges") or [])),
+                        "nextSeam": dict(preferred_payload.get("nextSeam") or {}),
+                    },
+                    provenance={
+                        "payloadHash": str(preferred_provenance.get("payloadHash") or ""),
+                        "reducer": "materialized-subject-state-view-v1",
+                        "selection": "preferred-historical",
+                    },
+                    reducer_version="materialized-subject-state-view-v1",
+                )
                 return dict(preferred_historical.get("payload") or {})
         existing_edge_rows = self.find_materialized_subject_edge_facts(project_name, project_file, trace_scope, subject_id)
         existing_edge_signatures = sorted(
@@ -11658,6 +17669,27 @@ class GhidraCacheDB:
             and _json_dumps(existing.get("payload") or {}) == _json_dumps(state_payload)
             and existing_edge_signatures == next_edge_signatures
         ):
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "subject-state",
+                stage_status="materialized",
+                upstream_signature=state_dependency_signature,
+                payload={
+                    "semanticKey": str(state_payload.get("semanticKey") or ""),
+                    "knownEdges": len(list(state_payload.get("knownEdges") or [])),
+                    "missingEdges": len(list(state_payload.get("missingEdges") or [])),
+                    "blockedEdges": len(list(state_payload.get("blockedEdges") or [])),
+                    "nextSeam": dict(state_payload.get("nextSeam") or {}),
+                },
+                provenance={
+                    "payloadHash": str(state_provenance.get("payloadHash") or ""),
+                    "reducer": "materialized-subject-state-view-v1",
+                },
+                reducer_version="materialized-subject-state-view-v1",
+            )
             return dict(existing.get("payload") or {})
         built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
@@ -11739,6 +17771,27 @@ class GhidraCacheDB:
                     built_at,
                 ),
             )
+        self.upsert_materialization_stage_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            "subject-state",
+            stage_status="materialized",
+            upstream_signature=state_dependency_signature,
+            payload={
+                "semanticKey": str(state_payload.get("semanticKey") or ""),
+                "knownEdges": len(list(state_payload.get("knownEdges") or [])),
+                "missingEdges": len(list(state_payload.get("missingEdges") or [])),
+                "blockedEdges": len(list(state_payload.get("blockedEdges") or [])),
+                "nextSeam": dict(state_payload.get("nextSeam") or {}),
+            },
+            provenance={
+                "payloadHash": str(state_provenance.get("payloadHash") or ""),
+                "reducer": "materialized-subject-state-view-v1",
+            },
+            reducer_version="materialized-subject-state-view-v1",
+        )
         return state_payload
 
     def find_or_materialize_subject_contract_view(
@@ -11795,17 +17848,33 @@ class GhidraCacheDB:
                     "anchorTerms": list(resolver_payload.get("anchorTerms") or [])
                     or list(existing_resolver_payload.get("anchorTerms") or []),
                 }
-        reconstruction_payload = dict(
-            (
-                self.find_canonical_semantic_fragment(
-                    project_name,
-                    project_file,
-                    "token_shop_reconstruction_fragment",
-                    f"token-shop-reconstruction:{compatibility_target_id or trace_scope}",
-                )
-                or {}
-            ).get("payload")
-            or {}
+        reconstruction_fragment = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "token_shop_reconstruction_fragment",
+            f"token-shop-reconstruction:{compatibility_target_id or trace_scope}",
+        ) or {}
+        reconstruction_payload = dict(reconstruction_fragment.get("payload") or {})
+        contract_dependency_signature = _build_materialization_dependency_signature(
+            {
+                "subjectState": {
+                    "payload": subject_state,
+                    "provenance": dict(subject_state.get("provenance") or {}),
+                    "reducerVersion": "materialized-subject-state-view-v1",
+                    "builtAt": str(dict(subject_state.get("provenance") or {}).get("builtAt") or ""),
+                },
+                "resolverTarget": resolver_target,
+                "reconstruction": reconstruction_fragment,
+            }
+        )
+        existing_provenance = dict((existing or {}).get("provenance") or {})
+        existing_inputs = dict(existing_provenance.get("inputs") or {})
+        existing_payload = dict((existing or {}).get("payload") or {})
+        existing_has_split = "core" in existing_payload and "enriched" in existing_payload
+        contract_fast_path = (
+            existing
+            and existing_has_split
+            and str(existing_inputs.get("dependencySignature") or "").strip() == contract_dependency_signature
         )
         row_shell = dict(reconstruction_payload.get("rowShell") or {})
         row_local_graph = dict(reconstruction_payload.get("rowLocalGraph") or {})
@@ -11836,60 +17905,148 @@ class GhidraCacheDB:
                 else None
             )
         )
-        shared_lane_contract = self._derive_token_shop_shared_contract_fields(
-            project_name,
-            project_file,
-            trace_scope,
-            subject_state,
-            resolver_payload,
-            support_summary,
-            blocked_input_reason,
+        is_token_shop_subject = (
+            str(family_id or "").strip() == "token-shop"
+            or str(compatibility_target_id or trace_scope).strip().startswith("token-shop")
         )
-        strongest_tokenium_naming_contract = self._select_strongest_token_shop_lane_contract(
-            project_name,
-            project_file,
-            "tokeniumNaming",
-            subject_state,
-            shared_lane_contract,
-        )
-        if strongest_tokenium_naming_contract.get("groundedFields"):
-            shared_lane_contract["groundedFields"]["tokeniumNaming"] = dict(
-                strongest_tokenium_naming_contract.get("groundedFields") or {}
+        if is_token_shop_subject:
+            shared_lane_contract = self._derive_token_shop_shared_contract_fields(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_state,
+                resolver_payload,
+                support_summary,
+                blocked_input_reason,
             )
-        shared_lane_contract["blockedInputReasons"]["tokeniumNaming"] = (
-            strongest_tokenium_naming_contract.get("blockedReason")
-        )
-        shared_lane_contract["supportSummary"]["tokeniumNaming"] = {
-            **dict((shared_lane_contract.get("supportSummary") or {}).get("tokeniumNaming") or {}),
-            **dict(strongest_tokenium_naming_contract.get("supportSummary") or {}),
-            "selectedSubjectId": strongest_tokenium_naming_contract.get("selectedSubjectId"),
-            "selectedSubjectKind": strongest_tokenium_naming_contract.get("selectedSubjectKind"),
-            "selectionSource": strongest_tokenium_naming_contract.get("selectionSource"),
-        }
-        shared_lane_contract["provenanceSummary"]["tokeniumNaming"] = list(
-            strongest_tokenium_naming_contract.get("provenanceSummary")
-            or ((shared_lane_contract.get("provenanceSummary") or {}).get("tokeniumNaming") or [])
-        )
-        strongest_daily_lane_contract = self._select_strongest_token_shop_lane_contract(
-            project_name,
-            project_file,
-            "dailyTokeniumLane",
-            subject_state,
-            shared_lane_contract,
-        )
-        shared_lane_contract["blockedInputReasons"]["dailyTokeniumLane"] = (
-            strongest_daily_lane_contract.get("blockedReason")
-        )
-        shared_lane_contract["supportSummary"]["dailyTokeniumLane"] = {
-            **dict((shared_lane_contract.get("supportSummary") or {}).get("dailyTokeniumLane") or {}),
-            "selectedSubjectId": strongest_daily_lane_contract.get("selectedSubjectId"),
-            "selectedSubjectKind": strongest_daily_lane_contract.get("selectedSubjectKind"),
-            "selectionSource": strongest_daily_lane_contract.get("selectionSource"),
-        }
+            strongest_tokenium_naming_contract = self._select_strongest_token_shop_lane_contract(
+                project_name,
+                project_file,
+                "tokeniumNaming",
+                subject_state,
+                shared_lane_contract,
+            )
+            if strongest_tokenium_naming_contract.get("groundedFields"):
+                shared_lane_contract["groundedFields"]["tokeniumNaming"] = dict(
+                    strongest_tokenium_naming_contract.get("groundedFields") or {}
+                )
+            shared_lane_contract["blockedInputReasons"]["tokeniumNaming"] = (
+                strongest_tokenium_naming_contract.get("blockedReason")
+            )
+            shared_lane_contract["supportSummary"]["tokeniumNaming"] = {
+                **dict((shared_lane_contract.get("supportSummary") or {}).get("tokeniumNaming") or {}),
+                **dict(strongest_tokenium_naming_contract.get("supportSummary") or {}),
+                "selectedSubjectId": strongest_tokenium_naming_contract.get("selectedSubjectId"),
+                "selectedSubjectKind": strongest_tokenium_naming_contract.get("selectedSubjectKind"),
+                "selectionSource": strongest_tokenium_naming_contract.get("selectionSource"),
+            }
+            shared_lane_contract["provenanceSummary"]["tokeniumNaming"] = list(
+                strongest_tokenium_naming_contract.get("provenanceSummary")
+                or ((shared_lane_contract.get("provenanceSummary") or {}).get("tokeniumNaming") or [])
+            )
+            strongest_daily_lane_contract = self._select_strongest_token_shop_lane_contract(
+                project_name,
+                project_file,
+                "dailyTokeniumLane",
+                subject_state,
+                shared_lane_contract,
+            )
+            shared_lane_contract["blockedInputReasons"]["dailyTokeniumLane"] = (
+                strongest_daily_lane_contract.get("blockedReason")
+            )
+            shared_lane_contract["supportSummary"]["dailyTokeniumLane"] = {
+                **dict((shared_lane_contract.get("supportSummary") or {}).get("dailyTokeniumLane") or {}),
+                "selectedSubjectId": strongest_daily_lane_contract.get("selectedSubjectId"),
+                "selectedSubjectKind": strongest_daily_lane_contract.get("selectedSubjectKind"),
+                "selectionSource": strongest_daily_lane_contract.get("selectionSource"),
+            }
+        else:
+            shared_lane_contract = {
+                "groundedFields": {},
+                "supportSummary": {},
+                "provenanceSummary": {},
+                "blockedInputReasons": {},
+            }
         shared_grounded_fields = dict(shared_lane_contract.get("groundedFields") or {})
         shared_support_summary = dict(shared_lane_contract.get("supportSummary") or {})
         shared_provenance_summary = dict(shared_lane_contract.get("provenanceSummary") or {})
         shared_blocked_reasons = dict(shared_lane_contract.get("blockedInputReasons") or {})
+        generic_mechanics_views = _derive_generic_mechanics_views_from_subject_inputs(
+            trace_scope,
+            subject_state,
+            resolver_payload,
+            reconstruction_payload,
+            shared_lane_contract,
+        )
+        self.publish_generic_mechanics_views(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            upstream_signature=contract_dependency_signature,
+            generic_views=generic_mechanics_views,
+        )
+        inferred_boundary_views = _derive_boundary_views_from_subject_inputs(
+            trace_scope,
+            subject_state,
+            generic_mechanics_views,
+        )
+        self.publish_inferred_boundary_views(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            upstream_signature=contract_dependency_signature,
+            boundary_rows=inferred_boundary_views,
+        )
+        if contract_fast_path:
+            aggregate_stage, core_stage, enriched_stage = _contract_stage_payloads(existing_payload)
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "subject-contract-core",
+                stage_status="materialized",
+                upstream_signature=contract_dependency_signature,
+                payload=core_stage,
+                provenance={
+                    "payloadHash": _dependency_hash_payload(dict(existing_payload.get("core") or {})),
+                    "reducer": "materialized-subject-contract-core-view-v1",
+                },
+                reducer_version="materialized-subject-contract-core-view-v1",
+            )
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "subject-contract-enriched",
+                stage_status="materialized",
+                upstream_signature=contract_dependency_signature,
+                payload=enriched_stage,
+                provenance={
+                    "payloadHash": _dependency_hash_payload(dict(existing_payload.get("enriched") or {})),
+                    "reducer": "materialized-subject-contract-enriched-view-v1",
+                },
+                reducer_version="materialized-subject-contract-enriched-view-v1",
+            )
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "subject-contract",
+                stage_status="materialized",
+                upstream_signature=contract_dependency_signature,
+                payload=aggregate_stage,
+                provenance={
+                    "payloadHash": str(existing_provenance.get("payloadHash") or ""),
+                    "reducer": "materialized-subject-contract-view-v1",
+                },
+                reducer_version="materialized-subject-contract-view-v1",
+            )
+            return dict(existing.get("payload") or {})
         row_detail_identity = ""
         row_detail_identity_source = ""
         if isinstance(shared_grounded_fields.get("rowDetail"), dict):
@@ -11950,155 +18107,18 @@ class GhidraCacheDB:
             "detailNote": row_detail_note or None,
             "blockedFields": row_detail_blocked_fields,
         }
-        row_details_by_field: dict[str, dict[str, Any]] = {}
-        if subject_id == "range:token-shop:ATU1Button-ATU28Button":
-            family_shell_terms = [
-                str(term).strip()
-                for surface in support_surfaces
-                if str(surface.get("id") or "").strip() == "family-shells"
-                for term in (surface.get("terms") or [])
-                if str(term).strip()
-            ]
-            family_proxy_terms = [
-                str(term).strip()
-                for surface in support_surfaces
-                if str(surface.get("id") or "").strip() == "bridge-proxies"
-                for term in (surface.get("terms") or [])
-                if str(term).strip()
-            ]
-            family_prefab_terms = [
-                str(term).strip()
-                for surface in support_surfaces
-                if str(surface.get("id") or "").strip() == "prefab-roster"
-                for term in (surface.get("terms") or [])
-                if str(term).strip()
-            ]
-            family_title_terms = [
-                str(term).strip()
-                for surface in support_surfaces
-                if str(surface.get("id") or "").strip() == "title-text-surfaces"
-                for term in (surface.get("terms") or [])
-                if str(term).strip()
-            ]
-            mk_chain_note = (
-                "Canonical range-family contract is active here; the MK chain row identity is grounded through the Token Shop family shell, proxy, prefab, and title surfaces."
+        row_details_by_field = self.reconstruct_subject_row_details_from_generic_views(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            upstream_signature=contract_dependency_signature,
+        )
+        if not row_details_by_field:
+            row_details_by_field = _derive_token_shop_range_row_details_from_support_surfaces(
+                subject_id,
+                support_surfaces,
             )
-            atu6_grounded = all(
-                [
-                    "ATU6Button" in family_shell_terms,
-                    "BuyMK2TokenBoost" in family_proxy_terms,
-                    "NewTokenUPGPrefab.T1.MK2Booster" in family_prefab_terms,
-                    "Mk2 Generator Booster" in family_title_terms,
-                ]
-            )
-            mk_chain_blocked_rows = {
-                field: {
-                    "isGrounded": False,
-                    "identity": None,
-                    "identitySource": None,
-                    "rowType": None,
-                    "rowTypeLabel": None,
-                    "detailNote": None,
-                    "blockedFields": {
-                        "rowDetail": f"missing-db-row-detail-evidence:mk-chain-field-specific-support:{field}"
-                    },
-                }
-                for field in (
-                    "ATU8Level",
-                    "ATU9Level",
-                    "ATU10Level",
-                    "ATU11Level",
-                    "ATU12Level",
-                )
-            }
-            row_details_by_field = {
-                "ATU6Level": {
-                    "isGrounded": atu6_grounded,
-                    "identity": "Mk2 Generator Booster" if atu6_grounded else None,
-                    "identitySource": (
-                        "Canonical Token Shop family title surface" if atu6_grounded else None
-                    ),
-                    "rowType": "prefab-driven" if atu6_grounded else None,
-                    "rowTypeLabel": "Canonical range family contract row" if atu6_grounded else None,
-                    "detailNote": mk_chain_note if atu6_grounded else None,
-                    "blockedFields": {
-                        "playerFacingSupportText": "missing-db-row-detail-evidence:player-facing-support-text",
-                        "effectText": "not-applicable:row-detail-effect-text",
-                    },
-                },
-                **mk_chain_blocked_rows,
-            }
-        if subject_id == "range:token-shop:ATU21Button-ATU23Button":
-            trio_title_terms = [
-                str(term).strip()
-                for surface in support_surfaces
-                if str(surface.get("id") or "").strip() == "title-text-surfaces"
-                for term in (surface.get("terms") or [])
-                if str(term).strip()
-            ]
-            trio_prefab_terms = [
-                str(term).strip()
-                for surface in support_surfaces
-                if str(surface.get("id") or "").strip() == "prefab-roster"
-                for term in (surface.get("terms") or [])
-                if str(term).strip()
-            ]
-            trio_note = (
-                "Canonical range-family contract is active here; row identity is grounded through the T3 trio shell range and title or prefab surfaces."
-            )
-            atu21_identity = "Trinity Booster One" if "Trinity Booster One" in trio_title_terms else (
-                trio_prefab_terms[0] if len(trio_prefab_terms) > 0 else None
-            )
-            atu21_identity_source = (
-                "Canonical range-family title surface"
-                if "Trinity Booster One" in trio_title_terms
-                else ("Canonical range-family prefab roster" if atu21_identity else None)
-            )
-            atu22_identity = "Trinity Oom Booster" if "Trinity Oom Booster" in trio_title_terms else (
-                trio_prefab_terms[1] if len(trio_prefab_terms) > 1 else None
-            )
-            atu22_identity_source = (
-                "Canonical range-family title surface"
-                if "Trinity Oom Booster" in trio_title_terms
-                else ("Canonical range-family prefab roster" if atu22_identity else None)
-            )
-            row_details_by_field = {
-                "ATU21Level": {
-                    "isGrounded": bool(atu21_identity),
-                    "identity": atu21_identity,
-                    "identitySource": atu21_identity_source,
-                    "rowType": "prefab-driven" if atu21_identity else None,
-                    "rowTypeLabel": "Canonical range family contract row" if atu21_identity else None,
-                    "detailNote": trio_note if atu21_identity else None,
-                    "blockedFields": {
-                        "playerFacingSupportText": "missing-db-row-detail-evidence:player-facing-support-text",
-                        "effectText": "not-applicable:row-detail-effect-text",
-                    },
-                },
-                "ATU22Level": {
-                    "isGrounded": bool(atu22_identity),
-                    "identity": atu22_identity,
-                    "identitySource": atu22_identity_source,
-                    "rowType": "prefab-driven" if atu22_identity else None,
-                    "rowTypeLabel": "Canonical range family contract row" if atu22_identity else None,
-                    "detailNote": trio_note if atu22_identity else None,
-                    "blockedFields": {
-                        "playerFacingSupportText": "missing-db-row-detail-evidence:player-facing-support-text",
-                        "effectText": "not-applicable:row-detail-effect-text",
-                    },
-                },
-                "ATU23Level": {
-                    "isGrounded": False,
-                    "identity": None,
-                    "identitySource": None,
-                    "rowType": None,
-                    "rowTypeLabel": None,
-                    "detailNote": None,
-                    "blockedFields": {
-                        "rowDetail": "missing-db-row-detail-evidence:t3-trio-third-row-identity"
-                    },
-                },
-            }
         payload = {
             "semanticKey": f"subject-contract:{trace_scope}:{subject_id}",
             "traceScope": trace_scope,
@@ -12138,17 +18158,66 @@ class GhidraCacheDB:
             "blockedInputReasons": shared_blocked_reasons,
         }
         payload["supportSummary"]["sharedLanes"] = shared_support_summary
+        payload["core"] = _contract_core_view(payload)
+        payload["enriched"] = _contract_enriched_view(payload)
         provenance = {
             "reducer": "materialized-subject-contract-view-v1",
             "traceScope": trace_scope,
             "subjectId": subject_id,
             "inputs": {
+                "dependencySignature": contract_dependency_signature,
                 "subjectStateSemanticKey": str(subject_state.get("semanticKey") or ""),
                 "resolverTargetSemanticKey": str(resolver_payload.get("semanticKey") or ""),
             },
             "payloadHash": _dependency_hash_payload(payload),
         }
-        if existing and _json_dumps(existing.get("payload") or {}) == _json_dumps(payload):
+        if existing and existing_has_split and _json_dumps(existing.get("payload") or {}) == _json_dumps(payload):
+            aggregate_stage, core_stage, enriched_stage = _contract_stage_payloads(payload)
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "subject-contract-core",
+                stage_status="materialized",
+                upstream_signature=contract_dependency_signature,
+                payload=core_stage,
+                provenance={
+                    "payloadHash": _dependency_hash_payload(dict(payload.get("core") or {})),
+                    "reducer": "materialized-subject-contract-core-view-v1",
+                },
+                reducer_version="materialized-subject-contract-core-view-v1",
+            )
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "subject-contract-enriched",
+                stage_status="materialized",
+                upstream_signature=contract_dependency_signature,
+                payload=enriched_stage,
+                provenance={
+                    "payloadHash": _dependency_hash_payload(dict(payload.get("enriched") or {})),
+                    "reducer": "materialized-subject-contract-enriched-view-v1",
+                },
+                reducer_version="materialized-subject-contract-enriched-view-v1",
+            )
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "subject-contract",
+                stage_status="materialized",
+                upstream_signature=contract_dependency_signature,
+                payload=aggregate_stage,
+                provenance={
+                    "payloadHash": str(provenance.get("payloadHash") or ""),
+                    "reducer": "materialized-subject-contract-view-v1",
+                },
+                reducer_version="materialized-subject-contract-view-v1",
+            )
             return dict(existing.get("payload") or {})
         built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
@@ -12174,6 +18243,52 @@ class GhidraCacheDB:
                     built_at,
                 ),
             )
+        aggregate_stage, core_stage, enriched_stage = _contract_stage_payloads(payload)
+        self.upsert_materialization_stage_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            "subject-contract-core",
+            stage_status="materialized",
+            upstream_signature=contract_dependency_signature,
+            payload=core_stage,
+            provenance={
+                "payloadHash": _dependency_hash_payload(dict(payload.get("core") or {})),
+                "reducer": "materialized-subject-contract-core-view-v1",
+            },
+            reducer_version="materialized-subject-contract-core-view-v1",
+        )
+        self.upsert_materialization_stage_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            "subject-contract-enriched",
+            stage_status="materialized",
+            upstream_signature=contract_dependency_signature,
+            payload=enriched_stage,
+            provenance={
+                "payloadHash": _dependency_hash_payload(dict(payload.get("enriched") or {})),
+                "reducer": "materialized-subject-contract-enriched-view-v1",
+            },
+            reducer_version="materialized-subject-contract-enriched-view-v1",
+        )
+        self.upsert_materialization_stage_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            "subject-contract",
+            stage_status="materialized",
+            upstream_signature=contract_dependency_signature,
+            payload=aggregate_stage,
+            provenance={
+                "payloadHash": str(provenance.get("payloadHash") or ""),
+                "reducer": "materialized-subject-contract-view-v1",
+            },
+            reducer_version="materialized-subject-contract-view-v1",
+        )
         return payload
 
     def find_or_materialize_resolver_target_view(
@@ -12241,19 +18356,21 @@ class GhidraCacheDB:
             family_id=str(execution_context.get("familyId") or family_id or ""),
             compatibility_target_id=compatibility_target_id,
         ) or {}
-        reconstruction_payload = dict(
-            (
-                self.find_canonical_semantic_fragment(
-                    project_name,
-                    project_file,
-                    "token_shop_reconstruction_fragment",
-                    f"token-shop-reconstruction:{compatibility_target_id or trace_scope}",
-                )
-                or {}
-            ).get("payload")
-            or {}
-        )
+        reconstruction_fragment = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "token_shop_reconstruction_fragment",
+            f"token-shop-reconstruction:{compatibility_target_id or trace_scope}",
+        ) or {}
+        reconstruction_payload = dict(reconstruction_fragment.get("payload") or {})
         support_rows = _resolver_support_rows_from_surface_plan(trace_scope, surface_plan, reconstruction_payload)
+        support_rows = _normalize_token_shop_support_rows(
+            trace_scope,
+            support_rows,
+            str(execution_context.get("targetId") or compatibility_target_id or trace_scope),
+            str(execution_context.get("label") or ""),
+            str(execution_context.get("joinGoal") or ""),
+        )
         support_surfaces = _resolver_support_surfaces_from_surface_plan(surface_plan)
         decision_summary = dict(latest_bundle_payload.get("decisionSummary") or assessment_payload.get("decisionSummary") or {})
         if not target_narrative:
@@ -12290,6 +18407,17 @@ class GhidraCacheDB:
             support_surfaces,
             blocked_edge_types,
             anchor_terms,
+        )
+        resolver_dependency_signature = _build_materialization_dependency_signature(
+            {
+                "latestBundle": latest_bundle,
+                "executionContext": execution_context,
+                "surfacePlan": surface_plan,
+                "targetNarrative": target_narrative,
+                "assessment": assessment_payload,
+                "subjectState": subject_state,
+                "reconstruction": reconstruction_fragment,
+            }
         )
         defining_views = _unique_strings(
             [
@@ -12359,6 +18487,7 @@ class GhidraCacheDB:
             "reducer": "materialized-resolver-target-view-v1",
             "traceScope": trace_scope,
             "inputs": {
+                "dependencySignature": resolver_dependency_signature,
                 "executionContextSemanticKey": f"target-execution-context:{trace_scope}",
                 "surfacePlanSemanticKey": f"target-surface-plan:{trace_scope}",
                 "assessmentSemanticKey": f"target-assessment:{trace_scope}",
@@ -12367,7 +18496,70 @@ class GhidraCacheDB:
             },
             "payloadHash": _dependency_hash_payload(payload),
         }
+        existing_inputs = dict(dict((existing or {}).get("provenance") or {}).get("inputs") or {})
+        if (
+            existing
+            and str(existing_inputs.get("dependencySignature") or "").strip() == resolver_dependency_signature
+        ):
+            existing_payload = dict(existing.get("payload") or {})
+            existing_payload["supportRows"] = _normalize_token_shop_support_rows(
+                trace_scope,
+                list(existing_payload.get("supportRows") or []),
+                str(execution_context.get("targetId") or compatibility_target_id or trace_scope),
+                str(execution_context.get("label") or ""),
+                str(execution_context.get("joinGoal") or ""),
+            )
+            existing_payload = {
+                **existing_payload,
+                "subjectId": str(subject_state.get("subjectId") or existing_payload.get("subjectId") or ""),
+                "subjectKind": str(subject_state.get("subjectKind") or existing_payload.get("subjectKind") or ""),
+                "subjectKey": str(subject_state.get("subjectKey") or existing_payload.get("subjectKey") or ""),
+                "subjectLabel": str(subject_state.get("subjectLabel") or existing_payload.get("subjectLabel") or ""),
+            }
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                str(subject_state.get("subjectId") or compatibility_target_id or trace_scope),
+                "resolver-target",
+                stage_status="materialized",
+                upstream_signature=resolver_dependency_signature,
+                payload={
+                    "semanticKey": str(existing_payload.get("semanticKey") or ""),
+                    "targetId": str(existing_payload.get("targetId") or ""),
+                    "subjectId": str(existing_payload.get("subjectId") or ""),
+                    "traceRoutineHint": str(existing_payload.get("traceRoutineHint") or ""),
+                    "disableNativeTrace": bool(existing_payload.get("disableNativeTrace")),
+                },
+                provenance={
+                    "payloadHash": str(dict((existing or {}).get("provenance") or {}).get("payloadHash") or ""),
+                    "reducer": "materialized-resolver-target-view-v1",
+                },
+                reducer_version="materialized-resolver-target-view-v1",
+            )
+            return existing_payload
         if existing and _json_dumps(existing.get("payload") or {}) == _json_dumps(payload):
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                str(subject_state.get("subjectId") or compatibility_target_id or trace_scope),
+                "resolver-target",
+                stage_status="materialized",
+                upstream_signature=resolver_dependency_signature,
+                payload={
+                    "semanticKey": str(payload.get("semanticKey") or ""),
+                    "targetId": str(payload.get("targetId") or ""),
+                    "subjectId": str(payload.get("subjectId") or ""),
+                    "traceRoutineHint": str(payload.get("traceRoutineHint") or ""),
+                    "disableNativeTrace": bool(payload.get("disableNativeTrace")),
+                },
+                provenance={
+                    "payloadHash": str(provenance.get("payloadHash") or ""),
+                    "reducer": "materialized-resolver-target-view-v1",
+                },
+                reducer_version="materialized-resolver-target-view-v1",
+            )
             return dict(existing.get("payload") or {})
         built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
@@ -12392,6 +18584,27 @@ class GhidraCacheDB:
                     built_at,
                 ),
             )
+        self.upsert_materialization_stage_view(
+            project_name,
+            project_file,
+            trace_scope,
+            str(subject_state.get("subjectId") or compatibility_target_id or trace_scope),
+            "resolver-target",
+            stage_status="materialized",
+            upstream_signature=resolver_dependency_signature,
+            payload={
+                "semanticKey": str(payload.get("semanticKey") or ""),
+                "targetId": str(payload.get("targetId") or ""),
+                "subjectId": str(payload.get("subjectId") or ""),
+                "traceRoutineHint": str(payload.get("traceRoutineHint") or ""),
+                "disableNativeTrace": bool(payload.get("disableNativeTrace")),
+            },
+            provenance={
+                "payloadHash": str(provenance.get("payloadHash") or ""),
+                "reducer": "materialized-resolver-target-view-v1",
+            },
+            reducer_version="materialized-resolver-target-view-v1",
+        )
         return payload
 
     def find_canonical_semantic_fragment(
@@ -12439,7 +18652,10 @@ class GhidraCacheDB:
         resolver_target = self.find_materialized_resolver_target_view(project_name, project_file, trace_scope) or {}
         resolver_payload = dict(resolver_target.get("payload") or {})
         if canonical:
-            payload = dict(canonical.get("payload") or {})
+            payload = _normalize_token_shop_execution_context_payload(
+                trace_scope,
+                dict(canonical.get("payload") or {}),
+            )
             if resolver_payload:
                 if resolver_payload.get("outputSummaryRules"):
                     payload["outputSummaryRules"] = dict(resolver_payload.get("outputSummaryRules") or {})
@@ -12504,7 +18720,9 @@ class GhidraCacheDB:
             else:
                 join_goal = f"Reconstruct the {compatibility_target_id or trace_scope} subject from current canonical fragments and close directly adjacent gaps only."
 
-        return {
+        return _normalize_token_shop_execution_context_payload(
+            trace_scope,
+            {
             "semanticKey": f"target-execution-context:{trace_scope}",
             "scopeType": "target-execution-context",
             "traceScope": trace_scope,
@@ -12520,7 +18738,8 @@ class GhidraCacheDB:
             "targetDefinitionSemanticKey": f"target-definition:{trace_scope}",
             "acceptedAnchors": list(resolver_payload.get("acceptedAnchors") or []),
             "synthesized": True,
-        }
+            },
+        )
 
     def find_or_synthesize_surface_plan(
         self,
@@ -12981,6 +19200,16 @@ class GhidraCacheDB:
             family_id=str(execution_context.get("familyId") or family_id or ""),
             compatibility_target_id=compatibility_target_id,
         ) or {}
+        subject_state_decision_summary = dict(subject_state.get("decisionSummary") or {})
+        if (
+            subject_state_decision_summary
+            and (
+                [str(value).strip() for value in (subject_state_decision_summary.get("blockedEdgeTypes") or []) if str(value).strip()]
+                or [str(value).strip() for value in (subject_state_decision_summary.get("baselineGap") or []) if str(value).strip()]
+                or str(subject_state_decision_summary.get("verdict") or "").strip().lower() == "quarantine"
+            )
+        ):
+            decision_summary = subject_state_decision_summary
         blocked_edge_types = _unique_strings([str(value) for value in (subject_state.get("blockedEdges") or []) if str(value).strip()])
         cleared_edge_types = _unique_strings([str(value) for value in (subject_state.get("knownEdges") or []) if str(value).strip()])
         missing_edge_types = _unique_strings([str(value) for value in (subject_state.get("missingEdges") or []) if str(value).strip()])
@@ -13391,6 +19620,7 @@ class GhidraCacheDB:
                 subject_key=explicit_target_id,
                 family_id=selected_family_id,
                 compatibility_target_id=explicit_target_id,
+                requested_seam_ids=requested_queries,
             )
             planner_resolution = self._apply_knowledge_subject_identity(planner_resolution, knowledge_plan)
             return {

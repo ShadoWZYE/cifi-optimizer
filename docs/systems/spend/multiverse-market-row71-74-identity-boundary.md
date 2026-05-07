@@ -32,10 +32,13 @@ This document does not reopen that ordered mapping.
 
 ## Grounded conclusion
 
-- No stable player-facing identity is currently grounded for rows `71-74`.
-- Ordered row mapping and player-facing identity must stay separated:
+- A stable row-identity chain is now grounded for rows `71-74`:
   - ordered mapping is checked for rows `71-74`
   - same-number `IS71ID` through `IS74ID` is also checked for rows `71-74`
-  - prefab numbering diverges inside the remap band to serialized ids `59-62`
-  - player-facing identity is still unresolved for rows `71-74`
-- Because row identity is still unresolved, the canonical import-safe subset stays explicitly empty.
+  - the remapped prefab band `ChrystosEmporiumUpgrade71-ID59` through `ChrystosEmporiumUpgrade74-ID62` stays preserved only as shell-local anomaly metadata
+- Ordered row identity and prefab-shell numbering must still stay separated:
+  - the root save-owner runtime gate now clears through the same-number row-owner chain
+  - the broken prefab suffix band does not rewrite that grounded row identity
+- What is still unresolved here is narrower:
+  - the exact game-side player-facing effect or label text source for rows `71-74`
+  - not the root row identity or root canonical import gate

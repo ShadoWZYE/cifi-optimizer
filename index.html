@@ -61,6 +61,10 @@
               <span class="nav-link-title">Research Archive</span>
               <span class="nav-link-meta">Findings, blockers, and future lanes</span>
             </button>
+            <button class="nav-link" data-page="traceGap">
+              <span class="nav-link-title">Trace Gap Deck</span>
+              <span class="nav-link-meta">DB-backed best-gap launcher and diagnostics</span>
+            </button>
             <button class="nav-link" data-page="gem">
               <span class="nav-link-title">Gem Node Lab</span>
               <span class="nav-link-meta">Experimental planner kept outside MVP tools</span>
@@ -248,22 +252,22 @@
                 </div>
 
                 <div class="pill-row">
-                  <span class="pill pill-neutral">TokenShop helper-only input</span>
+                  <span class="pill pill-neutral">TokenShop player-state helper</span>
                   <span class="pill pill-neutral">Auto-saves with the profile</span>
                 </div>
-                <details class="field-collapse">
-                  <summary>Open TokenShop helper editor</summary>
+                <details class="field-collapse" id="tokenShopHelper">
+                  <summary>Open TokenShop player-state helper</summary>
                   <p class="meta">
-                    Enter checked TokenShop row levels with game-facing labels. This helper remains
-                    planner-side support, not canonical player truth.
+                    Enter checked TokenShop row levels with game-facing labels. These values feed the
+                    Progression-side TokenShop storefront while remaining planner-side support rather
+                    than canonical player truth.
                   </p>
-                  <p class="meta">Work one tier at a time so the helper stays scannable.</p>
+                  <p class="meta">Work one visible in-game tier at a time so the helper stays scannable.</p>
                   <div class="tier-tabs">
-                    <button type="button" class="tier-tab active" data-tier="t1">T1</button>
-                    <button type="button" class="tier-tab" data-tier="t2">T2</button>
-                    <button type="button" class="tier-tab" data-tier="t3">T3</button>
-                    <button type="button" class="tier-tab" data-tier="t4">T4</button>
-                    <button type="button" class="tier-tab" data-tier="t5">T5</button>
+                    <button type="button" class="tier-tab token-shop-helper-tab active" data-token-shop-helper-tier="t1">T1</button>
+                    <button type="button" class="tier-tab token-shop-helper-tab" data-token-shop-helper-tier="t2">T2</button>
+                    <button type="button" class="tier-tab token-shop-helper-tab" data-token-shop-helper-tier="t3">T3</button>
+                    <button type="button" class="tier-tab token-shop-helper-tab" data-token-shop-helper-tier="t4">T4</button>
                   </div>
                   <div class="field-grid tokenshop-levels-grid" id="tokenshopLevelsGrid">
                     <div class="field-group">
@@ -875,15 +879,7 @@
               ></div>
             </section>
 
-            <section class="panel">
-              <div class="panel-header">
-                <div>
-                  <p class="eyebrow">Active Subsystem</p>
-                  <h2>Current progression surface</h2>
-                </div>
-              </div>
-              <div id="progressionResults" class="recommendation-list"></div>
-            </section>
+            <div id="progressionResults" class="recommendation-list"></div>
           </div>
         </section>
 
@@ -984,6 +980,87 @@
             <div id="researchResults" class="research-stack"></div>
           </section>
         </section>
+
+        <section class="page" data-page="traceGap">
+          <div class="page-header">
+            <div>
+              <p class="eyebrow">Trace Gap Deck</p>
+              <h2>DB-backed best-gap launch, status, and diagnostics</h2>
+            </div>
+          </div>
+          <div class="page-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Launcher Controls</p>
+                  <h2>Bounded trace-gap run controls</h2>
+                </div>
+              </div>
+              <p class="meta">
+                This surface stays on the DB-first recovery path. It preflights or executes the
+                current best gap without widening into unrelated families.
+              </p>
+              <div class="module-controls">
+                <div class="field-group">
+                  <label for="traceGapRepeat">Best-gap reruns</label>
+                  <input
+                    id="traceGapRepeat"
+                    type="number"
+                    min="1"
+                    max="9"
+                    step="1"
+                    value="1"
+                  />
+                </div>
+              </div>
+              <div class="profile-actions">
+                <button id="traceGapDryRunBtn" class="button">Plan best gap</button>
+                <button id="traceGapRunBtn" class="button button-primary">
+                  Run best gap
+                </button>
+                <button id="traceGapRestartServerBtn" class="button button-ghost">
+                  Restart local server
+                </button>
+              </div>
+              <div id="traceGapStatus" class="status-line"></div>
+              <div class="pill-row" id="traceGapPills"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-header">
+                <div>
+                  <p class="eyebrow">Run Summary</p>
+                  <h2>Selected target and current stop point</h2>
+                </div>
+              </div>
+              <div id="traceGapSummary" class="preview-stack"></div>
+            </section>
+          </div>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">DB Overview</p>
+                <h2>Materializer and trace-table health</h2>
+              </div>
+            </div>
+            <p class="meta">
+              This panel shows whether the DB-backed trace path is actually creating or refreshing
+              the rows you expect during a run.
+            </p>
+            <div id="traceGapDbOverview" class="validation-grid"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Diagnostics</p>
+                <h2>Live output, command, and bounded details</h2>
+              </div>
+            </div>
+            <div id="traceGapDiagnostics" class="preview-stack"></div>
+          </section>
+        </section>
       </main>
     </div>
 
@@ -991,7 +1068,9 @@
       window.__CIFI_SERVER_CAPABILITIES__ = {
         sessionApi: false,
         launcherMode: false,
-        systemUnitApi: false
+        systemUnitApi: false,
+        traceGapApi: false,
+        serverControlApi: false
       };
     </script>
     <script src="./app.js" type="module"></script>
