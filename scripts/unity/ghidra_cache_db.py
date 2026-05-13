@@ -30,6 +30,15 @@ CONTRACT_LITERAL_EXCLUDED_TRACE_FRAGMENT_KINDS = (
     "executionAnchors",
 )
 
+
+def _is_payload_searchable_term(term: str) -> bool:
+    normalized = str(term or "").strip().lower()
+    if len(normalized) < 3:
+        return False
+    if normalized.isdigit():
+        return False
+    return any(character.isalpha() for character in normalized)
+
 TRACE_FRAGMENT_TOP_LEVEL_KEYS = {
     "assetSet",
     "bridgePromotionRule",
@@ -166,6 +175,40 @@ def _json_loads(value: str | None, default: Any) -> Any:
         return json.loads(value)
     except json.JSONDecodeError:
         return default
+
+
+def _materialized_target_bundle_payload_rank(
+    payload: dict[str, Any] | None,
+    *,
+    built_at: str = "",
+    request_signature: str = "",
+) -> tuple[int, int, str]:
+    payload = dict(payload or {})
+    planner_resolution = dict(payload.get("plannerResolution") or {})
+    trace_registry = dict(payload.get("traceRegistry") or {})
+    target = dict(payload.get("target") or {})
+    trace_run = dict(payload.get("traceRun") or {})
+    post_run_discoveries = dict(payload.get("postRunDiscoveries") or {})
+    native_trace = dict(payload.get("nativeTrace") or {})
+    score = 0
+    if planner_resolution:
+        score += 100
+    if str(trace_registry.get("executionTraceScope") or "").strip():
+        score += 100
+    if str(trace_registry.get("selectedSubjectKey") or "").strip():
+        score += 60
+    if str(trace_registry.get("selectedFamilyId") or "").strip():
+        score += 40
+    if str(target.get("id") or "").strip():
+        score += 40
+    if trace_run:
+        score += 30
+    if post_run_discoveries:
+        score += 20
+    if native_trace:
+        score += 10
+    built_sort = int(re.sub(r"\D", "", str(built_at or "")) or "0")
+    return (score, built_sort, str(request_signature or ""))
 
 
 def _term_signature(search_terms: list[str]) -> str:
@@ -310,10 +353,11 @@ def _subject_state_quality_tuple(payload: dict[str, Any], built_at: str = "") ->
     proof_count = len([item for item in (payload.get("proofs") or []) if isinstance(item, dict)])
     signal_count = len(blocked_edges) + len(missing_edges) + len(known_edges) + len(nonblocking_edges) + proof_count
     clear_rank = 1 if next_status == "clear" and signal_count > 0 else 0
+    no_negative_rank = 1 if not blocked_edges and not missing_edges else 0
     return (
         verdict_rank,
-        1 if blocked_edges or missing_edges else 0,
         clear_rank,
+        no_negative_rank,
         signal_count,
         -len(blocked_edges),
         -len(missing_edges),
@@ -323,6 +367,18 @@ def _subject_state_quality_tuple(payload: dict[str, Any], built_at: str = "") ->
         canonical_id_rank,
         str(built_at or ""),
     )
+
+
+def _subject_state_open_edge_set(payload: dict[str, Any]) -> set[str]:
+    payload = dict(payload or {})
+    return {
+        str(value).strip()
+        for value in [
+            *list(payload.get("blockedEdges") or []),
+            *list(payload.get("missingEdges") or []),
+        ]
+        if str(value).strip()
+    }
 
 
 def _collect_reconstruction_subject_terms(payload: dict[str, Any]) -> list[str]:
@@ -2019,12 +2075,15 @@ def _derive_token_shop_reconstruction_fragment(
     assessment_summary: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     target = dict(payload.get("target") or {})
-    if str(target.get("familyId") or "") != "token-shop":
+    family_id = str(target.get("familyId") or payload.get("familyId") or "").strip()
+    if not family_id and str(trace_scope or "").startswith("token-shop-"):
+        family_id = "token-shop"
+    if family_id != "token-shop":
         return None
 
     formula_fragment = dict(payload.get("formula_fragment") or {})
     runtime_table_fragment = dict(payload.get("runtime_table_fragment") or {})
-    target_id = str(target.get("id") or trace_scope).strip()
+    target_id = str(target.get("id") or target.get("targetId") or payload.get("targetId") or trace_scope).strip()
     row_recovery = _sanitize_row_recovery_for_persistence(dict(payload.get("rowRecovery") or {}))
     row_scope_id = _normalize_token_shop_row_scope_id(
         trace_scope,
@@ -2053,6 +2112,16 @@ def _derive_token_shop_reconstruction_fragment(
         if isinstance(path, dict)
     ]
     presentation_path = dict(presentation_paths[0] or {}) if presentation_paths else {}
+    presentation_update_hooks = _unique_strings(
+        [
+            str(hook).strip()
+            for path in presentation_paths
+            if isinstance(path, dict)
+            and (list(path.get("interactionToRenderPaths") or []) or list(path.get("interactionNodes") or []))
+            for hook in (path.get("updateHookCandidates") or [])
+            if str(hook).strip()
+        ]
+    )
     slots = dict(presentation_path.get("slots") or {})
     shell_windows = [
         shell_window
@@ -2073,6 +2142,23 @@ def _derive_token_shop_reconstruction_fragment(
     row_local_graph = dict(row_scope.get("rowLocalGraph") or {})
     semantic_graph = dict(row_scope.get("semanticGraph") or {})
     missing_seams = list(row_scope.get("missingSeams") or [])
+    if presentation_update_hooks:
+        if not row_local_graph:
+            row_local_graph = {}
+        row_local_graph["updateHooks"] = _unique_strings(
+            [
+                *[str(value).strip() for value in (row_local_graph.get("updateHooks") or []) if str(value).strip()],
+                *presentation_update_hooks,
+            ]
+        )
+        missing_seams = [
+            seam
+            for seam in missing_seams
+            if not (
+                isinstance(seam, dict)
+                and str(seam.get("id") or "").strip() == "exact-display-update-path"
+            )
+        ]
     missing_seam_ids = _unique_strings(
         [str(item.get("id") or "") for item in missing_seams if isinstance(item, dict) and str(item.get("id") or "").strip()]
     )
@@ -2458,6 +2544,101 @@ BOOTSTRAP_OUTPUT_SUMMARY_RULES = {
 }
 
 RELATION_SEAM_CONTRACT_REGISTRY: dict[str, dict[str, dict[str, Any]]] = {
+    "token-shop": {
+        "exact-cellboost-consumer-method": {
+            "coverageMode": "relation-shaped",
+            "probeMode": "relation-shaped",
+            "allowedTraceScopes": [
+                "token-shop-atu3-chest-consumer",
+                "token-shop-atu3-chest-consumer-read",
+                "token-shop-atu3-cells-effect",
+            ],
+            "traceScope": "token-shop-atu3-chest-consumer-read",
+            "requiredCoverageSeamIds": ["exact-cellboost-consumer-method"],
+            "fallbackExpectedTerms": [
+                "get_SmallAdCellGains",
+                "get_BigAdCellGains",
+                "SetBoosterAdBonus",
+                "get_FinalBoosterAdBonus",
+                "SmallAdCellGains",
+                "BigAdCellGains",
+                "FinalBoosterAdBonus",
+                "<BoosterAdRoutine>d__158",
+                "<FinalAdTokenChestBonus>k__BackingField",
+                "<FinalDiamondChestBonus>k__BackingField",
+            ],
+            "fallbackAnchors": [
+                "get_SmallAdCellGains",
+                "get_BigAdCellGains",
+                "SetBoosterAdBonus",
+                "get_FinalBoosterAdBonus",
+            ],
+            "routine": "token-shop-atu3-consumer-read-trace",
+            "skipNativeExecution": False,
+        },
+        "exact-cellboost-to-booster-bonus-handoff": {
+            "coverageMode": "relation-shaped",
+            "probeMode": "relation-shaped",
+            "allowedTraceScopes": [
+                "token-shop-atu3-chest-consumer",
+                "token-shop-atu3-chest-consumer-read",
+                "token-shop-atu3-cells-effect",
+            ],
+            "traceScope": "token-shop-atu3-chest-consumer-read",
+            "requiredCoverageSeamIds": ["exact-cellboost-to-booster-bonus-handoff"],
+            "fallbackExpectedTerms": [
+                "get_SmallAdCellGains",
+                "get_BigAdCellGains",
+                "SetBoosterAdBonus",
+                "get_FinalBoosterAdBonus",
+                "SmallAdCellGains",
+                "BigAdCellGains",
+                "FinalBoosterAdBonus",
+                "<BoosterAdRoutine>d__158",
+                "<FinalAdTokenChestBonus>k__BackingField",
+                "<FinalDiamondChestBonus>k__BackingField",
+            ],
+            "fallbackAnchors": [
+                "SetBoosterAdBonus",
+                "get_FinalBoosterAdBonus",
+                "get_SmallAdCellGains",
+                "get_BigAdCellGains",
+            ],
+            "routine": "token-shop-atu3-consumer-read-trace",
+            "skipNativeExecution": False,
+        },
+        "runtime-model-gap": {
+            "coverageMode": "relation-shaped",
+            "probeMode": "relation-shaped",
+            "allowedTraceScopes": [
+                "token-shop-atu3-chest-consumer",
+                "token-shop-atu3-chest-consumer-read",
+                "token-shop-atu3-cells-effect",
+            ],
+            "traceScope": "token-shop-atu3-chest-consumer-read",
+            "requiredCoverageSeamIds": ["runtime-model-gap"],
+            "fallbackExpectedTerms": [
+                "get_SmallAdCellGains",
+                "get_BigAdCellGains",
+                "SetBoosterAdBonus",
+                "get_FinalBoosterAdBonus",
+                "SmallAdCellGains",
+                "BigAdCellGains",
+                "FinalBoosterAdBonus",
+                "<BoosterAdRoutine>d__158",
+                "<FinalAdTokenChestBonus>k__BackingField",
+                "<FinalDiamondChestBonus>k__BackingField",
+            ],
+            "fallbackAnchors": [
+                "get_SmallAdCellGains",
+                "get_BigAdCellGains",
+                "get_FinalBoosterAdBonus",
+                "SetBoosterAdBonus",
+            ],
+            "routine": "token-shop-atu3-consumer-read-trace",
+            "skipNativeExecution": False,
+        },
+    },
     "multiverse-market-save-owner": {
         "typed-market-field-recovery": {
             "coverageMode": "relation-shaped",
@@ -3478,6 +3659,12 @@ def _derive_execution_context_fragment(
     selected_subject_key = str(planner_resolution.get("selectedSubjectKey") or trace_registry.get("selectedSubjectKey") or "").strip()
     execution_target_id = str(trace_registry.get("executionTargetId") or target_id).strip()
     execution_trace_scope = str(trace_registry.get("executionTraceScope") or trace_scope).strip()
+    trace_routine_hint = str(
+        target.get("traceRoutineHint")
+        or trace_registry.get("executionRoutineId")
+        or trace_workflow.get("traceRoutineHint")
+        or ""
+    ).strip()
     if family_id == "token-shop" and "family" not in trace_scope:
         expected_row_field = ""
         expected_match = re.search(
@@ -3509,6 +3696,7 @@ def _derive_execution_context_fragment(
             selected_subject_key,
             execution_target_id,
             execution_trace_scope,
+            trace_routine_hint,
         ]
     ):
         return None
@@ -3529,6 +3717,7 @@ def _derive_execution_context_fragment(
         "targetId": target_id or trace_scope,
         "executionTargetId": execution_target_id or target_id or trace_scope,
         "executionTraceScope": execution_trace_scope or trace_scope,
+        "traceRoutineHint": trace_routine_hint or None,
         "familyId": family_id,
         "label": label,
         "acceptedAnchors": accepted_anchors,
@@ -3607,6 +3796,73 @@ def _normalize_token_shop_support_rows(
         if str(row.get("field") or row.get("shellField") or "").strip() == expected_row_field
     ]
     return filtered_rows or rows
+
+
+def _derive_execution_plan_relation_seam_contracts(
+    family_id: str,
+    trace_scope: str,
+    claim_stages: list[dict[str, Any]] | None,
+    follow_up_terms: list[str] | None = None,
+    trace_routine_hint: str = "",
+) -> dict[str, dict[str, Any]]:
+    family_id = str(family_id or "").strip()
+    trace_scope = str(trace_scope or "").strip()
+    registry = dict(RELATION_SEAM_CONTRACT_REGISTRY.get(family_id) or {})
+    normalized_trace_routine_hint = str(trace_routine_hint or "").strip()
+    normalized_follow_up_terms = _unique_strings([str(value).strip() for value in (follow_up_terms or []) if str(value).strip()])
+    if not family_id or not trace_scope or not registry:
+        registry = {}
+    missing_seam_ids = _unique_strings(
+        [
+            str(seam_id).strip()
+            for claim_stage in list(claim_stages or [])
+            if isinstance(claim_stage, dict)
+            for seam_id in list(claim_stage.get("missingSeamIds") or [])
+            if str(seam_id).strip()
+        ]
+    )
+    missing_seam_set = set(missing_seam_ids)
+    contracts: dict[str, dict[str, Any]] = {}
+    for seam_id, raw_contract in registry.items():
+        normalized_seam_id = str(seam_id or "").strip()
+        if not normalized_seam_id:
+            continue
+        contract = dict(raw_contract or {})
+        allowed_trace_scopes = {
+            str(value).strip()
+            for value in (contract.get("allowedTraceScopes") or [])
+            if str(value).strip()
+        }
+        contract_trace_scope = str(contract.get("traceScope") or "").strip()
+        if allowed_trace_scopes and trace_scope not in allowed_trace_scopes:
+            continue
+        if missing_seam_set and normalized_seam_id not in missing_seam_set:
+            if contract_trace_scope and contract_trace_scope != trace_scope:
+                continue
+            if not allowed_trace_scopes and contract_trace_scope and contract_trace_scope != trace_scope:
+                continue
+        if not contract_trace_scope:
+            contract["traceScope"] = trace_scope
+        contract["source"] = "execution-plan-fragment"
+        contracts[normalized_seam_id] = contract
+    if contracts or not missing_seam_set:
+        return contracts
+    generic_probe_mode = "relation-shaped"
+    for seam_id in missing_seam_ids:
+        normalized_seam_id = str(seam_id or "").strip()
+        if not normalized_seam_id:
+            continue
+        contracts[normalized_seam_id] = {
+            "traceScope": trace_scope,
+            "routine": normalized_trace_routine_hint or None,
+            "coverageMode": generic_probe_mode,
+            "probeMode": generic_probe_mode,
+            "requiredCoverageSeamIds": [normalized_seam_id],
+            "fallbackExpectedTerms": list(normalized_follow_up_terms[:12]),
+            "fallbackAnchors": list(normalized_follow_up_terms[:4]),
+            "source": "execution-plan-fragment-generic",
+        }
+    return contracts
 
 
 def _derive_token_shop_execution_plan_fragment(
@@ -3754,16 +4010,25 @@ def _derive_token_shop_execution_plan_fragment(
         str(target.get("id") or trace_scope),
         support_payloads,
     )
+    relation_seam_contracts = _derive_execution_plan_relation_seam_contracts(
+        "token-shop",
+        trace_scope,
+        claim_stages,
+        follow_up_terms,
+        str(target.get("traceRoutineHint") or ""),
+    )
     return {
         "semanticKey": f"target-execution-plan:{trace_scope}",
         "traceScope": trace_scope,
         "targetId": str(target.get("id") or trace_scope),
         "familyId": "token-shop",
+        "traceRoutineHint": str(target.get("traceRoutineHint") or "") or None,
         "subjectKind": "family-graph" if family_graph_fragment else "semantic-scope",
         "joinGoal": join_goal,
         "followUpTerms": follow_up_terms,
         "claimStages": claim_stages,
         "depthPlan": depth_plan,
+        "relationSeamContracts": relation_seam_contracts or None,
         "sourceIds": source_ids,
         "updatedAt": datetime.now().isoformat(timespec="seconds"),
         "support": support,
@@ -3825,16 +4090,25 @@ def _derive_generic_execution_plan_fragment(
             dict((family_graph_fragment or {}).get("support") or {}),
         ],
     )
+    relation_seam_contracts = _derive_execution_plan_relation_seam_contracts(
+        family_id,
+        trace_scope,
+        claim_stages,
+        follow_up_terms,
+        str(target.get("traceRoutineHint") or ""),
+    )
     return {
         "semanticKey": f"target-execution-plan:{trace_scope}",
         "traceScope": trace_scope,
         "targetId": str(target.get("id") or trace_scope),
         "familyId": family_id,
+        "traceRoutineHint": str(target.get("traceRoutineHint") or "") or None,
         "subjectKind": "family-graph",
         "joinGoal": join_goal,
         "followUpTerms": follow_up_terms,
         "claimStages": claim_stages,
         "depthPlan": depth_plan,
+        "relationSeamContracts": relation_seam_contracts or None,
         "sourceIds": source_ids,
         "updatedAt": datetime.now().isoformat(timespec="seconds"),
         "support": support,
@@ -3874,6 +4148,11 @@ def _derive_surface_plan_fragment(
                 "sourceIds": source_ids,
             }
         )
+    surface_plans = _merge_surface_plans_with_bootstrap_support_surfaces(
+        surface_plans,
+        str(target.get("id") or "").strip(),
+        trace_scope,
+    )
     if not surface_plans:
         return None
     support = _collect_trace_support_metadata(
@@ -3894,6 +4173,68 @@ def _derive_surface_plan_fragment(
         "updatedAt": datetime.now().isoformat(timespec="seconds"),
         "support": support,
     }
+
+
+def _merge_surface_plans_with_bootstrap_support_surfaces(
+    surface_plans: list[dict[str, Any]] | None,
+    target_id: str,
+    trace_scope: str,
+) -> list[dict[str, Any]]:
+    existing_surface_plans = [dict(item) for item in (surface_plans or []) if isinstance(item, dict)]
+    strategy_support_context = dict(
+        BOOTSTRAP_SUPPORT_CONTEXTS.get(str(target_id or "").strip() or trace_scope)
+        or BOOTSTRAP_SUPPORT_CONTEXTS.get(trace_scope)
+        or {}
+    )
+    configured_surfaces = [dict(item) for item in (strategy_support_context.get("surfaces") or []) if isinstance(item, dict)]
+    if not configured_surfaces:
+        return existing_surface_plans
+    merged_by_id: dict[str, dict[str, Any]] = {
+        str(surface.get("id") or "").strip(): dict(surface)
+        for surface in existing_surface_plans
+        if str(surface.get("id") or "").strip()
+    }
+    for configured_surface in configured_surfaces:
+        surface_id = str(configured_surface.get("id") or "").strip()
+        if not surface_id:
+            continue
+        existing_surface = dict(merged_by_id.get(surface_id) or {})
+        merged_by_id[surface_id] = {
+            "id": surface_id,
+            "label": str(existing_surface.get("label") or configured_surface.get("label") or "").strip(),
+            "terms": _unique_strings(
+                [
+                    *[str(value) for value in (existing_surface.get("terms") or []) if str(value).strip()],
+                    *[str(value) for value in (configured_surface.get("terms") or []) if str(value).strip()],
+                ]
+            ),
+            "sourceIds": _unique_strings(
+                [
+                    *[str(value) for value in (existing_surface.get("sourceIds") or []) if str(value).strip()],
+                    *[str(value) for value in (configured_surface.get("sourceIds") or []) if str(value).strip()],
+                ]
+            ),
+        }
+    ordered_surface_ids = [
+        *[
+            str(surface.get("id") or "").strip()
+            for surface in existing_surface_plans
+            if str(surface.get("id") or "").strip()
+        ],
+        *[
+            str(surface.get("id") or "").strip()
+            for surface in configured_surfaces
+            if str(surface.get("id") or "").strip()
+        ],
+    ]
+    seen_surface_ids: set[str] = set()
+    merged_surface_plans: list[dict[str, Any]] = []
+    for surface_id in ordered_surface_ids:
+        if not surface_id or surface_id in seen_surface_ids or surface_id not in merged_by_id:
+            continue
+        seen_surface_ids.add(surface_id)
+        merged_surface_plans.append(dict(merged_by_id[surface_id]))
+    return merged_surface_plans
 
 
 def _derive_graph_plan_fragment(
@@ -5155,6 +5496,96 @@ def _derive_relation_rule_edges(
         if bool(rule.get("nonblocking")):
             nonblocking_edges.append(edge_type)
     return _unique_strings(known_edges), _unique_strings(nonblocking_edges)
+
+
+def _compact_subject_state_dependency_bundle(
+    latest_bundle: dict[str, Any] | None,
+    latest_native_trace: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    latest_bundle = dict(latest_bundle or {})
+    latest_payload = dict(latest_bundle.get("payload") or {})
+    latest_native_trace = dict(latest_native_trace or latest_payload.get("nativeTrace") or {})
+    trace_graph = dict(latest_payload.get("traceGraph") or {})
+    bridge_check = dict(latest_payload.get("bridgeCheck") or {})
+    decision_summary = dict(latest_payload.get("decisionSummary") or {})
+
+    def _compact_edge(edge: Any) -> dict[str, Any]:
+        edge = dict(edge or {})
+        proofs = [
+            {
+                "sourceId": str(proof.get("sourceId") or "").strip(),
+                "sourcePath": str(proof.get("sourcePath") or "").strip(),
+                "term": str(proof.get("term") or "").strip(),
+                "locator": str(proof.get("locator") or "").strip(),
+            }
+            for proof in (edge.get("provedBy") or [])
+            if isinstance(proof, dict)
+        ]
+        return {
+            "type": str(edge.get("type") or "").strip(),
+            "status": str(edge.get("status") or "").strip(),
+            "from": str(edge.get("from") or "").strip(),
+            "to": str(edge.get("to") or "").strip(),
+            "statement": str(edge.get("statement") or "").strip(),
+            "provedBy": proofs,
+        }
+
+    compact_native_summary = dict(latest_native_trace.get("summary") or {})
+    compact_native_context = dict(latest_native_trace.get("requestContext") or {})
+    compact_native_reuse = dict(latest_native_trace.get("reuseReport") or {})
+    return {
+        "builtAt": str(latest_bundle.get("builtAt") or "").strip(),
+        "target": {
+            "id": str((latest_payload.get("target") or {}).get("id") or "").strip(),
+            "familyId": str((latest_payload.get("target") or {}).get("familyId") or "").strip(),
+        },
+        "decisionSummary": {
+            "verdict": str(decision_summary.get("verdict") or "").strip(),
+            "summary": str(decision_summary.get("summary") or "").strip(),
+            "baselineGap": _unique_strings([str(value).strip() for value in (decision_summary.get("baselineGap") or []) if str(value).strip()]),
+            "blockedEdgeTypes": _unique_strings([str(value).strip() for value in (decision_summary.get("blockedEdgeTypes") or []) if str(value).strip()]),
+            "supportingEdgeTypes": _unique_strings([str(value).strip() for value in (decision_summary.get("supportingEdgeTypes") or []) if str(value).strip()]),
+            "provedEdgeCount": int(decision_summary.get("provedEdgeCount") or 0),
+            "negativeEdgeCount": int(decision_summary.get("negativeEdgeCount") or 0),
+        },
+        "bridgeCheck": {
+            "status": str(bridge_check.get("status") or "").strip(),
+            "clearedEdgeTypes": _unique_strings([str(value).strip() for value in (bridge_check.get("clearedEdgeTypes") or []) if str(value).strip()]),
+            "blockedEdgeTypes": _unique_strings([str(value).strip() for value in (bridge_check.get("blockedEdgeTypes") or []) if str(value).strip()]),
+            "missingEdgeTypes": _unique_strings([str(value).strip() for value in (bridge_check.get("missingEdgeTypes") or []) if str(value).strip()]),
+        },
+        "traceGraph": {
+            "edges": [_compact_edge(edge) for edge in (trace_graph.get("edges") or []) if isinstance(edge, dict)],
+            "negativeEdges": [_compact_edge(edge) for edge in (trace_graph.get("negativeEdges") or []) if isinstance(edge, dict)],
+        },
+        "runtimeStatus": str(latest_payload.get("runtimeStatus") or "").strip(),
+        "nativeTrace": {
+            "requestContext": {
+                "coverageMode": str(compact_native_context.get("coverageMode") or "").strip(),
+                "subjectId": str(compact_native_context.get("subjectId") or "").strip(),
+                "seamId": str(compact_native_context.get("seamId") or "").strip(),
+                "executionRoutineId": str(compact_native_context.get("executionRoutineId") or "").strip(),
+                "edgeOnly": bool(compact_native_context.get("edgeOnly")),
+                "expectedTerms": _unique_strings([str(value).strip() for value in (compact_native_context.get("expectedTerms") or []) if str(value).strip()]),
+                "anchors": _unique_strings([str(value).strip() for value in (compact_native_context.get("anchors") or []) if str(value).strip()]),
+            },
+            "summary": {
+                "reconstructedOwners": _unique_strings([str(value).strip() for value in (compact_native_summary.get("reconstructedOwners") or []) if str(value).strip()]),
+                "reconstructedMethods": _unique_strings([str(value).strip() for value in (compact_native_summary.get("reconstructedMethods") or []) if str(value).strip()]),
+                "reconstructedFields": _unique_strings([str(value).strip() for value in (compact_native_summary.get("reconstructedFields") or []) if str(value).strip()]),
+                "rawValueTerms": _unique_strings([str(value).strip() for value in (compact_native_summary.get("rawValueTerms") or []) if str(value).strip()]),
+                "promotedOwner": str(compact_native_summary.get("promotedOwner") or "").strip(),
+                "promotedMethods": _unique_strings([str(value).strip() for value in (compact_native_summary.get("promotedMethods") or []) if str(value).strip()]),
+                "promotedFields": _unique_strings([str(value).strip() for value in (compact_native_summary.get("promotedFields") or []) if str(value).strip()]),
+                "promotedRawValues": _unique_strings([str(value).strip() for value in (compact_native_summary.get("promotedRawValues") or []) if str(value).strip()]),
+            },
+            "reuseReport": {
+                "executedSearchTerms": _unique_strings([str(value).strip() for value in (compact_native_reuse.get("executedSearchTerms") or []) if str(value).strip()]),
+                "newlyTracedAnchors": _unique_strings([str(value).strip() for value in (compact_native_reuse.get("newlyTracedAnchors") or []) if str(value).strip()]),
+                "missingAnchorsAfterExecution": _unique_strings([str(value).strip() for value in (compact_native_reuse.get("missingAnchorsAfterExecution") or []) if str(value).strip()]),
+            },
+        },
+    }
 
 
 def _iter_multiverse_grounded_text_lanes(fragment_inputs: dict[str, Any]) -> list[dict[str, str | None]]:
@@ -7183,6 +7614,113 @@ def _derive_token_shop_range_row_details_from_support_surfaces(
     return {}
 
 
+def _looks_like_prefab_identity_term(term: str) -> bool:
+    term = str(term or "").strip()
+    if not term:
+        return False
+    lowered = term.lower()
+    return lowered.startswith("newtokenupgprefab.") or lowered.startswith("newdiamondupgprefab.")
+
+
+def _looks_like_shell_identity_term(term: str) -> bool:
+    term = str(term or "").strip()
+    if not term:
+        return False
+    if " through " in term and "button" in term.lower():
+        return True
+    return term.endswith("Button") or term.endswith("Overlay")
+
+
+def _looks_like_title_hook_term(term: str) -> bool:
+    term = str(term or "").strip()
+    if not term:
+        return False
+    return term in {"SetAllTokenShopTexts", "SetTokenTexts"}
+
+
+def _looks_like_title_surface_term(term: str) -> bool:
+    term = str(term or "").strip()
+    if not term:
+        return False
+    if _looks_like_title_hook_term(term) or _looks_like_prefab_identity_term(term) or _looks_like_shell_identity_term(term):
+        return False
+    lowered = term.lower()
+    if lowered.endswith(("button", "overlay", "content")):
+        return False
+    return " " in term
+
+
+def _is_title_localization_seam(seam_id: str) -> bool:
+    seam_id = str(seam_id or "").strip().lower()
+    return any(
+        token in seam_id
+        for token in (
+            "shell-to-title",
+            "title-localization",
+            "title-exemplar",
+        )
+    )
+
+
+def _is_shell_to_prefab_seam(seam_id: str) -> bool:
+    seam_id = str(seam_id or "").strip().lower()
+    return "shell-to-prefab" in seam_id or "prefab-subset" in seam_id
+
+
+def _is_shell_identity_seam(seam_id: str) -> bool:
+    seam_id = str(seam_id or "").strip().lower()
+    return "identity-gap" in seam_id
+
+
+def _derive_native_relation_satisfied_seams(
+    trace_scope: str,
+    subject_id: str,
+    native_trace_payload: dict[str, Any] | None,
+) -> list[str]:
+    native_trace_payload = dict(native_trace_payload or {})
+    request_context = dict(native_trace_payload.get("requestContext") or {})
+    if str(request_context.get("coverageMode") or "").strip() != "relation-shaped":
+        return []
+    if str(request_context.get("relationScope") or "").strip() != str(trace_scope or "").strip():
+        return []
+    request_subject_id = str(request_context.get("subjectId") or "").strip()
+    if request_subject_id and request_subject_id != str(subject_id or "").strip():
+        return []
+    bridge_plan = dict(native_trace_payload.get("bridgePlan") or {})
+    bridge_terms = _unique_strings(
+        [
+            *[str(value).strip() for value in (bridge_plan.get("bridgedTerms") or []) if str(value).strip()],
+            *[str(value).strip() for value in (bridge_plan.get("nativeCoreTerms") or []) if str(value).strip()],
+            *[str(value).strip() for value in (bridge_plan.get("contextTerms") or []) if str(value).strip()],
+            *[str(value).strip() for value in (bridge_plan.get("requestedTerms") or []) if str(value).strip()],
+            *[str(value).strip() for value in (request_context.get("expectedTerms") or []) if str(value).strip()],
+        ]
+    )
+    if not bridge_terms:
+        return []
+    has_prefab = any(_looks_like_prefab_identity_term(term) for term in bridge_terms)
+    has_shell = any(_looks_like_shell_identity_term(term) for term in bridge_terms)
+    has_title_hook = any(_looks_like_title_hook_term(term) for term in bridge_terms)
+    has_title_surface = any(_looks_like_title_surface_term(term) for term in bridge_terms)
+    satisfied: list[str] = []
+    for seam_id in _unique_strings(
+        [str(value).strip() for value in (request_context.get("requiredCoverageSeamIds") or []) if str(value).strip()]
+    ):
+        if _is_title_localization_seam(seam_id):
+            if has_shell and (has_title_surface or (has_prefab and has_title_hook)):
+                satisfied.append(seam_id)
+            continue
+        if _is_shell_to_prefab_seam(seam_id):
+            if has_prefab and has_shell:
+                satisfied.append(seam_id)
+            continue
+        if _is_shell_identity_seam(seam_id):
+            if has_prefab and has_shell:
+                satisfied.append(seam_id)
+            continue
+    return _unique_strings(satisfied)
+
+
 def _derive_generic_mechanics_views_from_subject_inputs(
     trace_scope: str,
     subject_state: dict[str, Any],
@@ -7401,20 +7939,48 @@ def _get_fact_status(facts: list[dict[str, Any]], edge_type: str) -> str:
     return ""
 
 
-def _collect_relation_contract_runtime_handoff(trace_payload: dict[str, Any]) -> dict[str, Any]:
+_RUNTIME_RELATION_HANDOFF_SPECS: list[dict[str, Any]] = [
+    {
+        "seamId": "exact-cellboost-consumer-method",
+        "allowedRelationScopes": {
+            "token-shop-atu3-chest-consumer",
+            "token-shop-atu3-chest-consumer-read",
+        },
+        "subjectPrefixes": ("row:ATU3",),
+        "factKinds": [
+            "exact-cellboost-consumer-method",
+        ],
+    },
+    {
+        "seamId": "exact-cellboost-to-booster-bonus-handoff",
+        "allowedRelationScopes": {
+            "token-shop-atu3-chest-consumer",
+            "token-shop-atu3-chest-consumer-read",
+        },
+        "subjectPrefixes": ("row:ATU3",),
+        "factKinds": [
+            "exact-cellboost-to-booster-bonus-handoff",
+            "typed-shared-effect-owner",
+            "runtime-model-gap",
+        ],
+    },
+]
+
+
+def _collect_relation_contract_runtime_handoffs(trace_payload: dict[str, Any]) -> list[dict[str, Any]]:
     native_trace = dict(trace_payload.get("nativeTrace") or {})
     request_context = dict(native_trace.get("requestContext") or {})
     if str(request_context.get("coverageMode") or "").strip() != "relation-shaped":
-        return {}
+        return []
     required_seams = _unique_strings(
         [str(value).strip() for value in (request_context.get("requiredCoverageSeamIds") or []) if str(value).strip()]
     )
-    if "exact-cellboost-to-booster-bonus-handoff" not in required_seams:
-        return {}
+    if not required_seams:
+        return []
     relation_scope = str(request_context.get("relationScope") or "").strip()
     subject_id = str(request_context.get("subjectId") or "").strip()
-    if relation_scope != "token-shop-atu3-chest-consumer-read" or subject_id != "row:ATU3Button":
-        return {}
+    if not subject_id:
+        return []
 
     summary = dict(native_trace.get("summary") or {})
     result = dict(native_trace.get("result") or {})
@@ -7459,7 +8025,7 @@ def _collect_relation_contract_runtime_handoff(trace_payload: dict[str, Any]) ->
         if not relation_handoff_terms:
             relation_handoff_terms = [term for term in expected_terms if term in handoff_term_pool or term in field_terms or term in method_terms]
     if not relation_consumer_methods or not relation_declaring_fields or not relation_handoff_terms:
-        return {}
+        return []
 
     cellboost_terms = {
         "CellBoostStartCost",
@@ -7485,13 +8051,13 @@ def _collect_relation_contract_runtime_handoff(trace_payload: dict[str, Any]) ->
 
     combined_relation_terms = set(relation_declaring_fields).union(relation_handoff_terms)
     if not (combined_relation_terms & cellboost_terms):
-        return {}
+        return []
     if not (set(relation_consumer_methods) & getter_methods):
-        return {}
+        return []
     if not (set(relation_consumer_methods) & booster_methods):
-        return {}
+        return []
     if not (combined_relation_terms & booster_terms):
-        return {}
+        return []
 
     supporting_owners: list[str] = []
     for owner, bucket in owner_to_terms.items():
@@ -7532,7 +8098,7 @@ def _collect_relation_contract_runtime_handoff(trace_payload: dict[str, Any]) ->
             supporting_owners.append(owner)
     supporting_owners = _unique_strings(supporting_owners)
     if not supporting_owners:
-        return {}
+        return []
 
     evidence_terms = _unique_strings(
         [
@@ -7544,48 +8110,200 @@ def _collect_relation_contract_runtime_handoff(trace_payload: dict[str, Any]) ->
     )
     proofs = [
         {
-            "edgeType": "exact-cellboost-to-booster-bonus-handoff",
+            "edgeType": "runtime-relation-handoff",
             "sourceId": "materialized-native-trace",
             "sourcePath": "nativeTrace.summary",
             "term": supporting_owners[0],
             "locator": "$.nativeTrace.result.managedReconstruction.ownerToTerms",
         },
         {
-            "edgeType": "exact-cellboost-to-booster-bonus-handoff",
+            "edgeType": "runtime-relation-handoff",
             "sourceId": "materialized-native-trace",
             "sourcePath": "nativeTrace.summary",
             "term": next((term for term in relation_consumer_methods if term in getter_methods), relation_consumer_methods[0]),
             "locator": "$.nativeTrace.summary.relationConsumerMethods",
         },
         {
-            "edgeType": "exact-cellboost-to-booster-bonus-handoff",
+            "edgeType": "runtime-relation-handoff",
             "sourceId": "materialized-native-trace",
             "sourcePath": "nativeTrace.summary",
             "term": next((term for term in relation_consumer_methods if term in booster_methods), relation_consumer_methods[-1]),
             "locator": "$.nativeTrace.summary.relationConsumerMethods",
         },
         {
-            "edgeType": "exact-cellboost-to-booster-bonus-handoff",
+            "edgeType": "runtime-relation-handoff",
             "sourceId": "materialized-native-trace",
             "sourcePath": "nativeTrace.summary",
             "term": next((term for term in relation_declaring_fields if term in cellboost_terms), relation_declaring_fields[0]),
             "locator": "$.nativeTrace.summary.relationDeclaringFields",
         },
         {
-            "edgeType": "exact-cellboost-to-booster-bonus-handoff",
+            "edgeType": "runtime-relation-handoff",
             "sourceId": "materialized-native-trace",
             "sourcePath": "nativeTrace.summary",
             "term": next((term for term in relation_handoff_terms if term in booster_terms), relation_handoff_terms[0]),
             "locator": "$.nativeTrace.summary.relationHandoffTerms",
         },
     ]
-    return {
-        "subjectId": subject_id,
-        "relationScope": relation_scope,
-        "supportingOwners": supporting_owners,
-        "evidenceTerms": evidence_terms[:12],
-        "proofs": proofs,
-    }
+    results: list[dict[str, Any]] = []
+    for spec in _RUNTIME_RELATION_HANDOFF_SPECS:
+        seam_id = str(spec.get("seamId") or "").strip()
+        if seam_id not in required_seams:
+            continue
+        allowed_relation_scopes = {
+            str(value).strip()
+            for value in (spec.get("allowedRelationScopes") or set())
+            if str(value).strip()
+        }
+        if allowed_relation_scopes and relation_scope and relation_scope not in allowed_relation_scopes:
+            continue
+        subject_prefixes = tuple(
+            str(value).strip()
+            for value in (spec.get("subjectPrefixes") or tuple())
+            if str(value).strip()
+        )
+        if subject_prefixes and not any(subject_id.startswith(prefix) for prefix in subject_prefixes):
+            continue
+        results.append(
+            {
+                "subjectId": subject_id,
+                "relationScope": relation_scope,
+                "coveredSeamIds": [seam_id],
+                "factKinds": _unique_strings([str(value).strip() for value in (spec.get("factKinds") or []) if str(value).strip()]),
+                "supportingOwners": supporting_owners,
+                "evidenceTerms": evidence_terms[:12],
+                "proofs": proofs,
+            }
+        )
+    return results
+
+
+def _diagnostic_seam_evidence_terms(
+    diagnostic_payload: dict[str, Any],
+    relation_coverage: dict[str, Any] | None = None,
+) -> list[str]:
+    relation_coverage = dict(relation_coverage or {})
+    seam_ids = _unique_strings(
+        [str(value).strip() for value in (relation_coverage.get("requiredSeams") or []) if str(value).strip()]
+    )
+    candidate_terms = _unique_strings(
+        [
+            *[str(value).strip() for value in (relation_coverage.get("evidenceTerms") or []) if str(value).strip()],
+            *[str(value).strip() for value in (diagnostic_payload.get("expectedCoverage") or []) if str(value).strip()],
+            str(diagnostic_payload.get("acquisitionTerm") or "").strip(),
+        ]
+    )
+    filtered_terms: list[str] = []
+    for term in candidate_terms:
+        lowered = term.lower()
+        if lowered in {"class", "method", "string", "path id"}:
+            continue
+        if not re.search(r"[A-Za-z_]", term):
+            continue
+        if seam_ids and not any(_subject_edge_terms_match_seam(seam_id, term) for seam_id in seam_ids):
+            continue
+        filtered_terms.append(term)
+    return _unique_strings(filtered_terms)
+
+
+def _looks_runtime_getter_term(term: str) -> bool:
+    normalized = str(term or "").strip()
+    return normalized.startswith("get_") or normalized.startswith("set_")
+
+
+def _looks_generic_placeholder_term(term: str) -> bool:
+    normalized = str(term or "").strip()
+    lowered = normalized.lower()
+    if lowered in {"class", "method", "string", "path id", "cost", "description"}:
+        return True
+    if normalized.endswith("MaxOverlay"):
+        return True
+    if lowered.endswith("startcost") or lowered.endswith("additivecost") or lowered.endswith("costexponent"):
+        return True
+    if lowered.endswith("maxlevel") or lowered.endswith("fillmaxlevel"):
+        return True
+    return False
+
+
+def _subject_edge_terms_match_seam(edge_type: str, term: str) -> bool:
+    normalized_edge = str(edge_type or "").strip().lower()
+    candidate = str(term or "").strip()
+    lowered = candidate.lower()
+    if not candidate:
+        return False
+    if _looks_generic_placeholder_term(candidate):
+        return False
+    if not re.search(r"[A-Za-z_]", candidate):
+        return False
+    if "title" in normalized_edge or "localization" in normalized_edge:
+        if _looks_runtime_getter_term(candidate):
+            return False
+        return any(
+            token in lowered
+            for token in (
+                "title",
+                "text",
+                "label",
+                "local",
+                "shop",
+                "upgrade",
+                "button",
+                "prefab",
+                "info",
+                "tab",
+                "tooltip",
+                "content",
+                "buy",
+            )
+        )
+    if "display-update-path" in normalized_edge or "display" in normalized_edge:
+        return not _looks_runtime_getter_term(candidate) and any(
+            token in lowered
+            for token in (
+                "display",
+                "text",
+                "label",
+                "fill",
+                "button",
+                "update",
+                "render",
+                "slot",
+                "buy",
+                "bonus",
+                "routine",
+            )
+        )
+    if "prefab" in normalized_edge or "identity" in normalized_edge:
+        return not _looks_runtime_getter_term(candidate) and any(
+            token in lowered
+            for token in (
+                "prefab",
+                "buy",
+                "button",
+                "upgrade",
+                "token",
+                "diamond",
+                "booster",
+                "daily",
+                "duo",
+                "trinity",
+                "campaign",
+            )
+        )
+    return True
+
+
+def _filter_subject_edge_terms(edge_type: str, terms: list[str] | None) -> list[str]:
+    candidates = _unique_strings([str(value).strip() for value in (terms or []) if str(value).strip()])
+    seam_filtered = [term for term in candidates if _subject_edge_terms_match_seam(edge_type, term)]
+    if seam_filtered:
+        return seam_filtered[:12]
+    fallback_filtered = [
+        term
+        for term in candidates
+        if not _looks_generic_placeholder_term(term) and re.search(r"[A-Za-z_]", term)
+    ]
+    return fallback_filtered[:12]
 
 
 def _build_subject_edge_facts(
@@ -7630,6 +8348,24 @@ def _build_subject_edge_facts(
     reconstruction_blocked_edge_types = _unique_strings(
         [str(value) for value in (reconstruction_assessment.get("blockedEdgeTypes") or []) if str(value).strip()]
     )
+    claim_stages = [stage for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]
+    if claim_stages:
+        planned_open_seam_ids = _unique_strings(
+            [
+                str(seam_id).strip()
+                for stage in claim_stages
+                for seam_id in (stage.get("missingSeamIds") or [])
+                if str(seam_id).strip()
+            ]
+        )
+        decision_baseline_gap = [
+            seam_id for seam_id in decision_baseline_gap
+            if seam_id in set(planned_open_seam_ids)
+        ]
+        decision_blocked_edge_types = [
+            seam_id for seam_id in decision_blocked_edge_types
+            if seam_id in set(planned_open_seam_ids)
+        ]
     prefer_decision_summary_range_gaps = (
         subject_class == "range-family"
         and bool(decision_blocked_edge_types)
@@ -7668,7 +8404,7 @@ def _build_subject_edge_facts(
                 "status": normalized_status,
                 "priority": int(priority),
                 "reason": str(reason or "").strip() or None,
-                "terms": _unique_strings([str(value) for value in (terms or []) if str(value).strip()])[:12],
+                "terms": _filter_subject_edge_terms(normalized_edge_type, terms),
                 "sourceIds": _unique_strings([str(value) for value in (source_ids or []) if str(value).strip()]),
                 "goal": str(goal or "").strip() or None,
                 "proofs": list(proofs or []),
@@ -7759,47 +8495,33 @@ def _build_subject_edge_facts(
                 proofs=support_proofs[:4],
             )
 
-    relation_handoff = _collect_relation_contract_runtime_handoff(trace_payload)
-    if subject_class == "row-local" and str(relation_handoff.get("subjectId") or "").strip() == subject_id:
-        relation_terms = _unique_strings(
-            [
-                *[str(value).strip() for value in (relation_handoff.get("evidenceTerms") or []) if str(value).strip()],
-                *follow_up_terms,
-                *support_terms,
-            ]
-        )
-        relation_proofs = list(relation_handoff.get("proofs") or []) or support_proofs[:4]
-        common_source_ids = ["materialized-native-trace", "canonical-term-view", "graph-links"]
-        add_fact(
-            "exact-cellboost-to-booster-bonus-handoff",
-            "known",
-            priority=5050,
-            reason="native-relation:exact-cellboost-handoff",
-            terms=relation_terms,
-            source_ids=common_source_ids,
-            goal=str(execution_context.get("joinGoal") or "").strip(),
-            proofs=relation_proofs[:4],
-        )
-        add_fact(
-            "typed-shared-effect-owner",
-            "known",
-            priority=5051,
-            reason="native-relation:typed-owner-covered",
-            terms=relation_terms,
-            source_ids=common_source_ids,
-            goal=str(execution_context.get("joinGoal") or "").strip(),
-            proofs=relation_proofs[:4],
-        )
-        add_fact(
-            "runtime-model-gap",
-            "known",
-            priority=5052,
-            reason="native-relation:runtime-model-covered",
-            terms=relation_terms,
-            source_ids=common_source_ids,
-            goal=str(execution_context.get("joinGoal") or "").strip(),
-            proofs=relation_proofs[:4],
-        )
+    relation_handoffs = list(_collect_relation_contract_runtime_handoffs(trace_payload) or [])
+    if subject_class == "row-local":
+        for relation_handoff in relation_handoffs:
+            if str(relation_handoff.get("subjectId") or "").strip() != subject_id:
+                continue
+            relation_terms = _unique_strings(
+                [
+                    *[str(value).strip() for value in (relation_handoff.get("evidenceTerms") or []) if str(value).strip()],
+                    *follow_up_terms,
+                    *support_terms,
+                ]
+            )
+            relation_proofs = list(relation_handoff.get("proofs") or []) or support_proofs[:4]
+            common_source_ids = ["materialized-native-trace", "canonical-term-view", "graph-links"]
+            for offset, fact_kind in enumerate(
+                _unique_strings([str(value).strip() for value in (relation_handoff.get("factKinds") or []) if str(value).strip()])
+            ):
+                add_fact(
+                    fact_kind,
+                    "known",
+                    priority=5050 + offset,
+                    reason=f"native-relation:{fact_kind}",
+                    terms=relation_terms,
+                    source_ids=common_source_ids,
+                    goal=str(execution_context.get("joinGoal") or "").strip(),
+                    proofs=relation_proofs[:4],
+                )
 
     for seam in (reconstruction_status.get("nonBlockingSeams") or []):
         if not isinstance(seam, dict):
@@ -7818,7 +8540,6 @@ def _build_subject_edge_facts(
             proofs=support_proofs[:4],
         )
 
-    claim_stages = [stage for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]
     missing_priority = 0
     if subject_class == "range-family":
         range_baseline_gap = decision_baseline_gap if prefer_decision_summary_range_gaps else reconstruction_baseline_gap
@@ -8027,6 +8748,25 @@ def _derive_subject_identity(
         expected_row_field = f"{match.group(1).upper()}Button"
 
     if effective_family_id == "token-shop" and "family" in trace_scope:
+        def _parse_token_shop_range_subject(subject_id: str) -> tuple[str, str] | None:
+            match = re.fullmatch(
+                r"range:token-shop:(ATU\d+Button)-(ATU\d+Button)",
+                str(subject_id or "").strip(),
+                re.IGNORECASE,
+            )
+            if not match:
+                return None
+            return (
+                f"{match.group(1)[:-6].upper()}Button",
+                f"{match.group(2)[:-6].upper()}Button",
+            )
+
+        def _token_shop_button_order(field: str) -> tuple[int, str]:
+            match = re.search(r"ATU(\d+)Button", str(field or ""), re.IGNORECASE)
+            if match:
+                return (int(match.group(1)), str(field or ""))
+            return (999999, str(field or ""))
+
         def collect_range_button_fields(values: list[str]) -> list[str]:
             normalized_fields: list[str] = []
             seen_fields: set[str] = set()
@@ -8037,6 +8777,7 @@ def _derive_subject_identity(
                         continue
                     seen_fields.add(field)
                     normalized_fields.append(field)
+            normalized_fields.sort(key=_token_shop_button_order)
             return normalized_fields
 
         row_fields = _unique_strings(
@@ -8058,6 +8799,13 @@ def _derive_subject_identity(
         if row_fields:
             first_field = row_fields[0]
             last_field = row_fields[-1]
+            selected_range = _parse_token_shop_range_subject(selected_subject_key)
+            if selected_range:
+                selected_first_field, selected_last_field = selected_range
+                row_field_set = set(row_fields)
+                if selected_first_field in row_field_set and selected_last_field in row_field_set:
+                    first_field = selected_first_field
+                    last_field = selected_last_field
             canonical_subject_id = f"range:{effective_family_id}:{first_field}-{last_field}"
             return {
                 "subjectId": canonical_subject_id,
@@ -8304,6 +9052,57 @@ def _resolver_support_surfaces_from_surface_plan(surface_plan: dict[str, Any]) -
     return surfaces
 
 
+def _merge_resolver_support_surfaces(
+    current_surfaces: list[dict[str, Any]] | None,
+    existing_surfaces: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    merged_by_id: dict[str, dict[str, Any]] = {}
+    ordered_surface_ids: list[str] = []
+    for candidate_surface in [
+        *[dict(item) for item in (existing_surfaces or []) if isinstance(item, dict)],
+        *[dict(item) for item in (current_surfaces or []) if isinstance(item, dict)],
+    ]:
+        surface_id = str(candidate_surface.get("id") or "").strip()
+        if not surface_id:
+            continue
+        existing_surface = dict(merged_by_id.get(surface_id) or {})
+        merged_by_id[surface_id] = {
+            "id": surface_id,
+            "label": str(candidate_surface.get("label") or existing_surface.get("label") or "").strip(),
+            "sourceIds": _unique_strings(
+                [
+                    *[
+                        str(value)
+                        for value in (existing_surface.get("sourceIds") or [])
+                        if str(value).strip()
+                    ],
+                    *[
+                        str(value)
+                        for value in (candidate_surface.get("sourceIds") or [])
+                        if str(value).strip()
+                    ],
+                ]
+            ),
+            "terms": _unique_strings(
+                [
+                    *[
+                        str(value)
+                        for value in (existing_surface.get("terms") or [])
+                        if str(value).strip()
+                    ],
+                    *[
+                        str(value)
+                        for value in (candidate_surface.get("terms") or [])
+                        if str(value).strip()
+                    ],
+                ]
+            ),
+        }
+        if surface_id not in ordered_surface_ids:
+            ordered_surface_ids.append(surface_id)
+    return [dict(merged_by_id[surface_id]) for surface_id in ordered_surface_ids if surface_id in merged_by_id]
+
+
 def _resolver_anchor_terms(
     trace_scope: str,
     execution_context: dict[str, Any],
@@ -8515,6 +9314,7 @@ def _derive_resolver_trace_workflow_policy(
     support_rows: list[dict[str, Any]],
     support_surfaces: list[dict[str, Any]],
     blocked_edge_types: list[str],
+    cleared_edge_types: list[str],
     anchor_terms: list[str],
 ) -> dict[str, Any]:
     effective_family_id = str(family_id or "").strip() or ("token-shop" if trace_scope.startswith("token-shop") else "")
@@ -8524,6 +9324,7 @@ def _derive_resolver_trace_workflow_policy(
         if str(surface.get("id") or "").strip()
     }
     blocked_edge_type_set = {str(value).strip() for value in blocked_edge_types if str(value).strip()}
+    cleared_edge_type_set = {str(value).strip() for value in cleared_edge_types if str(value).strip()}
     trace_routine_hint = ""
     family_trace_profile = ""
     disable_native_trace = False
@@ -8531,31 +9332,53 @@ def _derive_resolver_trace_workflow_policy(
     native_trace_terms: list[str] = []
 
     if effective_family_id == "token-shop":
+        if "exact-cellboost-to-booster-bonus-handoff" in blocked_edge_type_set and "exact-cellboost-consumer-method" not in blocked_edge_type_set:
+            if {
+                "consumer-family-to-cell-gain-getters",
+                "cell-gain-getters-to-booster-bonus-shell",
+            } <= cleared_edge_type_set:
+                trace_routine_hint = "token-shop-atu3-consumer-read-trace"
+        elif {
+            "exact-cellboost-consumer-method",
+            "exact-cellboost-to-booster-bonus-handoff",
+        } <= blocked_edge_type_set:
+            if {
+                "shared-effect-system",
+                "derived-player-effect-surface",
+                "parameter-surface",
+            } <= cleared_edge_type_set:
+                trace_routine_hint = "token-shop-atu3-effect-trace"
+            elif {
+                "shared-effect-to-consumer-family",
+                "consumer-family-to-chest-routines",
+                "consumer-family-to-bonus-shell",
+            } <= cleared_edge_type_set:
+                trace_routine_hint = "token-shop-atu3-consumer-trace"
         if len(support_rows) > 1:
-            trace_routine_hint = "token-shop-family-trace"
+            trace_routine_hint = trace_routine_hint or "token-shop-family-trace"
             if target_class == "range-family-audit" and {"title-text-surfaces", "prefab-roster", "effect-lane"} <= support_surface_ids:
                 family_trace_profile = "late-atu-family"
             elif {"title-text-surfaces", "prefab-roster", "action-lane"} <= support_surface_ids:
                 family_trace_profile = "generic-structure"
         else:
             if {"support-text-lane", "title-roster-gap", "prefab-lane"} <= support_surface_ids:
-                trace_routine_hint = "token-shop-mk1-title-trace"
+                trace_routine_hint = trace_routine_hint or "token-shop-mk1-title-trace"
             elif {"title-lane", "prefab-lane", "text-hooks"} <= support_surface_ids:
-                trace_routine_hint = "token-shop-mod-trace"
+                trace_routine_hint = trace_routine_hint or "token-shop-mod-trace"
             elif {"prefab-lane", "action-lane"} <= support_surface_ids and "metadata-neighborhood" in support_surface_ids:
-                trace_routine_hint = "token-shop-mk3-bridge-trace"
+                trace_routine_hint = trace_routine_hint or "token-shop-mk3-bridge-trace"
             elif {"prefab-roster", "action-lane"} <= support_surface_ids and (
                 "title-text-surfaces" in support_surface_ids
                 or "effect-lane" in support_surface_ids
                 or "family-shells" in support_surface_ids
             ):
-                trace_routine_hint = "token-shop-shell-bridge-trace"
+                trace_routine_hint = trace_routine_hint or "token-shop-shell-bridge-trace"
             elif {"shared-effect-title", "shared-effect-text", "detached-identity-surfaces"} <= support_surface_ids:
-                trace_routine_hint = "token-shop-atu3-effect-trace"
+                trace_routine_hint = trace_routine_hint or "token-shop-atu3-effect-trace"
             elif {"consumer-family", "consumer-routines", "chest-objects"} <= support_surface_ids:
-                trace_routine_hint = "token-shop-atu3-consumer-trace"
+                trace_routine_hint = trace_routine_hint or "token-shop-atu3-consumer-trace"
             elif {"consumer-family", "consumer-routines", "booster-bonus-shell"} <= support_surface_ids:
-                trace_routine_hint = "token-shop-atu3-consumer-read-trace"
+                trace_routine_hint = trace_routine_hint or "token-shop-atu3-consumer-read-trace"
             if "exact-display-update-path" in blocked_edge_type_set:
                 default_presentation_update_hook = "SetCostRelatedAttributes"
         if family_trace_profile == "late-atu-family":
@@ -8698,9 +9521,50 @@ def _build_materialized_trace_dependency_proof(
     )
 
 
+_TRACE_COMPARE_VOLATILE_KEYS = {
+    "builtAt",
+    "generatedAt",
+    "jobId",
+    "launcherLog",
+    "launcherPid",
+    "logFile",
+    "markerFile",
+    "materializedAt",
+    "outputFile",
+    "startTime",
+    "timestamp",
+    "updatedAt",
+}
+
+
+def _strip_trace_compare_volatiles(value: Any) -> Any:
+    if isinstance(value, dict):
+        output: dict[str, Any] = {}
+        for key, child in value.items():
+            key_str = str(key or "").strip()
+            if key_str in _TRACE_COMPARE_VOLATILE_KEYS:
+                continue
+            if key_str in {"cache", "headless"} and isinstance(child, dict):
+                sanitized_child = {
+                    nested_key: _strip_trace_compare_volatiles(nested_value)
+                    for nested_key, nested_value in child.items()
+                    if str(nested_key or "").strip() not in _TRACE_COMPARE_VOLATILE_KEYS
+                }
+                output[key] = sanitized_child
+                continue
+            output[key] = _strip_trace_compare_volatiles(child)
+        return output
+    if isinstance(value, list):
+        return [_strip_trace_compare_volatiles(item) for item in value]
+    return value
+
+
 def _stable_trace_fragment_compare_payload(fragment_kind: str, payload: Any) -> Any:
     stable = _stable_proof_value(payload)
-    if str(fragment_kind or "").strip() == "traceRun" and isinstance(stable, dict):
+    fragment_kind = str(fragment_kind or "").strip()
+    if fragment_kind in {"traceRun", "nativeTrace", "nativeReconstruction", "tracePayload"}:
+        stable = _strip_trace_compare_volatiles(stable)
+    if fragment_kind == "traceRun" and isinstance(stable, dict):
         stable.pop("materializedAt", None)
     return stable
 
@@ -8812,9 +9676,13 @@ def _derive_fragment_dependency_inputs(
     if fragment_kind == "token_shop_reconstruction_fragment":
         row_scope_key = str(((payload.get("rowRecovery") or {}).get("semanticScopeId")) or "")
         return {
+            "reducerInputVersion": "token-shop-reconstruction-ui-binding-v4",
             "formula": payload.get("formula_fragment"),
             "runtimeTable": payload.get("runtime_table_fragment"),
             "rowScope": derived_payloads.get(("semantic_scope_fragment", row_scope_key)),
+            "shellWindow": payload.get("shellWindow"),
+            "surfaces": payload.get("surfaces"),
+            "traceGraph": payload.get("traceGraph"),
             "assessment": derived_payloads.get(("assessment_fragment", f"target-assessment:{trace_scope}")),
         }
     if fragment_kind == "family_graph_fragment":
@@ -9296,7 +10164,11 @@ def _build_target_bundle_projection(
     execution_plan_fragment = dict((semantic_views.get("execution_plan_fragment") or {}).get(f"target-execution-plan:{trace_scope}") or {})
     graph_plan_fragment = dict((semantic_views.get("graph_plan_fragment") or {}).get(f"target-graph-plan:{trace_scope}") or {})
     bridge_policy_fragment = dict((semantic_views.get("bridge_policy_fragment") or {}).get(f"target-bridge-policy:{trace_scope}") or {})
-    closure_status = dict(((payload.get("rowRecovery") or {}).get("closureStatus") or {}))
+    live_row_recovery = dict(payload.get("rowRecovery") or {})
+    canonical_row_recovery = dict(token_shop_reconstruction_fragment.get("rowRecovery") or {})
+    effective_row_recovery = live_row_recovery or canonical_row_recovery
+    row_recovery_projection = _sanitize_row_recovery_for_persistence(effective_row_recovery)
+    closure_status = dict((effective_row_recovery.get("closureStatus") or {}))
     canonical_status = dict(token_shop_reconstruction_fragment.get("status") or {})
     decision_summary = dict(assessment_fragment.get("decisionSummary") or {})
     if not decision_summary:
@@ -9380,6 +10252,9 @@ def _build_target_bundle_projection(
         "generatedAt": payload.get("generatedAt"),
         "target": execution_context_fragment or payload.get("target"),
         "plannerResolution": payload.get("plannerResolution"),
+        "traceRun": payload.get("traceRun"),
+        "traceDirective": payload.get("traceDirective"),
+        "postRunDiscoveries": payload.get("postRunDiscoveries"),
         "traceRegistry": {
             "selectedSubjectKind": (payload.get("traceRegistry") or {}).get("selectedSubjectKind"),
             "selectedSubjectKey": (payload.get("traceRegistry") or {}).get("selectedSubjectKey"),
@@ -9415,6 +10290,7 @@ def _build_target_bundle_projection(
         "graphPlan": graph_plan_fragment or None,
         "bridgePolicySemanticKey": str(bridge_policy_fragment.get("semanticKey") or f"target-bridge-policy:{trace_scope}"),
         "bridgePolicy": bridge_policy_fragment or None,
+        "rowRecovery": row_recovery_projection or None,
         "sourceFamilies": _build_canonical_source_projection(payload),
         "nativeView": _build_native_view_projection(payload),
         "systemViews": projected_system_payload,
@@ -9502,12 +10378,15 @@ class GhidraCacheDB:
                     raise
                 time.sleep(0.25 * (attempt + 1))
 
+    def _timing_span(self, name: str):
+        return self.timing_span_factory(name) if callable(self.timing_span_factory) else nullcontext()
+
     @contextmanager
     def connect(self) -> Iterator[sqlite3.Connection]:
-        conn = sqlite3.connect(str(self.db_path), timeout=30.0)
+        conn = sqlite3.connect(str(self.db_path), timeout=120.0)
         conn.row_factory = sqlite3.Row
         conn.execute("PRAGMA foreign_keys=ON")
-        conn.execute("PRAGMA busy_timeout=30000")
+        conn.execute("PRAGMA busy_timeout=120000")
         conn.execute("PRAGMA synchronous=NORMAL")
         conn.execute("PRAGMA temp_store=MEMORY")
         conn.execute(f"PRAGMA cache_size={-int(SQLITE_CACHE_SIZE_KIB)}")
@@ -11048,6 +11927,36 @@ class GhidraCacheDB:
         )
         if not normalized_terms:
             return {}
+        weak_graph_source_terms = {
+            "",
+            "class",
+            "method",
+            "methods",
+            "string",
+            "strings",
+            "field",
+            "fields",
+            "cost",
+            "bonus",
+            "value",
+            "text",
+            "title",
+            "level",
+            "data",
+        }
+
+        def is_structural_graph_ref(row: sqlite3.Row) -> bool:
+            target_term = str(row["target_term"] or "").strip()
+            source_term = str(row["source_term"] or "").strip()
+            kind = str(row["kind"] or "").strip()
+            if not target_term or not source_term:
+                return False
+            if source_term == target_term:
+                return False
+            if source_term.lower() in weak_graph_source_terms:
+                return False
+            return kind in {"managed_graph_edge", "managed_graph_owner", "owner_candidates"}
+
         placeholders = ",".join("?" for _ in normalized_terms)
         with self.connect() as conn:
             term_rows = conn.execute(
@@ -11086,6 +11995,8 @@ class GhidraCacheDB:
         }
         graph_lookup: dict[str, list[dict[str, str]]] = {term: [] for term in normalized_terms}
         for row in graph_rows:
+            if not is_structural_graph_ref(row):
+                continue
             target_term = str(row["target_term"] or "")
             graph_lookup.setdefault(target_term, []).append(
                 {
@@ -11101,17 +12012,222 @@ class GhidraCacheDB:
             graph_refs = list(graph_lookup.get(normalized) or [])[:6]
             summaries[normalized] = {
                 "term": normalized,
-                "found": bool(term_view) or bool(graph_refs),
+                "found": bool(term_view),
                 "sourceIds": _unique_strings(
                     [
                         "canonical-term-view" if term_view else "",
-                        "graph-links" if graph_refs else "",
+                        "graph-links" if graph_refs and term_view else "",
                     ]
                 ),
                 "graphRefs": graph_refs,
                 "payloadHits": [],
             }
         return summaries
+
+    def find_contract_term_evidences(
+        self,
+        project_name: str,
+        project_file: str,
+        terms: list[str],
+        *,
+        sync_jobs: bool = True,
+    ) -> dict[str, dict[str, Any]]:
+        if sync_jobs:
+            self.sync_from_jobs_if_needed()
+        normalized_terms = _unique_strings(
+            [str(term or "").strip().lower() for term in terms if str(term or "").strip()]
+        )
+        if not normalized_terms:
+            return {}
+        weak_graph_source_terms = {
+            "",
+            "class",
+            "method",
+            "methods",
+            "string",
+            "strings",
+            "field",
+            "fields",
+            "cost",
+            "bonus",
+            "value",
+            "text",
+            "title",
+            "level",
+            "data",
+        }
+
+        def is_structural_graph_ref(row: sqlite3.Row) -> bool:
+            target_term = str(row["target_term"] or "").strip()
+            source_term = str(row["source_term"] or "").strip()
+            kind = str(row["kind"] or "").strip()
+            if not target_term or not source_term:
+                return False
+            if source_term == target_term:
+                return False
+            if source_term.lower() in weak_graph_source_terms:
+                return False
+            return kind in {"managed_graph_edge", "managed_graph_owner", "owner_candidates"}
+
+        placeholders = ",".join("?" for _ in normalized_terms)
+        excluded_fragment_placeholders = ",".join(
+            "?" for _ in CONTRACT_LITERAL_EXCLUDED_TRACE_FRAGMENT_KINDS
+        )
+        payload_search_terms = [
+            normalized for normalized in normalized_terms if _is_payload_searchable_term(normalized)
+        ]
+
+        def _build_payload_count_query(table_name: str, payload_column: str, *, exclude_fragment_kinds: bool) -> str:
+            term_count_columns = ", ".join(
+                f"SUM(CASE WHEN INSTR(LOWER({payload_column}), ?) > 0 THEN 1 ELSE 0 END) AS c{index}"
+                for index, _ in enumerate(payload_search_terms)
+            )
+            exclusion_clause = ""
+            if exclude_fragment_kinds:
+                exclusion_clause = (
+                    f"AND fragment_kind NOT IN ({excluded_fragment_placeholders})"
+                )
+            return f"""
+                SELECT {term_count_columns}
+                FROM {table_name}
+                WHERE project_name = ?
+                  AND project_file = ?
+                  {exclusion_clause}
+            """
+
+        with self.connect() as conn:
+            term_rows = conn.execute(
+                f"""
+                SELECT normalized_term, term, payload_json, provenance_json, updated_at
+                FROM materialized_term_views
+                WHERE project_name = ? AND project_file = ? AND normalized_term IN ({placeholders})
+                """,
+                (project_name, project_file, *normalized_terms),
+            ).fetchall()
+            graph_rows = conn.execute(
+                f"""
+                SELECT target_term, source_term, kind, source_ref
+                FROM graph_links
+                WHERE project_name = ? AND project_file = ? AND target_term IN ({placeholders})
+                ORDER BY start_time DESC
+                """,
+                (project_name, project_file, *normalized_terms),
+            ).fetchall()
+            evidence_count_row = None
+            trace_count_row = None
+            canonical_trace_count_row = None
+            if payload_search_terms:
+                evidence_count_row = conn.execute(
+                    _build_payload_count_query("evidence", "payload_json", exclude_fragment_kinds=False),
+                    tuple([*payload_search_terms, project_name, project_file]),
+                ).fetchone()
+                trace_count_row = conn.execute(
+                    _build_payload_count_query("trace_fragments", "payload_json", exclude_fragment_kinds=True),
+                    tuple(
+                        [
+                            *payload_search_terms,
+                            project_name,
+                            project_file,
+                            *CONTRACT_LITERAL_EXCLUDED_TRACE_FRAGMENT_KINDS,
+                        ]
+                    ),
+                ).fetchone()
+                canonical_trace_count_row = conn.execute(
+                    _build_payload_count_query(
+                        "canonical_trace_fragments",
+                        "canonical_payload_json",
+                        exclude_fragment_kinds=True,
+                    ),
+                    tuple(
+                        [
+                            *payload_search_terms,
+                            project_name,
+                            project_file,
+                            *CONTRACT_LITERAL_EXCLUDED_TRACE_FRAGMENT_KINDS,
+                        ]
+                    ),
+                ).fetchone()
+
+        term_lookup = {
+            str(row["normalized_term"] or ""): {
+                "job": {
+                    "job_id": "canonical-term:" + str(row["normalized_term"] or ""),
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "status": "completed",
+                    "start_time": str(row["updated_at"]),
+                    "output_file": None,
+                    "cache_mode": "canonical-term",
+                    "provenance": _json_loads(row["provenance_json"], {}),
+                },
+                "result": _json_loads(row["payload_json"], {}),
+                "terms": [str(row["term"])],
+            }
+            for row in term_rows
+        }
+        graph_lookup: dict[str, list[dict[str, str]]] = {term: [] for term in normalized_terms}
+        for row in graph_rows:
+            if not is_structural_graph_ref(row):
+                continue
+            target_term = str(row["target_term"] or "")
+            graph_lookup.setdefault(target_term, []).append(
+                {
+                    "value": target_term,
+                    "sourceTerm": str(row["source_term"]),
+                    "kind": str(row["kind"]),
+                    "sourceRef": str(row["source_ref"]),
+                }
+            )
+
+        payload_search_index = {
+            normalized: index for index, normalized in enumerate(payload_search_terms)
+        }
+
+        def _payload_count(count_row: sqlite3.Row | None, normalized: str) -> int:
+            if count_row is None:
+                return 0
+            index = payload_search_index.get(normalized)
+            if index is None:
+                return 0
+            return int(count_row[f"c{index}"] or 0)
+
+        evidences: dict[str, dict[str, Any]] = {}
+        for normalized in normalized_terms:
+            term_view = term_lookup.get(normalized)
+            graph_refs = list(graph_lookup.get(normalized) or [])[:6]
+            payload_hits: list[dict[str, Any]] = []
+            literal_sources: list[str] = []
+            evidence_count = _payload_count(evidence_count_row, normalized)
+            if evidence_count:
+                literal_sources.append("evidence-payload")
+                payload_hits.append({"source": "evidence-payload", "count": evidence_count})
+            trace_count = _payload_count(trace_count_row, normalized)
+            if trace_count:
+                literal_sources.append("trace-fragment-payload")
+                payload_hits.append({"source": "trace-fragment-payload", "count": trace_count})
+            canonical_trace_count = _payload_count(canonical_trace_count_row, normalized)
+            if canonical_trace_count:
+                literal_sources.append("canonical-trace-fragment-payload")
+                payload_hits.append(
+                    {
+                        "source": "canonical-trace-fragment-payload",
+                        "count": canonical_trace_count,
+                    }
+                )
+            evidences[normalized] = {
+                "term": normalized,
+                "found": bool(term_view) or bool(payload_hits),
+                "sourceIds": _unique_strings(
+                    [
+                        "canonical-term-view" if term_view else "",
+                        "graph-links" if graph_refs and (term_view or payload_hits) else "",
+                        *literal_sources,
+                    ]
+                ),
+                "graphRefs": graph_refs,
+                "payloadHits": payload_hits[:6],
+            }
+        return evidences
 
     def find_live_evidence_row(
         self,
@@ -11204,8 +12320,11 @@ class GhidraCacheDB:
         bridge_plan: dict[str, Any],
         family_hint: str | None = None,
         request_context: dict[str, Any] | None = None,
+        *,
+        skip_job_sync: bool = False,
     ) -> dict[str, Any]:
-        self.sync_from_jobs_if_needed()
+        if not skip_job_sync:
+            self.sync_from_jobs_if_needed()
         requested_terms = [str(term).strip() for term in requested_terms if str(term).strip()]
         search_terms = [str(term).strip() for term in search_terms if str(term).strip()]
         all_terms = _dedupe_sequence([*requested_terms, *search_terms])
@@ -11485,6 +12604,23 @@ class GhidraCacheDB:
     ) -> list[dict[str, str]]:
         if sync_jobs:
             self.sync_from_jobs_if_needed()
+        weak_graph_source_terms = {
+            "",
+            "class",
+            "method",
+            "methods",
+            "string",
+            "strings",
+            "field",
+            "fields",
+            "cost",
+            "bonus",
+            "value",
+            "text",
+            "title",
+            "level",
+            "data",
+        }
         with self.connect() as conn:
             rows = conn.execute(
                 """
@@ -11496,6 +12632,20 @@ class GhidraCacheDB:
                 """,
                 (project_name, project_file, term.lower()),
             ).fetchall()
+        filtered_rows = []
+        for row in rows:
+            source_term = str(row["source_term"] or "").strip()
+            target_term = str(row["target_term"] or "").strip()
+            kind = str(row["kind"] or "").strip()
+            if not source_term or not target_term:
+                continue
+            if source_term == target_term:
+                continue
+            if source_term.lower() in weak_graph_source_terms:
+                continue
+            if kind not in {"managed_graph_edge", "managed_graph_owner", "owner_candidates"}:
+                continue
+            filtered_rows.append(row)
         return [
             {
                 "value": str(row["target_term"]),
@@ -11503,7 +12653,7 @@ class GhidraCacheDB:
                 "kind": str(row["kind"]),
                 "sourceRef": str(row["source_ref"]),
             }
-            for row in rows
+            for row in filtered_rows
         ]
 
     def _find_contract_term_evidence(
@@ -11622,11 +12772,11 @@ class GhidraCacheDB:
                 )
         return {
             "term": normalized_term,
-            "found": bool(term_view) or bool(graph_refs) or bool(payload_hits),
+            "found": bool(term_view) or bool(payload_hits),
             "sourceIds": _unique_strings(
                 [
                     "canonical-term-view" if term_view else "",
-                    "graph-links" if graph_refs else "",
+                    "graph-links" if graph_refs and (term_view or payload_hits) else "",
                     *literal_sources,
                 ]
             ),
@@ -12900,64 +14050,41 @@ class GhidraCacheDB:
     def rebuild_trace_views(self, trace_scopes: list[str] | None = None) -> None:
         post_materialization_scopes: set[tuple[str, str, str]] = set()
         with self.connect() as conn:
-            _normalize_live_trace_fragment_payloads(conn)
+            with self._timing_span("reducerMaterializerRebuild.normalizeLiveTraceFragments"):
+                _normalize_live_trace_fragment_payloads(conn)
             requested_scopes = sorted({str(scope or "").strip() for scope in (trace_scopes or []) if str(scope or "").strip()})
             scoped_refresh = bool(requested_scopes)
-            if scoped_refresh:
-                placeholders = ",".join("?" for _ in requested_scopes)
-                rows = conn.execute(
-                    f"""
-                    SELECT * FROM trace_fragments
-                    WHERE is_valid = 1
-                      AND invalidated_at IS NULL
-                      AND trace_scope IN ({placeholders})
-                    ORDER BY project_name, project_file, trace_scope, request_signature, fragment_kind, updated_at DESC
-                    """,
-                    tuple(requested_scopes),
-                ).fetchall()
-            else:
-                conn.execute("DELETE FROM canonical_trace_fragments")
-                conn.execute("DELETE FROM materialized_trace_views")
-                conn.execute("DELETE FROM canonical_system_trace_views")
-                conn.execute("DELETE FROM canonical_semantic_fragments")
-                conn.execute("DELETE FROM materialized_target_bundle_views")
-                rows = conn.execute(
-                    """
-                    SELECT * FROM trace_fragments
-                    WHERE is_valid = 1 AND invalidated_at IS NULL
-                    ORDER BY project_name, project_file, trace_scope, request_signature, fragment_kind, updated_at DESC
-                    """
-                ).fetchall()
+            with self._timing_span("reducerMaterializerRebuild.loadTraceFragments"):
+                if scoped_refresh:
+                    placeholders = ",".join("?" for _ in requested_scopes)
+                    rows = conn.execute(
+                        f"""
+                        SELECT * FROM trace_fragments
+                        WHERE is_valid = 1
+                          AND invalidated_at IS NULL
+                          AND trace_scope IN ({placeholders})
+                        ORDER BY project_name, project_file, trace_scope, request_signature, fragment_kind, updated_at DESC
+                        """,
+                        tuple(requested_scopes),
+                    ).fetchall()
+                else:
+                    conn.execute("DELETE FROM canonical_trace_fragments")
+                    conn.execute("DELETE FROM materialized_trace_views")
+                    conn.execute("DELETE FROM canonical_system_trace_views")
+                    conn.execute("DELETE FROM canonical_semantic_fragments")
+                    conn.execute("DELETE FROM materialized_target_bundle_views")
+                    rows = conn.execute(
+                        """
+                        SELECT * FROM trace_fragments
+                        WHERE is_valid = 1 AND invalidated_at IS NULL
+                        ORDER BY project_name, project_file, trace_scope, request_signature, fragment_kind, updated_at DESC
+                        """
+                    ).fetchall()
             grouped: dict[tuple[str, str, str, str, str, str], list[sqlite3.Row]] = {}
-            for row in rows:
-                if _is_ignored_legacy_trace_fragment(row):
-                    continue
-                key = (
-                    str(row["project_name"]),
-                    str(row["project_file"]),
-                    str(row["trace_scope"]),
-                    str(row["request_signature"]),
-                    str(row["fragment_kind"]),
-                    str(row["fragment_key"]),
-                )
-                grouped.setdefault(key, []).append(row)
-            trace_groups: dict[tuple[str, str, str, str], dict[str, Any]] = {}
-            semantic_groups: dict[tuple[str, str, str, str], list[sqlite3.Row]] = {}
-            previous_canonical_trace_lookup: dict[tuple[str, str, str, str, str, str], dict[str, Any]] = {}
-            previous_materialized_trace_lookup: dict[tuple[str, str, str, str], dict[str, Any]] = {}
-            previous_system_trace_lookup: dict[tuple[str, str, str, str], dict[str, Any]] = {}
-            previous_semantic_lookup: dict[tuple[str, str, str, str], dict[str, Any]] = {}
-            previous_target_bundle_lookup: dict[tuple[str, str, str, str], dict[str, Any]] = {}
-            if scoped_refresh:
-                canonical_trace_rows = conn.execute(
-                    f"""
-                    SELECT *
-                    FROM canonical_trace_fragments
-                    WHERE trace_scope IN ({placeholders})
-                    """,
-                    tuple(requested_scopes),
-                ).fetchall()
-                for row in canonical_trace_rows:
+            with self._timing_span("reducerMaterializerRebuild.groupTraceFragments"):
+                for row in rows:
+                    if _is_ignored_legacy_trace_fragment(row):
+                        continue
                     key = (
                         str(row["project_name"]),
                         str(row["project_file"]),
@@ -12966,54 +14093,81 @@ class GhidraCacheDB:
                         str(row["fragment_kind"]),
                         str(row["fragment_key"]),
                     )
-                    previous_canonical_trace_lookup[key] = {
-                        "payload": _json_loads(row["canonical_payload_json"], {}),
-                        "alternates": _json_loads(row["alternate_payloads_json"], []),
-                        "provenance": _json_loads(row["provenance_json"], {}),
-                        "updatedAt": str(row["updated_at"] or ""),
-                    }
-                trace_view_rows = conn.execute(
-                    f"""
-                    SELECT *
-                    FROM materialized_trace_views
-                    WHERE trace_scope IN ({placeholders})
-                    """,
-                    tuple(requested_scopes),
-                ).fetchall()
-                for row in trace_view_rows:
-                    key = (
-                        str(row["project_name"]),
-                        str(row["project_file"]),
-                        str(row["trace_scope"]),
-                        str(row["request_signature"]),
-                    )
-                    previous_materialized_trace_lookup[key] = {
-                        "payload": _json_loads(row["payload_json"], {}),
-                        "provenance": _json_loads(row["provenance_json"], {}),
-                        "reducerVersion": str(row["reducer_version"] or ""),
-                        "builtAt": str(row["built_at"] or ""),
-                    }
-                system_trace_rows = conn.execute(
-                    f"""
-                    SELECT *
-                    FROM canonical_system_trace_views
-                    WHERE trace_scope IN ({placeholders})
-                    """,
-                    tuple(requested_scopes),
-                ).fetchall()
-                for row in system_trace_rows:
-                    key = (
-                        str(row["project_name"]),
-                        str(row["project_file"]),
-                        str(row["trace_scope"]),
-                        str(row["request_signature"]),
-                    )
-                    previous_system_trace_lookup[key] = {
-                        "payload": _json_loads(row["payload_json"], {}),
-                        "provenance": _json_loads(row["provenance_json"], {}),
-                        "reducerVersion": str(row["reducer_version"] or ""),
-                        "builtAt": str(row["built_at"] or ""),
-                    }
+                    grouped.setdefault(key, []).append(row)
+            trace_groups: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+            semantic_groups: dict[tuple[str, str, str, str], list[sqlite3.Row]] = {}
+            previous_canonical_trace_lookup: dict[tuple[str, str, str, str, str, str], dict[str, Any]] = {}
+            previous_materialized_trace_lookup: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+            previous_system_trace_lookup: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+            previous_semantic_lookup: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+            previous_target_bundle_lookup: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+            if scoped_refresh:
+                with self._timing_span("reducerMaterializerRebuild.loadPreviousTraceViews"):
+                    canonical_trace_rows = conn.execute(
+                        f"""
+                        SELECT *
+                        FROM canonical_trace_fragments
+                        WHERE trace_scope IN ({placeholders})
+                        """,
+                        tuple(requested_scopes),
+                    ).fetchall()
+                    for row in canonical_trace_rows:
+                        key = (
+                            str(row["project_name"]),
+                            str(row["project_file"]),
+                            str(row["trace_scope"]),
+                            str(row["request_signature"]),
+                            str(row["fragment_kind"]),
+                            str(row["fragment_key"]),
+                        )
+                        previous_canonical_trace_lookup[key] = {
+                            "payload": _json_loads(row["canonical_payload_json"], {}),
+                            "alternates": _json_loads(row["alternate_payloads_json"], []),
+                            "provenance": _json_loads(row["provenance_json"], {}),
+                            "updatedAt": str(row["updated_at"] or ""),
+                        }
+                    trace_view_rows = conn.execute(
+                        f"""
+                        SELECT *
+                        FROM materialized_trace_views
+                        WHERE trace_scope IN ({placeholders})
+                        """,
+                        tuple(requested_scopes),
+                    ).fetchall()
+                    for row in trace_view_rows:
+                        key = (
+                            str(row["project_name"]),
+                            str(row["project_file"]),
+                            str(row["trace_scope"]),
+                            str(row["request_signature"]),
+                        )
+                        previous_materialized_trace_lookup[key] = {
+                            "payload": _json_loads(row["payload_json"], {}),
+                            "provenance": _json_loads(row["provenance_json"], {}),
+                            "reducerVersion": str(row["reducer_version"] or ""),
+                            "builtAt": str(row["built_at"] or ""),
+                        }
+                    system_trace_rows = conn.execute(
+                        f"""
+                        SELECT *
+                        FROM canonical_system_trace_views
+                        WHERE trace_scope IN ({placeholders})
+                        """,
+                        tuple(requested_scopes),
+                    ).fetchall()
+                    for row in system_trace_rows:
+                        key = (
+                            str(row["project_name"]),
+                            str(row["project_file"]),
+                            str(row["trace_scope"]),
+                            str(row["request_signature"]),
+                        )
+                        previous_system_trace_lookup[key] = {
+                            "payload": _json_loads(row["payload_json"], {}),
+                            "provenance": _json_loads(row["provenance_json"], {}),
+                            "reducerVersion": str(row["reducer_version"] or ""),
+                            "builtAt": str(row["built_at"] or ""),
+                        }
             for key, fragment_rows in grouped.items():
                 project_name, project_file, trace_scope, request_signature, fragment_kind, fragment_key = key
                 ordered = sorted(fragment_rows, key=_rank_row, reverse=True)
@@ -13132,45 +14286,47 @@ class GhidraCacheDB:
                     )
 
             if scoped_refresh and trace_groups:
-                project_pairs = sorted({(project_name, project_file) for project_name, project_file, _, _ in trace_groups.keys()})
-                for project_name, project_file in project_pairs:
-                    rows = conn.execute(
-                        """
-                        SELECT fragment_kind, fragment_key, canonical_payload_json, alternate_payloads_json, provenance_json
-                        FROM canonical_semantic_fragments
-                        WHERE project_name = ? AND project_file = ?
-                        """,
-                        (project_name, project_file),
-                    ).fetchall()
-                    for row in rows:
-                        semantic_key = (
-                            project_name,
-                            project_file,
-                            str(row["fragment_kind"]),
-                            str(row["fragment_key"]),
-                        )
-                        previous_semantic_lookup[semantic_key] = {
-                            "payload": _json_loads(row["canonical_payload_json"], {}),
-                            "alternates": _json_loads(row["alternate_payloads_json"], []),
+                with self._timing_span("reducerMaterializerRebuild.loadPreviousSemanticFragments"):
+                    project_pairs = sorted({(project_name, project_file) for project_name, project_file, _, _ in trace_groups.keys()})
+                    for project_name, project_file in project_pairs:
+                        rows = conn.execute(
+                            """
+                            SELECT fragment_kind, fragment_key, canonical_payload_json, alternate_payloads_json, provenance_json
+                            FROM canonical_semantic_fragments
+                            WHERE project_name = ? AND project_file = ?
+                            """,
+                            (project_name, project_file),
+                        ).fetchall()
+                        for row in rows:
+                            semantic_key = (
+                                project_name,
+                                project_file,
+                                str(row["fragment_kind"]),
+                                str(row["fragment_key"]),
+                            )
+                            previous_semantic_lookup[semantic_key] = {
+                                "payload": _json_loads(row["canonical_payload_json"], {}),
+                                "alternates": _json_loads(row["alternate_payloads_json"], []),
+                                "provenance": _json_loads(row["provenance_json"], {}),
+                            }
+                with self._timing_span("reducerMaterializerRebuild.loadPreviousTargetBundles"):
+                    for project_name, project_file, trace_scope, request_signature in trace_groups.keys():
+                        row = conn.execute(
+                            """
+                            SELECT payload_json, provenance_json, reducer_version, built_at
+                            FROM materialized_target_bundle_views
+                            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
+                            """,
+                            (project_name, project_file, trace_scope, request_signature),
+                        ).fetchone()
+                        if row is None:
+                            continue
+                        previous_target_bundle_lookup[(project_name, project_file, trace_scope, request_signature)] = {
+                            "payload": _json_loads(row["payload_json"], {}),
                             "provenance": _json_loads(row["provenance_json"], {}),
+                            "reducerVersion": str(row["reducer_version"] or ""),
+                            "builtAt": str(row["built_at"] or ""),
                         }
-                for project_name, project_file, trace_scope, request_signature in trace_groups.keys():
-                    row = conn.execute(
-                        """
-                        SELECT payload_json, provenance_json, reducer_version, built_at
-                        FROM materialized_target_bundle_views
-                        WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
-                        """,
-                        (project_name, project_file, trace_scope, request_signature),
-                    ).fetchone()
-                    if row is None:
-                        continue
-                    previous_target_bundle_lookup[(project_name, project_file, trace_scope, request_signature)] = {
-                        "payload": _json_loads(row["payload_json"], {}),
-                        "provenance": _json_loads(row["provenance_json"], {}),
-                        "reducerVersion": str(row["reducer_version"] or ""),
-                        "builtAt": str(row["built_at"] or ""),
-                    }
 
             canonical_semantic_lookup: dict[tuple[str, str, str, str], dict[str, Any]] = {}
             canonical_semantic_entries: list[dict[str, Any]] = []
@@ -13192,13 +14348,15 @@ class GhidraCacheDB:
                     if contributing_scopes & touched_scope_set:
                         previous_direct_semantic_keys.add(semantic_key)
             if scoped_refresh:
-                derived_entries, derived_semantic_lookup, derived_dependency_proofs, removed_semantic_keys = _derive_reducer_semantic_fragments_with_reuse(
-                    conn,
-                    trace_groups,
-                    previous_semantic_lookup,
-                )
+                with self._timing_span("reducerMaterializerRebuild.deriveSemanticFragments"):
+                    derived_entries, derived_semantic_lookup, derived_dependency_proofs, removed_semantic_keys = _derive_reducer_semantic_fragments_with_reuse(
+                        conn,
+                        trace_groups,
+                        previous_semantic_lookup,
+                    )
             else:
-                derived_entries = _derive_reducer_semantic_fragments(conn, trace_groups)
+                with self._timing_span("reducerMaterializerRebuild.deriveSemanticFragments"):
+                    derived_entries = _derive_reducer_semantic_fragments(conn, trace_groups)
             if scoped_refresh:
                 semantic_delete_keys: set[tuple[str, str, str, str]] = set()
                 semantic_delete_keys.update(
@@ -13386,227 +14544,228 @@ class GhidraCacheDB:
                         }
                     )
 
-            for (project_name, project_file, trace_scope, request_signature), value in trace_groups.items():
-                payload = dict(value["payload"])
-                payload.setdefault("dataset", "unity-trace-bundle")
-                payload.setdefault("generatedAt", datetime.now().isoformat(timespec="seconds"))
-                trace_view_key = (project_name, project_file, trace_scope, request_signature)
-                trace_selection_proofs = dict(value.get("selectionProofs") or {})
-                trace_dependency_proof = _build_materialized_trace_dependency_proof(payload, trace_selection_proofs)
-                trace_view_provenance = {
-                    **value["provenance"],
-                    "canonicalSelectionProofs": trace_selection_proofs,
-                    "dependencyProof": {
-                        "reuseDecision": "recomputed",
-                        **trace_dependency_proof,
-                    },
-                    "payloadSignals": _collect_payload_provenance_signals(payload),
-                }
-                previous_trace_view = previous_materialized_trace_lookup.get(trace_view_key)
-                previous_trace_proof = dict((previous_trace_view or {}).get("provenance") or {}).get("dependencyProof") or {}
-                if not (
-                    scoped_refresh
-                    and previous_trace_view
-                    and previous_trace_proof.get("combinedHash") == trace_dependency_proof.get("combinedHash")
-                ):
-                    if scoped_refresh and previous_trace_view is not None:
-                        conn.execute(
-                            """
-                            DELETE FROM materialized_trace_views
-                            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
-                            """,
-                            trace_view_key,
-                        )
-                    conn.execute(
-                        """
-                        INSERT INTO materialized_trace_views(
-                            project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
-                        ) VALUES(?,?,?,?,?,?,?,?)
-                        """,
-                        (
-                            project_name,
-                            project_file,
-                            trace_scope,
-                            request_signature,
-                            _json_dumps(payload),
-                            _json_dumps(trace_view_provenance),
-                            "trace-fragment-best-rank-v1",
-                            datetime.now().isoformat(),
-                        ),
-                    )
-
-                system_payload = {
-                    kind: payload
-                    for kind, payload in value["payload"].items()
-                    if kind in SYSTEM_TRACE_FRAGMENT_KINDS
-                }
-                system_provenance = {
-                    kind: provenance
-                    for kind, provenance in value["provenance"].items()
-                    if kind in SYSTEM_TRACE_FRAGMENT_KINDS
-                }
-                system_selection_proofs = {
-                    key: value
-                    for key, value in trace_selection_proofs.items()
-                    if key.split(":", 1)[0] in SYSTEM_TRACE_FRAGMENT_KINDS
-                }
-                system_dependency_proof = _build_canonical_system_trace_dependency_proof(system_payload, system_selection_proofs)
-                system_trace_provenance = {
-                    **system_provenance,
-                    "canonicalSelectionProofs": system_selection_proofs,
-                    "dependencyProof": {
-                        "reuseDecision": "recomputed",
-                        **system_dependency_proof,
-                    },
-                    "payloadSignals": _collect_payload_provenance_signals(system_payload),
-                }
-                previous_system_view = previous_system_trace_lookup.get(trace_view_key)
-                previous_system_proof = dict((previous_system_view or {}).get("provenance") or {}).get("dependencyProof") or {}
-                if not (
-                    scoped_refresh
-                    and previous_system_view
-                    and previous_system_proof.get("combinedHash") == system_dependency_proof.get("combinedHash")
-                ):
-                    if scoped_refresh and previous_system_view is not None:
-                        conn.execute(
-                            """
-                            DELETE FROM canonical_system_trace_views
-                            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
-                            """,
-                            trace_view_key,
-                        )
-                    conn.execute(
-                        """
-                        INSERT INTO canonical_system_trace_views(
-                            project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
-                        ) VALUES(?,?,?,?,?,?,?,?)
-                        """,
-                        (
-                            project_name,
-                            project_file,
-                            trace_scope,
-                            request_signature,
-                            _json_dumps(system_payload),
-                            _json_dumps(system_trace_provenance),
-                            "system-trace-best-rank-v1",
-                            datetime.now().isoformat(),
-                        ),
-                    )
-                semantic_keys = [
-                    (kind, str((payload.get(kind) or {}).get("semanticKey", "")))
-                    for kind in SYSTEM_TRACE_FRAGMENT_KINDS
-                    if isinstance(payload.get(kind), dict) and str((payload.get(kind) or {}).get("semanticKey", ""))
-                ]
-                if trace_scope == "shard-owned-state-upgradeinfolist-population":
-                    semantic_keys.append(("semantic_scope_fragment", "shard-owned-state:upgradeinfolist-population"))
-                if trace_scope == "token-shop-atu4-mod":
-                    semantic_keys.append(("semantic_scope_fragment", "token-shop-updater-display:ATU4"))
-                if str((payload.get("target") or {}).get("familyId") or "") == "token-shop":
-                    semantic_keys.append(("token_shop_reconstruction_fragment", f"token-shop-reconstruction:{trace_scope}"))
-                    semantic_keys.append(("execution_plan_fragment", f"target-execution-plan:{trace_scope}"))
-                    semantic_keys.append(("surface_plan_fragment", f"target-surface-plan:{trace_scope}"))
-                    semantic_keys.append(("graph_plan_fragment", f"target-graph-plan:{trace_scope}"))
-                    semantic_keys.append(("bridge_policy_fragment", f"target-bridge-policy:{trace_scope}"))
-                family_id = str((payload.get("target") or {}).get("familyId") or "")
-                if family_id:
-                    semantic_keys.append(("family_graph_fragment", f"family-graph:{family_id}"))
-                semantic_keys.append(("execution_context_fragment", f"target-execution-context:{trace_scope}"))
-                semantic_keys.append(("assessment_fragment", f"target-assessment:{trace_scope}"))
-                semantic_keys.append(("target_narrative_fragment", f"target-narrative:{trace_scope}"))
-                if trace_scope in {
-                    "shard-owned-state-upgradeinfolist-population",
-                    "multiverse-market-save-owner-boundary",
-                }:
-                    semantic_keys.append(("bridge_comparison_fragment", f"target-bridge-comparison:{trace_scope}"))
-                semantic_views = {}
-                semantic_alternates = {}
-                semantic_provenance = {}
-                for kind, fragment_key in semantic_keys:
-                    semantic_entry = canonical_semantic_lookup.get((project_name, project_file, kind, fragment_key))
-                    if not semantic_entry:
-                        continue
-                    bucket = semantic_views.setdefault(kind, {})
-                    bucket[fragment_key] = semantic_entry["payload"]
-                    semantic_alternates.setdefault(kind, {})[fragment_key] = semantic_entry["alternates"]
-                    semantic_provenance.setdefault(kind, {})[fragment_key] = semantic_entry["provenance"]
-                semantic_coverage = _build_semantic_coverage_summary(
-                    [
-                        entry
-                        for entry in canonical_semantic_entries
-                        if entry["project_name"] == project_name and entry["project_file"] == project_file
-                    ],
-                    trace_scope=trace_scope,
-                )
-                target_bundle_dependency_proof = _build_dependency_proof(
-                    {
-                        "target": payload.get("target"),
-                        "plannerResolution": payload.get("plannerResolution"),
-                        "traceRegistry": payload.get("traceRegistry"),
-                        "status": {
-                            "status": payload.get("status"),
-                            "semanticStatus": payload.get("semanticStatus"),
-                            "literalStatus": payload.get("literalStatus"),
-                            "runtimeStatus": payload.get("runtimeStatus"),
+            with self._timing_span("reducerMaterializerRebuild.writeMaterializedViews"):
+                for (project_name, project_file, trace_scope, request_signature), value in trace_groups.items():
+                    payload = dict(value["payload"])
+                    payload.setdefault("dataset", "unity-trace-bundle")
+                    payload.setdefault("generatedAt", datetime.now().isoformat(timespec="seconds"))
+                    trace_view_key = (project_name, project_file, trace_scope, request_signature)
+                    trace_selection_proofs = dict(value.get("selectionProofs") or {})
+                    trace_dependency_proof = _build_materialized_trace_dependency_proof(payload, trace_selection_proofs)
+                    trace_view_provenance = {
+                        **value["provenance"],
+                        "canonicalSelectionProofs": trace_selection_proofs,
+                        "dependencyProof": {
+                            "reuseDecision": "recomputed",
+                            **trace_dependency_proof,
                         },
-                        "systemPayload": system_payload,
-                        "semanticViews": semantic_views,
+                        "payloadSignals": _collect_payload_provenance_signals(payload),
                     }
-                )
-                previous_target_bundle = previous_target_bundle_lookup.get((project_name, project_file, trace_scope, request_signature))
-                previous_target_bundle_proof = dict((previous_target_bundle or {}).get("provenance") or {}).get("dependencyProof") or {}
-                if scoped_refresh and previous_target_bundle and previous_target_bundle_proof.get("combinedHash") == target_bundle_dependency_proof.get("combinedHash"):
-                    continue
-                target_bundle_payload = _build_target_bundle_projection(
-                    payload,
-                    system_payload,
-                    semantic_views,
-                    semantic_coverage,
-                    trace_scope,
-                    request_signature,
-                )
-                target_bundle_provenance = {
-                    "trace": value["provenance"],
-                    "system": system_provenance,
-                    "semantic": semantic_provenance,
-                    "semanticAlternates": semantic_alternates,
-                    "semanticCoverage": {"traceScope": trace_scope, "source": "canonical_semantic_fragments"},
-                    "dependencyProof": {
-                        "reuseDecision": "recomputed",
-                        **target_bundle_dependency_proof,
-                    },
-                    "semanticDependencyProofs": {
-                        "{}:{}".format(kind, fragment_key): proof
-                        for (dep_project, dep_file, kind, fragment_key), proof in derived_dependency_proofs.items()
-                        if dep_project == project_name and dep_file == project_file
-                    },
-                    "payloadSignals": _collect_payload_provenance_signals(target_bundle_payload),
-                }
-                if scoped_refresh:
-                    conn.execute(
-                        """
-                        DELETE FROM materialized_target_bundle_views
-                        WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
-                        """,
-                        (project_name, project_file, trace_scope, request_signature),
+                    previous_trace_view = previous_materialized_trace_lookup.get(trace_view_key)
+                    previous_trace_proof = dict((previous_trace_view or {}).get("provenance") or {}).get("dependencyProof") or {}
+                    if not (
+                        scoped_refresh
+                        and previous_trace_view
+                        and previous_trace_proof.get("combinedHash") == trace_dependency_proof.get("combinedHash")
+                    ):
+                        if scoped_refresh and previous_trace_view is not None:
+                            conn.execute(
+                                """
+                                DELETE FROM materialized_trace_views
+                                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
+                                """,
+                                trace_view_key,
+                            )
+                        conn.execute(
+                            """
+                            INSERT INTO materialized_trace_views(
+                                project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
+                            ) VALUES(?,?,?,?,?,?,?,?)
+                            """,
+                            (
+                                project_name,
+                                project_file,
+                                trace_scope,
+                                request_signature,
+                                _json_dumps(payload),
+                                _json_dumps(trace_view_provenance),
+                                "trace-fragment-best-rank-v1",
+                                datetime.now().isoformat(),
+                            ),
+                        )
+
+                    system_payload = {
+                        kind: payload
+                        for kind, payload in value["payload"].items()
+                        if kind in SYSTEM_TRACE_FRAGMENT_KINDS
+                    }
+                    system_provenance = {
+                        kind: provenance
+                        for kind, provenance in value["provenance"].items()
+                        if kind in SYSTEM_TRACE_FRAGMENT_KINDS
+                    }
+                    system_selection_proofs = {
+                        key: value
+                        for key, value in trace_selection_proofs.items()
+                        if key.split(":", 1)[0] in SYSTEM_TRACE_FRAGMENT_KINDS
+                    }
+                    system_dependency_proof = _build_canonical_system_trace_dependency_proof(system_payload, system_selection_proofs)
+                    system_trace_provenance = {
+                        **system_provenance,
+                        "canonicalSelectionProofs": system_selection_proofs,
+                        "dependencyProof": {
+                            "reuseDecision": "recomputed",
+                            **system_dependency_proof,
+                        },
+                        "payloadSignals": _collect_payload_provenance_signals(system_payload),
+                    }
+                    previous_system_view = previous_system_trace_lookup.get(trace_view_key)
+                    previous_system_proof = dict((previous_system_view or {}).get("provenance") or {}).get("dependencyProof") or {}
+                    if not (
+                        scoped_refresh
+                        and previous_system_view
+                        and previous_system_proof.get("combinedHash") == system_dependency_proof.get("combinedHash")
+                    ):
+                        if scoped_refresh and previous_system_view is not None:
+                            conn.execute(
+                                """
+                                DELETE FROM canonical_system_trace_views
+                                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
+                                """,
+                                trace_view_key,
+                            )
+                        conn.execute(
+                            """
+                            INSERT INTO canonical_system_trace_views(
+                                project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
+                            ) VALUES(?,?,?,?,?,?,?,?)
+                            """,
+                            (
+                                project_name,
+                                project_file,
+                                trace_scope,
+                                request_signature,
+                                _json_dumps(system_payload),
+                                _json_dumps(system_trace_provenance),
+                                "system-trace-best-rank-v1",
+                                datetime.now().isoformat(),
+                            ),
+                        )
+                    semantic_keys = [
+                        (kind, str((payload.get(kind) or {}).get("semanticKey", "")))
+                        for kind in SYSTEM_TRACE_FRAGMENT_KINDS
+                        if isinstance(payload.get(kind), dict) and str((payload.get(kind) or {}).get("semanticKey", ""))
+                    ]
+                    if trace_scope == "shard-owned-state-upgradeinfolist-population":
+                        semantic_keys.append(("semantic_scope_fragment", "shard-owned-state:upgradeinfolist-population"))
+                    if trace_scope == "token-shop-atu4-mod":
+                        semantic_keys.append(("semantic_scope_fragment", "token-shop-updater-display:ATU4"))
+                    if str((payload.get("target") or {}).get("familyId") or "") == "token-shop":
+                        semantic_keys.append(("token_shop_reconstruction_fragment", f"token-shop-reconstruction:{trace_scope}"))
+                        semantic_keys.append(("execution_plan_fragment", f"target-execution-plan:{trace_scope}"))
+                        semantic_keys.append(("surface_plan_fragment", f"target-surface-plan:{trace_scope}"))
+                        semantic_keys.append(("graph_plan_fragment", f"target-graph-plan:{trace_scope}"))
+                        semantic_keys.append(("bridge_policy_fragment", f"target-bridge-policy:{trace_scope}"))
+                    family_id = str((payload.get("target") or {}).get("familyId") or "")
+                    if family_id:
+                        semantic_keys.append(("family_graph_fragment", f"family-graph:{family_id}"))
+                    semantic_keys.append(("execution_context_fragment", f"target-execution-context:{trace_scope}"))
+                    semantic_keys.append(("assessment_fragment", f"target-assessment:{trace_scope}"))
+                    semantic_keys.append(("target_narrative_fragment", f"target-narrative:{trace_scope}"))
+                    if trace_scope in {
+                        "shard-owned-state-upgradeinfolist-population",
+                        "multiverse-market-save-owner-boundary",
+                    }:
+                        semantic_keys.append(("bridge_comparison_fragment", f"target-bridge-comparison:{trace_scope}"))
+                    semantic_views = {}
+                    semantic_alternates = {}
+                    semantic_provenance = {}
+                    for kind, fragment_key in semantic_keys:
+                        semantic_entry = canonical_semantic_lookup.get((project_name, project_file, kind, fragment_key))
+                        if not semantic_entry:
+                            continue
+                        bucket = semantic_views.setdefault(kind, {})
+                        bucket[fragment_key] = semantic_entry["payload"]
+                        semantic_alternates.setdefault(kind, {})[fragment_key] = semantic_entry["alternates"]
+                        semantic_provenance.setdefault(kind, {})[fragment_key] = semantic_entry["provenance"]
+                    semantic_coverage = _build_semantic_coverage_summary(
+                        [
+                            entry
+                            for entry in canonical_semantic_entries
+                            if entry["project_name"] == project_name and entry["project_file"] == project_file
+                        ],
+                        trace_scope=trace_scope,
                     )
-                conn.execute(
-                    """
-                    INSERT INTO materialized_target_bundle_views(
-                        project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
-                    ) VALUES(?,?,?,?,?,?,?,?)
-                    """,
-                    (
-                        project_name,
-                        project_file,
+                    target_bundle_dependency_proof = _build_dependency_proof(
+                        {
+                            "target": payload.get("target"),
+                            "plannerResolution": payload.get("plannerResolution"),
+                            "traceRegistry": payload.get("traceRegistry"),
+                            "status": {
+                                "status": payload.get("status"),
+                                "semanticStatus": payload.get("semanticStatus"),
+                                "literalStatus": payload.get("literalStatus"),
+                                "runtimeStatus": payload.get("runtimeStatus"),
+                            },
+                            "systemPayload": system_payload,
+                            "semanticViews": semantic_views,
+                        }
+                    )
+                    previous_target_bundle = previous_target_bundle_lookup.get((project_name, project_file, trace_scope, request_signature))
+                    previous_target_bundle_proof = dict((previous_target_bundle or {}).get("provenance") or {}).get("dependencyProof") or {}
+                    if scoped_refresh and previous_target_bundle and previous_target_bundle_proof.get("combinedHash") == target_bundle_dependency_proof.get("combinedHash"):
+                        continue
+                    target_bundle_payload = _build_target_bundle_projection(
+                        payload,
+                        system_payload,
+                        semantic_views,
+                        semantic_coverage,
                         trace_scope,
                         request_signature,
-                        _json_dumps(target_bundle_payload),
-                        _json_dumps(target_bundle_provenance),
-                        "target-bundle-v1",
-                        datetime.now().isoformat(),
-                    ),
-                )
-                post_materialization_scopes.add((project_name, project_file, trace_scope))
+                    )
+                    target_bundle_provenance = {
+                        "trace": value["provenance"],
+                        "system": system_provenance,
+                        "semantic": semantic_provenance,
+                        "semanticAlternates": semantic_alternates,
+                        "semanticCoverage": {"traceScope": trace_scope, "source": "canonical_semantic_fragments"},
+                        "dependencyProof": {
+                            "reuseDecision": "recomputed",
+                            **target_bundle_dependency_proof,
+                        },
+                        "semanticDependencyProofs": {
+                            "{}:{}".format(kind, fragment_key): proof
+                            for (dep_project, dep_file, kind, fragment_key), proof in derived_dependency_proofs.items()
+                            if dep_project == project_name and dep_file == project_file
+                        },
+                        "payloadSignals": _collect_payload_provenance_signals(target_bundle_payload),
+                    }
+                    if scoped_refresh:
+                        conn.execute(
+                            """
+                            DELETE FROM materialized_target_bundle_views
+                            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
+                            """,
+                            (project_name, project_file, trace_scope, request_signature),
+                        )
+                    conn.execute(
+                        """
+                        INSERT INTO materialized_target_bundle_views(
+                            project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
+                        ) VALUES(?,?,?,?,?,?,?,?)
+                        """,
+                        (
+                            project_name,
+                            project_file,
+                            trace_scope,
+                            request_signature,
+                            _json_dumps(target_bundle_payload),
+                            _json_dumps(target_bundle_provenance),
+                            "target-bundle-v1",
+                            datetime.now().isoformat(),
+                        ),
+                    )
+                    post_materialization_scopes.add((project_name, project_file, trace_scope))
 
             if scoped_refresh:
                 current_trace_group_keys = set(trace_groups.keys())
@@ -13627,11 +14786,12 @@ class GhidraCacheDB:
                         key,
                     )
                 self._prune_trace_retention(conn, trace_scopes=requested_scopes if scoped_refresh else None)
-        for project_name, project_file, trace_scope in sorted(post_materialization_scopes):
-            try:
-                self.refresh_scope_materializations(project_name, project_file, trace_scope)
-            except Exception:
-                continue
+        with self._timing_span("reducerMaterializerRebuild.refreshScopeMaterializations"):
+            for project_name, project_file, trace_scope in sorted(post_materialization_scopes):
+                try:
+                    self.refresh_scope_materializations(project_name, project_file, trace_scope)
+                except Exception:
+                    continue
 
     def _prune_trace_retention(
         self,
@@ -13763,6 +14923,31 @@ class GhidraCacheDB:
             "builtAt": str(row["built_at"]),
         }
 
+    def find_latest_materialized_trace_view(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> dict[str, Any] | None:
+        with self.connect() as conn:
+            row = conn.execute(
+                """
+                SELECT * FROM materialized_trace_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                ORDER BY built_at DESC, request_signature DESC
+                LIMIT 1
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "payload": _json_loads(row["payload_json"], {}),
+            "provenance": _json_loads(row["provenance_json"], {}),
+            "reducerVersion": str(row["reducer_version"]),
+            "builtAt": str(row["built_at"]),
+        }
+
     def find_canonical_system_trace_view(
         self,
         project_name: str,
@@ -13818,24 +15003,31 @@ class GhidraCacheDB:
         trace_scope: str,
     ) -> dict[str, Any] | None:
         with self.connect() as conn:
-            row = conn.execute(
+            rows = conn.execute(
                 """
                 SELECT * FROM materialized_target_bundle_views
                 WHERE project_name = ? AND project_file = ? AND trace_scope = ?
                 ORDER BY built_at DESC, request_signature DESC
-                LIMIT 1
                 """,
                 (project_name, project_file, trace_scope),
-            ).fetchone()
-        if row is None:
+            ).fetchall()
+        if not rows:
             return None
+        best_row = max(
+            rows,
+            key=lambda row: _materialized_target_bundle_payload_rank(
+                _json_loads(row["payload_json"], {}),
+                built_at=str(row["built_at"]),
+                request_signature=str(row["request_signature"]),
+            ),
+        )
         return {
-            "traceScope": str(row["trace_scope"]),
-            "requestSignature": str(row["request_signature"]),
-            "payload": _json_loads(row["payload_json"], {}),
-            "provenance": _json_loads(row["provenance_json"], {}),
-            "reducerVersion": str(row["reducer_version"]),
-            "builtAt": str(row["built_at"]),
+            "traceScope": str(best_row["trace_scope"]),
+            "requestSignature": str(best_row["request_signature"]),
+            "payload": _json_loads(best_row["payload_json"], {}),
+            "provenance": _json_loads(best_row["provenance_json"], {}),
+            "reducerVersion": str(best_row["reducer_version"]),
+            "builtAt": str(best_row["built_at"]),
         }
 
     def list_latest_materialized_target_bundle_views(
@@ -13846,35 +15038,37 @@ class GhidraCacheDB:
         with self.connect() as conn:
             rows = conn.execute(
                 """
-                SELECT mtbv.*
-                FROM materialized_target_bundle_views AS mtbv
-                INNER JOIN (
-                    SELECT trace_scope, MAX(built_at) AS max_built_at
-                    FROM materialized_target_bundle_views
-                    WHERE project_name = ? AND project_file = ?
-                    GROUP BY trace_scope
-                ) AS latest
-                  ON latest.trace_scope = mtbv.trace_scope
-                 AND latest.max_built_at = mtbv.built_at
-                WHERE mtbv.project_name = ? AND mtbv.project_file = ?
-                ORDER BY mtbv.trace_scope ASC, mtbv.request_signature DESC
+                SELECT *
+                FROM materialized_target_bundle_views
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, built_at DESC, request_signature DESC
                 """,
-                (project_name, project_file, project_name, project_file),
+                (project_name, project_file),
             ).fetchall()
-        latest_by_scope: dict[str, dict[str, Any]] = {}
+        latest_by_scope: dict[str, tuple[tuple[int, int, str], dict[str, Any]]] = {}
         for row in rows:
             trace_scope = str(row["trace_scope"] or "")
-            if not trace_scope or trace_scope in latest_by_scope:
+            if not trace_scope:
                 continue
-            latest_by_scope[trace_scope] = {
+            payload = _json_loads(row["payload_json"], {})
+            candidate = {
                 "traceScope": trace_scope,
                 "requestSignature": str(row["request_signature"]),
-                "payload": _json_loads(row["payload_json"], {}),
+                "payload": payload,
                 "provenance": _json_loads(row["provenance_json"], {}),
                 "reducerVersion": str(row["reducer_version"]),
                 "builtAt": str(row["built_at"]),
             }
-        return list(latest_by_scope.values())
+            rank = _materialized_target_bundle_payload_rank(
+                payload,
+                built_at=str(row["built_at"]),
+                request_signature=str(row["request_signature"]),
+            )
+            existing = latest_by_scope.get(trace_scope)
+            if existing and existing[0] >= rank:
+                continue
+            latest_by_scope[trace_scope] = (rank, candidate)
+        return [entry for _, entry in sorted(latest_by_scope.values(), key=lambda item: item[1]["traceScope"])]
 
     def find_materialized_resolver_target_view(
         self,
@@ -13924,6 +15118,73 @@ class GhidraCacheDB:
             }
             for row in rows
         ]
+
+    def backfill_resolver_target_trace_policy(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> dict[str, Any] | None:
+        existing = self.find_materialized_resolver_target_view(project_name, project_file, trace_scope)
+        if not existing:
+            return None
+        payload = dict(existing.get("payload") or {})
+        family_id = str(payload.get("familyId") or ("token-shop" if str(trace_scope).startswith("token-shop") else "")).strip()
+        target_class = str(payload.get("targetClass") or ("family-audit" if "family" in str(trace_scope or "") else "target")).strip()
+        policy = _derive_resolver_trace_workflow_policy(
+            str(trace_scope or ""),
+            family_id,
+            target_class,
+            [dict(item) for item in (payload.get("supportRows") or []) if isinstance(item, dict)],
+            [dict(item) for item in (payload.get("supportSurfaces") or []) if isinstance(item, dict)],
+            [str(value).strip() for value in (payload.get("blockedEdgeTypes") or []) if str(value).strip()],
+            [str(value).strip() for value in (payload.get("clearedEdgeTypes") or []) if str(value).strip()],
+            [str(value).strip() for value in (payload.get("anchorTerms") or []) if str(value).strip()],
+        )
+        updated_payload = {
+            **payload,
+            "traceRoutineHint": policy.get("traceRoutineHint"),
+            "familyTraceProfile": policy.get("familyTraceProfile"),
+            "disableNativeTrace": policy.get("disableNativeTrace"),
+            "defaultPresentationUpdateHook": policy.get("defaultPresentationUpdateHook"),
+            "nativeTraceTerms": policy.get("nativeTraceTerms"),
+        }
+        if _json_dumps(updated_payload) == _json_dumps(payload):
+            return existing
+        updated_provenance = {
+            **dict(existing.get("provenance") or {}),
+            "payloadHash": _dependency_hash_payload(updated_payload),
+            "backfillReason": "resolver-trace-policy",
+        }
+        built_at = datetime.now().isoformat(timespec="microseconds")
+        with self.connect() as conn:
+            conn.execute(
+                """
+                INSERT INTO materialized_resolver_target_views(
+                    project_name, project_file, trace_scope, payload_json, provenance_json, reducer_version, built_at
+                ) VALUES(?,?,?,?,?,?,?)
+                ON CONFLICT(project_name, project_file, trace_scope) DO UPDATE SET
+                    payload_json=excluded.payload_json,
+                    provenance_json=excluded.provenance_json,
+                    reducer_version=excluded.reducer_version,
+                    built_at=excluded.built_at
+                """,
+                (
+                    project_name,
+                    project_file,
+                    str(trace_scope or ""),
+                    _json_dumps(updated_payload),
+                    _json_dumps(updated_provenance),
+                    str(existing.get("reducerVersion") or "materialized-resolver-target-view-v1"),
+                    built_at,
+                ),
+            )
+        return {
+            "payload": updated_payload,
+            "provenance": updated_provenance,
+            "reducerVersion": str(existing.get("reducerVersion") or "materialized-resolver-target-view-v1"),
+            "builtAt": built_at,
+        }
 
     def list_latest_materialized_subject_contract_views(
         self,
@@ -14154,12 +15415,14 @@ class GhidraCacheDB:
         *,
         sync_jobs: bool = True,
     ) -> dict[str, Any]:
-        return self._find_contract_term_evidence(
+        normalized = str(term or "").strip().lower()
+        evidences = self.find_contract_term_evidences(
             project_name,
             project_file,
-            term,
+            [term],
             sync_jobs=sync_jobs,
         )
+        return dict(evidences.get(normalized) or {"term": str(term or "").strip(), "found": False, "sourceIds": [], "graphRefs": [], "payloadHits": []})
 
     @staticmethod
     def _parse_missing_db_term_blocker(reason: str) -> tuple[str, list[str]]:
@@ -14240,15 +15503,13 @@ class GhidraCacheDB:
                 ]
             )[:12]
             coverage_seam_ids = ["exact-cellboost-to-booster-bonus-handoff"]
-            candidate_subject_state = self.find_or_materialize_subject_state_view(
+            candidate_subject_state_row = self.find_materialized_subject_state_view(
                 "cifi-full",
                 "libil2cpp.so",
                 candidate_scope,
-                subject_kind="row-local",
-                subject_key=f"row:{shell_field}",
-                family_id=family_id,
-                compatibility_target_id=candidate_scope,
+                f"row:{shell_field}",
             ) or {}
+            candidate_subject_state = dict(candidate_subject_state_row.get("payload") or {})
             candidate_open_edges = {
                 str(value).strip()
                 for value in (
@@ -14321,6 +15582,54 @@ class GhidraCacheDB:
         if not selected_seam_id:
             return {}
 
+        seam_id_lower = selected_seam_id.lower()
+
+        def _is_generic_probe_junk(term: str) -> bool:
+            lowered = str(term or "").strip().lower()
+            if not lowered:
+                return True
+            if lowered in {"class", "method", "string", "path id", "cost", "description"}:
+                return True
+            if lowered.endswith(("maxoverlay", "costtext", "desctext", "titletext", "leveltext", "reqtext")):
+                return True
+            return False
+
+        def _is_structure_identity_seam() -> bool:
+            return any(
+                token in seam_id_lower
+                for token in ("title", "localization", "prefab", "identity", "display-update-path")
+            )
+
+        def _filter_requested_seam_terms(terms: list[str] | set[str]) -> list[str]:
+            candidates = _unique_strings([str(value).strip() for value in terms if str(value).strip()])
+            if not _is_structure_identity_seam():
+                return candidates
+            preferred_terms = [
+                term
+                for term in candidates
+                if not _is_generic_probe_junk(term)
+                and (
+                    term.endswith("Button")
+                    or term.startswith("Buy")
+                    or term.startswith("Set")
+                    or "Prefab" in term
+                    or "Jaxis" in term
+                    or "Card" in term
+                )
+            ]
+            if preferred_terms:
+                return _unique_strings(preferred_terms)
+            fallback_terms = [term for term in candidates if not _is_generic_probe_junk(term)]
+            return _unique_strings(fallback_terms) if fallback_terms else candidates
+
+        def _is_preferred_anchor(term: str) -> bool:
+            normalized = str(term or "").strip()
+            if not normalized:
+                return False
+            if _is_structure_identity_seam() and _is_generic_probe_junk(normalized):
+                return False
+            return True
+
         depth_plan = [dict(item) for item in (knowledge.get("depthPlan") or []) if isinstance(item, dict)]
         selected_depth_step = {}
         matching_depth_steps = [
@@ -14364,9 +15673,9 @@ class GhidraCacheDB:
             for value in (next_seam.get("terms") or [])
             if str(value).strip()
         }
-        exact_requested_terms = list(requested_term_set)
+        exact_requested_terms = _filter_requested_seam_terms(list(requested_term_set))
         if not exact_requested_terms:
-            exact_requested_terms = [selected_seam_id]
+            exact_requested_terms = _filter_requested_seam_terms(list(next_seam_term_set)) or [selected_seam_id]
         support_rows = [dict(item) for item in (resolver_payload.get("supportRows") or []) if isinstance(item, dict)]
         support_surfaces = [dict(item) for item in (resolver_payload.get("supportSurfaces") or []) if isinstance(item, dict)]
         subject_label = str(subject_state.get("subjectLabel") or resolver_payload.get("subjectLabel") or "").strip()
@@ -14395,17 +15704,21 @@ class GhidraCacheDB:
         }
         if not requested_term_set:
             seam_context_terms.update(next_seam_term_set)
-        relation_probes = self._build_runtime_model_relation_probes(
-            trace_scope=str(knowledge.get("traceScope") or resolver_payload.get("traceScope") or "").strip(),
-            family_id=str(knowledge.get("familyId") or resolver_payload.get("familyId") or "").strip(),
-            primary_support_row=primary_support_row,
-            requested_terms=exact_requested_terms,
-            selected_seam_id=selected_seam_id,
-        )
+        relation_probes: list[dict[str, Any]] = []
+        if any(token in seam_id_lower for token in ("runtime-model", "consumer", "read-site", "typed-owner")):
+            relation_probes = self._build_runtime_model_relation_probes(
+                trace_scope=str(knowledge.get("traceScope") or resolver_payload.get("traceScope") or "").strip(),
+                family_id=str(knowledge.get("familyId") or resolver_payload.get("familyId") or "").strip(),
+                primary_support_row=primary_support_row,
+                requested_terms=exact_requested_terms,
+                selected_seam_id=selected_seam_id,
+            )
 
         def _looks_like_anchor(term: str) -> bool:
             normalized = str(term or "").strip()
             if not normalized or normalized in accepted_anchor_terms:
+                return False
+            if not _is_preferred_anchor(normalized):
                 return False
             if normalized == selected_seam_id:
                 return False
@@ -15516,6 +16829,12 @@ class GhidraCacheDB:
                         project_name, project_file, entity_id, trace_scope, field_key, fact_kind, fact_value,
                         payload_json, provenance_json, reducer_version, built_at
                     ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                    ON CONFLICT(project_name, project_file, entity_id, field_key, fact_kind, fact_value) DO UPDATE SET
+                        trace_scope=excluded.trace_scope,
+                        payload_json=excluded.payload_json,
+                        provenance_json=excluded.provenance_json,
+                        reducer_version=excluded.reducer_version,
+                        built_at=excluded.built_at
                     """,
                     (
                         project_name,
@@ -16813,43 +18132,88 @@ class GhidraCacheDB:
         latest_bundle = self.find_latest_materialized_target_bundle_view(project_name, project_file, trace_scope) or {}
         if not latest_bundle:
             return {}
+        latest_payload = dict(latest_bundle.get("payload") or {})
+        latest_trace_view = self.find_latest_materialized_trace_view(project_name, project_file, trace_scope) or {}
+        latest_trace_payload = dict(latest_trace_view.get("payload") or {})
+        latest_trace_run = dict(latest_payload.get("traceRun") or latest_trace_payload.get("traceRun") or {})
+        latest_native_trace = dict(latest_payload.get("nativeTrace") or {})
+        trace_view_native_trace = dict(latest_trace_payload.get("nativeTrace") or {})
+        if trace_view_native_trace:
+            latest_native_trace = {
+                **trace_view_native_trace,
+                **latest_native_trace,
+                "requestContext": dict(latest_native_trace.get("requestContext") or trace_view_native_trace.get("requestContext") or {}),
+            }
+        if not latest_trace_run or not dict(latest_native_trace.get("requestContext") or {}):
+            with self.connect() as conn:
+                rows = conn.execute(
+                    """
+                    SELECT fragment_kind, payload_json
+                    FROM trace_fragments
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                      AND is_valid = 1 AND invalidated_at IS NULL
+                      AND fragment_kind IN ('traceRun', 'nativeTrace')
+                    ORDER BY updated_at DESC, fragment_id DESC
+                    """,
+                    (project_name, project_file, trace_scope),
+                ).fetchall()
+            for row in rows:
+                fragment_kind = str(row["fragment_kind"] or "").strip()
+                payload = _json_loads(row["payload_json"], {})
+                if fragment_kind == "traceRun" and not latest_trace_run:
+                    latest_trace_run = dict(payload or {})
+                elif fragment_kind == "nativeTrace" and not dict(latest_native_trace.get("requestContext") or {}):
+                    payload_dict = dict(payload or {})
+                    latest_native_trace = {
+                        **payload_dict,
+                        **latest_native_trace,
+                        "requestContext": dict(latest_native_trace.get("requestContext") or payload_dict.get("requestContext") or {}),
+                    }
+        latest_request_context = dict(latest_native_trace.get("requestContext") or {})
+        frontier_only_materialization = bool(
+            str(latest_trace_run.get("mode") or "").strip() == "run-evidence-acquisition"
+            or bool(latest_request_context.get("edgeOnly"))
+        )
         materialization_args = self._resolve_scope_subject_materialization_args(trace_scope, latest_bundle)
-        subject_state = self.find_or_materialize_subject_state_view(
-            project_name,
-            project_file,
-            trace_scope,
-            subject_kind=materialization_args["subject_kind"],
-            subject_key=materialization_args["subject_key"],
-            family_id=materialization_args["family_id"],
-            compatibility_target_id=materialization_args["compatibility_target_id"],
-        ) or {}
-        resolver_target = self.find_or_materialize_resolver_target_view(
-            project_name,
-            project_file,
-            trace_scope,
-            subject_kind=materialization_args["subject_kind"],
-            subject_key=materialization_args["subject_key"],
-            family_id=materialization_args["family_id"],
-            compatibility_target_id=materialization_args["compatibility_target_id"],
-        ) or {}
-        subject_state = self.find_or_materialize_subject_state_view(
-            project_name,
-            project_file,
-            trace_scope,
-            subject_kind=materialization_args["subject_kind"],
-            subject_key=materialization_args["subject_key"],
-            family_id=materialization_args["family_id"],
-            compatibility_target_id=materialization_args["compatibility_target_id"],
-        ) or {}
-        subject_contract = self.find_or_materialize_subject_contract_view(
-            project_name,
-            project_file,
-            trace_scope,
-            subject_kind=materialization_args["subject_kind"],
-            subject_key=materialization_args["subject_key"],
-            family_id=materialization_args["family_id"],
-            compatibility_target_id=materialization_args["compatibility_target_id"],
-        ) or {}
+        with self._timing_span("reducerMaterializerRebuild.refreshScopeMaterializations.subjectState"):
+            subject_state = self.find_or_materialize_subject_state_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_kind=materialization_args["subject_kind"],
+                subject_key=materialization_args["subject_key"],
+                family_id=materialization_args["family_id"],
+                compatibility_target_id=materialization_args["compatibility_target_id"],
+            ) or {}
+        with self._timing_span("reducerMaterializerRebuild.refreshScopeMaterializations.resolverTarget"):
+            resolver_target = self.find_or_materialize_resolver_target_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_kind=materialization_args["subject_kind"],
+                subject_key=materialization_args["subject_key"],
+                family_id=materialization_args["family_id"],
+                compatibility_target_id=materialization_args["compatibility_target_id"],
+                precomputed_subject_state=subject_state,
+            ) or {}
+        if frontier_only_materialization:
+            return {
+                "subjectState": subject_state,
+                "resolverTarget": resolver_target,
+                "frontierOnly": True,
+            }
+        with self._timing_span("reducerMaterializerRebuild.refreshScopeMaterializations.subjectContract"):
+            subject_contract = self.find_or_materialize_subject_contract_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_kind=materialization_args["subject_kind"],
+                subject_key=materialization_args["subject_key"],
+                family_id=materialization_args["family_id"],
+                compatibility_target_id=materialization_args["compatibility_target_id"],
+                precomputed_subject_state=subject_state,
+                precomputed_resolver_target=resolver_target,
+            ) or {}
         subject_id = str(subject_state.get("subjectId") or materialization_args["compatibility_target_id"] or trace_scope).strip()
         planner_payload = {
             "traceScope": trace_scope,
@@ -16958,20 +18322,55 @@ class GhidraCacheDB:
             family_id=family_id,
             compatibility_target_id=compatibility_target_id,
         )
-        subject_class = (
-            "range-family"
-            if "family" in trace_scope or "family" in str(subject_kind or "")
-            else "row-local"
-        )
-        resolver_target = self.find_materialized_resolver_target_view(project_name, project_file, trace_scope) or {}
+        resolver_target = self.backfill_resolver_target_trace_policy(
+            project_name,
+            project_file,
+            trace_scope,
+        ) or self.find_materialized_resolver_target_view(project_name, project_file, trace_scope) or {}
         resolver_payload = dict((resolver_target or {}).get("payload") or {})
-        execution_plan_fragment = self.find_canonical_semantic_fragment(
+        execution_plan_fragment = self.backfill_execution_plan_relation_seam_contracts(
+            project_name,
+            project_file,
+            trace_scope,
+        ) or self.find_canonical_semantic_fragment(
             project_name,
             project_file,
             "execution_plan_fragment",
             f"target-execution-plan:{trace_scope}",
         ) or {}
         execution_plan = dict(execution_plan_fragment.get("payload") or {})
+        effective_subject_kind = str(
+            subject_kind
+            or execution_context.get("selectedSubjectKind")
+            or execution_plan.get("subjectKind")
+            or ""
+        ).strip()
+        effective_family_id_for_class = str(
+            family_id
+            or execution_context.get("familyId")
+            or execution_plan.get("familyId")
+            or ""
+        ).strip()
+        explicit_row_local_subject = effective_subject_kind in {
+            "row-local",
+            "semantic-scope",
+            "row",
+            "row-field",
+        }
+        subject_class = (
+            "row-local"
+            if explicit_row_local_subject
+            else (
+                "range-family"
+                if (
+                    "family" in trace_scope
+                    or "family" in effective_subject_kind
+                    or effective_subject_kind == "family-graph"
+                    or bool(effective_family_id_for_class)
+                )
+                else "row-local"
+            )
+        )
         reconstruction_fragment = self.find_canonical_semantic_fragment(
             project_name,
             project_file,
@@ -17017,6 +18416,23 @@ class GhidraCacheDB:
                     reconstruction_scope_id,
                 ) or {}
                 semantic_scope_payload = dict(semantic_scope_fragment.get("payload") or {})
+        expected_row_field = _expected_token_shop_row_field(
+            trace_scope,
+            compatibility_target_id,
+            str(execution_context.get("label") or ""),
+            str(execution_context.get("joinGoal") or ""),
+        )
+        if expected_row_field and str((dict(semantic_scope_payload.get("rowShell") or {})).get("field") or "").strip() != expected_row_field:
+            expected_scope_fragment = self.find_canonical_semantic_fragment(
+                project_name,
+                project_file,
+                "semantic_scope_fragment",
+                f"row:{expected_row_field}",
+            ) or {}
+            expected_scope_payload = dict(expected_scope_fragment.get("payload") or {})
+            if expected_scope_payload:
+                semantic_scope_fragment = expected_scope_fragment
+                semantic_scope_payload = expected_scope_payload
         if not semantic_scope_payload and subject_class != "range-family" and "family" not in trace_scope:
             with self.connect() as conn:
                 semantic_rows = conn.execute(
@@ -17036,23 +18452,6 @@ class GhidraCacheDB:
                 if str(candidate_row_shell.get("field") or "").strip():
                     semantic_scope_payload = candidate
                     break
-        expected_row_field = _expected_token_shop_row_field(
-            trace_scope,
-            compatibility_target_id,
-            str(execution_context.get("label") or ""),
-            str(execution_context.get("joinGoal") or ""),
-        )
-        if expected_row_field and str((dict(semantic_scope_payload.get("rowShell") or {})).get("field") or "").strip() != expected_row_field:
-            expected_scope_fragment = self.find_canonical_semantic_fragment(
-                project_name,
-                project_file,
-                "semantic_scope_fragment",
-                f"row:{expected_row_field}",
-            ) or {}
-            expected_scope_payload = dict(expected_scope_fragment.get("payload") or {})
-            if expected_scope_payload:
-                semantic_scope_fragment = expected_scope_fragment
-                semantic_scope_payload = expected_scope_payload
         support_rows_for_identity = _resolver_support_rows_from_surface_plan(
             trace_scope,
             self.find_or_synthesize_surface_plan(
@@ -17112,19 +18511,46 @@ class GhidraCacheDB:
                     continue
                 relation_backfill_view = relation_native_view
                 break
-            if relation_backfill_view is None and str(subject_id).startswith("row:ATU3"):
-                relation_backfill_view = self.find_latest_materialized_native_trace_view_for_relation(
-                    project_name,
-                    project_file,
-                    subject_id=subject_id,
-                    required_seam_ids=["exact-cellboost-to-booster-bonus-handoff"],
-                )
-            if relation_backfill_view:
-                latest_native_trace = {
-                    **latest_native_trace,
-                    **dict(relation_backfill_view.get("payload") or {}),
+            if relation_backfill_view is None:
+                relation_seam_contracts = {
+                    str(seam_id).strip(): dict(contract or {})
+                    for seam_id, contract in dict(execution_plan.get("relationSeamContracts") or {}).items()
+                    if str(seam_id).strip() and isinstance(contract, dict)
                 }
-                latest_payload["nativeTrace"] = latest_native_trace
+                candidate_seam_ids = _unique_strings(
+                    [
+                        *relation_seam_contracts.keys(),
+                        *[
+                            str(seam_id).strip()
+                            for stage in (execution_plan.get("claimStages") or [])
+                            if isinstance(stage, dict)
+                            for seam_id in (stage.get("missingSeamIds") or [])
+                            if str(seam_id).strip()
+                        ],
+                    ]
+                )
+                for seam_id in candidate_seam_ids:
+                    relation_scope = str((relation_seam_contracts.get(seam_id) or {}).get("traceScope") or "").strip()
+                    relation_backfill_view = self.find_latest_materialized_native_trace_view_for_relation(
+                        project_name,
+                        project_file,
+                        subject_id=subject_id,
+                        relation_scope=relation_scope,
+                        required_seam_ids=[seam_id],
+                    )
+                    if relation_backfill_view:
+                        break
+        if relation_backfill_view:
+            latest_native_trace = {
+                **latest_native_trace,
+                **dict(relation_backfill_view.get("payload") or {}),
+            }
+            latest_payload["nativeTrace"] = latest_native_trace
+        native_relation_satisfied_seams = _derive_native_relation_satisfied_seams(
+            trace_scope,
+            subject_id,
+            latest_native_trace,
+        )
         assessment_fragment = self.find_canonical_semantic_fragment(
             project_name,
             project_file,
@@ -17132,7 +18558,18 @@ class GhidraCacheDB:
             f"target-assessment:{trace_scope}",
         ) or {}
         assessment_payload = dict(assessment_fragment.get("payload") or {})
-        decision_summary = dict(latest_payload.get("decisionSummary") or assessment_payload.get("decisionSummary") or {})
+        latest_decision_summary = dict(latest_payload.get("decisionSummary") or {})
+        assessment_decision_summary = dict(assessment_payload.get("decisionSummary") or {})
+        latest_decision_has_gap_shape = bool(
+            [str(value).strip() for value in (latest_decision_summary.get("blockedEdgeTypes") or []) if str(value).strip()]
+            or [str(value).strip() for value in (latest_decision_summary.get("baselineGap") or []) if str(value).strip()]
+            or [str(value).strip() for value in (latest_decision_summary.get("supportingEdgeTypes") or []) if str(value).strip()]
+        )
+        decision_summary = dict(
+            latest_decision_summary
+            if latest_decision_has_gap_shape
+            else (assessment_decision_summary or latest_decision_summary)
+        )
         surface_plan = self.find_or_synthesize_surface_plan(
             project_name,
             project_file,
@@ -17148,27 +18585,66 @@ class GhidraCacheDB:
                 "reconstruction": reconstruction_fragment,
                 "familyGraph": family_graph_fragment,
                 "semanticScope": semantic_scope_fragment or semantic_scope_payload,
-                "latestBundle": latest_bundle,
+                "latestBundle": _compact_subject_state_dependency_bundle(
+                    latest_bundle,
+                    latest_native_trace,
+                ),
                 "assessment": assessment_fragment,
                 "surfacePlan": surface_plan,
                 "subjectIdentity": subject_identity,
-                "nativeTrace": latest_native_trace,
             }
         )
         existing_provenance = dict((existing or {}).get("provenance") or {})
         existing_inputs = dict(existing_provenance.get("inputs") or {})
         existing_payload = dict((existing or {}).get("payload") or {})
+        def _claim_stage_signature(stages: list[dict[str, Any]] | None) -> list[tuple[str, tuple[str, ...], str]]:
+            signature: list[tuple[str, tuple[str, ...], str]] = []
+            for stage in [item for item in (stages or []) if isinstance(item, dict)]:
+                signature.append(
+                    (
+                        str(stage.get("id") or "").strip(),
+                        tuple(
+                            _unique_strings(
+                                str(seam_id).strip()
+                                for seam_id in (stage.get("missingSeamIds") or [])
+                                if str(seam_id).strip()
+                            )
+                        ),
+                        str(stage.get("status") or "").strip(),
+                    )
+                )
+            return signature
         stale_multiverse_save_owner_state = (
             trace_scope == "multiverse-market-save-owner-boundary"
             and not [str(value).strip() for value in (existing_payload.get("missingEdges") or []) if str(value).strip()]
             and not [str(value).strip() for value in (existing_payload.get("blockedEdges") or []) if str(value).strip()]
             and "typed-save-owner" in [str(value).strip() for value in (existing_payload.get("knownEdges") or []) if str(value).strip()]
         )
+        stale_claim_stage_state = (
+            _claim_stage_signature(existing_payload.get("claimStages") or [])
+            != _claim_stage_signature(execution_plan.get("claimStages") or [])
+        )
         if (
             existing
             and str(existing_inputs.get("dependencySignature") or "").strip() == state_dependency_signature
             and not stale_multiverse_save_owner_state
+            and not stale_claim_stage_state
         ):
+            with self.connect() as conn:
+                conn.execute(
+                    """
+                    DELETE FROM materialized_subject_state_views
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
+                    """,
+                    (project_name, project_file, trace_scope, subject_id),
+                )
+                conn.execute(
+                    """
+                    DELETE FROM materialized_subject_edge_facts
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
+                    """,
+                    (project_name, project_file, trace_scope, subject_id),
+                )
             existing_payload = {
                 **existing_payload,
                 "subjectId": str(subject_identity.get("subjectId") or existing_payload.get("subjectId") or ""),
@@ -17257,11 +18733,21 @@ class GhidraCacheDB:
             support_proofs,
         )
         existing_edge_facts = self.find_materialized_subject_edge_facts(project_name, project_file, trace_scope, subject_id)
+        current_open_statuses_by_type: dict[str, set[str]] = {}
+        for item in edge_facts:
+            edge_type = str(item.get("edgeType") or "").strip()
+            edge_status = str(item.get("status") or "").strip()
+            if not edge_type or not edge_status:
+                continue
+            current_open_statuses_by_type.setdefault(edge_type, set()).add(edge_status)
         for existing in existing_edge_facts:
             existing_status = str(existing.get("edgeStatus") or "").strip()
             if existing_status in {"known", "nonblocking"}:
                 existing_type = str(existing.get("edgeType") or "").strip()
                 if existing_type:
+                    current_statuses = current_open_statuses_by_type.get(existing_type, set())
+                    if {"missing", "blocked"} & current_statuses:
+                        continue
                     has_conflicting = any(
                         str(e.get("edgeType") or "").strip() == existing_type
                         and str(e.get("status") or "").strip() == existing_status
@@ -17296,15 +18782,25 @@ class GhidraCacheDB:
             )
             relation_scope = str(relation_coverage.get("relationScope") or "").strip()
             relation_covered = bool(relation_coverage.get("covered"))
+            diagnostic_evidence_terms = _diagnostic_seam_evidence_terms(diagnostic_payload, relation_coverage)
+            seam_fact_terms = _unique_strings([*diagnostic_evidence_terms, *support_terms])[:12]
             if required_seams:
+                known_edge_types_before_relation = {
+                    str(item.get("edgeType") or "").strip()
+                    for item in edge_facts
+                    if str(item.get("status") or "").strip() == "known"
+                    and str(item.get("edgeType") or "").strip()
+                }
                 for seam_index, seam_id in enumerate(required_seams):
+                    seam_already_known = seam_id in known_edge_types_before_relation
+                    seam_status = "known" if (relation_covered or seam_id in native_relation_satisfied_seams or seam_already_known) else "blocked"
                     relation_required_seam_edge_facts.append(
                         {
                             "edgeType": seam_id,
-                            "status": "known" if relation_covered else "blocked",
-                            "priority": (500 + seam_index) if relation_covered else (1100 + seam_index),
-                            "reason": "relation-contract-coverage",
-                            "terms": list(support_terms)[:12],
+                            "status": seam_status,
+                            "priority": (500 + seam_index) if seam_status == "known" else (1100 + seam_index),
+                            "reason": "relation-contract-coverage" if not seam_already_known else "reconstruction-covered-required-seam",
+                            "terms": seam_fact_terms,
                             "sourceIds": [relation_scope or trace_scope, "materialized-acquisition-diagnostics"],
                             "goal": str(execution_context.get("joinGoal") or "").strip() or None,
                             "proofs": [],
@@ -17319,7 +18815,7 @@ class GhidraCacheDB:
                         "status": "nonblocking",
                         "priority": 900 + edge_index,
                         "reason": "relation-contract-progress",
-                        "terms": list(support_terms)[:12],
+                        "terms": seam_fact_terms,
                         "sourceIds": [relation_scope or trace_scope, "materialized-acquisition-diagnostics"],
                         "goal": str(execution_context.get("joinGoal") or "").strip() or None,
                         "proofs": [],
@@ -17349,6 +18845,47 @@ class GhidraCacheDB:
                 if str(item.get("edgeType") or "").strip() not in required_edge_types
             ]
             edge_facts.extend(relation_required_seam_edge_facts)
+        if native_relation_satisfied_seams:
+            existing_known_by_type = {
+                str(item.get("edgeType") or "").strip()
+                for item in edge_facts
+                if str(item.get("status") or "").strip() == "known"
+            }
+            for seam_index, seam_id in enumerate(native_relation_satisfied_seams):
+                if seam_id in existing_known_by_type:
+                    continue
+                edge_facts.append(
+                    {
+                        "edgeType": seam_id,
+                        "status": "known",
+                        "priority": 450 + seam_index,
+                        "reason": "native-relation-bridge",
+                        "terms": _unique_strings(
+                            [
+                                *[str(value).strip() for value in ((latest_native_trace.get("bridgePlan") or {}).get("bridgedTerms") or []) if str(value).strip()],
+                                *[str(value).strip() for value in ((latest_native_trace.get("requestContext") or {}).get("expectedTerms") or []) if str(value).strip()],
+                            ]
+                        )[:12],
+                        "sourceIds": ["materialized-native-trace-view"],
+                        "goal": str(execution_context.get("joinGoal") or "").strip() or None,
+                        "proofs": [],
+                    }
+                )
+        open_edge_types = {
+            str(item.get("edgeType") or "").strip()
+            for item in edge_facts
+            if str(item.get("status") or "").strip() in {"missing", "blocked"}
+            and str(item.get("edgeType") or "").strip()
+        }
+        if open_edge_types:
+            edge_facts = [
+                item
+                for item in edge_facts
+                if not (
+                    str(item.get("edgeType") or "").strip() in open_edge_types
+                    and str(item.get("status") or "").strip() in {"known", "nonblocking"}
+                )
+            ]
         state_payload = _derive_subject_state_from_edge_facts(
             trace_scope,
             subject_id,
@@ -17362,6 +18899,86 @@ class GhidraCacheDB:
             identity_reason=str(subject_identity.get("identityReason") or ""),
             subject_path_id=str(subject_identity.get("subjectPathId") or ""),
         )
+        claim_stages_for_subject = [stage for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]
+        if claim_stages_for_subject and subject_class != "row-local":
+            planned_open_seam_ids = _unique_strings(
+                [
+                    str(seam_id).strip()
+                    for stage in claim_stages_for_subject
+                    for seam_id in (stage.get("missingSeamIds") or [])
+                    if str(seam_id).strip()
+                ]
+            )
+            if not planned_open_seam_ids:
+                planned_open_seam_ids = _unique_strings(
+                    [
+                        *[
+                            str(edge_type).strip()
+                            for edge_type in (decision_summary.get("blockedEdgeTypes") or [])
+                            if str(edge_type).strip()
+                        ],
+                        *[
+                            str(edge_type).strip()
+                            for edge_type in (decision_summary.get("baselineGap") or [])
+                            if str(edge_type).strip()
+                        ],
+                    ]
+                )
+                if planned_open_seam_ids:
+                    for claim_stage in claim_stages_for_subject:
+                        claim_stage["missingSeamIds"] = list(planned_open_seam_ids)
+                        claim_stage["status"] = "open"
+            current_open_state_edges = _unique_strings(
+                [
+                    *[
+                        str(edge_type).strip()
+                        for edge_type in (state_payload.get("missingEdges") or [])
+                        if str(edge_type).strip()
+                    ],
+                    *[
+                        str(edge_type).strip()
+                        for edge_type in (state_payload.get("blockedEdges") or [])
+                        if str(edge_type).strip()
+                    ],
+                ]
+            )
+            if planned_open_seam_ids and not current_open_state_edges:
+                state_payload["blockedEdges"] = list(planned_open_seam_ids)
+                state_payload["missingEdges"] = []
+                next_seam_payload = dict(state_payload.get("nextSeam") or {})
+                state_payload["nextSeam"] = {
+                    **next_seam_payload,
+                    "id": planned_open_seam_ids[0] if planned_open_seam_ids else None,
+                    "status": "open" if planned_open_seam_ids else "clear",
+                    "reason": str(next_seam_payload.get("reason") or "").strip() or "assessment-open-seam",
+                    "terms": list(next_seam_payload.get("terms") or []),
+                }
+            state_payload["missingEdges"] = _unique_strings(
+                [
+                    str(edge_type).strip()
+                    for edge_type in (state_payload.get("missingEdges") or [])
+                    if str(edge_type).strip() in set(planned_open_seam_ids)
+                ]
+            )
+            state_payload["blockedEdges"] = _unique_strings(
+                [
+                    str(edge_type).strip()
+                    for edge_type in (state_payload.get("blockedEdges") or [])
+                    if str(edge_type).strip() in set(planned_open_seam_ids)
+                ]
+            )
+            remaining_open_edges = _unique_strings(
+                [
+                    *[str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()],
+                    *[str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()],
+                ]
+            )
+            next_seam_payload = dict(state_payload.get("nextSeam") or {})
+            state_payload["nextSeam"] = {
+                **next_seam_payload,
+                "id": remaining_open_edges[0] if remaining_open_edges else None,
+                "status": "open" if remaining_open_edges else "clear",
+            }
         required_coverage_seam_ids = _unique_strings(
             [str(item.get("edgeType") or "").strip() for item in relation_required_seam_edge_facts if str(item.get("edgeType") or "").strip()]
         )
@@ -17432,6 +19049,7 @@ class GhidraCacheDB:
         for claim_stage in [stage for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]:
             if str(claim_stage.get("id") or "").strip() == "family-subject":
                 claim_stage["missingSeamIds"] = list(unresolved_required_seam_ids)
+                claim_stage["status"] = "open" if unresolved_required_seam_ids else "closed"
         if trace_scope == "multiverse-market-save-owner-boundary":
             bounded_multiverse_negative_edges = _unique_strings(
                 [
@@ -17490,9 +19108,6 @@ class GhidraCacheDB:
             trace_scope == "token-shop-daily-tokenium-family"
             and str(state_payload.get("subjectKind") or "").strip() == "range-family"
             and str(state_payload.get("subjectId") or "").strip().startswith("range:token-shop:")
-            and not [str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()]
-            and not [str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()]
-            and str(((state_payload.get("nextSeam") or {}).get("status")) or "").strip() == "clear"
         ):
             strongest_historical_state = {}
             historical_candidates = [
@@ -17543,6 +19158,34 @@ class GhidraCacheDB:
                 and bool(strongest_tokenium_naming_contract.get("groundedFields") or {})
                 and bool(strongest_daily_lane_contract.get("groundedFields") or {})
             )
+            historical_clear = (
+                not [str(value).strip() for value in (strongest_historical_state.get("blockedEdges") or []) if str(value).strip()]
+                and not [str(value).strip() for value in (strongest_historical_state.get("missingEdges") or []) if str(value).strip()]
+                and str(((strongest_historical_state.get("nextSeam") or {}).get("status")) or "").strip() == "clear"
+            )
+            current_open_edges = _unique_strings(
+                [
+                    *[str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()],
+                    *[str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()],
+                ]
+            )
+            if (
+                lane_contract_clear
+                and historical_clear
+                and current_open_edges
+                and set(current_open_edges) <= {"exact-shell-to-title", "exact-display-update-path"}
+            ):
+                state_payload["missingEdges"] = []
+                state_payload["blockedEdges"] = []
+                state_payload["nextSeam"] = {
+                    **dict(state_payload.get("nextSeam") or {}),
+                    "id": None,
+                    "status": "clear",
+                    "reason": "historical-grounded-state-preserved",
+                    "terms": [],
+                }
+                decision_summary["baselineGap"] = []
+                decision_summary["blockedEdgeTypes"] = []
             preserved_nonblocking_edges = _unique_strings(
                 [
                     *[str(value).strip() for value in (state_payload.get("nonblockingEdges") or []) if str(value).strip()],
@@ -17600,8 +19243,26 @@ class GhidraCacheDB:
             },
             "payloadHash": _dependency_hash_payload(state_payload),
         }
-        historical_states = self.list_materialized_subject_state_views(project_name, project_file, trace_scope)
+        historical_states = [
+            item
+            for item in self.list_materialized_subject_state_views(project_name, project_file, trace_scope)
+            if str(item.get("subjectId") or "").strip() == subject_id
+        ]
         preferred_historical = None
+        current_decision_open_edges = _unique_strings(
+            [
+                *[
+                    str(value).strip()
+                    for value in (decision_summary.get("blockedEdgeTypes") or [])
+                    if str(value).strip()
+                ],
+                *[
+                    str(value).strip()
+                    for value in (decision_summary.get("baselineGap") or [])
+                    if str(value).strip()
+                ],
+            ]
+        )
         if historical_states and trace_scope != "multiverse-market-save-owner-boundary":
             preferred_historical = max(
                 historical_states,
@@ -17610,11 +19271,23 @@ class GhidraCacheDB:
                     str(item.get("builtAt") or ""),
                 ),
             )
-            if _subject_state_quality_tuple(
-                dict(preferred_historical.get("payload") or {}),
-                str(preferred_historical.get("builtAt") or ""),
-            ) > _subject_state_quality_tuple(state_payload, ""):
-                preferred_payload = dict(preferred_historical.get("payload") or {})
+            preferred_payload = dict(preferred_historical.get("payload") or {})
+            preferred_open_edges = _subject_state_open_edge_set(preferred_payload)
+            candidate_open_edges = _subject_state_open_edge_set(state_payload)
+            preferred_is_not_less_closed = preferred_open_edges.issubset(candidate_open_edges)
+            if (
+                not current_decision_open_edges
+                and not (
+                    [str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()]
+                    or [str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()]
+                )
+                and
+                preferred_is_not_less_closed
+                and _subject_state_quality_tuple(
+                    preferred_payload,
+                    str(preferred_historical.get("builtAt") or ""),
+                ) > _subject_state_quality_tuple(state_payload, "")
+            ):
                 preferred_provenance = dict(preferred_historical.get("provenance") or {})
                 self.upsert_materialization_stage_view(
                     project_name,
@@ -17638,6 +19311,21 @@ class GhidraCacheDB:
                     },
                     reducer_version="materialized-subject-state-view-v1",
                 )
+                with self.connect() as conn:
+                    conn.execute(
+                        """
+                        DELETE FROM materialized_subject_state_views
+                        WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
+                        """,
+                        (project_name, project_file, trace_scope, subject_id),
+                    )
+                    conn.execute(
+                        """
+                        DELETE FROM materialized_subject_edge_facts
+                        WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
+                        """,
+                        (project_name, project_file, trace_scope, subject_id),
+                    )
                 return dict(preferred_historical.get("payload") or {})
         existing_edge_rows = self.find_materialized_subject_edge_facts(project_name, project_file, trace_scope, subject_id)
         existing_edge_signatures = sorted(
@@ -17669,6 +19357,21 @@ class GhidraCacheDB:
             and _json_dumps(existing.get("payload") or {}) == _json_dumps(state_payload)
             and existing_edge_signatures == next_edge_signatures
         ):
+            with self.connect() as conn:
+                conn.execute(
+                    """
+                    DELETE FROM materialized_subject_state_views
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
+                    """,
+                    (project_name, project_file, trace_scope, subject_id),
+                )
+                conn.execute(
+                    """
+                    DELETE FROM materialized_subject_edge_facts
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
+                    """,
+                    (project_name, project_file, trace_scope, subject_id),
+                )
             self.upsert_materialization_stage_view(
                 project_name,
                 project_file,
@@ -17693,6 +19396,20 @@ class GhidraCacheDB:
             return dict(existing.get("payload") or {})
         built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM materialized_subject_state_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            )
+            conn.execute(
+                """
+                DELETE FROM materialized_subject_edge_facts
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            )
             stale_keys = {
                 (str(row["edge_type"]), str(row["edge_status"]))
                 for row in conn.execute(
@@ -17804,8 +19521,10 @@ class GhidraCacheDB:
         subject_key: str = "",
         family_id: str = "",
         compatibility_target_id: str = "",
+        precomputed_subject_state: dict[str, Any] | None = None,
+        precomputed_resolver_target: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        subject_state = self.find_or_materialize_subject_state_view(
+        subject_state = dict(precomputed_subject_state or {}) or self.find_or_materialize_subject_state_view(
             project_name,
             project_file,
             trace_scope,
@@ -17816,12 +19535,12 @@ class GhidraCacheDB:
         ) or {}
         subject_id = str(subject_state.get("subjectId") or compatibility_target_id or trace_scope).strip()
         existing = self.find_materialized_subject_contract_view(project_name, project_file, trace_scope, subject_id)
-        existing_resolver_target = self.find_materialized_resolver_target_view(
+        existing_resolver_target = dict(precomputed_resolver_target or {}) or self.find_materialized_resolver_target_view(
             project_name,
             project_file,
             trace_scope,
         ) or {}
-        resolver_target = self.find_or_materialize_resolver_target_view(
+        resolver_target = dict(precomputed_resolver_target or {}) or self.find_or_materialize_resolver_target_view(
             project_name,
             project_file,
             trace_scope,
@@ -17829,6 +19548,7 @@ class GhidraCacheDB:
             subject_key=subject_key,
             family_id=family_id,
             compatibility_target_id=compatibility_target_id,
+            precomputed_subject_state=subject_state,
         ) or {}
         resolver_payload = dict((resolver_target or {}).get("payload") or {})
         existing_resolver_payload = dict((existing_resolver_target or {}).get("payload") or {})
@@ -17876,6 +19596,62 @@ class GhidraCacheDB:
             and existing_has_split
             and str(existing_inputs.get("dependencySignature") or "").strip() == contract_dependency_signature
         )
+        if contract_fast_path:
+            with self.connect() as conn:
+                conn.execute(
+                    """
+                    DELETE FROM materialized_subject_contract_views
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
+                    """,
+                    (project_name, project_file, trace_scope, subject_id),
+                )
+            aggregate_stage, core_stage, enriched_stage = _contract_stage_payloads(existing_payload)
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "subject-contract-core",
+                stage_status="materialized",
+                upstream_signature=contract_dependency_signature,
+                payload=core_stage,
+                provenance={
+                    "payloadHash": _dependency_hash_payload(dict(existing_payload.get("core") or {})),
+                    "reducer": "materialized-subject-contract-core-view-v1",
+                },
+                reducer_version="materialized-subject-contract-core-view-v1",
+            )
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "subject-contract-enriched",
+                stage_status="materialized",
+                upstream_signature=contract_dependency_signature,
+                payload=enriched_stage,
+                provenance={
+                    "payloadHash": _dependency_hash_payload(dict(existing_payload.get("enriched") or {})),
+                    "reducer": "materialized-subject-contract-enriched-view-v1",
+                },
+                reducer_version="materialized-subject-contract-enriched-view-v1",
+            )
+            self.upsert_materialization_stage_view(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                "subject-contract",
+                stage_status="materialized",
+                upstream_signature=contract_dependency_signature,
+                payload=aggregate_stage,
+                provenance={
+                    "payloadHash": str(existing_provenance.get("payloadHash") or ""),
+                    "reducer": "materialized-subject-contract-view-v1",
+                },
+                reducer_version="materialized-subject-contract-view-v1",
+            )
+            return dict(existing.get("payload") or {})
         row_shell = dict(reconstruction_payload.get("rowShell") or {})
         row_local_graph = dict(reconstruction_payload.get("rowLocalGraph") or {})
         support_surfaces = [dict(item) for item in (resolver_payload.get("supportSurfaces") or []) if isinstance(item, dict)]
@@ -17999,54 +19775,6 @@ class GhidraCacheDB:
             upstream_signature=contract_dependency_signature,
             boundary_rows=inferred_boundary_views,
         )
-        if contract_fast_path:
-            aggregate_stage, core_stage, enriched_stage = _contract_stage_payloads(existing_payload)
-            self.upsert_materialization_stage_view(
-                project_name,
-                project_file,
-                trace_scope,
-                subject_id,
-                "subject-contract-core",
-                stage_status="materialized",
-                upstream_signature=contract_dependency_signature,
-                payload=core_stage,
-                provenance={
-                    "payloadHash": _dependency_hash_payload(dict(existing_payload.get("core") or {})),
-                    "reducer": "materialized-subject-contract-core-view-v1",
-                },
-                reducer_version="materialized-subject-contract-core-view-v1",
-            )
-            self.upsert_materialization_stage_view(
-                project_name,
-                project_file,
-                trace_scope,
-                subject_id,
-                "subject-contract-enriched",
-                stage_status="materialized",
-                upstream_signature=contract_dependency_signature,
-                payload=enriched_stage,
-                provenance={
-                    "payloadHash": _dependency_hash_payload(dict(existing_payload.get("enriched") or {})),
-                    "reducer": "materialized-subject-contract-enriched-view-v1",
-                },
-                reducer_version="materialized-subject-contract-enriched-view-v1",
-            )
-            self.upsert_materialization_stage_view(
-                project_name,
-                project_file,
-                trace_scope,
-                subject_id,
-                "subject-contract",
-                stage_status="materialized",
-                upstream_signature=contract_dependency_signature,
-                payload=aggregate_stage,
-                provenance={
-                    "payloadHash": str(existing_provenance.get("payloadHash") or ""),
-                    "reducer": "materialized-subject-contract-view-v1",
-                },
-                reducer_version="materialized-subject-contract-view-v1",
-            )
-            return dict(existing.get("payload") or {})
         row_detail_identity = ""
         row_detail_identity_source = ""
         if isinstance(shared_grounded_fields.get("rowDetail"), dict):
@@ -18172,6 +19900,14 @@ class GhidraCacheDB:
             "payloadHash": _dependency_hash_payload(payload),
         }
         if existing and existing_has_split and _json_dumps(existing.get("payload") or {}) == _json_dumps(payload):
+            with self.connect() as conn:
+                conn.execute(
+                    """
+                    DELETE FROM materialized_subject_contract_views
+                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
+                    """,
+                    (project_name, project_file, trace_scope, subject_id),
+                )
             aggregate_stage, core_stage, enriched_stage = _contract_stage_payloads(payload)
             self.upsert_materialization_stage_view(
                 project_name,
@@ -18221,6 +19957,13 @@ class GhidraCacheDB:
             return dict(existing.get("payload") or {})
         built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
+            conn.execute(
+                """
+                DELETE FROM materialized_subject_contract_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            )
             conn.execute(
                 """
                 INSERT INTO materialized_subject_contract_views(
@@ -18301,6 +20044,7 @@ class GhidraCacheDB:
         subject_key: str = "",
         family_id: str = "",
         compatibility_target_id: str = "",
+        precomputed_subject_state: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         trace_scope = str(trace_scope or "").strip()
         compatibility_target_id = str(compatibility_target_id or trace_scope or "").strip()
@@ -18347,7 +20091,7 @@ class GhidraCacheDB:
             ).get("payload")
             or {}
         )
-        subject_state = self.find_or_materialize_subject_state_view(
+        subject_state = dict(precomputed_subject_state or {}) or self.find_or_materialize_subject_state_view(
             project_name,
             project_file,
             trace_scope,
@@ -18406,6 +20150,7 @@ class GhidraCacheDB:
             support_rows,
             support_surfaces,
             blocked_edge_types,
+            cleared_edge_types,
             anchor_terms,
         )
         resolver_dependency_signature = _build_materialization_dependency_signature(
@@ -18502,9 +20247,15 @@ class GhidraCacheDB:
             and str(existing_inputs.get("dependencySignature") or "").strip() == resolver_dependency_signature
         ):
             existing_payload = dict(existing.get("payload") or {})
+            existing_support_surfaces = [
+                dict(item) for item in (existing_payload.get("supportSurfaces") or []) if isinstance(item, dict)
+            ]
+            existing_support_rows = [
+                dict(item) for item in (existing_payload.get("supportRows") or []) if isinstance(item, dict)
+            ]
             existing_payload["supportRows"] = _normalize_token_shop_support_rows(
                 trace_scope,
-                list(existing_payload.get("supportRows") or []),
+                support_rows or existing_support_rows,
                 str(execution_context.get("targetId") or compatibility_target_id or trace_scope),
                 str(execution_context.get("label") or ""),
                 str(execution_context.get("joinGoal") or ""),
@@ -18515,7 +20266,58 @@ class GhidraCacheDB:
                 "subjectKind": str(subject_state.get("subjectKind") or existing_payload.get("subjectKind") or ""),
                 "subjectKey": str(subject_state.get("subjectKey") or existing_payload.get("subjectKey") or ""),
                 "subjectLabel": str(subject_state.get("subjectLabel") or existing_payload.get("subjectLabel") or ""),
+                "targetClass": target_class,
+                "whyExists": _resolver_why_exists(
+                    trace_scope,
+                    execution_context,
+                    subject_state,
+                    latest_bundle_payload,
+                    support_rows or existing_support_rows,
+                    _merge_resolver_support_surfaces(support_surfaces, existing_support_surfaces),
+                    target_class,
+                ),
+                "supportRows": existing_payload.get("supportRows"),
+                "supportSurfaces": _merge_resolver_support_surfaces(support_surfaces, existing_support_surfaces),
+                "shellWindow": dict(surface_plan.get("shellWindow") or existing_payload.get("shellWindow") or {}),
+                "traceRoutineHint": trace_workflow_policy.get("traceRoutineHint"),
+                "familyTraceProfile": trace_workflow_policy.get("familyTraceProfile"),
+                "disableNativeTrace": trace_workflow_policy.get("disableNativeTrace"),
+                "defaultPresentationUpdateHook": trace_workflow_policy.get("defaultPresentationUpdateHook"),
+                "nativeTraceTerms": trace_workflow_policy.get("nativeTraceTerms"),
+                "blockedEdgeTypes": blocked_edge_types,
+                "clearedEdgeTypes": cleared_edge_types,
+                "anchorTerms": anchor_terms,
+                "resolutionAliases": resolution_aliases,
             }
+            if _json_dumps(existing.get("payload") or {}) != _json_dumps(existing_payload):
+                built_at = datetime.now().isoformat(timespec="microseconds")
+                with self.connect() as conn:
+                    conn.execute(
+                        """
+                        INSERT INTO materialized_resolver_target_views(
+                            project_name, project_file, trace_scope, payload_json, provenance_json, reducer_version, built_at
+                        ) VALUES(?,?,?,?,?,?,?)
+                        ON CONFLICT(project_name, project_file, trace_scope) DO UPDATE SET
+                            payload_json=excluded.payload_json,
+                            provenance_json=excluded.provenance_json,
+                            reducer_version=excluded.reducer_version,
+                            built_at=excluded.built_at
+                        """,
+                        (
+                            project_name,
+                            project_file,
+                            trace_scope,
+                            _json_dumps(existing_payload),
+                            _json_dumps(
+                                {
+                                    **dict((existing or {}).get("provenance") or {}),
+                                    "payloadHash": _dependency_hash_payload(existing_payload),
+                                }
+                            ),
+                            "materialized-resolver-target-view-v1",
+                            built_at,
+                        ),
+                    )
             self.upsert_materialization_stage_view(
                 project_name,
                 project_file,
@@ -18632,6 +20434,357 @@ class GhidraCacheDB:
             "builtAt": str(row["built_at"]),
         }
 
+    def backfill_execution_plan_relation_seam_contracts(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> dict[str, Any] | None:
+        trace_scope = str(trace_scope or "").strip()
+        if not trace_scope:
+            return None
+        canonical = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "execution_plan_fragment",
+            f"target-execution-plan:{trace_scope}",
+        )
+        if not canonical:
+            return None
+        payload = dict(canonical.get("payload") or {})
+        resolver_target = self.backfill_resolver_target_trace_policy(
+            project_name,
+            project_file,
+            trace_scope,
+        ) or self.find_materialized_resolver_target_view(project_name, project_file, trace_scope) or {}
+        resolver_payload = dict(resolver_target.get("payload") or {})
+        family_id = str(payload.get("familyId") or "").strip()
+        claim_stages = [dict(stage) for stage in (payload.get("claimStages") or []) if isinstance(stage, dict)]
+        assessment_fragment = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "assessment_fragment",
+            f"target-assessment:{trace_scope}",
+        ) or {}
+        assessment_payload = dict(assessment_fragment.get("payload") or {})
+        assessment_decision_summary = dict(assessment_payload.get("decisionSummary") or {})
+        claim_stage_missing_seams = _unique_strings(
+            [
+                str(seam_id).strip()
+                for stage in claim_stages
+                for seam_id in (stage.get("missingSeamIds") or [])
+                if str(seam_id).strip()
+            ]
+        )
+        assessment_open_seams = _unique_strings(
+            [
+                *[
+                    str(value).strip()
+                    for value in (assessment_decision_summary.get("blockedEdgeTypes") or [])
+                    if str(value).strip()
+                ],
+                *[
+                    str(value).strip()
+                    for value in (assessment_decision_summary.get("baselineGap") or [])
+                    if str(value).strip()
+                ],
+            ]
+        )
+        blocked_edge_types = _unique_strings(
+            [
+                *claim_stage_missing_seams,
+                *assessment_open_seams,
+                *[str(value).strip() for value in (resolver_payload.get("blockedEdgeTypes") or []) if str(value).strip()],
+            ]
+        )
+        if blocked_edge_types and not claim_stage_missing_seams:
+            stage_id = "family-shell" if family_id == "token-shop" and "family" in trace_scope else "family-subject"
+            stage_label = "Token Shop family shell" if stage_id == "family-shell" else "Family subject"
+            claim_stages = [
+                {
+                    "id": stage_id,
+                    "label": stage_label,
+                    "status": "open",
+                    "missingSeamIds": list(blocked_edge_types),
+                }
+            ]
+            claim_stage_missing_seams = list(blocked_edge_types)
+        target_class = "family-audit" if "family" in trace_scope else "target"
+        if family_id == "token-shop" and "family" in trace_scope:
+            target_class = "range-family-audit"
+        derived_trace_policy = _derive_resolver_trace_workflow_policy(
+            trace_scope,
+            family_id,
+            target_class,
+            [dict(item) for item in (resolver_payload.get("supportRows") or []) if isinstance(item, dict)],
+            [dict(item) for item in (resolver_payload.get("supportSurfaces") or []) if isinstance(item, dict)],
+            blocked_edge_types,
+            [str(value).strip() for value in (resolver_payload.get("clearedEdgeTypes") or []) if str(value).strip()],
+            [str(value).strip() for value in (payload.get("followUpTerms") or []) if str(value).strip()],
+        )
+        trace_routine_hint = str(
+            derived_trace_policy.get("traceRoutineHint")
+            or resolver_payload.get("traceRoutineHint")
+            or payload.get("traceRoutineHint")
+            or ""
+        ).strip()
+        relation_seam_contracts = dict(payload.get("relationSeamContracts") or {})
+        if (
+            relation_seam_contracts
+            and trace_routine_hint
+            and str(payload.get("traceRoutineHint") or "").strip() == trace_routine_hint
+        ):
+            return canonical
+        relation_seam_contracts = relation_seam_contracts or _derive_execution_plan_relation_seam_contracts(
+            family_id,
+            trace_scope,
+            claim_stages,
+            list(payload.get("followUpTerms") or []),
+            trace_routine_hint,
+        )
+        if not relation_seam_contracts and not trace_routine_hint:
+            return canonical
+        updated_payload = dict(payload)
+        if relation_seam_contracts:
+            updated_payload["relationSeamContracts"] = relation_seam_contracts
+        if claim_stages:
+            updated_payload["claimStages"] = claim_stages
+        join_goal = str(updated_payload.get("joinGoal") or "").strip()
+        if blocked_edge_types:
+            desired_goal = (
+                f"Reconstruct the Token Shop family shell from current canonical fragments and audit the remaining family seams: {', '.join(blocked_edge_types)}."
+                if family_id == "token-shop" and "family" in trace_scope
+                else f"Reconstruct the {trace_scope} subject from current canonical fragments and close the remaining adjacent seams: {', '.join(blocked_edge_types)}."
+            )
+        else:
+            desired_goal = (
+                "Recheck the Token Shop family shell from current canonical fragments and verify no family seam reopened."
+                if family_id == "token-shop" and "family" in trace_scope
+                else join_goal
+            )
+        if desired_goal and desired_goal != join_goal:
+            updated_payload["joinGoal"] = desired_goal
+        if trace_routine_hint and str(updated_payload.get("traceRoutineHint") or "").strip() != trace_routine_hint:
+            updated_payload["traceRoutineHint"] = trace_routine_hint
+        updated_provenance = dict(canonical.get("provenance") or {})
+        updated_provenance["dependencyProof"] = {
+            **dict(updated_provenance.get("dependencyProof") or {}),
+            "reuseDecision": "backfilled-relation-seam-contracts",
+        }
+        attempts = 4
+        for attempt in range(attempts):
+            try:
+                with self.connect() as conn:
+                    conn.execute(
+                        """
+                        INSERT OR REPLACE INTO canonical_semantic_fragments(
+                            project_name, project_file, fragment_kind, fragment_key, canonical_payload_json,
+                            alternate_payloads_json, provenance_json, reducer_version, built_at
+                        ) VALUES(?,?,?,?,?,?,?,?,?)
+                        """,
+                        (
+                            project_name,
+                            project_file,
+                            "execution_plan_fragment",
+                            f"target-execution-plan:{trace_scope}",
+                            _json_dumps(updated_payload),
+                            _json_dumps(list(canonical.get("alternates") or [])),
+                            _json_dumps(updated_provenance),
+                            str(canonical.get("reducerVersion") or "semantic-fragment-derived-v1"),
+                            datetime.now().isoformat(),
+                        ),
+                    )
+                break
+            except sqlite3.OperationalError as exc:
+                if "database is locked" not in str(exc).lower() or attempt >= attempts - 1:
+                    raise
+                time.sleep(0.5 * (attempt + 1))
+        return {
+            "payload": updated_payload,
+            "alternates": list(canonical.get("alternates") or []),
+            "provenance": updated_provenance,
+            "reducerVersion": str(canonical.get("reducerVersion") or "semantic-fragment-derived-v1"),
+            "builtAt": datetime.now().isoformat(),
+        }
+
+    def backfill_execution_context_fragment_metadata(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> dict[str, Any] | None:
+        trace_scope = str(trace_scope or "").strip()
+        if not trace_scope:
+            return None
+        canonical = self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "execution_context_fragment",
+            f"target-execution-context:{trace_scope}",
+        )
+        if not canonical:
+            return None
+        payload = dict(canonical.get("payload") or {})
+        execution_plan = self.backfill_execution_plan_relation_seam_contracts(
+            project_name,
+            project_file,
+            trace_scope,
+        ) or self.find_canonical_semantic_fragment(
+            project_name,
+            project_file,
+            "execution_plan_fragment",
+            f"target-execution-plan:{trace_scope}",
+        ) or {}
+        execution_plan_payload = dict(execution_plan.get("payload") or {})
+        resolver_target = self.find_materialized_resolver_target_view(project_name, project_file, trace_scope) or {}
+        resolver_payload = dict(resolver_target.get("payload") or {})
+        expected_row_field = _expected_token_shop_row_field(
+            trace_scope,
+            str(payload.get("targetId") or ""),
+            str(payload.get("label") or ""),
+            str(payload.get("joinGoal") or execution_plan_payload.get("joinGoal") or ""),
+        )
+        updated_payload = dict(payload)
+        if execution_plan_payload.get("familyId") and not str(updated_payload.get("familyId") or "").strip():
+            updated_payload["familyId"] = str(execution_plan_payload.get("familyId") or "")
+        if execution_plan_payload.get("joinGoal") and not str(updated_payload.get("joinGoal") or "").strip():
+            updated_payload["joinGoal"] = str(execution_plan_payload.get("joinGoal") or "")
+        if execution_plan_payload.get("traceRoutineHint") and str(updated_payload.get("traceRoutineHint") or "").strip() != str(execution_plan_payload.get("traceRoutineHint") or "").strip():
+            updated_payload["traceRoutineHint"] = str(execution_plan_payload.get("traceRoutineHint") or "")
+        if resolver_payload.get("label") and not str(updated_payload.get("label") or "").strip():
+            updated_payload["label"] = str(resolver_payload.get("label") or "")
+        if resolver_payload.get("acceptedAnchors") and not list(updated_payload.get("acceptedAnchors") or []):
+            updated_payload["acceptedAnchors"] = list(resolver_payload.get("acceptedAnchors") or [])
+        if expected_row_field:
+            updated_payload["selectedSubjectKind"] = "row-local"
+            updated_payload["selectedSubjectKey"] = f"row:{expected_row_field}"
+        if updated_payload == payload:
+            return canonical
+        updated_provenance = dict(canonical.get("provenance") or {})
+        updated_provenance["dependencyProof"] = {
+            **dict(updated_provenance.get("dependencyProof") or {}),
+            "reuseDecision": "backfilled-execution-context-metadata",
+        }
+        with self.connect() as conn:
+            conn.execute(
+                """
+                INSERT OR REPLACE INTO canonical_semantic_fragments(
+                    project_name, project_file, fragment_kind, fragment_key, canonical_payload_json,
+                    alternate_payloads_json, provenance_json, reducer_version, built_at
+                ) VALUES(?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    project_name,
+                    project_file,
+                    "execution_context_fragment",
+                    f"target-execution-context:{trace_scope}",
+                    _json_dumps(updated_payload),
+                    _json_dumps(list(canonical.get("alternates") or [])),
+                    _json_dumps(updated_provenance),
+                    str(canonical.get("reducerVersion") or "semantic-fragment-derived-v1"),
+                    datetime.now().isoformat(),
+                ),
+            )
+        return {
+            "payload": updated_payload,
+            "alternates": list(canonical.get("alternates") or []),
+            "provenance": updated_provenance,
+            "reducerVersion": str(canonical.get("reducerVersion") or "semantic-fragment-derived-v1"),
+            "builtAt": datetime.now().isoformat(),
+        }
+
+    def backfill_all_execution_context_fragment_metadata(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> list[dict[str, Any]]:
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT fragment_key
+                FROM canonical_semantic_fragments
+                WHERE project_name = ? AND project_file = ? AND fragment_kind = 'execution_context_fragment'
+                ORDER BY fragment_key
+                """,
+                (project_name, project_file),
+            ).fetchall()
+        refreshed: list[dict[str, Any]] = []
+        for row in rows:
+            fragment_key = str(row["fragment_key"] or "").strip()
+            if not fragment_key.startswith("target-execution-context:"):
+                continue
+            trace_scope = fragment_key.split(":", 1)[1].strip()
+            before = self.find_canonical_semantic_fragment(
+                project_name,
+                project_file,
+                "execution_context_fragment",
+                fragment_key,
+            ) or {}
+            before_payload = dict(before.get("payload") or {})
+            repaired = self.backfill_execution_context_fragment_metadata(
+                project_name,
+                project_file,
+                trace_scope,
+            )
+            after_payload = dict((repaired or before).get("payload") or {})
+            if after_payload != before_payload:
+                refreshed.append(
+                    {
+                        "traceScope": trace_scope,
+                        "familyId": str(after_payload.get("familyId") or ""),
+                        "traceRoutineHint": str(after_payload.get("traceRoutineHint") or ""),
+                        "selectedSubjectKind": str(after_payload.get("selectedSubjectKind") or ""),
+                        "selectedSubjectKey": str(after_payload.get("selectedSubjectKey") or ""),
+                    }
+                )
+        return refreshed
+
+    def backfill_all_execution_plan_relation_seam_contracts(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> list[dict[str, Any]]:
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT fragment_key
+                FROM canonical_semantic_fragments
+                WHERE project_name = ? AND project_file = ? AND fragment_kind = 'execution_plan_fragment'
+                ORDER BY fragment_key
+                """,
+                (project_name, project_file),
+            ).fetchall()
+        refreshed: list[dict[str, Any]] = []
+        for row in rows:
+            fragment_key = str(row["fragment_key"] or "").strip()
+            if not fragment_key.startswith("target-execution-plan:"):
+                continue
+            trace_scope = fragment_key.split(":", 1)[1].strip()
+            before = self.find_canonical_semantic_fragment(
+                project_name,
+                project_file,
+                "execution_plan_fragment",
+                fragment_key,
+            ) or {}
+            before_payload = dict(before.get("payload") or {})
+            had_contracts = bool(dict(before_payload.get("relationSeamContracts") or {}))
+            refreshed_view = self.backfill_execution_plan_relation_seam_contracts(
+                project_name,
+                project_file,
+                trace_scope,
+            )
+            after_payload = dict((refreshed_view or before).get("payload") or {})
+            has_contracts = bool(dict(after_payload.get("relationSeamContracts") or {}))
+            if not had_contracts and has_contracts:
+                refreshed.append(
+                    {
+                        "traceScope": trace_scope,
+                        "familyId": str(after_payload.get("familyId") or ""),
+                        "contractCount": len(dict(after_payload.get("relationSeamContracts") or {})),
+                    }
+                )
+        return refreshed
+
     def find_or_synthesize_execution_context(
         self,
         project_name: str,
@@ -18643,12 +20796,19 @@ class GhidraCacheDB:
         family_id: str = "",
         compatibility_target_id: str = "",
     ) -> dict[str, Any]:
+        repaired_context = self.backfill_execution_context_fragment_metadata(
+            project_name,
+            project_file,
+            trace_scope,
+        )
         canonical = self.find_canonical_semantic_fragment(
             project_name,
             project_file,
             "execution_context_fragment",
             f"target-execution-context:{trace_scope}",
         )
+        if repaired_context:
+            canonical = repaired_context
         resolver_target = self.find_materialized_resolver_target_view(project_name, project_file, trace_scope) or {}
         resolver_payload = dict(resolver_target.get("payload") or {})
         if canonical:
@@ -18757,7 +20917,13 @@ class GhidraCacheDB:
             f"target-surface-plan:{trace_scope}",
         )
         if canonical:
-            return dict(canonical.get("payload") or {})
+            canonical_payload = dict(canonical.get("payload") or {})
+            canonical_payload["surfacePlans"] = _merge_surface_plans_with_bootstrap_support_surfaces(
+                list(canonical_payload.get("surfacePlans") or []),
+                str(compatibility_target_id or trace_scope or "").strip(),
+                trace_scope,
+            )
+            return canonical_payload
         resolver_target = self.find_materialized_resolver_target_view(project_name, project_file, trace_scope) or {}
         resolver_payload = dict(resolver_target.get("payload") or {})
         latest_bundle = self.find_latest_materialized_target_bundle_view(project_name, project_file, trace_scope) or {}
@@ -18770,6 +20936,11 @@ class GhidraCacheDB:
             latest_bundle_payload,
         )
         if db_surface_plan:
+            db_surface_plan["surfacePlans"] = _merge_surface_plans_with_bootstrap_support_surfaces(
+                list(db_surface_plan.get("surfacePlans") or []),
+                str(compatibility_target_id or trace_scope or "").strip(),
+                trace_scope,
+            )
             return db_surface_plan
         target_id = str(compatibility_target_id or trace_scope or "").strip()
         if target_id.startswith("token-shop") and (resolver_payload or latest_bundle_payload):

@@ -520,6 +520,12 @@ textarea {
   border-color: rgba(159, 232, 255, 0.14);
 }
 
+.button-danger {
+  background: linear-gradient(135deg, #d94f45 0%, #9f2b2f 60%, #5b171d 100%);
+  color: white;
+  border-color: rgba(255, 184, 155, 0.18);
+}
+
 .button-ghost {
   background: rgba(255, 255, 255, 0.02);
 }
@@ -734,9 +740,41 @@ textarea {
   gap: 14px;
 }
 
+.trace-gap-launcher-controls {
+  gap: 16px;
+  margin-top: 8px;
+  margin-bottom: 10px;
+}
+
+.trace-gap-launcher-controls .field-group {
+  max-width: 180px;
+}
+
+.trace-gap-launcher-controls input {
+  margin-top: 2px;
+}
+
+.trace-gap-launcher-actions {
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.trace-gap-summary-card .validation-grid,
+.trace-gap-summary-card .validation-card {
+  min-width: 0;
+}
+
+.trace-gap-summary-card .validation-card strong,
+.trace-gap-summary-card .validation-card .meta {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .trace-gap-log {
   display: grid;
   gap: 8px;
+  min-width: 0;
   max-height: 420px;
   overflow: auto;
   padding: 14px;
@@ -748,6 +786,7 @@ textarea {
 .trace-gap-log-line {
   display: grid;
   gap: 4px;
+  min-width: 0;
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.82rem;
   line-height: 1.45;
@@ -763,6 +802,44 @@ textarea {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-size: 0.72rem;
+}
+
+.trace-gap-log-line span:last-child,
+.trace-gap-log-line code,
+.trace-gap-log-line pre {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+details[data-trace-gap-section] {
+  min-width: 0;
+}
+
+details[data-trace-gap-section] summary {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+details[data-trace-gap-section] .preview-card,
+details[data-trace-gap-section] .meta,
+details[data-trace-gap-section] p,
+details[data-trace-gap-section] code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+details[data-trace-gap-section] pre {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ship-page-grid {
@@ -871,7 +948,7 @@ textarea {
 
 .token-shop-shell-card {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr) 108px;
+  grid-template-columns: 82px minmax(0, 1fr) 88px;
   grid-template-areas:
     "overlay overlay overlay"
     "progress title buy"
@@ -892,16 +969,22 @@ textarea {
 .token-shop-title-box {
   grid-area: title;
   display: grid;
-  gap: 3px;
-  align-content: start;
-  padding: 4px 8px 2px 2px;
-  background: linear-gradient(180deg, rgba(87, 60, 18, 0.34), rgba(61, 39, 13, 0));
+  gap: 2px;
+  align-content: center;
+  min-height: 28px;
+  padding: 3px 7px 2px 4px;
+  border-bottom: 1px solid rgba(209, 166, 64, 0.52);
+  background:
+    linear-gradient(180deg, rgba(103, 72, 20, 0.38), rgba(64, 41, 13, 0.1)),
+    linear-gradient(90deg, rgba(244, 205, 110, 0.08), transparent 72%);
 }
 
 .token-shop-title-box strong {
-  font-size: 0.84rem;
-  line-height: 1.06;
-  color: #f6efe0;
+  font-size: 0.78rem;
+  line-height: 1.04;
+  font-weight: 600;
+  color: #f3ead7;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
 }
 
 .token-shop-title-box-eyebrow {
@@ -911,18 +994,18 @@ textarea {
 .token-shop-shell-content {
   grid-area: content;
   display: grid;
-  gap: 6px;
-  padding: 2px 8px 6px 2px;
+  gap: 4px;
+  padding: 3px 6px 5px 4px;
   border-right: 1px solid rgba(246, 210, 125, 0.16);
 }
 
 .token-shop-progress-cluster {
   grid-area: progress;
   display: grid;
-  gap: 6px;
+  gap: 4px;
   justify-items: center;
   align-content: start;
-  padding: 7px 0 4px 4px;
+  padding: 6px 0 4px 4px;
 }
 
 .token-shop-level-ring {
@@ -930,22 +1013,22 @@ textarea {
   align-content: center;
   justify-items: center;
   gap: 1px;
-  width: 82px;
-  min-height: 82px;
-  padding: 6px 5px;
+  width: 74px;
+  min-height: 74px;
+  padding: 4px 4px;
   border-radius: 999px;
-  border: 4px solid rgba(241, 186, 65, 0.95);
+  border: 3px solid rgba(241, 186, 65, 0.95);
   background:
     radial-gradient(circle at 35% 30%, rgba(78, 89, 116, 0.82), rgba(17, 22, 34, 0.99) 72%),
     linear-gradient(180deg, rgba(255, 214, 97, 0.24), rgba(82, 55, 11, 0.12));
   box-shadow:
-    inset 0 0 0 2px rgba(255, 238, 173, 0.12),
-    0 0 0 2px rgba(105, 66, 9, 0.46);
-  transform: translateX(-8px);
+    inset 0 0 0 2px rgba(255, 238, 173, 0.14),
+    0 0 0 2px rgba(105, 66, 9, 0.5);
+  transform: translateX(-3px);
 }
 
 .token-shop-level-caption {
-  font-size: 0.58rem;
+  font-size: 0.54rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(255, 240, 205, 0.74);
@@ -960,21 +1043,21 @@ textarea {
 
 .token-shop-level-value,
 .token-shop-level-cap {
-  font-size: 0.98rem;
+  font-size: 0.93rem;
   line-height: 1;
   font-weight: 700;
 }
 
 .token-shop-level-divider {
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   opacity: 0.8;
 }
 
 .token-shop-fill-track {
   position: relative;
   width: 100%;
-  max-width: 90px;
-  height: 10px;
+  max-width: 84px;
+  height: 9px;
   padding: 2px;
   border-radius: 3px;
   background: rgba(18, 25, 39, 0.92);
@@ -1067,10 +1150,74 @@ textarea {
 }
 
 .token-shop-effect-line {
-  font-size: 0.96rem;
-  line-height: 1.12;
-  color: rgba(245, 234, 211, 0.94);
+  font-size: 0.78rem;
+  line-height: 1.1;
+  color: rgba(246, 234, 212, 0.96);
+  letter-spacing: 0;
   margin: 0;
+}
+
+.token-shop-effect-line-secondary {
+  font-size: 0.74rem;
+  opacity: 0.96;
+}
+
+.token-shop-effect-line-bullet {
+  padding-left: 0.9rem;
+  text-indent: -0.55rem;
+  line-height: 1.16;
+}
+
+.token-shop-effect-key {
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.18);
+}
+
+.token-shop-effect-key--value {
+  color: #fff2cf;
+}
+
+.token-shop-effect-key--source {
+  color: rgba(246, 234, 212, 0.96);
+  font-weight: 600;
+}
+
+.token-shop-effect-key--qualifier {
+  color: rgba(240, 224, 188, 0.78);
+  font-style: italic;
+  font-weight: 600;
+}
+
+.token-shop-effect-key--token {
+  color: #ffd76a;
+}
+
+.token-shop-effect-key--diamond {
+  color: #f0a2ff;
+}
+
+.token-shop-effect-key--generator {
+  color: #7deaa8;
+}
+
+.token-shop-effect-key--mod {
+  color: #ff8a6d;
+}
+
+.token-shop-effect-key--shard {
+  color: #8eb8ff;
+}
+
+.token-shop-effect-key--rp {
+  color: #ffc06e;
+}
+
+.token-shop-effect-key--ap {
+  color: #bca3ff;
+}
+
+.token-shop-effect-key--cells {
+  color: #8fefba;
 }
 
 .token-shop-support-preview {
@@ -1099,13 +1246,27 @@ textarea {
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   align-items: center;
-  gap: 5px;
-  padding: 6px 8px;
+  gap: 3px;
+  padding: 4px 4px;
   border-left: 1px solid rgba(246, 210, 125, 0.16);
   background:
     linear-gradient(180deg, rgba(40, 158, 186, 0.98), rgba(20, 100, 126, 0.98)),
     linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent 70%);
   text-align: center;
+}
+
+.token-shop-buy-panel.maxed {
+  background:
+    linear-gradient(180deg, rgba(84, 66, 14, 0.98), rgba(52, 40, 8, 0.98)),
+    linear-gradient(90deg, rgba(255, 247, 217, 0.08), transparent 68%);
+  border-left-color: rgba(228, 194, 90, 0.34);
+}
+
+.token-shop-buy-panel.is-research {
+  background:
+    linear-gradient(180deg, rgba(79, 66, 132, 0.96), rgba(54, 41, 93, 0.98)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04), transparent 70%);
+  border-left-color: rgba(185, 165, 235, 0.32);
 }
 
 .token-shop-buy-panel.actionable {
@@ -1131,19 +1292,33 @@ textarea {
 }
 
 .token-shop-buy-label {
-  font-size: 0.7rem;
+  font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: #effcff;
 }
 
+.token-shop-buy-panel.is-research .token-shop-buy-label {
+  color: rgba(243, 235, 255, 0.95);
+}
+
+.token-shop-buy-panel.maxed .token-shop-buy-label {
+  color: #fff4d2;
+  align-self: start;
+}
+
 .token-shop-buy-panel strong {
-  font-size: 1.02rem;
+  font-size: 0.86rem;
   line-height: 1;
 }
 
+.token-shop-buy-panel.is-research strong {
+  font-size: 0.8rem;
+  color: rgba(244, 237, 255, 0.98);
+}
+
 .token-shop-buy-panel .meta {
-  font-size: 0.66rem;
+  font-size: 0.62rem;
   color: rgba(232, 249, 255, 0.88);
   margin: 0;
 }
@@ -1165,10 +1340,29 @@ textarea {
 }
 
 .token-shop-buy-hint {
-  font-size: 0.58rem;
+  font-size: 0.52rem;
   color: rgba(232, 249, 255, 0.82);
   align-self: end;
-  line-height: 1.2;
+  line-height: 1.14;
+}
+
+.token-shop-buy-panel.is-research .token-shop-buy-hint {
+  color: rgba(235, 228, 255, 0.82);
+}
+
+.token-shop-buy-panel.maxed .token-shop-buy-hint {
+  color: rgba(255, 243, 206, 0.84);
+}
+
+.token-shop-buy-star {
+  display: block;
+  align-self: end;
+  font-size: 3.05rem;
+  line-height: 1;
+  color: #fffaf0;
+  text-shadow:
+    0 0 0 rgba(0, 0, 0, 0),
+    0 0 16px rgba(255, 255, 255, 0.22);
 }
 
 .token-shop-buff-strip {
@@ -1178,20 +1372,45 @@ textarea {
   margin-top: 0;
 }
 
+.token-shop-buff-strip.single-lane .token-shop-buff-label {
+  display: none;
+}
+
+.token-shop-buff-strip.single-lane .token-shop-buff-plate {
+  min-height: 42px;
+  padding: 7px 8px 8px;
+}
+
+.token-shop-buff-strip.single-lane .token-shop-buff-value {
+  font-size: 1rem;
+}
+
 .token-shop-buff-plate {
   display: grid;
   gap: 3px;
   align-content: center;
-  min-height: 52px;
-  padding: 6px 8px 7px;
+  min-height: 48px;
+  padding: 5px 8px 6px;
   border: 1px solid rgba(82, 112, 154, 0.46);
   background: linear-gradient(180deg, rgba(29, 40, 59, 0.98), rgba(20, 29, 43, 0.98));
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(124, 159, 205, 0.12);
   text-align: center;
 }
 
+.token-shop-buff-plate.is-collapsed-research {
+  gap: 2px;
+  min-height: 44px;
+}
+
+.token-shop-buff-plate.is-collapsed-research .token-shop-buff-label {
+  font-size: 0.54rem;
+  letter-spacing: 0.08em;
+}
+
 .token-shop-buff-label {
-  font-size: 0.52rem;
+  font-size: 0.5rem;
   letter-spacing: 0.11em;
   text-transform: uppercase;
   color: rgba(197, 218, 255, 0.8);
@@ -1199,10 +1418,11 @@ textarea {
 }
 
 .token-shop-buff-value {
-  font-size: 0.9rem;
+  font-size: 0.94rem;
   line-height: 1;
   color: #dff3ff;
   order: 1;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.16);
 }
 
 .token-shop-buff-plate[data-tone="token"] .token-shop-buff-value {
@@ -1210,7 +1430,43 @@ textarea {
 }
 
 .token-shop-buff-plate[data-tone="diamond"] .token-shop-buff-value {
-  color: #86f1ff;
+  color: #f3a4ff;
+}
+
+.token-shop-buff-plate[data-tone="token"] .token-shop-buff-label {
+  color: rgba(255, 222, 124, 0.86);
+}
+
+.token-shop-buff-plate[data-tone="diamond"] .token-shop-buff-label {
+  color: rgba(243, 176, 255, 0.86);
+}
+
+.token-shop-buff-plate[data-tone="generator"] .token-shop-buff-label {
+  color: rgba(153, 239, 185, 0.86);
+}
+
+.token-shop-buff-plate[data-tone="mod"] .token-shop-buff-label {
+  color: rgba(255, 166, 143, 0.86);
+}
+
+.token-shop-buff-plate[data-tone="shard"] .token-shop-buff-label {
+  color: rgba(170, 198, 255, 0.86);
+}
+
+.token-shop-buff-plate[data-tone="rp"] .token-shop-buff-label {
+  color: rgba(255, 201, 129, 0.86);
+}
+
+.token-shop-buff-plate[data-tone="ap"] .token-shop-buff-label {
+  color: rgba(201, 181, 255, 0.86);
+}
+
+.token-shop-buff-plate[data-tone="cells"] .token-shop-buff-label {
+  color: rgba(170, 247, 200, 0.86);
+}
+
+.token-shop-buff-plate[data-tone="uplift"] .token-shop-buff-label {
+  color: rgba(255, 226, 165, 0.86);
 }
 
 .token-shop-buff-plate[data-tone="generator"] .token-shop-buff-value {

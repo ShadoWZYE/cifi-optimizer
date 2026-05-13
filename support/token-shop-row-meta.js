@@ -91,8 +91,8 @@ export const TOKEN_SHOP_ROW_META = Object.freeze({
     title: "Duo Booster One",
     progressionFamily: "duo-booster",
     storeLane: "Duo chain",
-    storeEffectText: "x1.02 to Tokens Gained & Diamonds Gained.",
-    storeBuffTargets: [buff("Tokens", "token"), buff("Diamonds", "diamond")]
+    storeEffectText: "x1.02 to MP Gained & Shards Gained.",
+    storeBuffTargets: [buff("MP", "mod"), buff("Shards", "shard")]
   }),
   ATU16Level: Object.freeze({
     title: "Duo Booster Two",
@@ -177,24 +177,24 @@ export const TOKEN_SHOP_ROW_META = Object.freeze({
     progressionFamily: "late-ultima",
     storeLane: "Late shelf",
     storeShell: "late-shelf",
-    storeEffectText: "+1000 Max Levels to Tier 1 Upgrades.",
-    storeBuffTargets: [buff("Tier 1 Max", "uplift")]
+    storeEffectText: "+1000 Max Levels to Tier 1 Upgrades (Some Upgrades Excluded).",
+    storeBuffTargets: [buff("Tier 1 Upgrades", "uplift")]
   }),
   ATU27Level: Object.freeze({
     title: "Tier 2 Max Level Increaser",
     progressionFamily: "late-ultima",
     storeLane: "Late shelf",
     storeShell: "late-shelf",
-    storeEffectText: "+500 Max Levels to Tier 2 Upgrades.",
-    storeBuffTargets: [buff("Tier 2 Max", "uplift")]
+    storeEffectText: "+500 Max Levels to Tier 2 Upgrades (Some Upgrades Excluded).",
+    storeBuffTargets: [buff("Tier 2 Upgrades", "uplift")]
   }),
   ATU28Level: Object.freeze({
     title: "Tier 3 Max Level Increaser",
     progressionFamily: "late-ultima",
     storeLane: "Late shelf",
     storeShell: "late-shelf",
-    storeEffectText: "+250 Max Levels to Tier 3 Upgrades.",
-    storeBuffTargets: [buff("Tier 3 Max", "uplift")]
+    storeEffectText: "+500 Max Levels to Tier 3 Upgrades (Some Upgrades Excluded).",
+    storeBuffTargets: [buff("Tier 3 Upgrades", "uplift")]
   })
 });
 

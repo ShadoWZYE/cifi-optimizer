@@ -15,6 +15,9 @@ import {
 const root = cwd();
 const port = Number(process.env.PORT || 4173);
 const cacheDbPath = join(root, "workbench", "ghidra-cache", "ghidra_cache.sqlite3");
+const appStateDbPath = process.env.CIFI_APP_STATE_DB_PATH
+  ? normalize(process.env.CIFI_APP_STATE_DB_PATH)
+  : join(root, "workbench", "app-state.sqlite3");
 const systemUnitsDir = join(root, "data", "system-units");
 const launcherMode =
   process.env.CIFI_LAUNCH_MODE === "1" || process.argv.includes("--launcher-mode");
@@ -41,7 +44,8 @@ const serverCapabilitiesScript = `<script>window.__CIFI_SERVER_CAPABILITIES__ = 
   systemUnitApi: true,
   systemDbBundleApi: true,
   traceGapApi: true,
-  serverControlApi: true
+  serverControlApi: true,
+  playerProfileApi: true
 })};</script>`;
 const traceGapLogLimit = 240;
 let traceGapRun = createTraceGapRunState();
@@ -99,6 +103,16 @@ const server = createServer(async (request, response) => {
     return;
   }
 
+  if (request.method === "GET" && requestUrl.pathname === "/api/player-profile") {
+    handlePlayerProfileGet(response);
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/player-profile") {
+    await handlePlayerProfileUpsert(request, response);
+    return;
+  }
+
   if (request.method === "GET" && requestUrl.pathname === "/api/token-shop-db") {
     handleTokenShopDb(response, requestUrl);
     return;
@@ -131,6 +145,11 @@ const server = createServer(async (request, response) => {
 
   if (request.method === "POST" && requestUrl.pathname === "/api/trace-gap/run") {
     await handleTraceGapRun(request, response);
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/trace-gap/stop") {
+    handleTraceGapStop(response);
     return;
   }
 
@@ -287,6 +306,24 @@ function withCacheDb(fn) {
   }
 }
 
+function withAppStateDb(fn) {
+  const db = new DatabaseSync(appStateDbPath);
+  db.exec("PRAGMA busy_timeout=30000");
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS player_profiles (
+      profile_id TEXT PRIMARY KEY,
+      payload_json TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      source_label TEXT NOT NULL DEFAULT 'app'
+    );
+  `);
+  try {
+    return fn(db);
+  } finally {
+    db.close();
+  }
+}
+
 function loadSystemUnitSnapshots(systemIds) {
   const units = {};
   const missing = [];
@@ -378,6 +415,95 @@ function handleSystemUnits(response, requestUrl) {
     writeJson(response, 500, {
       error: error instanceof Error ? error.message : String(error),
       source: "system-unit-server"
+    });
+  }
+}
+
+function maxBuiltAt(...values) {
+  return values
+    .flat()
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .sort()
+    .at(-1) || null;
+}
+
+function handlePlayerProfileGet(response) {
+  try {
+    const result = withAppStateDb((db) => {
+      const row = db
+        .prepare(
+          `
+            SELECT profile_id, payload_json, updated_at, source_label
+            FROM player_profiles
+            WHERE profile_id = 'active'
+          `
+        )
+        .get();
+      if (!row) {
+        return null;
+      }
+      return {
+        profileId: row.profile_id,
+        profile: JSON.parse(row.payload_json),
+        updatedAt: row.updated_at,
+        sourceLabel: row.source_label
+      };
+    });
+    if (!result) {
+      writeJson(response, 404, { error: "No DB-backed player profile is stored yet." });
+      return;
+    }
+    writeJson(response, 200, result);
+  } catch (error) {
+    writeJson(response, 500, {
+      error: error instanceof Error ? error.message : String(error),
+      source: "player-profile-server"
+    });
+  }
+}
+
+async function handlePlayerProfileUpsert(request, response) {
+  try {
+    const payload = await readJsonBody(request);
+    const profile =
+      payload?.profile && typeof payload.profile === "object" && !Array.isArray(payload.profile)
+        ? payload.profile
+        : null;
+    if (!profile) {
+      writeJson(response, 400, { error: "profile object is required." });
+      return;
+    }
+    const updatedAt =
+      typeof profile?.meta?.updatedAt === "string" && profile.meta.updatedAt.trim()
+        ? profile.meta.updatedAt.trim()
+        : new Date().toISOString();
+    const sourceLabel =
+      typeof payload?.sourceLabel === "string" && payload.sourceLabel.trim()
+        ? payload.sourceLabel.trim()
+        : "app";
+    withAppStateDb((db) => {
+      db.prepare(
+        `
+          INSERT INTO player_profiles (profile_id, payload_json, updated_at, source_label)
+          VALUES ('active', ?, ?, ?)
+          ON CONFLICT(profile_id) DO UPDATE SET
+            payload_json = excluded.payload_json,
+            updated_at = excluded.updated_at,
+            source_label = excluded.source_label
+        `
+      ).run(JSON.stringify(profile), updatedAt, sourceLabel);
+    });
+    writeJson(response, 200, {
+      ok: true,
+      profileId: "active",
+      updatedAt,
+      sourceLabel
+    });
+  } catch (error) {
+    writeJson(response, 500, {
+      error: error instanceof Error ? error.message : String(error),
+      source: "player-profile-server"
     });
   }
 }
@@ -528,6 +654,7 @@ function querySystemGenericMechanics(requestUrl) {
         .all(...params);
 
       const scopes = {};
+      let latestBuiltAt = null;
       const ensureScope = (traceScope) => {
         const key = String(traceScope || "").trim();
         if (!key) {
@@ -545,6 +672,7 @@ function querySystemGenericMechanics(requestUrl) {
       };
 
       entityRows.forEach((row) => {
+        latestBuiltAt = maxBuiltAt(latestBuiltAt, row.built_at);
         const scope = ensureScope(row.trace_scope);
         if (!scope) {
           return;
@@ -557,6 +685,7 @@ function querySystemGenericMechanics(requestUrl) {
         });
       });
       factRows.forEach((row) => {
+        latestBuiltAt = maxBuiltAt(latestBuiltAt, row.built_at);
         const scope = ensureScope(row.trace_scope);
         if (!scope) {
           return;
@@ -571,6 +700,7 @@ function querySystemGenericMechanics(requestUrl) {
         });
       });
       relationRows.forEach((row) => {
+        latestBuiltAt = maxBuiltAt(latestBuiltAt, row.built_at);
         const scope = ensureScope(row.trace_scope);
         if (!scope) {
           return;
@@ -585,6 +715,7 @@ function querySystemGenericMechanics(requestUrl) {
         });
       });
       gapRows.forEach((row) => {
+        latestBuiltAt = maxBuiltAt(latestBuiltAt, row.built_at);
         const scope = ensureScope(row.trace_scope);
         if (!scope) {
           return;
@@ -601,6 +732,7 @@ function querySystemGenericMechanics(requestUrl) {
       return {
         systemId,
         scopeCount: Object.keys(scopes).length,
+        builtAt: latestBuiltAt,
         scopes
       };
     });
@@ -670,7 +802,11 @@ function querySystemDbBundle(requestUrl) {
       source: "system-db-bundle",
       systemId: String(requestUrl.searchParams.get("systemId") || "").trim(),
       mode: "db",
-      builtAt: contractResult.statusCode < 400 ? contractResult.body?.builtAt ?? null : null,
+      builtAt: maxBuiltAt(
+        contractResult.statusCode < 400 ? contractResult.body?.builtAt ?? null : null,
+        genericResult.statusCode < 400 ? genericResult.body?.builtAt ?? null : null,
+        boundaryResult.statusCode < 400 ? boundaryResult.body?.builtAt ?? null : null
+      ),
       subjectMetadata: contractResult.statusCode < 400 ? contractResult.body : null,
       genericMechanics: genericResult.statusCode < 400 ? genericResult.body : null,
       boundaries: boundaryResult.statusCode < 400 ? boundaryResult.body : null
@@ -714,7 +850,9 @@ function querySystemBoundaries(requestUrl) {
         .all(...params);
 
       const boundaries = {};
+      let latestBuiltAt = null;
       for (const row of boundaryRows) {
+        latestBuiltAt = maxBuiltAt(latestBuiltAt, row.built_at);
         const key = String(row.subject_id || "").trim();
         if (!key) {
           continue;
@@ -732,6 +870,7 @@ function querySystemBoundaries(requestUrl) {
       return {
         systemId,
         boundaryCount: Object.keys(boundaries).length,
+        builtAt: latestBuiltAt,
         boundaries
       };
     });
@@ -784,10 +923,20 @@ function createTraceGapRunState(overrides = {}) {
     summary: "",
     recoveredSummary: "",
     tracedSummary: "",
+    attemptedSummary: "",
+    missingSummary: "",
+    newEdgesSummary: "",
     progressSummary: "",
+    cumulativeRecovered: [],
+    cumulativeTraced: [],
+    cumulativeAttempted: [],
+    cumulativeMissing: [],
+    cumulativeNewEdges: [],
+    progressDetected: false,
     rerankCount: 0,
     currentIteration: 0,
     lastOutputAt: null,
+    stopRequestedAt: null,
     logEntries: [],
     lineCount: 0,
     stdoutBuffer: "",
@@ -795,6 +944,68 @@ function createTraceGapRunState(overrides = {}) {
     child: null,
     ...overrides
   };
+}
+
+function parseTraceGapSummaryList(value) {
+  const text = String(value || "").trim();
+  if (!text || text === "none") {
+    return [];
+  }
+  return text
+    .split(",")
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+}
+
+function mergeTraceGapSummaryList(existing, value) {
+  const next = Array.isArray(existing) ? [...existing] : [];
+  const seen = new Set(next.map((item) => String(item)));
+  for (const item of parseTraceGapSummaryList(value)) {
+    if (seen.has(item)) {
+      continue;
+    }
+    seen.add(item);
+    next.push(item);
+  }
+  return next;
+}
+
+function formatTraceGapSummaryList(values) {
+  return Array.isArray(values) && values.length ? values.join(",") : "none";
+}
+
+function updateTraceGapCumulativeSummary(fields) {
+  if ("recovered" in fields) {
+    traceGapRun.cumulativeRecovered = mergeTraceGapSummaryList(traceGapRun.cumulativeRecovered, fields.recovered);
+    traceGapRun.recoveredSummary = formatTraceGapSummaryList(traceGapRun.cumulativeRecovered);
+  }
+  if ("traced" in fields) {
+    traceGapRun.cumulativeTraced = mergeTraceGapSummaryList(traceGapRun.cumulativeTraced, fields.traced);
+    traceGapRun.tracedSummary = formatTraceGapSummaryList(traceGapRun.cumulativeTraced);
+  }
+  if ("attempted" in fields) {
+    traceGapRun.cumulativeAttempted = mergeTraceGapSummaryList(traceGapRun.cumulativeAttempted, fields.attempted);
+    traceGapRun.attemptedSummary = formatTraceGapSummaryList(traceGapRun.cumulativeAttempted);
+  }
+  if ("missing" in fields) {
+    traceGapRun.cumulativeMissing = mergeTraceGapSummaryList(traceGapRun.cumulativeMissing, fields.missing);
+    traceGapRun.missingSummary = formatTraceGapSummaryList(traceGapRun.cumulativeMissing);
+  }
+  if ("newEdges" in fields) {
+    traceGapRun.cumulativeNewEdges = mergeTraceGapSummaryList(traceGapRun.cumulativeNewEdges, fields.newEdges);
+    traceGapRun.newEdgesSummary = formatTraceGapSummaryList(traceGapRun.cumulativeNewEdges);
+  }
+  if ("netProgress" in fields) {
+    const nextProgress = String(fields.netProgress || "").trim().toLowerCase();
+    if (nextProgress === "yes") {
+      traceGapRun.progressDetected = true;
+    }
+    if (traceGapRun.progressDetected) {
+      traceGapRun.progressSummary = "yes";
+    } else if (nextProgress) {
+      traceGapRun.progressSummary = nextProgress;
+    }
+  }
 }
 
 function getPublicTraceGapRun() {
@@ -894,6 +1105,21 @@ function updateTraceGapRunSummary(line) {
   if (!trimmed) {
     return;
   }
+  const progressSummaryMatch =
+    /^recovered=(.*?)\s+traced=(.*?)\s+attempted=(.*?)\s+missing=(.*?)\s+newEdges=(.*?)\s+netProgress=(\S+)$/.exec(
+      trimmed
+    );
+  if (progressSummaryMatch) {
+    updateTraceGapCumulativeSummary({
+      recovered: progressSummaryMatch[1],
+      traced: progressSummaryMatch[2],
+      attempted: progressSummaryMatch[3],
+      missing: progressSummaryMatch[4],
+      newEdges: progressSummaryMatch[5],
+      netProgress: progressSummaryMatch[6]
+    });
+    return;
+  }
   if (trimmed.startsWith("[phase ")) {
     const match = /^\[phase\s+\d+\]\s+(.+?)(?:\.\.\.| done in .+)?$/.exec(trimmed);
     if (match?.[1]) {
@@ -953,11 +1179,17 @@ function updateTraceGapRunSummary(line) {
   } else if (key === "summary") {
     traceGapRun.summary = value;
   } else if (key === "recovered") {
-    traceGapRun.recoveredSummary = value;
+    updateTraceGapCumulativeSummary({ recovered: value });
   } else if (key === "traced") {
-    traceGapRun.tracedSummary = value;
+    updateTraceGapCumulativeSummary({ traced: value });
+  } else if (key === "attempted") {
+    updateTraceGapCumulativeSummary({ attempted: value });
+  } else if (key === "missing") {
+    updateTraceGapCumulativeSummary({ missing: value });
+  } else if (key === "newEdges") {
+    updateTraceGapCumulativeSummary({ newEdges: value });
   } else if (key === "netProgress") {
-    traceGapRun.progressSummary = value;
+    updateTraceGapCumulativeSummary({ netProgress: value });
   } else if (key === "verdict") {
     traceGapRun.verdict = value;
   }
@@ -1226,6 +1458,67 @@ function handleTraceGapOverview(response, requestUrl) {
                 .get(...scopeParams).count || 0
             )
           };
+          const gapStateCounts = (() => {
+            if (scopeHint) {
+              return {
+                open: counts.gaps,
+                closedOnly: 0,
+                orphan: 0,
+                total: counts.gaps
+              };
+            }
+            const subjectRows = db
+              .prepare(
+                `SELECT mssv.trace_scope, mssv.payload_json
+                 FROM materialized_subject_state_views AS mssv
+                 INNER JOIN (
+                   SELECT trace_scope, subject_id, MAX(built_at) AS max_built_at
+                   FROM materialized_subject_state_views
+                   WHERE project_name = ? AND project_file = ?
+                   GROUP BY trace_scope, subject_id
+                 ) AS latest
+                   ON latest.trace_scope = mssv.trace_scope
+                  AND latest.subject_id = mssv.subject_id
+                  AND latest.max_built_at = mssv.built_at
+                 WHERE mssv.project_name = ? AND mssv.project_file = ?`
+              )
+              .all("cifi-full", "libil2cpp.so", "cifi-full", "libil2cpp.so");
+            const openScopes = new Set();
+            const knownScopes = new Set();
+            for (const row of subjectRows) {
+              knownScopes.add(row.trace_scope);
+              let payload = {};
+              try {
+                payload = JSON.parse(row.payload_json || "{}");
+              } catch {}
+              const nextSeam = payload.nextSeam && payload.nextSeam.id;
+              const blockedEdges = Array.isArray(payload.blockedEdges) ? payload.blockedEdges : [];
+              const missingEdges = Array.isArray(payload.missingEdges) ? payload.missingEdges : [];
+              if (nextSeam || blockedEdges.length || missingEdges.length) {
+                openScopes.add(row.trace_scope);
+              }
+            }
+            const gapScopeRows = db
+              .prepare(
+                `SELECT trace_scope, COUNT(*) AS count
+                 FROM materialized_gap_views
+                 WHERE project_name = ? AND project_file = ?
+                 GROUP BY trace_scope`
+              )
+              .all("cifi-full", "libil2cpp.so");
+            const result = { open: 0, closedOnly: 0, orphan: 0, total: counts.gaps };
+            for (const row of gapScopeRows) {
+              const count = Number(row.count || 0);
+              if (openScopes.has(row.trace_scope)) {
+                result.open += count;
+              } else if (knownScopes.has(row.trace_scope)) {
+                result.closedOnly += count;
+              } else {
+                result.orphan += count;
+              }
+            }
+            return result;
+          })();
           const gapKindCounts = (scopeHint
             ? db
                 .prepare(
@@ -1303,6 +1596,7 @@ function handleTraceGapOverview(response, requestUrl) {
           }));
           return {
             counts,
+            gapStateCounts,
             gapKindCounts,
             latestGapRows,
             latestFactRows
@@ -1407,7 +1701,7 @@ waitForPortRelease();
 
 async function handleTraceGapRun(request, response) {
   try {
-    if (traceGapRun.status === "running") {
+    if (traceGapRun.status === "running" || traceGapRun.status === "stopping") {
       writeJson(response, 409, {
         error: "A trace-gap run is already active.",
         run: getPublicTraceGapRun()
@@ -1416,7 +1710,7 @@ async function handleTraceGapRun(request, response) {
     }
     const payload = await readJsonBody(request);
     const mode = payload?.mode === "dry-run" ? "dry-run" : "execute";
-    const repeat = Math.min(9, Math.max(1, Number(payload?.repeat || 1)));
+    const repeat = Math.min(50, Math.max(1, Number(payload?.repeat || 1)));
     const python = resolvePythonCommand();
     const args = [
       ...python.prefixArgs,
@@ -1470,10 +1764,12 @@ async function handleTraceGapRun(request, response) {
     child.on("close", (code) => {
       flushTraceGapLogBuffer("stdout");
       flushTraceGapLogBuffer("stderr");
-      traceGapRun.status = code === 0 ? "completed" : "failed";
+      traceGapRun.status = traceGapRun.stopRequestedAt ? "stopped" : code === 0 ? "completed" : "failed";
       traceGapRun.exitCode = code ?? 1;
       traceGapRun.finishedAt = new Date().toISOString();
-      if (!traceGapRun.summary && traceGapRun.mode === "dry-run" && !traceGapRun.selectedTarget) {
+      if (traceGapRun.status === "stopped") {
+        traceGapRun.activityLabel = "Trace-gap run stopped";
+      } else if (!traceGapRun.summary && traceGapRun.mode === "dry-run" && !traceGapRun.selectedTarget) {
         traceGapRun.activityLabel = "Dry-run completed without a selected target";
       } else if (traceGapRun.status === "completed") {
         traceGapRun.activityLabel =
@@ -1492,6 +1788,54 @@ async function handleTraceGapRun(request, response) {
       run: getPublicTraceGapRun()
     });
   }
+}
+
+function handleTraceGapStop(response) {
+  if (traceGapRun.status === "stopping") {
+    writeJson(response, 202, { ok: true, run: getPublicTraceGapRun() });
+    return;
+  }
+  if (traceGapRun.status !== "running" || !traceGapRun.child) {
+    writeJson(response, 409, {
+      error: "No trace-gap run is active.",
+      run: getPublicTraceGapRun()
+    });
+    return;
+  }
+
+  traceGapRun.status = "stopping";
+  traceGapRun.stopRequestedAt = new Date().toISOString();
+  traceGapRun.activityLabel = "Stopping trace-gap run";
+  pushTraceGapLogLine("stdout", "[control] Stop requested from trace-gap UI.");
+  stopTraceGapProcess(traceGapRun.child);
+  broadcastTraceGapState();
+  writeJson(response, 202, { ok: true, run: getPublicTraceGapRun() });
+}
+
+function stopTraceGapProcess(child) {
+  if (!child || child.killed) {
+    return;
+  }
+  if (process.platform === "win32" && child.pid) {
+    const result = spawnSync("taskkill", ["/pid", String(child.pid), "/t", "/f"], {
+      cwd: root,
+      stdio: "ignore"
+    });
+    if (result.status === 0) {
+      return;
+    }
+  }
+  try {
+    child.kill("SIGTERM");
+  } catch {}
+  setTimeout(() => {
+    if (child.exitCode !== null || child.killed) {
+      return;
+    }
+    try {
+      child.kill("SIGKILL");
+    } catch {}
+  }, 2500).unref();
 }
 
 async function handleClientSessionTouch(request, response) {

@@ -7,6 +7,17 @@ Scope:
 - Extracted file locations from the emulator
 - Manual raw-report helpers such as `scripts/unity/unity_extract_report.py`, `scripts/unity/unity_textasset_dump.py`, and `scripts/unity/unity_targeted_string_report.py` when DB-backed/system-unit surfaces do not answer the question directly
 
+Screenshot and emulator-capture policy:
+- ADB or LDPlayer screenshots are validation-only surfaces.
+- Use them to test current UI rendering, compare wording, check row ordering, and calibrate presentation styling.
+- Do not use captured screenshots as grounding sources for canonical row identity, formulas, ownership, or mechanic truth.
+- Grounding must still come from committed extraction outputs, DB-backed trace/materializer artifacts, or other explicit in-game asset/native evidence.
+
+DB-first grounding policy:
+- For active app behavior, row wiring, row titles, formulas, and display-value modeling, prefer DB-backed materialized views, target bundles, subject-state views, and system-unit views first.
+- Do not ground live app behavior from stored fixed JSON snapshots under `data/` when the same lane already exists in the DB-backed reconstruction path.
+- Treat committed JSON exports as fallback, distribution, debug, or historical comparison surfaces only unless the DB-backed lane is absent.
+
 Current status:
 - The game exposes external files at `/storage/emulated/0/Android/data/com.OctocubeGamesCompany.CIFI/files`
 - The main exposed save/export artifacts are `CifiBackup.text` and `DATA.text`
@@ -114,6 +125,4 @@ Recommended use for MVP:
 - Use the metadata and UI strings to ground manual import labels and internal field names.
 - Do not assume the save blobs are safely parseable yet.
 - If deeper extraction is needed, the next step is targeted Unity asset parsing or an IL2CPP-oriented decoder for the `ObscuredFilePrefs` save path.
-
-
 

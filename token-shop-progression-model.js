@@ -32,6 +32,89 @@ export function resolveTokenShopProgressionLevelSource(
   };
 }
 
+function getTokenShopNumericFieldValues(tokenShop, fieldNames) {
+  return (Array.isArray(fieldNames) ? fieldNames : [])
+    .map((fieldName) => ({
+      field: fieldName,
+      value: getTokenShopNumericFieldValue(tokenShop, fieldName)
+    }))
+    .filter((entry) => typeof entry.field === "string" && entry.field);
+}
+
+function resolveTokenShopCostState(row, currentLevel, startCost, additiveCost, maxLevel) {
+  const costFormulaType = String(row?.costFormulaType || "linear").trim() || "linear";
+  const costFormulaConfidence = String(row?.costFormulaConfidence || "verified").trim() || "verified";
+  const hasLevel = typeof currentLevel === "number" && Number.isFinite(currentLevel);
+  const isMaxed =
+    hasLevel && typeof maxLevel === "number" && Number.isFinite(maxLevel) && currentLevel >= maxLevel;
+
+  if (isMaxed) {
+    return {
+      costFormulaType,
+      costFormulaConfidence,
+      nextKnownCost: null,
+      projectedNextCost: null,
+      isMaxed: true,
+      costFormulaLabel: "No next cost within known cap",
+      costFormulaKnown: true,
+      costFormulaProjected: false
+    };
+  }
+
+  if (costFormulaType === "start-only") {
+    const hasStartCost = typeof startCost === "number" && Number.isFinite(startCost);
+    const nextKnownCost = hasLevel && currentLevel === 0 && hasStartCost ? startCost : null;
+    return {
+      costFormulaType,
+      costFormulaConfidence,
+      nextKnownCost,
+      projectedNextCost: nextKnownCost,
+      isMaxed: false,
+      costFormulaKnown: hasStartCost,
+      costFormulaProjected: false,
+      costFormulaLabel:
+        hasStartCost && currentLevel === 0
+          ? `Known first-purchase cost: ${startCost}.`
+          : hasStartCost
+            ? "Only the first-purchase cost is grounded in this build."
+            : "Known cost inputs are incomplete in this build."
+    };
+  }
+
+  const hasLinearInputs =
+    typeof startCost === "number" &&
+    Number.isFinite(startCost) &&
+    typeof additiveCost === "number" &&
+    Number.isFinite(additiveCost);
+  const projectedNextCost = hasLevel && hasLinearInputs ? startCost + additiveCost * currentLevel : null;
+  if (costFormulaConfidence === "projected") {
+    return {
+      costFormulaType,
+      costFormulaConfidence,
+      nextKnownCost: null,
+      projectedNextCost,
+      isMaxed: false,
+      costFormulaKnown: hasLinearInputs,
+      costFormulaProjected: hasLinearInputs,
+      costFormulaLabel: hasLinearInputs
+        ? `Projected linear cost from extracted StartCost/AdditiveCost: start ${startCost} + additive ${additiveCost} x current level. Exact runtime formula is still unverified for this row.`
+        : "Known cost inputs are incomplete in this build."
+    };
+  }
+  return {
+    costFormulaType,
+    costFormulaConfidence,
+    nextKnownCost: projectedNextCost,
+    projectedNextCost,
+    isMaxed: false,
+    costFormulaKnown: hasLinearInputs,
+    costFormulaProjected: false,
+    costFormulaLabel: hasLinearInputs
+      ? `Known cost inputs: start ${startCost} + additive ${additiveCost} x current level.`
+      : "Known cost inputs are incomplete in this build."
+  };
+}
+
 export function buildTokenShopProgressionModel({
   progressionState,
   compatibilityLevels,
@@ -52,14 +135,15 @@ export function buildTokenShopProgressionModel({
 
     const startCost = getTokenShopNumericFieldValue(tokenShop, row.startCostField);
     const additiveCost = getTokenShopNumericFieldValue(tokenShop, row.additiveCostField);
-    const bonusValue = getTokenShopNumericFieldValue(tokenShop, row.bonusField);
+    const bonusValues = getTokenShopNumericFieldValues(tokenShop, row.bonusFields);
+    const bonusValue =
+      getTokenShopNumericFieldValue(tokenShop, row.bonusField) ??
+      bonusValues.find((entry) => typeof entry?.value === "number")?.value ??
+      null;
     const maxLevel = getTokenShopNumericFieldValue(tokenShop, row.maxLevelField);
-    const hasLevel = typeof currentLevel === "number" && Number.isFinite(currentLevel);
-    const isMaxed = hasLevel && typeof maxLevel === "number" && currentLevel >= maxLevel;
-    const nextKnownCost =
-      hasLevel && !isMaxed && typeof startCost === "number" && typeof additiveCost === "number"
-        ? startCost + additiveCost * currentLevel
-        : null;
+    const bonusMode = String(row?.bonusMode || row?.bonusStepMode || "additive").trim() || "additive";
+    const costState = resolveTokenShopCostState(row, currentLevel, startCost, additiveCost, maxLevel);
+    const nextKnownCost = costState.nextKnownCost;
     const isAffordable =
       typeof nextKnownCost === "number" && typeof currentTokens === "number"
         ? currentTokens >= nextKnownCost
@@ -73,10 +157,18 @@ export function buildTokenShopProgressionModel({
       startCost,
       additiveCost,
       bonusValue,
+      bonusValues,
+      bonusMode,
       nextKnownCost,
+      projectedNextCost: costState.projectedNextCost,
       isAffordable,
-      isMaxed,
+      isMaxed: costState.isMaxed,
       maxLevel,
+      costFormulaType: costState.costFormulaType,
+      costFormulaConfidence: costState.costFormulaConfidence,
+      costFormulaKnown: costState.costFormulaKnown,
+      costFormulaProjected: costState.costFormulaProjected,
+      costFormulaLabel: costState.costFormulaLabel,
       maxStatus: getKnownMaxStatus(currentLevel, maxLevel),
       currentVsNextBonus: getCurrentVsNextBonusSummary(row, currentLevel, maxLevel, bonusValue)
     };

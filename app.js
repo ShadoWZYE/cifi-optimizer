@@ -55,7 +55,7 @@ import {
   buildShardSystemView,
   buildSpendSystemView
 } from "./support/system-unit-projections.js";
-import { loadSystemUnits } from "./support/system-unit-provider.js";
+import { loadSystemUnits, SYSTEM_UNIT_IDS } from "./support/system-unit-provider.js";
 import { hasTokenShopDbBundle } from "./support/token-shop-db-bundle.js";
 import { MULTIVERSE_MARKET_SCOPE_IDS } from "./support/multiverse-market-scope-map.js";
 import { SHARD_SCOPE_IDS } from "./support/shard-scope-map.js";
@@ -135,7 +135,8 @@ const DEFAULT_SERVER_CAPABILITIES = Object.freeze({
   systemUnitApi: false,
   systemDbBundleApi: false,
   traceGapApi: false,
-  serverControlApi: false
+  serverControlApi: false,
+  playerProfileApi: false
 });
 
 
@@ -311,7 +312,7 @@ function getTokenShopTierForField(field) {
 }
 
 function getTokenShopRowLabel(row) {
-  return getTokenShopRowTitle(row?.field, tokenShopUi.getTokenShopRowDisplayTitle(row));
+  return tokenShopUi.getTokenShopRowDisplayTitle(row);
 }
 
 function calculateTokenShopTierUnlockStates(thresholds, levelMap = {}) {
@@ -691,6 +692,20 @@ const ROUTE_METADATA = {
   }
 };
 
+const SYSTEM_UNIT_STATE_KEYS = Object.freeze({
+  "app-meta": "appMeta",
+  "player-state": "playerState",
+  shards: "shards",
+  "token-shop": "tokenShop",
+  "multiverse-market": "multiverseMarket"
+});
+
+const ROUTE_SYSTEM_REFRESH_CONTEXT = Object.freeze({
+  profile: {
+    systemIds: ["player-state"]
+  }
+});
+
 function makeDefaultShipFilters(source = {}) {
   return {
     cells: source.cells ?? true,
@@ -710,6 +725,8 @@ const state = {
   shipTemplates: null,
   systemUnits: null,
   systemUnitSource: null,
+  systemUnitBuiltAtById: {},
+  systemDbBuiltAtById: {},
   playerProfile: null,
   shipConfig: null,
   launchCoordinator: null,
@@ -729,7 +746,7 @@ const state = {
   traceGapOverviewScope: "",
   traceGapOverviewFetchedAt: 0,
   traceGapUi: {
-    diagnosticsOpen: true,
+    diagnosticsOpen: false,
     commandOpen: false
   },
   sourceRegistry: [],
@@ -743,6 +760,8 @@ const state = {
 
 let profileAutoSaveTimer = null;
 let shipCalibrationAutoSaveTimer = null;
+let playerProfileServerSyncTimer = null;
+let pendingPlayerProfileServerSyncPayload = null;
 
 bootstrap().catch((error) => console.error(error));
 
@@ -776,7 +795,9 @@ async function bootstrap() {
       multiverseMarket: multiverseMarketSystemUnit
     },
     mode: systemUnitSource,
-    systemDb
+    systemDb,
+    builtAt,
+    systemDbBuiltAt
   } = loadedSystemUnits;
   const appMetaView = buildAppMetaSystemView(appMetaSystemUnit);
 
@@ -784,6 +805,7 @@ async function bootstrap() {
   const playerStateView = buildPlayerStateSystemView(playerStateSystemUnit, mergeDeep);
   const playerProfileDefaults = playerStateView.defaults;
   const legacyShipConfig = loadStoredJson(STORAGE_KEYS.shipConfig, null);
+  const dbBackedPlayerProfile = await loadServerPlayerProfile();
   const storedPlayerProfile = loadStoredJson(STORAGE_KEYS.playerProfile, null);
   const legacyProfile = loadStoredJson(LEGACY_STORAGE_KEYS.profile, null);
 
@@ -803,8 +825,10 @@ async function bootstrap() {
   };
   state.systemDb = systemDb ?? null;
   state.systemUnitSource = systemUnitSource;
+  state.systemUnitBuiltAtById = buildSystemUnitBuiltAtMap(SYSTEM_UNIT_IDS, builtAt);
+  state.systemDbBuiltAtById = systemDbBuiltAt ?? {};
   state.playerProfile = normalizePlayerProfile(
-    storedPlayerProfile ?? legacyProfile ?? playerProfileDefaults,
+    dbBackedPlayerProfile ?? storedPlayerProfile ?? legacyProfile ?? playerProfileDefaults,
     mergeDeep(
       mergeDeep(baselineShipPlayerState, legacyShipConfig?.playerState ?? {}),
       typeof legacyShipConfig?.softCap === "boolean"
@@ -834,7 +858,7 @@ async function bootstrap() {
   startTraceGapPolling();
 
   if (state.pendingLaunchRefresh) {
-    refreshFromPersistentState();
+    await refreshFromPersistentState();
   }
 }
 
@@ -859,8 +883,218 @@ function fetchJson(url) {
   });
 }
 
+function hasPlayerProfileServerCapability() {
+  return (
+    window.location.origin.startsWith("http") &&
+    SERVER_CAPABILITIES.playerProfileApi === true
+  );
+}
+
+async function loadServerPlayerProfile() {
+  if (!hasPlayerProfileServerCapability()) {
+    return null;
+  }
+  try {
+    const response = await fetch("/api/player-profile", { cache: "no-store" });
+    if (response.status === 404) {
+      return null;
+    }
+    if (!response.ok) {
+      throw new Error(`Failed to load /api/player-profile (${response.status})`);
+    }
+    const payload = await response.json();
+    return payload?.profile && typeof payload.profile === "object" ? payload.profile : null;
+  } catch {
+    return null;
+  }
+}
+
 function getCurrentPlayerStateView() {
   return buildPlayerStateSystemView(state.systemUnits?.playerState, mergeDeep);
+}
+
+function buildSystemUnitBuiltAtMap(systemIds, builtAt) {
+  const builtAtMap = {};
+  for (const systemId of systemIds || []) {
+    if (systemId) {
+      builtAtMap[systemId] = builtAt ?? null;
+    }
+  }
+  return builtAtMap;
+}
+
+function getSystemUnitStateKey(systemId) {
+  return SYSTEM_UNIT_STATE_KEYS[systemId] ?? null;
+}
+
+function getSystemDbStateKey(systemId) {
+  return SYSTEM_UNIT_STATE_KEYS[systemId] ?? null;
+}
+
+function getProgressionSystemRefreshContext() {
+  const subsystem = getSelectedProgressionSubsystem();
+  if (subsystem === "shards") {
+    return {
+      systemIds: ["shards"],
+      systemDbScopes: { shards: SHARD_SCOPE_IDS }
+    };
+  }
+  if (subsystem === "tokenShop") {
+    return {
+      systemIds: ["token-shop"],
+      systemDbScopes: { tokenShop: TOKEN_SHOP_SCOPE_IDS }
+    };
+  }
+  return null;
+}
+
+function getRouteSystemRefreshContext(route = state.route) {
+  if (route === "progression") {
+    return getProgressionSystemRefreshContext();
+  }
+  return ROUTE_SYSTEM_REFRESH_CONTEXT[route] ?? null;
+}
+
+function hasSystemRefreshCapability() {
+  return (
+    window.location.origin.startsWith("http") &&
+    SERVER_CAPABILITIES.systemUnitApi === true
+  );
+}
+
+function getLatestLoadedBuiltAtForSystemIds(systemIds = []) {
+  let latest = 0;
+  for (const systemId of systemIds) {
+    const builtAt = Date.parse(state.systemUnitBuiltAtById?.[systemId] || "");
+    if (Number.isFinite(builtAt)) {
+      latest = Math.max(latest, builtAt);
+    }
+  }
+  return latest;
+}
+
+function getLatestLoadedDbBuiltAtForSystemIds(systemIds = []) {
+  let latest = 0;
+  for (const systemId of systemIds) {
+    const dbKey = getSystemDbStateKey(systemId);
+    const builtAt = Date.parse(state.systemDbBuiltAtById?.[dbKey] || "");
+    if (Number.isFinite(builtAt)) {
+      latest = Math.max(latest, builtAt);
+    }
+  }
+  return latest;
+}
+
+function getSystemFreshnessSummary(systemId) {
+  const stateKey = getSystemUnitStateKey(systemId);
+  const unitBuiltAt = state.systemUnitBuiltAtById?.[systemId] || null;
+  const dbBuiltAt = stateKey ? state.systemDbBuiltAtById?.[stateKey] || null : null;
+  const dbBundle = stateKey ? state.systemDb?.[stateKey] : null;
+  return {
+    source: state.systemUnitSource || "unknown",
+    unitBuiltAt,
+    dbBuiltAt,
+    dbBundleLoaded: Boolean(dbBundle?.subjectMetadata || dbBundle?.genericMechanics || dbBundle?.boundaries)
+  };
+}
+
+function shouldApplyLoadedSystemUnits(loadedSystemUnits, systemIds = []) {
+  if (!loadedSystemUnits || !Array.isArray(systemIds) || !systemIds.length) {
+    return false;
+  }
+  const incomingBuiltAt = Date.parse(loadedSystemUnits.builtAt || "");
+  const currentBuiltAt = getLatestLoadedBuiltAtForSystemIds(systemIds);
+  if (Number.isFinite(incomingBuiltAt) && incomingBuiltAt > currentBuiltAt) {
+    return true;
+  }
+  const incomingDbBuiltAts = systemIds
+    .map((systemId) => {
+      const dbKey = getSystemDbStateKey(systemId);
+      return Date.parse(loadedSystemUnits.systemDbBuiltAt?.[dbKey] || "");
+    })
+    .filter(Number.isFinite);
+  const incomingDbBuiltAt = incomingDbBuiltAts.length ? Math.max(...incomingDbBuiltAts) : NaN;
+  const currentDbBuiltAt = getLatestLoadedDbBuiltAtForSystemIds(systemIds);
+  if (Number.isFinite(incomingDbBuiltAt) && incomingDbBuiltAt > currentDbBuiltAt) {
+    return true;
+  }
+  return systemIds.some((systemId) => {
+    const stateKey = getSystemUnitStateKey(systemId);
+    return stateKey && !state.systemUnits?.[stateKey];
+  });
+}
+
+function applyLoadedSystemUnits(loadedSystemUnits, systemIds = []) {
+  if (!loadedSystemUnits || !Array.isArray(systemIds) || !systemIds.length) {
+    return;
+  }
+  const nextUnits = { ...(state.systemUnits || {}) };
+  for (const systemId of systemIds) {
+    const stateKey = getSystemUnitStateKey(systemId);
+    if (!stateKey) {
+      continue;
+    }
+    const incomingUnit = loadedSystemUnits.units?.[stateKey];
+    if (incomingUnit) {
+      nextUnits[stateKey] = incomingUnit;
+    }
+  }
+  state.systemUnits = nextUnits;
+  if (loadedSystemUnits.systemDb) {
+    state.systemDb = {
+      ...(state.systemDb || {}),
+      ...Object.fromEntries(
+        Object.entries(loadedSystemUnits.systemDb).filter(([, value]) => value != null)
+      )
+    };
+  }
+  if (loadedSystemUnits.mode) {
+    state.systemUnitSource = loadedSystemUnits.mode;
+  }
+  const builtAtMap = buildSystemUnitBuiltAtMap(systemIds, loadedSystemUnits.builtAt ?? null);
+  state.systemUnitBuiltAtById = {
+    ...(state.systemUnitBuiltAtById || {}),
+    ...builtAtMap
+  };
+  if (loadedSystemUnits.systemDbBuiltAt) {
+    state.systemDbBuiltAtById = {
+      ...(state.systemDbBuiltAtById || {}),
+      ...loadedSystemUnits.systemDbBuiltAt
+    };
+  }
+}
+
+async function ensureFreshSystemViewOnAccess(route = state.route) {
+  const refreshContext = getRouteSystemRefreshContext(route);
+  if (!refreshContext?.systemIds?.length || !hasSystemRefreshCapability()) {
+    return false;
+  }
+  const loadedSystemUnits = await loadSystemUnits({
+    fetchJson,
+    origin: window.location.origin,
+    serverCapabilities: SERVER_CAPABILITIES,
+    allowStaticFallback: false,
+    systemIds: refreshContext.systemIds,
+    systemDbScopes: refreshContext.systemDbScopes || {}
+  });
+  if (!shouldApplyLoadedSystemUnits(loadedSystemUnits, refreshContext.systemIds)) {
+    return false;
+  }
+  applyLoadedSystemUnits(loadedSystemUnits, refreshContext.systemIds);
+  renderAll();
+  return true;
+}
+
+async function navigateToRoute(targetRoute) {
+  if (!targetRoute) {
+    return;
+  }
+  if (state.route !== targetRoute) {
+    state.route = targetRoute;
+    persistRoute();
+    renderNavigation();
+  }
+  await ensureFreshSystemViewOnAccess(targetRoute);
 }
 
 function getCurrentPlayerProfileDefaults() {
@@ -1220,20 +1454,21 @@ function handleLaunchSignal(coordinator, payload) {
   handlePrimaryReopen();
 }
 
-function handlePrimaryReopen() {
+async function handlePrimaryReopen() {
   if (!state.snapshot || !state.shipBaseline) {
     state.pendingLaunchRefresh = true;
     return;
   }
   state.pendingLaunchRefresh = false;
-  refreshFromPersistentState();
+  await refreshFromPersistentState();
   showLaunchNotice("CIFI reopened from launcher.");
 }
 
-function refreshFromPersistentState() {
+async function refreshFromPersistentState() {
+  const dbBackedPlayerProfile = await loadServerPlayerProfile();
   const storedPlayerProfile = loadStoredJson(STORAGE_KEYS.playerProfile, state.playerProfile);
   state.playerProfile = normalizePlayerProfile(
-    storedPlayerProfile,
+    dbBackedPlayerProfile ?? storedPlayerProfile,
     createDefaultShipPlayerState(state.shipBaseline)
   );
   state.snapshot = loadStoredJson(STORAGE_KEYS.snapshot, state.snapshot);
@@ -1295,6 +1530,32 @@ function persistPlayerProfile() {
   state.playerProfile.meta.updatedAt = new Date().toISOString();
   state.playerProfile.meta.schemaVersion = PLAYER_PROFILE_SCHEMA_VERSION;
   saveStoredJson(STORAGE_KEYS.playerProfile, state.playerProfile);
+  queuePlayerProfileServerSync();
+}
+
+function queuePlayerProfileServerSync() {
+  if (!hasPlayerProfileServerCapability()) {
+    return;
+  }
+  pendingPlayerProfileServerSyncPayload = structuredClone(state.playerProfile);
+  window.clearTimeout(playerProfileServerSyncTimer);
+  playerProfileServerSyncTimer = window.setTimeout(async () => {
+    const profilePayload = pendingPlayerProfileServerSyncPayload;
+    pendingPlayerProfileServerSyncPayload = null;
+    if (!profilePayload) {
+      return;
+    }
+    try {
+      await fetch("/api/player-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sourceLabel: "app-local-profile",
+          profile: profilePayload
+        })
+      });
+    } catch {}
+  }, 180);
 }
 
 function getShipCommunityToolState() {
@@ -1465,17 +1726,15 @@ function mergeDeep(base, patch) {
 }
 
 function bindNavigation() {
-  $("#pageNav").addEventListener("click", (event) => {
+  $("#pageNav").addEventListener("click", async (event) => {
     const button = event.target.closest(".nav-link");
     if (!button) {
       return;
     }
-    state.route = button.dataset.page;
-    persistRoute();
-    renderNavigation();
+    await navigateToRoute(button.dataset.page);
   });
 
-  $(".workspace").addEventListener("click", (event) => {
+  $(".workspace").addEventListener("click", async (event) => {
     const button = event.target.closest("[data-route-target]");
     if (!button) {
       return;
@@ -1484,9 +1743,7 @@ function bindNavigation() {
     if (!target) {
       return;
     }
-    state.route = target;
-    persistRoute();
-    renderNavigation();
+    await navigateToRoute(target);
   });
 }
 
@@ -1568,7 +1825,7 @@ function bindDataActions() {
 }
 
 function bindOptimizerActions() {
-  $("#progressionSubsystemToggle").addEventListener("click", (event) => {
+  $("#progressionSubsystemToggle").addEventListener("click", async (event) => {
     const button = event.target.closest("[data-progression-view]");
     if (!button) {
       return;
@@ -1579,6 +1836,7 @@ function bindOptimizerActions() {
     }
     state.progressionView = nextView;
     renderProgressionResults(runProgressionOptimization());
+    await ensureFreshSystemViewOnAccess("progression");
   });
   $("#progressionResults").addEventListener("click", (event) => {
     const tokenShopTierButton = event.target.closest("[data-token-shop-tier]");
@@ -1641,10 +1899,16 @@ function bindOptimizerActions() {
 
 function bindTraceGapActions() {
   $("#traceGapRepeat")?.addEventListener("input", (event) => {
-    state.traceGapRepeat = clampNumber(event.target.value || 1, 1, 9);
+    state.traceGapRepeat = clampNumber(event.target.value || 1, 1, 50);
   });
   $("#traceGapDryRunBtn")?.addEventListener("click", () => runTraceGap("dry-run"));
-  $("#traceGapRunBtn")?.addEventListener("click", () => runTraceGap("execute"));
+  $("#traceGapRunBtn")?.addEventListener("click", () => {
+    if (isTraceGapActive(state.traceGapRun)) {
+      stopTraceGap();
+      return;
+    }
+    runTraceGap("execute");
+  });
   $("#traceGapRestartServerBtn")?.addEventListener("click", () => restartLocalServer());
 }
 
@@ -2251,7 +2515,7 @@ function startTraceGapPolling() {
   fetchTraceGapStatus({ silent: true });
   fetchTraceGapOverview({ silent: true });
   state.traceGapPollId = window.setInterval(() => {
-    const isRunning = state.traceGapRun?.status === "running";
+    const isRunning = isTraceGapActive(state.traceGapRun);
     if (isRunning || state.route === "traceGap") {
       fetchTraceGapStatus({ silent: true });
       const scope = state.traceGapRun?.executionScope || state.traceGapRun?.selectedTarget || "";
@@ -2319,7 +2583,7 @@ async function runTraceGap(mode = "execute") {
     setStatus("traceGapStatus", "Trace-gap API is unavailable on this app launch.", "warning");
     return;
   }
-  const repeat = clampNumber($("#traceGapRepeat")?.value || state.traceGapRepeat || 1, 1, 9);
+  const repeat = clampNumber($("#traceGapRepeat")?.value || state.traceGapRepeat || 1, 1, 50);
   state.traceGapRepeat = repeat;
   setStatus(
     "traceGapStatus",
@@ -2355,6 +2619,42 @@ async function runTraceGap(mode = "execute") {
   } catch (error) {
     setStatus("traceGapStatus", `Trace-gap launch failed: ${error.message}`, "warning");
   }
+}
+
+async function stopTraceGap() {
+  if (!SERVER_CAPABILITIES.traceGapApi) {
+    setStatus("traceGapStatus", "Trace-gap API is unavailable on this app launch.", "warning");
+    return;
+  }
+  if (!isTraceGapActive(state.traceGapRun)) {
+    return;
+  }
+  setStatus("traceGapStatus", "Stopping trace-gap execution...", "");
+  renderTraceGapPanel();
+  try {
+    const response = await fetch("/api/trace-gap/stop", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: "{}"
+    });
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error || "Trace-gap stop failed.");
+    }
+    state.traceGapRun = payload.run ?? state.traceGapRun;
+    setStatus("traceGapStatus", "Trace-gap stop requested. Waiting for the process to exit.", "");
+    renderTraceGapPanel();
+    fetchTraceGapStatus({ silent: true });
+  } catch (error) {
+    setStatus("traceGapStatus", `Trace-gap stop failed: ${error.message}`, "warning");
+    renderTraceGapPanel();
+  }
+}
+
+function isTraceGapActive(run) {
+  return run?.status === "running" || run?.status === "stopping";
 }
 
 async function restartLocalServer() {
@@ -2426,7 +2726,7 @@ function renderTraceGapPanel() {
     return;
   }
 
-  repeatInput.value = String(clampNumber(state.traceGapRepeat || 1, 1, 9));
+  repeatInput.value = String(clampNumber(state.traceGapRepeat || 1, 1, 50));
 
   if (!SERVER_CAPABILITIES.traceGapApi) {
     dryRunBtn.disabled = true;
@@ -2436,31 +2736,43 @@ function renderTraceGapPanel() {
     const launchHint = window.location.origin.startsWith("http")
       ? `Current origin: ${window.location.origin}. Refresh this tab if the local dev server was restarted after the page opened.`
       : "This page is not running from the local server. Open `launch-cifi.vbs` or browse to `http://localhost:4173`.";
-    summary.innerHTML = `<article class="preview-card"><p class="meta">This app launch is not connected to the local trace-gap API.</p><p class="meta">${escapeHtml(launchHint)}</p></article>`;
-    dbOverview.innerHTML = "";
-    diagnostics.innerHTML = "";
+    setContainerHtmlPreserveSelection(
+      summary,
+      `<article class="preview-card"><p class="meta">This app launch is not connected to the local trace-gap API.</p><p class="meta">${escapeHtml(launchHint)}</p></article>`
+    );
+    setContainerHtmlPreserveSelection(dbOverview, "");
+    setContainerHtmlPreserveSelection(diagnostics, "");
     return;
   }
 
   const run = state.traceGapRun;
   const isRunning = run?.status === "running";
-  dryRunBtn.disabled = isRunning;
-  runBtn.disabled = isRunning;
-  restartServerBtn.disabled = state.serverRestartBusy || isRunning;
+  const isStopping = run?.status === "stopping";
+  const isActive = isTraceGapActive(run);
+  repeatInput.disabled = isActive;
+  dryRunBtn.disabled = isActive;
+  runBtn.disabled = isStopping;
+  runBtn.textContent = isActive ? (isStopping ? "Stopping trace" : "Stop trace") : "Run best gap";
+  runBtn.classList.toggle("button-primary", !isActive);
+  runBtn.classList.toggle("button-danger", isActive);
+  restartServerBtn.disabled = state.serverRestartBusy || isActive;
 
   if (!run) {
     pills.innerHTML = `
       <span class="pill pill-neutral">idle</span>
       <span class="pill pill-neutral">repeat ${escapeHtml(String(state.traceGapRepeat || 1))}</span>
     `;
-    summary.innerHTML = `
+    setContainerHtmlPreserveSelection(
+      summary,
+      `
       <article class="preview-card">
         <strong>No trace-gap run started yet.</strong>
         <p class="meta">Use Plan best gap for a DB-backed dry run, or Run best gap for a structured execution pass.</p>
       </article>
-    `;
-    dbOverview.innerHTML = renderTraceGapDbOverview();
-    diagnostics.innerHTML = "";
+    `
+    );
+    setContainerHtmlPreserveSelection(dbOverview, renderTraceGapDbOverview());
+    setContainerHtmlPreserveSelection(diagnostics, "");
     return;
   }
 
@@ -2487,7 +2799,9 @@ function renderTraceGapPanel() {
       : run.lastOutputAt
         ? `Last output ${escapeHtml(formatUiDateTime(run.lastOutputAt))}.`
         : "No diagnostic output captured yet.";
-  summary.innerHTML = `
+  setContainerHtmlPreserveSelection(
+    summary,
+    `
     <article class="preview-card trace-gap-summary-card">
       <div class="recommendation-head">
         <div>
@@ -2509,14 +2823,16 @@ function renderTraceGapPanel() {
         ${makeTraceGapInfoCard("Unresolved anchor", run.unresolvedAnchor || "none")}
         ${makeTraceGapInfoCard("Recovered", run.recoveredSummary || "none")}
         ${makeTraceGapInfoCard("Traced", run.tracedSummary || "none")}
+        ${makeTraceGapInfoCard("New edges", run.newEdgesSummary || "none")}
         ${makeTraceGapInfoCard("Net progress", run.progressSummary || "unknown")}
         ${makeTraceGapInfoCard("Started", formatUiDateTime(run.startedAt))}
         ${makeTraceGapInfoCard("Finished", formatUiDateTime(run.finishedAt))}
       </div>
       <p class="meta">${lastOutputNote}</p>
     </article>
-  `;
-  dbOverview.innerHTML = renderTraceGapDbOverview();
+  `
+  );
+  setContainerHtmlPreserveSelection(dbOverview, renderTraceGapDbOverview());
 
   const commandText = Array.isArray(run.command) ? run.command.join(" ") : "";
   renderTraceGapDiagnostics(diagnostics, run, commandText);
@@ -2543,7 +2859,9 @@ function renderTraceGapDiagnostics(container, run, commandText) {
           )
           .join("")
       : `<p class="meta">No diagnostic lines captured yet.</p>`;
-    container.innerHTML = `
+    setContainerHtmlPreserveSelection(
+      container,
+      `
       <details class="field-collapse" data-trace-gap-section="diagnostics" ${state.traceGapUi.diagnosticsOpen ? "open" : ""}>
         <summary>Open live diagnostics</summary>
         <p class="meta">The output below is the live local process stream for this DB-backed best-gap run.</p>
@@ -2558,13 +2876,15 @@ function renderTraceGapDiagnostics(container, run, commandText) {
           <p class="meta">Captured lines: ${escapeHtml(String(run.lineCount || 0))}</p>
           <p class="meta">Best-gap reranks observed: ${escapeHtml(String(run.rerankCount || 0))}</p>
           <p class="meta">Current iteration: ${escapeHtml(String(run.currentIteration || 0))}</p>
-          <p class="meta">Recovered: ${escapeHtml(run.recoveredSummary || "none")}</p>
-          <p class="meta">Traced: ${escapeHtml(run.tracedSummary || "none")}</p>
+          <p class="meta">Recovered (cumulative): ${escapeHtml(run.recoveredSummary || "none")}</p>
+          <p class="meta">Traced (cumulative): ${escapeHtml(run.tracedSummary || "none")}</p>
+          <p class="meta">New edges (cumulative): ${escapeHtml(run.newEdgesSummary || "none")}</p>
           <p class="meta">Net progress: ${escapeHtml(run.progressSummary || "unknown")}</p>
           <p class="meta">Exit code: ${escapeHtml(run.exitCode === null || run.exitCode === undefined ? "running" : String(run.exitCode))}</p>
         </div>
       </details>
-    `;
+    `
+    );
     bindTraceGapDiagnosticsUi(container);
     return;
   }
@@ -2582,7 +2902,7 @@ function renderTraceGapDiagnostics(container, run, commandText) {
           .join("")
       : `<p class="meta">No diagnostic lines captured yet.</p>`;
     if (logContainer.innerHTML !== nextMarkup) {
-      logContainer.innerHTML = nextMarkup;
+      setContainerHtmlPreserveSelection(logContainer, nextMarkup);
       if (wasNearBottom) {
         logContainer.scrollTop = logContainer.scrollHeight;
       }
@@ -2591,18 +2911,22 @@ function renderTraceGapDiagnostics(container, run, commandText) {
 
   const commandCard = existingCommand.querySelector(".preview-card");
   if (commandCard) {
-    commandCard.innerHTML = `
+    setContainerHtmlPreserveSelection(
+      commandCard,
+      `
       <p class="meta">Run id: <code>${escapeHtml(run.runId || "unknown")}</code></p>
       <p class="meta">Command:</p>
       <pre>${escapeHtml(commandText || "Unavailable")}</pre>
       <p class="meta">Captured lines: ${escapeHtml(String(run.lineCount || 0))}</p>
       <p class="meta">Best-gap reranks observed: ${escapeHtml(String(run.rerankCount || 0))}</p>
       <p class="meta">Current iteration: ${escapeHtml(String(run.currentIteration || 0))}</p>
-      <p class="meta">Recovered: ${escapeHtml(run.recoveredSummary || "none")}</p>
-      <p class="meta">Traced: ${escapeHtml(run.tracedSummary || "none")}</p>
+      <p class="meta">Recovered (cumulative): ${escapeHtml(run.recoveredSummary || "none")}</p>
+      <p class="meta">Traced (cumulative): ${escapeHtml(run.tracedSummary || "none")}</p>
+      <p class="meta">New edges (cumulative): ${escapeHtml(run.newEdgesSummary || "none")}</p>
       <p class="meta">Net progress: ${escapeHtml(run.progressSummary || "unknown")}</p>
       <p class="meta">Exit code: ${escapeHtml(run.exitCode === null || run.exitCode === undefined ? "running" : String(run.exitCode))}</p>
-    `;
+    `
+    );
   }
   bindTraceGapDiagnosticsUi(container);
 }
@@ -2686,6 +3010,7 @@ function renderTraceGapDbOverview() {
     .join("");
   const genericMechanics = overview.genericMechanics || {};
   const genericCounts = genericMechanics.counts || {};
+  const genericGapStateCounts = genericMechanics.gapStateCounts || {};
   const genericGapKinds = Array.isArray(genericMechanics.gapKindCounts)
     ? genericMechanics.gapKindCounts
     : [];
@@ -2700,7 +3025,8 @@ function renderTraceGapDbOverview() {
       ? `
           <article class="validation-card">
             <strong>Generic mechanics model</strong>
-            <p class="meta">Entities: ${escapeHtml(String(genericCounts.entities ?? 0))} | Facts: ${escapeHtml(String(genericCounts.facts ?? 0))} | Relations: ${escapeHtml(String(genericCounts.relations ?? 0))} | Gaps: ${escapeHtml(String(genericCounts.gaps ?? 0))}</p>
+            <p class="meta">Entities: ${escapeHtml(String(genericCounts.entities ?? 0))} | Facts: ${escapeHtml(String(genericCounts.facts ?? 0))} | Relations: ${escapeHtml(String(genericCounts.relations ?? 0))} | Gaps: ${escapeHtml(String(genericGapStateCounts.open ?? genericCounts.gaps ?? 0))} active / ${escapeHtml(String(genericGapStateCounts.total ?? genericCounts.gaps ?? 0))} total</p>
+            <p class="meta">Gap state: closed-only ${escapeHtml(String(genericGapStateCounts.closedOnly ?? 0))} | orphan ${escapeHtml(String(genericGapStateCounts.orphan ?? 0))}</p>
             <p class="meta">Gap kinds: ${escapeHtml(
               genericGapKinds.map((item) => `${item.gapKind}=${item.count}`).join(" | ") || "none"
             )}</p>
@@ -2729,6 +3055,95 @@ function makeTraceGapInfoCard(title, value) {
       <p class="meta">${escapeHtml(value || "n/a")}</p>
     </article>
   `;
+}
+
+function snapshotTextSelectionWithin(container) {
+  if (!container || typeof window.getSelection !== "function") {
+    return null;
+  }
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+    return null;
+  }
+  const range = selection.getRangeAt(0);
+  const commonAncestor =
+    range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+      ? range.commonAncestorContainer
+      : range.commonAncestorContainer.parentElement;
+  if (!commonAncestor || !container.contains(commonAncestor)) {
+    return null;
+  }
+  const start = getTextOffsetWithinContainer(container, range.startContainer, range.startOffset);
+  const end = getTextOffsetWithinContainer(container, range.endContainer, range.endOffset);
+  if (start === null || end === null) {
+    return null;
+  }
+  return { start, end };
+}
+
+function getTextOffsetWithinContainer(container, targetNode, targetOffset) {
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  let offset = 0;
+  let node = walker.nextNode();
+  while (node) {
+    const length = node.textContent?.length || 0;
+    if (node === targetNode) {
+      return offset + Math.min(targetOffset, length);
+    }
+    offset += length;
+    node = walker.nextNode();
+  }
+  return null;
+}
+
+function resolveTextOffsetWithinContainer(container, targetOffset) {
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+  let traversed = 0;
+  let node = walker.nextNode();
+  while (node) {
+    const length = node.textContent?.length || 0;
+    if (targetOffset <= traversed + length) {
+      return { node, offset: Math.max(0, targetOffset - traversed) };
+    }
+    traversed += length;
+    node = walker.nextNode();
+  }
+  return null;
+}
+
+function restoreTextSelectionWithin(container, snapshot) {
+  if (!container || !snapshot || typeof window.getSelection !== "function") {
+    return;
+  }
+  const startPoint = resolveTextOffsetWithinContainer(container, snapshot.start);
+  const endPoint = resolveTextOffsetWithinContainer(container, snapshot.end);
+  if (!startPoint || !endPoint) {
+    return;
+  }
+  const selection = window.getSelection();
+  if (!selection) {
+    return;
+  }
+  const range = document.createRange();
+  range.setStart(startPoint.node, startPoint.offset);
+  range.setEnd(endPoint.node, endPoint.offset);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function setContainerHtmlPreserveSelection(container, markup) {
+  if (!container) {
+    return;
+  }
+  const nextMarkup = String(markup ?? "");
+  if (container.innerHTML === nextMarkup) {
+    return;
+  }
+  const selectionSnapshot = snapshotTextSelectionWithin(container);
+  container.innerHTML = nextMarkup;
+  if (selectionSnapshot) {
+    restoreTextSelectionWithin(container, selectionSnapshot);
+  }
 }
 
 function formatUiDateTime(value) {
@@ -5548,6 +5963,7 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       additiveCostField: "CellBoostAdditiveCost",
       bonusField: "CellBoostBonus",
       maxLevelField: "CellBoostMaxLevel",
+      bonusPlateSuffix: " sec",
       bonusStepLabel: "seconds timeskip to Cells Gained from Token & Diamond Chests",
       bonusStepMode: "additive",
       effectText:
@@ -5561,6 +5977,11 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU4Level",
       slot: "ATU4",
+      storefrontDisplayTitle: "Mod Points Booster",
+      storefrontEffectText: "x1.01 to MP Gained.",
+      storefrontBuffTargets: [{ label: "MP", tone: "mod" }],
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      costFormulaConfidence: "projected",
       identity:
         boundary?.traceFollowUp?.recoveredBridge?.prefabIdentity ||
         "NewTokenUPGPrefab.T1.ModPointsBooster",
@@ -5573,11 +5994,14 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
       maxLevelField: "ModBoostMaxLevel",
       bonusStepLabel: "Mod Points Gained",
       bonusStepMode: "multiplier",
-      note: "Checked shell-to-prefab bridge only. The remaining honest blocker is one exact shell-local join from the detached Tokens Booster, Tokens Booster T1, or >Diamond Upgrade 9 - TokensBoost title-side clue back to ATU1Button path id 15839."
+      note: "Checked shell-to-prefab bridge only. The remaining honest blocker is the exact runtime display-update path and runtime model for the ATU4 row, so the storefront keeps the per-level effect but does not pretend the cumulative plate total is verified."
     },
     {
       field: "ATU5Level",
       slot: "ATU5",
+      storefrontDisplayTitle: "Mk1 Generator Booster",
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      costFormulaConfidence: "projected",
       identity:
         boundary?.boundedRecoveredBridge?.prefabIdentity || "NewTokenUPGPrefab.T1.MK1Booster",
       identitySource: "Checked prefab identity",
@@ -5596,6 +6020,9 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU6Level",
       slot: "ATU6",
+      storefrontDisplayTitle: "Mk2 Generator Booster",
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      costFormulaConfidence: "projected",
       identity:
         boundary?.verifiedTitleJoin?.titleProbeTitle ||
         boundary?.boundedRecoveredBridgeFollowUp?.prefabIdentity ||
@@ -5617,6 +6044,9 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU7Level",
       slot: "ATU7",
+      storefrontDisplayTitle: "Mk3 Generator Booster",
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      costFormulaConfidence: "projected",
       identity:
         boundary?.atu7BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
         boundary?.atu7BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
@@ -5639,6 +6069,9 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU8Level",
       slot: "ATU8",
+      storefrontDisplayTitle: "Mk4 Generator Booster",
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      costFormulaConfidence: "projected",
       identity:
         boundary?.atu8BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
         boundary?.atu8BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
@@ -5661,6 +6094,9 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU9Level",
       slot: "ATU9",
+      storefrontDisplayTitle: "Mk5 Generator Booster",
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      costFormulaConfidence: "projected",
       identity:
         boundary?.atu9BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
         boundary?.atu9BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
@@ -5683,6 +6119,9 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU10Level",
       slot: "ATU10",
+      storefrontDisplayTitle: "Mk6 Generator Booster",
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      costFormulaConfidence: "projected",
       identity:
         boundary?.atu10BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
         boundary?.atu10BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
@@ -5705,6 +6144,9 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU12Level",
       slot: "ATU12",
+      storefrontDisplayTitle: "Mk8 Generator Booster",
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      costFormulaConfidence: "projected",
       identity:
         boundary?.atu12BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
         boundary?.atu12BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
@@ -5727,6 +6169,9 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU11Level",
       slot: "ATU11",
+      storefrontDisplayTitle: "Mk7 Generator Booster",
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      costFormulaConfidence: "projected",
       identity:
         boundary?.atu11BridgeFollowUp?.verifiedTitleTextChain?.titleProbeTitle ||
         boundary?.atu11BridgeFollowUp?.recoveredBridge?.prefabIdentity ||
@@ -5764,104 +6209,137 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU14Level",
       slot: "ATU14",
-      identity:
-        boundary?.dailyTokeniumFamilyPass?.anchoredDailyTokensRow?.prefabIdentity ||
-        "NewTokenUPGPrefab.T2.DailyTokens",
-      identitySource: "DB-backed owner-order compatibility identity",
+      displayTitle: "ATU14 Shell (TokenDailiesT2 clue)",
+      storefrontDisplayTitle: "Daily Tokens T2",
+      storefrontEffectText: "+20% to Tokens Gained from Daily Rewards & Events (additive).",
+      storefrontBuffTargets: [{ label: "Daily Tokens", tone: "token" }],
+      identity: "TokenDailiesT2",
+      identitySource: "DB-backed owner-order numeric family clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium family clue row",
       startCostField: "TokenDailiesT2StartCost",
       additiveCostField: "TokenDailiesT2AdditiveCost",
       bonusField: "TokenDailiesT2Bonus",
       maxLevelField: "TokenDailiesT2MaxLevel",
-      bonusStepLabel: "Daily Tokens T2 Bonus",
-      bonusStepMode: "multiplier",
+      bonusStepLabel: "to Tokens Gained from Daily Rewards & Events",
+      bonusStepMode: "additive",
+      bonusValueDisplayMode: "percent-total-multiplier",
       note: "DB-backed Daily Tokenium-family compatibility row. TokenDailiesT2 plus ATU14TokenDailiesBonus now anchor the owner-side row family, but direct purchase-hook recovery and the final player-facing title or runtime display path still stay quarantined."
     },
     {
       field: "ATU15Level",
       slot: "ATU15",
-      identity:
-        boundary?.dailyTokeniumFamilyPass?.duoFamilyRows?.[0]?.prefabIdentity ||
-        "NewTokenUPGPrefab.T2.DuoBoosterOne",
-      identitySource: "DB-backed owner-order compatibility identity",
+      displayTitle: "ATU15 Shell (T2Duo1 clue)",
+      storefrontDisplayTitle: "Duo Booster One",
+      storefrontEffectText: "x1.02 to MP Gained & Shards Gained.",
+      storefrontBuffTargets: [
+        { label: "MP", tone: "mod" },
+        { label: "Shards", tone: "shard" }
+      ],
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      identity: "T2Duo1",
+      identitySource: "DB-backed owner-order numeric family clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium family clue row",
       startCostField: "T2Duo1StartCost",
       additiveCostField: "T2Duo1AdditiveCost",
       bonusField: "T2Duo1Bonus",
       maxLevelField: "T2Duo1MaxLevel",
-      bonusStepLabel: "T2 Duo 1 Bonus",
+      bonusStepLabel: "the checked T2 duo-family lane",
       bonusStepMode: "multiplier",
-      note: "DB-backed Daily Tokenium-family compatibility row. The owner-side shell order now anchors this row on the T2 duo family, but the final player-facing title and runtime display path still stay quarantined."
+      note: "DB-backed Daily Tokenium-family clue row. The owner-side shell order now anchors this row on the T2Duo1 numeric block, but the final player-facing title, exact effect lane, and runtime display path still stay quarantined."
     },
     {
       field: "ATU16Level",
       slot: "ATU16",
-      identity:
-        boundary?.dailyTokeniumFamilyPass?.duoFamilyRows?.[1]?.prefabIdentity ||
-        "NewTokenUPGPrefab.T2.DuoBoosterTwo",
-      identitySource: "DB-backed owner-order compatibility identity",
+      displayTitle: "ATU16 Shell (T2Duo2 clue)",
+      storefrontDisplayTitle: "Duo Booster Two",
+      storefrontEffectText: "x1.02 to Mk1 Output & Mk2 Output.",
+      storefrontBuffTargets: [
+        { label: "Mk1", tone: "generator" },
+        { label: "Mk2", tone: "generator" }
+      ],
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      identity: "T2Duo2",
+      identitySource: "DB-backed owner-order numeric family clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium family clue row",
       startCostField: "T2Duo2StartCost",
       additiveCostField: "T2Duo2AdditiveCost",
       bonusField: "T2Duo2Bonus",
       maxLevelField: "T2Duo2MaxLevel",
-      bonusStepLabel: "T2 Duo 2 Bonus",
+      bonusStepLabel: "the checked T2 duo-family lane",
       bonusStepMode: "multiplier",
-      note: "DB-backed Daily Tokenium-family compatibility row. The owner-side shell order now anchors this row on the T2 duo family, but the final player-facing title and runtime display path still stay quarantined."
+      note: "DB-backed Daily Tokenium-family clue row. The owner-side shell order now anchors this row on the T2Duo2 numeric block, but the final player-facing title, exact effect lane, and runtime display path still stay quarantined."
     },
     {
       field: "ATU17Level",
       slot: "ATU17",
-      identity:
-        boundary?.dailyTokeniumFamilyPass?.duoFamilyRows?.[2]?.prefabIdentity ||
-        "NewTokenUPGPrefab.T2.DuoBoosterThree",
-      identitySource: "DB-backed owner-order compatibility identity",
+      displayTitle: "ATU17 Shell (T2Duo3 clue)",
+      storefrontDisplayTitle: "Duo Booster Three",
+      storefrontEffectText: "x1.02 to Mk3 Output & Mk4 Output.",
+      storefrontBuffTargets: [
+        { label: "Mk3", tone: "generator" },
+        { label: "Mk4", tone: "generator" }
+      ],
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      identity: "T2Duo3",
+      identitySource: "DB-backed owner-order numeric family clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium family clue row",
       startCostField: "T2Duo3StartCost",
       additiveCostField: "T2Duo3AdditiveCost",
       bonusField: "T2Duo3Bonus",
       maxLevelField: "T2Duo3MaxLevel",
-      bonusStepLabel: "T2 Duo 3 Bonus",
+      bonusStepLabel: "the checked T2 duo-family lane",
       bonusStepMode: "multiplier",
-      note: "DB-backed Daily Tokenium-family compatibility row. The owner-side shell order now anchors this row on the T2 duo family, but the final player-facing title and runtime display path still stay quarantined."
+      note: "DB-backed Daily Tokenium-family clue row. The owner-side shell order now anchors this row on the T2Duo3 numeric block, but the final player-facing title, exact effect lane, and runtime display path still stay quarantined."
     },
     {
       field: "ATU18Level",
       slot: "ATU18",
-      identity:
-        boundary?.dailyTokeniumFamilyPass?.duoFamilyRows?.[3]?.prefabIdentity ||
-        "NewTokenUPGPrefab.T2.DuoBoosterFour",
-      identitySource: "DB-backed owner-order compatibility identity",
+      displayTitle: "ATU18 Shell (T2Duo4 clue)",
+      storefrontDisplayTitle: "Duo Booster Four",
+      storefrontEffectText: "x1.02 to Mk5 Output & Mk6 Output.",
+      storefrontBuffTargets: [
+        { label: "Mk5", tone: "generator" },
+        { label: "Mk6", tone: "generator" }
+      ],
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      identity: "T2Duo4",
+      identitySource: "DB-backed owner-order numeric family clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium family clue row",
       startCostField: "T2Duo4StartCost",
       additiveCostField: "T2Duo4AdditiveCost",
       bonusField: "T2Duo4Bonus",
       maxLevelField: "T2Duo4MaxLevel",
-      bonusStepLabel: "T2 Duo 4 Bonus",
+      bonusStepLabel: "the checked T2 duo-family lane",
       bonusStepMode: "multiplier",
-      note: "DB-backed Daily Tokenium-family compatibility row. The owner-side shell order now anchors this row on the T2 duo family, but the final player-facing title and runtime display path still stay quarantined."
+      note: "DB-backed Daily Tokenium-family clue row. The owner-side shell order now anchors this row on the T2Duo4 numeric block, but the final player-facing title, exact effect lane, and runtime display path still stay quarantined."
     },
     {
       field: "ATU19Level",
       slot: "ATU19",
-      identity:
-        boundary?.dailyTokeniumFamilyPass?.duoFamilyRows?.[4]?.prefabIdentity ||
-        "NewTokenUPGPrefab.T2.DuoBoosterFive",
-      identitySource: "DB-backed owner-order compatibility identity",
+      displayTitle: "ATU19 Shell (T2Duo5 clue)",
+      storefrontDisplayTitle: "Duo Booster Five",
+      storefrontEffectText: "x1.02 to Mk7 Output & Mk8 Output.",
+      storefrontBuffTargets: [
+        { label: "Mk7", tone: "generator" },
+        { label: "Mk8", tone: "generator" }
+      ],
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      identity: "T2Duo5",
+      identitySource: "DB-backed owner-order numeric family clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "DB-backed Daily Tokenium compatibility row",
+      rowTypeLabel: "DB-backed Daily Tokenium family clue row",
       startCostField: "T2Duo5StartCost",
       additiveCostField: "T2Duo5AdditiveCost",
       bonusField: "T2Duo5Bonus",
       maxLevelField: "T2Duo5MaxLevel",
-      bonusStepLabel: "T2 Duo 5 Bonus",
+      bonusStepLabel: "the checked T2 duo-family lane",
       bonusStepMode: "multiplier",
-      note: "DB-backed Daily Tokenium-family compatibility row. The old ATU19 equals ATU20 duplicate claim no longer clears on owner-field order, but the final player-facing title or runtime display path still stays quarantined."
+      note: "DB-backed Daily Tokenium-family clue row. The old ATU19 equals ATU20 duplicate claim no longer clears on owner-field order, but the final player-facing title, exact effect lane, or runtime display path still stays quarantined."
     },
     {
       field: "ATU20Level",
@@ -5883,122 +6361,180 @@ function getTokenShopGroundedSubsetDefinitions(boundary) {
     {
       field: "ATU21Level",
       slot: "ATU21",
-      identity: "NewTokenUPGPrefab.T3.TrinityBoosterOne",
-      identitySource: "Compatibility-mapped prefab identity",
+      displayTitle: "ATU21 Shell (T3Trio1 clue)",
+      storefrontDisplayTitle: "Daily Tokens T3",
+      storefrontEffectText: "+20% to Tokens Gained from Daily Rewards & Events (additive).",
+      storefrontBuffTargets: [{ label: "Daily Tokens", tone: "token" }],
+      identity: "T3Trio1",
+      identitySource: "DB-backed owner-order numeric family clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "T3 trio family clue row",
       startCostField: "TokenDailiesT3StartCost",
       additiveCostField: "TokenDailiesT3AdditiveCost",
       bonusField: "TokenDailiesT3Bonus",
       maxLevelField: "TokenDailiesT3MaxLevel",
-      bonusStepLabel: "T3 Trinity 1 Dailies Bonus",
-      bonusStepMode: "multiplier",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
+      bonusStepLabel: "Tokens Gained from Daily Rewards & Events",
+      bonusStepMode: "additive",
+      bonusValueDisplayMode: "percent-total-multiplier",
+      note: "The owner-side shell order in the committed trio-family extract stays noisy, but the extracted T3 Daily Tokenium value lane is grounded. The storefront therefore uses the recovered Daily Tokens T3 cost and bonus fields while leaving the broader trio-family row-identity join as compatibility-only."
     },
     {
       field: "ATU22Level",
       slot: "ATU22",
-      identity: "NewTokenUPGPrefab.T3.TrinityBoosterTwo",
-      identitySource: "Compatibility-mapped prefab identity",
+      displayTitle: "ATU22 Shell (T3Trio2 clue)",
+      storefrontDisplayTitle: "Trinity Booster One",
+      storefrontEffectText: "x1.03 to All Generators Output, MP Gained & RP Gained.",
+      storefrontBuffTargets: [
+        { label: "Output", tone: "generator" },
+        { label: "MP", tone: "mod" },
+        { label: "RP", tone: "rp" }
+      ],
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      identity: "T3Trio2",
+      identitySource: "DB-backed owner-order numeric family clue",
       rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
-      startCostField: "T3Trio1StartCost",
-      additiveCostField: "T3Trio1AdditiveCost",
-      bonusField: "T3Trio1Bonus",
-      maxLevelField: "T3Trio1MaxLevel",
-      bonusStepLabel: "T3 Trinity 2 Bonus",
-      bonusStepMode: "multiplier",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
-    },
-    {
-      field: "ATU23Level",
-      slot: "ATU23",
-      identity: "NewTokenUPGPrefab.T3.DailyTokens",
-      identitySource: "Compatibility-mapped prefab identity",
-      rowType: "prefab-driven",
-      rowTypeLabel: "Prefab-driven compatibility row",
+      rowTypeLabel: "T3 trio family clue row",
       startCostField: "T3Trio2StartCost",
       additiveCostField: "T3Trio2AdditiveCost",
       bonusField: "T3Trio2Bonus",
       maxLevelField: "T3Trio2MaxLevel",
-      bonusStepLabel: "T3 Daily Tokens Bonus",
+      bonusStepLabel: "the checked T3 trio-family lane",
+      bonusStepMode: "multiplier",
+      note: "DB-backed T3 trio-family clue row. The owner-side shell order anchors ATU22 on the T3Trio2 numeric block, while the exact player-facing row identity and runtime display mapping still depend on stronger row-local joins."
+    },
+    {
+      field: "ATU23Level",
+      slot: "ATU23",
+      displayTitle: "ATU23 Shell (bounded placeholder clue)",
+      storefrontDisplayTitle: "Trinity Booster Two",
+      storefrontEffectText: "x1.03 to All Generators Output, Shards Gained & AP Gained.",
+      storefrontBuffTargets: [
+        { label: "Output", tone: "generator" },
+        { label: "Shards", tone: "shard" },
+        { label: "AP", tone: "ap" }
+      ],
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      identity: "ATU23 shell placeholder",
+      identitySource: "DB-backed bounded placeholder clue",
+      rowType: "prefab-driven",
+      rowTypeLabel: "T3 trio bounded placeholder row",
+      bonusStepLabel: "the unresolved ATU23 trio-family lane",
       bonusStepMode: "additive",
-      note: "Compatibility-mapped row using DB-derived TokenShop extract numerics; final grounded row identity is still unresolved."
+      note: "Bounded T3 trio placeholder row. The committed owner-side extract advances from ATU22 directly into the ATU23 shell and then into ATU24 without a surviving third T3 trio owner block, so this row stays unresolved until a stronger display-side or runtime join clears."
     },
     {
       field: "ATU24Level",
       slot: "ATU24",
-      identity: "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
-      identitySource: "Late-shelf prefab clue",
+      displayTitle: "ATU24 Shell (Token Ultima clue)",
+      storefrontDisplayTitle: "Token Ultima",
+      storefrontEffectLines: [
+        "Every level in any Token Upgrade provides:",
+        "- x1.001 to Cells Gained.",
+        "- x1.0005 to MP Gained.",
+        "- x1.0003 to Shards Gained.",
+        "- x1.0002 to RP Gained.",
+        "- x1.0001 to AP Gained."
+      ],
+      storefrontBuffTargets: [
+        { label: "Cells", tone: "cells", mode: "multiplier" },
+        { label: "MP", tone: "mod", mode: "multiplier" },
+        { label: "Shards", tone: "shard", mode: "multiplier" },
+        { label: "RP", tone: "rp", mode: "multiplier" },
+        { label: "AP", tone: "ap", mode: "multiplier" }
+      ],
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      identity: "Token Ultima",
+      identitySource: "Late-shelf title clue",
       rowType: "prefab-driven",
       rowTypeLabel: "Late-shelf compatibility row",
       startCostField: "ATU24StartCost",
-      additiveCostField: "T4UltimaShardsAdditiveCost",
       bonusField: "ATU24Bonus3",
-      maxLevelField: "T4UltimaShardsMaxLevel",
-      bonusStepLabel: "Late shelf shard bonus",
-      bonusStepMode: "multiplier",
-      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; the visible shelf title roster suggests Tier 3 Max Level Increaser, but the exact shell-to-title join is still unresolved."
+      bonusFields: ["ATU24Bonus1", "ATU24Bonus2", "ATU24Bonus3", "ATU24Bonus4", "ATU24Bonus5"],
+      bonusStepLabel: "Late shelf composite bonus lane",
+      bonusStepMode: "multi",
+      costFormulaType: "start-only",
+      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; the current build grounds the first-purchase ATU24 start cost plus five separate bonus lanes, but not a reusable additive-cost or max-level formula."
     },
     {
       field: "ATU25Level",
       slot: "ATU25",
-      identity: "NewTokenUPGPrefab.T4.Ultima",
-      identitySource: "Late-shelf prefab clue",
+      displayTitle: "ATU25 Shell (Daily Tokens T4 clue)",
+      storefrontDisplayTitle: "Daily Tokens T4",
+      storefrontEffectText: "+50% to Tokens Gained from Daily Rewards & Events (additive).",
+      storefrontBuffTargets: [{ label: "Daily Tokens", tone: "token" }],
+      identity: "Daily Tokens T4",
+      identitySource: "Late-shelf title clue",
       rowType: "prefab-driven",
       rowTypeLabel: "Late-shelf compatibility row",
       startCostField: "ATU25StartCost",
       additiveCostField: "ATU25AdditiveCost",
       bonusField: "ATU25Bonus",
       maxLevelField: "ATU25MaxLevel",
-      bonusStepLabel: "Late shelf academy bonus",
-      bonusStepMode: "multiplier",
-      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; Academy Booster survives as a title-side clue, but the exact shell-to-title join is still unresolved."
+      costFormulaConfidence: "projected",
+      bonusStepLabel: "Tokens Gained from Daily Rewards & Events",
+      bonusStepMode: "additive",
+      bonusValueDisplayMode: "percent-total-multiplier",
+      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; the visible shelf title clue aligns this shell with a Daily Tokens T4 lane, but the exact shell-to-title join and runtime cost formula are still unresolved."
     },
     {
       field: "ATU26Level",
       slot: "ATU26",
-      identity: "NewTokenUPGPrefab.T5.CampaignFragments",
-      identitySource: "Late-shelf effect-side prefab clue",
+      displayTitle: "ATU26 Shell (Tier 1 Max Level Increaser clue)",
+      storefrontDisplayTitle: "Tier 1 Max Level Increaser",
+      storefrontEffectText: "+1000 Max Levels to Tier 1 Upgrades (Some Upgrades Excluded).",
+      storefrontBuffTargets: [{ label: "Tier 1 Upgrades", tone: "uplift" }],
+      identity: "Tier 1 Max Level Increaser",
+      identitySource: "Late-shelf title clue",
       rowType: "prefab-driven",
       rowTypeLabel: "Late-shelf compatibility row",
       startCostField: "ATU26StartCost",
       additiveCostField: "ATU26AdditiveCost",
       bonusField: "ATU26Bonus",
       maxLevelField: "ATU26MaxLevel",
-      bonusStepLabel: "Late shelf campaign bonus",
+      costFormulaConfidence: "projected",
+      bonusStepLabel: "Tier 1 Max Levels",
       bonusStepMode: "additive",
-      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; Campaign Fragments survives on a narrower effect-side clue surface, but the exact shell-to-title join is still unresolved."
+      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; the visible shelf clue suggests a Tier 1 max-level lane, but the exact shell-to-title join and runtime cost formula remain unresolved, so the extracted linear projection is not treated as a verified next-buy cost."
     },
     {
       field: "ATU27Level",
       slot: "ATU27",
-      identity: "NewTokenUPGPrefab.T5.TrinityOomBooster",
-      identitySource: "Late-shelf prefab clue",
+      displayTitle: "ATU27 Shell (Tier 2 Max Level Increaser clue)",
+      storefrontDisplayTitle: "Tier 2 Max Level Increaser",
+      storefrontEffectText: "+500 Max Levels to Tier 2 Upgrades (Some Upgrades Excluded).",
+      storefrontBuffTargets: [{ label: "Tier 2 Upgrades", tone: "uplift" }],
+      identity: "Tier 2 Max Level Increaser",
+      identitySource: "Late-shelf title clue",
       rowType: "prefab-driven",
       rowTypeLabel: "Late-shelf compatibility row",
       startCostField: "ATU27StartCost",
       additiveCostField: "ATU27AdditiveCost",
       bonusField: "ATU27Bonus",
       maxLevelField: "ATU27MaxLevel",
-      bonusStepLabel: "Late shelf OOM bonus",
+      costFormulaConfidence: "projected",
+      bonusStepLabel: "Tier 2 Max Levels",
       bonusStepMode: "additive",
-      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; Trinity Oom Booster survives as a local prefab/title clue, but the exact shell-to-title join is still unresolved."
+      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; the visible shelf clue suggests a Tier 2 max-level lane, but the exact shell-to-title join and runtime cost formula remain unresolved, so the extracted linear projection is not treated as a verified next-buy cost."
     },
     {
       field: "ATU28Level",
       slot: "ATU28",
-      identity: "NewTokenUPGPrefab.T5.UltimaCells",
-      identitySource: "Late-shelf token-side prefab clue",
+      displayTitle: "ATU28 Shell (Tier 3 Max Level Increaser clue)",
+      storefrontDisplayTitle: "Tier 3 Max Level Increaser",
+      storefrontEffectText: "+500 Max Levels to Tier 3 Upgrades (Some Upgrades Excluded).",
+      storefrontBuffTargets: [{ label: "Tier 3 Upgrades", tone: "uplift" }],
+      identity: "Tier 3 Max Level Increaser",
+      identitySource: "Late-shelf title clue",
       rowType: "prefab-driven",
       rowTypeLabel: "Late-shelf compatibility row",
       startCostField: "ATU28StartCost",
       additiveCostField: "ATU28AdditiveCost",
       bonusField: "ATU28Bonus",
       maxLevelField: "ATU28MaxLevel",
-      bonusStepLabel: "Late shelf ultima cells bonus",
+      costFormulaConfidence: "projected",
+      bonusStepLabel: "Tier 3 Max Levels",
       bonusStepMode: "additive",
-      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; Token Ultima: Cells survives on a separate token-side clue surface, but the exact shell-to-title join is still unresolved."
+      note: "Late-shelf compatibility row using DB-derived TokenShop extract numerics; the visible shelf clue suggests a Tier 3 max-level lane, but the exact shell-to-title join and runtime cost formula remain unresolved, so the extracted linear projection is not treated as a verified next-buy cost."
     }
   ];
   return rows.map((row) => dbRowDetailResolver.apply(row));
@@ -6260,24 +6796,51 @@ function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recom
   const displayTitle = getTokenShopRowLabel(row);
   const rowMeta = getTokenShopRowMeta(row?.field);
   const isLateShelfRow = rowMeta?.storeShell === "late-shelf";
+  const runtimeUnresolvedBuffs =
+    String(row?.storefrontBuffDisplayMode || "").trim() === "runtime-unresolved";
+  const runtimeUnresolvedCap =
+    String(row?.storefrontCapDisplayMode || "").trim() === "runtime-unresolved" ||
+    (runtimeUnresolvedBuffs &&
+      typeof row.currentLevel === "number" &&
+      typeof row.maxLevel === "number" &&
+      Number.isFinite(row.currentLevel) &&
+      Number.isFinite(row.maxLevel) &&
+      row.currentLevel > row.maxLevel);
+  const displayMaxLevel = runtimeUnresolvedCap ? null : row.maxLevel;
+  const displayIsMaxed = runtimeUnresolvedCap ? false : row.isMaxed;
+  const displayMaxStatusLabel = runtimeUnresolvedCap
+    ? "Waiting on grounded max-level coverage."
+    : row.maxStatus.label;
   const currentLevelLabel = formatBoundaryValue(row.currentLevel);
   const capLabel =
-    typeof row.maxLevel === "number" && Number.isFinite(row.maxLevel)
-      ? formatBoundaryValue(row.maxLevel)
+    typeof displayMaxLevel === "number" && Number.isFinite(displayMaxLevel)
+      ? formatBoundaryValue(displayMaxLevel)
       : "n/a";
   const effectLine = tokenShopUi.formatTokenShopSentence(
     tokenShopUi.formatTokenShopEffectLine(row)
   );
+  const storefrontEffectLines = tokenShopUi.getTokenShopStorefrontEffectLines(row);
+  const effectLineHtml = renderTokenShopEffectLineHtml(effectLine);
+  const effectLinesMarkup = storefrontEffectLines.length
+    ? storefrontEffectLines
+        .map(
+          (line, index) =>
+            `<p class="token-shop-effect-line${index > 0 ? " token-shop-effect-line-secondary" : ""}${String(line).trim().startsWith("-") ? " token-shop-effect-line-bullet" : ""}">${renderTokenShopEffectLineHtml(
+              tokenShopUi.formatTokenShopSentence(line)
+            )}</p>`
+        )
+        .join("")
+    : `<p class="token-shop-effect-line">${effectLineHtml}</p>`;
   const playerFacingSupportText = tokenShopUi.getTokenShopPlayerFacingSupportText(row);
   const bonusStripEntries = tokenShopUi.getTokenShopBonusStripEntries(row);
   const groundingSummary = tokenShopUi.getTokenShopRowGroundingSummary(row);
   const contractMetaLine = tokenShopUi.getTokenShopContractMetaLine(row);
-  const nextKnownCostLabel = row.isMaxed
+  const nextKnownCostLabel = displayIsMaxed
     ? "No next cost within known cap"
     : typeof row.nextKnownCost === "number"
       ? formatBoundaryValue(row.nextKnownCost)
       : "Research";
-  const affordabilityLine = row.isMaxed
+  const affordabilityLine = displayIsMaxed
     ? "No next purchase within known cap."
     : row.isAffordable === true
       ? "Affordable from current Tokens."
@@ -6287,32 +6850,37 @@ function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recom
         ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
         : "Waiting on grounded runtime cost coverage.";
   const costFormulaLine =
-    typeof row.startCost === "number" && typeof row.additiveCost === "number"
-      ? `Known cost inputs: start ${formatBoundaryValue(row.startCost)} + additive ${formatBoundaryValue(row.additiveCost)} x current level.`
-      : "Known cost inputs are incomplete in this build.";
+    typeof row.costFormulaLabel === "string" && row.costFormulaLabel
+      ? row.costFormulaLabel
+      : typeof row.startCost === "number" && typeof row.additiveCost === "number"
+        ? `Known cost inputs: start ${formatBoundaryValue(row.startCost)} + additive ${formatBoundaryValue(row.additiveCost)} x current level.`
+        : "Known cost inputs are incomplete in this build.";
   const actionLabel = tierUnlocked
-    ? (row.isMaxed ? "MAXED" : typeof row.nextKnownCost === "number" ? "NEXT" : "RESEARCH")
+    ? (displayIsMaxed ? "MAXED" : typeof row.nextKnownCost === "number" ? "NEXT" : "RESEARCH")
     : "LOCKED";
   const tierGateLine = tierUnlocked
     ? `${TOKEN_SHOP_TIER_CONFIG[tierKey]?.label || tierKey.toUpperCase()} is currently available under the checked tier policy.`
     : `${TOKEN_SHOP_TIER_CONFIG[tierKey]?.label || tierKey.toUpperCase()} remains gated by the checked heuristic tier policy.`;
   const isRecommended = recommendation?.nextBest?.rowId === row.field;
-  const canPurchase = tierUnlocked && !row.isMaxed && row.isAffordable && typeof row.nextKnownCost === "number";
+  const canPurchase =
+    tierUnlocked && !displayIsMaxed && row.isAffordable && typeof row.nextKnownCost === "number";
+  const isResearchPanel =
+    tierUnlocked && !displayIsMaxed && !canPurchase && typeof row.nextKnownCost !== "number";
   const buyPanelAttrs = canPurchase
     ? ` data-token-shop-apply-row="${escapeHtml(row.field)}" role="button" tabindex="0" aria-label="${escapeHtml(`Buy ${displayTitle} next level`) }"`
     : "";
   const requirementOverlay = !tierUnlocked
     ? `<div class="token-shop-overlay-ribbon"><span class="token-shop-overlay-label">LOCKED</span><p>${escapeHtml(getTokenShopTierThresholdLabel(tierKey, getTokenShopTierUnlockSummary(summary).thresholds))}</p></div>`
-    : row.isMaxed
-      ? `<div class="token-shop-overlay-ribbon maxed"><span class="token-shop-overlay-label">MAXED</span><p>${escapeHtml(row.maxStatus.label)}</p></div>`
+    : displayIsMaxed
+      ? `<div class="token-shop-overlay-ribbon maxed"><span class="token-shop-overlay-label">MAXED</span><p>${escapeHtml(displayMaxStatusLabel)}</p></div>`
       : "";
   const buffStrip = bonusStripEntries.length
     ? `
-      <div class="token-shop-buff-strip" aria-label="Current upgrade buffs" style="grid-template-columns:repeat(${Math.max(1, bonusStripEntries.length)}, minmax(0, 1fr));">
+      <div class="token-shop-buff-strip${bonusStripEntries.length === 1 ? " single-lane" : ""}" aria-label="Current upgrade buffs" style="grid-template-columns:repeat(${Math.max(1, bonusStripEntries.length)}, minmax(0, 1fr));">
         ${bonusStripEntries
           .map(
             (entry) => `
-              <div class="token-shop-buff-plate" data-tone="${escapeHtml(entry.tone || "neutral")}">
+              <div class="token-shop-buff-plate${entry.isCollapsedResearch ? " is-collapsed-research" : ""}" data-tone="${escapeHtml(entry.tone || "neutral")}">
                 <strong class="token-shop-buff-value">${escapeHtml(entry.currentLabel)}</strong>
                 <span class="token-shop-buff-label">${escapeHtml(entry.label)}</span>
               </div>
@@ -6322,10 +6890,21 @@ function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recom
       </div>
     `
     : "";
-  const buyPanelBody = `
-      <span class="token-shop-buy-label">${escapeHtml(row.isMaxed ? "MAXED" : canPurchase ? "BUY" : actionLabel)}</span>
+  const buyPanelBody = displayIsMaxed
+    ? `
+      <span class="token-shop-buy-star" aria-hidden="true">★</span>
+      <span class="token-shop-buy-label">MAXED</span>
+    `
+    : isResearchPanel
+      ? `
+      <span class="token-shop-buy-label">RESEARCH</span>
+      <strong>Unresolved</strong>
+      <span class="token-shop-buy-hint">${escapeHtml(affordabilityLine)}</span>
+    `
+    : `
+      <span class="token-shop-buy-label">${escapeHtml(canPurchase ? "BUY" : actionLabel)}</span>
       <strong>${escapeHtml(nextKnownCostLabel)}</strong>
-      ${canPurchase ? `<span class="token-shop-buy-cta">${escapeHtml(isRecommended ? "BEST PICK" : "AVAILABLE")}</span>` : `<span class="token-shop-buy-hint">${escapeHtml(row.isMaxed ? "Known cap reached" : tierUnlocked ? affordabilityLine : tierGateLine)}</span>`}
+      ${canPurchase ? `<span class="token-shop-buy-cta">${escapeHtml(isRecommended ? "BEST PICK" : "AVAILABLE")}</span>` : `<span class="token-shop-buy-hint">${escapeHtml(tierUnlocked ? affordabilityLine : tierGateLine)}</span>`}
     `;
 
   return `
@@ -6336,7 +6915,7 @@ function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recom
           <strong>${escapeHtml(displayTitle)}</strong>
         </div>
         <div class="token-shop-shell-content">
-          <p class="token-shop-effect-line">${escapeHtml(effectLine)}</p>
+          ${effectLinesMarkup}
           ${buffStrip}
         </div>
         <div class="token-shop-progress-cluster">
@@ -6346,12 +6925,12 @@ function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recom
             <span class="token-shop-level-divider">/</span>
             <span class="token-shop-level-cap">${escapeHtml(capLabel)}</span>
           </div>
-          <div class="token-shop-fill-track">
-            <div class="token-shop-fill-track-rail"></div>
-            <div class="token-shop-fill-track-core" style="width:${escapeHtml(String(Math.max(8, Math.min(100, typeof row.maxLevel === "number" && row.maxLevel > 0 ? (row.currentLevel / row.maxLevel) * 100 : row.currentLevel > 0 ? 18 : 8))))}%"></div>
-          </div>
+        <div class="token-shop-fill-track">
+          <div class="token-shop-fill-track-rail"></div>
+          <div class="token-shop-fill-track-core" style="width:${escapeHtml(String(Math.max(8, Math.min(100, typeof displayMaxLevel === "number" && displayMaxLevel > 0 ? (row.currentLevel / displayMaxLevel) * 100 : row.currentLevel > 0 ? 18 : 8))))}%"></div>
         </div>
-        <div class="token-shop-buy-panel${canPurchase ? " actionable" : ""}${isRecommended ? " recommended" : ""}"${buyPanelAttrs}>
+      </div>
+        <div class="token-shop-buy-panel${displayIsMaxed ? " maxed" : ""}${canPurchase ? " actionable" : ""}${isRecommended ? " recommended" : ""}${isResearchPanel ? " is-research" : ""}"${buyPanelAttrs}>
           ${buyPanelBody}
         </div>
         <details class="token-shop-evidence-note">
@@ -6441,8 +7020,22 @@ function renderTokenShopStorefrontTierTabs(states, tierRows) {
   `;
 }
 
+function sortTokenShopTierRows(tierKey, rows) {
+  const configuredOrder = TOKEN_SHOP_TIER_CONFIG[tierKey]?.rows || [];
+  const indexByField = new Map(configuredOrder.map((field, index) => [field, index]));
+  return [...(Array.isArray(rows) ? rows : [])].sort((left, right) => {
+    const leftIndex = indexByField.has(left?.field) ? indexByField.get(left.field) : Number.MAX_SAFE_INTEGER;
+    const rightIndex = indexByField.has(right?.field) ? indexByField.get(right.field) : Number.MAX_SAFE_INTEGER;
+    if (leftIndex !== rightIndex) {
+      return leftIndex - rightIndex;
+    }
+    return String(left?.field || "").localeCompare(String(right?.field || ""));
+  });
+}
+
 function renderTokenShopProgressionEditor() {
   const summary = getTokenShopProgressionModel();
+  const freshness = getSystemFreshnessSummary("token-shop");
   const { thresholds, states } = getTokenShopTierUnlockSummary(summary);
   const storefrontRecommendation = getTokenShopStorefrontRecommendationModel(summary);
   const coverageSummary = getTokenShopRowCoverageSummary(summary.rows);
@@ -6463,7 +7056,10 @@ function renderTokenShopProgressionEditor() {
   const tierRows = Object.fromEntries(
     TOKEN_SHOP_TIER_SEQUENCE.map((tierKey) => [
       tierKey,
-      summary.rows.filter((row) => getTokenShopTierForField(row.field) === tierKey)
+      sortTokenShopTierRows(
+        tierKey,
+        summary.rows.filter((row) => getTokenShopTierForField(row.field) === tierKey)
+      )
     ])
   );
   const selectedTier = getSelectedTokenShopStorefrontTier(states);
@@ -6489,6 +7085,8 @@ function renderTokenShopProgressionEditor() {
       <div class="token-shop-bank-status">
         <span class="pill">${typeof summary.currentTokens === "number" ? `${formatBoundaryValue(summary.currentTokens)} Tokens` : "Tokens unavailable"}</span>
         <span class="pill">${summary.playerStateCount}/${summary.rows.length} active • ${coverageSummary.boundedCount}/${summary.rows.length} bounded</span>
+        <span class="pill">Source: ${escapeHtml(freshness.source)}${freshness.dbBundleLoaded ? " + DB bundle" : ""}</span>
+        <span class="pill">DB ${escapeHtml(formatUiDateTime(freshness.dbBuiltAt) || "not loaded")}</span>
       </div>
       ${renderTokenShopStorefrontTierTabs(states, tierRows)}
       <div class="token-shop-store-list">
@@ -6504,6 +7102,7 @@ function renderTokenShopProgressionEditor() {
       <details class="token-shop-store-details">
         <summary>Optimizer and grounding detail</summary>
         <p class="meta">Checked subset only. This TokenShop lane resolves current level from checked player state first and compatibility fallback second. Local override rows are removed from the active storefront path.</p>
+        <p class="meta">Refresh status: system-unit <code>${escapeHtml(formatUiDateTime(freshness.unitBuiltAt) || "not loaded")}</code>; DB mechanics bundle <code>${escapeHtml(formatUiDateTime(freshness.dbBuiltAt) || "not loaded")}</code>. If the DB timestamp changes but rows do not, the refresh worked and the visible storefront data did not materially change.</p>
         <p class="meta">The surface stays fixed to the grounded ATU subset: T1: ATU1-12, T2: ATU13-19, T3: ATU20-23, T4: ATU24-28.</p>
         <div class="pill-row">
           <span class="pill">${summary.defaultCount}/${summary.rows.length} defaulted to level 0</span>
@@ -7463,7 +8062,70 @@ function progressionUrgency(resource, bias) {
 }
 
 function escapeHtml(value) {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+const TOKEN_SHOP_EFFECT_HIGHLIGHTS = [
+  { pattern: /All Generators Output/g, tone: "generator" },
+  { pattern: /Mk[1-8] Output/g, tone: "generator" },
+  { pattern: /MP Gained/g, tone: "mod" },
+  { pattern: /Mod Points Gained/g, tone: "mod" },
+  { pattern: /Diamonds Gained/g, tone: "diamond" },
+  { pattern: /Tokens Gained/g, tone: "token" },
+  { pattern: /Cells Gained/g, tone: "cells" },
+  { pattern: /Shards Gained/g, tone: "shard" },
+  { pattern: /\bRP Gained\b/g, tone: "rp" },
+  { pattern: /\bAP Gained\b/g, tone: "ap" },
+  { pattern: /Daily Rewards & Events/g, tone: "source" },
+  { pattern: /Token & Diamond Chests/g, tone: "source" },
+  { pattern: /Diamond Chests/g, tone: "diamond" },
+  { pattern: /Token Chests/g, tone: "token" },
+  { pattern: /Mod Points|MP\b/g, tone: "mod" },
+  { pattern: /Diamonds?/g, tone: "diamond" },
+  { pattern: /Tokens?/g, tone: "token" },
+  { pattern: /Cells?/g, tone: "cells" },
+  { pattern: /Shards?/g, tone: "shard" },
+  { pattern: /\bRP\b/g, tone: "rp" },
+  { pattern: /\bAP\b/g, tone: "ap" },
+  { pattern: /Output/g, tone: "generator" }
+];
+
+function replaceTokenShopEffectTextNodes(html, pattern, replacer) {
+  return html
+    .split(/(<[^>]+>)/g)
+    .map((part) => (part.startsWith("<") ? part : part.replace(pattern, replacer)))
+    .join("");
+}
+
+function renderTokenShopEffectLineHtml(effectLine) {
+  let html = escapeHtml(effectLine);
+  html = replaceTokenShopEffectTextNodes(
+    html,
+    /(^|[\s(])([+x-]?\d+(?:\.\d+)?%?(?:e\d+)?)(?=$|[\s).,&])/g,
+    (match, prefix, value) =>
+      `${prefix}<span class="token-shop-effect-key token-shop-effect-key--value">${escapeHtml(value)}</span>`
+  );
+  html = replaceTokenShopEffectTextNodes(
+    html,
+    /\((additive|multiplicative)\)/gi,
+    (match) =>
+      `<span class="token-shop-effect-key token-shop-effect-key--qualifier">${escapeHtml(match.toLowerCase())}</span>`
+  );
+  for (const { pattern, tone } of TOKEN_SHOP_EFFECT_HIGHLIGHTS) {
+    html = replaceTokenShopEffectTextNodes(
+      html,
+      pattern,
+      (match) =>
+        `<span class="token-shop-effect-key token-shop-effect-key--${escapeHtml(tone)}">${escapeHtml(match)}</span>`
+    );
+  }
+  return html
+    .replace(/<\/span>\s+(?=<span class="token-shop-effect-key token-shop-effect-key--qualifier">)/g, " ")
+    .replace(/\s+([,.;:!?])/g, "$1")
+    .replace(/([,.;:!?])(?=<span class="token-shop-effect-key")/g, "$1 ");
 }
 
 function bumpSnapshotVersion(version) {

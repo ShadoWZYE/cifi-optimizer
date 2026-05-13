@@ -165,6 +165,10 @@ function getNormalizedProgressionGain(row, benefitInfo) {
   return Math.max(0, (benefitInfo?.incremental || 0) / additiveScale);
 }
 
+function getResolvedBonusMode(row) {
+  return String(row?.bonusMode || row?.bonusStepMode || "additive").trim() || "additive";
+}
+
 export function calculateUpgradeCost(row, currentLevel) {
   if (!row || typeof currentLevel !== "number") {
     return null;
@@ -172,16 +176,32 @@ export function calculateUpgradeCost(row, currentLevel) {
 
   const startCost = row.startCost;
   const additiveCost = row.additiveCost;
-
-  if (typeof startCost !== "number" || typeof additiveCost !== "number") {
-    return null;
-  }
+  const costFormulaType = String(row?.costFormulaType || "linear").trim() || "linear";
+  const costFormulaConfidence = String(row?.costFormulaConfidence || "verified").trim() || "verified";
 
   if (typeof row.maxLevel === "number" && currentLevel >= row.maxLevel) {
     return { cost: null, isMaxed: true };
   }
 
   const nextLevel = currentLevel + 1;
+  if (costFormulaType === "start-only") {
+    if (typeof startCost !== "number") {
+      return null;
+    }
+    if (currentLevel > 0) {
+      return { cost: null, isMaxed: false, nextLevel, formulaUnresolved: true };
+    }
+    return { cost: startCost, isMaxed: false, nextLevel };
+  }
+
+  if (costFormulaConfidence === "projected") {
+    return null;
+  }
+
+  if (typeof startCost !== "number" || typeof additiveCost !== "number") {
+    return null;
+  }
+
   const cost = startCost + additiveCost * currentLevel;
 
   return { cost, isMaxed: false, nextLevel };
@@ -193,7 +213,7 @@ export function calculateUpgradeBenefit(row, currentLevel) {
   }
 
   const bonus = row.bonusValue;
-  const bonusMode = row.bonusMode;
+  const bonusMode = getResolvedBonusMode(row);
   const maxLevel = row.maxLevel;
 
   if (typeof bonus !== "number") {

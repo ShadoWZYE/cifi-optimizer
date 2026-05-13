@@ -1,4 +1,4 @@
-const SYSTEM_UNIT_IDS = ["app-meta", "player-state", "shards", "token-shop", "multiverse-market"];
+export const SYSTEM_UNIT_IDS = ["app-meta", "player-state", "shards", "token-shop", "multiverse-market"];
 
 const STATIC_SYSTEM_UNIT_URLS = Object.freeze({
   "app-meta": "./data/system-units/app-meta.v1.json",
@@ -23,19 +23,20 @@ function shouldAllowStaticFallback(origin, serverCapabilities, allowStaticFallba
   return !shouldUseDbSystemUnitApi(origin, serverCapabilities);
 }
 
-async function loadStaticSystemUnits(fetchJson) {
-  const [appMeta, playerState, shards, tokenShop, multiverseMarket] = await Promise.all(
-    SYSTEM_UNIT_IDS.map((systemId) => fetchJson(STATIC_SYSTEM_UNIT_URLS[systemId]))
+async function loadStaticSystemUnits(fetchJson, systemIds = SYSTEM_UNIT_IDS) {
+  const entries = await Promise.all(
+    systemIds.map(async (systemId) => [systemId, await fetchJson(STATIC_SYSTEM_UNIT_URLS[systemId])])
   );
+  const unitsById = Object.fromEntries(entries);
   return {
     mode: "static-export",
     source: "data/system-units",
     units: {
-      appMeta,
-      playerState,
-      shards,
-      tokenShop,
-      multiverseMarket
+      appMeta: unitsById["app-meta"] ?? null,
+      playerState: unitsById["player-state"] ?? null,
+      shards: unitsById.shards ?? null,
+      tokenShop: unitsById["token-shop"] ?? null,
+      multiverseMarket: unitsById["multiverse-market"] ?? null
     }
   };
 }
@@ -75,14 +76,20 @@ export async function loadSystemUnits({
   origin,
   serverCapabilities,
   allowStaticFallback,
+  systemIds = SYSTEM_UNIT_IDS,
   systemDbScopes = {},
   tokenShopDbScopes = {},
   subjectContractScopes = {},
   genericMechanicsScopes = {}
 }) {
+  const requestedSystemIds = Array.from(
+    new Set(
+      (Array.isArray(systemIds) && systemIds.length ? systemIds : SYSTEM_UNIT_IDS).filter(Boolean)
+    )
+  );
   if (shouldUseDbSystemUnitApi(origin, serverCapabilities)) {
     try {
-      const query = new URLSearchParams({ ids: SYSTEM_UNIT_IDS.join(",") });
+      const query = new URLSearchParams({ ids: requestedSystemIds.join(",") });
       const useGenericSystemDbBundleApi = shouldUseDbSystemBundleApi(origin, serverCapabilities);
       const resolvedSystemDbScopes = getResolvedSystemDbScopes(systemDbScopes, tokenShopDbScopes);
       const tokenShopScopes =
@@ -121,6 +128,11 @@ export async function loadSystemUnits({
         mode: "db",
         source: "materialized_system_unit_views",
         builtAt: payload?.builtAt ?? null,
+        systemDbBuiltAt: {
+          tokenShop: resolvedTokenShopBundle?.builtAt ?? null,
+          shards: shardSystemDbBundle?.builtAt ?? null,
+          multiverseMarket: multiverseMarketSystemDbBundle?.builtAt ?? null
+        },
         systemDb: {
           tokenShop: {
             subjectMetadata:
@@ -139,11 +151,21 @@ export async function loadSystemUnits({
           }
         },
         units: {
-          appMeta: payload?.units?.["app-meta"] ?? null,
-          playerState: payload?.units?.["player-state"] ?? null,
-          shards: payload?.units?.shards ?? null,
-          tokenShop: payload?.units?.["token-shop"] ?? null,
-          multiverseMarket: payload?.units?.["multiverse-market"] ?? null
+          appMeta: requestedSystemIds.includes("app-meta")
+            ? payload?.units?.["app-meta"] ?? null
+            : null,
+          playerState: requestedSystemIds.includes("player-state")
+            ? payload?.units?.["player-state"] ?? null
+            : null,
+          shards: requestedSystemIds.includes("shards")
+            ? payload?.units?.shards ?? null
+            : null,
+          tokenShop: requestedSystemIds.includes("token-shop")
+            ? payload?.units?.["token-shop"] ?? null
+            : null,
+          multiverseMarket: requestedSystemIds.includes("multiverse-market")
+            ? payload?.units?.["multiverse-market"] ?? null
+            : null
         }
       };
     } catch (error) {
@@ -160,9 +182,14 @@ export async function loadSystemUnits({
     }
   }
 
-  const staticPayload = await loadStaticSystemUnits(fetchJson);
+  const staticPayload = await loadStaticSystemUnits(fetchJson, requestedSystemIds);
   return {
     ...staticPayload,
+    systemDbBuiltAt: {
+      tokenShop: null,
+      shards: null,
+      multiverseMarket: null
+    },
     systemDb: {
       tokenShop: {
         subjectMetadata: null,

@@ -151,3 +151,65 @@ test("getFullUpgradeAnalysis exposes progression-model carrier context", () => {
   assert.equal(analysis.nextBest.progressionObjectiveId, "objective:token-shop-short-run");
   assert.ok(["Grounded", "Bounded", "Blocked"].includes(analysis.nextBest.progressionConfidenceLabel));
 });
+
+test("calculateUpgradeCost supports bounded start-only late rows", () => {
+  assert.deepEqual(
+    calculateUpgradeCost(
+      {
+        startCost: 40000000,
+        costFormulaType: "start-only"
+      },
+      0
+    ),
+    {
+      cost: 40000000,
+      isMaxed: false,
+      nextLevel: 1
+    }
+  );
+
+  assert.deepEqual(
+    calculateUpgradeCost(
+      {
+        startCost: 40000000,
+        costFormulaType: "start-only"
+      },
+      1
+    ),
+    {
+      cost: null,
+      isMaxed: false,
+      nextLevel: 2,
+      formulaUnresolved: true
+    }
+  );
+});
+
+test("calculateUpgradeBenefit honors bonusStepMode fallback from progression rows", () => {
+  const result = calculateUpgradeBenefit(
+    {
+      bonusValue: 1.02,
+      bonusStepMode: "multiplier",
+      maxLevel: 10
+    },
+    2
+  );
+
+  assert.equal(result.bonusMode, "multiplier");
+  assert.equal(Number(result.incremental.toFixed(6)), Number(((1.02 ** 3) - (1.02 ** 2)).toFixed(6)));
+});
+
+test("calculateUpgradeCost skips projected formulas until runtime cost verification exists", () => {
+  assert.equal(
+    calculateUpgradeCost(
+      {
+        startCost: 10000000,
+        additiveCost: 1000000,
+        costFormulaType: "linear",
+        costFormulaConfidence: "projected"
+      },
+      2
+    ),
+    null
+  );
+});

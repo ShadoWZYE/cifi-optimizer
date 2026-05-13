@@ -15,6 +15,10 @@ The active reconstruction cycle is:
 5. app/tool read surfaces update from canonical DB views
 6. generated system units and bundle-shaped exports remain compatibility, debug, or distribution artifacts
 
+Grounding rule for live behavior:
+- When a subject already has DB-backed materialized views, target bundles, subject-state, or system-unit projections, use those DB surfaces as the source of truth for app wiring and UI display behavior.
+- Do not re-ground runtime titles, formulas, or row mappings from stored fixed JSON files under `data/` if the DB-native lane already exists.
+
 The primary runtime model is no longer:
 
 - hardcoded target ids
@@ -133,6 +137,24 @@ These facts are derived by reusable DB rules over:
 - evidence payload hits
 
 The goal is to replace target-shaped Python seam logic with subject-class rules.
+
+## Execution plans
+
+### `canonical_semantic_fragments.execution_plan_fragment`
+
+Execution plans are the DB-backed routing layer for follow-up work.
+
+They should carry:
+
+- `joinGoal`
+- `claimStages`
+- `depthPlan`
+- `traceRoutineHint`
+- `relationSeamContracts`
+
+`relationSeamContracts` is the DB-native replacement for planner-side seam registries. It is the place where seam-specific follow-up routing, expected terms, anchors, and preferred relation scopes should live once derived.
+
+Runtime planners should prefer the execution-plan fragment first and treat Python seam registries only as temporary compatibility fallback while old rows are being backfilled.
 
 ## Subject state
 

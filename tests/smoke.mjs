@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { inspect, isDeepStrictEqual, promisify } from "node:util";
 import {
@@ -714,7 +716,7 @@ assert.match(
 );
 assert.match(
   appJs,
-  /detached Tokens Booster, Tokens Booster T1, or >Diamond Upgrade 9 - TokensBoost title-side clue back to ATU1Button path id 15839/
+  /exact runtime display-update path and runtime model for the ATU4 row/i
 );
 assert.match(tokenShopUiSupport, /function sanitizeTokenShopRichText/);
 assert.match(appJs, /<details class="token-shop-evidence-note">/);
@@ -8393,6 +8395,8 @@ async function waitForServer(url, attempts = 50, delayMs = 250) {
 
 async function verifyLauncherModeServerLifecycle() {
   const testPort = 43000 + Math.floor(Math.random() * 1000);
+  const tempDir = await mkdtemp(join(tmpdir(), "cifi-smoke-app-state-"));
+  const tempAppStateDbPath = join(tempDir, "app-state.sqlite3");
   let serverProcess;
   let spawnError = null;
   let serverStdout = "";
@@ -8407,7 +8411,8 @@ async function verifyLauncherModeServerLifecycle() {
         env: {
           ...process.env,
           PORT: String(testPort),
-          CIFI_LAUNCH_MODE: "1"
+          CIFI_LAUNCH_MODE: "1",
+          CIFI_APP_STATE_DB_PATH: tempAppStateDbPath
         },
         stdio: ["ignore", "pipe", "pipe"]
       }
@@ -8433,65 +8438,116 @@ async function verifyLauncherModeServerLifecycle() {
   });
 
   try {
-    await waitForServer(`http://localhost:${testPort}/api/healthz`);
-  } catch (error) {
-    const combinedOutput = `${serverStdout}\n${serverStderr}`;
-    if (
-      spawnError?.code === "EPERM" ||
-      /EPERM|not permitted/i.test(combinedOutput) ||
-      serverProcess.exitCode !== null
-    ) {
-      console.warn(
-        "Skipping launcher-mode lifecycle spawn test because the environment blocked subprocess launch."
+    try {
+      await waitForServer(`http://localhost:${testPort}/api/healthz`);
+    } catch (error) {
+      const combinedOutput = `${serverStdout}\n${serverStderr}`;
+      if (
+        spawnError?.code === "EPERM" ||
+        /EPERM|not permitted/i.test(combinedOutput) ||
+        serverProcess.exitCode !== null
+      ) {
+        console.warn(
+          "Skipping launcher-mode lifecycle spawn test because the environment blocked subprocess launch."
+        );
+        return;
+      }
+      throw new Error(`${error.message}\nstdout: ${serverStdout}\nstderr: ${serverStderr}`);
+    }
+
+    const clientOpen = await postJson(`http://localhost:${testPort}/api/client/open`, {
+      clientId: "smoke-client"
+    });
+    hardAssert.equal(clientOpen.ok, true);
+    hardAssert.equal(clientOpen.launcherMode, true);
+
+    const eventController = new AbortController();
+    try {
+      const eventStream = await fetch(
+        `http://localhost:${testPort}/api/client/events?clientId=smoke-client`,
+        {
+          signal: eventController.signal
+        }
       );
-      return;
+      hardAssert.equal(eventStream.ok, true);
+
+      const launcherReopen = await fetch(`http://localhost:${testPort}/api/launcher/reopen`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}"
+      });
+      hardAssert.equal(launcherReopen.status, 202);
+
+      const healthAfterOpen = await fetchJson(`http://localhost:${testPort}/api/healthz`);
+      hardAssert.equal(healthAfterOpen.clientCount, 1);
+      hardAssert.equal(healthAfterOpen.launchSignalSequence, 1);
+
+      const systemUnits = await fetchJson(
+        `http://localhost:${testPort}/api/system-units?ids=player-state,token-shop`
+      );
+      hardAssert.ok(
+        systemUnits.mode === "db" || systemUnits.mode === "snapshot",
+        `Expected DB-backed or committed snapshot system-unit mode; received ${systemUnits.mode}`
+      );
+      hardAssert.ok(systemUnits.units["player-state"]);
+      hardAssert.ok(systemUnits.units["token-shop"]);
+
+      const smokeProfile = normalizePlayerProfile(
+        {
+          meta: {
+            profileName: "Smoke Test Profile",
+            updatedAt: "2026-05-11T00:00:00.000Z"
+          },
+          player: {
+            resources: {
+              tokens: 123456,
+              diamonds: 789
+            }
+          },
+          planning: {
+            tokenShop: {
+              checkedSubsetPlayerState: {
+                ATU1Level: 10,
+                ATU2Level: 5
+              }
+            }
+          }
+        },
+        createDefaultPlayerProfile().player
+      );
+      const storedProfile = await postJson(`http://localhost:${testPort}/api/player-profile`, {
+        sourceLabel: "smoke-test",
+        profile: smokeProfile
+      });
+      hardAssert.equal(storedProfile.ok, true);
+      hardAssert.equal(storedProfile.profileId, "active");
+      hardAssert.equal(storedProfile.sourceLabel, "smoke-test");
+
+      const fetchedProfile = await fetchJson(`http://localhost:${testPort}/api/player-profile`);
+      hardAssert.equal(fetchedProfile.profileId, "active");
+      hardAssert.equal(fetchedProfile.sourceLabel, "smoke-test");
+      hardAssert.equal(fetchedProfile.profile.meta.profileName, "Smoke Test Profile");
+      hardAssert.equal(fetchedProfile.profile.player.resources.tokens, 123456);
+      hardAssert.equal(
+        fetchedProfile.profile.planning.tokenShop.checkedSubsetPlayerState.ATU1Level,
+        10
+      );
+
+      const clientClose = await postJson(`http://localhost:${testPort}/api/client/close`, {
+        clientId: "smoke-client"
+      });
+      hardAssert.equal(clientClose.ok, true);
+    } finally {
+      eventController.abort();
     }
-    throw new Error(`${error.message}\nstdout: ${serverStdout}\nstderr: ${serverStderr}`);
+
+    await waitForExit(serverProcess, 9000);
+  } finally {
+    if (serverProcess && serverProcess.exitCode === null) {
+      serverProcess.kill();
+    }
+    await rm(tempDir, { recursive: true, force: true });
   }
-
-  const clientOpen = await postJson(`http://localhost:${testPort}/api/client/open`, {
-    clientId: "smoke-client"
-  });
-  hardAssert.equal(clientOpen.ok, true);
-  hardAssert.equal(clientOpen.launcherMode, true);
-
-  const eventController = new AbortController();
-  const eventStream = await fetch(
-    `http://localhost:${testPort}/api/client/events?clientId=smoke-client`,
-    {
-      signal: eventController.signal
-    }
-  );
-  hardAssert.equal(eventStream.ok, true);
-
-  const launcherReopen = await fetch(`http://localhost:${testPort}/api/launcher/reopen`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: "{}"
-  });
-  hardAssert.equal(launcherReopen.status, 202);
-
-  const healthAfterOpen = await fetchJson(`http://localhost:${testPort}/api/healthz`);
-  hardAssert.equal(healthAfterOpen.clientCount, 1);
-  hardAssert.equal(healthAfterOpen.launchSignalSequence, 1);
-
-  const systemUnits = await fetchJson(
-    `http://localhost:${testPort}/api/system-units?ids=player-state,token-shop`
-  );
-  hardAssert.ok(
-    systemUnits.mode === "db" || systemUnits.mode === "snapshot",
-    `Expected DB-backed or committed snapshot system-unit mode; received ${systemUnits.mode}`
-  );
-  hardAssert.ok(systemUnits.units["player-state"]);
-  hardAssert.ok(systemUnits.units["token-shop"]);
-
-  const clientClose = await postJson(`http://localhost:${testPort}/api/client/close`, {
-    clientId: "smoke-client"
-  });
-  hardAssert.equal(clientClose.ok, true);
-  eventController.abort();
-
-  await waitForExit(serverProcess, 9000);
 }
 
 async function postJson(url, payload) {
