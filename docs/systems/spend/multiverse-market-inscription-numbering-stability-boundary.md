@@ -41,4 +41,4 @@ Current grounded conclusion:
 - the checked broken same-number prefab band is rows `69-74`
 - the checked same-number prefab chain resumes at row `75` and stays direct through row `110`
 - this still does not ground new live player-facing effect text for unresolved rows
-- the canonical import-safe subset stays empty
+- the root import gate is already clear; this numbering-stability note only preserves the remaining player-facing text/effect gap

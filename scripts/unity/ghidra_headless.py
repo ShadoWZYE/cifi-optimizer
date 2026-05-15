@@ -71,6 +71,22 @@ PERSIST_NATIVE_DEBUG_ARTIFACTS = os.environ.get("CIFI_PERSIST_NATIVE_DEBUG_ARTIF
     "yes",
     "on",
 }
+FAST_PROCESS_PROJECT = os.environ.get("CIFI_FAST_PROCESS_PROJECT", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+MINIMAL_PROCESS_PROJECT = os.environ.get("CIFI_MINIMAL_PROCESS_PROJECT", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
+try:
+    PROCESS_PROJECT_BATCH_SIZE = max(1, int(os.environ.get("CIFI_PROCESS_PROJECT_BATCH_SIZE", "1") or "1"))
+except ValueError:
+    PROCESS_PROJECT_BATCH_SIZE = 1
 
 
 def _get_cache_db() -> GhidraCacheDB:
@@ -1562,6 +1578,189 @@ def _merge_candidate_results(
     )
 
 
+def _chunk_terms_in_order(terms: list[str], batch_size: int) -> list[list[str]]:
+    normalized_terms = normalize_search_terms(terms)
+    batch_size = max(1, int(batch_size or 0))
+    if not normalized_terms:
+        return []
+    if batch_size <= 1:
+        return [[term] for term in normalized_terms]
+    return [
+        normalized_terms[index : index + batch_size]
+        for index in range(0, len(normalized_terms), batch_size)
+    ]
+
+
+def _run_process_project_term_batch(
+    project_name: str,
+    project_file: str,
+    requested_terms: list[str],
+    timeout: int,
+    max_cpu: Optional[int],
+    scanned_binary: Path,
+) -> Optional[dict[str, Any]]:
+    search_strings = normalize_search_terms(requested_terms)
+    if not search_strings:
+        return None
+    if len(search_strings) == 1:
+        return _run_single_process_project_term(
+            project_name,
+            project_file,
+            search_strings[0],
+            timeout,
+            max_cpu,
+            scanned_binary,
+        )
+    metadata_neighborhoods = (
+        _scan_metadata_neighborhoods(scanned_binary, search_strings)
+        if scanned_binary.exists()
+        else {}
+    )
+    search_expansions = (
+        {
+            "requestedTerms": normalize_search_terms(search_strings),
+            "nativeSearchTerms": [],
+            "byRequestedTerm": {},
+        }
+        if MINIMAL_PROCESS_PROJECT
+        else _derive_search_expansions(search_strings, metadata_neighborhoods)
+    )
+    analysis_terms = (
+        normalize_search_terms(search_strings)
+        if MINIMAL_PROCESS_PROJECT
+        else _build_analysis_terms(
+            search_strings,
+            search_expansions.get("nativeSearchTerms", []),
+        )
+    )
+    script_name = "CiFiTierAnalysisPy.py"
+    _sync_jython_script(script_name)
+
+    job_id, job_dir = _make_job_dir("process")
+    output_file = job_dir / "results.json"
+    marker_file = job_dir / "results.done"
+    log_file = job_dir / "headless.log"
+
+    cmd = [
+        str(ANALYZE_HEADLESS),
+        str(PROJECT_DIR),
+        project_name,
+        "-process",
+        project_file,
+        "-readOnly",
+        "-noanalysis",
+        "-postScript",
+        script_name,
+        str(output_file),
+        str(marker_file),
+    ]
+    cmd.extend(analysis_terms)
+    if max_cpu:
+        cmd.extend(["-max-cpu", str(max_cpu)])
+
+    try:
+        proc = _run_headless_command(cmd, timeout, log_file)
+    except subprocess.TimeoutExpired as exc:
+        timeout_output = (exc.stdout or "") if isinstance(exc.stdout, str) else ""
+        if timeout_output:
+            log_file.write_text(timeout_output, encoding="utf-8")
+        job_info = {
+            "job_id": job_id,
+            "mode": "process-project",
+            "project_name": project_name,
+            "project_file": project_file,
+            "timeout": timeout,
+            "max_cpu": max_cpu,
+            "search_strings": search_strings,
+            "expanded_search_strings": analysis_terms,
+            "executed_search_strings": analysis_terms,
+            "output_file": str(output_file),
+            "marker_file": str(marker_file),
+            "log_file": str(log_file),
+            "start_time": datetime.now().isoformat(),
+            "status": "failed",
+            "batch_terms": list(search_strings),
+            "error": "timeout after {} seconds".format(timeout),
+        }
+        written = _write_job_info(job_dir, job_info)
+        return {
+            "job": written,
+            "result": {
+                "binary": project_file,
+                "timestamp": datetime.now().isoformat(),
+                "strings": {},
+                "functions": {},
+                "errors": ["timeout after {} seconds".format(timeout)],
+            },
+            "terms": search_strings,
+        }
+    except RuntimeError as exc:
+        print("ERROR: {}".format(exc))
+        return None
+
+    fresh_result = _load_json(output_file) or {
+        "binary": project_file,
+        "timestamp": datetime.now().isoformat(),
+        "strings": {},
+        "functions": {},
+        "errors": [],
+    }
+    marker_exists = marker_file.exists()
+    status = "completed" if proc.returncode == 0 and marker_exists else "failed"
+    error = None if status == "completed" else _extract_error(proc.stdout)
+
+    fresh_result["headless"] = {
+        "status": status,
+        "analyze": False,
+        "returncode": proc.returncode,
+        "log_file": str(log_file),
+        "script": script_name,
+        "project_name": project_name,
+        "project_file": project_file,
+        "mode": "process-project",
+    }
+    ascii_targets = _scan_ascii_targets(scanned_binary, search_strings) if scanned_binary.exists() else {}
+    fresh_result = _finalize_result_payload(
+        fresh_result,
+        search_strings,
+        metadata_neighborhoods,
+        search_expansions,
+        ascii_targets=ascii_targets,
+    )
+    if error:
+        fresh_result.setdefault("errors", []).append(error)
+
+    output_file.write_text(json.dumps(fresh_result, indent=2), encoding="utf-8")
+    if _should_persist_debug_artifacts(status):
+        shutil.copy(output_file, CACHE_DIR / "{}_results.json".format(job_id))
+
+    job_info = {
+        "job_id": job_id,
+        "mode": "process-project",
+        "project_name": project_name,
+        "project_file": project_file,
+        "timeout": timeout,
+        "max_cpu": max_cpu,
+        "search_strings": search_strings,
+        "expanded_search_strings": analysis_terms,
+        "executed_search_strings": analysis_terms,
+        "output_file": str(output_file),
+        "marker_file": str(marker_file),
+        "log_file": str(log_file),
+        "start_time": datetime.now().isoformat(),
+        "status": status,
+        "batch_terms": list(search_strings),
+    }
+    if error:
+        job_info["error"] = error
+    written = _write_job_info(job_dir, job_info)
+    return {
+        "job": written,
+        "result": fresh_result,
+        "terms": list(search_strings),
+    }
+
+
 def _run_single_process_project_term(
     project_name: str,
     project_file: str,
@@ -1576,10 +1775,22 @@ def _run_single_process_project_term(
         if scanned_binary.exists()
         else {}
     )
-    search_expansions = _derive_search_expansions(search_strings, metadata_neighborhoods)
-    analysis_terms = _build_analysis_terms(
-        search_strings,
-        search_expansions.get("nativeSearchTerms", []),
+    search_expansions = (
+        {
+            "requestedTerms": normalize_search_terms(search_strings),
+            "nativeSearchTerms": [],
+            "byRequestedTerm": {},
+        }
+        if MINIMAL_PROCESS_PROJECT
+        else _derive_search_expansions(search_strings, metadata_neighborhoods)
+    )
+    analysis_terms = (
+        normalize_search_terms(search_strings)
+        if MINIMAL_PROCESS_PROJECT
+        else _build_analysis_terms(
+            search_strings,
+            search_expansions.get("nativeSearchTerms", []),
+        )
     )
     script_name = "CiFiTierAnalysisPy.py"
     _sync_jython_script(script_name)
@@ -1703,8 +1914,9 @@ def _run_single_process_project_term(
         job_info["error"] = error
     written = _write_job_info(job_dir, job_info)
     if written.get("status") == "completed":
-        _rebuild_cache_views()
-        prune_ghidra_artifacts()
+        if not FAST_PROCESS_PROJECT:
+            _rebuild_cache_views()
+            prune_ghidra_artifacts()
     return {
         "job": written,
         "result": fresh_result,
@@ -2112,10 +2324,22 @@ def process_project(project_name: str, project_file: str, search_strings: list[s
         if scanned_binary.exists()
         else {}
     )
-    search_expansions = _derive_search_expansions(search_strings, metadata_neighborhoods)
-    analysis_terms = _build_analysis_terms(
-        search_strings,
-        search_expansions.get("nativeSearchTerms", []),
+    search_expansions = (
+        {
+            "requestedTerms": normalize_search_terms(search_strings),
+            "nativeSearchTerms": [],
+            "byRequestedTerm": {},
+        }
+        if MINIMAL_PROCESS_PROJECT
+        else _derive_search_expansions(search_strings, metadata_neighborhoods)
+    )
+    analysis_terms = (
+        normalize_search_terms(search_strings)
+        if MINIMAL_PROCESS_PROJECT
+        else _build_analysis_terms(
+            search_strings,
+            search_expansions.get("nativeSearchTerms", []),
+        )
     )
 
     exact_cached = _choose_cached_process_subset(project_name, project_file, search_strings)
@@ -2137,26 +2361,70 @@ def process_project(project_name: str, project_file: str, search_strings: list[s
         missing_terms,
         cached_term_hits,
     )
-    successful_candidates = [*cached_term_hits, *graph_term_hits]
+    initial_candidates = [*cached_term_hits, *graph_term_hits]
     failed_terms: list[str] = []
     executed_terms: list[str] = []
+    successful_job_ids: list[str] = []
+    completed_terms: list[str] = []
+    merged_candidate_result: dict[str, Any] = {}
 
-    for term in missing_terms:
-        executed_terms.append(term)
-        candidate = _run_single_process_project_term(
+    for candidate in initial_candidates:
+        candidate_job = dict(candidate.get("job", {}) or {})
+        candidate_result = dict(candidate.get("result", {}) or {})
+        candidate_job_id = str(candidate_job.get("job_id") or "").strip()
+        if candidate_job_id:
+            successful_job_ids.append(candidate_job_id)
+        completed_terms.extend(
+            [str(term).strip() for term in (candidate.get("terms") or []) if str(term).strip()]
+        )
+        if not merged_candidate_result:
+            merged_candidate_result = _merge_result_payloads(candidate_result, {}, search_strings, None, [])
+        else:
+            merged_candidate_result = _merge_result_payloads(
+                merged_candidate_result,
+                candidate_result,
+                search_strings,
+                candidate_job_id or None,
+                [],
+            )
+
+    term_batches = _chunk_terms_in_order(
+        missing_terms,
+        PROCESS_PROJECT_BATCH_SIZE if MINIMAL_PROCESS_PROJECT else 1,
+    )
+    for term_batch in term_batches:
+        executed_terms.extend(term_batch)
+        candidate = _run_process_project_term_batch(
             project_name,
             project_file,
-            term,
+            term_batch,
             timeout,
             max_cpu,
             scanned_binary,
         )
         if not candidate or candidate.get("job", {}).get("status") != "completed":
-            failed_terms.append(term)
+            failed_terms.extend(term_batch)
             continue
-        successful_candidates.append(candidate)
+        candidate_job = dict(candidate.get("job", {}) or {})
+        candidate_result = dict(candidate.get("result", {}) or {})
+        candidate_job_id = str(candidate_job.get("job_id") or "").strip()
+        if candidate_job_id:
+            successful_job_ids.append(candidate_job_id)
+        completed_terms.extend(
+            [str(term).strip() for term in (candidate.get("terms") or []) if str(term).strip()]
+        )
+        if not merged_candidate_result:
+            merged_candidate_result = _merge_result_payloads(candidate_result, {}, search_strings, None, [])
+        else:
+            merged_candidate_result = _merge_result_payloads(
+                merged_candidate_result,
+                candidate_result,
+                search_strings,
+                candidate_job_id or None,
+                [],
+            )
 
-    if not successful_candidates:
+    if not merged_candidate_result:
         job_id, job_dir = _make_job_dir("process")
         output_file = job_dir / "results.json"
         marker_file = job_dir / "results.done"
@@ -2201,8 +2469,8 @@ def process_project(project_name: str, project_file: str, search_strings: list[s
     output_file = job_dir / "results.json"
     marker_file = job_dir / "results.done"
     log_file = job_dir / "headless.log"
-    result_data = _merge_candidate_results(
-        successful_candidates,
+    result_data = _finalize_result_payload(
+        merged_candidate_result,
         search_strings,
         metadata_neighborhoods,
         search_expansions,
@@ -2236,7 +2504,6 @@ def process_project(project_name: str, project_file: str, search_strings: list[s
 
     reused_job_ids = [candidate.get("job", {}).get("job_id") for candidate in cached_term_hits if candidate.get("job", {}).get("job_id")]
     graph_reused_job_ids = [candidate.get("job", {}).get("job_id") for candidate in graph_term_hits if candidate.get("job", {}).get("job_id")]
-    per_term_job_ids = [candidate.get("job", {}).get("job_id") for candidate in successful_candidates if candidate.get("job", {}).get("job_id")]
     job_info = {
         "job_id": job_id,
         "mode": "process-project",
@@ -2247,9 +2514,9 @@ def process_project(project_name: str, project_file: str, search_strings: list[s
         "search_strings": search_strings,
         "expanded_search_strings": analysis_terms,
         "executed_search_strings": executed_terms,
-        "completed_terms": [candidate.get("terms", [""])[0] for candidate in successful_candidates if candidate.get("terms")],
+        "completed_terms": normalize_search_terms(completed_terms),
         "failed_terms": failed_terms,
-        "per_term_jobs": per_term_job_ids,
+        "per_term_jobs": successful_job_ids,
         "graph_backfilled_terms": sorted(graph_links_by_term.keys()),
         "output_file": str(output_file),
         "marker_file": str(marker_file),
@@ -2265,8 +2532,9 @@ def process_project(project_name: str, project_file: str, search_strings: list[s
         job_info["graph_reused_job_ids"] = graph_reused_job_ids
 
     written = _write_job_info(job_dir, job_info)
-    _rebuild_cache_views()
-    prune_ghidra_artifacts()
+    if not FAST_PROCESS_PROJECT:
+        _rebuild_cache_views()
+        prune_ghidra_artifacts()
     return written
 
 

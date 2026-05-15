@@ -276,20 +276,20 @@ Superseded parent:
   - status: `archived`
   - goal: extend the shipped checked-row TokenShop panel into the next small grounded row-detail tool for all 28 ATU rows grouped by tier
   - user question: `What do the grounded upgrades I can already inspect actually do at my current level and on the next level?`
-  - minimum required inputs: all 28 ATU rows (T1: ATU1-12, T2: ATU13-18, T3: ATU19-23, T4: ATU24-25, T5: ATU26-28) with tier unlock detection, imported current levels, and checked cost/bonus fields
+  - minimum required inputs: all 28 ATU rows grouped by the currently visible in-game tier shells (T1: ATU1-12, T2: ATU13-19, T3: ATU20-23, T4: ATU24-28) with tier unlock detection, imported current levels, and checked cost/bonus fields
   - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, best-buy ranking, ROI math, next-purchase recommendation rules
   - current true blocker: closed for this slice; broader planner-safe spend behavior still remains blocked on row identity coverage and a true next-purchase rule set
-  - largest coherent adjacent slice: a separate Overview module with tier tabs that shows all 28 rows grouped by tier (T1: ATU1-12, T2: ATU13-18, T3: ATU19-23, T4: ATU24-25, T5: ATU26-28), respects tier unlock thresholds, and shows each row's grounded identity, current level, next known cost, known max-level status without optimizer claims
+  - largest coherent adjacent slice: a separate Overview module with tier tabs that shows all 28 rows grouped by the visible in-game shells (T1: ATU1-12, T2: ATU13-19, T3: ATU20-23, T4: ATU24-28), respects tier unlock thresholds, and shows each row's grounded identity, current level, next known cost, known max-level status without optimizer claims
   - default next adjacent step: continue the same spend lane by moving all 28 rows into player-facing editor with tier grouping, not by widening into ranking or unresolved-row coverage
 - `progression-token-shop-editor-first-slice`
   - status: `archived`
-  - goal: move the checked TokenShop subset out of the Overview evidence panel and into the first real Progression-side TokenShop editor slice with tier grouping
+  - goal: move the checked TokenShop subset out of the Overview evidence panel and into the first real Progression-side TokenShop storefront slice with tier grouping
   - user question: `What do the grounded upgrades I can already inspect actually do at my current level and on the next level?`
-  - minimum required inputs: all 28 ATU rows (T1: ATU1-12, T2: ATU13-18, T3: ATU19-23, T4: ATU24-25, T5: ATU26-28) with tier unlock detection, local non-canonical editor levels, compatibility import as prefill only, and checked cost/bonus fields
+  - minimum required inputs: all 28 ATU rows grouped by the currently visible in-game tier shells (T1: ATU1-12, T2: ATU13-19, T3: ATU20-23, T4: ATU24-28) with tier unlock detection, checked player-state levels, compatibility import as fallback only, and checked cost/bonus fields
   - explicit non-blockers: token-bank cap or claimable-state recovery, Daily Tokenium cap or ready-state recovery, Emporium state recovery, best-buy ranking, ROI math, next-purchase recommendation rules
   - current true blocker: closed for this slice; broader planner-safe spend behavior still remains blocked on row identity coverage and a true next-purchase rule set
-  - largest coherent adjacent slice: a dedicated TokenShop category under the Progression selector with tier tabs that keeps row order grouped by tier, saves local row current levels under a non-canonical planner path, uses compatibility import only as prefill, and shows grounded identity, next known cost, known max-level status without optimizer claims
-  - default next adjacent step: continue only by grounding the next directly consumed checked-row inputs for that editor surface; keep ranking, ROI, and unresolved-row family expansion on separate lanes
+  - largest coherent adjacent slice: a dedicated TokenShop category under the Progression selector with tier tabs that keeps row order grouped by tier, reads checked player-state current levels, uses compatibility import only as fallback, and shows grounded identity, next known cost, known max-level status without optimizer claims
+  - default next adjacent step: continue only by grounding the next directly consumed checked-row inputs for that storefront surface; keep ranking, ROI, and unresolved-row family expansion on separate lanes
 
 Active spend panel contract:
 

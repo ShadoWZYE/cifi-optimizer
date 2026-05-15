@@ -33,6 +33,7 @@ Long native or Ghidra-backed trace runs are expected while cacheable parsing is 
 | `npm run extract:asset` | Run asset extraction directly |
 | `npm run extract:asset:run` | Build and run asset extraction in one command |
 | `npm run extract:trace` | Run the DB-first trace launcher |
+| `npm run capture:surface -- --surface progression --subsystem tokenshop --output workbench/token-shop.png` | Capture a local app surface through Playwright + installed Chrome/Edge, auto-injecting saved CiFi browser state when available |
 | `npm run verify:data` | Validate datasets, system units, and contracts |
 | `npm test` | Run smoke tests |
 
@@ -46,6 +47,7 @@ Long native or Ghidra-backed trace runs are expected while cacheable parsing is 
 | `launch-trace-gap.bat` | Run best-gap follow-up from DB state |
 | `node scripts/contracts/generate-system-units.mjs` | Export DB-backed system-unit snapshots |
 | `node scripts/contracts/validate-datasets.mjs` | Validate active dataset and export contracts |
+| `node scripts/ui/capture-local-surface.mjs ...` | Capture a local rendered UI surface for validation |
 
 ## Active Tools
 
@@ -76,6 +78,16 @@ Long native or Ghidra-backed trace runs are expected while cacheable parsing is 
 | `scripts/contracts/generate-dataset-index.mjs` | Ops/doc helper | Regenerates the dataset index documentation |
 | `scripts/contracts/validate-datasets.mjs` | Active validator | Enforces current dataset/export/runtime contracts |
 | `tests/smoke.mjs` | Active validator | Drift detection for app/bootstrap/export/tooling assumptions |
+| `scripts/ui/capture-local-surface.mjs` | Active validation helper | Uses Playwright with installed Chrome/Edge to capture local rendered app surfaces without the brittle raw headless Chromium path. Prefer the local server's DB-backed `/api/player-profile` state when available, and only fall back to browser localStorage scraping/cache when the server-backed player profile is absent. Use `--fresh` to force a blank state, or `--user-data-dir` with `--profile-directory` to target a specific browser profile. |
+
+### Runtime app state
+
+| Path / Surface | Role | Notes |
+| --- | --- | --- |
+| `workbench/app-state.sqlite3` | Active runtime store | Separate app-state DB for mutable user/profile state. Do not mix this with canonical extraction/materializer truth in `workbench/ghidra-cache/ghidra_cache.sqlite3`. |
+| `GET /api/player-profile` | Active runtime API | Returns the current DB-backed active player profile used by the app/capture validation path. |
+| `POST /api/player-profile` | Active runtime API | Upserts the current DB-backed active player profile. |
+| `CIFI_APP_STATE_DB_PATH` | Dev-server override | Optional environment override for the app-state DB path. Use this for tests or isolated validation runs instead of mutating the default local app-state DB. |
 
 ### Shard planners
 

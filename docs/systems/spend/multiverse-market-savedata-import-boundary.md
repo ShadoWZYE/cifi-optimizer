@@ -69,8 +69,8 @@ This note records the active follow-up lane after save-owner recovery closed: on
 - The adjacent `EsotericR*Trades`, `NecrumR*Trades`, and early-mech window remain verified SaveData neighbors, but they stay outside the admitted Emporium import slice and should not be preserved under the Emporium raw-import wrapper.
 - `InscryptionsDone` remains explicitly dual-declared and wrapper/export-only rather than part of the promoted `IS*Level` import span.
 - Exact typed recovery currently sets hard boundaries on that compatibility span: no checked `IS0Level` below it and no checked `IS111Level` above it.
-- Rows `71-74` remain ordered overlap only for identity work, not an import-admissible canonical subset.
-- If stronger identity evidence does not appear, the canonical import-safe subset stays explicitly empty.
+- Rows `71-74` remain ordered overlap only for the narrower player-facing text/label identity lane.
+- The root import gate is already clear for the bounded `IS1Level` through `IS110Level` compatibility span; stronger identity evidence would only narrow the downstream explanatory row-text lane further.
 
 ## Track implication
 

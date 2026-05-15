@@ -5,7 +5,17 @@ import {
   formatNumericRanges,
   getDailyTokeniumLaneSummary,
   getImportedMultiverseMarketPreview,
+  getMultiverseMarketActionShellSummary,
+  getMultiverseMarketBroadRowRemapSummary,
+  getMultiverseMarketCanonicalImportSummary,
   getMultiverseMarketMarketMemberBoundarySummary,
+  getMultiverseMarketMetadataSummary,
+  getMultiverseMarketOwnerFamilySummary,
+  getMultiverseMarketPrefabRemapBoundarySummary,
+  getMultiverseMarketRangeBoundarySummary,
+  getMultiverseMarketRowTextCoverageSummary,
+  getMultiverseMarketSaveBoundarySummary,
+  getMultiverseMarketTypedOwnerSummary,
   getSpendActionLaneSummary,
   getTokenBankControllerShellSummary,
   getTokenBankFormulaBoundarySummary,
@@ -16,6 +26,7 @@ import {
   getTokenShopOwnerShellSummary,
   getTokenShopSaveBoundarySummary
 } from "../support/spend-boundary-summary.js";
+import { buildSpendSystemView } from "../support/system-unit-projections.js";
 
 test("formatNumericRanges groups sorted unique values into joined ranges", () => {
   assert.equal(formatNumericRanges([7, 4, 5, 9, 7, 6, 11]), "4-7 and 9 and 11");
@@ -52,7 +63,7 @@ test("getTokenShopCostLaneSummary preserves the spend-lane split labels", () => 
 test("getTokenShopCostLaneSummary prefers canonical subject contracts when available", () => {
   assert.deepEqual(
     getTokenShopCostLaneSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu4-mod": {
           subjectId: "row:ATU4Button",
           subjectKind: "row-local",
@@ -75,7 +86,7 @@ test("getTokenShopCostLaneSummary prefers canonical subject contracts when avail
     }),
     {
       hasLaneSplit: true,
-      coverageSource: "subject-contracts",
+      coverageSource: "db-subject-metadata",
       keepsDailyTokeniumSeparate: true,
       tokenLaneLabel: "row:ATU4Button",
       diamondLaneLabel: "row-local",
@@ -97,7 +108,7 @@ test("getTokenShopCostLaneSummary prefers canonical subject contracts when avail
 test("getSpendActionLaneSummary prefers canonical subject contracts when available", () => {
   assert.deepEqual(
     getSpendActionLaneSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu7-mk3-bridge": {
           subjectId: "row:ATU7Button",
           subjectKind: "row-local",
@@ -117,7 +128,7 @@ test("getSpendActionLaneSummary prefers canonical subject contracts when availab
     }),
     {
       hasActionSplit: true,
-      coverageSource: "subject-contracts",
+      coverageSource: "db-subject-metadata",
       keepsDailyDirectHooksUnrecovered: true,
       tokenHook: "row:ATU7Button",
       diamondHook: "row-local",
@@ -140,7 +151,7 @@ test("getSpendActionLaneSummary prefers canonical subject contracts when availab
 test("getDailyTokeniumLaneSummary prefers canonical subject contracts when available", () => {
   assert.deepEqual(
     getDailyTokeniumLaneSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu4-mod": {
           subjectId: "row:ATU4Button",
           subjectKind: "row-local",
@@ -199,7 +210,7 @@ test("getDailyTokeniumLaneSummary prefers canonical subject contracts when avail
       hasOwnerFamilyClues: true,
       hasModifierBoundary: true,
       hasPlayerFacingBoundary: true,
-      coverageSource: "subject-contracts",
+      coverageSource: "db-subject-metadata",
       ownerFamilyLabel: "SpaceAcademy",
       missionFamilyLabel: "FarmMissions",
       academyController: "SpaceAcademyMain",
@@ -230,6 +241,20 @@ test("getTokenBankStateSummary keeps the cloud-save boundary separate from contr
     getTokenBankStateSummary({
       tokenShopMethods: ["ClaimBankedTokens", "get_TokenBankCap"],
       displayOrHandlerClues: ["BigStatisticPrefab.TokenBankCap", "SetLM244BonusText"],
+      exactSaveOwnerRecovery: {
+        declaringType: "SaveData",
+        storedAmountField: "BankedTokens"
+      },
+      genericTokeniumClaimableBoundary: {
+        declaringType: "SaveData",
+        field: "ClaimableTokenium"
+      },
+      playerProfilePersistenceBoundary: {
+        bridgeOwner: "PlayerProfileHandler",
+        bridgeMethod: "ConvertSaveDataToProfileData",
+        bridgeReturnType: "PlayerProfileData",
+        handlerField: "saveInfoCache"
+      },
       cloudSavePlayerProfileBoundary: {
         scriptName: "CloudSavePlayerProfile",
         typedTargetFound: false,
@@ -240,6 +265,9 @@ test("getTokenBankStateSummary keeps the cloud-save boundary separate from contr
     }),
     {
       hasControllerSplit: true,
+      hasExactStoredAmountOwner: true,
+      hasGenericClaimableBoundary: true,
+      hasPlayerProfileBridgeBoundary: true,
       hasCloudSaveShellBoundary: true,
       coverageSource: "legacy-token-bank-state",
       fallbackMode: "export-debug-compatibility",
@@ -249,6 +277,18 @@ test("getTokenBankStateSummary keeps the cloud-save boundary separate from contr
       displayShell: "BigStatisticPrefab.TokenBankCap",
       loopHandler: "TextHandlerLoopMods",
       loopHook: "SetLM244BonusText",
+      exactSaveOwnerType: "SaveData",
+      storedAmountField: "BankedTokens",
+      exactSaveOwnerLabel: "SaveData.BankedTokens",
+      genericClaimableFieldOwner: "SaveData",
+      genericClaimableField: "ClaimableTokenium",
+      genericClaimableLabel: "SaveData.ClaimableTokenium",
+      profileBridgeOwner: "PlayerProfileHandler",
+      profileBridgeMethod: "ConvertSaveDataToProfileData",
+      profileBridgeReturnType: "PlayerProfileData",
+      profileCacheField: "saveInfoCache",
+      profileBridgeLabel:
+        "PlayerProfileHandler.saveInfoCache + ConvertSaveDataToProfileData(...) -> PlayerProfileData",
       cloudSaveShell: "CloudSavePlayerProfile",
       cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
       cloudSaveProfileRoutine: "GetPlayerProfileInfo",
@@ -280,7 +320,7 @@ test("token spend naming and coverage summaries preserve the checked lane anchor
 
   assert.deepEqual(
     getTokeniumNamingSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu7-mk3-bridge": {
           subjectId: "row:ATU7Button",
           subjectKind: "row-local",
@@ -315,7 +355,7 @@ test("token spend naming and coverage summaries preserve the checked lane anchor
     }),
     {
       hasNamingClues: true,
-      coverageSource: "subject-contracts",
+      coverageSource: "db-subject-metadata",
       resourceLabel: "Resource_Tokenium",
       academyLabel: "Aca.Tokenium553",
       tokenShellLabel: "CostBox-Tokens",
@@ -356,7 +396,7 @@ test("token spend naming and coverage summaries preserve the checked lane anchor
 
 test("contract-backed Daily Tokenium summary ignores conflicting legacy fallback clues", () => {
   const summary = getDailyTokeniumLaneSummary({
-    subjectContracts: {
+    subjectMetadata: {
       "token-shop-atu4-mod": {
         subjectId: "row:ATU4Button",
         subjectKind: "row-local",
@@ -420,14 +460,14 @@ test("contract-backed Daily Tokenium summary ignores conflicting legacy fallback
     }
   });
 
-  assert.equal(summary.coverageSource, "subject-contracts");
+  assert.equal(summary.coverageSource, "db-subject-metadata");
   assert.equal(summary.purchaseHook, "BuyLM244");
   assert.equal(summary.ownerFamilyLabel, "SpaceAcademy");
 });
 
 test("contract-backed tokenium naming ignores conflicting legacy fallback clues", () => {
   const summary = getTokeniumNamingSummary({
-    subjectContracts: {
+    subjectMetadata: {
       "token-shop-atu7-mk3-bridge": {
         subjectId: "row:ATU7Button",
         subjectKind: "row-local",
@@ -451,15 +491,71 @@ test("contract-backed tokenium naming ignores conflicting legacy fallback clues"
     level0Shells: ["Wrong-Shell"]
   });
 
-  assert.equal(summary.coverageSource, "subject-contracts");
+  assert.equal(summary.coverageSource, "db-subject-metadata");
   assert.equal(summary.resourceLabel, "Resource_Tokenium");
   assert.equal(summary.academyLabel, "Aca.Tokenium553");
+});
+
+test("generic Token Shop lane summaries do not credit metadata when generic mechanics already clear the lane", () => {
+  const summary = getTokenShopCostLaneSummary({
+    genericMechanics: {
+      "token-shop-atu4-mod": {
+        entities: [
+          {
+            entityKind: "row-local",
+            entityId: "row:ATU4Button",
+            payload: { subjectId: "row:ATU4Button" }
+          }
+        ],
+        facts: [
+          {
+            factKind: "display-update-hook",
+            factValue: "SetCostRelatedAttributes"
+          }
+        ],
+        gaps: []
+      },
+      "token-shop-daily-tokenium-family": {
+        entities: [
+          {
+            entityKind: "range-family",
+            entityId: "range:token-shop:ATU14Button-ATU19Button",
+            payload: { subjectId: "range:token-shop:ATU14Button-ATU19Button" }
+          }
+        ],
+        facts: [
+          {
+            factKind: "support-surface-label",
+            factValue: "Daily Tokenium title and text surfaces"
+          }
+        ],
+        gaps: [
+          {
+            gapKind: "missing-edge",
+            payload: { edgeType: "exact-display-update-path" }
+          },
+          {
+            gapKind: "next-seam",
+            payload: { seamId: "exact-display-update-path" }
+          }
+        ]
+      }
+    },
+    subjectMetadata: {
+      "token-shop-atu4-mod": {
+        subjectId: "row:ATU4Button",
+        subjectKind: "row-local"
+      }
+    }
+  });
+
+  assert.equal(summary.coverageSource, "generic-mechanics");
 });
 
 test("getTokenShopCoverageSummary prefers canonical subject contracts when available", () => {
   assert.deepEqual(
     getTokenShopCoverageSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu4-mod": {
           subjectId: "row:ATU4Button",
           subjectKind: "row-local",
@@ -480,25 +576,77 @@ test("getTokenShopCoverageSummary prefers canonical subject contracts when avail
     }),
     {
       hasCoverage: true,
-      coverageSource: "subject-contracts",
+      coverageSource: "db-subject-metadata",
       numericGroupCount: 2,
       hasNamedLanes: true,
       namedLaneLabel: "row:ATU4Button, range:token-shop:ATU24Button-ATU28Button",
-      tierLabel: "1 row-local and 1 range-family canonical subjects",
+      tierLabel: "1 row-local and 1 range-family DB-backed subjects",
       hasControllerAnchors: true,
       subjectCount: 2,
       rowLocalCount: 1,
       rangeFamilyCount: 1,
       blockedCount: 2,
-      subjectLabels: ["row:ATU4Button", "range:token-shop:ATU24Button-ATU28Button"]
+      subjectLabels: ["row:ATU4Button", "range:token-shop:ATU24Button-ATU28Button"],
+      genericScopeCount: 0,
+      unresolvedRowFieldCount: 0
     }
   );
+});
+
+test("getTokenShopCoverageSummary prefers generic mechanics over metadata in active coverage labels", () => {
+  const summary = getTokenShopCoverageSummary({
+    genericMechanics: {
+      "token-shop-atu4-mod": {
+        entities: [
+          {
+            entityKind: "row-local",
+            entityId: "row:ATU4Button",
+            payload: { subjectId: "row:ATU4Button" }
+          }
+        ],
+        facts: [
+          {
+            factKind: "action-method",
+            factValue: "BuyModBoost"
+          }
+        ],
+        gaps: [
+          {
+            gapKind: "missing-edge",
+            payload: { edgeType: "exact-display-update-path" }
+          }
+        ]
+      },
+      "token-shop-late-atu-family": {
+        entities: [
+          {
+            entityKind: "range-family",
+            entityId: "range:token-shop:ATU24Button-ATU28Button",
+            payload: { subjectId: "range:token-shop:ATU24Button-ATU28Button" }
+          }
+        ],
+        facts: [],
+        gaps: []
+      }
+    },
+    subjectMetadata: {
+      "token-shop-atu4-mod": {
+        subjectId: "row:ATU4Button",
+        subjectKind: "row-local",
+        knownEdges: ["exact-shell-to-prefab"]
+      }
+    }
+  });
+
+  assert.equal(summary.coverageSource, "generic-mechanics");
+  assert.equal(summary.subjectCount, 2);
+  assert.equal(summary.genericScopeCount, 2);
 });
 
 test("getTokenShopOwnerShellSummary prefers canonical subject contracts when available", () => {
   assert.deepEqual(
     getTokenShopOwnerShellSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu7-mk3-bridge": {
           subjectId: "row:ATU7Button",
           subjectKind: "row-local",
@@ -518,7 +666,7 @@ test("getTokenShopOwnerShellSummary prefers canonical subject contracts when ava
     }),
     {
       hasOwnerShell: true,
-      coverageSource: "subject-contracts",
+      coverageSource: "db-subject-metadata",
       ownerAnchor: "row:ATU7Button",
       bankMethod: "BuyMK3TokenBoost",
       notificationHook: "exact-display-update-path",
@@ -538,7 +686,7 @@ test("getTokenShopOwnerShellSummary prefers canonical subject contracts when ava
 test("getTokenShopOwnerShellSummary preserves legacy fallback when contract remains blocked", () => {
   assert.deepEqual(
     getTokenShopOwnerShellSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu7-mk3-bridge": {
           subjectId: "row:ATU7Button",
           subjectKind: "row-local",
@@ -570,7 +718,7 @@ test("getTokenShopOwnerShellSummary preserves legacy fallback when contract rema
 test("getTokenShopSaveBoundarySummary prefers canonical subject contracts when available", () => {
   assert.deepEqual(
     getTokenShopSaveBoundarySummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu4-mod": {
           subjectId: "row:ATU4Button",
           subjectKind: "row-local",
@@ -587,10 +735,10 @@ test("getTokenShopSaveBoundarySummary prefers canonical subject contracts when a
     }),
     {
       hasSeparationBoundary: true,
-      coverageSource: "subject-contracts",
+      coverageSource: "db-subject-metadata",
       ownerAnchor: "row:ATU4Button",
       saveAnchor: "range:token-shop:ATU24Button-ATU28Button",
-      overlapLabel: "canonical subject-state separation",
+      overlapLabel: "db-backed subject-state separation",
       rowLocalSubjectId: "row:ATU4Button",
       rangeFamilySubjectId: "range:token-shop:ATU24Button-ATU28Button",
       rowLocalSubjectKind: "row-local",
@@ -605,7 +753,7 @@ test("getTokenShopSaveBoundarySummary prefers canonical subject contracts when a
 test("getTokenBankControllerShellSummary prefers canonical subject contracts when available", () => {
   assert.deepEqual(
     getTokenBankControllerShellSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu7-mk3-bridge": {
           subjectId: "row:ATU7Button",
           subjectKind: "row-local",
@@ -641,7 +789,7 @@ test("getTokenBankControllerShellSummary prefers canonical subject contracts whe
     }),
     {
       hasControllerShell: true,
-      coverageSource: "subject-contracts",
+      coverageSource: "db-subject-metadata",
       claimMethod: "ClaimBankedTokens",
       fillMethod: "SetBankFill",
       fillField: "BankFill",
@@ -665,7 +813,7 @@ test("getTokenBankControllerShellSummary prefers canonical subject contracts whe
 test("getTokenBankControllerShellSummary preserves legacy fallback when contract remains blocked", () => {
   assert.deepEqual(
     getTokenBankControllerShellSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu7-mk3-bridge": {
           subjectId: "row:ATU7Button",
           subjectKind: "row-local",
@@ -715,7 +863,7 @@ test("getTokenBankControllerShellSummary preserves legacy fallback when contract
 test("getTokenBankStateSummary prefers canonical subject contracts when available", () => {
   assert.deepEqual(
     getTokenBankStateSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu4-mod": {
           subjectId: "row:ATU4Button",
           subjectKind: "row-local",
@@ -726,6 +874,14 @@ test("getTokenBankStateSummary prefers canonical subject contracts when availabl
               displayShell: "BigStatisticPrefab.TokenBankCap",
               loopHandler: "TextHandlerLoopMods",
               loopHook: "SetLM244BonusText",
+              exactSaveOwnerType: "SaveData",
+              storedAmountField: "BankedTokens",
+              genericClaimableFieldOwner: "SaveData",
+              genericClaimableField: "ClaimableTokenium",
+              profileBridgeOwner: "PlayerProfileHandler",
+              profileBridgeMethod: "ConvertSaveDataToProfileData",
+              profileBridgeReturnType: "PlayerProfileData",
+              profileCacheField: "saveInfoCache",
               cloudSaveShell: "CloudSavePlayerProfile",
               cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
               cloudSaveProfileRoutine: "GetPlayerProfileInfo",
@@ -746,13 +902,28 @@ test("getTokenBankStateSummary prefers canonical subject contracts when availabl
     }),
     {
       hasControllerSplit: true,
+      hasExactStoredAmountOwner: true,
+      hasGenericClaimableBoundary: true,
+      hasPlayerProfileBridgeBoundary: true,
       hasCloudSaveShellBoundary: true,
-      coverageSource: "subject-contracts",
+      coverageSource: "db-subject-metadata",
       claimMethod: "ClaimBankedTokens",
       capMethod: "get_TokenBankCap",
       displayShell: "BigStatisticPrefab.TokenBankCap",
       loopHandler: "TextHandlerLoopMods",
       loopHook: "SetLM244BonusText",
+      exactSaveOwnerType: "SaveData",
+      storedAmountField: "BankedTokens",
+      exactSaveOwnerLabel: "SaveData.BankedTokens",
+      genericClaimableFieldOwner: "SaveData",
+      genericClaimableField: "ClaimableTokenium",
+      genericClaimableLabel: "SaveData.ClaimableTokenium",
+      profileBridgeOwner: "PlayerProfileHandler",
+      profileBridgeMethod: "ConvertSaveDataToProfileData",
+      profileBridgeReturnType: "PlayerProfileData",
+      profileCacheField: "saveInfoCache",
+      profileBridgeLabel:
+        "PlayerProfileHandler.saveInfoCache + ConvertSaveDataToProfileData(...) -> PlayerProfileData",
       cloudSaveShell: "CloudSavePlayerProfile",
       cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
       cloudSaveProfileRoutine: "GetPlayerProfileInfo",
@@ -769,7 +940,7 @@ test("getTokenBankStateSummary prefers canonical subject contracts when availabl
 test("getTokenBankStateSummary preserves legacy fallback when contract remains blocked", () => {
   assert.deepEqual(
     getTokenBankStateSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-daily-tokenium-family": {
           subjectId: "range:token-shop:ATU14Button-ATU19Button",
           subjectKind: "range-family",
@@ -791,6 +962,20 @@ test("getTokenBankStateSummary preserves legacy fallback when contract remains b
           }
         }
       },
+      exactSaveOwnerRecovery: {
+        declaringType: "SaveData",
+        storedAmountField: "BankedTokens"
+      },
+      genericTokeniumClaimableBoundary: {
+        declaringType: "SaveData",
+        field: "ClaimableTokenium"
+      },
+      playerProfilePersistenceBoundary: {
+        bridgeOwner: "PlayerProfileHandler",
+        bridgeMethod: "ConvertSaveDataToProfileData",
+        bridgeReturnType: "PlayerProfileData",
+        handlerField: "saveInfoCache"
+      },
       tokenShopMethods: ["ClaimBankedTokens", "get_TokenBankCap"],
       displayOrHandlerClues: ["BigStatisticPrefab.TokenBankCap", "SetLM244BonusText"],
       cloudSavePlayerProfileBoundary: {
@@ -803,6 +988,9 @@ test("getTokenBankStateSummary preserves legacy fallback when contract remains b
     }),
     {
       hasControllerSplit: true,
+      hasExactStoredAmountOwner: true,
+      hasGenericClaimableBoundary: true,
+      hasPlayerProfileBridgeBoundary: true,
       hasCloudSaveShellBoundary: true,
       coverageSource: "legacy-token-bank-state",
       fallbackMode: "export-debug-compatibility",
@@ -812,6 +1000,18 @@ test("getTokenBankStateSummary preserves legacy fallback when contract remains b
       displayShell: "BigStatisticPrefab.TokenBankCap",
       loopHandler: "TextHandlerLoopMods",
       loopHook: "SetLM244BonusText",
+      exactSaveOwnerType: "SaveData",
+      storedAmountField: "BankedTokens",
+      exactSaveOwnerLabel: "SaveData.BankedTokens",
+      genericClaimableFieldOwner: "SaveData",
+      genericClaimableField: "ClaimableTokenium",
+      genericClaimableLabel: "SaveData.ClaimableTokenium",
+      profileBridgeOwner: "PlayerProfileHandler",
+      profileBridgeMethod: "ConvertSaveDataToProfileData",
+      profileBridgeReturnType: "PlayerProfileData",
+      profileCacheField: "saveInfoCache",
+      profileBridgeLabel:
+        "PlayerProfileHandler.saveInfoCache + ConvertSaveDataToProfileData(...) -> PlayerProfileData",
       cloudSaveShell: "CloudSavePlayerProfile",
       cloudSaveInfoRoutine: "GetCurrentSaveFileInfo",
       cloudSaveProfileRoutine: "GetPlayerProfileInfo",
@@ -823,7 +1023,7 @@ test("getTokenBankStateSummary preserves legacy fallback when contract remains b
 test("getTokenBankFormulaBoundarySummary prefers canonical subject contracts when available", () => {
   assert.deepEqual(
     getTokenBankFormulaBoundarySummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-atu4-mod": {
           subjectId: "row:ATU4Button",
           subjectKind: "row-local",
@@ -854,7 +1054,7 @@ test("getTokenBankFormulaBoundarySummary prefers canonical subject contracts whe
     {
       hasDerivedOutputBoundary: true,
       hasNoSaveJoinInDerivedContext: true,
-      coverageSource: "subject-contracts",
+      coverageSource: "db-subject-metadata",
       capAccessor: "get_FinalTokenBankCap",
       fillAccessor: "get_FinalTokenBankFillSpeed",
       capField: "<FinalTokenBankCap>k__BackingField",
@@ -871,7 +1071,7 @@ test("getTokenBankFormulaBoundarySummary prefers canonical subject contracts whe
 test("getTokenBankFormulaBoundarySummary preserves legacy fallback when contract remains blocked", () => {
   assert.deepEqual(
     getTokenBankFormulaBoundarySummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-late-atu-family": {
           subjectId: "range:token-shop:ATU24Button-ATU28Button",
           subjectKind: "range-family",
@@ -918,7 +1118,7 @@ test("getTokenBankFormulaBoundarySummary preserves legacy fallback when contract
 test("getTokeniumNamingSummary preserves legacy fallback when contract remains blocked", () => {
   assert.deepEqual(
     getTokeniumNamingSummary({
-      subjectContracts: {
+      subjectMetadata: {
         "token-shop-daily-tokenium-family": {
           subjectId: "range:token-shop:ATU14Button-ATU19Button",
           subjectKind: "range-family",
@@ -1123,4 +1323,639 @@ test("getMultiverseMarketMarketMemberBoundarySummary keeps the PlayerProfile hos
   assert.equal(summary.favorsPlayerProfileMemberHost, true);
   assert.equal(summary.canonicalHostLabel, "PlayerProfileHandler get_Market accessor bridge");
   assert.equal(summary.exactSaveOwnerLabel, "SaveData");
+});
+
+test("multiverse save-owner summaries still fall back through a system view when DB coverage is absent", () => {
+  const spendView = buildSpendSystemView({
+    tokenShopSystemUnit: null,
+    multiverseMarketSystemUnit: {
+      sections: {
+        saveOwner: {
+          saveBoundary: {
+            data: {
+              actionShellTermsChecked: ["TextHandlerMarkets"],
+              saveFamilyTermsChecked: ["PlayerProfileData"],
+              boundaryEvidence: {
+                actionShellWithSaveOverlapCount: 0,
+                metadataNeighborhoodHasActionTerms: true,
+                metadataNeighborhoodHasSaveTerms: true,
+                metadataDirectCheckHasSaveTerms: false,
+                level0DirectCheckHasSaveTerms: false
+              }
+            }
+          },
+          marketMemberBoundary: {
+            data: {
+              playerProfileAccessorClues: ["get_Market"],
+              playerProfileMemberShellClues: ["Market"],
+              playerProfileHandlerBridgeClues: ["PlayerProfileHandler"],
+              directMemberHandoffClues: ["get_Market", "Market"],
+              typedSiblingContrastClues: ["PlayerProfileData|GemData"],
+              progressionPayloadFieldClues: ["InscryptionsDone"],
+              cloudSaveBridgeClues: ["CloudSavePlayerProfile"],
+              missingDirectTypeMapClues: ["PlayerProfileData|Market"],
+              negativeTypedDirectPlayerProfileProgressionChecks: ["PlayerProfileData.IS71Level"],
+              negativeTypedDirectMemberChecks: ["PlayerProfileData.Market"],
+              negativeTypedSaveDataMarketChecks: ["SaveData.Market"],
+              typedBridgeRecovery: {
+                bridgeOwner: "PlayerProfileHandler",
+                bridgeAccessor: "get_Market",
+                bridgeReturnType: "MultiverseMarket"
+              },
+              typedHandlerFieldRecovery: {
+                fieldOwner: "PlayerProfileHandler",
+                fieldName: "saveInfoCache",
+                fieldType: "PlayerProfileData"
+              }
+            }
+          }
+        }
+      }
+    },
+    systemDb: null
+  });
+
+  const saveSummary = getMultiverseMarketSaveBoundarySummary(spendView.multiverseMarket);
+  const memberSummary = getMultiverseMarketMarketMemberBoundarySummary(spendView.multiverseMarket);
+  assert.equal(saveSummary.hasSeparationBoundary, true);
+  assert.equal(saveSummary.actionAnchor, "TextHandlerMarkets");
+  assert.equal(memberSummary.hasTypedAccessorBridge, true);
+  assert.equal(memberSummary.exactSaveOwnerLabel, "SaveData");
+});
+
+test("buildSpendSystemView keeps multiverse save-owner artifacts only as compatibility fallback when DB coverage exists", () => {
+  const spendView = buildSpendSystemView({
+    tokenShopSystemUnit: null,
+    multiverseMarketSystemUnit: {
+      sections: {
+        saveOwner: {
+          saveBoundary: {
+            data: { actionShellTermsChecked: ["TextHandlerMarkets"] }
+          },
+          marketMemberBoundary: {
+            data: { playerProfileAccessorClues: ["get_Market"] }
+          }
+        }
+      }
+    },
+    systemDb: {
+      multiverseMarket: {
+        genericMechanics: {
+          scopes: {
+            "multiverse-market-save-owner-boundary": {
+              entities: [
+                { entityId: "multiverse-market-save-owner-boundary", entityKind: "family-graph" }
+              ],
+              facts: [],
+              relations: [],
+              gaps: []
+            }
+          }
+        },
+        boundaries: {
+          owner: {
+            subjectId: "multiverse-market-save-owner-boundary",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          }
+        }
+      }
+    }
+  });
+
+  assert.equal(spendView.multiverseMarket.saveOwner.saveBoundary, null);
+  assert.equal(spendView.multiverseMarket.saveOwner.marketMemberBoundary, null);
+  assert.deepEqual(spendView.multiverseMarket.saveOwner.compatibilityBoundaries.saveBoundary, {
+    actionShellTermsChecked: ["TextHandlerMarkets"]
+  });
+  assert.deepEqual(
+    spendView.multiverseMarket.saveOwner.compatibilityBoundaries.marketMemberBoundary,
+    { playerProfileAccessorClues: ["get_Market"] }
+  );
+});
+
+test("multiverse row-text, action-shell, and owner-family summaries prefer DB-backed generic mechanics when present", () => {
+  const market = {
+    db: {
+      genericMechanics: {
+        scopes: {
+          "multiverse-market-row-text-boundary": {
+            entities: [
+              { entityId: "family-graph:multiverse-market-row-text", entityKind: "family-graph" }
+            ],
+            facts: [
+              { factKind: "owner-anchor", factValue: "TextHandlerMarkets" },
+              { factKind: "owner-anchor", factValue: "SetAllChrystosEmporiumTexts" },
+              { factKind: "cost-text-sample", factValue: "SetIS71CostText" },
+              { factKind: "cost-text-sample", factValue: "SetIS74CostText" },
+              { factKind: "cost-text-row-id", factValue: "71" },
+              { factKind: "cost-text-row-id", factValue: "74" },
+              { factKind: "buy-hook-sample", factValue: "BuyIS71" },
+              { factKind: "buy-hook-sample", factValue: "BuyIS74" }
+            ],
+            relations: [],
+            gaps: [{ gapKind: "next-seam", payload: { seamId: "broad-row-identity-remap" } }]
+          },
+          "multiverse-market-action-shell-boundary": {
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-action-shell",
+                entityKind: "family-graph"
+              }
+            ],
+            facts: [
+              { factKind: "owner-anchor", factValue: "TextHandlerMarkets" },
+              { factKind: "owner-anchor", factValue: "SetAllChrystosEmporiumTexts" },
+              { factKind: "buy-hook-row-id", factValue: "71" },
+              { factKind: "buy-hook-row-id", factValue: "72" },
+              { factKind: "cost-text-row-id", factValue: "71" },
+              { factKind: "cost-text-row-id", factValue: "74" },
+              { factKind: "buy-hook-sample", factValue: "BuyIS71" },
+              { factKind: "buy-hook-sample", factValue: "BuyIS72" },
+              { factKind: "cost-text-sample", factValue: "SetIS71CostText" },
+              { factKind: "cost-text-sample", factValue: "SetIS74CostText" }
+            ],
+            relations: [],
+            gaps: [{ gapKind: "next-seam", payload: { seamId: "broad-row-identity-remap" } }]
+          },
+          "multiverse-market-owner-family-boundary": {
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-owner-family",
+                entityKind: "family-graph"
+              }
+            ],
+            facts: [
+              { factKind: "owner-anchor", factValue: "MultiverseMarket" },
+              { factKind: "owner-anchor", factValue: "TextHandlerMarkets" },
+              { factKind: "owner-anchor", factValue: "SetAllChrystosEmporiumTexts" },
+              { factKind: "resource-anchor", factValue: "ResourceAmountText" },
+              { factKind: "wrapper-only-field-label", factValue: "InscryptionsDone" }
+            ],
+            relations: [],
+            gaps: [{ gapKind: "next-seam", payload: { seamId: "currency-shell-range-recovery" } }]
+          }
+        }
+      },
+      boundaries: {
+        rowText: {
+          subjectId: "family-graph:multiverse-market-row-text",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        },
+        actionShell: {
+          subjectId: "family-graph:multiverse-market-action-shell",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        },
+        ownerFamily: {
+          subjectId: "family-graph:multiverse-market-owner-family",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        }
+      }
+    },
+    saveOwner: {
+      extract: {
+        source: {
+          validated_ids: [50, 59, 63, 71, 72, 73, 74]
+        }
+      }
+    }
+  };
+
+  const rowTextSummary = getMultiverseMarketRowTextCoverageSummary(null, market);
+  assert.equal(rowTextSummary.hasValidatedTextCoverage, true);
+  assert.equal(rowTextSummary.coverageSource, "generic-mechanics+boundary-model");
+  assert.equal(rowTextSummary.validatedRangeLabel, "71 and 74");
+
+  const actionShellSummary = getMultiverseMarketActionShellSummary(null, market);
+  assert.equal(actionShellSummary.hasActionShell, true);
+  assert.equal(actionShellSummary.coverageSource, "generic-mechanics+boundary-model");
+  assert.equal(actionShellSummary.buyRangeLabel, "BuyIS71-72");
+
+  const ownerFamilySummary = getMultiverseMarketOwnerFamilySummary(null, market);
+  assert.equal(ownerFamilySummary.hasOwnerFamily, true);
+  assert.equal(ownerFamilySummary.hasCurrencyShell, false);
+  assert.equal(ownerFamilySummary.coverageSource, "generic-mechanics+boundary-model");
+  assert.equal(ownerFamilySummary.inscryptionsLabel, "InscryptionsDone");
+
+  const metadataSummary = getMultiverseMarketMetadataSummary(null, {
+    ...market,
+    db: {
+      ...market.db,
+      genericMechanics: {
+        scopes: {
+          ...market.db.genericMechanics.scopes,
+          "multiverse-market-metadata-neighborhood": {
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-metadata-neighborhood",
+                entityKind: "family-graph"
+              }
+            ],
+            facts: [
+              { factKind: "metadata-anchor", factValue: "PlayerProfileData" },
+              { factKind: "metadata-anchor", factValue: "FillPlayerProfileData" },
+              { factKind: "metadata-anchor", factValue: "InscryptionsDone" },
+              { factKind: "metadata-anchor", factValue: "EsotericR1Trades" },
+              { factKind: "typed-span", factValue: "IS1Level through IS110Level" }
+            ],
+            relations: [],
+            gaps: [{ gapKind: "next-seam", payload: { seamId: "cloud-save-path-recovery" } }]
+          }
+        }
+      },
+      boundaries: {
+        ...market.db.boundaries,
+        metadataNeighborhood: {
+          subjectId: "family-graph:multiverse-market-metadata-neighborhood",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        }
+      }
+    }
+  });
+  assert.equal(metadataSummary.hasSaveFamilyClues, true);
+  assert.equal(metadataSummary.hasProgressionFieldCluster, true);
+  assert.equal(metadataSummary.hasCloudSavePathClues, false);
+  assert.equal(metadataSummary.coverageSource, "generic-mechanics+boundary-model");
+  assert.equal(metadataSummary.recoveredIsRangeLabel, "IS1Level through IS110Level");
+
+  const typedOwnerMetadataSummary = getMultiverseMarketMetadataSummary(null, {
+    ...market,
+    db: {
+      ...market.db,
+      genericMechanics: {
+        scopes: {
+          ...market.db.genericMechanics.scopes,
+          "multiverse-market-typed-owner-boundary": {
+            entities: [
+              { entityId: "family-graph:multiverse-market-typed-owner", entityKind: "family-graph" }
+            ],
+            facts: [
+              { factKind: "typed-host-anchor", factValue: "PlayerProfileData" },
+              { factKind: "typed-conversion-anchor", factValue: "FillPlayerProfileData" },
+              { factKind: "typed-field-sample", factValue: "InscryptionsDone" },
+              { factKind: "typed-field-sample", factValue: "EsotericR1Trades" },
+              { factKind: "typed-span", factValue: "IS1Level through IS110Level" }
+            ],
+            relations: [],
+            gaps: [{ gapKind: "next-seam", payload: { seamId: "typed-market-field-recovery" } }]
+          }
+        }
+      },
+      boundaries: {
+        ...market.db.boundaries,
+        typedOwner: {
+          subjectId: "family-graph:multiverse-market-typed-owner",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        }
+      }
+    }
+  });
+  assert.equal(typedOwnerMetadataSummary.hasSaveFamilyClues, true);
+  assert.equal(typedOwnerMetadataSummary.hasProgressionFieldCluster, true);
+  assert.equal(typedOwnerMetadataSummary.recoveredIsRangeLabel, "IS1Level through IS110Level");
+  assert.equal(typedOwnerMetadataSummary.coverageSource, "generic-mechanics+boundary-model");
+
+  const typedOwnerSummary = getMultiverseMarketTypedOwnerSummary({
+    ...market,
+    db: {
+      ...market.db,
+      genericMechanics: {
+        scopes: {
+          ...market.db.genericMechanics.scopes,
+          "multiverse-market-typed-owner-boundary": {
+            entities: [
+              { entityId: "family-graph:multiverse-market-typed-owner", entityKind: "family-graph" }
+            ],
+            facts: [
+              { factKind: "typed-host-anchor", factValue: "PlayerProfileHandler" },
+              { factKind: "typed-host-anchor", factValue: "PlayerProfileData" },
+              { factKind: "typed-host-anchor", factValue: "SaveData" },
+              { factKind: "typed-conversion-anchor", factValue: "FillPlayerProfileData" },
+              { factKind: "typed-field-sample", factValue: "InscryptionsDone" },
+              { factKind: "typed-field-sample", factValue: "EsotericR1Trades" },
+              { factKind: "typed-span", factValue: "IS1Level through IS110Level" }
+            ],
+            relations: [],
+            gaps: [
+              { gapKind: "missing-edge", payload: { edgeId: "typed-market-field-recovery" } },
+              { gapKind: "next-seam", payload: { seamId: "typed-market-field-recovery" } }
+            ]
+          }
+        }
+      },
+      boundaries: {
+        ...market.db.boundaries,
+        typedOwner: {
+          subjectId: "family-graph:multiverse-market-typed-owner",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        }
+      }
+    }
+  });
+  assert.equal(typedOwnerSummary.hasTypedOwnerAnchors, true);
+  assert.equal(typedOwnerSummary.hasTypedConversionAnchors, true);
+  assert.equal(typedOwnerSummary.hasTypedFieldSamples, true);
+  assert.equal(typedOwnerSummary.coverageSource, "generic-mechanics+boundary-model");
+  assert.equal(typedOwnerSummary.recoveredIsRangeLabel, "IS1Level through IS110Level");
+  assert.equal(
+    typedOwnerSummary.negativeTypedOwnerLabel,
+    "exact typed Market or MultiverseMarket field host remains unrecovered"
+  );
+
+  const canonicalImportSummary = getMultiverseMarketCanonicalImportSummary({
+    ...market,
+    db: {
+      ...market.db,
+      genericMechanics: {
+        scopes: {
+          ...market.db.genericMechanics.scopes,
+          "multiverse-market-canonical-import-boundary": {
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-canonical-import",
+                entityKind: "family-graph"
+              }
+            ],
+            facts: [
+              {
+                factKind: "compatibility-import-target-path",
+                factValue: "compatibility.unmappedSystemState.multiverseMarket"
+              },
+              { factKind: "canonical-import-safe-subset-label", factValue: "none" },
+              { factKind: "ordered-overlap-row-id", factValue: "71" },
+              { factKind: "ordered-overlap-row-id", factValue: "74" }
+            ],
+            relations: [],
+            gaps: [
+              { gapKind: "missing-edge", payload: { edgeId: "canonical-import-admissibility" } },
+              { gapKind: "next-seam", payload: { seamId: "canonical-import-admissibility" } }
+            ]
+          }
+        }
+      },
+      boundaries: {
+        ...market.db.boundaries,
+        canonicalImport: {
+          subjectId: "family-graph:multiverse-market-canonical-import",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        }
+      }
+    }
+  });
+  assert.equal(canonicalImportSummary.hasCanonicalImportBoundary, true);
+  assert.equal(canonicalImportSummary.coverageSource, "generic-mechanics+boundary-model");
+  assert.equal(canonicalImportSummary.safeSubsetLabel, "none");
+  assert.equal(
+    canonicalImportSummary.negativeCanonicalImportLabel,
+    "canonical import admissibility remains unrecovered"
+  );
+
+  const broadRemapSummary = getMultiverseMarketBroadRowRemapSummary({
+    ...market,
+    db: {
+      ...market.db,
+      genericMechanics: {
+        scopes: {
+          ...market.db.genericMechanics.scopes,
+          "multiverse-market-broad-row-remap-boundary": {
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-broad-row-remap",
+                entityKind: "family-graph"
+              }
+            ],
+            facts: [
+              {
+                factKind: "broader-row-remap-status",
+                factValue:
+                  "Broader row identity or remap stays blocked outside the checked 71-74 ordered overlap."
+              },
+              { factKind: "ordered-overlap-row-id", factValue: "71" },
+              { factKind: "ordered-overlap-row-id", factValue: "74" },
+              { factKind: "buy-hook-sample", factValue: "BuyIS71" },
+              { factKind: "buy-hook-sample", factValue: "BuyIS74" },
+              { factKind: "cost-text-sample", factValue: "SetIS71CostText" },
+              { factKind: "cost-text-sample", factValue: "SetIS74CostText" }
+            ],
+            relations: [],
+            gaps: [
+              { gapKind: "missing-edge", payload: { edgeId: "broad-row-identity-remap" } },
+              { gapKind: "next-seam", payload: { seamId: "broad-row-identity-remap" } }
+            ]
+          }
+        }
+      },
+      boundaries: {
+        ...market.db.boundaries,
+        broadRowRemap: {
+          subjectId: "family-graph:multiverse-market-broad-row-remap",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        }
+      }
+    }
+  });
+  assert.equal(broadRemapSummary.hasBroadRowRemapBoundary, true);
+  assert.equal(broadRemapSummary.coverageSource, "generic-mechanics+boundary-model");
+  assert.equal(
+    broadRemapSummary.negativeBroadRemapLabel,
+    "broader row identity remap remains unrecovered outside the checked overlap"
+  );
+  assert.equal(broadRemapSummary.buyRangeLabel, "71 and 74");
+  assert.equal(broadRemapSummary.costTextRangeLabel, "71 and 74");
+
+  const prefabRemapSummary = getMultiverseMarketPrefabRemapBoundarySummary(null, {
+    ...market,
+    db: {
+      ...market.db,
+      genericMechanics: {
+        scopes: {
+          ...market.db.genericMechanics.scopes,
+          "multiverse-market-prefab-remap-boundary": {
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-prefab-remap",
+                entityKind: "family-graph"
+              }
+            ],
+            facts: [
+              { factKind: "prefab-sample", factValue: "ChrystosEmporiumUpgrade71" },
+              { factKind: "prefab-sample", factValue: "ChrystosEmporiumUpgrade74" },
+              { factKind: "prefab-override-pair", factValue: "ChrystosEmporiumUpgrade71-ID59" },
+              { factKind: "prefab-override-pair", factValue: "ChrystosEmporiumUpgrade74-ID62" },
+              { factKind: "prefab-row-id", factValue: "71" },
+              { factKind: "prefab-row-id", factValue: "74" },
+              { factKind: "serialized-id-row-id", factValue: "59" },
+              { factKind: "serialized-id-row-id", factValue: "62" }
+            ],
+            relations: [],
+            gaps: [
+              { gapKind: "next-seam", payload: { seamId: "explicit-prefab-override-mapping" } }
+            ]
+          }
+        }
+      },
+      boundaries: {
+        ...market.db.boundaries,
+        prefabRemap: {
+          subjectId: "family-graph:multiverse-market-prefab-remap",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        }
+      }
+    }
+  });
+  assert.equal(prefabRemapSummary.hasOverrideBoundary, true);
+  assert.equal(prefabRemapSummary.coverageSource, "generic-mechanics+boundary-model");
+  assert.equal(prefabRemapSummary.validatedMismatchLabel, "71 and 74");
+  assert.deepEqual(prefabRemapSummary.overridePairs, [
+    "ChrystosEmporiumUpgrade71-ID59",
+    "ChrystosEmporiumUpgrade74-ID62"
+  ]);
+});
+
+test("buildSpendSystemView keeps multiverse row and ui-shell artifacts only as compatibility fallback when DB coverage exists", () => {
+  const spendView = buildSpendSystemView({
+    tokenShopSystemUnit: null,
+    multiverseMarketSystemUnit: {
+      sections: {
+        rowIdentity: {
+          metadataNeighborhood: {
+            data: { results: [{ anchor: "PlayerProfileData", matches: [] }] }
+          },
+          rangeBoundary: { data: { validatedRowRanges: ["50-59 and 63-74"] } },
+          rowTextCoverage: { data: { textHandlerAnchors: ["TextHandlerMarkets"] } },
+          prefabRemapBoundary: { data: { directPrefabNumberMatches: [50, 68] } }
+        },
+        uiShell: {
+          actionShell: { data: { textHandlerAnchors: ["TextHandlerMarkets"] } },
+          ownerFamily: { data: { ownerAnchors: ["MultiverseMarket"] } }
+        }
+      }
+    },
+    systemDb: {
+      multiverseMarket: {
+        genericMechanics: {
+          scopes: {
+            "multiverse-market-save-owner-boundary": {
+              entities: [
+                { entityId: "multiverse-market-save-owner-boundary", entityKind: "family-graph" }
+              ],
+              facts: [],
+              relations: [],
+              gaps: []
+            },
+            "multiverse-market-row-text-boundary": {
+              entities: [
+                { entityId: "family-graph:multiverse-market-row-text", entityKind: "family-graph" }
+              ],
+              facts: [],
+              relations: [],
+              gaps: []
+            },
+            "multiverse-market-metadata-neighborhood": {
+              entities: [
+                {
+                  entityId: "family-graph:multiverse-market-metadata-neighborhood",
+                  entityKind: "family-graph"
+                }
+              ],
+              facts: [],
+              relations: [],
+              gaps: []
+            },
+            "multiverse-market-action-shell-boundary": {
+              entities: [
+                {
+                  entityId: "family-graph:multiverse-market-action-shell",
+                  entityKind: "family-graph"
+                }
+              ],
+              facts: [],
+              relations: [],
+              gaps: []
+            },
+            "multiverse-market-owner-family-boundary": {
+              entities: [
+                {
+                  entityId: "family-graph:multiverse-market-owner-family",
+                  entityKind: "family-graph"
+                }
+              ],
+              facts: [],
+              relations: [],
+              gaps: []
+            },
+            "multiverse-market-prefab-remap-boundary": {
+              entities: [
+                {
+                  entityId: "family-graph:multiverse-market-prefab-remap",
+                  entityKind: "family-graph"
+                }
+              ],
+              facts: [],
+              relations: [],
+              gaps: []
+            }
+          }
+        },
+        boundaries: {
+          saveOwner: {
+            subjectId: "multiverse-market-save-owner-boundary",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          },
+          metadataNeighborhood: {
+            subjectId: "family-graph:multiverse-market-metadata-neighborhood",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          },
+          rowText: {
+            subjectId: "family-graph:multiverse-market-row-text",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          },
+          actionShell: {
+            subjectId: "family-graph:multiverse-market-action-shell",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          },
+          ownerFamily: {
+            subjectId: "family-graph:multiverse-market-owner-family",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          },
+          prefabRemap: {
+            subjectId: "family-graph:multiverse-market-prefab-remap",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          }
+        }
+      }
+    }
+  });
+
+  assert.equal(spendView.multiverseMarket.rowIdentity.metadataNeighborhood, null);
+  assert.equal(spendView.multiverseMarket.rowIdentity.rangeBoundary, null);
+  assert.equal(spendView.multiverseMarket.rowIdentity.rowTextCoverage, null);
+  assert.equal(spendView.multiverseMarket.rowIdentity.prefabRemapBoundary, null);
+  assert.equal(spendView.multiverseMarket.uiShell.actionShell, null);
+  assert.equal(spendView.multiverseMarket.uiShell.ownerFamily, null);
+  assert.deepEqual(
+    spendView.multiverseMarket.rowIdentity.compatibilityBoundaries.metadataNeighborhood,
+    { results: [{ anchor: "PlayerProfileData", matches: [] }] }
+  );
+  assert.deepEqual(spendView.multiverseMarket.rowIdentity.compatibilityBoundaries.rangeBoundary, {
+    validatedRowRanges: ["50-59 and 63-74"]
+  });
+  assert.deepEqual(spendView.multiverseMarket.uiShell.compatibilityBoundaries.ownerFamily, {
+    ownerAnchors: ["MultiverseMarket"]
+  });
 });

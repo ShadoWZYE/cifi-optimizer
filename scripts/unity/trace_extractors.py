@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import struct
 import subprocess
@@ -1189,6 +1190,25 @@ def normalize_native_search_terms(anchor_values: list[str]) -> list[str]:
     return sorted(normalized, key=str.lower)
 
 
+def _unique_native_search_terms_in_order(anchor_values: list[str]) -> list[str]:
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for value in anchor_values:
+        trimmed = str(value or "").strip()
+        if not trimmed:
+            continue
+        if trimmed.isdigit():
+            continue
+        if re.fullmatch(r"0x[0-9a-fA-F]+", trimmed):
+            continue
+        key = trimmed.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        normalized.append(trimmed)
+    return normalized
+
+
 def _term_signature(anchor_values: list[str]) -> str:
     return "\x1f".join(term.lower() for term in normalize_native_search_terms(anchor_values))
 
@@ -1326,7 +1346,51 @@ def _normalize_relation_request_context(request_context: dict[str, Any] | None) 
                 if str(value).strip()
             ]
         ),
-        "expectedTerms": normalize_native_search_terms(
+        "requiredFactKinds": _unique_native_search_terms_in_order(
+            [
+                str(value)
+                for value in (
+                    request_context.get("requiredFactKinds")
+                    or relation_probe.get("requiredFactKinds")
+                    or []
+                )
+                if str(value).strip()
+            ]
+        ),
+        "requiredRelationKinds": _unique_native_search_terms_in_order(
+            [
+                str(value)
+                for value in (
+                    request_context.get("requiredRelationKinds")
+                    or relation_probe.get("requiredRelationKinds")
+                    or []
+                )
+                if str(value).strip()
+            ]
+        ),
+        "progressRelationKinds": _unique_native_search_terms_in_order(
+            [
+                str(value)
+                for value in (
+                    request_context.get("progressRelationKinds")
+                    or relation_probe.get("progressRelationKinds")
+                    or []
+                )
+                if str(value).strip()
+            ]
+        ),
+        "progressEdgeTypes": _unique_native_search_terms_in_order(
+            [
+                str(value)
+                for value in (
+                    request_context.get("progressEdgeTypes")
+                    or relation_probe.get("progressEdgeTypes")
+                    or []
+                )
+                if str(value).strip()
+            ]
+        ),
+        "expectedTerms": _unique_native_search_terms_in_order(
             [
                 str(value)
                 for value in (
@@ -1337,7 +1401,7 @@ def _normalize_relation_request_context(request_context: dict[str, Any] | None) 
                 if str(value).strip()
             ]
         ),
-        "anchors": normalize_native_search_terms(
+        "anchors": _unique_native_search_terms_in_order(
             [
                 str(value)
                 for value in (
@@ -1351,7 +1415,103 @@ def _normalize_relation_request_context(request_context: dict[str, Any] | None) 
         "subjectId": str(request_context.get("subjectId") or "").strip(),
         "seamId": str(request_context.get("seamId") or "").strip(),
         "executionRoutineId": str(request_context.get("executionRoutineId") or "").strip(),
+        "edgeOnly": bool(request_context.get("edgeOnly")),
+        "disableFallbackExpansion": bool(request_context.get("disableFallbackExpansion")),
+        "maxSearchTerms": int(request_context.get("maxSearchTerms") or 0),
+        "maxRequestedTerms": int(request_context.get("maxRequestedTerms") or 0),
+        "minimalSearchExpansion": bool(request_context.get("minimalSearchExpansion")),
     }
+
+
+def _trim_requested_terms_for_request_context(
+    requested_terms: list[str],
+    request_context: dict[str, Any] | None,
+) -> list[str]:
+    normalized_request_context = _normalize_relation_request_context(request_context)
+    max_requested_terms = int(normalized_request_context.get("maxRequestedTerms") or 0)
+    if max_requested_terms <= 0 or len(requested_terms) <= max_requested_terms:
+        return list(requested_terms)
+    relation_kinds = {
+        str(value).strip()
+        for value in (normalized_request_context.get("requiredRelationKinds") or [])
+        if str(value).strip()
+    }
+    if _is_relation_shaped_request_context(normalized_request_context) and "owns-field" in relation_kinds:
+        expected_terms = list(normalized_request_context.get("expectedTerms") or [])
+        structured_terms = [term for term in expected_terms if "." in str(term)]
+        owner_terms = [
+            term
+            for term in expected_terms
+            if "." not in str(term) and any(token in str(term) for token in ("Profile", "SaveData", "Market"))
+        ]
+        prioritized_terms = _unique_native_search_terms_in_order(
+            [
+                *structured_terms,
+                *owner_terms,
+                *list(normalized_request_context.get("anchors") or []),
+                *requested_terms,
+            ]
+        )
+        return list(prioritized_terms[:max_requested_terms])
+    prioritized_terms = _unique_native_search_terms_in_order(
+        [
+            *list(normalized_request_context.get("anchors") or []),
+            *list(normalized_request_context.get("expectedTerms") or []),
+            *requested_terms,
+        ]
+    )
+    return list(prioritized_terms[:max_requested_terms])
+
+
+def _trim_native_search_terms_for_edge_only(
+    requested_terms: list[str],
+    bridge_plan: dict[str, Any],
+    max_search_terms: int,
+) -> list[str]:
+    max_search_terms = max(1, int(max_search_terms or 0))
+    if max_search_terms <= 0:
+        return list(requested_terms)
+    trimmed: list[str] = []
+    seen: set[str] = set()
+
+    def add_term(value: str) -> None:
+        candidate = str(value or "").strip()
+        if not candidate:
+            return
+        lowered = candidate.lower()
+        if lowered in seen:
+            return
+        seen.add(lowered)
+        trimmed.append(candidate)
+
+    for value in requested_terms:
+        add_term(value)
+        if len(trimmed) >= max_search_terms:
+            return trimmed[:max_search_terms]
+
+    for match in [dict(entry) for entry in (bridge_plan.get("matches") or []) if isinstance(entry, dict)]:
+        for key in ("matchedField", "shellField"):
+            add_term(str(match.get(key) or ""))
+            if len(trimmed) >= max_search_terms:
+                return trimmed[:max_search_terms]
+        for value in (match.get("selectedNativeCoreTerms") or [])[:2]:
+            add_term(str(value))
+            if len(trimmed) >= max_search_terms:
+                return trimmed[:max_search_terms]
+        for value in (match.get("ownerFieldBlock") or [])[:1]:
+            add_term(str(value))
+            if len(trimmed) >= max_search_terms:
+                return trimmed[:max_search_terms]
+        for value in (match.get("controllerBlock") or [])[:1]:
+            add_term(str(value))
+            if len(trimmed) >= max_search_terms:
+                return trimmed[:max_search_terms]
+
+    for value in list(bridge_plan.get("nativeCoreTerms") or [])[:max_search_terms]:
+        add_term(str(value))
+        if len(trimmed) >= max_search_terms:
+            return trimmed[:max_search_terms]
+    return trimmed[:max_search_terms]
 
 
 def _native_payload_relation_contract(payload: dict[str, Any] | None) -> dict[str, Any]:
@@ -1425,11 +1585,37 @@ def _find_reusable_native_anchor(
     return None
 
 
+def _relation_probe_materialized_terms(
+    materialized_payload: dict[str, Any],
+    normalized_request_context: dict[str, Any] | None,
+    requested_terms: list[str],
+) -> set[str]:
+    if not _is_relation_shaped_request_context(normalized_request_context):
+        return set()
+    if not _native_payload_covers_request(materialized_payload, normalized_request_context):
+        return set()
+    result_payload = dict(materialized_payload.get("result") or {})
+    covered_terms = {
+        str(term).strip()
+        for term in requested_terms
+        if str(term).strip()
+    }
+    if covered_terms:
+        return covered_terms
+    payload_contract = _native_payload_relation_contract(materialized_payload)
+    return {
+        str(term).strip()
+        for term in (payload_contract.get("expectedTerms") or [])
+        if str(term).strip()
+    }
+
+
 def _build_native_reuse_report(
     *,
     selected_anchors: list[str],
     reused_anchor_sources: dict[str, dict[str, Any]],
-    newly_traced_anchors: list[str],
+    attempted_new_trace_anchors: list[str],
+    newly_resolved_anchors: list[str],
     missing_after_execution: list[str],
     exact_materialized_reuse: bool = False,
     executed_search_terms: list[str] | None = None,
@@ -1439,7 +1625,8 @@ def _build_native_reuse_report(
         "selectedAnchors": list(selected_anchors),
         "reusedAnchors": reused_anchors,
         "skippedAnchors": list(reused_anchors),
-        "newlyTracedAnchors": list(newly_traced_anchors),
+        "attemptedNewTraceAnchors": list(attempted_new_trace_anchors),
+        "newlyTracedAnchors": list(newly_resolved_anchors),
         "missingAnchorsAfterExecution": list(missing_after_execution),
         "exactMaterializedReuse": bool(exact_materialized_reuse),
         "executedSearchTerms": list(executed_search_terms or []),
@@ -1550,6 +1737,26 @@ def _native_result_has_signal(result_payload: dict[str, Any] | None) -> bool:
                 "managed-expansion-bridge",
             }:
                 return True
+            if bridge.get("bridgeKind") == "metadata-neighborhood":
+                if (
+                    int(bridge.get("metadataNeighborhoodCount") or 0) > 0
+                    or int(bridge.get("metadataStringHitCount") or 0) > 0
+                    or list(bridge.get("ownerCandidates") or [])
+                    or list(bridge.get("relatedTerms") or [])
+                    or list(dict(bridge.get("searchExpansion") or {}).get("methodCandidates") or [])
+                    or list(dict(bridge.get("searchExpansion") or {}).get("fieldCandidates") or [])
+                ):
+                    return True
+    managed_reconstruction = result_payload.get("managedReconstruction", {})
+    if isinstance(managed_reconstruction, dict):
+        if (
+            list(managed_reconstruction.get("methods") or [])
+            or list(managed_reconstruction.get("fields") or [])
+            or list(managed_reconstruction.get("owners") or [])
+            or list(managed_reconstruction.get("rawValueTerms") or [])
+            or list(managed_reconstruction.get("scoredOwners") or [])
+        ):
+            return True
     return False
 
 
@@ -1559,22 +1766,25 @@ def plan_native_trace_extraction(
     request_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     normalized_request_context = _normalize_relation_request_context(request_context)
-    requested_terms = normalize_native_search_terms(
-        [
-            *anchor_values,
-            *list(normalized_request_context.get("anchors") or []),
-            *list(normalized_request_context.get("expectedTerms") or []),
-        ]
+    requested_terms = _trim_requested_terms_for_request_context(
+        _unique_native_search_terms_in_order(
+            [
+                *anchor_values,
+                *list(normalized_request_context.get("anchors") or []),
+                *list(normalized_request_context.get("expectedTerms") or []),
+            ]
+        ),
+        normalized_request_context,
     )
     if family_hint == "token-shop":
         bridge_plan = build_token_shop_native_bridge_plan(requested_terms)
     else:
         bridge_plan = build_generic_native_bridge_plan(requested_terms, family_hint=family_hint)
-    search_terms = normalize_native_search_terms(bridge_plan.get("nativeCoreTerms", []))
+    search_terms = _unique_native_search_terms_in_order(bridge_plan.get("nativeCoreTerms", []))
     if not search_terms:
         search_terms = requested_terms
     if _is_relation_shaped_request_context(normalized_request_context):
-        search_terms = normalize_native_search_terms(
+        search_terms = _unique_native_search_terms_in_order(
             [
                 *search_terms,
                 *requested_terms,
@@ -1582,7 +1792,16 @@ def plan_native_trace_extraction(
                 *list(normalized_request_context.get("anchors") or []),
             ]
         )
-    fallback_terms = normalize_native_search_terms(bridge_plan.get("secondStageTerms", []))
+    fallback_terms = _unique_native_search_terms_in_order(bridge_plan.get("secondStageTerms", []))
+    if bool(normalized_request_context.get("edgeOnly")):
+        edge_only_max_search_terms = int(normalized_request_context.get("maxSearchTerms") or 6)
+        search_terms = _trim_native_search_terms_for_edge_only(
+            requested_terms,
+            bridge_plan,
+            edge_only_max_search_terms,
+        )
+        if bool(normalized_request_context.get("disableFallbackExpansion")):
+            fallback_terms = []
     fallback_terms = [term for term in fallback_terms if term.lower() not in {value.lower() for value in search_terms}]
     request_signature = build_native_trace_request_signature(
         requested_terms,
@@ -1636,8 +1855,12 @@ def execute_native_trace_extraction(
             "requestContext": request_context,
         }
 
+    allow_cached_native_hit_reuse = (
+        not _is_relation_shaped_request_context(request_context)
+        and not bool(request_context.get("edgeOnly"))
+    )
     cached = find_cached_native_trace(search_terms, family_hint=family_hint)
-    if cached and not _is_relation_shaped_request_context(request_context):
+    if cached and allow_cached_native_hit_reuse:
         cached["requestedTerms"] = requested_terms
         cached["bridgePlan"] = bridge_plan
         cached["requestSignature"] = request_signature
@@ -1645,6 +1868,14 @@ def execute_native_trace_extraction(
         return cached
 
     def _run_process_project(terms: list[str]) -> tuple[subprocess.CompletedProcess[str], dict[str, Any]]:
+        process_env = os.environ.copy()
+        if bool(request_context.get("edgeOnly")):
+            process_env["CIFI_FAST_PROCESS_PROJECT"] = "1"
+        if bool(request_context.get("minimalSearchExpansion")):
+            process_env["CIFI_MINIMAL_PROCESS_PROJECT"] = "1"
+        batch_size = int(request_context.get("maxRequestedTerms") or 0)
+        if batch_size > 1:
+            process_env["CIFI_PROCESS_PROJECT_BATCH_SIZE"] = str(batch_size)
         cmd = [
             sys.executable,
             str(GHIDRA_WRAPPER),
@@ -1661,6 +1892,7 @@ def execute_native_trace_extraction(
         proc = subprocess.run(
             cmd,
             cwd=str(ROOT),
+            env=process_env,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -1685,7 +1917,35 @@ def execute_native_trace_extraction(
     }
 
     process_search_terms = _cap_process_project_search_terms(search_terms)
-    proc, payload = _run_process_project(process_search_terms)
+    edge_only_incremental = (
+        bool(request_context.get("edgeOnly"))
+        and len(process_search_terms) > 1
+    )
+    proc: subprocess.CompletedProcess[str]
+    payload: dict[str, Any]
+    if edge_only_incremental:
+        proc = None  # type: ignore[assignment]
+        payload = {}
+        for index in range(1, len(process_search_terms) + 1):
+            candidate_terms = process_search_terms[:index]
+            candidate_proc, candidate_payload = _run_process_project(candidate_terms)
+            proc = candidate_proc
+            payload = candidate_payload
+            if candidate_payload:
+                candidate_result = {}
+                candidate_output_file = candidate_payload.get("output_file")
+                if candidate_output_file:
+                    candidate_path = Path(candidate_output_file)
+                    if candidate_path.exists():
+                        try:
+                            candidate_result = json.loads(candidate_path.read_text(encoding="utf-8"))
+                        except json.JSONDecodeError:
+                            candidate_result = {"error": "invalid-json", "path": str(candidate_path)}
+                if _native_result_has_signal(candidate_result):
+                    process_search_terms = candidate_terms
+                    break
+    else:
+        proc, payload = _run_process_project(process_search_terms)
     result["returncode"] = proc.returncode
     if process_search_terms != search_terms:
         result["searchTermsTruncated"] = {
@@ -1899,7 +2159,14 @@ def persist_native_trace_extraction(
     db.record_extraction_job(extraction_job)
     evidence_rows = _build_native_trace_evidence_rows(extraction_job_id, extraction_result)
     if evidence_rows:
-        db.upsert_custom_evidence_rows(evidence_rows, rebuild_materialized=True)
+        edge_only_relation_probe = (
+            _is_relation_shaped_request_context(dict(extraction_plan.get("requestContext") or {}))
+            and bool(dict(extraction_plan.get("requestContext") or {}).get("edgeOnly"))
+        )
+        db.upsert_custom_evidence_rows(
+            evidence_rows,
+            rebuild_materialized=not edge_only_relation_probe,
+        )
     return db.materialize_native_trace_view(
         "cifi-full",
         "libil2cpp.so",
@@ -1909,6 +2176,7 @@ def persist_native_trace_extraction(
         dict(extraction_plan.get("bridgePlan", {}) or {}),
         family_hint=extraction_plan.get("familyHint"),
         request_context=dict(extraction_plan.get("requestContext") or {}),
+        skip_job_sync=True,
     )
 
 def _hydrate_materialized_native_trace(
@@ -1941,6 +2209,7 @@ def collect_native_trace(
     timeout: int = 120,
     family_hint: str | None = None,
     request_context: dict[str, Any] | None = None,
+    force_retrace: bool = False,
 ) -> dict[str, Any]:
     extraction_plan = plan_native_trace_extraction(
         anchor_values,
@@ -1949,55 +2218,135 @@ def collect_native_trace(
     )
     requested_terms = list(extraction_plan.get("requestedTerms", []))
     normalized_request_context = _normalize_relation_request_context(request_context)
-    existing = get_trace_cache_db().find_materialized_native_trace_view(
-        "cifi-full",
-        "libil2cpp.so",
-        str(extraction_plan.get("requestSignature", "")),
-    )
-    if existing and _native_payload_covers_request(dict(existing.get("payload") or {}), normalized_request_context):
-        return _hydrate_materialized_native_trace(
-            existing,
-            extraction_plan,
-            family_hint,
-            _build_native_reuse_report(
-                selected_anchors=requested_terms,
-                reused_anchor_sources={
-                    term: {
-                        "source": "materialized-native-trace-view",
-                        "jobId": ((existing.get("payload") or {}).get("jobId")),
-                        "requestSignature": str(extraction_plan.get("requestSignature", "")),
-                        "searchTerms": list(existing.get("searchTerms", [])),
-                    }
-                    for term in requested_terms
-                },
-                newly_traced_anchors=[],
-                missing_after_execution=[],
-                exact_materialized_reuse=True,
-                executed_search_terms=[],
-            ),
+    existing = None
+    covering = None
+    allow_native_materialized_reuse = not bool(normalized_request_context.get("edgeOnly"))
+    allow_term_presence_reuse = True
+    reused_anchor_sources: dict[str, dict[str, Any]] = {}
+    if not force_retrace and allow_native_materialized_reuse:
+        existing = get_trace_cache_db().find_materialized_native_trace_view(
+            "cifi-full",
+            "libil2cpp.so",
+            str(extraction_plan.get("requestSignature", "")),
         )
-    covering = _find_covering_materialized_native_trace(
-        requested_terms,
-        request_context=normalized_request_context,
+        if existing and _native_payload_covers_request(dict(existing.get("payload") or {}), normalized_request_context):
+            return _hydrate_materialized_native_trace(
+                existing,
+                extraction_plan,
+                family_hint,
+                _build_native_reuse_report(
+                    selected_anchors=requested_terms,
+                    reused_anchor_sources={
+                        term: {
+                            "source": "materialized-native-trace-view",
+                            "jobId": ((existing.get("payload") or {}).get("jobId")),
+                            "requestSignature": str(extraction_plan.get("requestSignature", "")),
+                            "searchTerms": list(existing.get("searchTerms", [])),
+                        }
+                        for term in requested_terms
+                    },
+                    attempted_new_trace_anchors=[],
+                    newly_resolved_anchors=[],
+                    missing_after_execution=[],
+                    exact_materialized_reuse=True,
+                    executed_search_terms=[],
+                ),
+            )
+        covering = _find_covering_materialized_native_trace(
+            requested_terms,
+            request_context=normalized_request_context,
+        )
+        if covering:
+            materialized = get_trace_cache_db().materialize_native_trace_view(
+                "cifi-full",
+                "libil2cpp.so",
+                str(extraction_plan.get("requestSignature", "")),
+                requested_terms,
+                list(covering.get("searchTerms", [])),
+                dict(extraction_plan.get("bridgePlan", {}) or {}),
+                family_hint=family_hint,
+                request_context=dict(extraction_plan.get("requestContext") or {}),
+            )
+            return _hydrate_materialized_native_trace(
+                {
+                    "payload": materialized,
+                    "provenance": dict(covering.get("provenance") or {}),
+                    "reducerVersion": covering.get("reducerVersion"),
+                    "builtAt": covering.get("builtAt"),
+                    "searchTerms": list(covering.get("searchTerms", [])),
+                },
+                extraction_plan,
+                family_hint,
+                _build_native_reuse_report(
+                    selected_anchors=requested_terms,
+                    reused_anchor_sources={
+                        term: {
+                            "source": "covering-materialized-native-trace",
+                            "jobId": materialized.get("jobId"),
+                            "requestSignature": str((covering.get("payload") or {}).get("requestSignature") or ""),
+                            "searchTerms": list(covering.get("searchTerms", [])),
+                        }
+                        for term in requested_terms
+                    },
+                    attempted_new_trace_anchors=[],
+                    newly_resolved_anchors=[],
+                    missing_after_execution=[],
+                    exact_materialized_reuse=False,
+                    executed_search_terms=[],
+                ),
+            )
+    if not force_retrace and allow_native_materialized_reuse:
+        reused_anchor_sources = {
+            term: source
+            for term in requested_terms
+            if (
+                source := _find_reusable_native_anchor(
+                    term,
+                    family_hint=family_hint,
+                    allow_term_presence_reuse=allow_term_presence_reuse,
+                )
+            )
+            is not None
+        }
+    missing_requested_terms = [term for term in requested_terms if term not in reused_anchor_sources]
+    executed_search_terms: list[str] = []
+    token_shop_shell_bridge_only = (
+        family_hint == "token-shop"
+        and bool(normalized_request_context.get("edgeOnly"))
+        and not _is_relation_shaped_request_context(normalized_request_context)
+        and bool(missing_requested_terms)
+        and all(re.fullmatch(r"ATU\d+Button", term) for term in missing_requested_terms)
+        and all(
+            any(
+                isinstance(match, dict)
+                and str(match.get("shellField") or "").strip() == term
+                and list(match.get("ownerFieldBlock") or [])
+                for match in (extraction_plan.get("bridgePlan", {}).get("matches") or [])
+            )
+            for term in missing_requested_terms
+        )
     )
-    if covering:
+    if token_shop_shell_bridge_only:
         materialized = get_trace_cache_db().materialize_native_trace_view(
             "cifi-full",
             "libil2cpp.so",
             str(extraction_plan.get("requestSignature", "")),
             requested_terms,
-            list(covering.get("searchTerms", [])),
+            list(extraction_plan.get("searchTerms", [])),
             dict(extraction_plan.get("bridgePlan", {}) or {}),
             family_hint=family_hint,
             request_context=dict(extraction_plan.get("requestContext") or {}),
+            skip_job_sync=True,
         )
+        materialized["status"] = "bridge-plan-only"
+        materialized["cacheHit"] = False
         return _hydrate_materialized_native_trace(
             {
                 "payload": materialized,
-                "provenance": dict(covering.get("provenance") or {}),
-                "reducerVersion": covering.get("reducerVersion"),
-                "builtAt": covering.get("builtAt"),
-                "searchTerms": list(covering.get("searchTerms", [])),
+                "provenance": dict(materialized.get("provenance") or {}),
+                "reducerVersion": materialized.get("reducerVersion"),
+                "builtAt": materialized.get("builtAt"),
+                "searchTerms": list(materialized.get("searchTerms", [])),
             },
             extraction_plan,
             family_hint,
@@ -2005,34 +2354,20 @@ def collect_native_trace(
                 selected_anchors=requested_terms,
                 reused_anchor_sources={
                     term: {
-                        "source": "covering-materialized-native-trace",
+                        "source": "token-shop-bridge-plan-only",
                         "jobId": materialized.get("jobId"),
-                        "requestSignature": str((covering.get("payload") or {}).get("requestSignature") or ""),
-                        "searchTerms": list(covering.get("searchTerms", [])),
+                        "requestSignature": str(extraction_plan.get("requestSignature", "")),
+                        "searchTerms": list(extraction_plan.get("searchTerms", [])),
                     }
-                    for term in requested_terms
+                    for term in missing_requested_terms
                 },
-                newly_traced_anchors=[],
+                attempted_new_trace_anchors=[],
+                newly_resolved_anchors=missing_requested_terms,
                 missing_after_execution=[],
                 exact_materialized_reuse=False,
                 executed_search_terms=[],
             ),
         )
-    allow_term_presence_reuse = not _is_relation_shaped_request_context(normalized_request_context)
-    reused_anchor_sources = {
-        term: source
-        for term in requested_terms
-        if (
-            source := _find_reusable_native_anchor(
-                term,
-                family_hint=family_hint,
-                allow_term_presence_reuse=allow_term_presence_reuse,
-            )
-        )
-        is not None
-    }
-    missing_requested_terms = [term for term in requested_terms if term not in reused_anchor_sources]
-    executed_search_terms: list[str] = []
     if missing_requested_terms:
         missing_extraction_plan = (
             extraction_plan
@@ -2062,16 +2397,36 @@ def collect_native_trace(
         dict(extraction_plan.get("bridgePlan", {}) or {}),
         family_hint=family_hint,
         request_context=dict(extraction_plan.get("requestContext") or {}),
+        skip_job_sync=bool(missing_requested_terms),
     )
-    missing_after_execution = [
-        term for term in requested_terms
-        if _find_reusable_native_anchor(
-            term,
-            family_hint=family_hint,
-            allow_term_presence_reuse=allow_term_presence_reuse,
-        )
-        is None
-    ]
+    relation_resolved_terms = _relation_probe_materialized_terms(
+        materialized,
+        normalized_request_context,
+        missing_requested_terms,
+    )
+    if relation_resolved_terms:
+        missing_after_execution = [
+            term for term in missing_requested_terms
+            if term not in relation_resolved_terms
+        ]
+        newly_resolved_after_execution = [
+            term for term in missing_requested_terms
+            if term in relation_resolved_terms
+        ]
+    else:
+        missing_after_execution = [
+            term for term in missing_requested_terms
+            if _find_reusable_native_anchor(
+                term,
+                family_hint=family_hint,
+                allow_term_presence_reuse=allow_term_presence_reuse,
+            )
+            is None
+        ]
+        newly_resolved_after_execution = [
+            term for term in missing_requested_terms
+            if term not in set(missing_after_execution)
+        ]
     return _hydrate_materialized_native_trace(
         {
             "payload": materialized,
@@ -2085,7 +2440,8 @@ def collect_native_trace(
         _build_native_reuse_report(
             selected_anchors=requested_terms,
             reused_anchor_sources=reused_anchor_sources,
-            newly_traced_anchors=missing_requested_terms,
+            attempted_new_trace_anchors=missing_requested_terms,
+            newly_resolved_anchors=newly_resolved_after_execution,
             missing_after_execution=missing_after_execution,
             exact_materialized_reuse=False,
             executed_search_terms=executed_search_terms,

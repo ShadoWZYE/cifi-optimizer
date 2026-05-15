@@ -75,6 +75,28 @@ function withDb(fn) {
   }
 }
 
+function fetchLatestMaterializedScopePayload(db, tableName, traceScope) {
+  const row = db
+    .prepare(
+      `
+      SELECT payload_json, reducer_version, built_at
+      FROM ${tableName}
+      WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+      ORDER BY built_at DESC
+      LIMIT 1
+    `
+    )
+    .get("cifi-full", "libil2cpp.so", traceScope);
+  if (!row) {
+    return null;
+  }
+  return {
+    payload: JSON.parse(row.payload_json),
+    reducerVersion: row.reducer_version ?? null,
+    builtAt: row.built_at ?? null
+  };
+}
+
 function fetchLatestMaterializedTargetBundle(traceScope) {
   return withDb((db) => {
     const row = db
@@ -94,13 +116,47 @@ function fetchLatestMaterializedTargetBundle(traceScope) {
           `Refresh DB-backed trace materializations before generating system units.`
       );
     }
+    const subjectState = fetchLatestMaterializedScopePayload(
+      db,
+      "materialized_subject_state_views",
+      traceScope
+    );
+    const subjectContract = fetchLatestMaterializedScopePayload(
+      db,
+      "materialized_subject_contract_views",
+      traceScope
+    );
+    const resolverTarget = fetchLatestMaterializedScopePayload(
+      db,
+      "materialized_resolver_target_views",
+      traceScope
+    );
+    const payload = JSON.parse(row.payload_json);
+    if (subjectState?.payload) {
+      payload.subjectState = subjectState.payload;
+    }
+    if (subjectContract?.payload) {
+      payload.subjectContract = subjectContract.payload;
+    }
+    if (resolverTarget?.payload) {
+      payload.target = resolverTarget.payload;
+    }
+    const builtAt = [
+      row.built_at,
+      subjectState?.builtAt,
+      subjectContract?.builtAt,
+      resolverTarget?.builtAt
+    ]
+      .filter(Boolean)
+      .sort()
+      .at(-1);
     return {
       traceScope: row.trace_scope,
       requestSignature: row.request_signature,
-      payload: JSON.parse(row.payload_json),
+      payload,
       provenance: row.provenance_json ? JSON.parse(row.provenance_json) : {},
       reducerVersion: row.reducer_version,
-      builtAt: row.built_at
+      builtAt
     };
   });
 }

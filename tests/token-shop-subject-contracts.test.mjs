@@ -2,9 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  applyTokenShopSupportingContractSignals,
   applyTokenShopSubjectContractToRow,
   buildTokenShopSubjectContractIndex,
-  getTokenShopSubjectContractForField
+  getTokenShopSubjectContractForField,
+  getTokenShopSupportingContractsForField
 } from "../support/token-shop-subject-contracts.js";
 
 test("row-local TokenShop contract adapter surfaces canonical row subject fields", () => {
@@ -283,6 +285,75 @@ test("Token Shop family contract can ground ATU6 while leaving the remaining MK 
     "missing-db-row-detail-evidence:mk-chain-field-specific-support:ATU8Level"
   );
   assert.equal(blockedRow.note, "Legacy MK chain row.");
+});
+
+test("supporting range-family contracts apply to late TokenShop rows by ATU range membership", () => {
+  const index = buildTokenShopSubjectContractIndex({
+    contracts: {
+      "token-shop-late-atu-family": {
+        traceScope: "token-shop-late-atu-family",
+        subjectId: "range:token-shop:ATU24Button-ATU28Button",
+        subjectKind: "range-family",
+        targetAliases: ["token-shop-late-atu-family"],
+        knownEdges: [
+          "runtime-next-cost-formula",
+          "runtime-final-max-level",
+          "exact-display-update-path"
+        ],
+        missingEdges: [],
+        blockedEdges: [],
+        nonblockingEdges: [],
+        nextSeam: { id: null, status: "clear" },
+        groundedFields: {},
+        supportSummary: {
+          supportSurfaceLabels: ["Late ATU shell range", "Late ATU action lane"],
+          proofCount: 2
+        },
+        provenanceSummary: {
+          proofs: [{ sourceId: "canonical-term-view" }]
+        }
+      },
+      "token-shop-family-structure": {
+        traceScope: "token-shop-family-structure",
+        subjectId: "range:token-shop:ATU1Button-ATU28Button",
+        subjectKind: "range-family",
+        targetAliases: ["token-shop-family-structure"],
+        knownEdges: ["runtime-next-cost-formula", "exact-display-update-path"],
+        missingEdges: [],
+        blockedEdges: [],
+        nonblockingEdges: [],
+        nextSeam: { id: null, status: "clear" },
+        groundedFields: {},
+        supportSummary: {
+          supportSurfaceLabels: ["Family shell range", "Title surfaces"],
+          proofCount: 2
+        },
+        provenanceSummary: {
+          proofs: [{ sourceId: "graph-links" }]
+        }
+      }
+    }
+  });
+
+  const supportingContracts = getTokenShopSupportingContractsForField(index, "ATU25Level");
+  assert.equal(supportingContracts.length, 1);
+  assert.equal(supportingContracts[0].traceScope, "token-shop-family-structure");
+
+  const resolvedRow = supportingContracts.reduce(
+    (currentRow, contract) => applyTokenShopSupportingContractSignals(currentRow, contract),
+    {
+      field: "ATU25Level",
+      costFormulaConfidence: "projected",
+      storefrontBuffDisplayMode: "runtime-unresolved",
+      storefrontCapDisplayMode: "runtime-unresolved"
+    }
+  );
+
+  assert.equal(resolvedRow.costFormulaConfidence, "verified");
+  assert.equal(resolvedRow.storefrontBuffDisplayMode, null);
+  assert.equal(resolvedRow.storefrontCapDisplayMode, null);
+  assert.ok(resolvedRow.knownEdges.includes("runtime-next-cost-formula"));
+  assert.ok(resolvedRow.knownEdges.includes("exact-display-update-path"));
 });
 
 test("legacy TokenShop row detail stays intact when contract row-detail block is absent", () => {

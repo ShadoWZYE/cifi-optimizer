@@ -4,6 +4,15 @@ Historical note:
 - This is a session-bound blocker assessment from `2026-04-15`.
 - The current active extract owner is `db:derived:token-shop-values`; `data/archive/token-shop-values.json`, `data/archive/uabea-extract-report.json`, and `data/archive/unity-apk-extract-report.json` are archived provenance snapshots, not live runtime owners.
 
+Current active model note:
+- The repo now exposes a canonical progression-graph scaffold through `support/progression-model.js` and `buildSpendSystemView(...)` in `support/system-unit-projections.js`.
+- That layer intentionally separates:
+  - measurable progression carriers
+  - grounded transforms
+  - blocked transforms
+  - objective modes
+- It is not a finished ROI solver yet. It is the canonical place where missing cross-system progression meaning is now modeled explicitly instead of being buried inside TokenShop-only heuristics.
+
 ## Session: 2026-04-15
 
 ### Honest Assessment: What Can We Actually Recommend?

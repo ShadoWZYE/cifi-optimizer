@@ -1,3 +1,9 @@
+import { getTokenShopRowMeta, getTokenShopRowTitle } from "./token-shop-row-meta.js";
+import {
+  DEFAULT_SPEND_OBJECTIVE_ID,
+  getTokenShopFamilyProgressionLens
+} from "./progression-model.js";
+
 export const TOKEN_SHOP_OPTIMIZER_VERSION = "1.0.0";
 
 export const TOKEN_COST_FORMULA = {
@@ -18,6 +24,154 @@ export const DIAMOND_COST_FORMULA = {
   }
 };
 
+const PROGRESSION_FAMILY_META = Object.freeze({
+  "token-chest": Object.freeze({
+    label: "Chest income",
+    impactWeight: 1.35,
+    additiveUnitScale: 0.5,
+    reason: "Improves Token chest income, which feeds future TokenShop purchases."
+  }),
+  "diamond-chest": Object.freeze({
+    label: "Diamond income",
+    impactWeight: 0.75,
+    additiveUnitScale: 1,
+    reason: "Helps diamond-side progression, but it is not the main TokenShop loop."
+  }),
+  "cells-chest": Object.freeze({
+    label: "Chest cells",
+    impactWeight: 0.9,
+    additiveUnitScale: 1,
+    reason:
+      "Improves chest-derived Cells, which supports adjacent progression but not direct Token loops."
+  }),
+  "mod-points": Object.freeze({
+    label: "Mod points",
+    impactWeight: 1.05,
+    additiveUnitScale: 0.01,
+    reason: "Improves Mod Point progression with a grounded multiplicative lane."
+  }),
+  "generator-output": Object.freeze({
+    label: "Generator output",
+    impactWeight: 1.45,
+    additiveUnitScale: 0.01,
+    reason: "Improves permanent generator output, a core long-run progression lane."
+  }),
+  "daily-tokenium": Object.freeze({
+    label: "Daily Tokenium",
+    impactWeight: 0.58,
+    additiveUnitScale: 0.2,
+    reason:
+      "Improves the separate Daily Tokenium lane, which is useful but not the main Token spend loop."
+  }),
+  "duo-booster": Object.freeze({
+    label: "Duo chain",
+    impactWeight: 1.08,
+    additiveUnitScale: 0.02,
+    reason: "Improves the Duo progression chain and is strongest once the mid tiers are open."
+  }),
+  "trinity-booster": Object.freeze({
+    label: "Trinity chain",
+    impactWeight: 1.16,
+    additiveUnitScale: 0.03,
+    reason:
+      "Improves the Trinity progression chain and becomes relevant in the later visible tiers."
+  }),
+  "late-ultima": Object.freeze({
+    label: "Ultima lane",
+    impactWeight: 0.68,
+    additiveUnitScale: 100,
+    reason: "Late Ultima rows are expensive and currently treated as late-lane progression helpers."
+  }),
+  default: Object.freeze({
+    label: "Checked lane",
+    impactWeight: 1,
+    additiveUnitScale: 1,
+    reason: "Grounded checked row with no stronger family-specific weighting yet."
+  })
+});
+
+function getRowFamilyMeta(row) {
+  const meta = getTokenShopRowMeta(row?.field);
+  return PROGRESSION_FAMILY_META[meta?.progressionFamily] || PROGRESSION_FAMILY_META.default;
+}
+
+function getRowProgressionLens(row, context = {}) {
+  const meta = getTokenShopRowMeta(row?.field);
+  const progressionLens = getTokenShopFamilyProgressionLens(
+    context?.progressionModel,
+    context?.objectiveId || DEFAULT_SPEND_OBJECTIVE_ID
+  );
+  return progressionLens.get(meta?.progressionFamily) || null;
+}
+
+function getTierOrdinal(tierKey) {
+  switch (String(tierKey || "").trim()) {
+    case "t4":
+      return 4;
+    case "t3":
+      return 3;
+    case "t2":
+      return 2;
+    default:
+      return 1;
+  }
+}
+
+function getHighestUnlockedTier(states = {}) {
+  if (states.t4) return "t4";
+  if (states.t3) return "t3";
+  if (states.t2) return "t2";
+  return "t1";
+}
+
+function getRowTierWeight(row, context = {}) {
+  const rowTier = getTierOrdinal(row?.storeTier || row?.tierKey || "t1");
+  const activeTier = getTierOrdinal(getHighestUnlockedTier(context?.tierStates || {}));
+  if (rowTier === activeTier) {
+    return 1.16;
+  }
+  if (rowTier < activeTier) {
+    return 0.94;
+  }
+  return 0.84;
+}
+
+function getUnlockPressureWeight(row, context = {}) {
+  const tierKey = String(row?.storeTier || row?.tierKey || "t1").trim();
+  if (!tierKey || tierKey === "t4") {
+    return 1;
+  }
+  const nextTier = tierKey === "t1" ? "t2" : tierKey === "t2" ? "t3" : "t4";
+  if (context?.tierStates?.[nextTier]) {
+    return 1;
+  }
+  const remainingLevels = Number(context?.tierLevelsRemaining?.[nextTier]);
+  if (!Number.isFinite(remainingLevels)) {
+    return 1;
+  }
+  if (remainingLevels <= 5) {
+    return 1.18;
+  }
+  if (remainingLevels <= 15) {
+    return 1.1;
+  }
+  return 1.04;
+}
+
+function getNormalizedProgressionGain(row, benefitInfo) {
+  const familyMeta = getRowFamilyMeta(row);
+  if (benefitInfo?.bonusMode === "multiplier") {
+    const rawBonus = typeof row?.bonusValue === "number" ? row.bonusValue : 1;
+    return Math.max(0, rawBonus - 1);
+  }
+  const additiveScale = familyMeta.additiveUnitScale || 1;
+  return Math.max(0, (benefitInfo?.incremental || 0) / additiveScale);
+}
+
+function getResolvedBonusMode(row) {
+  return String(row?.bonusMode || row?.bonusStepMode || "additive").trim() || "additive";
+}
+
 export function calculateUpgradeCost(row, currentLevel) {
   if (!row || typeof currentLevel !== "number") {
     return null;
@@ -25,16 +179,33 @@ export function calculateUpgradeCost(row, currentLevel) {
 
   const startCost = row.startCost;
   const additiveCost = row.additiveCost;
-
-  if (typeof startCost !== "number" || typeof additiveCost !== "number") {
-    return null;
-  }
+  const costFormulaType = String(row?.costFormulaType || "linear").trim() || "linear";
+  const costFormulaConfidence =
+    String(row?.costFormulaConfidence || "verified").trim() || "verified";
 
   if (typeof row.maxLevel === "number" && currentLevel >= row.maxLevel) {
     return { cost: null, isMaxed: true };
   }
 
   const nextLevel = currentLevel + 1;
+  if (costFormulaType === "start-only") {
+    if (typeof startCost !== "number") {
+      return null;
+    }
+    if (currentLevel > 0) {
+      return { cost: null, isMaxed: false, nextLevel, formulaUnresolved: true };
+    }
+    return { cost: startCost, isMaxed: false, nextLevel };
+  }
+
+  if (costFormulaConfidence === "projected") {
+    return null;
+  }
+
+  if (typeof startCost !== "number" || typeof additiveCost !== "number") {
+    return null;
+  }
+
   const cost = startCost + additiveCost * currentLevel;
 
   return { cost, isMaxed: false, nextLevel };
@@ -46,7 +217,7 @@ export function calculateUpgradeBenefit(row, currentLevel) {
   }
 
   const bonus = row.bonusValue;
-  const bonusMode = row.bonusMode;
+  const bonusMode = getResolvedBonusMode(row);
   const maxLevel = row.maxLevel;
 
   if (typeof bonus !== "number") {
@@ -58,17 +229,23 @@ export function calculateUpgradeBenefit(row, currentLevel) {
     return { benefit: 0, isMaxed: true, incremental: 0 };
   }
 
-  const incrementalBenefit = bonusMode === "multiplier" ? bonus - 1 : bonus;
+  const currentMagnitude =
+    bonusMode === "multiplier" ? Math.pow(bonus || 1, currentLevel) : currentLevel * bonus;
+  const nextMagnitude =
+    bonusMode === "multiplier"
+      ? Math.pow(bonus || 1, currentLevel + 1)
+      : (currentLevel + 1) * bonus;
+  const incrementalBenefit = nextMagnitude - currentMagnitude;
 
   return {
-    benefit: bonusMode === "multiplier" ? bonus : currentLevel * bonus,
+    benefit: currentMagnitude,
     incremental: incrementalBenefit,
     isMaxed: false,
     bonusMode
   };
 }
 
-export function calculateUpgradeValue(row, currentLevel, availableTokens) {
+export function calculateUpgradeValue(row, currentLevel, availableTokens, context = {}) {
   const costInfo = calculateUpgradeCost(row, currentLevel);
   const benefitInfo = calculateUpgradeBenefit(row, currentLevel);
 
@@ -77,46 +254,75 @@ export function calculateUpgradeValue(row, currentLevel, availableTokens) {
   }
 
   const canAfford = costInfo.cost <= availableTokens;
-  const value = benefitInfo.incremental / costInfo.cost;
+  const familyMeta = getRowFamilyMeta(row);
+  const progressionLens = getRowProgressionLens(row, context);
+  const normalizedGain = getNormalizedProgressionGain(row, benefitInfo);
+  const fallbackImpactWeight = familyMeta.impactWeight;
+  const lensWeight =
+    typeof progressionLens?.scoreMultiplier === "number" &&
+    Number.isFinite(progressionLens.scoreMultiplier)
+      ? progressionLens.scoreMultiplier
+      : 1;
+  const progressionWeight =
+    fallbackImpactWeight *
+    lensWeight *
+    getRowTierWeight(row, context) *
+    getUnlockPressureWeight(row, context);
+  const value = normalizedGain > 0 ? (normalizedGain * progressionWeight) / costInfo.cost : 0;
 
   return {
     rowId: row.field,
-    rowName: row.identity || row.slot,
+    rowName: getTokenShopRowTitle(row.field, row.identity || row.slot),
     currentLevel,
     nextLevel: costInfo.nextLevel,
     cost: costInfo.cost,
     benefit: benefitInfo.incremental,
+    normalizedGain,
+    progressionWeight,
     value,
     canAfford,
     bonusMode: benefitInfo.bonusMode,
-    bonusLabel: row.bonusStepLabel || "bonus"
+    bonusLabel: row.bonusStepLabel || "bonus",
+    familyLabel: familyMeta.label,
+    recommendationReason: familyMeta.reason,
+    progressionNotes: Array.isArray(progressionLens?.notes) ? progressionLens.notes : [],
+    progressionCarrierId: progressionLens?.carrierId || null,
+    progressionCarrierLabel: progressionLens?.carrierLabel || null,
+    progressionObjectiveId:
+      progressionLens?.objectiveId || context?.objectiveId || DEFAULT_SPEND_OBJECTIVE_ID,
+    progressionObjectiveLabel: progressionLens?.objectiveLabel || "Short-run Token Acceleration",
+    progressionConfidenceLabel: progressionLens?.confidenceLabel || "Heuristic fallback"
   };
 }
 
-export function rankUpgradesByValue(upgradeList, availableTokens) {
+export function rankUpgradesByValue(upgradeList, availableTokens, context = {}) {
   const ranked = upgradeList
-    .map((upgrade) => calculateUpgradeValue(upgrade.row, upgrade.currentLevel, availableTokens))
+    .map((upgrade) =>
+      calculateUpgradeValue(upgrade.row, upgrade.currentLevel, availableTokens, context)
+    )
     .filter((v) => v !== null && v.canAfford)
     .sort((a, b) => b.value - a.value);
 
   return ranked;
 }
 
-export function getNextBestUpgrade(upgradeList, availableTokens) {
-  const ranked = rankUpgradesByValue(upgradeList, availableTokens);
+export function getNextBestUpgrade(upgradeList, availableTokens, context = {}) {
+  const ranked = rankUpgradesByValue(upgradeList, availableTokens, context);
   return ranked.length > 0 ? ranked[0] : null;
 }
 
-export function getAffordableUpgrades(upgradeList, availableTokens) {
+export function getAffordableUpgrades(upgradeList, availableTokens, context = {}) {
   return upgradeList
-    .map((upgrade) => calculateUpgradeValue(upgrade.row, upgrade.currentLevel, availableTokens))
+    .map((upgrade) =>
+      calculateUpgradeValue(upgrade.row, upgrade.currentLevel, availableTokens, context)
+    )
     .filter((v) => v !== null && v.canAfford)
     .sort((a, b) => b.value - a.value);
 }
 
-export function getFullUpgradeAnalysis(upgradeList, availableTokens) {
+export function getFullUpgradeAnalysis(upgradeList, availableTokens, context = {}) {
   const all = upgradeList.map((upgrade) =>
-    calculateUpgradeValue(upgrade.row, upgrade.currentLevel, availableTokens)
+    calculateUpgradeValue(upgrade.row, upgrade.currentLevel, availableTokens, context)
   );
   const affordable = all.filter((v) => v && v.canAfford);
   const unaffordable = all.filter((v) => v && !v.canAfford);

@@ -29,8 +29,8 @@ test("getTokenShopCurrentVsNextBonusSummary preserves cap-aware detail", () => {
       1.5
     ),
     {
-      currentLabel: "[2] extracted bonus step(s) of x[1.5] to Mk1 Output",
-      nextLabel: "[3] extracted bonus step(s) of x[1.5] to Mk1 Output",
+      currentLabel: "[2] extracted bonus step(s) of x1.5 to Mk1 Output",
+      nextLabel: "[3] extracted bonus step(s) of x1.5 to Mk1 Output",
       detail:
         "Current level [2] to next level [3] adds one more extracted bonus step only. This view does not infer compounding, best-buy value, or optimizer math."
     }
@@ -50,7 +50,63 @@ test("getTokenShopBonusStripEntries handles multiplier rows and maxed rows", () 
       {
         label: "Mk2 Output",
         currentLabel: "x1.56",
-        nextLabel: "MAX"
+        nextLabel: "MAX",
+        isPrimary: true,
+        tone: "neutral"
+      }
+    ]
+  );
+});
+
+test("getTokenShopBonusStripEntries keeps computable bonuses visible despite unresolved runtime presentation", () => {
+  assert.deepEqual(
+    tokenShopUi.getTokenShopBonusStripEntries({
+      bonusStepLabel: "Mk1 Output",
+      bonusStepMode: "multiplier",
+      bonusValue: 1.01,
+      currentLevel: 3,
+      isMaxed: false,
+      storefrontBuffDisplayMode: "runtime-unresolved"
+    }),
+    [
+      {
+        label: "Mk1 Output",
+        currentLabel: "x1.01",
+        nextLabel: "x1.01",
+        isPrimary: true,
+        tone: "neutral"
+      }
+    ]
+  );
+});
+
+test("getTokenShopBonusStripEntries keeps computable composite bonuses visible", () => {
+  assert.deepEqual(
+    tokenShopUi.getTokenShopBonusStripEntries({
+      bonusStepMode: "multi",
+      bonusValues: [{ value: 1.001 }, { value: 1.0005 }],
+      storefrontBuffTargets: [
+        { label: "Cells", tone: "cells", mode: "multiplier" },
+        { label: "MP", tone: "mod", mode: "multiplier" }
+      ],
+      currentLevel: 2,
+      isMaxed: false,
+      storefrontBuffDisplayMode: "runtime-unresolved"
+    }),
+    [
+      {
+        label: "Cells",
+        tone: "cells",
+        currentLabel: "x1.00",
+        nextLabel: "x1.00",
+        isPrimary: true
+      },
+      {
+        label: "MP",
+        tone: "mod",
+        currentLabel: "x1.00",
+        nextLabel: "x1.00",
+        isPrimary: false
       }
     ]
   );

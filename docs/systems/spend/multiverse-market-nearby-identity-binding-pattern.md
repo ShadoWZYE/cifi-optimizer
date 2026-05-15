@@ -59,4 +59,4 @@ Current grounded conclusion:
 - ordered row mapping, sparse Unity anchors, and live effect text stay separate
 - rows `78` and `83` now only show the nearest checked partial text-adjacent controls
 - rows `69-74` now have their ordered identity carried by the same-number chain, but not their repo-local player-facing text provenance via this same-number binding pattern
-- the canonical import-safe subset stays empty
+- the root import gate is already clear; this nearby same-number pattern still does not close the narrower player-facing text-provenance lane

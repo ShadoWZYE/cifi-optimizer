@@ -94,4 +94,5 @@ Current grounded conclusion:
 - displayed row number follows the ordered same-number `SaveData` and row-carrier chain, not the prefab shell suffix
 - displayed bonus magnitude follows the validated row payload keyed by `inscription_id`, not the remapped shell ids
 - the shell layer diverges specifically at the `ISObject` or prefab-object boundary in rows `69-74`
-- compatibility-only MultiverseMarket import stays quarantined, `InscryptionsDone` stays wrapper-only, and planner-safe use stays blocked
+- root MultiverseMarket import and planner-safe gating now clear through the DB-backed save-owner boundary model
+- `InscryptionsDone` still stays wrapper-only on the narrower child text/effect explanation lane

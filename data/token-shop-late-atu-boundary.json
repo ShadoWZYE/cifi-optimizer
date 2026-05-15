@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-12",
+  "generatedAt": "2026-05-01",
   "dataset": "token-shop-late-atu-boundary",
   "sources": {
     "tokenShopExtract": "data/archive/token-shop-values.json",
@@ -193,17 +193,126 @@
     ],
     "groundedConclusion": "The late neighborhood is now a tighter negative result, not a bridge. The action shell, title roster, prefab roster, and effect-side strings all preserve the same general late TokenShop lane, but they remain separate local clusters. The title roster includes Academy Booster while the local prefab roster does not, and Campaign Fragments survives on a separate effect-side prefab and text surface rather than inside the same local cluster. That means the repo still cannot safely map ATU24 through ATU28 by row order, cardinality, or loose name similarity."
   },
+  "exactShellToTitlePass": {
+    "runDate": "2026-04-30",
+    "entrypoint": "best-gap-db",
+    "selectedTarget": "token-shop-late-atu-family",
+    "selectedSubject": "range:token-shop:ATU24Button-ATU28Button",
+    "selectedSeam": "exact-shell-to-title",
+    "selectedAnchor": "ATU24Button",
+    "selectedTerms": [
+      "exact-shell-to-title",
+      "ATU24Button",
+      "15797",
+      "ATU28Button",
+      "15813",
+      "BuyATU24",
+      "BuyATU28"
+    ],
+    "executionMode": "forced target-only rerun",
+    "knownEdges": [
+      "repeated-serialized-shell-adjacency",
+      "row-family-action-hook",
+      "late-title-roster-cluster",
+      "late-prefab-roster-cluster",
+      "late-effect-domain-cluster"
+    ],
+    "blockedEdges": [
+      "exact-shell-to-title",
+      "exact-shell-to-prefab",
+      "exact-effect-to-shell-join"
+    ],
+    "groundedConclusion": "A forced target-only rerun of the planner-selected exact-shell-to-title seam on anchor ATU24Button still preserved the same bounded negative. The run scanned only the late-ATU family-shell, action-lane, title-text, prefab-roster, and effect-lane surfaces, materialized fresh DB state, and still recovered no exact shell-local title join for ATU24Button through ATU28Button.",
+    "explicitEvidence": [
+      "Best-gap DB selection still ranks token-shop-late-atu-family first with seam exact-shell-to-title and selected anchor ATU24Button.",
+      "The forced late-ATU rerun still proves repeated-serialized-shell-adjacency, row-family-action-hook, late-title-roster-cluster, late-prefab-roster-cluster, and late-effect-domain-cluster.",
+      "The same rerun still leaves exact-shell-to-title, exact-shell-to-prefab, and exact-effect-to-shell-join blocked for the late-ATU family."
+    ],
+    "nextSeamInspection": {
+      "plannerSelectedNextSeam": "exact-shell-to-title",
+      "laneStatus": "blocked-on-same-seam",
+      "reason": "The planner did not advance to exact-shell-to-prefab or exact-effect-to-shell-join after the forced title pass, so widening to another seam would currently be a manual policy choice rather than the DB-selected next move."
+    }
+  },
+  "identityJoinFamilyPass": {
+    "runDate": "2026-04-30",
+    "entrypoint": "explicit-target coherent family rerun",
+    "selectedTarget": "token-shop-late-atu-family",
+    "selectedSubject": "range:token-shop:ATU24Button-ATU28Button",
+    "selectedQueries": [
+      "exact-shell-to-title",
+      "exact-shell-to-prefab",
+      "exact-effect-to-shell-join"
+    ],
+    "selectedAnchors": [
+      "ATU24Button",
+      "ATU28Button",
+      "BuyATU24",
+      "ATU24Bonus3Shards",
+      "Tier 3 Max Level Increaser",
+      "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser",
+      "Campaign Fragments"
+    ],
+    "executionMode": "forced target-only export rerun",
+    "result": "whole late-ATU identity-join family still blocked",
+    "groundedConclusion": "A coherent late-ATU identity pass that explicitly requested exact-shell-to-title, exact-shell-to-prefab, and exact-effect-to-shell-join together still preserved the same family-level quarantine verdict. The rerun kept the late shell range, action lane, title roster, prefab roster, and effect-side lane in one bounded family pass, and the native-enabled rerun then strengthened the family evidence by reaching one shared SetAllTokenShopTexts reconstruction context through get_ATU24Bonus3Shards plus the ATU24Bonus2 through ATU24Bonus5 owner-field neighborhood. Even with that added native reconstruction edge, no checked source crossed those surfaces back into one exact ATU24Button through ATU28Button identity join.",
+    "explicitEvidence": [
+      "The exported family bundle now records one bounded family verdict with supporting edges repeated-serialized-shell-adjacency, row-family-action-hook, late-title-roster-cluster, late-prefab-roster-cluster, and late-effect-domain-cluster.",
+      "The same exported family bundle still records blocked edges exact-shell-to-title, exact-shell-to-prefab, and exact-effect-to-shell-join together rather than as separate row-sized seams.",
+      "The plannerResolution payload for the coherent rerun preserves the requested title, prefab, and effect join queries plus the ATU24 shell, ATU28 shell, BuyATU24, ATU24Bonus3Shards, Tier 3 Max Level Increaser, NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser, and Campaign Fragments anchors in one pass.",
+      "The extended native-enabled rerun now adds one sixth supporting edge, native-reconstruction, with summary text tying the late-ATU lane to SetAllTokenShopTexts via method get_ATU24Bonus3Shards and fields ATU24Bonus2, ATU24Bonus3, ATU24Bonus4, and ATU24Bonus5.",
+      "The same extended native-enabled rerun still leaves exact-shell-to-title, exact-shell-to-prefab, and exact-effect-to-shell-join blocked together after tracing ATU24Button, ATU28Button, BuyATU24, Campaign Fragments, NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser, and Tier 3 Max Level Increaser."
+    ],
+    "instrumentationLimit": {
+      "status": "cleared-for-current-slice",
+      "groundedConclusion": "The earlier late-ATU policy boundary was real but is no longer the current stop point. Native tracing is now enabled for the late-ATU family and the extended rerun completed successfully, so the present lane stop is a stronger bounded negative with one added native reconstruction edge rather than an unresolved trace disable or timeout-only instrument limitation.",
+      "explicitEvidence": [
+        "Before policy change, the exported family bundle preserved nativeTrace.materializedFromDb = true, nativeTrace.requestedTerms = [], nativeTrace.searchTerms = [], nativeTrace.reuseReport.newlyTracedAnchors = [], and nativeTrace.requestContext.executionRoutineId = \"\".",
+        "The resolver-target support context now persists disableNativeTrace = false for token-shop-late-atu-family.",
+        "The resolver-target support context now persists nativeTraceTerms including ATU24Button, ATU28Button, BuyATU24, ATU24Bonus3Shards, Tier 3 Max Level Increaser, NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser, and Campaign Fragments.",
+        "The completed extended rerun now materializes a newer token-shop-late-atu-family target bundle and trace view with non-empty requestedTerms, non-empty searchTerms, and newlyTracedAnchors for ATU24Button, ATU28Button, BuyATU24, Campaign Fragments, NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser, and Tier 3 Max Level Increaser.",
+        "The completed extended rerun still leaves the family-level identity joins blocked even after that native reconstruction edge is added."
+      ]
+    }
+  },
+  "identityJoinFamilyAudit20260501": {
+    "runDate": "2026-05-01",
+    "entrypoint": "explicit-target seam-by-seam family audit",
+    "selectedTarget": "token-shop-late-atu-family",
+    "selectedSubject": "range:token-shop:ATU24Button-ATU28Button",
+    "selectedQueries": [
+      "exact-shell-to-title",
+      "exact-shell-to-prefab",
+      "exact-effect-to-shell-join"
+    ],
+    "selectedAnchor": "ATU24Button",
+    "executionMode": "forced target-only reruns with explicit seam selection",
+    "result": "whole late-ATU identity-join family still blocked after direct seam audit",
+    "groundedConclusion": "A direct seam-by-seam late-ATU audit now confirms the family-level stop point without relying on the planner's default next seam. After fixing explicit-target seam selection so the requested prefab and effect joins could be run intentionally, the title, prefab, and effect seams were each rerun against the same bounded late shell, action, title, prefab, and effect surfaces. All three passes preserved the same six supporting edges and left exact-shell-to-title, exact-shell-to-prefab, and exact-effect-to-shell-join blocked together, so the current stop point is a stronger whole-family bounded negative rather than one seam-specific uncertainty.",
+    "explicitEvidence": [
+      "A dry run on 2026-05-01 for --target token-shop-late-atu-family --query exact-shell-to-prefab now preserves acquisitionSubject seam = exact-shell-to-prefab instead of silently snapping back to exact-shell-to-title.",
+      "The forced exact-shell-to-prefab rerun completed with seam = exact-shell-to-prefab, verdict = quarantine, supporting edges repeated-serialized-shell-adjacency, row-family-action-hook, late-title-roster-cluster, late-prefab-roster-cluster, late-effect-domain-cluster, native-reconstruction, and blocked joins exact-shell-to-title, exact-shell-to-prefab, exact-effect-to-shell-join.",
+      "The forced exact-effect-to-shell-join rerun completed with seam = exact-effect-to-shell-join, verdict = quarantine, the same six supporting edges, and the same three blocked joins.",
+      "The direct title, prefab, and effect reruns all preserve the same native reconstruction tie into SetAllTokenShopTexts through get_ATU24Bonus3Shards and the ATU24Bonus2 through ATU24Bonus5 owner-field neighborhood, but none of those reruns adds one checked bridge back to a single ATU24Button through ATU28Button row identity."
+    ],
+    "instrumentationLimit": {
+      "status": "narrow-selector-bug-cleared",
+      "groundedConclusion": "The only newly exposed instrument limitation in this audit was selector-local rather than trace-local: explicit target reruns were ignoring requested seam ids and always inheriting the current next seam. That limitation is now cleared for this slice, so the current late-ATU stop point returns to evidence rather than routing.",
+      "explicitEvidence": [
+        "Before the selector fix, an explicit-target rerun requested as exact-shell-to-prefab still completed with seam = exact-shell-to-title.",
+        "After the selector fix, the same explicit-target family rerun path preserves acquisitionSubject seam = exact-shell-to-prefab on dry run and completes with seam = exact-shell-to-prefab on execution."
+      ]
+    }
+  },
   "result": "no concrete late-row object-or-title join cleared",
-  "groundedConclusion": "The ATU24-ATU28 late shell neighborhood now has a tighter bounded negative result. The repo preserves exact SaveData row levels, exact TokenShop shell path ids, direct BuyATU24 through BuyATU28 hooks, one local late title roster, one local late prefab roster, and separate Campaign Fragments or Academy effect-side strings, but no committed artifact crosses those surfaces back to one exact ATU24Button through ATU28Button shell. This neighborhood therefore narrows the unresolved late tier4plus seam without recovering one new checked shell-to-prefab or shell-to-title bridge.",
+  "groundedConclusion": "The ATU24-ATU28 late shell neighborhood now has a stronger family-level bounded negative result. The repo preserves exact SaveData row levels, exact TokenShop shell path ids, direct BuyATU24 through BuyATU28 hooks, one local late title roster, one local late prefab roster, separate Campaign Fragments or Academy effect-side strings, and one shared native reconstruction context at SetAllTokenShopTexts, but no committed artifact crosses those surfaces back to one exact ATU24Button through ATU28Button shell. This neighborhood therefore narrows the unresolved late tier4plus seam without recovering one checked shell-to-title, shell-to-prefab, or effect-to-shell bridge.",
   "currentBoundary": [
     "The repo now preserves one exact late shell neighborhood around ATU24Level through ATU28Level, ATU24Button through ATU28Button, and the same tier4plus owner-field range from ATU24StartCost through ATU28Fill.",
     "Each late shell also now has a direct action-side boundary: StartATU24Hold through StartATU28Hold, matching StopATU24Hold through StopATU28Hold, and direct BuyATU24 through BuyATU28 hooks all survive in committed probe output.",
     "Committed level0 title neighborhoods preserve a tighter late row-title roster with Duo Booster Four, Trinity Booster One, Academy Booster, Trinity Oom Booster, Tokens Booster T3, and Tier 3 Max Level Increaser, but that local title cluster still does not preserve any ATU shell field or exact shell path id.",
     "Committed level0 object neighborhoods preserve a tighter late prefab roster with NewTokenUPGPrefab.T3.TokensBoost, NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser, NewTokenUPGPrefab.T3.TrinityBoosterOne, NewTokenUPGPrefab.T5.TrinityOomBooster, and NewTokenUPGPrefab.T2.DuoBoosterFour, while NewTokenUPGPrefab.T5.CampaignFragments stays on a separate effect-side surface.",
     "Committed effect-side evidence also narrows the same late lane through ATU24Bonus3Shards, Campaign Fragments strings, and Academy Points strings, but those clues still do not cross back to one exact ATU24Button through ATU28Button shell.",
-    "Because the late action shell, title roster, prefab roster, and effect-side strings remain separate local clusters, the repo still cannot honestly recover one concrete ATU24 through ATU28 row identity from this neighborhood.",
-    "This new late-shell pass therefore records a tighter negative result instead of widening the remap: do not infer ATU24 through ATU28 row identity from row order, nearby roster size, loose title similarity, or prefab-only naming."
+    "Because the late action shell, title roster, prefab roster, effect-side strings, and shared SetAllTokenShopTexts reconstruction context still remain separate local clusters, the repo still cannot honestly recover one concrete ATU24 through ATU28 row identity from this neighborhood.",
+    "This late-shell family audit therefore records a stronger negative result instead of widening the remap: do not infer ATU24 through ATU28 row identity from row order, nearby roster size, loose title similarity, prefab-only naming, or one shared late text-owner context."
   ]
 }
-
-

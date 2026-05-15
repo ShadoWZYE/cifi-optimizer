@@ -8,6 +8,7 @@
   },
   "scripts": {
     "check:syntax": "node ./scripts/contracts/check-js-syntax.mjs",
+    "capture:surface": "node ./scripts/ui/capture-local-surface.mjs",
     "ci:local": "npm run verify && npm test && npm run test:unit",
     "contracts:gen-index": "node ./scripts/contracts/generate-dataset-index.mjs",
     "dev": "node ./scripts/dev-server.mjs",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "eslint": "^10.2.1",
+    "playwright": "^1.59.1",
     "prettier": "^3.8.3"
   }
 }

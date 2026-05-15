@@ -64,4 +64,4 @@ Current grounded conclusion:
 - remapped serialized ids `57-62` still fail to recover a checked player-facing text or label source, so following the prefab remap does not narrow the missing text source any further
 - the `69-74 -> 57-62` relation is therefore bounded as internal shell metadata only, not as the live player-facing remap model
 - the actual missing source class is the game-side player-facing effect or label text path for Emporium rows, likely in the `TextHandlerMarkets` / bonus-text / localization layer beyond the recovered cost hooks and row payload carriers
-- canonical Emporium import remains blocked for separate reasons, so the canonical import-safe subset stays empty
+- canonical Emporium import is no longer the blocker here; the remaining gap is the narrower player-facing effect/label text source for Emporium rows

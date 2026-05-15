@@ -42,4 +42,4 @@ This note records the smallest checked explanation for why rows `71-74` break th
 - Prefab numbering does not stay aligned in that band; prefab numbers `71-74` are reused as shells for serialized ids `59-62`.
 - The supplied live UI screenshots falsify that shell swap as the player-facing row-identity model for rows `71-74`.
 - The `59-62` relation therefore stays bounded as internal shell metadata only.
-- This does not widen canonical import or planner safety, so the canonical import-safe subset stays empty.
+- This does not widen the narrower player-facing text/effect lane; the root import and planner gate is already clear.

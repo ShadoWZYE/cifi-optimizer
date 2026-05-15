@@ -81,7 +81,7 @@ Current grounded conclusion:
 - following the broken band back to remapped serialized ids `57-62` does not recover a narrower player-facing text source either and therefore stays bounded as internal shell metadata only
 - the raw `TextHandlerMarkets` base-bonus and `ISObject` shell continuation is now exhausted as a checked negative boundary for repo-local effect or label text recovery
 - the remaining unresolved lane is the actual game-side player-facing effect or label text source for Emporium rows
-- the canonical import-safe subset stays empty
+- this is now a bounded child-scope text-source gap, not a root canonical import blocker
 
 ## Checked 69-74 anomaly provenance boundary
 
@@ -131,7 +131,7 @@ Current grounded conclusion:
 - the actual structure linking displayed inscription rows through to `SaveData` is the ordered same-number owner and row-carrier path, not the prefab shell suffix
 - the `57-62` relation is meaningful only as shell-local anomaly metadata
 - row payload carriers recover live bonus magnitudes for rows `69-74`, but not their player-facing bonus-text phrases
-- compatibility-only import and planner blocks remain unchanged
+- root save-owner import/planner gating is now cleared by the DB-backed boundary model; the remaining gap is the narrower player-facing text/effect explanation lane
 
 ## Alternate serialized-export indirect-join boundary
 
@@ -337,6 +337,5 @@ Current grounded conclusion:
 2. keep any player-owned inscription-level preview descriptive and quarantined unless a narrower grounded canonical import slice is checked
 3. keep any future Emporium follow-up focused on the actual missing source class: game-side player-facing effect or label text provenance beyond the recovered same-number row chain
 4. only then revisit whether any canonical Emporium import or spend-planner recommendation is justified
-
 
 

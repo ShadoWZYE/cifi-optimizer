@@ -9,14 +9,6 @@ export function resolveTokenShopProgressionLevelSource(
   progressionState,
   compatibilityLevels
 ) {
-  const localOverrideValue = progressionState?.checkedSubsetLevels?.[fieldName];
-  if (typeof localOverrideValue === "number" && Number.isFinite(localOverrideValue)) {
-    return {
-      value: localOverrideValue,
-      sourceLabel: "Local progression override",
-      path: `planning.tokenShop.checkedSubsetLevels.${fieldName}`
-    };
-  }
   const playerStateValue = progressionState?.checkedSubsetPlayerState?.[fieldName];
   if (typeof playerStateValue === "number" && Number.isFinite(playerStateValue)) {
     return {
@@ -36,7 +28,90 @@ export function resolveTokenShopProgressionLevelSource(
   return {
     value: 0,
     sourceLabel: "Default level 0",
-    path: `planning.tokenShop.checkedSubsetLevels.${fieldName}`
+    path: `planning.tokenShop.checkedSubsetPlayerState.${fieldName}`
+  };
+}
+
+function getTokenShopNumericFieldValues(tokenShop, fieldNames) {
+  return (Array.isArray(fieldNames) ? fieldNames : [])
+    .map((fieldName) => ({
+      field: fieldName,
+      value: getTokenShopNumericFieldValue(tokenShop, fieldName)
+    }))
+    .filter((entry) => typeof entry.field === "string" && entry.field);
+}
+
+function resolveTokenShopCostState(row, currentLevel, startCost, additiveCost, maxLevel) {
+  const costFormulaType = String(row?.costFormulaType || "linear").trim() || "linear";
+  const costFormulaConfidence = String(row?.costFormulaConfidence || "verified").trim() || "verified";
+  const hasLevel = typeof currentLevel === "number" && Number.isFinite(currentLevel);
+  const isMaxed =
+    hasLevel && typeof maxLevel === "number" && Number.isFinite(maxLevel) && currentLevel >= maxLevel;
+
+  if (isMaxed) {
+    return {
+      costFormulaType,
+      costFormulaConfidence,
+      nextKnownCost: null,
+      projectedNextCost: null,
+      isMaxed: true,
+      costFormulaLabel: "No next cost within known cap",
+      costFormulaKnown: true,
+      costFormulaProjected: false
+    };
+  }
+
+  if (costFormulaType === "start-only") {
+    const hasStartCost = typeof startCost === "number" && Number.isFinite(startCost);
+    const nextKnownCost = hasLevel && currentLevel === 0 && hasStartCost ? startCost : null;
+    return {
+      costFormulaType,
+      costFormulaConfidence,
+      nextKnownCost,
+      projectedNextCost: nextKnownCost,
+      isMaxed: false,
+      costFormulaKnown: hasStartCost,
+      costFormulaProjected: false,
+      costFormulaLabel:
+        hasStartCost && currentLevel === 0
+          ? `Known first-purchase cost: ${startCost}.`
+          : hasStartCost
+            ? "Only the first-purchase cost is grounded in this build."
+            : "Known cost inputs are incomplete in this build."
+    };
+  }
+
+  const hasLinearInputs =
+    typeof startCost === "number" &&
+    Number.isFinite(startCost) &&
+    typeof additiveCost === "number" &&
+    Number.isFinite(additiveCost);
+  const projectedNextCost = hasLevel && hasLinearInputs ? startCost + additiveCost * currentLevel : null;
+  if (costFormulaConfidence === "projected") {
+    return {
+      costFormulaType,
+      costFormulaConfidence,
+      nextKnownCost: null,
+      projectedNextCost,
+      isMaxed: false,
+      costFormulaKnown: hasLinearInputs,
+      costFormulaProjected: hasLinearInputs,
+      costFormulaLabel: hasLinearInputs
+        ? `Exact runtime cost formula is unverified for this row. Extracted StartCost/AdditiveCost inputs are available but are not used as known next-cost evidence.`
+        : "Known cost inputs are incomplete in this build."
+    };
+  }
+  return {
+    costFormulaType,
+    costFormulaConfidence,
+    nextKnownCost: projectedNextCost,
+    projectedNextCost,
+    isMaxed: false,
+    costFormulaKnown: hasLinearInputs,
+    costFormulaProjected: false,
+    costFormulaLabel: hasLinearInputs
+      ? `Known cost inputs: start ${startCost} + additive ${additiveCost} x current level.`
+      : "Known cost inputs are incomplete in this build."
   };
 }
 
@@ -50,7 +125,8 @@ export function buildTokenShopProgressionModel({
   getKnownMaxStatus,
   getCurrentVsNextBonusSummary
 }) {
-  const rows = getGroundedSubsetDefinitions(boundary).map((row) => {
+  const groundedSubsetDefinitions = getGroundedSubsetDefinitions(boundary);
+  const rows = groundedSubsetDefinitions.map((row) => {
     const levelSource = resolveTokenShopProgressionLevelSource(
       row.field,
       progressionState,
@@ -60,14 +136,15 @@ export function buildTokenShopProgressionModel({
 
     const startCost = getTokenShopNumericFieldValue(tokenShop, row.startCostField);
     const additiveCost = getTokenShopNumericFieldValue(tokenShop, row.additiveCostField);
-    const bonusValue = getTokenShopNumericFieldValue(tokenShop, row.bonusField);
+    const bonusValues = getTokenShopNumericFieldValues(tokenShop, row.bonusFields);
+    const bonusValue =
+      getTokenShopNumericFieldValue(tokenShop, row.bonusField) ??
+      bonusValues.find((entry) => typeof entry?.value === "number")?.value ??
+      null;
     const maxLevel = getTokenShopNumericFieldValue(tokenShop, row.maxLevelField);
-    const hasLevel = typeof currentLevel === "number" && Number.isFinite(currentLevel);
-    const isMaxed = hasLevel && typeof maxLevel === "number" && currentLevel >= maxLevel;
-    const nextKnownCost =
-      hasLevel && !isMaxed && typeof startCost === "number" && typeof additiveCost === "number"
-        ? startCost + additiveCost * currentLevel
-        : null;
+    const bonusMode = String(row?.bonusMode || row?.bonusStepMode || "additive").trim() || "additive";
+    const costState = resolveTokenShopCostState(row, currentLevel, startCost, additiveCost, maxLevel);
+    const nextKnownCost = costState.nextKnownCost;
     const isAffordable =
       typeof nextKnownCost === "number" && typeof currentTokens === "number"
         ? currentTokens >= nextKnownCost
@@ -81,10 +158,18 @@ export function buildTokenShopProgressionModel({
       startCost,
       additiveCost,
       bonusValue,
+      bonusValues,
+      bonusMode,
       nextKnownCost,
+      projectedNextCost: costState.projectedNextCost,
       isAffordable,
-      isMaxed,
+      isMaxed: costState.isMaxed,
       maxLevel,
+      costFormulaType: costState.costFormulaType,
+      costFormulaConfidence: costState.costFormulaConfidence,
+      costFormulaKnown: costState.costFormulaKnown,
+      costFormulaProjected: costState.costFormulaProjected,
+      costFormulaLabel: costState.costFormulaLabel,
       maxStatus: getKnownMaxStatus(currentLevel, maxLevel),
       currentVsNextBonus: getCurrentVsNextBonusSummary(row, currentLevel, maxLevel, bonusValue)
     };
@@ -93,10 +178,8 @@ export function buildTokenShopProgressionModel({
   return {
     currentTokens,
     displayRule:
-      "Rows are shown in grounded ATU slot order by tier: T1 (ATU1-ATU12), T2 (ATU13-ATU18), T3 (ATU19-ATU23), T4 (ATU24-ATU25), T5 (ATU26-ATU28). Locked tiers are hidden in player input.",
+      "Rows are shown in grounded ATU slot order by visible in-game tier shell: T1 (ATU1-ATU12), T2 (ATU13-ATU19), T3 (ATU20-ATU23), T4 (ATU24-ATU28). Player-profile checked state is primary, compatibility is fallback only, and tier locks remain heuristic policy until stronger in-game gating clears.",
     rows,
-    localCount: rows.filter((row) => row.currentLevelSourceLabel === "Local progression override")
-      .length,
     playerStateCount: rows.filter((row) => row.currentLevelSourceLabel === "Checked player state")
       .length,
     compatibilityCount: rows.filter(

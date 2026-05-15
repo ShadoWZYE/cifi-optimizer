@@ -2,6 +2,7 @@ export function createShardEvidenceSupport({
   formatShardNumber,
   getShardCostModelBoundarySummary,
   getShardEffectTextHandlerBoundarySummary,
+  getShardSaveBoundarySummary,
   getShardSystemView,
   getShardMilestoneRowModelBoundarySummary,
   getShardMilestoneTitleEffectBoundarySummary,
@@ -456,7 +457,9 @@ export function createShardEvidenceSupport({
   }
 
   function getShardOwnedStateBlockerSummary() {
+    const shardSystem = getShardSystemView?.() ?? {};
     const saveBoundary = getShardGroundingCompatibilityView()?.saveBoundary ?? {};
+    const dbSaveBoundary = getShardSaveBoundarySummary?.(shardSystem) ?? {};
     const boundaryEvidence = saveBoundary.boundaryEvidence || {};
     const recoveredDeclaringRowModel =
       typeof saveBoundary?.recoveredDeclaringRowModel === "object" &&
@@ -474,21 +477,27 @@ export function createShardEvidenceSupport({
       : "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo";
     return {
       statusLabel: "Blocked",
-      ownerLine:
-        boundaryEvidence.saveSideOwnerRecovered === false
+      ownerLine: dbSaveBoundary?.subjectId
+        ? `DB-backed shard owned-state subject ${dbSaveBoundary.subjectId} still does not recover a checked save-side owner for player-owned shard rows; the trail stops at ${dbSaveBoundary.runtimeShellAnchor || runtimeShellAnchor}.`
+        : boundaryEvidence.saveSideOwnerRecovered === false
           ? `No checked save-side owner is recovered for player-owned shard rows; the trail still stops at ${runtimeShellAnchor}.`
           : "A checked save-side owner is recovered.",
-      traceLine:
-        boundaryEvidence.ownedStateOutcomeKind === "deeper-wrapper-handoff"
+      traceLine: dbSaveBoundary?.coverageSource
+        ? `Current shard DB coverage source is ${dbSaveBoundary.coverageSource}, and the owned-state bridge still stops at ${dbSaveBoundary.nextSeamId || dbSaveBoundary.ownedStateOutcomeKind || "an unrecorded seam"}.`
+        : boundaryEvidence.ownedStateOutcomeKind === "deeper-wrapper-handoff"
           ? "The trace does not recover a local ShardMining producer, but it does preserve a deeper wrapper handoff for owned-state values."
           : "The trace rules out a local upgradeInfoList population bridge and still cannot name a deeper wrapper handoff, so owned-state values stay bounded as a non-local injection seam.",
-      importLine:
-        "No grounded import path is available from PlayerProfileData or CloudSavePlayerProfile, so player-owned shard rows cannot be imported from this contract.",
-      plannerLine:
-        "Planner-safe affordability, exact per-level math, ROI, ETA, and canonical state.playerProfile promotion stay blocked on this row.",
-      candidateLine: leadingCandidate?.label
-        ? `Current unresolved save-owner candidate: ${leadingCandidate.label}.`
-        : "No narrower save-owner candidate is promoted from this contract."
+      importLine: dbSaveBoundary?.subjectId
+        ? "No grounded import path is available from the current shard DB surface into PlayerProfileData or CloudSavePlayerProfile, so player-owned shard rows cannot be imported from this contract."
+        : "No grounded import path is available from PlayerProfileData or CloudSavePlayerProfile, so player-owned shard rows cannot be imported from this contract.",
+      plannerLine: dbSaveBoundary?.subjectId
+        ? "Planner-safe affordability, exact per-level math, ROI, ETA, and canonical state.playerProfile promotion stay blocked until this DB-owned shard save seam closes."
+        : "Planner-safe affordability, exact per-level math, ROI, ETA, and canonical state.playerProfile promotion stay blocked on this row.",
+      candidateLine: dbSaveBoundary?.unresolvedSaveCandidateLabel
+        ? `Current unresolved save-owner candidate: ${dbSaveBoundary.unresolvedSaveCandidateLabel}.`
+        : leadingCandidate?.label
+          ? `Current unresolved save-owner candidate: ${leadingCandidate.label}.`
+          : "No narrower save-owner candidate is promoted from this contract."
     };
   }
 
