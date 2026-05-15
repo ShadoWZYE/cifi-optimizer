@@ -2543,6 +2543,28 @@ BOOTSTRAP_OUTPUT_SUMMARY_RULES = {
     },
 }
 
+COMPOSITE_SUBJECT_SEAM_CLOSURE_RULES = {
+    "multiverse-market-save-owner-boundary": {
+        "save-owner-boundary": {
+            "requiredKnownEdges": [
+                "typed-market-field-recovery",
+                "canonical-import-admissibility",
+                "broad-row-identity-remap",
+            ],
+        },
+    },
+    "shard-cost-su0-structure": {
+        "automated-calibration-closure": {
+            "requiredKnownEdges": [
+                "getter-family",
+                "getter-to-parameter-shell",
+                "metadata-row0-parameter-shell",
+                "deterministic-evaluator",
+            ],
+        },
+    },
+}
+
 RELATION_SEAM_CONTRACT_REGISTRY: dict[str, dict[str, dict[str, Any]]] = {
     "token-shop": {
         "exact-cellboost-consumer-method": {
@@ -3847,6 +3869,23 @@ def _derive_execution_plan_relation_seam_contracts(
         contracts[normalized_seam_id] = contract
     if contracts or not missing_seam_set:
         return contracts
+
+    def _generic_required_fact_kinds(candidate_seam_id: str) -> list[str]:
+        seam_lower = str(candidate_seam_id or "").strip().lower()
+        if "runtime-next-cost-formula" in seam_lower:
+            return ["runtime-next-cost-accessor"]
+        if "runtime-final-max-level" in seam_lower:
+            return ["runtime-final-max-level"]
+        return []
+
+    def _generic_required_relation_kinds(candidate_seam_id: str) -> list[str]:
+        seam_lower = str(candidate_seam_id or "").strip().lower()
+        if "runtime-next-cost-formula" in seam_lower:
+            return ["buy-method-cost-read", "runtime-next-cost-formula", "runtime-next-cost-accessor"]
+        if "runtime-final-max-level" in seam_lower:
+            return ["runtime-final-max-level"]
+        return []
+
     generic_probe_mode = "relation-shaped"
     for seam_id in missing_seam_ids:
         normalized_seam_id = str(seam_id or "").strip()
@@ -3858,6 +3897,8 @@ def _derive_execution_plan_relation_seam_contracts(
             "coverageMode": generic_probe_mode,
             "probeMode": generic_probe_mode,
             "requiredCoverageSeamIds": [normalized_seam_id],
+            "requiredFactKinds": _generic_required_fact_kinds(normalized_seam_id),
+            "requiredRelationKinds": _generic_required_relation_kinds(normalized_seam_id),
             "fallbackExpectedTerms": list(normalized_follow_up_terms[:12]),
             "fallbackAnchors": list(normalized_follow_up_terms[:4]),
             "source": "execution-plan-fragment-generic",
@@ -4199,13 +4240,21 @@ def _merge_surface_plans_with_bootstrap_support_surfaces(
         if not surface_id:
             continue
         existing_surface = dict(merged_by_id.get(surface_id) or {})
+        existing_terms = [str(value) for value in (existing_surface.get("terms") or []) if str(value).strip()]
+        configured_terms = [str(value) for value in (configured_surface.get("terms") or []) if str(value).strip()]
+        support_origin = "bootstrap-only"
+        synthetic_bootstrap = True
+        if existing_surface:
+            support_origin = "db+bootstrap"
+            synthetic_bootstrap = False
         merged_by_id[surface_id] = {
             "id": surface_id,
             "label": str(existing_surface.get("label") or configured_surface.get("label") or "").strip(),
-            "terms": _unique_strings(
+            "terms": _unique_strings(existing_terms or configured_terms),
+            "fallbackTerms": _unique_strings(
                 [
-                    *[str(value) for value in (existing_surface.get("terms") or []) if str(value).strip()],
-                    *[str(value) for value in (configured_surface.get("terms") or []) if str(value).strip()],
+                    *[str(value) for value in (existing_surface.get("fallbackTerms") or []) if str(value).strip()],
+                    *([] if not existing_surface else configured_terms),
                 ]
             ),
             "sourceIds": _unique_strings(
@@ -4214,6 +4263,8 @@ def _merge_surface_plans_with_bootstrap_support_surfaces(
                     *[str(value) for value in (configured_surface.get("sourceIds") or []) if str(value).strip()],
                 ]
             ),
+            "supportOrigin": str(existing_surface.get("supportOrigin") or support_origin),
+            "syntheticBootstrap": bool(existing_surface.get("syntheticBootstrap")) or synthetic_bootstrap,
         }
     ordered_surface_ids = [
         *[
@@ -4235,6 +4286,59 @@ def _merge_surface_plans_with_bootstrap_support_surfaces(
         seen_surface_ids.add(surface_id)
         merged_surface_plans.append(dict(merged_by_id[surface_id]))
     return merged_surface_plans
+
+
+def _filter_grounded_support_surfaces(
+    support_surfaces: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    grounded: list[dict[str, Any]] = []
+    for surface in [dict(item) for item in (support_surfaces or []) if isinstance(item, dict)]:
+        if bool(surface.get("syntheticBootstrap")):
+            continue
+        grounded.append(surface)
+    return grounded
+
+
+def _normalize_support_surfaces_against_bootstrap_context(
+    support_surfaces: list[dict[str, Any]] | None,
+    *,
+    target_id: str,
+    trace_scope: str,
+) -> list[dict[str, Any]]:
+    normalized_surfaces: list[dict[str, Any]] = []
+    strategy_support_context = dict(
+        BOOTSTRAP_SUPPORT_CONTEXTS.get(str(target_id or "").strip() or trace_scope)
+        or BOOTSTRAP_SUPPORT_CONTEXTS.get(trace_scope)
+        or {}
+    )
+    configured_surfaces = {
+        str(surface.get("id") or "").strip(): {
+            str(value).strip()
+            for value in (surface.get("terms") or [])
+            if str(value).strip()
+        }
+        for surface in (strategy_support_context.get("surfaces") or [])
+        if isinstance(surface, dict) and str(surface.get("id") or "").strip()
+    }
+    for surface in [dict(item) for item in (support_surfaces or []) if isinstance(item, dict)]:
+        surface_id = str(surface.get("id") or "").strip()
+        bootstrap_terms = set(configured_surfaces.get(surface_id) or set())
+        active_terms = [str(value).strip() for value in (surface.get("terms") or []) if str(value).strip()]
+        fallback_terms = [str(value).strip() for value in (surface.get("fallbackTerms") or []) if str(value).strip()]
+        if bootstrap_terms:
+            retained_terms = [term for term in active_terms if term not in bootstrap_terms]
+            bootstrap_only_terms = [term for term in active_terms if term in bootstrap_terms]
+            surface["terms"] = _unique_strings(retained_terms or bootstrap_only_terms)
+            surface["fallbackTerms"] = _unique_strings([*fallback_terms, *bootstrap_only_terms] if retained_terms else fallback_terms)
+            surface["syntheticBootstrap"] = not bool(retained_terms)
+            if retained_terms and bootstrap_only_terms:
+                surface["supportOrigin"] = "db+bootstrap"
+            elif bootstrap_only_terms:
+                surface["supportOrigin"] = "bootstrap-only"
+            else:
+                surface["supportOrigin"] = str(surface.get("supportOrigin") or "db").strip() or "db"
+        normalized_surfaces.append(surface)
+    return normalized_surfaces
 
 
 def _derive_graph_plan_fragment(
@@ -5069,7 +5173,10 @@ def _derive_generic_mechanics_views_from_subject_contract(payload: dict[str, Any
             )
     blocked_input_reasons = dict(payload.get("blockedInputReasons") or {})
     for lane_id, blocked_reason in sorted(blocked_input_reasons.items()):
-        if not str(blocked_reason).strip():
+        if blocked_reason is None:
+            continue
+        blocked_reason_text = str(blocked_reason).strip()
+        if not blocked_reason_text or blocked_reason_text.lower() == "none":
             continue
         gaps.append(
             {
@@ -5079,7 +5186,7 @@ def _derive_generic_mechanics_views_from_subject_contract(payload: dict[str, Any
                 "gapKind": "blocked-lane",
                 "payload": {
                     "laneId": lane_id,
-                    "reason": str(blocked_reason).strip(),
+                    "reason": blocked_reason_text,
                 },
             }
         )
@@ -5215,6 +5322,1070 @@ def _derive_generic_mechanics_views_from_subject_contract(payload: dict[str, Any
         "relations": relations,
         "gaps": gaps,
     }
+
+
+RUNTIME_COVERAGE_GAP_CONFIGS: dict[str, dict[str, Any]] = {
+    "token-shop": {
+        "systemUnitId": "token-shop-values",
+        "systemUnitVersion": "v1",
+        "traceScopePrefix": "token-shop",
+        "defaultTraceScope": "token-shop-family-structure",
+        "shellFieldPattern": r"ATU(?P<row>\d+)Button",
+        "fieldKeyTemplate": "ATU{row}Level",
+        "slotTemplate": "ATU{row}",
+        "traceScopeRules": [
+            {"row": 3, "traceScope": "token-shop-atu3-cells-effect"},
+            {"row": 4, "traceScope": "token-shop-atu4-mod"},
+            {"row": 5, "traceScope": "token-shop-atu5-mk1-title"},
+            {"row": 7, "traceScope": "token-shop-atu7-mk3-bridge"},
+            {"rowMin": 14, "rowMax": 19, "traceScope": "token-shop-daily-tokenium-family"},
+            {"rowMin": 21, "rowMax": 23, "traceScope": "token-shop-t3-trio-family"},
+            {"rowMin": 24, "rowMax": 28, "traceScope": "token-shop-late-atu-family"},
+        ],
+        "ownerFieldPattern": r"(?:[A-Za-z0-9]+)(?:StartCost|AdditiveCost|Bonus\d*|Bonus|MaxLevel|FillMaxLevel|Fill)",
+        "stemSuffixes": ["StartCost", "AdditiveCost", "FillMaxLevel", "MaxLevel", "Bonus"],
+        "startSuffixes": ["StartCost"],
+        "continuationSuffixes": ["AdditiveCost", "MaxLevel", "FillMaxLevel", "Bonus"],
+        "requiredUpdaterTerms": ["SetCostRelatedAttributes"],
+        "contextTerms": ["SetTokenTexts", "SetAllTokenShopTexts"],
+        "stemIncludePatterns": [
+            r"ModBoost",
+            r"MK\d+TokenBoost",
+            r"T2Duo\d+",
+            r"T3Trio\d+",
+            r"ATU2[4-8]",
+        ],
+        "fieldIncludePatterns": [r"ATU2[4-8]Level"],
+        "actionSurfaceIds": ["action-lane", "bridge-proxies", "negative-neighborhoods"],
+        "actionPrefixes": ["Buy", "Start", "Stop"],
+        "primaryActionTermLimit": 1,
+        "gapKind": "runtime-cost-coverage",
+        "gapReason": "optimizer-visible-runtime-cost-gap",
+        "gapSource": "db-system-unit-owner-order",
+        "expectedEvidence": [
+            "level-to-cost-input-owner",
+            "buy-method-cost-read",
+            "runtime-next-cost-formula",
+        ],
+    },
+}
+
+
+def _runtime_coverage_config_for_trace_scope(trace_scope: str) -> tuple[str, dict[str, Any]] | tuple[str, dict]:
+    trace_scope = str(trace_scope or "").strip()
+    for system_key, config in RUNTIME_COVERAGE_GAP_CONFIGS.items():
+        prefix = str(config.get("traceScopePrefix") or "").strip()
+        scopes = {str(value).strip() for value in (config.get("traceScopes") or []) if str(value).strip()}
+        if (prefix and trace_scope.startswith(prefix)) or trace_scope in scopes:
+            return system_key, dict(config)
+    return "", {}
+
+
+def _runtime_coverage_expand_shell_terms(values: list[Any]) -> list[str]:
+    terms: list[str] = []
+    for value in values:
+        text = str(value or "").strip()
+        if not text:
+            continue
+        range_match = re.fullmatch(r"([A-Za-z_]+)(\d+)([A-Za-z_]+)\s+through\s+\1(\d+)\3", text)
+        if range_match:
+            prefix, start, suffix, end = range_match.groups()
+            for number in range(int(start), int(end) + 1):
+                terms.append(f"{prefix}{number}{suffix}")
+            continue
+        terms.extend(re.findall(r"\b[A-Za-z_]+\d+[A-Za-z_]*Button\b", text))
+    return _unique_strings(terms)
+
+
+def _infer_runtime_coverage_shell_pattern(shell_terms: list[str]) -> dict[str, str]:
+    candidates: dict[tuple[str, str], int] = {}
+    for term in shell_terms:
+        match = re.fullmatch(r"([A-Za-z_]+)(\d+)([A-Za-z_]+)", str(term or "").strip())
+        if not match:
+            continue
+        prefix, _, suffix = match.groups()
+        candidates[(prefix, suffix)] = candidates.get((prefix, suffix), 0) + 1
+    if not candidates:
+        return {}
+    (prefix, suffix), _ = sorted(candidates.items(), key=lambda item: (-item[1], item[0]))[0]
+    field_suffix = "Level" if suffix == "Button" else suffix
+    return {
+        "shellFieldPattern": rf"{re.escape(prefix)}(?P<row>\d+){re.escape(suffix)}",
+        "fieldKeyTemplate": f"{prefix}{{row}}{field_suffix}",
+        "slotTemplate": f"{prefix}{{row}}",
+    }
+
+
+def _infer_runtime_coverage_updater_terms(
+    resolver_payload: dict[str, Any],
+    fallback_terms: list[Any],
+) -> list[str]:
+    del fallback_terms
+    raw_terms: list[str] = []
+    for surface in list(dict(resolver_payload or {}).get("supportSurfaces") or []):
+        if not isinstance(surface, dict):
+            continue
+        raw_terms.extend([str(term).strip() for term in (surface.get("terms") or []) if str(term).strip()])
+    raw_terms.extend([str(term).strip() for term in (dict(resolver_payload or {}).get("nativeTraceTerms") or []) if str(term).strip()])
+    inferred = [
+        term
+        for term in _unique_strings(raw_terms)
+        if re.fullmatch(r"Set[A-Za-z0-9_]*(?:Cost|Costs|Attribute|Attributes|Text|Texts)[A-Za-z0-9_]*", term)
+    ]
+    cost_first = [term for term in inferred if "Cost" in term or "Attribute" in term]
+    return cost_first or inferred
+
+
+def _infer_runtime_coverage_config(
+    trace_scope: str,
+    resolver_payload: dict[str, Any],
+    config_hint: dict[str, Any],
+) -> dict[str, Any]:
+    resolver_payload = dict(resolver_payload or {})
+    config = dict(config_hint or {})
+    config["supportSurfaces"] = [dict(surface) for surface in (resolver_payload.get("supportSurfaces") or []) if isinstance(surface, dict)]
+    shell_values: list[Any] = []
+    for row in list(resolver_payload.get("supportRows") or []):
+        if isinstance(row, dict):
+            shell_values.extend([row.get("shellField"), row.get("field")])
+    if not _runtime_coverage_expand_shell_terms(shell_values):
+        for surface in list(resolver_payload.get("supportSurfaces") or []):
+            if not isinstance(surface, dict):
+                continue
+            if str(surface.get("id") or "").strip() in {"family-shells", "shells", "shell-range"}:
+                shell_values.extend(list(surface.get("terms") or []))
+    scope_shell_terms = _runtime_coverage_expand_shell_terms(shell_values)
+    inferred_shell = _infer_runtime_coverage_shell_pattern(scope_shell_terms)
+    for key, value in inferred_shell.items():
+        config.setdefault(key, value)
+    if scope_shell_terms:
+        config["scopeShellTerms"] = scope_shell_terms
+    if not config.get("ownerFieldPattern"):
+        config["ownerFieldPattern"] = r"(?:[A-Za-z0-9]+)(?:StartCost|AdditiveCost|Bonus\d*|Bonus|MaxLevel|FillMaxLevel|Fill)"
+    config.setdefault("stemSuffixes", ["StartCost", "AdditiveCost", "FillMaxLevel", "MaxLevel", "Bonus"])
+    config.setdefault("startSuffixes", ["StartCost"])
+    config.setdefault("continuationSuffixes", ["AdditiveCost", "MaxLevel", "FillMaxLevel", "Bonus"])
+    config["requiredUpdaterTerms"] = _infer_runtime_coverage_updater_terms(
+        resolver_payload,
+        list(config.get("requiredUpdaterTerms") or []),
+    )
+    config.setdefault("gapKind", "runtime-cost-coverage")
+    config.setdefault("gapReason", "optimizer-visible-runtime-cost-gap")
+    config.setdefault("gapSource", "db-inferred-system-unit-owner-order")
+    return config
+
+
+def _runtime_coverage_trace_scope_for_row(config: dict[str, Any], row_number: int) -> str:
+    for rule in list(config.get("traceScopeRules") or []):
+        if not isinstance(rule, dict):
+            continue
+        if "row" in rule and int(rule.get("row") or -1) == row_number:
+            return str(rule.get("traceScope") or "").strip()
+        row_min = int(rule.get("rowMin") or -1)
+        row_max = int(rule.get("rowMax") or -1)
+        if row_min >= 0 and row_max >= row_min and row_min <= row_number <= row_max:
+            return str(rule.get("traceScope") or "").strip()
+    return str(config.get("defaultTraceScope") or "").strip()
+
+
+def _runtime_coverage_value_matches_any(value: str, patterns: list[Any]) -> bool:
+    value = str(value or "").strip()
+    for pattern in patterns:
+        if re.fullmatch(str(pattern or ""), value):
+            return True
+    return False
+
+
+def _runtime_coverage_gap_stem_is_relevant(config: dict[str, Any], stem: str, field_key: str) -> bool:
+    stem_patterns = list(config.get("stemIncludePatterns") or [])
+    field_patterns = list(config.get("fieldIncludePatterns") or [])
+    if not stem_patterns and not field_patterns:
+        return True
+    return _runtime_coverage_value_matches_any(stem, stem_patterns) or _runtime_coverage_value_matches_any(
+        field_key,
+        field_patterns,
+    )
+
+
+def _runtime_coverage_action_terms_for_gap(
+    config: dict[str, Any],
+    trace_scope: str,
+    stem: str,
+    slot: str,
+) -> list[str]:
+    terms: list[str] = []
+    action_surface_ids = {str(value).strip() for value in (config.get("actionSurfaceIds") or []) if str(value).strip()}
+    action_prefixes = tuple(str(value).strip() for value in (config.get("actionPrefixes") or []) if str(value).strip())
+    for surface in list(config.get("supportSurfaces") or []):
+        if not isinstance(surface, dict):
+            continue
+        surface_id = str(surface.get("id") or "").strip()
+        if action_surface_ids and surface_id not in action_surface_ids:
+            continue
+        for term in list(surface.get("terms") or []):
+            term_text = str(term or "").strip()
+            if term_text and (not action_prefixes or term_text.startswith(action_prefixes)):
+                terms.append(term_text)
+    ordered_terms = _unique_strings(terms)
+    ranked_terms = [
+        (term, _runtime_coverage_action_term_rank(term, stem, slot, index))
+        for index, term in enumerate(ordered_terms)
+    ]
+    ranked_terms.sort(key=lambda item: item[1])
+    return [term for term, _ in ranked_terms]
+
+
+def _runtime_coverage_action_term_rank(term: str, stem: str, slot: str, original_index: int = 0) -> tuple[int, int, str]:
+    term_text = str(term or "").strip()
+    term_lower = term_text.lower()
+    stem_text = str(stem or "").strip()
+    stem_lower = stem_text.lower()
+    slot_lower = str(slot or "").strip().lower()
+    stem_digits = set(re.findall(r"\d+", stem_lower))
+    term_digits = set(re.findall(r"\d+", term_lower))
+    stem_alpha_parts = [
+        part.lower()
+        for part in re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?=[A-Z]|$)", stem_text)
+        if len(part) > 1
+    ]
+    score = 0
+    if stem_lower and stem_lower in term_lower:
+        score += 8
+    if slot_lower and slot_lower in term_lower:
+        score += 6
+    score += 3 * len(stem_digits.intersection(term_digits))
+    score += sum(1 for part in stem_alpha_parts if part in term_lower)
+    if term_text.startswith("Buy"):
+        score += 1
+    return (-score, original_index, term_text)
+
+
+def _runtime_coverage_gap_rows_from_system_unit(
+    system_unit_payload: dict[str, Any],
+    *,
+    config: dict[str, Any],
+    trace_scope: str,
+    subject_id: str,
+) -> list[dict[str, Any]]:
+    fields = list(dict(system_unit_payload or {}).get("fields") or [])
+    if not fields:
+        return []
+    rows: list[dict[str, Any]] = []
+    pending_fields: list[str] = []
+    for field_entry in fields:
+        if not isinstance(field_entry, dict):
+            continue
+        field_name = str(field_entry.get("field") or "").strip()
+        if not field_name:
+            continue
+        shell_match = re.fullmatch(str(config.get("shellFieldPattern") or ""), field_name)
+        if not shell_match:
+            pending_fields.append(field_name)
+            continue
+        row_number = int(shell_match.groupdict().get("row") or shell_match.group(1) or 0)
+        format_values = {"row": row_number}
+        slot = str(config.get("slotTemplate") or "{row}").format(**format_values)
+        field_key = str(config.get("fieldKeyTemplate") or "{slot}").format(slot=slot, **format_values)
+        scope_shell_terms = {str(term).strip() for term in (config.get("scopeShellTerms") or []) if str(term).strip()}
+        row_trace_scope = trace_scope if (not scope_shell_terms or field_name in scope_shell_terms) else _runtime_coverage_trace_scope_for_row(config, row_number)
+        row_block_terms = [
+            term
+            for term in pending_fields
+            if re.fullmatch(str(config.get("ownerFieldPattern") or ""), term)
+        ]
+        pending_fields = []
+        if row_trace_scope != trace_scope or not row_block_terms:
+            continue
+        stem = ""
+        for suffix in list(config.get("stemSuffixes") or []):
+            for term in row_block_terms:
+                if term.endswith(suffix):
+                    stem = term[: -len(suffix)]
+                    break
+            if stem:
+                break
+        if not _runtime_coverage_gap_stem_is_relevant(config, stem, field_key):
+            continue
+        action_terms = _runtime_coverage_action_terms_for_gap(config, row_trace_scope, stem, slot)
+        updater_terms = [str(term).strip() for term in (config.get("requiredUpdaterTerms") or []) if str(term).strip()]
+        context_terms = [str(term).strip() for term in (config.get("contextTerms") or []) if str(term).strip()]
+        runtime_terms = _unique_strings(
+            [
+                field_name,
+                field_key,
+                *row_block_terms,
+                *action_terms,
+                *updater_terms,
+                *context_terms,
+            ]
+        )
+        rows.append(
+            {
+                "entityId": f"{subject_id}#{field_key}",
+                "traceScope": row_trace_scope,
+                "fieldKey": field_key,
+                "gapKind": str(config.get("gapKind") or "runtime-coverage"),
+                "payload": {
+                    "reason": str(config.get("gapReason") or "optimizer-visible-runtime-gap"),
+                    "rowField": field_key,
+                    "shellField": field_name,
+                    "ownerFieldStem": stem or None,
+                    "ownerFieldBlock": list(row_block_terms),
+                    "preferredActionTerms": list(action_terms),
+                    "primaryActionTermLimit": int(config.get("primaryActionTermLimit") or 1),
+                    "updaterTerms": list(updater_terms),
+                    "terms": runtime_terms,
+                    "expectedEvidence": list(config.get("expectedEvidence") or []),
+                    "source": str(config.get("gapSource") or "db-system-unit-owner-order"),
+                },
+            }
+        )
+    return rows
+
+
+def _runtime_coverage_field_names_from_system_unit(payload: dict[str, Any]) -> set[str]:
+    field_names: set[str] = set()
+    for field_entry in list(dict(payload or {}).get("fields") or []):
+        if not isinstance(field_entry, dict):
+            continue
+        field_name = str(field_entry.get("field") or "").strip()
+        if field_name:
+            field_names.add(field_name)
+    return field_names
+
+
+def _find_runtime_coverage_system_unit_for_config(
+    conn: sqlite3.Connection,
+    config: dict[str, Any],
+) -> tuple[str, str, dict[str, Any]]:
+    configured_system_id = str(config.get("systemUnitId") or "").strip()
+    configured_version = str(config.get("systemUnitVersion") or "").strip()
+    if configured_system_id and configured_version:
+        row = conn.execute(
+            """
+            SELECT system_id, version, payload_json
+            FROM materialized_system_unit_views
+            WHERE system_id = ?
+              AND version = ?
+            ORDER BY built_at DESC
+            LIMIT 1
+            """,
+            (configured_system_id, configured_version),
+        ).fetchone()
+        if row:
+            payload = _json_loads(row["payload_json"], {})
+            if _runtime_coverage_field_names_from_system_unit(payload):
+                return str(row["system_id"]), str(row["version"]), payload
+    shell_terms = {
+        str(term).strip()
+        for term in (config.get("scopeShellTerms") or [])
+        if str(term).strip()
+    }
+    if not shell_terms:
+        return "", "", {}
+    rows = conn.execute(
+        """
+        SELECT system_id, version, payload_json
+        FROM materialized_system_unit_views
+        ORDER BY built_at DESC
+        """
+    ).fetchall()
+    best: tuple[int, int, str, str, dict[str, Any]] | None = None
+    for row in rows:
+        payload = _json_loads(row["payload_json"], {})
+        field_names = _runtime_coverage_field_names_from_system_unit(payload)
+        if not field_names:
+            continue
+        overlap = len(shell_terms.intersection(field_names))
+        if overlap <= 0:
+            continue
+        score = (overlap, min(len(field_names), 100000), str(row["system_id"]), str(row["version"]), payload)
+        if best is None or (score[0], -score[1], score[2], score[3]) > (best[0], -best[1], best[2], best[3]):
+            best = score
+    if not best:
+        return "", "", {}
+    return best[2], best[3], dict(best[4])
+
+
+def _runtime_coverage_gap_closed_by_term_view(
+    gap_row: dict[str, Any],
+    term_view: dict[str, Any] | None,
+) -> bool:
+    if not isinstance(term_view, dict):
+        return False
+    payload = dict(gap_row.get("payload") or {})
+    result = dict(term_view.get("result") or {})
+    bridge_plans = dict(result.get("bridgePlans") or {})
+    if not bridge_plans:
+        return False
+    shell_field = str(payload.get("shellField") or "").strip()
+    updater_terms = {str(term).strip() for term in (payload.get("updaterTerms") or []) if str(term).strip()}
+    owner_block = [str(term).strip() for term in (payload.get("ownerFieldBlock") or []) if str(term).strip()]
+    terms = [str(term).strip() for term in (payload.get("terms") or []) if str(term).strip()]
+    action_terms = {
+        term
+        for term in [
+            *[str(value).strip() for value in (payload.get("preferredActionTerms") or []) if str(value).strip()],
+            *terms,
+        ]
+        if term.startswith(("Buy", "Start", "Stop"))
+    }
+    start_terms = {term for term in owner_block if term.endswith("StartCost")}
+    additive_terms = {term for term in owner_block if term.endswith("AdditiveCost")}
+    max_terms = {term for term in owner_block if term.endswith(("MaxLevel", "FillMaxLevel"))}
+    if not shell_field or not start_terms:
+        return False
+    required_any_cost_continuation = bool(additive_terms or max_terms or any("Bonus" in term for term in owner_block))
+    if not required_any_cost_continuation:
+        return False
+    for bridge_plan in bridge_plans.values():
+        if not isinstance(bridge_plan, dict):
+            continue
+        plan_terms = {
+            str(term).strip()
+            for term in [
+                *list(bridge_plan.get("requestedTerms") or []),
+                *list(bridge_plan.get("fallbackTerms") or []),
+                *list(bridge_plan.get("selectedContextTerms") or []),
+                *list(bridge_plan.get("selectedNativeCoreTerms") or []),
+                *list(bridge_plan.get("bridgedTerms") or []),
+                *list(bridge_plan.get("nativeCoreTerms") or []),
+            ]
+            if str(term).strip()
+        }
+        if shell_field not in plan_terms:
+            continue
+        if updater_terms and not updater_terms.intersection(plan_terms):
+            continue
+        if not start_terms.intersection(plan_terms):
+            continue
+        if additive_terms and not additive_terms.intersection(plan_terms):
+            continue
+        if max_terms and not max_terms.intersection(plan_terms):
+            continue
+        return True
+    return False
+
+
+def _gap_row_effective_seam_id(gap_row: dict[str, Any]) -> str:
+    row = dict(gap_row or {})
+    payload = dict(row.get("payload") or {})
+    seam_id = str(
+        payload.get("seamId")
+        or payload.get("edgeId")
+        or payload.get("edgeType")
+        or ""
+    ).strip()
+    if seam_id:
+        return seam_id
+    for candidate in (
+        row.get("fieldKey"),
+        row.get("entityId"),
+        payload.get("gapId"),
+    ):
+        candidate_text = str(candidate or "").strip()
+        if candidate_text.startswith("edge:"):
+            return candidate_text.split(":", 1)[1].strip()
+    return ""
+
+
+def _derive_subject_state_delta_from_newer_gap_rows(
+    gap_rows: list[dict[str, Any]],
+    *,
+    runtime_coverage_closed_keys: set[tuple[str, str]],
+    satisfied_seam_ids: set[str] | None = None,
+) -> dict[str, Any]:
+    satisfied_seam_ids = {str(value).strip() for value in (satisfied_seam_ids or set()) if str(value).strip()}
+    concretely_supported_seam_ids: set[str] = set()
+    for gap_row in gap_rows:
+        gap_kind = str(gap_row.get("gapKind") or "").strip()
+        field_key = str(gap_row.get("fieldKey") or "").strip()
+        payload = dict(gap_row.get("payload") or {})
+        if gap_kind == "runtime-cost-coverage":
+            concretely_supported_seam_ids.add("runtime-next-cost-formula")
+            continue
+        if gap_kind == "blocked-lane":
+            lane_id = str(payload.get("laneId") or field_key or "").strip()
+            if lane_id:
+                concretely_supported_seam_ids.add(lane_id)
+            continue
+        if gap_kind in {"playerFacingSupportText", "effectText", "rowDetail", "row-detail"}:
+            if gap_kind == "row-detail":
+                concretely_supported_seam_ids.add("rowDetail")
+            elif gap_kind:
+                concretely_supported_seam_ids.add(gap_kind)
+    missing_edges: list[str] = []
+    blocked_edges: list[str] = []
+    next_terms: list[str] = []
+    for gap_row in gap_rows:
+        gap_kind = str(gap_row.get("gapKind") or "").strip()
+        field_key = str(gap_row.get("fieldKey") or "").strip()
+        entity_id = str(gap_row.get("entityId") or "").strip()
+        payload = dict(gap_row.get("payload") or {})
+        reason = str(payload.get("reason") or "").strip()
+        if gap_kind == "nonblocking-edge":
+            continue
+        if gap_kind == "runtime-cost-coverage":
+            if (entity_id, field_key) in runtime_coverage_closed_keys:
+                continue
+            missing_edges.append("runtime-next-cost-formula")
+            next_terms.extend([str(term).strip() for term in (payload.get("terms") or []) if str(term).strip()])
+            continue
+        if gap_kind == "effectText" and reason.startswith("not-applicable:"):
+            continue
+        if gap_kind in {"playerFacingSupportText", "effectText"}:
+            blocked_edges.append(gap_kind)
+            next_terms.extend([str(term).strip() for term in (payload.get("terms") or []) if str(term).strip()])
+            continue
+        if gap_kind == "blocked-lane":
+            if not reason or reason.lower() == "none":
+                continue
+            blocked_edges.append(field_key or entity_id or "blocked-lane")
+            next_terms.extend([str(term).strip() for term in (payload.get("terms") or []) if str(term).strip()])
+            continue
+        if gap_kind in {"missing-edge", "blocked-edge", "next-seam"}:
+            seam_id = _gap_row_effective_seam_id(gap_row)
+            if not seam_id or seam_id in satisfied_seam_ids:
+                continue
+            payload_terms = [str(term).strip() for term in (payload.get("terms") or []) if str(term).strip()]
+            payload_reason = str(payload.get("reason") or "").strip()
+            has_concrete_payload = bool(payload_terms or payload_reason and payload_reason not in {"newer-materialized-gap-view"})
+            if seam_id not in concretely_supported_seam_ids and not has_concrete_payload:
+                continue
+            (blocked_edges if gap_kind == "blocked-edge" else missing_edges).append(seam_id)
+            next_terms.extend(payload_terms)
+    missing_edges = _unique_strings(missing_edges)
+    blocked_edges = _unique_strings(blocked_edges)
+    next_terms = _unique_strings(next_terms)
+    next_seam_id = blocked_edges[0] if blocked_edges else (missing_edges[0] if missing_edges else "")
+    return {
+        "missingEdges": missing_edges,
+        "blockedEdges": blocked_edges,
+        "nextSeam": {
+            "id": next_seam_id or None,
+            "status": "open" if next_seam_id else "clear",
+            "reason": "newer-materialized-gap-view" if next_seam_id else "clear",
+            "terms": next_terms[:12],
+        },
+    }
+
+
+def _is_grounded_shared_lane_contract(candidate: dict[str, Any] | None) -> bool:
+    candidate = dict(candidate or {})
+    if str(candidate.get("blockedReason") or "").strip():
+        return False
+    grounded_fields = dict(candidate.get("groundedFields") or {})
+    support_summary = dict(candidate.get("supportSummary") or {})
+    provenance_summary = list(candidate.get("provenanceSummary") or [])
+    return bool(
+        grounded_fields
+        or support_summary
+        or provenance_summary
+    )
+
+
+def _runtime_coverage_bridge_evidence_from_native_trace_payload(
+    native_payload: dict[str, Any] | None,
+    *,
+    trace_scope: str,
+    shell_field: str,
+) -> dict[str, Any]:
+    native_payload = dict(native_payload or {})
+    trace_scope = str(trace_scope or "").strip()
+    shell_field = str(shell_field or "").strip()
+    if not trace_scope or not shell_field:
+        return {}
+    request_context = dict(native_payload.get("requestContext") or {})
+    if str(request_context.get("coverageMode") or "").strip() != "relation-shaped":
+        return {}
+    if str(request_context.get("relationScope") or "").strip() != trace_scope:
+        return {}
+    bridge_plan = dict(native_payload.get("bridgePlan") or {})
+    if not bridge_plan:
+        return {}
+    match_payloads = [
+        dict(match)
+        for match in (bridge_plan.get("matches") or [])
+        if isinstance(match, dict)
+    ]
+    selected_match = next(
+        (
+            match
+            for match in match_payloads
+            if str(match.get("shellField") or "").strip() == shell_field
+        ),
+        {},
+    )
+    owner_field_block = [
+        str(value).strip()
+        for value in (
+            selected_match.get("ownerFieldBlock")
+            or bridge_plan.get("ownerFieldBlock")
+            or []
+        )
+        if str(value).strip()
+    ]
+    if not owner_field_block:
+        return {}
+    candidate_action_terms = _unique_strings(
+        [
+            *[
+                str(value).strip()
+                for value in (request_context.get("anchors") or [])
+                if str(value).strip() and str(value).strip().startswith(("Buy", "Start", "Stop"))
+            ],
+            *[
+                str(value).strip()
+                for value in (request_context.get("expectedTerms") or [])
+                if str(value).strip() and str(value).strip().startswith(("Buy", "Start", "Stop"))
+            ],
+            *[
+                str(value).strip()
+                for value in (bridge_plan.get("bridgedTerms") or [])
+                if str(value).strip() and str(value).strip().startswith(("Buy", "Start", "Stop"))
+            ],
+            *[
+                str(value).strip()
+                for value in (bridge_plan.get("requestedTerms") or [])
+                if str(value).strip() and str(value).strip().startswith(("Buy", "Start", "Stop"))
+            ],
+        ]
+    )
+    owner_stem = ""
+    for owner_term in owner_field_block:
+        matched = re.match(r"^(.+?)(StartCost|AdditiveCost|Bonus\d*|Bonus|FillMaxLevel|Fill|MaxLevel)$", owner_term)
+        if matched:
+            owner_stem = matched.group(1)
+            break
+    if owner_stem:
+        synthetic_action = f"Buy{owner_stem}"
+        if synthetic_action not in candidate_action_terms:
+            candidate_action_terms.append(synthetic_action)
+    start_terms = [term for term in owner_field_block if term.endswith("StartCost")]
+    continuation_terms = [
+        term for term in owner_field_block
+        if term.endswith(("AdditiveCost", "MaxLevel", "FillMaxLevel")) or "Bonus" in term
+    ]
+    if not candidate_action_terms or not start_terms or not continuation_terms:
+        return {}
+    evidence_terms = _unique_strings(
+        [
+            shell_field,
+            *candidate_action_terms,
+            *owner_field_block,
+            *[
+                str(value).strip()
+                for value in (bridge_plan.get("bridgedTerms") or [])
+                if str(value).strip()
+            ],
+        ]
+    )
+    return {
+        "shellField": shell_field,
+        "ownerFieldStem": owner_stem,
+        "ownerFieldBlock": owner_field_block,
+        "actionTerms": candidate_action_terms,
+        "startTerms": start_terms,
+        "continuationTerms": continuation_terms,
+        "evidenceTerms": evidence_terms,
+        "source": "native-trace-bridge-plan",
+    }
+
+
+def _runtime_coverage_relation_rows_from_bridge_evidence(
+    *,
+    gap_row: dict[str, Any],
+    trace_scope: str,
+    bridge_evidence: dict[str, Any],
+) -> list[dict[str, Any]]:
+    trace_scope = str(trace_scope or "").strip()
+    gap_row = dict(gap_row or {})
+    bridge_evidence = dict(bridge_evidence or {})
+    entity_id = str(gap_row.get("entityId") or "").strip()
+    field_key = str(gap_row.get("fieldKey") or "").strip()
+    if not trace_scope or not entity_id or not field_key:
+        return []
+    shell_field = str(bridge_evidence.get("shellField") or "").strip()
+    owner_field_stem = str(bridge_evidence.get("ownerFieldStem") or "").strip()
+    owner_field_block = [str(value).strip() for value in (bridge_evidence.get("ownerFieldBlock") or []) if str(value).strip()]
+    action_terms = [str(value).strip() for value in (bridge_evidence.get("actionTerms") or []) if str(value).strip()]
+    start_terms = [str(value).strip() for value in (bridge_evidence.get("startTerms") or []) if str(value).strip()]
+    continuation_terms = [str(value).strip() for value in (bridge_evidence.get("continuationTerms") or []) if str(value).strip()]
+    evidence_terms = [str(value).strip() for value in (bridge_evidence.get("evidenceTerms") or []) if str(value).strip()]
+    if not shell_field or not owner_field_block or not action_terms or not start_terms or not continuation_terms:
+        return []
+    relation_rows: list[dict[str, Any]] = []
+    relation_rows.append(
+        {
+            "sourceEntityId": entity_id,
+            "traceScope": trace_scope,
+            "fieldKey": field_key,
+            "relationKind": "buy-method-cost-read",
+            "targetEntityId": action_terms[0],
+            "payload": {
+                "subjectId": entity_id,
+                "shellField": shell_field,
+                "ownerFieldStem": owner_field_stem or None,
+                "ownerFieldBlock": owner_field_block,
+                "actionTerms": action_terms,
+                "startTerms": start_terms,
+                "continuationTerms": continuation_terms,
+                "evidenceTerms": evidence_terms,
+                "evidenceSource": str(bridge_evidence.get("source") or "bridge-evidence"),
+            },
+        }
+    )
+    relation_rows.append(
+        {
+            "sourceEntityId": entity_id,
+            "traceScope": trace_scope,
+            "fieldKey": field_key,
+            "relationKind": "runtime-next-cost-formula",
+            "targetEntityId": owner_field_stem or start_terms[0],
+            "payload": {
+                "subjectId": entity_id,
+                "shellField": shell_field,
+                "ownerFieldStem": owner_field_stem or None,
+                "ownerFieldBlock": owner_field_block,
+                "actionTerms": action_terms,
+                "startTerms": start_terms,
+                "continuationTerms": continuation_terms,
+                "evidenceTerms": evidence_terms,
+                "evidenceSource": str(bridge_evidence.get("source") or "bridge-evidence"),
+            },
+        }
+    )
+    return relation_rows
+
+
+def _runtime_coverage_mechanic_candidate_terms(
+    *,
+    owner_field_stem: str,
+    owner_field_block: list[str],
+) -> dict[str, list[str]]:
+    stem = str(owner_field_stem or "").strip()
+    owner_terms = [str(value).strip() for value in (owner_field_block or []) if str(value).strip()]
+    if not stem or not owner_terms:
+        return {"nextCostAccessorTerms": [], "finalMaxAccessorTerms": []}
+    has_fill = any(term.endswith("Fill") for term in owner_terms)
+    has_fill_max = any(term.endswith("FillMaxLevel") for term in owner_terms)
+    has_max = any(term.endswith("MaxLevel") and not term.endswith("FillMaxLevel") for term in owner_terms)
+    next_cost_terms = _unique_strings(
+        [
+            f"get_{stem}FillCost" if has_fill else "",
+            f"get_{stem}Cost",
+            f"get_{stem.lower()}fillcost" if has_fill else "",
+            "get_cost",
+        ]
+    )
+    final_max_terms = _unique_strings(
+        [
+            f"get_Final{stem}FillMaxLevel" if has_fill_max else "",
+            f"Final{stem}FillMaxLevel" if has_fill_max else "",
+            f"get_Final{stem}MaxLevel" if has_max else "",
+            f"Final{stem}MaxLevel" if has_max else "",
+        ]
+    )
+    return {
+        "nextCostAccessorTerms": next_cost_terms,
+        "finalMaxAccessorTerms": final_max_terms,
+    }
+
+
+def _runtime_coverage_payload_rows_from_materialized_views(
+    *,
+    target_bundle_rows: list[sqlite3.Row],
+    native_trace_rows: list[sqlite3.Row],
+    native_trace_scope: str,
+) -> list[dict[str, str]]:
+    payload_rows: list[dict[str, str]] = []
+    fallback_native_scope = str(native_trace_scope or "").strip()
+    for row in target_bundle_rows:
+        payload_text = str(row["payload_json"] or "")
+        if not payload_text:
+            continue
+        payload_rows.append(
+            {
+                "traceScope": str(row["trace_scope"] or "").strip(),
+                "payloadText": payload_text,
+                "evidenceSource": "materialized-target-bundle",
+            }
+        )
+    for row in native_trace_rows:
+        payload_text = str(row["payload_json"] or "")
+        if not payload_text:
+            continue
+        row_keys = set(row.keys()) if hasattr(row, "keys") else set()
+        payload_rows.append(
+            {
+                "traceScope": str((row["trace_scope"] if "trace_scope" in row_keys else fallback_native_scope) or fallback_native_scope).strip(),
+                "payloadText": payload_text,
+                "evidenceSource": "materialized-native-trace",
+            }
+        )
+    return payload_rows
+
+
+def _runtime_coverage_accessor_evidence_from_payload_rows(
+    *,
+    candidate_terms: list[str],
+    context_terms: list[str],
+    payload_rows: list[dict[str, str]],
+    preferred_trace_scope: str,
+) -> dict[str, Any]:
+    preferred_scope = str(preferred_trace_scope or "").strip()
+    contexts = [str(term).strip() for term in (context_terms or []) if str(term).strip()]
+    candidates = [str(term).strip() for term in (candidate_terms or []) if str(term).strip()]
+    if not candidates or not payload_rows:
+        return {}
+    best: tuple[int, int, int, str, dict[str, Any]] | None = None
+    for row in payload_rows:
+        payload_text = str(row.get("payloadText") or "")
+        if not payload_text:
+            continue
+        matched_terms = [term for term in candidates if term in payload_text]
+        if not matched_terms:
+            continue
+        trace_scope = str(row.get("traceScope") or "").strip()
+        context_hits = sum(1 for term in contexts if term and term in payload_text)
+        scope_bonus = 1 if preferred_scope and trace_scope == preferred_scope else 0
+        for matched_term in matched_terms:
+            min_context_hits = 2 if matched_term == "get_cost" else 1
+            if context_hits < min_context_hits:
+                continue
+            score = (
+                context_hits + scope_bonus,
+                len(matched_term),
+                scope_bonus,
+                matched_term,
+                {
+                    "term": matched_term,
+                    "traceScope": trace_scope,
+                    "evidenceSource": str(row.get("evidenceSource") or "").strip() or "materialized-payload",
+                    "contextHits": context_hits,
+                },
+            )
+            if best is None or score[:4] > best[:4]:
+                best = score
+    return dict(best[4]) if best else {}
+
+
+def _runtime_coverage_accessor_mechanic_evidence(
+    *,
+    gap_row: dict[str, Any],
+    bridge_evidence: dict[str, Any],
+    payload_rows: list[dict[str, str]],
+    trace_scope: str,
+) -> dict[str, dict[str, Any]]:
+    gap_payload = dict(gap_row.get("payload") or {})
+    bridge_payload = dict(bridge_evidence or {})
+    owner_field_stem = str(
+        bridge_payload.get("ownerFieldStem")
+        or gap_payload.get("ownerFieldStem")
+        or ""
+    ).strip()
+    owner_field_block = [
+        str(value).strip()
+        for value in (
+            bridge_payload.get("ownerFieldBlock")
+            or gap_payload.get("ownerFieldBlock")
+            or []
+        )
+        if str(value).strip()
+    ]
+    shell_field = str(
+        bridge_payload.get("shellField")
+        or gap_payload.get("shellField")
+        or ""
+    ).strip()
+    action_terms = [
+        str(value).strip()
+        for value in (
+            bridge_payload.get("actionTerms")
+            or gap_payload.get("preferredActionTerms")
+            or []
+        )
+        if str(value).strip()
+    ]
+    if not owner_field_stem or not owner_field_block or not shell_field:
+        return {}
+    candidate_terms = _runtime_coverage_mechanic_candidate_terms(
+        owner_field_stem=owner_field_stem,
+        owner_field_block=owner_field_block,
+    )
+    context_terms = _unique_strings([shell_field, owner_field_stem, *owner_field_block, *action_terms])
+    next_cost_evidence = _runtime_coverage_accessor_evidence_from_payload_rows(
+        candidate_terms=list(candidate_terms.get("nextCostAccessorTerms") or []),
+        context_terms=context_terms,
+        payload_rows=payload_rows,
+        preferred_trace_scope=trace_scope,
+    )
+    if next_cost_evidence:
+        next_cost_evidence["candidateTerms"] = list(candidate_terms.get("nextCostAccessorTerms") or [])
+    final_max_evidence = _runtime_coverage_accessor_evidence_from_payload_rows(
+        candidate_terms=list(candidate_terms.get("finalMaxAccessorTerms") or []),
+        context_terms=context_terms,
+        payload_rows=payload_rows,
+        preferred_trace_scope=trace_scope,
+    )
+    if final_max_evidence:
+        final_max_evidence["candidateTerms"] = list(candidate_terms.get("finalMaxAccessorTerms") or [])
+    return {
+        "nextCost": next_cost_evidence,
+        "finalMax": final_max_evidence,
+        "candidateTerms": candidate_terms,
+        "contextTerms": context_terms,
+    }
+
+
+def _runtime_coverage_confident_action_terms_from_payload(
+    gap_row: dict[str, Any],
+    payload: dict[str, Any],
+) -> list[str]:
+    gap_payload = dict(gap_row.get("payload") or {})
+    payload = dict(payload or {})
+    direct_terms = [str(value).strip() for value in (payload.get("actionTerms") or []) if str(value).strip()]
+    if direct_terms:
+        return _unique_strings(direct_terms)
+    preferred_terms = [str(value).strip() for value in (payload.get("preferredActionTerms") or []) if str(value).strip()]
+    if not preferred_terms:
+        return []
+    field_key = str(gap_row.get("fieldKey") or "").strip()
+    shell_field = str(payload.get("shellField") or gap_payload.get("shellField") or "").strip()
+    stem = str(payload.get("ownerFieldStem") or gap_payload.get("ownerFieldStem") or "").strip()
+    slot = ""
+    for candidate in (shell_field, field_key):
+        candidate_text = str(candidate or "").strip()
+        if candidate_text.endswith("Button"):
+            slot = candidate_text[: -len("Button")]
+            break
+        if candidate_text.endswith("Level"):
+            slot = candidate_text[: -len("Level")]
+            break
+    ranked_terms = [
+        (term, _runtime_coverage_action_term_rank(term, stem, slot, index))
+        for index, term in enumerate(_unique_strings(preferred_terms))
+    ]
+    ranked_terms.sort(key=lambda item: item[1])
+    if not ranked_terms:
+        return []
+    top_term = str(ranked_terms[0][0] or "").strip()
+    top_lower = top_term.lower()
+    stem_lower = stem.lower()
+    slot_lower = slot.lower()
+    if slot_lower and slot_lower in top_lower:
+        return [top_term]
+    if stem_lower and stem_lower in top_lower:
+        return [top_term]
+    return []
+
+
+def _runtime_coverage_bridge_evidence_from_payload(
+    *,
+    gap_row: dict[str, Any],
+    payload: dict[str, Any],
+    evidence_source: str,
+) -> dict[str, Any]:
+    gap_payload = dict(gap_row.get("payload") or {})
+    payload = dict(payload or {})
+    shell_field = str(payload.get("shellField") or gap_payload.get("shellField") or "").strip()
+    owner_field_stem = str(payload.get("ownerFieldStem") or gap_payload.get("ownerFieldStem") or "").strip()
+    owner_field_block = [
+        str(value).strip()
+        for value in (payload.get("ownerFieldBlock") or gap_payload.get("ownerFieldBlock") or [])
+        if str(value).strip()
+    ]
+    action_terms = _runtime_coverage_confident_action_terms_from_payload(gap_row, payload)
+    if not shell_field or not owner_field_block or not action_terms:
+        return {}
+    start_terms = [term for term in owner_field_block if term.endswith("StartCost")]
+    continuation_terms = [
+        term
+        for term in owner_field_block
+        if re.fullmatch(r".*(?:AdditiveCost|MaxLevel|FillMaxLevel|Bonus\d*|Bonus|Fill)$", term)
+    ]
+    if not start_terms or not continuation_terms:
+        return {}
+    evidence_terms = _unique_strings([shell_field, *action_terms, *owner_field_block])
+    return {
+        "shellField": shell_field,
+        "ownerFieldStem": owner_field_stem or None,
+        "ownerFieldBlock": owner_field_block,
+        "actionTerms": action_terms,
+        "startTerms": start_terms,
+        "continuationTerms": continuation_terms,
+        "evidenceTerms": evidence_terms,
+        "source": str(evidence_source or "db-materialized-bridge"),
+    }
+
+
+def _runtime_coverage_bridge_evidence_from_materialized_views(
+    *,
+    gap_row: dict[str, Any],
+    relation_rows: list[dict[str, Any]],
+    fact_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    gap_payload = dict(gap_row.get("payload") or {})
+    shell_field = str(gap_payload.get("shellField") or "").strip()
+    owner_field_stem = str(gap_payload.get("ownerFieldStem") or "").strip()
+
+    def _payload_matches(payload: dict[str, Any]) -> bool:
+        payload = dict(payload or {})
+        payload_shell = str(payload.get("shellField") or "").strip()
+        payload_stem = str(payload.get("ownerFieldStem") or "").strip()
+        if shell_field and payload_shell and payload_shell == shell_field:
+            return True
+        if owner_field_stem and payload_stem and payload_stem == owner_field_stem:
+            return True
+        return False
+
+    grouped_relations: dict[tuple[str, str], dict[str, dict[str, Any]]] = {}
+    for relation_row in relation_rows:
+        row_payload = dict(relation_row.get("payload") or {})
+        if not _payload_matches(row_payload):
+            continue
+        relation_kind = str(relation_row.get("relationKind") or "").strip()
+        if relation_kind not in {"buy-method-cost-read", "runtime-next-cost-formula"}:
+            continue
+        group_key = (
+            str(relation_row.get("traceScope") or "").strip(),
+            str(relation_row.get("sourceEntityId") or "").strip(),
+        )
+        grouped_relations.setdefault(group_key, {})[relation_kind] = relation_row
+    for (candidate_scope, _candidate_source), relation_group in grouped_relations.items():
+        buy_relation = relation_group.get("buy-method-cost-read")
+        runtime_relation = relation_group.get("runtime-next-cost-formula")
+        if not buy_relation or not runtime_relation:
+            continue
+        merged_payload = dict(runtime_relation.get("payload") or {})
+        merged_payload.setdefault("actionTerms", list(dict(buy_relation.get("payload") or {}).get("actionTerms") or []))
+        if not merged_payload.get("actionTerms"):
+            merged_payload["actionTerms"] = [str(buy_relation.get("targetEntityId") or "").strip()]
+        if not merged_payload.get("ownerFieldStem"):
+            merged_payload["ownerFieldStem"] = str(runtime_relation.get("targetEntityId") or "").strip()
+        bridge_evidence = _runtime_coverage_bridge_evidence_from_payload(
+            gap_row=gap_row,
+            payload=merged_payload,
+            evidence_source=f"materialized-relation:{candidate_scope}",
+        )
+        if bridge_evidence:
+            return bridge_evidence
+    for fact_row in fact_rows:
+        row_payload = dict(fact_row.get("payload") or {})
+        if not _payload_matches(row_payload):
+            continue
+        bridge_evidence = _runtime_coverage_bridge_evidence_from_payload(
+            gap_row=gap_row,
+            payload=row_payload,
+            evidence_source=f"materialized-fact:{str(fact_row.get('traceScope') or '').strip()}",
+        )
+        if bridge_evidence:
+            return bridge_evidence
+    return _runtime_coverage_bridge_evidence_from_payload(
+        gap_row=gap_row,
+        payload=gap_payload,
+        evidence_source="gap-payload-heuristic",
+    )
 
 
 def _to_kebab_case(value: str) -> str:
@@ -5384,6 +6555,306 @@ def _augment_fragment_inputs_with_structured_claim_facts(
     return fragment_inputs
 
 
+def _canonical_exact_structured_claim_terms_from_aspects(
+    conn: sqlite3.Connection,
+    *,
+    project_name: str,
+    project_file: str,
+    claim_candidates: list[str],
+) -> list[str]:
+    normalized_candidates = {
+        str(value).strip().lower(): str(value).strip()
+        for value in (claim_candidates or [])
+        if str(value).strip() and "." in str(value).strip()
+    }
+    if not normalized_candidates:
+        return []
+    placeholders = ",".join("?" for _ in normalized_candidates)
+    rows = conn.execute(
+        f"""
+        SELECT normalized_term, canonical_payload_json
+        FROM canonical_term_aspects
+        WHERE project_name = ?
+          AND project_file = ?
+          AND aspect_kind = 'acquisition_exact_term'
+          AND normalized_term IN ({placeholders})
+        """,
+        (project_name, project_file, *normalized_candidates.keys()),
+    ).fetchall()
+    exact_terms: list[str] = []
+    for row in rows:
+        term = normalized_candidates.get(str(row["normalized_term"] or "").strip().lower())
+        if not term:
+            continue
+        payloads = _json_loads(str(row["canonical_payload_json"] or ""), [])
+        if not isinstance(payloads, list):
+            payloads = [payloads]
+        for payload in payloads:
+            if not isinstance(payload, dict):
+                continue
+            evidence_hits = dict(payload.get("evidenceHits") or {})
+            if (
+                bool(payload.get("durableEvidence"))
+                and bool(evidence_hits.get("found"))
+                and str(payload.get("source") or "").strip() == "acquisition-exact-hit"
+            ):
+                exact_terms.append(term)
+                break
+    return _unique_strings(exact_terms)
+
+
+def _canonical_token_shop_stem_evidence_from_term_view(term_view: dict[str, Any] | None) -> dict[str, Any]:
+    result = dict((term_view or {}).get("result") or {})
+    neighborhoods = dict(result.get("metadataNeighborhoods") or {})
+    scored_terms: list[tuple[int, str]] = []
+    for entries in neighborhoods.values():
+        for entry in (entries or []):
+            if not isinstance(entry, dict):
+                continue
+            try:
+                anchor_address = int(str(entry.get("address") or "0"), 16)
+            except ValueError:
+                anchor_address = 0
+            for item in (entry.get("context") or []):
+                if not isinstance(item, dict):
+                    continue
+                term = str(item.get("string") or "").strip()
+                if not term:
+                    continue
+                try:
+                    address = int(str(item.get("address") or "0"), 16)
+                except ValueError:
+                    address = 0
+                if anchor_address and address <= anchor_address:
+                    distance = anchor_address - address
+                elif anchor_address and address:
+                    distance = 1000000 + (address - anchor_address)
+                else:
+                    distance = 1000000
+                scored_terms.append((distance, term))
+    bridge_plans = dict(result.get("bridgePlans") or {})
+    for bridge_plan in bridge_plans.values():
+        if not isinstance(bridge_plan, dict):
+            continue
+        bridge_terms = _unique_strings(
+            [
+                *[str(value).strip() for value in (bridge_plan.get("fallbackTerms") or []) if str(value).strip()],
+                *[str(value).strip() for value in (bridge_plan.get("selectedNativeCoreTerms") or []) if str(value).strip()],
+                *[str(value).strip() for value in (bridge_plan.get("selectedContextTerms") or []) if str(value).strip()],
+                *[str(value).strip() for value in (bridge_plan.get("bridgedTerms") or []) if str(value).strip()],
+                *[str(value).strip() for value in (bridge_plan.get("nativeCoreTerms") or []) if str(value).strip()],
+                *[str(value).strip() for value in (bridge_plan.get("secondStageTerms") or []) if str(value).strip()],
+            ]
+        )
+        for match in [dict(value) for value in (bridge_plan.get("matches") or []) if isinstance(value, dict)]:
+            bridge_terms.extend(
+                _unique_strings(
+                    [
+                        str(match.get("matchedField") or "").strip(),
+                        str(match.get("shellField") or "").strip(),
+                        *[str(value).strip() for value in (match.get("ownerFieldBlock") or []) if str(value).strip()],
+                        *[str(value).strip() for value in (match.get("controllerBlock") or []) if str(value).strip()],
+                    ]
+                )
+            )
+        for index, term in enumerate(bridge_terms):
+            scored_terms.append((10000 + index, term))
+    context_terms = _unique_strings([term for _, term in sorted(scored_terms, key=lambda item: item[0])])
+    stem_scores: dict[str, tuple[int, int]] = {}
+    for distance, term in scored_terms:
+        match = re.match(r"^(MK\d+TokenBoost)(?:StartCost|AdditiveCost|Bonus|FillMaxLevel|Fill|MaxLevel)?$", term)
+        if match:
+            current_count, current_distance = stem_scores.get(match.group(1), (0, 10**9))
+            stem_scores[match.group(1)] = (current_count + 1, min(current_distance, distance))
+    if not stem_scores:
+        return {}
+    stem = sorted(stem_scores.items(), key=lambda item: (item[1][1], -item[1][0], item[0]))[0][0]
+    bounded_terms = [
+        term
+        for term in context_terms
+        if term == stem or term.startswith(stem) or term == f"Buy{stem}"
+    ]
+    return {
+        "stem": stem,
+        "boundedTerms": _unique_strings(bounded_terms),
+        "contextTermCount": stem_scores.get(stem, (0, 0))[0],
+    }
+
+
+def _token_shop_stem_evidence_from_native_trace_payload(
+    native_payload: dict[str, Any] | None,
+    shell_field: str,
+) -> dict[str, Any]:
+    if not isinstance(native_payload, dict):
+        return {}
+    shell_field = str(shell_field or "").strip()
+    bridge_plan = dict(native_payload.get("bridgePlan") or {})
+    if not bridge_plan:
+        return {}
+    requested_terms = {
+        str(value).strip()
+        for value in (native_payload.get("requestedTerms") or bridge_plan.get("requestedTerms") or [])
+        if str(value).strip()
+    }
+    if shell_field and requested_terms and shell_field not in requested_terms:
+        return {}
+    synthetic_view = {
+        "result": {
+            "bridgePlans": {
+                shell_field or "native-trace": bridge_plan,
+            }
+        }
+    }
+    evidence = _canonical_token_shop_stem_evidence_from_term_view(synthetic_view)
+    if not evidence:
+        return {}
+    if shell_field:
+        evidence["shellField"] = shell_field
+    return evidence
+
+
+def _compiler_property_term_aliases(term: str) -> list[str]:
+    term = str(term or "").strip()
+    if not term:
+        return []
+    aliases = [term]
+    backing_match = re.fullmatch(r"<([^>]+)>k__BackingField", term)
+    if backing_match:
+        property_name = backing_match.group(1)
+        aliases.extend([property_name, f"get_{property_name}"])
+    elif term.startswith("get_") and len(term) > 4:
+        property_name = term[4:]
+        aliases.extend([property_name, f"<{property_name}>k__BackingField"])
+    elif re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", term):
+        aliases.extend([f"get_{term}", f"<{term}>k__BackingField"])
+    return _unique_strings(aliases)
+
+
+def _remove_gap_rows_for_grounded_fields(
+    gap_rows: list[dict[str, Any]],
+    *,
+    grounded_field_keys: set[str],
+    gap_kinds: set[str],
+) -> list[dict[str, Any]]:
+    if not grounded_field_keys:
+        return list(gap_rows or [])
+    return [
+        dict(row)
+        for row in (gap_rows or [])
+        if not (
+            str(row.get("fieldKey") or "").strip() in grounded_field_keys
+            and str(row.get("gapKind") or "").strip() in gap_kinds
+        )
+    ]
+
+
+def _contract_payload_satisfies_gap_row(
+    contract_payload: dict[str, Any],
+    gap_row: dict[str, Any],
+) -> bool:
+    payload = dict(contract_payload or {})
+    gap_kind = str(gap_row.get("gapKind") or "").strip()
+    field_key = str(gap_row.get("fieldKey") or "").strip()
+    gap_payload = dict(gap_row.get("payload") or {})
+    grounded_fields = dict(payload.get("groundedFields") or {})
+    row_details_by_field = dict(grounded_fields.get("rowDetailsByField") or {})
+    if gap_kind in {"rowDetail", "row-detail", "playerFacingSupportText", "effectText"}:
+        row_detail = dict(row_details_by_field.get(field_key) or {})
+        if not row_detail:
+            return False
+        blocked_fields = {
+            str(key).strip()
+            for key in dict(row_detail.get("blockedFields") or {}).keys()
+            if str(key).strip()
+        }
+        if gap_kind in {"rowDetail", "row-detail"}:
+            return bool(row_detail.get("isGrounded")) and "rowDetail" not in blocked_fields
+        return gap_kind not in blocked_fields
+    seam_id = ""
+    if gap_kind in {"missing-edge", "blocked-edge", "next-seam"}:
+        seam_id = str(
+            gap_payload.get("seamId")
+            or gap_payload.get("edgeId")
+            or gap_payload.get("edgeType")
+            or ""
+        ).strip()
+    elif gap_kind == "nonblocking-edge":
+        seam_id = str(gap_payload.get("edgeType") or "").strip()
+    if seam_id:
+        missing_edges = {
+            str(value).strip()
+            for value in list(payload.get("missingEdges") or [])
+            if str(value).strip()
+        }
+        blocked_edges = {
+            str(value).strip()
+            for value in list(payload.get("blockedEdges") or [])
+            if str(value).strip()
+        }
+        known_edges = {
+            str(value).strip()
+            for value in [
+                *list(payload.get("knownEdges") or []),
+                *list(payload.get("nonblockingEdges") or []),
+            ]
+            if str(value).strip()
+        }
+        next_seam = dict(payload.get("nextSeam") or {})
+        next_seam_id = str(next_seam.get("id") or "").strip()
+        next_seam_status = str(next_seam.get("status") or "").strip().lower()
+        seam_open = seam_id in missing_edges or seam_id in blocked_edges or (
+            seam_id == next_seam_id and next_seam_status not in {"", "clear", "closed", "covered", "resolved", "none"}
+        )
+        if gap_kind == "nonblocking-edge":
+            return seam_id in known_edges
+        return (not seam_open) and seam_id in known_edges
+    return False
+
+
+def _prune_satisfied_gap_rows_by_contract_payload(
+    gap_rows: list[dict[str, Any]],
+    contract_payload: dict[str, Any],
+) -> list[dict[str, Any]]:
+    payload = dict(contract_payload or {})
+    if not payload:
+        return [dict(row) for row in (gap_rows or [])]
+    return [
+        dict(row)
+        for row in (gap_rows or [])
+        if not _contract_payload_satisfies_gap_row(payload, dict(row))
+    ]
+
+
+def _generic_mechanics_stage_needs_refresh_from_contract(
+    stage: dict[str, Any] | None,
+    *,
+    upstream_signature: str,
+    current_gap_rows: list[dict[str, Any]],
+    contract_payload: dict[str, Any],
+) -> bool:
+    if not isinstance(stage, dict):
+        return True
+    if upstream_signature and str(stage.get("upstreamSignature") or "").strip() != upstream_signature:
+        return True
+    return any(
+        _contract_payload_satisfies_gap_row(contract_payload, dict(row))
+        for row in (current_gap_rows or [])
+    )
+
+
+def _sanitize_resolver_anchor_terms(values: list[str] | None) -> list[str]:
+    junk_terms = {"class", "method", "methods", "string", "strings", "path id", "cost", "description"}
+    sanitized: list[str] = []
+    for value in values or []:
+        term = str(value or "").strip()
+        if not term:
+            continue
+        if term.lower() in junk_terms:
+            continue
+        sanitized.append(term)
+    return _unique_strings(sanitized)
+
+
 def _append_structured_claim_relations(
     entities: list[dict[str, Any]],
     relations: list[dict[str, Any]],
@@ -5496,6 +6967,80 @@ def _derive_relation_rule_edges(
         if bool(rule.get("nonblocking")):
             nonblocking_edges.append(edge_type)
     return _unique_strings(known_edges), _unique_strings(nonblocking_edges)
+
+
+def _closed_composite_subject_seams(trace_scope: str, state_payload: dict[str, Any]) -> list[str]:
+    trace_scope = str(trace_scope or "").strip()
+    closure_rules = dict(COMPOSITE_SUBJECT_SEAM_CLOSURE_RULES.get(trace_scope) or {})
+    if not closure_rules:
+        return []
+    known_edges = {
+        str(edge_id).strip()
+        for edge_id in (state_payload.get("knownEdges") or [])
+        if str(edge_id).strip()
+    }
+    closed: list[str] = []
+    for seam_id, rule in closure_rules.items():
+        required_known_edges = {
+            str(edge_id).strip()
+            for edge_id in (dict(rule or {}).get("requiredKnownEdges") or [])
+            if str(edge_id).strip()
+        }
+        if required_known_edges and required_known_edges.issubset(known_edges):
+            closed.append(str(seam_id).strip())
+    return _unique_strings(closed)
+
+
+def _apply_composite_subject_seam_closure(
+    trace_scope: str,
+    state_payload: dict[str, Any],
+    decision_summary: dict[str, Any],
+    claim_stages: list[dict[str, Any]] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]], list[str]]:
+    state_payload = dict(state_payload or {})
+    decision_summary = dict(decision_summary or {})
+    claim_stages = [dict(stage) for stage in (claim_stages or []) if isinstance(stage, dict)]
+    closed_seams = _closed_composite_subject_seams(trace_scope, state_payload)
+    if not closed_seams:
+        return state_payload, decision_summary, claim_stages, []
+    closed_seam_set = set(closed_seams)
+
+    def _filter_edges(values: list[Any] | None) -> list[str]:
+        return _unique_strings(
+            [
+                str(value).strip()
+                for value in (values or [])
+                if str(value).strip() and str(value).strip() not in closed_seam_set
+            ]
+        )
+
+    state_payload["missingEdges"] = _filter_edges(state_payload.get("missingEdges") or [])
+    state_payload["blockedEdges"] = _filter_edges(state_payload.get("blockedEdges") or [])
+    decision_summary["baselineGap"] = _filter_edges(decision_summary.get("baselineGap") or [])
+    decision_summary["blockedEdgeTypes"] = _filter_edges(decision_summary.get("blockedEdgeTypes") or [])
+
+    next_seam_payload = dict(state_payload.get("nextSeam") or {})
+    if str(next_seam_payload.get("id") or "").strip() in closed_seam_set:
+        remaining_open_edges = _unique_strings(
+            [
+                *[str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()],
+                *[str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()],
+            ]
+        )
+        state_payload["nextSeam"] = {
+            **next_seam_payload,
+            "id": remaining_open_edges[0] if remaining_open_edges else None,
+            "status": "open" if remaining_open_edges else "clear",
+            "reason": "composite-db-seam-closure" if not remaining_open_edges else next_seam_payload.get("reason"),
+        }
+
+    for claim_stage in claim_stages:
+        claim_stage["missingSeamIds"] = _filter_edges(claim_stage.get("missingSeamIds") or [])
+        if not claim_stage["missingSeamIds"]:
+            claim_stage["status"] = "closed"
+
+    state_payload["knownEdges"] = _unique_strings([*list(state_payload.get("knownEdges") or []), *closed_seams])
+    return state_payload, decision_summary, claim_stages, closed_seams
 
 
 def _compact_subject_state_dependency_bundle(
@@ -7444,7 +8989,7 @@ def _derive_token_shop_range_row_details_from_support_surfaces(
             )
         }
         return {
-            "ATU6Level": {
+            "ATU6Level": _normalize_row_detail_blocked_fields({
                 "isGrounded": atu6_grounded,
                 "identity": "Mk2 Generator Booster" if atu6_grounded else None,
                 "identitySource": (
@@ -7457,7 +9002,7 @@ def _derive_token_shop_range_row_details_from_support_surfaces(
                     "playerFacingSupportText": "missing-db-row-detail-evidence:player-facing-support-text",
                     "effectText": "not-applicable:row-detail-effect-text",
                 },
-            },
+            }),
             **mk_chain_blocked_rows,
         }
 
@@ -7467,7 +9012,7 @@ def _derive_token_shop_range_row_details_from_support_surfaces(
             for surface in support_surfaces
             if str(surface.get("id") or "").strip() == "title-text-surfaces"
             for term in (surface.get("terms") or [])
-            if str(term).strip()
+            if str(term).strip() and _looks_like_title_surface_term(str(term).strip())
         ]
         trio_prefab_terms = [
             str(term).strip()
@@ -7479,59 +9024,37 @@ def _derive_token_shop_range_row_details_from_support_surfaces(
         trio_note = (
             "Canonical range-family contract is active here; row identity is grounded through the T3 trio shell range and title or prefab surfaces."
         )
-        atu21_identity = "Trinity Booster One" if "Trinity Booster One" in trio_title_terms else (
-            trio_prefab_terms[0] if len(trio_prefab_terms) > 0 else None
-        )
-        atu21_identity_source = (
-            "Canonical range-family title surface"
-            if "Trinity Booster One" in trio_title_terms
-            else ("Canonical range-family prefab roster" if atu21_identity else None)
-        )
-        atu22_identity = "Trinity Oom Booster" if "Trinity Oom Booster" in trio_title_terms else (
-            trio_prefab_terms[1] if len(trio_prefab_terms) > 1 else None
-        )
-        atu22_identity_source = (
-            "Canonical range-family title surface"
-            if "Trinity Oom Booster" in trio_title_terms
-            else ("Canonical range-family prefab roster" if atu22_identity else None)
-        )
-        return {
-            "ATU21Level": {
-                "isGrounded": bool(atu21_identity),
-                "identity": atu21_identity,
-                "identitySource": atu21_identity_source,
-                "rowType": "prefab-driven" if atu21_identity else None,
-                "rowTypeLabel": "Canonical range family contract row" if atu21_identity else None,
-                "detailNote": trio_note if atu21_identity else None,
-                "blockedFields": {
-                    "playerFacingSupportText": "missing-db-row-detail-evidence:player-facing-support-text",
-                    "effectText": "not-applicable:row-detail-effect-text",
-                },
-            },
-            "ATU22Level": {
-                "isGrounded": bool(atu22_identity),
-                "identity": atu22_identity,
-                "identitySource": atu22_identity_source,
-                "rowType": "prefab-driven" if atu22_identity else None,
-                "rowTypeLabel": "Canonical range family contract row" if atu22_identity else None,
-                "detailNote": trio_note if atu22_identity else None,
-                "blockedFields": {
-                    "playerFacingSupportText": "missing-db-row-detail-evidence:player-facing-support-text",
-                    "effectText": "not-applicable:row-detail-effect-text",
-                },
-            },
-            "ATU23Level": {
-                "isGrounded": False,
-                "identity": None,
-                "identitySource": None,
-                "rowType": None,
-                "rowTypeLabel": None,
-                "detailNote": None,
-                "blockedFields": {
-                    "rowDetail": "missing-db-row-detail-evidence:t3-trio-third-row-identity"
-                },
-            },
-        }
+        trio_fields = ["ATU21Level", "ATU22Level", "ATU23Level"]
+        row_details_by_field: dict[str, dict[str, Any]] = {}
+        ordered_title_identity = trio_title_terms if len(trio_title_terms) >= len(trio_fields) else []
+        for index, field in enumerate(trio_fields):
+            identity = ordered_title_identity[index] if index < len(ordered_title_identity) else (
+                trio_prefab_terms[index] if index < len(trio_prefab_terms) else None
+            )
+            identity_source = (
+                "Canonical range-family ordered title surface"
+                if ordered_title_identity and identity
+                else ("Canonical range-family prefab roster" if identity else None)
+            )
+            row_details_by_field[field] = _normalize_row_detail_blocked_fields({
+                "isGrounded": bool(identity),
+                "identity": identity,
+                "identitySource": identity_source,
+                "rowType": "prefab-driven" if identity else None,
+                "rowTypeLabel": "Canonical range family contract row" if identity else None,
+                "detailNote": trio_note if identity else None,
+                "blockedFields": (
+                    {
+                        "playerFacingSupportText": "missing-db-row-detail-evidence:player-facing-support-text",
+                        "effectText": "not-applicable:row-detail-effect-text",
+                    }
+                    if identity
+                    else {
+                        "rowDetail": f"missing-db-row-detail-evidence:t3-trio-row-identity:{field}",
+                    }
+                ),
+            })
+        return row_details_by_field
 
     if subject_id == "range:token-shop:ATU24Button-ATU28Button":
         late_title_terms = [
@@ -7563,7 +9086,7 @@ def _derive_token_shop_range_row_details_from_support_surfaces(
             if str(term).strip()
         ]
         late_range_note = (
-            "Canonical range-family contract is active here, but this row still sits inside the unresolved ATU24-ATU28 remap band."
+            "Canonical range-family contract is active here; this row is bounded by shell and action-side evidence while exact title/prefab identity remains unresolved."
         )
         late_field_evidence = {
             "ATU24Level": {
@@ -7585,11 +9108,13 @@ def _derive_token_shop_range_row_details_from_support_surfaces(
         }
         row_details_by_field: dict[str, dict[str, Any]] = {}
         for field, evidence in late_field_evidence.items():
+            action_hook = str(evidence.get("actionHook") or "").strip()
+            effect_term = str(evidence.get("effectTerm") or "").strip()
             evidence_terms = _unique_strings(
                 [
                     field.replace("Level", "Button"),
-                    str(evidence.get("actionHook") or "").strip(),
-                    str(evidence.get("effectTerm") or "").strip(),
+                    action_hook,
+                    effect_term,
                     "Tier 3 Max Level Increaser" if "Tier 3 Max Level Increaser" in late_title_terms else "",
                     "Campaign Fragments" if "Campaign Fragments" in late_effect_terms else "",
                     "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"
@@ -7597,18 +9122,30 @@ def _derive_token_shop_range_row_details_from_support_surfaces(
                     else "",
                 ]
             )
-            row_details_by_field[field] = {
-                "isGrounded": False,
-                "identity": None,
-                "identitySource": None,
-                "rowType": None,
-                "rowTypeLabel": None,
+            is_grounded = bool(action_hook and field.replace("Level", "Button") in evidence_terms)
+            row_details_by_field[field] = _normalize_row_detail_blocked_fields({
+                "isGrounded": is_grounded,
+                "identity": action_hook or None,
+                "identitySource": "Canonical range-family action hook" if action_hook else None,
+                "rowType": "action-grounded-bounded" if is_grounded else None,
+                "rowTypeLabel": "Canonical bounded action row" if is_grounded else None,
                 "detailNote": late_range_note,
-                "blockedFields": {
-                    "rowDetail": f"missing-db-row-detail-evidence:late-atu-row-identity:{field}"
-                },
+                "blockedFields": (
+                    {
+                        "playerFacingSupportText": "missing-db-row-detail-evidence:late-atu-player-facing-title",
+                        **(
+                            {}
+                            if effect_term
+                            else {"effectText": "not-applicable:row-detail-effect-text"}
+                        ),
+                    }
+                    if is_grounded
+                    else {
+                        "rowDetail": f"missing-db-row-detail-evidence:late-atu-row-identity:{field}"
+                    }
+                ),
                 "boundedEvidenceTerms": evidence_terms,
-            }
+            })
         return row_details_by_field
 
     return {}
@@ -7638,6 +9175,189 @@ def _looks_like_title_hook_term(term: str) -> bool:
     return term in {"SetAllTokenShopTexts", "SetTokenTexts"}
 
 
+def _row_detail_supports_player_facing_text(row_detail: dict[str, Any]) -> bool:
+    row_detail = dict(row_detail or {})
+    identity = str(row_detail.get("identity") or "").strip()
+    identity_source = str(row_detail.get("identitySource") or "").strip().lower()
+    bounded_evidence_terms = [str(term).strip() for term in (row_detail.get("boundedEvidenceTerms") or []) if str(term).strip()]
+    if identity and _looks_like_title_surface_term(identity):
+        return True
+    if "title surface" in identity_source or "title text" in identity_source:
+        return True
+    return any(_looks_like_title_surface_term(term) and term == identity for term in bounded_evidence_terms)
+
+
+def _normalize_row_detail_blocked_fields(row_detail: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(row_detail or {})
+    blocked_fields = {
+        str(key).strip(): value
+        for key, value in dict(normalized.get("blockedFields") or {}).items()
+        if str(key).strip()
+    }
+    if _row_detail_supports_player_facing_text(normalized):
+        blocked_fields.pop("playerFacingSupportText", None)
+    normalized["blockedFields"] = blocked_fields
+    return normalized
+
+
+def _aggregate_row_detail_blocked_fields(
+    row_details_by_field: dict[str, Any],
+    *,
+    fallback_player_facing_reason: str | None = None,
+    fallback_effect_reason: str | None = None,
+) -> dict[str, str]:
+    player_facing_reason = ""
+    effect_reason = ""
+    for row_detail in dict(row_details_by_field or {}).values():
+        if not isinstance(row_detail, dict):
+            continue
+        blocked_fields = {
+            str(key).strip(): str(value).strip()
+            for key, value in dict(row_detail.get("blockedFields") or {}).items()
+            if str(key).strip() and str(value).strip()
+        }
+        if not player_facing_reason and blocked_fields.get("playerFacingSupportText"):
+            player_facing_reason = blocked_fields["playerFacingSupportText"]
+        effect_value = blocked_fields.get("effectText") or ""
+        if effect_value and not effect_reason and not effect_value.startswith("not-applicable:"):
+            effect_reason = effect_value
+    aggregated: dict[str, str] = {}
+    if player_facing_reason or str(fallback_player_facing_reason or "").strip():
+        aggregated["playerFacingSupportText"] = player_facing_reason or str(fallback_player_facing_reason or "").strip()
+    if effect_reason or str(fallback_effect_reason or "").strip():
+        aggregated["effectText"] = effect_reason or str(fallback_effect_reason or "").strip()
+    return aggregated
+
+
+def _should_suppress_aggregate_range_family_row_detail(
+    *,
+    subject_kind: str,
+    row_detail_identity: str,
+    row_details_by_field: dict[str, Any],
+) -> bool:
+    if str(subject_kind or "").strip() != "range-family":
+        return False
+    if str(row_detail_identity or "").strip():
+        return False
+    normalized_row_details = {
+        str(field).strip(): dict(detail)
+        for field, detail in dict(row_details_by_field or {}).items()
+        if str(field).strip() and isinstance(detail, dict)
+    }
+    if not normalized_row_details:
+        return False
+    return not any(
+        str(
+            dict(detail.get("blockedFields") or {}).get("playerFacingSupportText") or ""
+        ).strip()
+        for detail in normalized_row_details.values()
+    )
+
+
+def _merge_row_details_by_field_prefer_grounded(
+    primary_row_details: dict[str, Any],
+    secondary_row_details: dict[str, Any],
+) -> dict[str, dict[str, Any]]:
+    merged: dict[str, dict[str, Any]] = {}
+    field_keys = _unique_strings(
+        [
+            *[str(field).strip() for field in dict(primary_row_details or {}).keys() if str(field).strip()],
+            *[str(field).strip() for field in dict(secondary_row_details or {}).keys() if str(field).strip()],
+        ]
+    )
+    for field_key in field_keys:
+        primary = (
+            _normalize_row_detail_blocked_fields(dict(primary_row_details.get(field_key) or {}))
+            if isinstance(primary_row_details.get(field_key), dict)
+            else {}
+        )
+        secondary = (
+            _normalize_row_detail_blocked_fields(dict(secondary_row_details.get(field_key) or {}))
+            if isinstance(secondary_row_details.get(field_key), dict)
+            else {}
+        )
+        if not primary:
+            merged[field_key] = secondary
+            continue
+        if not secondary:
+            merged[field_key] = primary
+            continue
+        primary_grounded = bool(primary.get("isGrounded"))
+        secondary_grounded = bool(secondary.get("isGrounded"))
+        if secondary_grounded and not primary_grounded:
+            merged[field_key] = secondary
+            continue
+        bounded_evidence_terms = _unique_strings(
+            [
+                *[str(value).strip() for value in (primary.get("boundedEvidenceTerms") or []) if str(value).strip()],
+                *[str(value).strip() for value in (secondary.get("boundedEvidenceTerms") or []) if str(value).strip()],
+            ]
+        )
+        blocked_fields = {
+            **dict(secondary.get("blockedFields") or {}),
+            **dict(primary.get("blockedFields") or {}),
+        }
+        merged_row_detail = {
+            "isGrounded": primary_grounded or secondary_grounded,
+            "identity": primary.get("identity") or secondary.get("identity"),
+            "identitySource": primary.get("identitySource") or secondary.get("identitySource"),
+            "rowType": primary.get("rowType") or secondary.get("rowType"),
+            "rowTypeLabel": primary.get("rowTypeLabel") or secondary.get("rowTypeLabel"),
+            "detailNote": primary.get("detailNote") or secondary.get("detailNote"),
+            "blockedFields": blocked_fields,
+        }
+        if merged_row_detail["isGrounded"]:
+            merged_row_detail["blockedFields"] = {
+                key: value
+                for key, value in dict(merged_row_detail.get("blockedFields") or {}).items()
+                if str(key).strip() != "rowDetail"
+            }
+        if bounded_evidence_terms:
+            merged_row_detail["boundedEvidenceTerms"] = bounded_evidence_terms
+        merged[field_key] = _normalize_row_detail_blocked_fields(merged_row_detail)
+    return merged
+
+
+def _strip_range_family_aggregate_descriptive_seams(
+    *,
+    subject_kind: str,
+    row_detail_identity: str,
+    row_details_by_field: dict[str, Any],
+    missing_edges: list[str],
+    blocked_edges: list[str],
+    nonblocking_edges: list[str],
+    next_seam: dict[str, Any],
+) -> tuple[list[str], list[str], list[str], dict[str, Any]]:
+    if str(subject_kind or "").strip() != "range-family":
+        return missing_edges, blocked_edges, nonblocking_edges, next_seam
+    if str(row_detail_identity or "").strip():
+        return missing_edges, blocked_edges, nonblocking_edges, next_seam
+    if "playerFacingSupportText" not in set(missing_edges) | set(blocked_edges):
+        return missing_edges, blocked_edges, nonblocking_edges, next_seam
+    normalized_row_details = {
+        str(field).strip(): dict(detail)
+        for field, detail in dict(row_details_by_field or {}).items()
+        if str(field).strip() and isinstance(detail, dict)
+    }
+    if not normalized_row_details:
+        return missing_edges, blocked_edges, nonblocking_edges, next_seam
+    missing_edges = [edge for edge in missing_edges if edge != "playerFacingSupportText"]
+    blocked_edges = [edge for edge in blocked_edges if edge != "playerFacingSupportText"]
+    nonblocking_edges = _unique_strings([*nonblocking_edges, "playerFacingSupportText"])
+    next_seam = dict(next_seam or {})
+    if str(next_seam.get("id") or "").strip() == "playerFacingSupportText":
+        replacement_edge = blocked_edges[0] if blocked_edges else (missing_edges[0] if missing_edges else "")
+        next_seam = {
+            "id": replacement_edge or None,
+            "status": "open" if replacement_edge else "clear",
+            "reason": str(next_seam.get("reason") or "").strip() or (
+                "range-family-row-local-descriptive-seam" if replacement_edge else "clear"
+            ),
+            "terms": list(next_seam.get("terms") or []),
+        }
+    return missing_edges, blocked_edges, nonblocking_edges, next_seam
+
+
 def _looks_like_title_surface_term(term: str) -> bool:
     term = str(term or "").strip()
     if not term:
@@ -7648,6 +9368,32 @@ def _looks_like_title_surface_term(term: str) -> bool:
     if lowered.endswith(("button", "overlay", "content")):
         return False
     return " " in term
+
+
+def _grounded_token_shop_support_title_and_update_terms(
+    support_surfaces: list[dict[str, Any]] | None,
+) -> tuple[list[str], list[str]]:
+    title_surface_ids = {"title-text-surfaces"}
+    update_surface_ids = {"title-text-surfaces", "text-hooks"}
+    title_terms = _unique_strings(
+        [
+            str(term).strip()
+            for surface in [dict(item) for item in (support_surfaces or []) if isinstance(item, dict)]
+            if str(surface.get("id") or "").strip() in title_surface_ids
+            for term in (surface.get("terms") or [])
+            if str(term).strip() and _looks_like_title_surface_term(str(term).strip())
+        ]
+    )
+    update_hook_terms = _unique_strings(
+        [
+            str(term).strip()
+            for surface in [dict(item) for item in (support_surfaces or []) if isinstance(item, dict)]
+            if str(surface.get("id") or "").strip() in update_surface_ids
+            for term in (surface.get("terms") or [])
+            if str(term).strip() and _looks_like_title_hook_term(str(term).strip())
+        ]
+    )
+    return title_terms, update_hook_terms
 
 
 def _is_title_localization_seam(seam_id: str) -> bool:
@@ -7670,6 +9416,103 @@ def _is_shell_to_prefab_seam(seam_id: str) -> bool:
 def _is_shell_identity_seam(seam_id: str) -> bool:
     seam_id = str(seam_id or "").strip().lower()
     return "identity-gap" in seam_id
+
+
+def _is_runtime_population_bridge_seam(seam_id: str) -> bool:
+    seam_id = str(seam_id or "").strip().lower()
+    return "runtime-population-bridge" in seam_id or (
+        "runtime" in seam_id and "population" in seam_id and "bridge" in seam_id
+    )
+
+
+def _is_deeper_wrapper_handoff_seam(seam_id: str) -> bool:
+    seam_id = str(seam_id or "").strip().lower()
+    return "deeper-wrapper-handoff" in seam_id or (
+        "wrapper" in seam_id and "handoff" in seam_id
+    )
+
+
+def _runtime_population_bridge_terms_satisfied(terms: list[str]) -> bool:
+    lowered_terms = [str(term or "").strip().lower() for term in terms if str(term or "").strip()]
+    if not lowered_terms:
+        return False
+    has_runtime_initializer = any(
+        "initialize" in term or "update" in term or "populate" in term
+        for term in lowered_terms
+    )
+    has_profile_or_state_owner = any(
+        "playerprofile" in term or "profiledata" in term or "savedata" in term
+        for term in lowered_terms
+    )
+    has_runtime_collection = any(
+        token in term
+        for term in lowered_terms
+        for token in (
+            "upgradeinfolist",
+            "unlockedmilestoneslist",
+            "maxedmilestoneslist",
+            "milestonecostlist",
+            "ownedlist",
+        )
+    )
+    has_runtime_consumer = any(
+        token in term
+        for term in lowered_terms
+        for token in (
+            "cost",
+            "level",
+            "affordable",
+            "milestone",
+            "unlocked",
+            "maxed",
+            "owned",
+        )
+    )
+    return has_runtime_initializer and has_profile_or_state_owner and has_runtime_collection and has_runtime_consumer
+
+
+def _deeper_wrapper_handoff_terms_satisfied(terms: list[str]) -> bool:
+    lowered_terms = [str(term or "").strip().lower() for term in terms if str(term or "").strip()]
+    if not lowered_terms:
+        return False
+    has_runtime_initializer = any(
+        "initialize" in term or "update" in term or "populate" in term
+        for term in lowered_terms
+    )
+    has_profile_or_state_owner = any(
+        "playerprofile" in term or "profiledata" in term or "savedata" in term
+        for term in lowered_terms
+    )
+    has_runtime_collection = any(
+        token in term
+        for term in lowered_terms
+        for token in (
+            "upgradeinfolist",
+            "unlockedmilestoneslist",
+            "maxedmilestoneslist",
+            "milestonecostlist",
+            "ownedlist",
+        )
+    )
+    has_wrapper_or_handoff_context = any(
+        token in term
+        for term in lowered_terms
+        for token in (
+            "milestonecostlist",
+            "getshardcostlist",
+            "playersprofiledata",
+            "playerprofiledata",
+            "cloudsaveplayerprofile",
+            "fillplayerprofiledata",
+            "constructionmilestones",
+        )
+    )
+    return (
+        has_runtime_initializer
+        and has_profile_or_state_owner
+        and has_runtime_collection
+        and has_wrapper_or_handoff_context
+    )
 
 
 def _derive_native_relation_satisfied_seams(
@@ -7718,6 +9561,14 @@ def _derive_native_relation_satisfied_seams(
             if has_prefab and has_shell:
                 satisfied.append(seam_id)
             continue
+        if _is_runtime_population_bridge_seam(seam_id):
+            if _runtime_population_bridge_terms_satisfied(bridge_terms):
+                satisfied.append(seam_id)
+            continue
+        if _is_deeper_wrapper_handoff_seam(seam_id):
+            if _deeper_wrapper_handoff_terms_satisfied(bridge_terms):
+                satisfied.append(seam_id)
+            continue
     return _unique_strings(satisfied)
 
 
@@ -7738,6 +9589,7 @@ def _derive_generic_mechanics_views_from_subject_inputs(
     row_local_graph = dict(reconstruction_payload.get("rowLocalGraph") or {})
     support_rows = [dict(item) for item in (resolver_payload.get("supportRows") or []) if isinstance(item, dict)]
     support_surfaces = [dict(item) for item in (resolver_payload.get("supportSurfaces") or []) if isinstance(item, dict)]
+    grounded_support_surfaces = _filter_grounded_support_surfaces(support_surfaces)
     shared_grounded_fields = dict(shared_lane_contract.get("groundedFields") or {})
     shared_support_summary = dict(shared_lane_contract.get("supportSummary") or {})
     shared_provenance_summary = dict(shared_lane_contract.get("provenanceSummary") or {})
@@ -7746,6 +9598,16 @@ def _derive_generic_mechanics_views_from_subject_inputs(
     missing_edges = _unique_strings([str(value) for value in (subject_state.get("missingEdges") or []) if str(value).strip()])
     blocked_edges = _unique_strings([str(value) for value in (subject_state.get("blockedEdges") or []) if str(value).strip()])
     nonblocking_edges = _unique_strings([str(value) for value in (subject_state.get("nonblockingEdges") or []) if str(value).strip()])
+    title_surface_terms, support_update_hook_terms = _grounded_token_shop_support_title_and_update_terms(
+        grounded_support_surfaces
+    )
+    grounded_display_update_hooks = _unique_strings(
+        [
+            *[str(value).strip() for value in (row_local_graph.get("updateHooks") or []) if str(value).strip()],
+            *support_update_hook_terms,
+        ]
+    )
+    grounded_literal_title_recovered = bool(row_local_graph.get("literalTitleRecovered")) or bool(title_surface_terms)
 
     payload = {
         "traceScope": trace_scope,
@@ -7765,10 +9627,11 @@ def _derive_generic_mechanics_views_from_subject_inputs(
             "rowShellPathId": str(row_shell.get("pathId") or support_rows[0].get("shellPathId") if support_rows else ""),
             "actionMethods": list(row_local_graph.get("actionMethods") or []) if "exact-shell-to-action-hook" in known_edges else [],
             "prefabCandidates": list(row_local_graph.get("prefabCandidates") or []) if "exact-shell-to-prefab" in known_edges else [],
-            "displayUpdateHooks": list(row_local_graph.get("updateHooks") or []) if "exact-display-update-path" in known_edges else [],
-            "literalTitleRecovered": bool(row_local_graph.get("literalTitleRecovered")) if "exact-shell-to-title" in known_edges else False,
+            "displayUpdateHooks": grounded_display_update_hooks if ("exact-display-update-path" in known_edges or grounded_display_update_hooks) else [],
+            "literalTitleRecovered": grounded_literal_title_recovered if ("exact-shell-to-title" in known_edges or grounded_literal_title_recovered) else False,
+            "literalTitleText": title_surface_terms[0] if title_surface_terms else None,
             **shared_grounded_fields,
-            "rowDetailsByField": _derive_token_shop_range_row_details_from_support_surfaces(subject_id, support_surfaces),
+            "rowDetailsByField": _derive_token_shop_range_row_details_from_support_surfaces(subject_id, grounded_support_surfaces),
         },
         "supportSummary": {
             "sharedLanes": shared_support_summary,
@@ -7832,6 +9695,16 @@ def _reconstruct_row_details_from_generic_mechanics(
         if entity_id in row_entity_meta:
             gaps_by_entity.setdefault(entity_id, []).append(dict(gap_row))
 
+    relations_by_entity: dict[str, list[dict[str, Any]]] = {}
+    for relation_row in relation_rows:
+        relation_kind = str(relation_row.get("relationKind") or "").strip()
+        if not relation_kind:
+            continue
+        for endpoint_key in ("sourceEntityId", "targetEntityId"):
+            entity_id = str(relation_row.get(endpoint_key) or "").strip()
+            if entity_id in row_entity_meta:
+                relations_by_entity.setdefault(entity_id, []).append(dict(relation_row))
+
     row_details_by_field: dict[str, dict[str, Any]] = {}
     for entity_id, meta in sorted(row_entity_meta.items(), key=lambda item: item[1].get("fieldKey") or item[0]):
         field_key = str(meta.get("fieldKey") or "").strip()
@@ -7868,11 +9741,59 @@ def _reconstruct_row_details_from_generic_mechanics(
             _unique_strings(list(values_by_kind.get("bounded-evidence-term") or [])),
             key=_bounded_evidence_term_sort_key,
         )
+        relation_bucket = relations_by_entity.get(entity_id, [])
+        action_targets = sorted(
+            _unique_strings(
+                [
+                    str(relation_row.get("targetEntityId") or "").strip()
+                    for relation_row in relation_bucket
+                    if (
+                        str(relation_row.get("sourceEntityId") or "").strip() == entity_id
+                        and str(relation_row.get("relationKind") or "").strip() == "buy-method-cost-read"
+                        and str(relation_row.get("targetEntityId") or "").strip()
+                    )
+                ]
+            )
+        )
+        runtime_targets = sorted(
+            _unique_strings(
+                [
+                    str(relation_row.get("targetEntityId") or "").strip()
+                    for relation_row in relation_bucket
+                    if (
+                        str(relation_row.get("sourceEntityId") or "").strip() == entity_id
+                        and str(relation_row.get("relationKind") or "").strip()
+                        in {"runtime-next-cost-accessor", "runtime-next-cost-formula", "runtime-final-max-level"}
+                        and str(relation_row.get("targetEntityId") or "").strip()
+                    )
+                ]
+            )
+        )
+        shell_terms = _unique_strings(list(values_by_kind.get("shell-field") or []))
+        concrete_relation_grounding = False
+        if not identity and action_targets and (runtime_targets or shell_terms):
+            concrete_relation_grounding = True
+            identity = action_targets[0]
+            identity_source = identity_source or "DB materialized row-local action/runtime relations"
+            row_type = row_type or "action-grounded-bounded"
+            row_type_label = row_type_label or "Canonical bounded action row"
+            if not detail_note:
+                detail_note = (
+                    f"{field_key or entity_id} is grounded through row-local action/runtime relations already materialized in DB."
+                )
+            bounded_evidence_terms = sorted(
+                _unique_strings([*bounded_evidence_terms, *shell_terms, *action_targets, *runtime_targets]),
+                key=_bounded_evidence_term_sort_key,
+            )
 
-        if is_grounded_from_gap is None:
+        if concrete_relation_grounding:
+            is_grounded = True
+        elif is_grounded_from_gap is None:
             is_grounded = bool(identity and row_type_label)
         else:
             is_grounded = is_grounded_from_gap
+        if is_grounded and "rowDetail" in blocked_fields:
+            blocked_fields.pop("rowDetail", None)
 
         row_detail: dict[str, Any] = {
             "isGrounded": is_grounded,
@@ -7885,7 +9806,7 @@ def _reconstruct_row_details_from_generic_mechanics(
         }
         if bounded_evidence_terms:
             row_detail["boundedEvidenceTerms"] = bounded_evidence_terms
-        row_details_by_field[field_key] = row_detail
+        row_details_by_field[field_key] = _normalize_row_detail_blocked_fields(row_detail)
 
     return row_details_by_field
 
@@ -8211,6 +10132,17 @@ def _looks_runtime_getter_term(term: str) -> bool:
     return normalized.startswith("get_") or normalized.startswith("set_")
 
 
+def _is_nonblocking_contract_lane_missing_term(term: str) -> bool:
+    normalized = str(term or "").strip()
+    if not normalized:
+        return False
+    if re.fullmatch(r"<[^>]+>d__\d+", normalized):
+        return True
+    if re.fullmatch(r"<[^>]+>k__BackingField", normalized):
+        return True
+    return False
+
+
 def _looks_generic_placeholder_term(term: str) -> bool:
     normalized = str(term or "").strip()
     lowered = normalized.lower()
@@ -8348,7 +10280,42 @@ def _build_subject_edge_facts(
     reconstruction_blocked_edge_types = _unique_strings(
         [str(value) for value in (reconstruction_assessment.get("blockedEdgeTypes") or []) if str(value).strip()]
     )
-    claim_stages = [stage for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]
+    claim_stages = [dict(stage) for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]
+    current_reconstruction_missing_seams = _unique_strings(
+        [
+            str(seam.get("id") or "").strip()
+            for seam in (reconstruction_payload.get("missingSeams") or [])
+            if isinstance(seam, dict) and str(seam.get("id") or "").strip()
+        ]
+    )
+    current_open_seam_ids = _unique_strings(
+        [
+            *decision_baseline_gap,
+            *decision_blocked_edge_types,
+            *reconstruction_baseline_gap,
+            *reconstruction_blocked_edge_types,
+            *current_reconstruction_missing_seams,
+        ]
+    )
+    reconstruction_has_current_open_shape = bool(
+        current_open_seam_ids
+        or reconstruction_payload
+        or decision_summary
+    )
+    if claim_stages and reconstruction_has_current_open_shape:
+        current_open_seam_set = set(current_open_seam_ids)
+        filtered_claim_stages: list[dict[str, Any]] = []
+        for stage in claim_stages:
+            stage = dict(stage)
+            stage["missingSeamIds"] = [
+                str(seam_id).strip()
+                for seam_id in (stage.get("missingSeamIds") or [])
+                if str(seam_id).strip() and str(seam_id).strip() in current_open_seam_set
+            ]
+            if not stage["missingSeamIds"]:
+                stage["status"] = "closed"
+            filtered_claim_stages.append(stage)
+        claim_stages = filtered_claim_stages
     if claim_stages:
         planned_open_seam_ids = _unique_strings(
             [
@@ -8491,6 +10458,29 @@ def _build_subject_edge_facts(
                 reason="reconstruction:runtime-closed",
                 terms=[*follow_up_terms, *support_terms],
                 source_ids=["reconstruction-fragment", "canonical-term-view", "graph-links"],
+                goal=str(execution_context.get("joinGoal") or "").strip(),
+                proofs=support_proofs[:4],
+            )
+    if subject_class == "range-family":
+        if any(_looks_like_title_surface_term(term) for term in support_terms):
+            add_fact(
+                "exact-shell-to-title",
+                "known",
+                priority=4998,
+                reason="support-surface:literal-title",
+                terms=[*follow_up_terms, *support_terms],
+                source_ids=["resolver-target", "canonical-term-view", "graph-links"],
+                goal=str(execution_context.get("joinGoal") or "").strip(),
+                proofs=support_proofs[:4],
+            )
+        if any(_looks_like_title_hook_term(term) for term in support_terms):
+            add_fact(
+                "exact-display-update-path",
+                "known",
+                priority=4999,
+                reason="support-surface:update-hooks",
+                terms=[*follow_up_terms, *support_terms],
+                source_ids=["resolver-target", "canonical-term-view", "graph-links"],
                 goal=str(execution_context.get("joinGoal") or "").strip(),
                 proofs=support_proofs[:4],
             )
@@ -8966,6 +10956,69 @@ def _derive_subject_state_from_edge_facts(
     }
 
 
+def _normalize_subject_state_edge_conflicts(payload: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(payload or {})
+    known_edges = _unique_strings([str(value).strip() for value in (normalized.get("knownEdges") or []) if str(value).strip()])
+    known_edge_set = set(known_edges)
+    missing_edges = _unique_strings(
+        [
+            str(value).strip()
+            for value in (normalized.get("missingEdges") or [])
+            if str(value).strip() and str(value).strip() not in known_edge_set
+        ]
+    )
+    blocked_edges = _unique_strings(
+        [
+            str(value).strip()
+            for value in (normalized.get("blockedEdges") or [])
+            if str(value).strip() and str(value).strip() not in known_edge_set
+        ]
+    )
+    normalized["knownEdges"] = known_edges
+    normalized["missingEdges"] = missing_edges
+    normalized["blockedEdges"] = blocked_edges
+    remaining_open_edges = _unique_strings([*missing_edges, *blocked_edges])
+    next_seam = dict(normalized.get("nextSeam") or {})
+    next_id = str(next_seam.get("id") or "").strip()
+    if next_id in known_edge_set or next_id not in set(remaining_open_edges):
+        normalized["nextSeam"] = {
+            **next_seam,
+            "id": remaining_open_edges[0] if remaining_open_edges else None,
+            "status": "open" if remaining_open_edges else "clear",
+            "reason": str(next_seam.get("reason") or "").strip() or ("facts:no-open-seam" if not remaining_open_edges else "known-edge-conflict-normalized"),
+            "terms": list(next_seam.get("terms") or []) if remaining_open_edges else [],
+        }
+    if str(normalized.get("subjectKind") or "").strip() == "range-family":
+        missing_edges = [edge for edge in list(normalized.get("missingEdges") or []) if str(edge).strip() != "playerFacingSupportText"]
+        blocked_edges = [edge for edge in list(normalized.get("blockedEdges") or []) if str(edge).strip() != "playerFacingSupportText"]
+        nonblocking_edges = _unique_strings(
+            [
+                *[str(value).strip() for value in (normalized.get("nonblockingEdges") or []) if str(value).strip()],
+                *(
+                    ["playerFacingSupportText"]
+                    if "playerFacingSupportText" in set(normalized.get("missingEdges") or []) | set(normalized.get("blockedEdges") or [])
+                    else []
+                ),
+            ]
+        )
+        normalized["missingEdges"] = missing_edges
+        normalized["blockedEdges"] = blocked_edges
+        normalized["nonblockingEdges"] = nonblocking_edges
+        next_seam = dict(normalized.get("nextSeam") or {})
+        if str(next_seam.get("id") or "").strip() == "playerFacingSupportText":
+            replacement_edge = blocked_edges[0] if blocked_edges else (missing_edges[0] if missing_edges else "")
+            normalized["nextSeam"] = {
+                **next_seam,
+                "id": replacement_edge or None,
+                "status": "open" if replacement_edge else "clear",
+                "reason": str(next_seam.get("reason") or "").strip() or (
+                    "range-family-row-local-descriptive-seam" if replacement_edge else "facts:no-open-seam"
+                ),
+                "terms": list(next_seam.get("terms") or []) if replacement_edge else [],
+            }
+    return normalized
+
+
 def _build_dependency_proof(inputs: dict[str, Any]) -> dict[str, Any]:
     normalized = {
         key: _dependency_hash_payload(value)
@@ -9055,6 +11108,9 @@ def _resolver_support_surfaces_from_surface_plan(surface_plan: dict[str, Any]) -
 def _merge_resolver_support_surfaces(
     current_surfaces: list[dict[str, Any]] | None,
     existing_surfaces: list[dict[str, Any]] | None,
+    *,
+    target_id: str = "",
+    trace_scope: str = "",
 ) -> list[dict[str, Any]]:
     merged_by_id: dict[str, dict[str, Any]] = {}
     ordered_surface_ids: list[str] = []
@@ -9097,10 +11153,36 @@ def _merge_resolver_support_surfaces(
                     ],
                 ]
             ),
+            "fallbackTerms": _unique_strings(
+                [
+                    *[
+                        str(value)
+                        for value in (existing_surface.get("fallbackTerms") or [])
+                        if str(value).strip()
+                    ],
+                    *[
+                        str(value)
+                        for value in (candidate_surface.get("fallbackTerms") or [])
+                        if str(value).strip()
+                    ],
+                ]
+            ),
+            "supportOrigin": str(
+                candidate_surface.get("supportOrigin")
+                or existing_surface.get("supportOrigin")
+                or "db"
+            ).strip(),
+            "syntheticBootstrap": bool(candidate_surface.get("syntheticBootstrap"))
+            or bool(existing_surface.get("syntheticBootstrap")),
         }
         if surface_id not in ordered_surface_ids:
             ordered_surface_ids.append(surface_id)
-    return [dict(merged_by_id[surface_id]) for surface_id in ordered_surface_ids if surface_id in merged_by_id]
+    merged = [dict(merged_by_id[surface_id]) for surface_id in ordered_surface_ids if surface_id in merged_by_id]
+    return _normalize_support_surfaces_against_bootstrap_context(
+        merged,
+        target_id=target_id,
+        trace_scope=trace_scope,
+    )
 
 
 def _resolver_anchor_terms(
@@ -10364,6 +12446,8 @@ class GhidraCacheDB:
         self.db_path = db_path
         self.jobs_dir = jobs_dir
         self.timing_span_factory = None
+        self._subject_contract_term_evidence_cache: dict[tuple[str, str, str], dict[str, Any]] = {}
+        self._relation_native_trace_view_cache: dict[tuple[str, str, str, str], list[dict[str, Any]]] = {}
         self._last_jobs_scan_checked_at = 0.0
         self._last_jobs_scan_latest_fs = ""
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -10659,6 +12743,8 @@ class GhidraCacheDB:
                     built_at TEXT NOT NULL,
                     PRIMARY KEY(project_name, project_file, trace_scope, request_signature)
                 );
+                CREATE INDEX IF NOT EXISTS idx_materialized_trace_views_latest
+                    ON materialized_trace_views(project_name, project_file, trace_scope, built_at DESC, request_signature DESC);
 
                 CREATE TABLE IF NOT EXISTS materialized_native_trace_views (
                     project_name TEXT NOT NULL,
@@ -10672,6 +12758,8 @@ class GhidraCacheDB:
                     built_at TEXT NOT NULL,
                     PRIMARY KEY(project_name, project_file, request_signature)
                 );
+                CREATE INDEX IF NOT EXISTS idx_materialized_native_trace_views_latest
+                    ON materialized_native_trace_views(project_name, project_file, built_at DESC, request_signature DESC);
 
                 CREATE TABLE IF NOT EXISTS canonical_system_trace_views (
                     project_name TEXT NOT NULL,
@@ -12031,6 +14119,7 @@ class GhidraCacheDB:
         terms: list[str],
         *,
         sync_jobs: bool = True,
+        include_payload_scan: bool = True,
     ) -> dict[str, dict[str, Any]]:
         if sync_jobs:
             self.sync_from_jobs_if_needed()
@@ -12073,10 +14162,6 @@ class GhidraCacheDB:
         excluded_fragment_placeholders = ",".join(
             "?" for _ in CONTRACT_LITERAL_EXCLUDED_TRACE_FRAGMENT_KINDS
         )
-        payload_search_terms = [
-            normalized for normalized in normalized_terms if _is_payload_searchable_term(normalized)
-        ]
-
         def _build_payload_count_query(table_name: str, payload_column: str, *, exclude_fragment_kinds: bool) -> str:
             term_count_columns = ", ".join(
                 f"SUM(CASE WHEN INSTR(LOWER({payload_column}), ?) > 0 THEN 1 ELSE 0 END) AS c{index}"
@@ -12113,6 +14198,30 @@ class GhidraCacheDB:
                 """,
                 (project_name, project_file, *normalized_terms),
             ).fetchall()
+            term_lookup = {
+                str(row["normalized_term"] or ""): {
+                    "job": {
+                        "job_id": "canonical-term:" + str(row["normalized_term"] or ""),
+                        "project_name": project_name,
+                        "project_file": project_file,
+                        "status": "completed",
+                        "start_time": str(row["updated_at"]),
+                        "output_file": None,
+                        "cache_mode": "canonical-term",
+                        "provenance": _json_loads(row["provenance_json"], {}),
+                    },
+                    "result": _json_loads(row["payload_json"], {}),
+                    "terms": [str(row["term"])],
+                }
+                for row in term_rows
+            }
+            payload_search_terms = [
+                normalized
+                for normalized in normalized_terms
+                if include_payload_scan
+                and normalized not in term_lookup
+                and _is_payload_searchable_term(normalized)
+            ]
             evidence_count_row = None
             trace_count_row = None
             canonical_trace_count_row = None
@@ -12148,23 +14257,6 @@ class GhidraCacheDB:
                     ),
                 ).fetchone()
 
-        term_lookup = {
-            str(row["normalized_term"] or ""): {
-                "job": {
-                    "job_id": "canonical-term:" + str(row["normalized_term"] or ""),
-                    "project_name": project_name,
-                    "project_file": project_file,
-                    "status": "completed",
-                    "start_time": str(row["updated_at"]),
-                    "output_file": None,
-                    "cache_mode": "canonical-term",
-                    "provenance": _json_loads(row["provenance_json"], {}),
-                },
-                "result": _json_loads(row["payload_json"], {}),
-                "terms": [str(row["term"])],
-            }
-            for row in term_rows
-        }
         graph_lookup: dict[str, list[dict[str, str]]] = {term: [] for term in normalized_terms}
         for row in graph_rows:
             if not is_structural_graph_ref(row):
@@ -12521,6 +14613,7 @@ class GhidraCacheDB:
                 if "database is locked" not in str(exc).lower() or attempt >= attempts - 1:
                     raise
                 time.sleep(0.5 * (attempt + 1))
+        self._relation_native_trace_view_cache.clear()
         return payload
 
     def find_materialized_native_trace_view(self, project_name: str, project_file: str, request_signature: str) -> dict[str, Any] | None:
@@ -12559,38 +14652,90 @@ class GhidraCacheDB:
         required_seam_ids = _unique_strings([str(value).strip() for value in (required_seam_ids or []) if str(value).strip()])
         if not subject_id:
             return None
-        with self.connect() as conn:
-            rows = conn.execute(
-                """
-                SELECT * FROM materialized_native_trace_views
-                WHERE project_name = ? AND project_file = ?
-                ORDER BY built_at DESC
-                LIMIT 128
-                """,
-                (project_name, project_file),
-            ).fetchall()
-        for row in rows:
-            payload = _json_loads(row["payload_json"], {})
-            provenance = _json_loads(row["provenance_json"], {})
-            request_context = dict(payload.get("requestContext") or provenance.get("requestContext") or {})
-            if str(request_context.get("coverageMode") or "").strip() != "relation-shaped":
-                continue
-            if str(request_context.get("subjectId") or "").strip() != subject_id:
-                continue
-            if relation_scope and str(request_context.get("relationScope") or "").strip() != relation_scope:
-                continue
+        cache_key = (
+            str(project_name or "").strip(),
+            str(project_file or "").strip(),
+            subject_id,
+            relation_scope,
+        )
+        relation_views = self._relation_native_trace_view_cache.get(cache_key)
+        if relation_views is None:
+            with self.connect() as conn:
+                rows = conn.execute(
+                    """
+                    SELECT * FROM materialized_native_trace_views
+                    WHERE project_name = ? AND project_file = ?
+                    ORDER BY built_at DESC
+                    LIMIT 128
+                    """,
+                    (project_name, project_file),
+                ).fetchall()
+                if not any(
+                    str(((_json_loads(row["payload_json"], {}) or {}).get("requestContext") or {}).get("subjectId") or "").strip() == subject_id
+                    and (
+                        not relation_scope
+                        or str(((_json_loads(row["payload_json"], {}) or {}).get("requestContext") or {}).get("relationScope") or "").strip() == relation_scope
+                    )
+                    for row in rows
+                ):
+                    relation_rows = conn.execute(
+                        """
+                        SELECT * FROM materialized_native_trace_views
+                        WHERE project_name = ? AND project_file = ?
+                          AND payload_json LIKE ?
+                          AND (? = '' OR payload_json LIKE ?)
+                        ORDER BY built_at DESC
+                        LIMIT 128
+                        """,
+                        (
+                            project_name,
+                            project_file,
+                            f'%"{subject_id}"%',
+                            relation_scope,
+                            f'%"{relation_scope}"%',
+                        ),
+                    ).fetchall()
+                    existing_signatures = {str(row["request_signature"]) for row in rows}
+                    rows = list(rows) + [
+                        row for row in relation_rows if str(row["request_signature"]) not in existing_signatures
+                    ]
+            relation_views = []
+            for row in rows:
+                payload = _json_loads(row["payload_json"], {})
+                provenance = _json_loads(row["provenance_json"], {})
+                request_context = dict(payload.get("requestContext") or provenance.get("requestContext") or {})
+                if str(request_context.get("coverageMode") or "").strip() != "relation-shaped":
+                    continue
+                if str(request_context.get("subjectId") or "").strip() != subject_id:
+                    continue
+                if relation_scope and str(request_context.get("relationScope") or "").strip() != relation_scope:
+                    continue
+                relation_views.append(
+                    {
+                        "requestedTerms": _json_loads(row["requested_terms_json"], []),
+                        "searchTerms": _json_loads(row["search_terms_json"], []),
+                        "payload": payload,
+                        "provenance": provenance,
+                        "requestContext": request_context,
+                        "reducerVersion": str(row["reducer_version"] or ""),
+                        "builtAt": str(row["built_at"]),
+                    }
+                )
+            self._relation_native_trace_view_cache[cache_key] = relation_views
+        for view in relation_views:
+            request_context = dict(view.get("requestContext") or {})
             row_required_seams = _unique_strings(
                 [str(value).strip() for value in (request_context.get("requiredCoverageSeamIds") or []) if str(value).strip()]
             )
             if required_seam_ids and any(seam_id not in row_required_seams for seam_id in required_seam_ids):
                 continue
             return {
-                "requestedTerms": _json_loads(row["requested_terms_json"], []),
-                "searchTerms": _json_loads(row["search_terms_json"], []),
-                "payload": payload,
-                "provenance": provenance,
-                "reducerVersion": str(row["reducer_version"] or ""),
-                "builtAt": str(row["built_at"]),
+                "requestedTerms": list(view.get("requestedTerms") or []),
+                "searchTerms": list(view.get("searchTerms") or []),
+                "payload": dict(view.get("payload") or {}),
+                "provenance": dict(view.get("provenance") or {}),
+                "reducerVersion": str(view.get("reducerVersion") or ""),
+                "builtAt": str(view.get("builtAt") or ""),
             }
         return None
 
@@ -12790,6 +14935,36 @@ class GhidraCacheDB:
         project_file: str,
         term: str,
     ) -> dict[str, Any]:
+        normalized_term = str(term or "").strip().lower()
+        cached = self._subject_contract_term_evidence_cache.get((str(project_name or "").strip(), str(project_file or "").strip(), normalized_term))
+        if cached is not None:
+            return dict(cached)
+        evidences = self._find_subject_contract_term_evidences(project_name, project_file, [term])
+        evidence = dict(evidences.get(normalized_term) or {"term": str(term or "").strip(), "found": False, "sourceIds": [], "graphRefs": [], "payloadHits": [], "projectFiles": []})
+        self._subject_contract_term_evidence_cache[(str(project_name or "").strip(), str(project_file or "").strip(), normalized_term)] = dict(evidence)
+        return evidence
+
+    def _find_subject_contract_term_evidences(
+        self,
+        project_name: str,
+        project_file: str,
+        terms: list[str],
+    ) -> dict[str, dict[str, Any]]:
+        normalized_terms = _unique_strings([str(term or "").strip().lower() for term in terms if str(term or "").strip()])
+        if not normalized_terms:
+            return {}
+        cache_project = str(project_name or "").strip()
+        cache_file = str(project_file or "").strip()
+        results: dict[str, dict[str, Any]] = {}
+        missing_terms: list[str] = []
+        for normalized in normalized_terms:
+            cached = self._subject_contract_term_evidence_cache.get((cache_project, cache_file, normalized))
+            if cached is not None:
+                results[normalized] = dict(cached)
+            else:
+                missing_terms.append(normalized)
+        if not missing_terms:
+            return results
         candidate_pairs: list[tuple[str, str]] = []
         for candidate in [
             (str(project_name or "").strip(), str(project_file or "").strip()),
@@ -12798,53 +14973,237 @@ class GhidraCacheDB:
             if candidate[0] and candidate[1] and candidate not in candidate_pairs:
                 candidate_pairs.append(candidate)
 
-        evidence_rows = [
-            self._find_contract_term_evidence(candidate_project, candidate_file, term)
-            for candidate_project, candidate_file in candidate_pairs
-        ]
-        project_files = _unique_strings(
-            [
-                f"{candidate_project}/{candidate_file}"
-                for (candidate_project, candidate_file), evidence in zip(candidate_pairs, evidence_rows)
-                if bool(evidence.get("found"))
-            ]
-        )
-        merged_graph_refs: list[dict[str, Any]] = []
-        seen_graph_refs: set[str] = set()
-        for evidence in evidence_rows:
-            for graph_ref in (evidence.get("graphRefs") or []):
-                if not isinstance(graph_ref, dict):
-                    continue
-                serialized = _json_dumps(graph_ref)
-                if serialized in seen_graph_refs:
-                    continue
-                seen_graph_refs.add(serialized)
-                merged_graph_refs.append(dict(graph_ref))
-        merged_payload_hits: list[dict[str, Any]] = []
-        seen_payload_hits: set[str] = set()
-        for evidence in evidence_rows:
-            for payload_hit in (evidence.get("payloadHits") or []):
-                if not isinstance(payload_hit, dict):
-                    continue
-                serialized = _json_dumps(payload_hit)
-                if serialized in seen_payload_hits:
-                    continue
-                seen_payload_hits.add(serialized)
-                merged_payload_hits.append(dict(payload_hit))
-        return {
-            "term": str(term or "").strip(),
-            "found": any(bool(evidence.get("found")) for evidence in evidence_rows),
-            "sourceIds": _unique_strings(
-                [
-                    source_id
-                    for evidence in evidence_rows
-                    for source_id in (evidence.get("sourceIds") or [])
-                ]
-            ),
-            "graphRefs": merged_graph_refs[:6],
-            "payloadHits": merged_payload_hits[:6],
-            "projectFiles": project_files,
+        evidence_rows_by_pair = {
+            candidate_pair: self.find_contract_term_evidences(
+                candidate_pair[0],
+                candidate_pair[1],
+                missing_terms,
+                sync_jobs=False,
+                include_payload_scan=False,
+            )
+            for candidate_pair in candidate_pairs
         }
+        for normalized in missing_terms:
+            evidence_rows = [
+                dict((evidence_rows_by_pair.get(candidate_pair) or {}).get(normalized) or {})
+                for candidate_pair in candidate_pairs
+            ]
+            project_files = _unique_strings(
+                [
+                    f"{candidate_project}/{candidate_file}"
+                    for (candidate_project, candidate_file), evidence in zip(candidate_pairs, evidence_rows)
+                    if bool(evidence.get("found"))
+                ]
+            )
+            merged_graph_refs: list[dict[str, Any]] = []
+            seen_graph_refs: set[str] = set()
+            for evidence in evidence_rows:
+                for graph_ref in (evidence.get("graphRefs") or []):
+                    if not isinstance(graph_ref, dict):
+                        continue
+                    serialized = _json_dumps(graph_ref)
+                    if serialized in seen_graph_refs:
+                        continue
+                    seen_graph_refs.add(serialized)
+                    merged_graph_refs.append(dict(graph_ref))
+            merged_payload_hits: list[dict[str, Any]] = []
+            seen_payload_hits: set[str] = set()
+            for evidence in evidence_rows:
+                for payload_hit in (evidence.get("payloadHits") or []):
+                    if not isinstance(payload_hit, dict):
+                        continue
+                    serialized = _json_dumps(payload_hit)
+                    if serialized in seen_payload_hits:
+                        continue
+                    seen_payload_hits.add(serialized)
+                    merged_payload_hits.append(dict(payload_hit))
+            merged = {
+                "term": normalized,
+                "found": any(bool(evidence.get("found")) for evidence in evidence_rows),
+                "sourceIds": _unique_strings(
+                    [
+                        source_id
+                        for evidence in evidence_rows
+                        for source_id in (evidence.get("sourceIds") or [])
+                    ]
+                ),
+                "graphRefs": merged_graph_refs[:6],
+                "payloadHits": merged_payload_hits[:6],
+                "projectFiles": project_files,
+            }
+            self._subject_contract_term_evidence_cache[(cache_project, cache_file, normalized)] = dict(merged)
+            results[normalized] = merged
+        return results
+
+    def _materialize_system_unit_field_term_evidence(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        system_id: str,
+        version: str,
+        terms: list[str],
+        source_kind: str,
+    ) -> bool:
+        requested_terms = _unique_strings([str(term or "").strip() for term in terms if str(term or "").strip()])
+        if not requested_terms:
+            return False
+        system_unit = self.find_materialized_system_unit_view(system_id, version)
+        payload = dict((system_unit or {}).get("payload") or {})
+        fields = [dict(entry) for entry in (payload.get("fields") or []) if isinstance(entry, dict)]
+        if not fields:
+            return False
+        fields_by_name = {
+            str(entry.get("field") or "").strip().lower(): entry
+            for entry in fields
+            if str(entry.get("field") or "").strip()
+        }
+        selected_entries = [
+            dict(fields_by_name.get(term.lower()) or {})
+            for term in requested_terms
+            if term.lower() in fields_by_name
+        ]
+        if not selected_entries:
+            return False
+
+        fields_by_group: dict[str, list[dict[str, Any]]] = {}
+        for entry in fields:
+            fields_by_group.setdefault(str(entry.get("group") or "unknown"), []).append(entry)
+        for group_entries in fields_by_group.values():
+            group_entries.sort(key=lambda entry: int(entry.get("object_offset") or 0))
+
+        start_time = datetime.now().isoformat()
+        signature = hashlib.sha256(
+            _json_dumps(
+                {
+                    "systemId": system_id,
+                    "version": version,
+                    "projectName": project_name,
+                    "projectFile": project_file,
+                    "terms": sorted([str(entry.get("field") or "") for entry in selected_entries]),
+                }
+            ).encode("utf-8")
+        ).hexdigest()[:24]
+        source_job_id = f"system-unit-field-evidence:{system_id}:{version}:{signature}"
+        job_info = {
+            "job_id": source_job_id,
+            "mode": "process-project",
+            "project_name": project_name,
+            "project_file": project_file,
+            "binary": project_file,
+            "status": "completed",
+            "start_time": start_time,
+            "output_file": None,
+            "job_file": None,
+            "marker_file": None,
+            "log_file": None,
+            "signature": signature,
+            "cache_mode": "db-system-unit-field-evidence",
+            "search_strings": [str(entry.get("field") or "") for entry in selected_entries],
+            "expanded_search_strings": requested_terms,
+            "executed_search_strings": [str(entry.get("field") or "") for entry in selected_entries],
+            "completed_terms": [str(entry.get("field") or "") for entry in selected_entries],
+            "failed_terms": [term for term in requested_terms if term.lower() not in fields_by_name],
+            "per_term_jobs": [],
+            "graph_backfilled_terms": [],
+        }
+        self.record_extraction_job(job_info)
+
+        evidence_rows: list[dict[str, Any]] = []
+
+        def field_address(entry: dict[str, Any]) -> str:
+            offset = int(entry.get("object_offset") or 0)
+            return f"0x{offset:08x}"
+
+        def add(term: str, aspect_kind: str, payload_value: Any, aspect_key: str = "__self__", confidence: float | None = None) -> None:
+            if payload_value is None:
+                return
+            if isinstance(payload_value, list) and not payload_value:
+                return
+            if isinstance(payload_value, dict) and not payload_value:
+                return
+            evidence_rows.append(
+                {
+                    "project_name": project_name,
+                    "project_file": project_file,
+                    "normalized_term": term.lower(),
+                    "term": term,
+                    "aspect_kind": aspect_kind,
+                    "aspect_key": aspect_key,
+                    "source_job_id": source_job_id,
+                    "payload": payload_value,
+                    "confidence": float(confidence if confidence is not None else ASPECT_PRIORITIES.get(aspect_kind, 50)) / 100.0,
+                    "reducer_priority": int(ASPECT_PRIORITIES.get(aspect_kind, 50)),
+                    "schema_version": SCHEMA_VERSION_FLOOR,
+                    "script_name": "ghidra_cache_db.py",
+                    "producer_version": "system-unit-field-evidence-v1",
+                    "start_time": start_time,
+                }
+            )
+
+        for entry in selected_entries:
+            term = str(entry.get("field") or "").strip()
+            if not term:
+                continue
+            group = str(entry.get("group") or "unknown")
+            group_entries = fields_by_group.get(group, [])
+            try:
+                index = next(index for index, candidate in enumerate(group_entries) if candidate is entry or str(candidate.get("field") or "").strip() == term)
+            except StopIteration:
+                index = -1
+            context_entries = group_entries[max(0, index - 4): index + 5] if index >= 0 else []
+            context_terms = _unique_strings(
+                [
+                    str(context_entry.get("field") or "").strip()
+                    for context_entry in context_entries
+                    if str(context_entry.get("field") or "").strip() and str(context_entry.get("field") or "").strip() != term
+                ]
+            )
+            field_payload = {
+                "term": term,
+                "source": source_kind,
+                "sourceSystemUnit": f"{system_id}:{version}",
+                "sourceBuiltAt": str((system_unit or {}).get("builtAt") or ""),
+                "field": term,
+                "fieldRecord": entry,
+                "fieldGroup": group,
+                "provenance": "extracted-unity-system-unit",
+            }
+            add(term, "term_bridge_core", {**field_payload, "relatedTerms": context_terms}, confidence=0.93)
+            add(term, "related_terms", context_terms, aspect_key=f"{system_id}:{version}:{group}", confidence=0.78)
+            add(
+                term,
+                "metadata_neighborhoods",
+                [
+                    {
+                        "string": term,
+                        "address": field_address(entry),
+                        "source": source_kind,
+                        "sourceSystemUnit": f"{system_id}:{version}",
+                        "group": group,
+                        "kind": str(entry.get("kind") or ""),
+                        "context": [
+                            {
+                                "string": str(context_entry.get("field") or "").strip(),
+                                "address": field_address(context_entry),
+                                "group": str(context_entry.get("group") or ""),
+                                "kind": str(context_entry.get("kind") or ""),
+                            }
+                            for context_entry in context_entries
+                            if str(context_entry.get("field") or "").strip()
+                        ],
+                    }
+                ],
+                aspect_key=f"{system_id}:{version}:{group}:{field_address(entry)}",
+                confidence=0.92,
+            )
+
+        changed = self.upsert_custom_evidence_rows(evidence_rows, rebuild_materialized=True, rebuild_job_views=False)
+        if changed:
+            for term in requested_terms:
+                self._subject_contract_term_evidence_cache.pop((str(project_name or "").strip(), str(project_file or "").strip(), term.lower()), None)
+                self._subject_contract_term_evidence_cache.pop(("cifi-full", "libil2cpp.so", term.lower()), None)
+        return changed
 
     def _derive_token_shop_shared_contract_fields(
         self,
@@ -12972,13 +15331,67 @@ class GhidraCacheDB:
         shared_support_summary: dict[str, Any] = {}
         shared_provenance_summary: dict[str, Any] = {}
         shared_blocked_reasons: dict[str, Any] = {}
+        contract_terms = _unique_strings(
+            [
+                alias
+                for lane_spec in lane_specs.values()
+                for term in [
+                    *list((lane_spec.get("labels") or {}).values()),
+                    *list(lane_spec.get("adjacentTerms") or []),
+                    *list(lane_spec.get("excludedTerms") or []),
+                ]
+                for alias in _compiler_property_term_aliases(str(term).strip())
+                if alias
+            ]
+        )
+        self._materialize_system_unit_field_term_evidence(
+            project_name,
+            project_file,
+            system_id="token-shop-values",
+            version="v1",
+            terms=contract_terms,
+            source_kind="db:derived:token-shop-values",
+        )
+        batched_evidence_by_term = self._find_subject_contract_term_evidences(
+            project_name,
+            project_file,
+            contract_terms,
+        )
 
         for lane_id, lane_spec in lane_specs.items():
             required_labels = dict(lane_spec.get("labels") or {})
             adjacent_terms = [str(value).strip() for value in (lane_spec.get("adjacentTerms") or []) if str(value).strip()]
+            label_aliases = {
+                field_name: _compiler_property_term_aliases(str(term).strip())
+                for field_name, term in required_labels.items()
+                if str(term).strip()
+            }
+            adjacent_alias_terms = _unique_strings(
+                [
+                    alias
+                    for term in adjacent_terms
+                    for alias in _compiler_property_term_aliases(term)
+                    if alias
+                ]
+            )
+            lane_evidence_terms = _unique_strings(
+                [
+                    alias
+                    for aliases in label_aliases.values()
+                    for alias in aliases
+                ]
+                + adjacent_alias_terms
+            )
             evidence_by_term = {
-                term: self._find_subject_contract_term_evidence(project_name, project_file, term)
-                for term in [*required_labels.values(), *adjacent_terms]
+                term: dict(batched_evidence_by_term.get(term.lower()) or {
+                    "term": term,
+                    "found": False,
+                    "sourceIds": [],
+                    "graphRefs": [],
+                    "payloadHits": [],
+                    "projectFiles": [],
+                })
+                for term in lane_evidence_terms
             }
             found_terms = [
                 term
@@ -12986,19 +15399,44 @@ class GhidraCacheDB:
                 if bool(evidence.get("found"))
             ]
             missing_terms = [
-                term
-                for term, evidence in evidence_by_term.items()
-                if not bool(evidence.get("found"))
+                str(required_term).strip()
+                for required_term in required_labels.values()
+                if str(required_term).strip()
+                and not any(bool((evidence_by_term.get(alias) or {}).get("found")) for alias in _compiler_property_term_aliases(str(required_term).strip()))
+            ]
+            missing_terms.extend(
+                [
+                    term
+                    for term in adjacent_terms
+                    if not any(bool((evidence_by_term.get(alias) or {}).get("found")) for alias in _compiler_property_term_aliases(term))
+                ]
+            )
+            missing_terms = _unique_strings(missing_terms)
+            advisory_missing_terms = [
+                term for term in missing_terms if _is_nonblocking_contract_lane_missing_term(term)
+            ]
+            blocking_missing_terms = [
+                term for term in missing_terms if term not in set(advisory_missing_terms)
             ]
 
-            lane_fields = {
-                field_name: term
-                for field_name, term in required_labels.items()
-                if bool((evidence_by_term.get(term) or {}).get("found"))
-            }
+            lane_fields = {}
+            for field_name, term in required_labels.items():
+                aliases = label_aliases.get(field_name) or []
+                matched_term = next(
+                    (
+                        alias
+                        for alias in aliases
+                        if bool((evidence_by_term.get(alias) or {}).get("found"))
+                    ),
+                    "",
+                )
+                if matched_term:
+                    lane_fields[field_name] = matched_term
             if adjacent_terms:
                 lane_fields["adjacentTerms"] = [
-                    term for term in adjacent_terms if bool((evidence_by_term.get(term) or {}).get("found"))
+                    term
+                    for term in adjacent_terms
+                    if any(bool((evidence_by_term.get(alias) or {}).get("found")) for alias in _compiler_property_term_aliases(term))
                 ]
             excluded_terms = [
                 str(value).strip()
@@ -13189,7 +15627,8 @@ class GhidraCacheDB:
             ]
             shared_support_summary[lane_id] = {
                 "foundTerms": found_terms,
-                "missingTerms": missing_terms,
+                "missingTerms": blocking_missing_terms,
+                "advisoryMissingTerms": advisory_missing_terms,
                 "sourceIds": source_ids,
                 "graphRefs": graph_refs[:8],
                 "proofCount": len(found_terms),
@@ -13211,13 +15650,15 @@ class GhidraCacheDB:
             ]
             if missing_terms:
                 shared_blocked_reasons[lane_id] = (
-                    f"missing-db-term-evidence:{lane_id}:{','.join(missing_terms)}"
-                )
+                    f"missing-db-term-evidence:{lane_id}:{','.join(blocking_missing_terms)}"
+                ) if blocking_missing_terms else None
             elif excluded_terms and not exclusion_clear:
                 shared_blocked_reasons[lane_id] = (
                     str(lane_spec.get("exclusionBlockedReason") or "").strip()
                     or f"missing-db-derived-context-clearance:{lane_id}:{','.join(excluded_terms)}"
                 )
+            elif lane_fields:
+                shared_blocked_reasons[lane_id] = None
             else:
                 shared_blocked_reasons[lane_id] = (
                     str(lane_spec.get("blockedReason") or "").strip() or None
@@ -16898,6 +19339,12 @@ class GhidraCacheDB:
                         project_name, project_file, source_entity_id, trace_scope, field_key, relation_kind, target_entity_id,
                         payload_json, provenance_json, reducer_version, built_at
                     ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                    ON CONFLICT(project_name, project_file, source_entity_id, field_key, relation_kind, target_entity_id) DO UPDATE SET
+                        trace_scope=excluded.trace_scope,
+                        payload_json=excluded.payload_json,
+                        provenance_json=excluded.provenance_json,
+                        reducer_version=excluded.reducer_version,
+                        built_at=excluded.built_at
                     """,
                     (
                         project_name,
@@ -17270,7 +19717,17 @@ class GhidraCacheDB:
                 subject_id,
                 "generic-mechanics-model",
             )
-            if stage and upstream_signature and str(stage.get("upstreamSignature") or "").strip() == upstream_signature:
+            current_gap_rows = self.list_latest_materialized_gap_views(
+                project_name,
+                project_file,
+                trace_scope=scope,
+            )
+            if not _generic_mechanics_stage_needs_refresh_from_contract(
+                stage,
+                upstream_signature=upstream_signature,
+                current_gap_rows=current_gap_rows,
+                contract_payload=payload,
+            ):
                 continue
             generic_views = _derive_generic_mechanics_views_from_subject_contract(payload)
             self.publish_generic_mechanics_views(
@@ -17709,6 +20166,20 @@ class GhidraCacheDB:
             exact_key="typedOwnerClaimTerms",
             candidate_key="typedOwnerClaimCandidates",
         )
+        with self.connect() as conn:
+            exact_structured_claim_terms = _canonical_exact_structured_claim_terms_from_aspects(
+                conn,
+                project_name=project_name,
+                project_file=project_file,
+                claim_candidates=list(fragment_inputs.get("typedOwnerClaimCandidates") or []),
+            )
+        if exact_structured_claim_terms:
+            fragment_inputs["typedOwnerClaimTerms"] = _unique_strings(
+                [
+                    *[str(value) for value in (fragment_inputs.get("typedOwnerClaimTerms") or []) if str(value).strip()],
+                    *exact_structured_claim_terms,
+                ]
+            )
         graph_terms: list[str] = []
         for claim_value in list(fragment_inputs.get("typedOwnerClaimCandidates") or []):
             claim_text = str(claim_value or "").strip()
@@ -17921,8 +20392,8 @@ class GhidraCacheDB:
                 subject_id,
                 "generic-mechanics-model",
             )
-            if not generic_stage or str(generic_stage.get("upstreamSignature") or "").strip() != str(upstream_signature).strip():
-                return {}
+            if generic_stage and str(generic_stage.get("upstreamSignature") or "").strip() != str(upstream_signature).strip():
+                upstream_signature = ""
         return _reconstruct_row_details_from_generic_mechanics(
             subject_id,
             self.list_latest_materialized_entity_views(project_name, project_file, trace_scope=trace_scope),
@@ -18196,7 +20667,7 @@ class GhidraCacheDB:
                 compatibility_target_id=materialization_args["compatibility_target_id"],
                 precomputed_subject_state=subject_state,
             ) or {}
-        if frontier_only_materialization:
+        if frontier_only_materialization and not trace_scope.startswith("token-shop-"):
             return {
                 "subjectState": subject_state,
                 "resolverTarget": resolver_target,
@@ -18485,9 +20956,15 @@ class GhidraCacheDB:
         subject_id = str(subject_identity.get("subjectId") or execution_context.get("targetId") or compatibility_target_id or trace_scope).strip()
         existing = self.find_materialized_subject_state_view(project_name, project_file, trace_scope, subject_id)
         latest_bundle = self.find_latest_materialized_target_bundle_view(project_name, project_file, trace_scope) or {}
+        latest_bundle_built_at = str((latest_bundle or {}).get("built_at") or "").strip()
         latest_payload = dict(latest_bundle.get("payload") or {})
         latest_native_trace = dict(latest_payload.get("nativeTrace") or {})
-        if not dict(latest_native_trace.get("requestContext") or {}):
+        latest_native_request_context = dict(latest_native_trace.get("requestContext") or {})
+        latest_native_is_relation_context = (
+            str(latest_native_request_context.get("coverageMode") or "").strip() == "relation-shaped"
+            and str(latest_native_request_context.get("relationScope") or "").strip() == trace_scope
+        )
+        if not latest_native_is_relation_context:
             relation_backfill_view = None
             for diagnostic_row in self.list_latest_materialized_acquisition_diagnostics_for_scope(
                 project_name,
@@ -18551,6 +21028,32 @@ class GhidraCacheDB:
             subject_id,
             latest_native_trace,
         )
+        if not native_relation_satisfied_seams:
+            relation_seam_contracts_for_satisfaction = {
+                str(seam_id).strip(): dict(contract or {})
+                for seam_id, contract in dict(execution_plan.get("relationSeamContracts") or {}).items()
+                if str(seam_id).strip() and isinstance(contract, dict)
+            }
+            for seam_id, contract in relation_seam_contracts_for_satisfaction.items():
+                relation_native_view = self.find_latest_materialized_native_trace_view_for_relation(
+                    project_name,
+                    project_file,
+                    subject_id=subject_id,
+                    relation_scope=str(contract.get("traceScope") or trace_scope).strip(),
+                    required_seam_ids=[seam_id],
+                )
+                if not relation_native_view:
+                    continue
+                native_relation_satisfied_seams = _unique_strings(
+                    [
+                        *native_relation_satisfied_seams,
+                        *_derive_native_relation_satisfied_seams(
+                            trace_scope,
+                            subject_id,
+                            dict(relation_native_view.get("payload") or {}),
+                        ),
+                    ]
+                )
         assessment_fragment = self.find_canonical_semantic_fragment(
             project_name,
             project_file,
@@ -18577,6 +21080,63 @@ class GhidraCacheDB:
             family_id=str(execution_context.get("familyId") or family_id or ""),
             compatibility_target_id=compatibility_target_id,
         ) or {}
+        support_surface_terms = [
+            str(term)
+            for surface in (_resolver_support_surfaces_from_surface_plan(surface_plan) if surface_plan else [])
+            if isinstance(surface, dict)
+            for term in (surface.get("terms") or [])
+            if str(term).strip()
+        ]
+        support_terms = _unique_strings(
+            [
+                *[str(value) for value in (resolver_payload.get("anchorTerms") or []) if str(value).strip()],
+                *[
+                    str(term)
+                    for surface in (resolver_payload.get("supportSurfaces") or [])
+                    if isinstance(surface, dict)
+                    for term in (surface.get("terms") or [])
+                    if str(term).strip()
+                ],
+                *support_surface_terms,
+            ]
+        )
+        newer_scope_gap_rows: list[dict[str, Any]] = []
+        with self.connect() as conn:
+            gap_query = """
+                SELECT entity_id, field_key, gap_kind, payload_json, built_at
+                FROM materialized_gap_views
+                WHERE project_name = ?
+                  AND project_file = ?
+                  AND trace_scope = ?
+            """
+            gap_params: list[str] = [project_name, project_file, trace_scope]
+            if latest_bundle_built_at:
+                gap_query += " AND built_at >= ?"
+                gap_params.append(latest_bundle_built_at)
+            gap_query += " ORDER BY built_at DESC"
+            for gap_row in conn.execute(gap_query, tuple(gap_params)).fetchall():
+                newer_scope_gap_rows.append(
+                    {
+                        "entityId": str(gap_row["entity_id"] or "").strip(),
+                        "fieldKey": str(gap_row["field_key"] or "").strip(),
+                        "gapKind": str(gap_row["gap_kind"] or "").strip(),
+                        "payload": _json_loads(gap_row["payload_json"], {}),
+                        "builtAt": str(gap_row["built_at"] or "").strip(),
+                    }
+                )
+        def _support_term_dependency_snapshot(terms: list[str]) -> list[dict[str, Any]]:
+            snapshots: list[dict[str, Any]] = []
+            for term in _unique_strings([str(value).strip() for value in (terms or []) if str(value).strip()])[:12]:
+                canonical_term = self.find_canonical_term_view(project_name, project_file, term)
+                graph_refs = self.find_graph_backfill(project_name, project_file, term)[:4]
+                snapshots.append(
+                    {
+                        "term": str(term),
+                        "canonical": _dependency_descriptor(canonical_term) if canonical_term else None,
+                        "graphRefs": [_dependency_descriptor(item) for item in graph_refs if item],
+                    }
+                )
+            return snapshots
         state_dependency_signature = _build_materialization_dependency_signature(
             {
                 "executionContext": execution_context,
@@ -18591,7 +21151,18 @@ class GhidraCacheDB:
                 ),
                 "assessment": assessment_fragment,
                 "surfacePlan": surface_plan,
+                "supportTermEvidence": _support_term_dependency_snapshot(support_terms),
+                "newerScopeGapRows": [
+                    {
+                        "entityId": str(item.get("entityId") or "").strip(),
+                        "fieldKey": str(item.get("fieldKey") or "").strip(),
+                        "gapKind": str(item.get("gapKind") or "").strip(),
+                        "payload": dict(item.get("payload") or {}),
+                    }
+                    for item in newer_scope_gap_rows[:64]
+                ],
                 "subjectIdentity": subject_identity,
+                "reducerVersion": "materialized-subject-state-view-v14",
             }
         )
         existing_provenance = dict((existing or {}).get("provenance") or {})
@@ -18672,31 +21243,11 @@ class GhidraCacheDB:
                 },
                 provenance={
                     "payloadHash": str(existing_provenance.get("payloadHash") or ""),
-                    "reducer": "materialized-subject-state-view-v1",
+                    "reducer": "materialized-subject-state-view-v14",
                 },
-                reducer_version="materialized-subject-state-view-v1",
+                reducer_version="materialized-subject-state-view-v14",
             )
             return existing_payload
-        support_surface_terms = [
-            str(term)
-            for surface in (_resolver_support_surfaces_from_surface_plan(surface_plan) if surface_plan else [])
-            if isinstance(surface, dict)
-            for term in (surface.get("terms") or [])
-            if str(term).strip()
-        ]
-        support_terms = _unique_strings(
-            [
-                *[str(value) for value in (resolver_payload.get("anchorTerms") or []) if str(value).strip()],
-                *[
-                    str(term)
-                    for surface in (resolver_payload.get("supportSurfaces") or [])
-                    if isinstance(surface, dict)
-                    for term in (surface.get("terms") or [])
-                    if str(term).strip()
-                ],
-                *support_surface_terms,
-            ]
-        )
         support_proofs: list[dict[str, Any]] = []
         for term in support_terms[:8]:
             canonical_term = self.find_canonical_term_view(project_name, project_file, term)
@@ -18793,7 +21344,28 @@ class GhidraCacheDB:
                 }
                 for seam_index, seam_id in enumerate(required_seams):
                     seam_already_known = seam_id in known_edge_types_before_relation
+                    self_referential_relation_blocker = (
+                        not relation_covered
+                        and seam_id == str(diagnostic_payload.get("seamId") or relation_coverage.get("seamId") or "").strip()
+                        and not progress_edges
+                        and not [str(value).strip() for value in (relation_coverage.get("requiredFactKinds") or []) if str(value).strip()]
+                        and not [str(value).strip() for value in (relation_coverage.get("requiredRelationKinds") or []) if str(value).strip()]
+                    )
+                    if self_referential_relation_blocker and not seam_already_known:
+                        continue
                     seam_status = "known" if (relation_covered or seam_id in native_relation_satisfied_seams or seam_already_known) else "blocked"
+                    if seam_status != "known" and any(
+                        str(item.get("edgeType") or "").strip() == seam_id
+                        and str(item.get("status") or "").strip() == "known"
+                        for item in relation_required_seam_edge_facts
+                    ):
+                        continue
+                    if seam_status == "known":
+                        relation_required_seam_edge_facts = [
+                            item
+                            for item in relation_required_seam_edge_facts
+                            if str(item.get("edgeType") or "").strip() != seam_id
+                        ]
                     relation_required_seam_edge_facts.append(
                         {
                             "edgeType": seam_id,
@@ -18899,7 +21471,32 @@ class GhidraCacheDB:
             identity_reason=str(subject_identity.get("identityReason") or ""),
             subject_path_id=str(subject_identity.get("subjectPathId") or ""),
         )
-        claim_stages_for_subject = [stage for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]
+        claim_stages = [dict(stage) for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]
+        state_payload, decision_summary, claim_stages, _closed_composite_seams = _apply_composite_subject_seam_closure(
+            trace_scope,
+            state_payload,
+            decision_summary,
+            claim_stages,
+        )
+        current_open_edge_ids = _unique_strings(
+            [
+                *[str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()],
+                *[str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()],
+                *[str(value).strip() for value in (decision_summary.get("baselineGap") or []) if str(value).strip()],
+                *[str(value).strip() for value in (decision_summary.get("blockedEdgeTypes") or []) if str(value).strip()],
+            ]
+        )
+        if claim_stages:
+            current_open_edge_set = set(current_open_edge_ids)
+            for claim_stage in claim_stages:
+                claim_stage["missingSeamIds"] = [
+                    str(seam_id).strip()
+                    for seam_id in (claim_stage.get("missingSeamIds") or [])
+                    if str(seam_id).strip() and str(seam_id).strip() in current_open_edge_set
+                ]
+                if not claim_stage["missingSeamIds"]:
+                    claim_stage["status"] = "closed"
+        claim_stages_for_subject = [dict(stage) for stage in claim_stages if isinstance(stage, dict)]
         if claim_stages_for_subject and subject_class != "row-local":
             planned_open_seam_ids = _unique_strings(
                 [
@@ -19046,7 +21643,7 @@ class GhidraCacheDB:
                     if str(value).strip() and str(value).strip() not in covered_required_seam_id_set
                 ]
             )
-        for claim_stage in [stage for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]:
+        for claim_stage in [stage for stage in claim_stages if isinstance(stage, dict)]:
             if str(claim_stage.get("id") or "").strip() == "family-subject":
                 claim_stage["missingSeamIds"] = list(unresolved_required_seam_ids)
                 claim_stage["status"] = "open" if unresolved_required_seam_ids else "closed"
@@ -19102,7 +21699,7 @@ class GhidraCacheDB:
                         "blockedEdgeTypes": [],
                     }
         state_payload["decisionSummary"] = decision_summary
-        state_payload["claimStages"] = list(execution_plan.get("claimStages") or [])
+        state_payload["claimStages"] = list(claim_stages)
         state_payload["depthPlan"] = list(execution_plan.get("depthPlan") or [])
         if (
             trace_scope == "token-shop-daily-tokenium-family"
@@ -19214,6 +21811,315 @@ class GhidraCacheDB:
                         *historical_known_edges,
                     ]
                 )
+        contract_satisfied_seams: list[str] = []
+        for seam_id, contract in dict(execution_plan.get("relationSeamContracts") or {}).items():
+            seam_id = str(seam_id or "").strip()
+            if not seam_id or not isinstance(contract, dict):
+                continue
+            relation_scope = str(contract.get("traceScope") or trace_scope).strip()
+            required_fact_kinds = {
+                str(value).strip()
+                for value in (contract.get("requiredFactKinds") or [])
+                if str(value).strip()
+            }
+            required_relation_kinds = {
+                str(value).strip()
+                for value in (contract.get("requiredRelationKinds") or [])
+                if str(value).strip()
+            }
+            if required_fact_kinds or required_relation_kinds:
+                fact_kinds_present = {
+                    str(row.get("factKind") or "").strip()
+                    for row in self.list_latest_materialized_fact_views(
+                        project_name,
+                        project_file,
+                        trace_scope=relation_scope,
+                    )
+                    if str(row.get("factKind") or "").strip()
+                }
+                relation_kinds_present = {
+                    str(row.get("relationKind") or "").strip()
+                    for row in self.list_latest_materialized_relation_views(
+                        project_name,
+                        project_file,
+                        trace_scope=relation_scope,
+                    )
+                    if str(row.get("relationKind") or "").strip()
+                }
+                if required_fact_kinds.issubset(fact_kinds_present) and required_relation_kinds.issubset(relation_kinds_present):
+                    contract_satisfied_seams = _unique_strings([*contract_satisfied_seams, seam_id])
+            relation_native_view = self.find_latest_materialized_native_trace_view_for_relation(
+                project_name,
+                project_file,
+                subject_id=subject_id,
+                relation_scope=relation_scope,
+                required_seam_ids=[seam_id],
+            )
+            if not relation_native_view:
+                continue
+            contract_satisfied_seams = _unique_strings(
+                [
+                    *contract_satisfied_seams,
+                    *_derive_native_relation_satisfied_seams(
+                        trace_scope,
+                        subject_id,
+                        dict(relation_native_view.get("payload") or {}),
+                    ),
+                ]
+            )
+        if contract_satisfied_seams:
+            satisfied_set = set(contract_satisfied_seams)
+            state_payload["knownEdges"] = _unique_strings(
+                [
+                    *[str(value).strip() for value in (state_payload.get("knownEdges") or []) if str(value).strip()],
+                    *contract_satisfied_seams,
+                ]
+            )
+            state_payload["missingEdges"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (state_payload.get("missingEdges") or [])
+                    if str(value).strip() and str(value).strip() not in satisfied_set
+                ]
+            )
+            state_payload["blockedEdges"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (state_payload.get("blockedEdges") or [])
+                    if str(value).strip() and str(value).strip() not in satisfied_set
+                ]
+            )
+        grounded_shared_lane_seams: list[str] = []
+        if trace_scope.startswith("token-shop"):
+            for lane_id in (
+                "tokenBankController",
+                "tokenBankState",
+                "tokenBankFormula",
+                "dailyTokeniumLane",
+                "tokeniumNaming",
+            ):
+                strongest_lane_contract = self._select_strongest_token_shop_lane_contract(
+                    project_name,
+                    project_file,
+                    lane_id,
+                    state_payload,
+                )
+                if _is_grounded_shared_lane_contract(strongest_lane_contract):
+                    grounded_shared_lane_seams.append(lane_id)
+        if grounded_shared_lane_seams:
+            grounded_shared_lane_set = set(grounded_shared_lane_seams)
+            state_payload["knownEdges"] = _unique_strings(
+                [
+                    *[str(value).strip() for value in (state_payload.get("knownEdges") or []) if str(value).strip()],
+                    *grounded_shared_lane_seams,
+                ]
+            )
+            state_payload["missingEdges"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (state_payload.get("missingEdges") or [])
+                    if str(value).strip() and str(value).strip() not in grounded_shared_lane_set
+                ]
+            )
+            state_payload["blockedEdges"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (state_payload.get("blockedEdges") or [])
+                    if str(value).strip() and str(value).strip() not in grounded_shared_lane_set
+                ]
+            )
+        runtime_coverage_closed_keys: set[tuple[str, str]] = set()
+        runtime_formula_closed_keys: set[tuple[str, str]] = set()
+        runtime_final_max_closed_keys: set[tuple[str, str]] = set()
+        current_scope_runtime_gap_rows: list[dict[str, Any]] = []
+        current_scope_runtime_seam_gap_rows: list[dict[str, Any]] = []
+        with self.connect() as conn:
+            for fact_row in conn.execute(
+                """
+                SELECT entity_id, field_key
+                FROM materialized_fact_views
+                WHERE project_name = ?
+                  AND project_file = ?
+                  AND trace_scope = ?
+                  AND fact_kind = 'runtime-cost-coverage'
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall():
+                runtime_coverage_closed_keys.add(
+                    (str(fact_row["entity_id"] or "").strip(), str(fact_row["field_key"] or "").strip())
+                )
+            relation_kinds_by_key: dict[tuple[str, str], set[str]] = {}
+            for relation_row in conn.execute(
+                """
+                SELECT source_entity_id, field_key, relation_kind
+                FROM materialized_relation_views
+                WHERE project_name = ?
+                  AND project_file = ?
+                  AND trace_scope = ?
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall():
+                relation_key = (
+                    str(relation_row["source_entity_id"] or "").strip(),
+                    str(relation_row["field_key"] or "").strip(),
+                )
+                relation_kinds_by_key.setdefault(relation_key, set()).add(
+                    str(relation_row["relation_kind"] or "").strip()
+                )
+            for gap_row in conn.execute(
+                """
+                SELECT entity_id, field_key, gap_kind, payload_json
+                FROM materialized_gap_views
+                WHERE project_name = ?
+                  AND project_file = ?
+                  AND trace_scope = ?
+                  AND gap_kind = 'runtime-cost-coverage'
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall():
+                current_scope_runtime_gap_rows.append(
+                    {
+                        "entityId": str(gap_row["entity_id"] or "").strip(),
+                        "fieldKey": str(gap_row["field_key"] or "").strip(),
+                        "gapKind": str(gap_row["gap_kind"] or "").strip(),
+                        "payload": _json_loads(gap_row["payload_json"], {}),
+                    }
+                )
+            for gap_row in conn.execute(
+                """
+                SELECT entity_id, field_key, gap_kind, payload_json
+                FROM materialized_gap_views
+                WHERE project_name = ?
+                  AND project_file = ?
+                  AND trace_scope = ?
+                  AND gap_kind IN ('missing-edge', 'blocked-edge')
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall():
+                payload = _json_loads(gap_row["payload_json"], {})
+                seam_id = str(payload.get("edgeType") or payload.get("seamId") or "").strip()
+                if seam_id not in {"runtime-next-cost-formula", "runtime-final-max-level"}:
+                    continue
+                current_scope_runtime_seam_gap_rows.append(
+                    {
+                        "entityId": str(gap_row["entity_id"] or "").strip(),
+                        "fieldKey": str(gap_row["field_key"] or "").strip(),
+                        "gapKind": str(gap_row["gap_kind"] or "").strip(),
+                        "payload": payload,
+                    }
+                )
+        for relation_key, relation_kinds in relation_kinds_by_key.items():
+            if {"buy-method-cost-read", "runtime-next-cost-formula"}.issubset(relation_kinds):
+                runtime_coverage_closed_keys.add(relation_key)
+            if {
+                "buy-method-cost-read",
+                "runtime-next-cost-formula",
+                "runtime-next-cost-accessor",
+            }.issubset(relation_kinds):
+                runtime_formula_closed_keys.add(relation_key)
+            if "runtime-final-max-level" in relation_kinds:
+                runtime_final_max_closed_keys.add(relation_key)
+        derived_satisfied_seams: set[str] = set()
+        has_open_runtime_coverage_gap = any(
+            (
+                str(gap_row.get("entityId") or "").strip(),
+                str(gap_row.get("fieldKey") or "").strip(),
+            )
+            not in runtime_coverage_closed_keys
+            for gap_row in current_scope_runtime_gap_rows
+        )
+        has_open_runtime_formula_gap = any(
+            str((gap_row.get("payload") or {}).get("edgeType") or (gap_row.get("payload") or {}).get("seamId") or "").strip()
+            == "runtime-next-cost-formula"
+            for gap_row in current_scope_runtime_seam_gap_rows
+        )
+        has_open_runtime_final_max_gap = any(
+            str((gap_row.get("payload") or {}).get("edgeType") or (gap_row.get("payload") or {}).get("seamId") or "").strip()
+            == "runtime-final-max-level"
+            for gap_row in current_scope_runtime_seam_gap_rows
+        )
+        if runtime_formula_closed_keys and not has_open_runtime_formula_gap:
+            derived_satisfied_seams.add("runtime-next-cost-formula")
+        if runtime_final_max_closed_keys and not has_open_runtime_final_max_gap:
+            derived_satisfied_seams.add("runtime-final-max-level")
+        if derived_satisfied_seams:
+            state_payload["knownEdges"] = _unique_strings(
+                [
+                    *[str(value).strip() for value in (state_payload.get("knownEdges") or []) if str(value).strip()],
+                    *sorted(derived_satisfied_seams),
+                ]
+            )
+            state_payload["missingEdges"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (state_payload.get("missingEdges") or [])
+                    if str(value).strip() and str(value).strip() not in derived_satisfied_seams
+                ]
+            )
+            state_payload["blockedEdges"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (state_payload.get("blockedEdges") or [])
+                    if str(value).strip() and str(value).strip() not in derived_satisfied_seams
+                ]
+            )
+        if newer_scope_gap_rows:
+            newer_gap_delta = _derive_subject_state_delta_from_newer_gap_rows(
+                newer_scope_gap_rows,
+                runtime_coverage_closed_keys=runtime_coverage_closed_keys,
+                satisfied_seam_ids={
+                    *derived_satisfied_seams,
+                    *contract_satisfied_seams,
+                    *grounded_shared_lane_seams,
+                },
+            )
+            newer_missing_edges = [
+                str(value).strip()
+                for value in (newer_gap_delta.get("missingEdges") or [])
+                if str(value).strip()
+            ]
+            newer_blocked_edges = [
+                str(value).strip()
+                for value in (newer_gap_delta.get("blockedEdges") or [])
+                if str(value).strip()
+            ]
+            if newer_missing_edges or newer_blocked_edges:
+                state_payload["missingEdges"] = _unique_strings(
+                    [
+                        *[str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()],
+                        *newer_missing_edges,
+                    ]
+                )
+                state_payload["blockedEdges"] = _unique_strings(
+                    [
+                        *[str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()],
+                        *newer_blocked_edges,
+                    ]
+                )
+                next_seam_payload = dict(state_payload.get("nextSeam") or {})
+                derived_next_seam = dict(newer_gap_delta.get("nextSeam") or {})
+                if not str(next_seam_payload.get("id") or "").strip():
+                    state_payload["nextSeam"] = {
+                        **next_seam_payload,
+                        **derived_next_seam,
+                    }
+        state_payload = _normalize_subject_state_edge_conflicts(state_payload)
+        known_edge_set = {str(value).strip() for value in (state_payload.get("knownEdges") or []) if str(value).strip()}
+        decision_summary["baselineGap"] = _unique_strings(
+            [
+                str(value).strip()
+                for value in (decision_summary.get("baselineGap") or [])
+                if str(value).strip() and str(value).strip() not in known_edge_set
+            ]
+        )
+        decision_summary["blockedEdgeTypes"] = _unique_strings(
+            [
+                str(value).strip()
+                for value in (decision_summary.get("blockedEdgeTypes") or [])
+                if str(value).strip() and str(value).strip() not in known_edge_set
+            ]
+        )
+        state_payload["decisionSummary"] = decision_summary
         edge_hashes = [
             _dependency_hash_payload(
                 {
@@ -19230,7 +22136,7 @@ class GhidraCacheDB:
             for item in edge_facts
         ]
         state_provenance = {
-            "reducer": "materialized-subject-state-view-v1",
+            "reducer": "materialized-subject-state-view-v14",
             "traceScope": trace_scope,
             "subjectId": subject_id,
             "inputs": {
@@ -19306,10 +22212,10 @@ class GhidraCacheDB:
                     },
                     provenance={
                         "payloadHash": str(preferred_provenance.get("payloadHash") or ""),
-                        "reducer": "materialized-subject-state-view-v1",
+                        "reducer": "materialized-subject-state-view-v14",
                         "selection": "preferred-historical",
                     },
-                    reducer_version="materialized-subject-state-view-v1",
+                    reducer_version="materialized-subject-state-view-v14",
                 )
                 with self.connect() as conn:
                     conn.execute(
@@ -19326,7 +22232,7 @@ class GhidraCacheDB:
                         """,
                         (project_name, project_file, trace_scope, subject_id),
                     )
-                return dict(preferred_historical.get("payload") or {})
+                return _normalize_subject_state_edge_conflicts(dict(preferred_historical.get("payload") or {}))
         existing_edge_rows = self.find_materialized_subject_edge_facts(project_name, project_file, trace_scope, subject_id)
         existing_edge_signatures = sorted(
             [
@@ -19389,11 +22295,11 @@ class GhidraCacheDB:
                 },
                 provenance={
                     "payloadHash": str(state_provenance.get("payloadHash") or ""),
-                    "reducer": "materialized-subject-state-view-v1",
+                    "reducer": "materialized-subject-state-view-v14",
                 },
-                reducer_version="materialized-subject-state-view-v1",
+                reducer_version="materialized-subject-state-view-v14",
             )
-            return dict(existing.get("payload") or {})
+            return _normalize_subject_state_edge_conflicts(dict(existing.get("payload") or {}))
         built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
             conn.execute(
@@ -19484,7 +22390,7 @@ class GhidraCacheDB:
                     subject_id,
                     _json_dumps(state_payload),
                     _json_dumps(state_provenance),
-                    "materialized-subject-state-view-v1",
+                    "materialized-subject-state-view-v14",
                     built_at,
                 ),
             )
@@ -19505,9 +22411,9 @@ class GhidraCacheDB:
             },
             provenance={
                 "payloadHash": str(state_provenance.get("payloadHash") or ""),
-                "reducer": "materialized-subject-state-view-v1",
+                "reducer": "materialized-subject-state-view-v14",
             },
-            reducer_version="materialized-subject-state-view-v1",
+            reducer_version="materialized-subject-state-view-v14",
         )
         return state_payload
 
@@ -19550,8 +22456,8 @@ class GhidraCacheDB:
             compatibility_target_id=compatibility_target_id,
             precomputed_subject_state=subject_state,
         ) or {}
-        resolver_payload = dict((resolver_target or {}).get("payload") or {})
-        existing_resolver_payload = dict((existing_resolver_target or {}).get("payload") or {})
+        resolver_payload = dict((resolver_target or {}).get("payload") or resolver_target or {})
+        existing_resolver_payload = dict((existing_resolver_target or {}).get("payload") or existing_resolver_target or {})
         if existing_resolver_payload:
             existing_support_surfaces = list(existing_resolver_payload.get("supportSurfaces") or [])
             existing_support_rows = list(existing_resolver_payload.get("supportRows") or [])
@@ -19585,6 +22491,7 @@ class GhidraCacheDB:
                 },
                 "resolverTarget": resolver_target,
                 "reconstruction": reconstruction_fragment,
+                "contractReducer": "materialized-subject-contract-view-v24",
             }
         )
         existing_provenance = dict((existing or {}).get("provenance") or {})
@@ -19617,9 +22524,9 @@ class GhidraCacheDB:
                 payload=core_stage,
                 provenance={
                     "payloadHash": _dependency_hash_payload(dict(existing_payload.get("core") or {})),
-                    "reducer": "materialized-subject-contract-core-view-v1",
+                    "reducer": "materialized-subject-contract-core-view-v3",
                 },
-                reducer_version="materialized-subject-contract-core-view-v1",
+                reducer_version="materialized-subject-contract-core-view-v3",
             )
             self.upsert_materialization_stage_view(
                 project_name,
@@ -19632,9 +22539,9 @@ class GhidraCacheDB:
                 payload=enriched_stage,
                 provenance={
                     "payloadHash": _dependency_hash_payload(dict(existing_payload.get("enriched") or {})),
-                    "reducer": "materialized-subject-contract-enriched-view-v1",
+                    "reducer": "materialized-subject-contract-enriched-view-v3",
                 },
-                reducer_version="materialized-subject-contract-enriched-view-v1",
+                reducer_version="materialized-subject-contract-enriched-view-v3",
             )
             self.upsert_materialization_stage_view(
                 project_name,
@@ -19647,24 +22554,40 @@ class GhidraCacheDB:
                 payload=aggregate_stage,
                 provenance={
                     "payloadHash": str(existing_provenance.get("payloadHash") or ""),
-                    "reducer": "materialized-subject-contract-view-v1",
+                    "reducer": "materialized-subject-contract-view-v3",
                 },
-                reducer_version="materialized-subject-contract-view-v1",
+                reducer_version="materialized-subject-contract-view-v3",
             )
             return dict(existing.get("payload") or {})
         row_shell = dict(reconstruction_payload.get("rowShell") or {})
         row_local_graph = dict(reconstruction_payload.get("rowLocalGraph") or {})
         support_surfaces = [dict(item) for item in (resolver_payload.get("supportSurfaces") or []) if isinstance(item, dict)]
+        grounded_support_surfaces = _filter_grounded_support_surfaces(support_surfaces)
         support_rows = [dict(item) for item in (resolver_payload.get("supportRows") or []) if isinstance(item, dict)]
         support_surface_ids = _unique_strings(
-            [str(item.get("id") or "").strip() for item in support_surfaces if str(item.get("id") or "").strip()]
+            [
+                str(item.get("id") or "").strip()
+                for item in grounded_support_surfaces
+                if str(item.get("id") or "").strip()
+            ]
         )
         support_summary = {
             "supportRowCount": len(support_rows),
             "supportRows": support_rows,
             "supportSurfaceIds": support_surface_ids,
             "supportSurfaceLabels": _unique_strings(
-                [str(item.get("label") or "").strip() for item in support_surfaces if str(item.get("label") or "").strip()]
+                [
+                    str(item.get("label") or "").strip()
+                    for item in grounded_support_surfaces
+                    if str(item.get("label") or "").strip()
+                ]
+            ),
+            "fallbackSurfaceIds": _unique_strings(
+                [
+                    str(item.get("id") or "").strip()
+                    for item in support_surfaces
+                    if bool(item.get("syntheticBootstrap")) and str(item.get("id") or "").strip()
+                ]
             ),
             "proofCount": len(list(subject_state.get("proofs") or [])),
         }
@@ -19747,6 +22670,16 @@ class GhidraCacheDB:
         shared_support_summary = dict(shared_lane_contract.get("supportSummary") or {})
         shared_provenance_summary = dict(shared_lane_contract.get("provenanceSummary") or {})
         shared_blocked_reasons = dict(shared_lane_contract.get("blockedInputReasons") or {})
+        support_title_terms, support_update_hook_terms = _grounded_token_shop_support_title_and_update_terms(
+            grounded_support_surfaces
+        )
+        grounded_display_update_hooks = _unique_strings(
+            [
+                *[str(value).strip() for value in (row_local_graph.get("updateHooks") or []) if str(value).strip()],
+                *support_update_hook_terms,
+            ]
+        )
+        grounded_literal_title_recovered = bool(row_local_graph.get("literalTitleRecovered")) or bool(support_title_terms)
         generic_mechanics_views = _derive_generic_mechanics_views_from_subject_inputs(
             trace_scope,
             subject_state,
@@ -19754,6 +22687,539 @@ class GhidraCacheDB:
             reconstruction_payload,
             shared_lane_contract,
         )
+        if trace_scope == "token-shop-family-structure":
+            grounded_row_detail_fields: set[str] = set()
+            existing_fact_keys = {
+                (
+                    str(row.get("entityId") or "").strip(),
+                    str(row.get("fieldKey") or "").strip(),
+                    str(row.get("factKind") or "").strip(),
+                    str(row.get("factValue") or "").strip(),
+                )
+                for row in (generic_mechanics_views.get("facts") or [])
+                if isinstance(row, dict)
+            }
+            for gap_row in [dict(row) for row in (generic_mechanics_views.get("gaps") or []) if isinstance(row, dict)]:
+                field_key = str(gap_row.get("fieldKey") or "").strip()
+                if str(gap_row.get("gapKind") or "").strip() not in {"rowDetail", "row-detail"}:
+                    continue
+                if not re.fullmatch(r"ATU\d+Level", field_key):
+                    continue
+                shell_field = field_key.replace("Level", "Button")
+                shell_term_view = self.find_canonical_term_view(
+                    project_name,
+                    project_file,
+                    shell_field,
+                    sync_jobs=False,
+                )
+                stem_evidence = _canonical_token_shop_stem_evidence_from_term_view(shell_term_view)
+                if not stem_evidence:
+                    with self.connect() as conn:
+                        native_rows = conn.execute(
+                            """
+                            SELECT payload_json
+                            FROM materialized_native_trace_views
+                            WHERE project_name = ?
+                              AND project_file = ?
+                              AND requested_terms_json LIKE ?
+                            ORDER BY built_at DESC
+                            LIMIT 8
+                            """,
+                            (project_name, project_file, f'%"{shell_field}"%'),
+                        ).fetchall()
+                    for native_row in native_rows:
+                        stem_evidence = _token_shop_stem_evidence_from_native_trace_payload(
+                            _json_loads(native_row["payload_json"], {}),
+                            shell_field,
+                        )
+                        if stem_evidence:
+                            break
+                stem = str(stem_evidence.get("stem") or "").strip()
+                if not stem or int(stem_evidence.get("contextTermCount") or 0) < 3:
+                    continue
+                action_term = f"Buy{stem}"
+                action_term_view = self.find_canonical_term_view(
+                    project_name,
+                    project_file,
+                    action_term,
+                    sync_jobs=False,
+                )
+                if not action_term_view:
+                    continue
+                entity_id = str(gap_row.get("entityId") or "").strip()
+                if not entity_id:
+                    continue
+                bounded_terms = _unique_strings(
+                    [
+                        shell_field,
+                        field_key,
+                        action_term,
+                        *[str(value) for value in (stem_evidence.get("boundedTerms") or []) if str(value).strip()],
+                    ]
+                )
+                row_facts = [
+                    ("identity", stem),
+                    ("identity-source", "DB canonical term evidence and exact action-term evidence"),
+                    ("row-type", "metadata-stem-bounded"),
+                    ("row-type-label", "Canonical term-evidence stem row"),
+                    (
+                        "detail-note",
+                        f"{shell_field} is bounded to the {stem} field family by DB canonical term evidence and the exact {action_term} action term.",
+                    ),
+                    ("action-method", action_term),
+                    *[("bounded-evidence-term", term) for term in bounded_terms],
+                ]
+                for fact_kind, fact_value in row_facts:
+                    fact_value = str(fact_value or "").strip()
+                    if not fact_value:
+                        continue
+                    fact_key = (entity_id, field_key, fact_kind, fact_value)
+                    if fact_key in existing_fact_keys:
+                        continue
+                    generic_mechanics_views.setdefault("facts", []).append(
+                        {
+                            "entityId": entity_id,
+                            "traceScope": trace_scope,
+                            "fieldKey": field_key,
+                            "factKind": fact_kind,
+                            "factValue": fact_value,
+                            "payload": {
+                                "subjectId": subject_id,
+                                "evidenceSource": "canonical-term-view",
+                                "shellField": shell_field,
+                            },
+                        }
+                    )
+                    existing_fact_keys.add(fact_key)
+                grounded_row_detail_fields.add(field_key)
+            if grounded_row_detail_fields:
+                generic_mechanics_views["gaps"] = _remove_gap_rows_for_grounded_fields(
+                    list(generic_mechanics_views.get("gaps") or []),
+                    grounded_field_keys=grounded_row_detail_fields,
+                    gap_kinds={"rowDetail", "row-detail"},
+                )
+        runtime_coverage_system_key, runtime_coverage_config_hint = _runtime_coverage_config_for_trace_scope(trace_scope)
+        runtime_coverage_config = _infer_runtime_coverage_config(
+            trace_scope,
+            resolver_payload,
+            runtime_coverage_config_hint,
+        )
+        if runtime_coverage_config.get("shellFieldPattern"):
+            runtime_coverage_system_unit_payload: dict[str, Any] = {}
+            with self.connect() as conn:
+                inferred_system_id, inferred_system_version, runtime_coverage_system_unit_payload = _find_runtime_coverage_system_unit_for_config(
+                    conn,
+                    runtime_coverage_config,
+                )
+            if inferred_system_id:
+                runtime_coverage_system_key = runtime_coverage_system_key or inferred_system_id
+                runtime_coverage_config["systemUnitId"] = inferred_system_id
+                runtime_coverage_config["systemUnitVersion"] = inferred_system_version
+            if runtime_coverage_system_unit_payload:
+                existing_runtime_cost_closed_facts: dict[str, dict[str, Any]] = {}
+                existing_runtime_cost_fact_candidates_by_field: dict[str, list[dict[str, Any]]] = {}
+                existing_runtime_mechanic_facts_by_field: dict[str, dict[str, dict[str, Any]]] = {}
+                existing_runtime_relation_candidates_by_field: dict[str, list[dict[str, Any]]] = {}
+                existing_runtime_relation_kinds_by_field: dict[str, set[str]] = {}
+                existing_relation_keys = {
+                    (
+                        str(row.get("sourceEntityId") or "").strip(),
+                        str(row.get("fieldKey") or "").strip(),
+                        str(row.get("relationKind") or "").strip(),
+                        str(row.get("targetEntityId") or "").strip(),
+                    )
+                    for row in (generic_mechanics_views.get("relations") or [])
+                    if isinstance(row, dict)
+                }
+                existing_fact_keys = {
+                    (
+                        str(row.get("entityId") or "").strip(),
+                        str(row.get("fieldKey") or "").strip(),
+                        str(row.get("factKind") or "").strip(),
+                        str(row.get("factValue") or "").strip(),
+                    )
+                    for row in (generic_mechanics_views.get("facts") or [])
+                    if isinstance(row, dict)
+                }
+                with self.connect() as conn:
+                    for fact_row in conn.execute(
+                        """
+                        SELECT trace_scope, entity_id, field_key, fact_kind, fact_value, payload_json
+                        FROM materialized_fact_views
+                        WHERE project_name = ?
+                          AND project_file = ?
+                          AND fact_kind IN ('runtime-cost-coverage', 'runtime-next-cost-accessor', 'runtime-final-max-level')
+                        """,
+                        (project_name, project_file),
+                    ).fetchall():
+                        fact_payload = _json_loads(fact_row["payload_json"], {})
+                        fact_entry = {
+                            "traceScope": str(fact_row["trace_scope"] or "").strip(),
+                            "entityId": str(fact_row["entity_id"] or "").strip(),
+                            "fieldKey": str(fact_row["field_key"] or "").strip(),
+                            "factKind": str(fact_row["fact_kind"] or "").strip(),
+                            "factValue": str(fact_row["fact_value"] or "").strip(),
+                            "payload": fact_payload,
+                        }
+                        field_key = str(fact_row["field_key"] or "").strip()
+                        if fact_entry["factKind"] == "runtime-cost-coverage":
+                            existing_runtime_cost_fact_candidates_by_field.setdefault(field_key, []).append(fact_entry)
+                        else:
+                            existing_runtime_mechanic_facts_by_field.setdefault(field_key, {})[fact_entry["factKind"]] = fact_entry
+                        if (
+                            str(fact_row["trace_scope"] or "").strip() == trace_scope
+                            and fact_entry["factKind"] == "runtime-cost-coverage"
+                        ):
+                            existing_runtime_cost_closed_facts[field_key] = fact_entry
+                    for relation_row in conn.execute(
+                        """
+                        SELECT trace_scope, source_entity_id, field_key, relation_kind, target_entity_id, payload_json
+                        FROM materialized_relation_views
+                        WHERE project_name = ?
+                          AND project_file = ?
+                          AND relation_kind IN ('buy-method-cost-read', 'runtime-next-cost-formula', 'runtime-next-cost-accessor', 'runtime-final-max-level')
+                        """,
+                        (project_name, project_file),
+                    ).fetchall():
+                        field_key = str(relation_row["field_key"] or "").strip()
+                        relation_kind = str(relation_row["relation_kind"] or "").strip()
+                        existing_runtime_relation_candidates_by_field.setdefault(field_key, []).append(
+                            {
+                                "traceScope": str(relation_row["trace_scope"] or "").strip(),
+                                "sourceEntityId": str(relation_row["source_entity_id"] or "").strip(),
+                                "fieldKey": field_key,
+                                "relationKind": relation_kind,
+                                "targetEntityId": str(relation_row["target_entity_id"] or "").strip(),
+                                "payload": _json_loads(relation_row["payload_json"], {}),
+                            }
+                        )
+                        existing_runtime_relation_kinds_by_field.setdefault(field_key, set()).add(relation_kind)
+                    native_runtime_rows = conn.execute(
+                        """
+                        SELECT payload_json
+                        FROM materialized_native_trace_views
+                        WHERE project_name = ?
+                          AND project_file = ?
+                          AND payload_json LIKE ?
+                        ORDER BY built_at DESC
+                        LIMIT 16
+                        """,
+                        (project_name, project_file, f'%"{trace_scope}"%'),
+                    ).fetchall()
+                    target_bundle_rows = conn.execute(
+                        """
+                        SELECT trace_scope, payload_json
+                        FROM materialized_target_bundle_views
+                        WHERE project_name = ?
+                          AND project_file = ?
+                        ORDER BY built_at DESC
+                        LIMIT 24
+                        """,
+                        (project_name, project_file),
+                    ).fetchall()
+                runtime_payload_rows = _runtime_coverage_payload_rows_from_materialized_views(
+                    target_bundle_rows=target_bundle_rows,
+                    native_trace_rows=native_runtime_rows,
+                    native_trace_scope=trace_scope,
+                )
+                updater_term_views = [
+                    self.find_canonical_term_view(project_name, project_file, updater_term, sync_jobs=False)
+                    for updater_term in (runtime_coverage_config.get("requiredUpdaterTerms") or [])
+                    if str(updater_term or "").strip()
+                ]
+                existing_gap_keys = {
+                    (
+                        str(row.get("entityId") or "").strip(),
+                        str(row.get("fieldKey") or "").strip(),
+                        str(row.get("gapKind") or "").strip(),
+                    )
+                    for row in (generic_mechanics_views.get("gaps") or [])
+                    if isinstance(row, dict)
+                }
+                existing_gap_identity_keys = {
+                    (
+                        str(row.get("entityId") or "").strip(),
+                        str(row.get("fieldKey") or "").strip(),
+                        str(row.get("gapKind") or "").strip(),
+                        str(dict(row.get("payload") or {}).get("edgeType") or dict(row.get("payload") or {}).get("seamId") or "").strip(),
+                    )
+                    for row in (generic_mechanics_views.get("gaps") or [])
+                    if isinstance(row, dict)
+                }
+                for gap_row in _runtime_coverage_gap_rows_from_system_unit(
+                    runtime_coverage_system_unit_payload,
+                    config=runtime_coverage_config,
+                    trace_scope=trace_scope,
+                    subject_id=subject_id,
+                ):
+                    gap_key = (
+                        str(gap_row.get("entityId") or "").strip(),
+                        str(gap_row.get("fieldKey") or "").strip(),
+                        str(gap_row.get("gapKind") or "").strip(),
+                    )
+                    if gap_key in existing_gap_keys:
+                        continue
+                    existing_closed_fact = existing_runtime_cost_closed_facts.get(str(gap_row.get("fieldKey") or "").strip())
+                    is_closed_by_bridge = any(
+                        _runtime_coverage_gap_closed_by_term_view(gap_row, term_view)
+                        for term_view in updater_term_views
+                    )
+                    native_bridge_evidence = {}
+                    shell_field = str(dict(gap_row.get("payload") or {}).get("shellField") or "").strip()
+                    for native_row in native_runtime_rows:
+                        candidate_bridge_evidence = _runtime_coverage_bridge_evidence_from_native_trace_payload(
+                            _json_loads(native_row["payload_json"], {}),
+                            trace_scope=trace_scope,
+                            shell_field=shell_field,
+                        )
+                        if candidate_bridge_evidence:
+                            native_bridge_evidence = candidate_bridge_evidence
+                            break
+                    materialized_bridge_evidence = _runtime_coverage_bridge_evidence_from_materialized_views(
+                        gap_row=gap_row,
+                        relation_rows=list(
+                            existing_runtime_relation_candidates_by_field.get(str(gap_row.get("fieldKey") or "").strip(), [])
+                        ),
+                        fact_rows=list(
+                            existing_runtime_cost_fact_candidates_by_field.get(str(gap_row.get("fieldKey") or "").strip(), [])
+                        ),
+                    )
+                    selected_bridge_evidence = native_bridge_evidence or materialized_bridge_evidence
+                    inferred_relation_rows = _runtime_coverage_relation_rows_from_bridge_evidence(
+                        gap_row=gap_row,
+                        trace_scope=trace_scope,
+                        bridge_evidence=selected_bridge_evidence,
+                    )
+                    for relation_row in inferred_relation_rows:
+                        relation_key = (
+                            str(relation_row.get("sourceEntityId") or "").strip(),
+                            str(relation_row.get("fieldKey") or "").strip(),
+                            str(relation_row.get("relationKind") or "").strip(),
+                            str(relation_row.get("targetEntityId") or "").strip(),
+                        )
+                        if relation_key in existing_relation_keys:
+                            continue
+                        generic_mechanics_views.setdefault("relations", []).append(relation_row)
+                        existing_relation_keys.add(relation_key)
+                    inferred_relation_kinds = {
+                        str(relation_row.get("relationKind") or "").strip()
+                        for relation_row in inferred_relation_rows
+                        if str(relation_row.get("relationKind") or "").strip()
+                    }
+                    field_key = str(gap_row.get("fieldKey") or "").strip()
+                    entity_id = str(gap_row.get("entityId") or "").strip()
+                    owner_bridge_closed = bool(
+                        existing_closed_fact
+                        or is_closed_by_bridge
+                        or {"buy-method-cost-read", "runtime-next-cost-formula"}.issubset(inferred_relation_kinds)
+                    )
+                    runtime_mechanic_evidence = _runtime_coverage_accessor_mechanic_evidence(
+                        gap_row=gap_row,
+                        bridge_evidence=selected_bridge_evidence,
+                        payload_rows=runtime_payload_rows,
+                        trace_scope=trace_scope,
+                    )
+                    owner_block = list(dict(gap_row.get("payload") or {}).get("ownerFieldBlock") or [])
+                    has_final_max_shape = any(
+                        str(term).strip().endswith(("MaxLevel", "FillMaxLevel"))
+                        for term in owner_block
+                    )
+                    existing_relation_kinds = set(existing_runtime_relation_kinds_by_field.get(field_key, set()))
+                    for relation_kind, evidence_key in (
+                        ("runtime-next-cost-accessor", "nextCost"),
+                        ("runtime-final-max-level", "finalMax"),
+                    ):
+                        evidence_payload = dict(runtime_mechanic_evidence.get(evidence_key) or {})
+                        accessor_term = str(evidence_payload.get("term") or "").strip()
+                        if not accessor_term:
+                            continue
+                        relation_key = (
+                            entity_id,
+                            field_key,
+                            relation_kind,
+                            accessor_term,
+                        )
+                        if relation_key not in existing_relation_keys:
+                            relation_payload = {
+                                "subjectId": entity_id,
+                                "shellField": shell_field,
+                                "ownerFieldStem": dict(gap_row.get("payload") or {}).get("ownerFieldStem"),
+                                "ownerFieldBlock": owner_block,
+                                "actionTerms": list(selected_bridge_evidence.get("actionTerms") or []),
+                                "evidenceTerms": list(selected_bridge_evidence.get("evidenceTerms") or []),
+                                "accessorTerm": accessor_term,
+                                "candidateTerms": list(evidence_payload.get("candidateTerms") or []),
+                                "supportingTraceScope": str(evidence_payload.get("traceScope") or "").strip() or None,
+                                "evidenceSource": str(evidence_payload.get("evidenceSource") or "").strip() or "materialized-payload",
+                                "contextHits": int(evidence_payload.get("contextHits") or 0),
+                            }
+                            generic_mechanics_views.setdefault("relations", []).append(
+                                {
+                                    "sourceEntityId": entity_id,
+                                    "traceScope": trace_scope,
+                                    "fieldKey": field_key,
+                                    "relationKind": relation_kind,
+                                    "targetEntityId": accessor_term,
+                                    "payload": relation_payload,
+                                }
+                            )
+                            existing_relation_keys.add(relation_key)
+                        existing_relation_kinds.add(relation_kind)
+                        fact_key = (entity_id, field_key, relation_kind, accessor_term)
+                        if fact_key not in existing_fact_keys:
+                            generic_mechanics_views.setdefault("facts", []).append(
+                                {
+                                    "entityId": entity_id,
+                                    "traceScope": trace_scope,
+                                    "fieldKey": field_key,
+                                    "factKind": relation_kind,
+                                    "factValue": accessor_term,
+                                    "payload": {
+                                        "subjectId": entity_id,
+                                        "shellField": shell_field,
+                                        "ownerFieldStem": dict(gap_row.get("payload") or {}).get("ownerFieldStem"),
+                                        "ownerFieldBlock": owner_block,
+                                        "candidateTerms": list(evidence_payload.get("candidateTerms") or []),
+                                        "supportingTraceScope": str(evidence_payload.get("traceScope") or "").strip() or None,
+                                        "evidenceSource": str(evidence_payload.get("evidenceSource") or "").strip() or "materialized-payload",
+                                        "contextHits": int(evidence_payload.get("contextHits") or 0),
+                                    },
+                                }
+                            )
+                            existing_fact_keys.add(fact_key)
+                    if existing_closed_fact or is_closed_by_bridge:
+                        closed_payload = (
+                            dict(existing_closed_fact.get("payload") or {})
+                            if existing_closed_fact
+                            else {
+                                "subjectId": subject_id,
+                                "evidenceSource": "canonical-term-view:runtime-coverage-updater",
+                                "systemKey": runtime_coverage_system_key,
+                                "shellField": dict(gap_row.get("payload") or {}).get("shellField"),
+                                "ownerFieldStem": dict(gap_row.get("payload") or {}).get("ownerFieldStem"),
+                                "ownerFieldBlock": list(dict(gap_row.get("payload") or {}).get("ownerFieldBlock") or []),
+                                "updaterTerms": list(dict(gap_row.get("payload") or {}).get("updaterTerms") or []),
+                            }
+                        )
+                        if native_bridge_evidence:
+                            closed_payload.setdefault(
+                                "actionTerms",
+                                list(native_bridge_evidence.get("actionTerms") or []),
+                            )
+                            closed_payload.setdefault(
+                                "evidenceTerms",
+                                list(native_bridge_evidence.get("evidenceTerms") or []),
+                            )
+                        elif materialized_bridge_evidence:
+                            closed_payload.setdefault(
+                                "actionTerms",
+                                list(materialized_bridge_evidence.get("actionTerms") or []),
+                            )
+                            closed_payload.setdefault(
+                                "evidenceTerms",
+                                list(materialized_bridge_evidence.get("evidenceTerms") or []),
+                            )
+                        generic_mechanics_views.setdefault("facts", []).append(
+                            {
+                                "entityId": entity_id,
+                                "traceScope": trace_scope,
+                                "fieldKey": field_key,
+                                "factKind": "runtime-cost-coverage",
+                                "factValue": "closed-by-db-term-bridge",
+                                "payload": closed_payload,
+                            }
+                        )
+                    elif {
+                        "buy-method-cost-read",
+                        "runtime-next-cost-formula",
+                    }.issubset(inferred_relation_kinds):
+                        bridge_evidence_source = str(selected_bridge_evidence.get("source") or "").strip()
+                        fact_value = (
+                            "closed-by-native-bridge"
+                            if bridge_evidence_source == "native-trace-bridge-plan"
+                            else "closed-by-db-term-bridge"
+                        )
+                        generic_mechanics_views.setdefault("facts", []).append(
+                            {
+                                "entityId": entity_id,
+                                "traceScope": trace_scope,
+                                "fieldKey": field_key,
+                                "factKind": "runtime-cost-coverage",
+                                "factValue": fact_value,
+                                "payload": {
+                                    "subjectId": entity_id,
+                                    "evidenceSource": bridge_evidence_source or "db-materialized-bridge",
+                                    "systemKey": runtime_coverage_system_key,
+                                    "shellField": shell_field,
+                                    "ownerFieldStem": dict(gap_row.get("payload") or {}).get("ownerFieldStem"),
+                                    "ownerFieldBlock": list(dict(gap_row.get("payload") or {}).get("ownerFieldBlock") or []),
+                                    "actionTerms": list(selected_bridge_evidence.get("actionTerms") or []),
+                                    "evidenceTerms": list(selected_bridge_evidence.get("evidenceTerms") or []),
+                                },
+                            }
+                        )
+                    if owner_bridge_closed:
+                        accessor_gap_specs = [
+                            (
+                                "runtime-next-cost-formula",
+                                "nextCost",
+                                "missing-runtime-accessor-evidence",
+                            ),
+                            (
+                                "runtime-final-max-level",
+                                "finalMax",
+                                "missing-final-max-accessor-evidence",
+                            ),
+                        ]
+                        for seam_id, evidence_key, reason_prefix in accessor_gap_specs:
+                            if seam_id == "runtime-final-max-level" and not has_final_max_shape:
+                                continue
+                            if seam_id == "runtime-next-cost-formula" and "runtime-next-cost-accessor" in existing_relation_kinds:
+                                continue
+                            if seam_id == "runtime-final-max-level" and "runtime-final-max-level" in existing_relation_kinds:
+                                continue
+                            evidence_payload = dict(runtime_mechanic_evidence.get(evidence_key) or {})
+                            if evidence_payload.get("term"):
+                                continue
+                            candidate_terms = list(
+                                (
+                                    dict(runtime_mechanic_evidence.get("candidateTerms") or {}).get(
+                                        "nextCostAccessorTerms" if evidence_key == "nextCost" else "finalMaxAccessorTerms"
+                                    )
+                                )
+                                or []
+                            )
+                            if not candidate_terms:
+                                continue
+                            seam_gap_key = (entity_id, field_key, "missing-edge", seam_id)
+                            if seam_gap_key in existing_gap_identity_keys:
+                                continue
+                            seam_gap_row = {
+                                "entityId": entity_id,
+                                "traceScope": trace_scope,
+                                "fieldKey": field_key,
+                                "gapKind": "missing-edge",
+                                "payload": {
+                                    "edgeType": seam_id,
+                                    "seamId": seam_id,
+                                    "reason": f"{reason_prefix}:{','.join(candidate_terms[:4])}",
+                                    "term": candidate_terms[0],
+                                    "requiredTerm": candidate_terms[0],
+                                    "terms": _unique_strings(
+                                        [
+                                            *candidate_terms,
+                                            shell_field,
+                                            *list(selected_bridge_evidence.get("actionTerms") or []),
+                                            *list(selected_bridge_evidence.get("evidenceTerms") or []),
+                                        ]
+                                    )[:12],
+                                },
+                            }
+                            generic_mechanics_views.setdefault("gaps", []).append(seam_gap_row)
+                            existing_gap_identity_keys.add(seam_gap_key)
+                    if not owner_bridge_closed:
+                        generic_mechanics_views.setdefault("gaps", []).append(gap_row)
+                        existing_gap_keys.add(gap_key)
         self.publish_generic_mechanics_views(
             project_name,
             project_file,
@@ -19821,20 +23287,6 @@ class GhidraCacheDB:
                 )
             else:
                 row_detail_note = "Canonical subject contract is active here."
-        row_detail_blocked_fields: dict[str, str] = {}
-        if not str(shared_grounded_fields.get("literalTitleText") or "").strip():
-            row_detail_blocked_fields["playerFacingSupportText"] = "missing-db-row-detail-evidence:player-facing-support-text"
-        if row_detail_type != "effect-driven":
-            row_detail_blocked_fields["effectText"] = "not-applicable:row-detail-effect-text"
-        row_detail = {
-            "isGrounded": bool(row_detail_type and row_detail_label),
-            "identity": row_detail_identity or None,
-            "identitySource": row_detail_identity_source or None,
-            "rowType": row_detail_type or None,
-            "rowTypeLabel": row_detail_label or None,
-            "detailNote": row_detail_note or None,
-            "blockedFields": row_detail_blocked_fields,
-        }
         row_details_by_field = self.reconstruct_subject_row_details_from_generic_views(
             project_name,
             project_file,
@@ -19842,11 +23294,103 @@ class GhidraCacheDB:
             subject_id,
             upstream_signature=contract_dependency_signature,
         )
-        if not row_details_by_field:
-            row_details_by_field = _derive_token_shop_range_row_details_from_support_surfaces(
-                subject_id,
-                support_surfaces,
+        fallback_row_details_by_field = _derive_token_shop_range_row_details_from_support_surfaces(
+            subject_id,
+            grounded_support_surfaces,
+        )
+        row_details_by_field = _merge_row_details_by_field_prefer_grounded(
+            row_details_by_field,
+            fallback_row_details_by_field,
+        )
+        grounded_row_detail_fields = {
+            str(field_key).strip()
+            for field_key, row_detail_item in dict(row_details_by_field or {}).items()
+            if (
+                str(field_key).strip()
+                and isinstance(row_detail_item, dict)
+                and bool(row_detail_item.get("isGrounded"))
+                and "rowDetail" not in {str(key).strip() for key in dict(row_detail_item.get("blockedFields") or {}).keys() if str(key).strip()}
             )
+        }
+        if grounded_row_detail_fields:
+            generic_mechanics_views["gaps"] = _remove_gap_rows_for_grounded_fields(
+                list(generic_mechanics_views.get("gaps") or []),
+                grounded_field_keys=grounded_row_detail_fields,
+                gap_kinds={"rowDetail", "row-detail"},
+            )
+            self.publish_generic_mechanics_views(
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                upstream_signature=contract_dependency_signature,
+                generic_views=generic_mechanics_views,
+            )
+            current_gap_rows = self.list_latest_materialized_gap_views(
+                project_name,
+                project_file,
+                trace_scope=trace_scope,
+            )
+            cleaned_gap_rows = _remove_gap_rows_for_grounded_fields(
+                current_gap_rows,
+                grounded_field_keys=grounded_row_detail_fields,
+                gap_kinds={"rowDetail", "row-detail"},
+            )
+            if len(cleaned_gap_rows) != len(current_gap_rows):
+                self.replace_materialized_gap_views(
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    cleaned_gap_rows,
+                )
+        row_detail = {
+            "isGrounded": bool(row_detail_type and row_detail_label),
+            "identity": row_detail_identity or None,
+            "identitySource": row_detail_identity_source or None,
+            "rowType": row_detail_type or None,
+            "rowTypeLabel": row_detail_label or None,
+            "detailNote": row_detail_note or None,
+            "blockedFields": _aggregate_row_detail_blocked_fields(
+                row_details_by_field,
+                fallback_player_facing_reason=(
+                    None
+                    if row_details_by_field
+                    else (
+                        None
+                        if _row_detail_supports_player_facing_text(
+                            {
+                                "identity": row_detail_identity or None,
+                                "identitySource": row_detail_identity_source or None,
+                                "boundedEvidenceTerms": [],
+                            }
+                        )
+                        else "missing-db-row-detail-evidence:player-facing-support-text"
+                    )
+                ),
+                fallback_effect_reason=(
+                    None if row_detail_type == "effect-driven" else "not-applicable:row-detail-effect-text"
+                ),
+            ),
+        }
+        if _should_suppress_aggregate_range_family_row_detail(
+            subject_kind=str(subject_state.get("subjectKind") or ""),
+            row_detail_identity=row_detail_identity,
+            row_details_by_field=row_details_by_field,
+        ):
+            row_detail["blockedFields"] = {
+                key: value
+                for key, value in dict(row_detail.get("blockedFields") or {}).items()
+                if str(key).strip() != "playerFacingSupportText"
+            }
+        missing_edges, blocked_edges, nonblocking_edges, next_seam_payload = _strip_range_family_aggregate_descriptive_seams(
+            subject_kind=str(subject_state.get("subjectKind") or ""),
+            row_detail_identity=row_detail_identity,
+            row_details_by_field=row_details_by_field,
+            missing_edges=missing_edges,
+            blocked_edges=blocked_edges,
+            nonblocking_edges=nonblocking_edges,
+            next_seam=dict(subject_state.get("nextSeam") or {}),
+        )
         payload = {
             "semanticKey": f"subject-contract:{trace_scope}:{subject_id}",
             "traceScope": trace_scope,
@@ -19861,18 +23405,20 @@ class GhidraCacheDB:
             "missingEdges": missing_edges,
             "blockedEdges": blocked_edges,
             "nonblockingEdges": nonblocking_edges,
-            "nextSeam": dict(subject_state.get("nextSeam") or {}),
+            "nextSeam": next_seam_payload,
             "groundedFields": {
                 "rowShellField": str(row_shell.get("field") or support_rows[0].get("shellField") if support_rows else ""),
                 "rowShellPathId": str(row_shell.get("pathId") or support_rows[0].get("shellPathId") if support_rows else ""),
                 "actionMethods": list(row_local_graph.get("actionMethods") or []) if "exact-shell-to-action-hook" in known_edges else [],
                 "prefabCandidates": list(row_local_graph.get("prefabCandidates") or []) if "exact-shell-to-prefab" in known_edges else [],
-                "displayUpdateHooks": list(row_local_graph.get("updateHooks") or []) if "exact-display-update-path" in known_edges else [],
-                "literalTitleRecovered": bool(row_local_graph.get("literalTitleRecovered")) if "exact-shell-to-title" in known_edges else False,
+                "displayUpdateHooks": grounded_display_update_hooks if ("exact-display-update-path" in known_edges or grounded_display_update_hooks) else [],
+                "literalTitleRecovered": grounded_literal_title_recovered if ("exact-shell-to-title" in known_edges or grounded_literal_title_recovered) else False,
                 **shared_grounded_fields,
-                "literalTitleText": row_detail_identity
-                if row_detail_identity_source == "Canonical DB subject title"
-                else None,
+                "literalTitleText": (
+                    row_detail_identity
+                    if row_detail_identity_source == "Canonical DB subject title"
+                    else (support_title_terms[0] if support_title_terms else None)
+                ),
                 "rowDetail": row_detail,
                 "rowDetailsByField": row_details_by_field,
             },
@@ -19885,11 +23431,51 @@ class GhidraCacheDB:
             "blockedInputReason": blocked_input_reason,
             "blockedInputReasons": shared_blocked_reasons,
         }
+        final_missing_edges, final_blocked_edges, final_nonblocking_edges, final_next_seam = (
+            _strip_range_family_aggregate_descriptive_seams(
+                subject_kind=str(payload.get("subjectKind") or ""),
+                row_detail_identity=str((((payload.get("groundedFields") or {}).get("rowDetail") or {}).get("identity")) or ""),
+                row_details_by_field=dict(((payload.get("groundedFields") or {}).get("rowDetailsByField") or {})),
+                missing_edges=list(payload.get("missingEdges") or []),
+                blocked_edges=list(payload.get("blockedEdges") or []),
+                nonblocking_edges=list(payload.get("nonblockingEdges") or []),
+                next_seam=dict(payload.get("nextSeam") or {}),
+            )
+        )
+        payload["missingEdges"] = final_missing_edges
+        payload["blockedEdges"] = final_blocked_edges
+        payload["nonblockingEdges"] = final_nonblocking_edges
+        payload["nextSeam"] = final_next_seam
+        if str(payload.get("subjectKind") or "") == "range-family":
+            row_detail_payload = dict(((payload.get("groundedFields") or {}).get("rowDetail") or {}))
+            row_detail_payload["blockedFields"] = {
+                key: value
+                for key, value in dict(row_detail_payload.get("blockedFields") or {}).items()
+                if str(key).strip() != "playerFacingSupportText"
+            }
+            payload.setdefault("groundedFields", {})["rowDetail"] = row_detail_payload
         payload["supportSummary"]["sharedLanes"] = shared_support_summary
         payload["core"] = _contract_core_view(payload)
         payload["enriched"] = _contract_enriched_view(payload)
+        current_gap_rows = self.list_latest_materialized_gap_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+        cleaned_gap_rows = [
+            dict(row)
+            for row in current_gap_rows
+            if not _contract_payload_satisfies_gap_row(payload, row)
+        ]
+        if len(cleaned_gap_rows) != len(current_gap_rows):
+            self.replace_materialized_gap_views(
+                project_name,
+                project_file,
+                trace_scope,
+                cleaned_gap_rows,
+            )
         provenance = {
-            "reducer": "materialized-subject-contract-view-v1",
+            "reducer": "materialized-subject-contract-view-v3",
             "traceScope": trace_scope,
             "subjectId": subject_id,
             "inputs": {
@@ -19900,6 +23486,22 @@ class GhidraCacheDB:
             "payloadHash": _dependency_hash_payload(payload),
         }
         if existing and existing_has_split and _json_dumps(existing.get("payload") or {}) == _json_dumps(payload):
+            current_gap_rows = self.list_latest_materialized_gap_views(
+                project_name,
+                project_file,
+                trace_scope=trace_scope,
+            )
+            cleaned_gap_rows = _prune_satisfied_gap_rows_by_contract_payload(
+                current_gap_rows,
+                payload,
+            )
+            if len(cleaned_gap_rows) != len(current_gap_rows):
+                self.replace_materialized_gap_views(
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    cleaned_gap_rows,
+                )
             with self.connect() as conn:
                 conn.execute(
                     """
@@ -19920,9 +23522,9 @@ class GhidraCacheDB:
                 payload=core_stage,
                 provenance={
                     "payloadHash": _dependency_hash_payload(dict(payload.get("core") or {})),
-                    "reducer": "materialized-subject-contract-core-view-v1",
+                    "reducer": "materialized-subject-contract-core-view-v3",
                 },
-                reducer_version="materialized-subject-contract-core-view-v1",
+                reducer_version="materialized-subject-contract-core-view-v3",
             )
             self.upsert_materialization_stage_view(
                 project_name,
@@ -19935,9 +23537,9 @@ class GhidraCacheDB:
                 payload=enriched_stage,
                 provenance={
                     "payloadHash": _dependency_hash_payload(dict(payload.get("enriched") or {})),
-                    "reducer": "materialized-subject-contract-enriched-view-v1",
+                    "reducer": "materialized-subject-contract-enriched-view-v3",
                 },
-                reducer_version="materialized-subject-contract-enriched-view-v1",
+                reducer_version="materialized-subject-contract-enriched-view-v3",
             )
             self.upsert_materialization_stage_view(
                 project_name,
@@ -19950,9 +23552,9 @@ class GhidraCacheDB:
                 payload=aggregate_stage,
                 provenance={
                     "payloadHash": str(provenance.get("payloadHash") or ""),
-                    "reducer": "materialized-subject-contract-view-v1",
+                    "reducer": "materialized-subject-contract-view-v3",
                 },
-                reducer_version="materialized-subject-contract-view-v1",
+                reducer_version="materialized-subject-contract-view-v3",
             )
             return dict(existing.get("payload") or {})
         built_at = datetime.now().isoformat(timespec="microseconds")
@@ -19982,9 +23584,25 @@ class GhidraCacheDB:
                     subject_id,
                     _json_dumps(payload),
                     _json_dumps(provenance),
-                    "materialized-subject-contract-view-v1",
+                    "materialized-subject-contract-view-v3",
                     built_at,
                 ),
+            )
+        current_gap_rows = self.list_latest_materialized_gap_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+        cleaned_gap_rows = _prune_satisfied_gap_rows_by_contract_payload(
+            current_gap_rows,
+            payload,
+        )
+        if len(cleaned_gap_rows) != len(current_gap_rows):
+            self.replace_materialized_gap_views(
+                project_name,
+                project_file,
+                trace_scope,
+                cleaned_gap_rows,
             )
         aggregate_stage, core_stage, enriched_stage = _contract_stage_payloads(payload)
         self.upsert_materialization_stage_view(
@@ -19998,9 +23616,9 @@ class GhidraCacheDB:
             payload=core_stage,
             provenance={
                 "payloadHash": _dependency_hash_payload(dict(payload.get("core") or {})),
-                "reducer": "materialized-subject-contract-core-view-v1",
+                "reducer": "materialized-subject-contract-core-view-v3",
             },
-            reducer_version="materialized-subject-contract-core-view-v1",
+            reducer_version="materialized-subject-contract-core-view-v3",
         )
         self.upsert_materialization_stage_view(
             project_name,
@@ -20013,9 +23631,9 @@ class GhidraCacheDB:
             payload=enriched_stage,
             provenance={
                 "payloadHash": _dependency_hash_payload(dict(payload.get("enriched") or {})),
-                "reducer": "materialized-subject-contract-enriched-view-v1",
+                "reducer": "materialized-subject-contract-enriched-view-v3",
             },
-            reducer_version="materialized-subject-contract-enriched-view-v1",
+            reducer_version="materialized-subject-contract-enriched-view-v3",
         )
         self.upsert_materialization_stage_view(
             project_name,
@@ -20028,9 +23646,9 @@ class GhidraCacheDB:
             payload=aggregate_stage,
             provenance={
                 "payloadHash": str(provenance.get("payloadHash") or ""),
-                "reducer": "materialized-subject-contract-view-v1",
+                "reducer": "materialized-subject-contract-view-v3",
             },
-            reducer_version="materialized-subject-contract-view-v1",
+            reducer_version="materialized-subject-contract-view-v3",
         )
         return payload
 
@@ -20191,9 +23809,9 @@ class GhidraCacheDB:
             "supportRows": support_rows,
             "supportSurfaces": support_surfaces,
             "shellWindow": dict(surface_plan.get("shellWindow") or {}),
-            "anchorTerms": anchor_terms,
-            "acceptedAnchors": ["class", "method", "string", "path id"],
-            "resolutionAliases": resolution_aliases,
+            "anchorTerms": _sanitize_resolver_anchor_terms(anchor_terms),
+            "acceptedAnchors": _sanitize_resolver_anchor_terms(anchor_terms),
+            "resolutionAliases": _sanitize_resolver_anchor_terms(resolution_aliases),
             "outputSummaryRules": output_summary_rules,
             "blockedEdgeTypes": blocked_edge_types,
             "clearedEdgeTypes": cleared_edge_types,
@@ -20273,11 +23891,21 @@ class GhidraCacheDB:
                     subject_state,
                     latest_bundle_payload,
                     support_rows or existing_support_rows,
-                    _merge_resolver_support_surfaces(support_surfaces, existing_support_surfaces),
+                    _merge_resolver_support_surfaces(
+                        support_surfaces,
+                        existing_support_surfaces,
+                        target_id=str(execution_context.get("targetId") or compatibility_target_id or trace_scope),
+                        trace_scope=trace_scope,
+                    ),
                     target_class,
                 ),
                 "supportRows": existing_payload.get("supportRows"),
-                "supportSurfaces": _merge_resolver_support_surfaces(support_surfaces, existing_support_surfaces),
+                "supportSurfaces": _merge_resolver_support_surfaces(
+                    support_surfaces,
+                    existing_support_surfaces,
+                    target_id=str(execution_context.get("targetId") or compatibility_target_id or trace_scope),
+                    trace_scope=trace_scope,
+                ),
                 "shellWindow": dict(surface_plan.get("shellWindow") or existing_payload.get("shellWindow") or {}),
                 "traceRoutineHint": trace_workflow_policy.get("traceRoutineHint"),
                 "familyTraceProfile": trace_workflow_policy.get("familyTraceProfile"),
@@ -20286,8 +23914,9 @@ class GhidraCacheDB:
                 "nativeTraceTerms": trace_workflow_policy.get("nativeTraceTerms"),
                 "blockedEdgeTypes": blocked_edge_types,
                 "clearedEdgeTypes": cleared_edge_types,
-                "anchorTerms": anchor_terms,
-                "resolutionAliases": resolution_aliases,
+                "anchorTerms": _sanitize_resolver_anchor_terms(anchor_terms),
+                "acceptedAnchors": _sanitize_resolver_anchor_terms(anchor_terms),
+                "resolutionAliases": _sanitize_resolver_anchor_terms(resolution_aliases),
             }
             if _json_dumps(existing.get("payload") or {}) != _json_dumps(existing_payload):
                 built_at = datetime.now().isoformat(timespec="microseconds")

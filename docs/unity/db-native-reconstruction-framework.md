@@ -262,6 +262,11 @@ It exposes:
 - reusable relations between grounded entities
 - explicit gaps and blockers
 
+Cleanup rule:
+- `materialized_gap_views` is not allowed to outrank newer grounded subject state or subject contracts.
+- If contract materialization proves a gap is already satisfied, that gap should be pruned from `materialized_gap_views` during the same DB-native pass.
+- Selector-side suppression is a safety backstop, not the primary cleanup mechanism.
+
 Active TokenShop runtime behavior is now generic-first:
 
 - row identity reads prefer generic mechanics

@@ -615,7 +615,7 @@ async function main() {
       await page.waitForTimeout(2000);
     }
 
-    if (tier && subsystemTabName && /TokenShop/i.test(String(subsystem))) {
+    if (tier && subsystemTabName && /tokenshop|token-shop/i.test(String(subsystem))) {
       await page.locator(`[data-token-shop-tier="${String(tier).trim().toLowerCase()}"]`).click({ force: true });
       await page.waitForTimeout(1500);
     }

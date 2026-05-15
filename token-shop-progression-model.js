@@ -97,7 +97,7 @@ function resolveTokenShopCostState(row, currentLevel, startCost, additiveCost, m
       costFormulaKnown: hasLinearInputs,
       costFormulaProjected: hasLinearInputs,
       costFormulaLabel: hasLinearInputs
-        ? `Projected linear cost from extracted StartCost/AdditiveCost: start ${startCost} + additive ${additiveCost} x current level. Exact runtime formula is still unverified for this row.`
+        ? `Exact runtime cost formula is unverified for this row. Extracted StartCost/AdditiveCost inputs are available but are not used as known next-cost evidence.`
         : "Known cost inputs are incomplete in this build."
     };
   }
@@ -125,7 +125,8 @@ export function buildTokenShopProgressionModel({
   getKnownMaxStatus,
   getCurrentVsNextBonusSummary
 }) {
-  const rows = getGroundedSubsetDefinitions(boundary).map((row) => {
+  const groundedSubsetDefinitions = getGroundedSubsetDefinitions(boundary);
+  const rows = groundedSubsetDefinitions.map((row) => {
     const levelSource = resolveTokenShopProgressionLevelSource(
       row.field,
       progressionState,

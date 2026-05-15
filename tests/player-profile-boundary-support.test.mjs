@@ -211,7 +211,7 @@ test("Emporium import preview card model preserves compatibility-only summary li
 
   assert.equal(model.hasPreview, true);
   assert.equal(model.pillLabels[0], "2/110 raw IS rows imported");
-  assert.match(model.metaLines[0], /compatibility-only evidence/);
+  assert.match(model.metaLines[0], /compatibility evidence only/);
   assert.equal(model.overlapCards[0].level, "#3");
   assert.equal(model.previewRows[0].level, "#3");
   assert.equal(model.trailingPreviewLine, "Trailing imported raw rows: IS72Level #4");

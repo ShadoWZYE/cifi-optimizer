@@ -31,10 +31,14 @@ function buildRowDetailFromGenericScope(scopePayload, fieldName) {
   }
 
   const rowFacts = normalizeArray(scope.facts).filter(
-    (fact) => String(fact?.entityId || "").trim() === rowEntityId
+    (fact) =>
+      String(fact?.entityId || "").trim() === rowEntityId ||
+      String(fact?.fieldKey || "").trim() === fieldName
   );
   const rowGaps = normalizeArray(scope.gaps).filter(
-    (gap) => String(gap?.entityId || "").trim() === rowEntityId
+    (gap) =>
+      String(gap?.entityId || "").trim() === rowEntityId ||
+      String(gap?.fieldKey || "").trim() === fieldName
   );
   if (!rowFacts.length && !rowGaps.length) {
     return null;
@@ -88,6 +92,27 @@ function buildRowDetailFromGenericScope(scopePayload, fieldName) {
   const boundedEvidenceTerms = uniqueStrings(valuesByKind.get("bounded-evidence-term") || []);
   if (boundedEvidenceTerms.length) {
     rowDetail.boundedEvidenceTerms = boundedEvidenceTerms;
+  }
+  const runtimeCostCoverageFact = rowFacts.find(
+    (fact) =>
+      String(fact?.factKind || "").trim() === "runtime-cost-coverage" &&
+      String(fact?.factValue || "").trim()
+  );
+  if (runtimeCostCoverageFact) {
+    const payload =
+      runtimeCostCoverageFact.payload && typeof runtimeCostCoverageFact.payload === "object"
+        ? runtimeCostCoverageFact.payload
+        : {};
+    rowDetail.runtimeCostCoverage = {
+      status: String(runtimeCostCoverageFact.factValue || "").trim(),
+      evidenceSource: String(payload.evidenceSource || "").trim() || null,
+      shellField: String(payload.shellField || "").trim() || null,
+      ownerFieldStem: String(payload.ownerFieldStem || "").trim() || null,
+      ownerFieldBlock: uniqueStrings(payload.ownerFieldBlock || []),
+      updaterTerms: uniqueStrings(payload.updaterTerms || []),
+      isClosed: true
+    };
+    delete rowDetail.blockedFields["runtime-cost-coverage"];
   }
   return rowDetail;
 }
@@ -731,8 +756,25 @@ export function buildTokenShopGenericMechanicsIndex(payload) {
 
 export function getTokenShopGenericRowDetailForField(index, fieldName) {
   const scopeId = TOKEN_SHOP_SCOPE_BY_FIELD[fieldName];
-  const scopePayload = scopeId ? index?.byScope?.get(scopeId) : null;
-  return buildRowDetailFromGenericScope(scopePayload, fieldName);
+  const preferredScopePayload = scopeId ? index?.byScope?.get(scopeId) : null;
+  const preferredRowDetail = buildRowDetailFromGenericScope(preferredScopePayload, fieldName);
+  if (preferredRowDetail?.runtimeCostCoverage?.isClosed || preferredRowDetail?.isGrounded) {
+    return preferredRowDetail;
+  }
+  for (const [candidateScopeId, scopePayload] of index?.byScope?.entries?.() || []) {
+    if (candidateScopeId === scopeId) {
+      continue;
+    }
+    const candidateRowDetail = buildRowDetailFromGenericScope(scopePayload, fieldName);
+    if (candidateRowDetail?.runtimeCostCoverage?.isClosed) {
+      return {
+        ...candidateRowDetail,
+        preferredScopeId: scopeId || null,
+        resolvedScopeId: candidateScopeId
+      };
+    }
+  }
+  return preferredRowDetail;
 }
 
 export function applyTokenShopGenericRowDetailToRow(row, rowDetail) {
@@ -743,6 +785,17 @@ export function applyTokenShopGenericRowDetailToRow(row, rowDetail) {
   const boundedEvidenceNote = boundedEvidenceTerms.length
     ? `Bounded row-remap evidence: ${boundedEvidenceTerms.join(", ")}.`
     : null;
+  const runtimeCostCoverage =
+    rowDetail.runtimeCostCoverage && typeof rowDetail.runtimeCostCoverage === "object"
+      ? rowDetail.runtimeCostCoverage
+      : null;
+  const runtimeCoverageNote = runtimeCostCoverage?.isClosed
+    ? `Runtime cost owner coverage closed by DB evidence${
+        runtimeCostCoverage.evidenceSource ? ` (${runtimeCostCoverage.evidenceSource})` : ""
+      }; exact next-cost formula still follows formula-confidence evidence.`
+    : null;
+  const currentCostFormulaConfidence =
+    String(row?.costFormulaConfidence || "verified").trim() || "verified";
   return {
     ...row,
     subjectId:
@@ -764,11 +817,16 @@ export function applyTokenShopGenericRowDetailToRow(row, rowDetail) {
     note:
       typeof rowDetail.detailNote === "string" && rowDetail.detailNote ? rowDetail.detailNote : row.note,
     rowDetail,
+    runtimeCostCoverage: runtimeCostCoverage || row.runtimeCostCoverage || null,
+    costFormulaConfidence:
+      runtimeCostCoverage?.isClosed && currentCostFormulaConfidence === "projected"
+        ? "verified"
+        : row?.costFormulaConfidence,
     blockedInputReason:
       row.blockedInputReason ||
       (typeof rowDetail?.blockedFields?.rowDetail === "string" ? rowDetail.blockedFields.rowDetail : null),
     dbMetadataSourceLabel: row.dbMetadataSourceLabel || row.contractSourceLabel || "Generic mechanics model",
     contractSourceLabel: row.contractSourceLabel || "Generic mechanics model",
-    supportingEvidenceNote: row.supportingEvidenceNote || boundedEvidenceNote
+    supportingEvidenceNote: row.supportingEvidenceNote || runtimeCoverageNote || boundedEvidenceNote
   };
 }

@@ -21,6 +21,7 @@ const appStateDbPath = process.env.CIFI_APP_STATE_DB_PATH
 const systemUnitsDir = join(root, "data", "system-units");
 const launcherMode =
   process.env.CIFI_LAUNCH_MODE === "1" || process.argv.includes("--launcher-mode");
+const servedSystemUnitIds = ["app-meta", "player-state", "shards", "token-shop", "multiverse-market"];
 const clientLeaseTtlMs = 60000;
 const launcherIdleCheckMs = 2000;
 const clientSessions = new Map();
@@ -42,6 +43,7 @@ const serverCapabilitiesScript = `<script>window.__CIFI_SERVER_CAPABILITIES__ = 
   sessionApi: true,
   launcherMode,
   systemUnitApi: true,
+  systemUnitRefreshApi: true,
   systemDbBundleApi: true,
   traceGapApi: true,
   serverControlApi: true,
@@ -100,6 +102,11 @@ const server = createServer(async (request, response) => {
 
   if (request.method === "GET" && requestUrl.pathname === "/api/system-units") {
     handleSystemUnits(response, requestUrl);
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/system-units/refresh") {
+    await handleSystemUnitsRefresh(request, response);
     return;
   }
 
@@ -353,7 +360,7 @@ function handleSystemUnits(response, requestUrl) {
     .filter(Boolean);
   const systemIds = requestedIds.length
     ? requestedIds
-    : ["app-meta", "player-state", "shards", "token-shop", "multiverse-market"];
+    : servedSystemUnitIds;
   const loadFromDb = () =>
     withCacheDb((db) => {
       const statement = db.prepare(`
@@ -415,6 +422,47 @@ function handleSystemUnits(response, requestUrl) {
     writeJson(response, 500, {
       error: error instanceof Error ? error.message : String(error),
       source: "system-unit-server"
+    });
+  }
+}
+
+async function handleSystemUnitsRefresh(request, response) {
+  try {
+    const payload = await readJsonBody(request);
+    const requestedSystemIds = Array.from(
+      new Set(
+        (Array.isArray(payload?.systemIds) ? payload.systemIds : [])
+          .map((value) => String(value || "").trim())
+          .filter(Boolean)
+      )
+    );
+    const refreshResult = await runProcess(execPath, ["scripts/contracts/generate-system-units.mjs"]);
+    const refreshed = withCacheDb((db) => {
+      const filteredSystemIds = requestedSystemIds.length
+        ? requestedSystemIds.filter((systemId) => servedSystemUnitIds.includes(systemId))
+        : servedSystemUnitIds;
+      const statement = db.prepare(`
+        SELECT system_id, built_at
+        FROM materialized_system_unit_views
+        WHERE version = 'v1' AND system_id = ?
+      `);
+      return filteredSystemIds
+        .map((systemId) => statement.get(systemId))
+        .filter(Boolean);
+    });
+    writeJson(response, 200, {
+      ok: true,
+      refreshedSystemIds: requestedSystemIds.length ? requestedSystemIds : servedSystemUnitIds,
+      builtAt: maxBuiltAt(refreshed.map((row) => row.built_at)),
+      stdout: String(refreshResult.stdout || "").trim() || null,
+      stderr: String(refreshResult.stderr || "").trim() || null
+    });
+  } catch (error) {
+    writeJson(response, 500, {
+      ok: false,
+      error: error instanceof Error ? error.message : String(error),
+      stdout: error?.stdout ? String(error.stdout) : null,
+      stderr: error?.stderr ? String(error.stderr) : null
     });
   }
 }
@@ -1957,7 +2005,10 @@ function readJsonBody(request) {
 
 function runProcess(command, args) {
   return new Promise((resolve, reject) => {
-    const child = spawn(command, args, { cwd: root });
+    const child = spawn(command, args, {
+      cwd: root,
+      windowsHide: true
+    });
     let stdout = "";
     let stderr = "";
 

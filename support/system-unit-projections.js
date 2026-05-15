@@ -161,6 +161,23 @@ export function buildSpendSystemView({
 }) {
   const normalizedDbBundle = normalizeTokenShopDbBundle(systemDb?.tokenShop);
   const normalizedMultiverseDbBundle = normalizeDbSystemBundle(systemDb?.multiverseMarket);
+  const hasDbTokenShopBundle = normalizedDbBundle.hasAny === true;
+  const hasDbTokenShopDailyTokeniumCoverage = hasDbSystemCoverageForSubjects(normalizedDbBundle, {
+    subjectIds: ["range:token-shop:ATU14Button-ATU19Button", "row:ATU3Button"],
+    traceScopes: ["token-shop-daily-tokenium-family", "token-shop-atu3-cells-effect"]
+  });
+  const hasDbTokenShopTokenBankCoverage = hasDbSystemCoverageForSubjects(normalizedDbBundle, {
+    subjectIds: [
+      "range:token-shop:ATU1Button-ATU28Button",
+      "range:token-shop:ATU14Button-ATU19Button",
+      "row:ATU3Button"
+    ],
+    traceScopes: [
+      "token-shop-family-structure",
+      "token-shop-daily-tokenium-family",
+      "token-shop-atu3-cells-effect"
+    ]
+  });
   const staticMultiverseMarketMemberBoundary =
     multiverseMarketSystemUnit?.sections?.saveOwner?.marketMemberBoundary?.data ?? null;
   const staticMultiverseSaveBoundary =
@@ -249,14 +266,36 @@ export function buildSpendSystemView({
         }
       },
       tokenBank: {
-        namingClues: tokenShopSystemUnit?.sections?.tokenBank?.namingClues?.data ?? null,
-        stateClues: tokenShopSystemUnit?.sections?.tokenBank?.stateClues?.data ?? null,
-        formulaBoundary: tokenShopSystemUnit?.sections?.tokenBank?.formulaBoundary?.data ?? null,
-        ownerShell: tokenShopSystemUnit?.sections?.tokenBank?.ownerShell?.data ?? null,
-        controllerShell: tokenShopSystemUnit?.sections?.tokenBank?.controllerShell?.data ?? null
+        namingClues: hasDbTokenShopBundle
+          ? null
+          : tokenShopSystemUnit?.sections?.tokenBank?.namingClues?.data ?? null,
+        stateClues: hasDbTokenShopTokenBankCoverage
+          ? null
+          : tokenShopSystemUnit?.sections?.tokenBank?.stateClues?.data ?? null,
+        formulaBoundary: hasDbTokenShopTokenBankCoverage
+          ? null
+          : tokenShopSystemUnit?.sections?.tokenBank?.formulaBoundary?.data ?? null,
+        ownerShell: hasDbTokenShopTokenBankCoverage
+          ? null
+          : tokenShopSystemUnit?.sections?.tokenBank?.ownerShell?.data ?? null,
+        controllerShell: hasDbTokenShopTokenBankCoverage
+          ? null
+          : tokenShopSystemUnit?.sections?.tokenBank?.controllerShell?.data ?? null,
+        compatibilityClues: {
+          namingClues: tokenShopSystemUnit?.sections?.tokenBank?.namingClues?.data ?? null,
+          stateClues: tokenShopSystemUnit?.sections?.tokenBank?.stateClues?.data ?? null,
+          formulaBoundary: tokenShopSystemUnit?.sections?.tokenBank?.formulaBoundary?.data ?? null,
+          ownerShell: tokenShopSystemUnit?.sections?.tokenBank?.ownerShell?.data ?? null,
+          controllerShell: tokenShopSystemUnit?.sections?.tokenBank?.controllerShell?.data ?? null
+        }
       },
       dailyTokenium: {
-        laneClues: tokenShopSystemUnit?.sections?.dailyTokenium?.laneClues?.data ?? null
+        laneClues: hasDbTokenShopDailyTokeniumCoverage
+          ? null
+          : tokenShopSystemUnit?.sections?.dailyTokenium?.laneClues?.data ?? null,
+        compatibilityClues: {
+          laneClues: tokenShopSystemUnit?.sections?.dailyTokenium?.laneClues?.data ?? null
+        }
       },
       spendLanes: {
         costLanes: tokenShopSystemUnit?.sections?.spendLanes?.costLanes?.data ?? null,

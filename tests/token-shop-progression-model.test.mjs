@@ -279,5 +279,5 @@ test("buildTokenShopProgressionModel keeps projected late linear formulas out of
   assert.equal(summary.rows[0].projectedNextCost, 12000000);
   assert.equal(summary.rows[0].isAffordable, null);
   assert.equal(summary.rows[0].costFormulaProjected, true);
-  assert.match(summary.rows[0].costFormulaLabel, /projected linear cost/i);
+  assert.match(summary.rows[0].costFormulaLabel, /not used as known next-cost evidence/i);
 });

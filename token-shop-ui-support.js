@@ -387,6 +387,15 @@ export function createTokenShopUiSupport({ formatValue }) {
       rowMeta,
       runtimeDisplayGap
     );
+    const preferStepBonusPresentation =
+      unresolvedBuffPresentation &&
+      (row?.bonusStepMode === "multiplier" || row?.bonusStepMode === "multi");
+    const hasDirectSingleBonusValue = typeof bonusValue === "number" && Number.isFinite(bonusValue);
+    const hasDirectCompositeBonusValues =
+      Array.isArray(row?.bonusValues) &&
+      row.bonusValues.length > 0 &&
+      row.bonusValues.every((entry) => typeof entry?.value === "number" && Number.isFinite(entry.value));
+    const canComputeBuffPresentation = hasDirectSingleBonusValue || hasDirectCompositeBonusValues;
 
     if (
       row?.bonusStepMode === "multi" &&
@@ -394,7 +403,7 @@ export function createTokenShopUiSupport({ formatValue }) {
       row.bonusValues.length &&
       buffTargets.length === row.bonusValues.length
     ) {
-      if (unresolvedBuffPresentation) {
+      if (unresolvedBuffPresentation && !hasDirectCompositeBonusValues) {
         const primaryTarget = buffTargets[0];
         const hiddenCount = Math.max(0, buffTargets.length - 1);
         return [
@@ -432,17 +441,19 @@ export function createTokenShopUiSupport({ formatValue }) {
           currentLevel,
           stepValue
         );
+        const targetResolvedCurrentMagnitude = preferStepBonusPresentation
+          ? stepValue
+          : targetCurrentMagnitude;
         return {
           label: String(target?.label || `Bonus ${index + 1}`).trim(),
           tone: String(target?.tone || "neutral").trim(),
-          currentLabel: formatTokenShopBonusMagnitudeForRow(targetRow, targetCurrentMagnitude),
+          currentLabel: formatTokenShopBonusMagnitudeForRow(targetRow, targetResolvedCurrentMagnitude),
           nextLabel:
             row?.isMaxed
               ? "MAX"
-              : formatTokenShopBonusMagnitudeForRow(
-                  targetRow,
-                  getTokenShopDisplayedBonusMagnitude(targetRow, currentLevel + 1, stepValue)
-                ),
+              : formatTokenShopBonusMagnitudeForRow(targetRow, preferStepBonusPresentation
+                  ? stepValue
+                  : getTokenShopDisplayedBonusMagnitude(targetRow, currentLevel + 1, stepValue)),
           isPrimary: index === 0
         };
       });
@@ -451,8 +462,18 @@ export function createTokenShopUiSupport({ formatValue }) {
     return buffTargets.map((target, index) => ({
       label: String(target?.label || row?.bonusStepLabel || "Bonus").trim(),
       tone: String(target?.tone || "neutral").trim(),
-      currentLabel: unresolvedBuffPresentation ? "Research" : currentLabel,
-      nextLabel: unresolvedBuffPresentation ? "Research" : nextLabel,
+      currentLabel:
+        unresolvedBuffPresentation && !canComputeBuffPresentation
+          ? "Research"
+          : preferStepBonusPresentation
+            ? formatTokenShopBonusMagnitudeForRow(row, bonusValue)
+            : currentLabel,
+      nextLabel:
+        unresolvedBuffPresentation && !canComputeBuffPresentation
+          ? "Research"
+          : preferStepBonusPresentation
+            ? formatTokenShopBonusMagnitudeForRow(row, bonusValue)
+            : nextLabel,
       isPrimary: index === 0
     }));
   }

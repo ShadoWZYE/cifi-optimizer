@@ -44,11 +44,15 @@ export function buildTokenShopSubjectContractIndex(payload) {
   const contracts = Object.values(contractMap).filter(Boolean);
   const byAlias = new Map();
   const bySubjectId = new Map();
+  const rangeFamilies = [];
 
   contracts.forEach((contract) => {
     const subjectId = String(contract?.subjectId || "").trim();
     if (subjectId) {
       bySubjectId.set(subjectId, contract);
+    }
+    if (String(contract?.subjectKind || "").trim() === "range-family") {
+      rangeFamilies.push(contract);
     }
     normalizeArray(contract?.targetAliases).forEach((alias) => {
       byAlias.set(String(alias), contract);
@@ -61,8 +65,38 @@ export function buildTokenShopSubjectContractIndex(payload) {
 
   return {
     byAlias,
-    bySubjectId
+    bySubjectId,
+    rangeFamilies
   };
+}
+
+function getTokenShopSupportingRangeContracts(contractIndex, fieldName) {
+  const normalizedFieldName = String(fieldName || "").trim();
+  const fieldMatch = normalizedFieldName.match(/^ATU(\d+)Level$/i);
+  const fieldIndex = fieldMatch ? Number.parseInt(fieldMatch[1], 10) : Number.NaN;
+  return (Array.isArray(contractIndex?.rangeFamilies) ? contractIndex.rangeFamilies : [])
+    .filter((contract) => {
+      const groundedFields = contract?.groundedFields ?? {};
+      const rowDetailsByField = groundedFields.rowDetailsByField ?? {};
+      if (rowDetailsByField && typeof rowDetailsByField[normalizedFieldName] === "object") {
+        return true;
+      }
+      if (!Number.isFinite(fieldIndex)) {
+        return false;
+      }
+      const subjectId = String(contract?.subjectId || "").trim();
+      const rangeMatch = subjectId.match(/^range:token-shop:ATU(\d+)Button-ATU(\d+)Button$/i);
+      if (!rangeMatch) {
+        return false;
+      }
+      const start = Number.parseInt(rangeMatch[1], 10);
+      const end = Number.parseInt(rangeMatch[2], 10);
+      if (!Number.isFinite(start) || !Number.isFinite(end)) {
+        return false;
+      }
+      return fieldIndex >= Math.min(start, end) && fieldIndex <= Math.max(start, end);
+    })
+    .sort((left, right) => String(left?.traceScope || "").localeCompare(String(right?.traceScope || "")));
 }
 
 export function getTokenShopSubjectContractForField(contractIndex, fieldName) {
@@ -73,6 +107,13 @@ export function getTokenShopSubjectContractForField(contractIndex, fieldName) {
   return contractIndex.byAlias.get(scopeId) ?? null;
 }
 
+export function getTokenShopSupportingContractsForField(contractIndex, fieldName) {
+  const directContract = getTokenShopSubjectContractForField(contractIndex, fieldName);
+  return getTokenShopSupportingRangeContracts(contractIndex, fieldName).filter(
+    (contract) => contract !== directContract
+  );
+}
+
 export function applyTokenShopSubjectContractToRow(row, contract) {
   if (!contract) {
     return row;
@@ -81,6 +122,10 @@ export function applyTokenShopSubjectContractToRow(row, contract) {
   const supportSummary = contract?.supportSummary ?? {};
   const provenanceSummary = contract?.provenanceSummary ?? {};
   const groundedFields = contract?.groundedFields ?? {};
+  const knownEdges = normalizeArray(contract?.knownEdges);
+  const missingEdges = normalizeArray(contract?.missingEdges);
+  const blockedEdges = normalizeArray(contract?.blockedEdges);
+  const nonblockingEdges = normalizeArray(contract?.nonblockingEdges);
   const rowDetailsByField = groundedFields.rowDetailsByField ?? {};
   const contractRowDetail =
     (row?.field &&
@@ -114,6 +159,17 @@ export function applyTokenShopSubjectContractToRow(row, contract) {
     !String(row?.identity || "").trim() ||
     !String(row?.rowType || "").trim();
   const nextSeam = contract?.nextSeam ?? null;
+  const hasClosedEdge = (edgeId) => {
+    const normalizedEdgeId = String(edgeId || "").trim();
+    if (!normalizedEdgeId) {
+      return false;
+    }
+    return (
+      knownEdges.includes(normalizedEdgeId) &&
+      !missingEdges.includes(normalizedEdgeId) &&
+      !blockedEdges.includes(normalizedEdgeId)
+    );
+  };
   const blockedInputReason =
     typeof contract?.blockedInputReason === "string" && contract.blockedInputReason
       ? contract.blockedInputReason
@@ -141,6 +197,18 @@ export function applyTokenShopSubjectContractToRow(row, contract) {
       : contract?.subjectId && contract?.subjectKind
         ? `${contract.subjectKind} subject metadata`
         : "DB subject metadata";
+  const currentCostFormulaConfidence =
+    String(row?.costFormulaConfidence || "verified").trim() || "verified";
+  const runtimeFormulaRecovered = hasClosedEdge("runtime-next-cost-formula");
+  const displayPathRecovered = hasClosedEdge("exact-display-update-path");
+  const nextCostFormulaConfidence =
+    runtimeFormulaRecovered && currentCostFormulaConfidence === "projected"
+      ? "verified"
+      : row?.costFormulaConfidence;
+  const nextStorefrontBuffDisplayMode =
+    displayPathRecovered && String(row?.storefrontBuffDisplayMode || "").trim() === "runtime-unresolved"
+      ? null
+      : row?.storefrontBuffDisplayMode;
 
   return {
     ...row,
@@ -173,13 +241,15 @@ export function applyTokenShopSubjectContractToRow(row, contract) {
       genericPrimary && typeof row?.subjectKind === "string" && row.subjectKind
         ? row.subjectKind
         : contract?.subjectKind ?? row?.subjectKind ?? null,
-    knownEdges: normalizeArray(contract?.knownEdges),
-    missingEdges: normalizeArray(contract?.missingEdges),
-    blockedEdges: normalizeArray(contract?.blockedEdges),
-    nonblockingEdges: normalizeArray(contract?.nonblockingEdges),
+    knownEdges,
+    missingEdges,
+    blockedEdges,
+    nonblockingEdges,
     nextSeam,
     groundedFields,
     rowDetail,
+    costFormulaConfidence: nextCostFormulaConfidence,
+    storefrontBuffDisplayMode: nextStorefrontBuffDisplayMode,
     supportSummary,
     provenanceSummary,
     blockedInputReason,
@@ -193,6 +263,53 @@ export function applyTokenShopSubjectContractToRow(row, contract) {
       row.supportingEvidenceNote ||
       boundedEvidenceNote ||
       (supportLabel ? `DB support surfaces: ${supportLabel}.` : null)
+  };
+}
+
+export function applyTokenShopSupportingContractSignals(row, contract) {
+  if (!contract) {
+    return row;
+  }
+  const knownEdges = normalizeArray(contract?.knownEdges);
+  const missingEdges = normalizeArray(contract?.missingEdges);
+  const blockedEdges = normalizeArray(contract?.blockedEdges);
+  const nonblockingEdges = normalizeArray(contract?.nonblockingEdges);
+  const currentCostFormulaConfidence =
+    String(row?.costFormulaConfidence || "verified").trim() || "verified";
+  const currentBuffDisplayMode = String(row?.storefrontBuffDisplayMode || "").trim();
+  const currentCapDisplayMode = String(row?.storefrontCapDisplayMode || "").trim();
+  const runtimeFormulaRecovered =
+    knownEdges.includes("runtime-next-cost-formula") &&
+    !missingEdges.includes("runtime-next-cost-formula") &&
+    !blockedEdges.includes("runtime-next-cost-formula");
+  const displayPathRecovered =
+    knownEdges.includes("exact-display-update-path") &&
+    !missingEdges.includes("exact-display-update-path") &&
+    !blockedEdges.includes("exact-display-update-path");
+  const mergedKnownEdges = [...new Set([...(Array.isArray(row?.knownEdges) ? row.knownEdges : []), ...knownEdges])];
+  const mergedMissingEdges = [...new Set([...(Array.isArray(row?.missingEdges) ? row.missingEdges : []), ...missingEdges])];
+  const mergedBlockedEdges = [...new Set([...(Array.isArray(row?.blockedEdges) ? row.blockedEdges : []), ...blockedEdges])];
+  const mergedNonblockingEdges = [...new Set([...(Array.isArray(row?.nonblockingEdges) ? row.nonblockingEdges : []), ...nonblockingEdges])];
+  const supportingRows = Array.isArray(row?.supportingSubjectIds) ? row.supportingSubjectIds : [];
+  return {
+    ...row,
+    knownEdges: mergedKnownEdges,
+    missingEdges: mergedMissingEdges,
+    blockedEdges: mergedBlockedEdges,
+    nonblockingEdges: mergedNonblockingEdges,
+    costFormulaConfidence:
+      runtimeFormulaRecovered && currentCostFormulaConfidence === "projected"
+        ? "verified"
+        : row?.costFormulaConfidence,
+    storefrontBuffDisplayMode:
+      displayPathRecovered && currentBuffDisplayMode === "runtime-unresolved"
+        ? null
+        : row?.storefrontBuffDisplayMode,
+    storefrontCapDisplayMode:
+      displayPathRecovered && currentCapDisplayMode === "runtime-unresolved"
+        ? null
+        : row?.storefrontCapDisplayMode,
+    supportingSubjectIds: [...new Set([...supportingRows, String(contract?.subjectId || "").trim()].filter(Boolean))]
   };
 }
 

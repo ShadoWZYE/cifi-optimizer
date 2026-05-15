@@ -55,7 +55,11 @@ import {
   buildShardSystemView,
   buildSpendSystemView
 } from "./support/system-unit-projections.js";
-import { loadSystemUnits, SYSTEM_UNIT_IDS } from "./support/system-unit-provider.js";
+import {
+  loadSystemUnits,
+  refreshSystemUnits,
+  SYSTEM_UNIT_IDS
+} from "./support/system-unit-provider.js";
 import { hasTokenShopDbBundle } from "./support/token-shop-db-bundle.js";
 import { MULTIVERSE_MARKET_SCOPE_IDS } from "./support/multiverse-market-scope-map.js";
 import { SHARD_SCOPE_IDS } from "./support/shard-scope-map.js";
@@ -133,6 +137,7 @@ const DEFAULT_SERVER_CAPABILITIES = Object.freeze({
   sessionApi: false,
   launcherMode: false,
   systemUnitApi: false,
+  systemUnitRefreshApi: false,
   systemDbBundleApi: false,
   traceGapApi: false,
   serverControlApi: false,
@@ -962,6 +967,13 @@ function hasSystemRefreshCapability() {
   );
 }
 
+function hasSystemUnitRematerializeCapability() {
+  return (
+    window.location.origin.startsWith("http") &&
+    SERVER_CAPABILITIES.systemUnitRefreshApi === true
+  );
+}
+
 function getLatestLoadedBuiltAtForSystemIds(systemIds = []) {
   let latest = 0;
   for (const systemId of systemIds) {
@@ -1068,6 +1080,17 @@ async function ensureFreshSystemViewOnAccess(route = state.route) {
   const refreshContext = getRouteSystemRefreshContext(route);
   if (!refreshContext?.systemIds?.length || !hasSystemRefreshCapability()) {
     return false;
+  }
+  if (hasSystemUnitRematerializeCapability()) {
+    try {
+      await refreshSystemUnits({
+        origin: window.location.origin,
+        serverCapabilities: SERVER_CAPABILITIES,
+        systemIds: refreshContext.systemIds
+      });
+    } catch (error) {
+      console.warn("System-unit rematerialization failed before route refresh.", error);
+    }
   }
   const loadedSystemUnits = await loadSystemUnits({
     fetchJson,
@@ -1198,6 +1221,8 @@ function initTokenShopTierTabs() {
     const tierConfig = TOKEN_SHOP_TIER_CONFIG[tier];
     if (!tierConfig) return;
     const tierLabels = getTierLabels();
+    const currentTokenShopLevels =
+      state.playerProfile?.planning?.tokenShop?.checkedSubsetPlayerState || {};
 
     const tierUnlocks =
       getCurrentSpendSystemView()?.tokenShop?.rows?.policy?.tierUnlocks?.tierUnlocks;
@@ -1209,6 +1234,11 @@ function initTokenShopTierTabs() {
         const label = tierLabels[field] || field;
         const tierForField = getTierForField(field);
         const isLocked = tierForField !== "t1" && !tierUnlockStates[tierForField];
+        const currentValue = currentTokenShopLevels[field];
+        const valueAttribute =
+          typeof currentValue === "number" && Number.isFinite(currentValue)
+            ? ` value="${escapeHtml(String(currentValue))}"`
+            : "";
         return `
           <div class="field-group${isLocked ? " locked" : ""}">
             <label for="${field}">${label}${isLocked ? " (locked)" : ""}</label>
@@ -1218,6 +1248,7 @@ function initTokenShopTierTabs() {
               type="text"
               inputmode="decimal"
               placeholder="0"
+              ${valueAttribute}
               ${isLocked ? "disabled" : ""}
             />
           </div>
@@ -1386,9 +1417,11 @@ function getServerCapabilities() {
     sessionApi: raw.sessionApi === true,
     launcherMode: raw.launcherMode === true,
     systemUnitApi: raw.systemUnitApi === true,
+    systemUnitRefreshApi: raw.systemUnitRefreshApi === true,
     systemDbBundleApi: raw.systemDbBundleApi === true,
     traceGapApi: raw.traceGapApi === true,
-    serverControlApi: raw.serverControlApi === true
+    serverControlApi: raw.serverControlApi === true,
+    playerProfileApi: raw.playerProfileApi === true
   };
 }
 
@@ -6848,6 +6881,8 @@ function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recom
           typeof row.nextKnownCost === "number" &&
           typeof summary.currentTokens === "number"
         ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
+        : typeof row.nextKnownCost === "number"
+          ? "Tokens unavailable in checked profile."
         : "Waiting on grounded runtime cost coverage.";
   const costFormulaLine =
     typeof row.costFormulaLabel === "string" && row.costFormulaLabel

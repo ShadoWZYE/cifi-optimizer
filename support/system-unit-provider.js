@@ -16,6 +16,13 @@ function shouldUseDbSystemBundleApi(origin, serverCapabilities) {
   return String(origin || "").startsWith("http") && serverCapabilities?.systemDbBundleApi === true;
 }
 
+function shouldUseSystemUnitRefreshApi(origin, serverCapabilities) {
+  return (
+    String(origin || "").startsWith("http") &&
+    serverCapabilities?.systemUnitRefreshApi === true
+  );
+}
+
 function shouldAllowStaticFallback(origin, serverCapabilities, allowStaticFallback) {
   if (typeof allowStaticFallback === "boolean") {
     return allowStaticFallback;
@@ -69,6 +76,33 @@ function getResolvedSystemDbScopes(systemDbScopes = {}, tokenShopDbScopes = {}) 
     }
   }
   return resolved;
+}
+
+export async function refreshSystemUnits({
+  origin,
+  serverCapabilities,
+  systemIds = SYSTEM_UNIT_IDS
+}) {
+  const requestedSystemIds = Array.from(
+    new Set(
+      (Array.isArray(systemIds) && systemIds.length ? systemIds : SYSTEM_UNIT_IDS).filter(Boolean)
+    )
+  );
+  if (!shouldUseSystemUnitRefreshApi(origin, serverCapabilities) || !requestedSystemIds.length) {
+    return null;
+  }
+  const response = await fetch("/api/system-units/refresh", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify({
+      systemIds: requestedSystemIds
+    })
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to refresh system units (${response.status}).`);
+  }
+  return response.json();
 }
 
 export async function loadSystemUnits({

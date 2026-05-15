@@ -3,9 +3,11 @@ import {
   normalizeTokenShopDbBundle
 } from "./token-shop-db-bundle.js";
 import {
+  applyTokenShopSupportingContractSignals,
   applyTokenShopDbSubjectMetadataToRow,
   buildTokenShopDbSubjectMetadataIndex,
-  getTokenShopDbSubjectMetadataForField
+  getTokenShopDbSubjectMetadataForField,
+  getTokenShopSupportingContractsForField
 } from "./token-shop-db-subject-metadata.js";
 import {
   applyTokenShopGenericRowDetailToRow,
@@ -24,11 +26,18 @@ export function buildTokenShopDbRowDetailResolver(input = {}) {
     apply(row) {
       const genericRowDetail = getTokenShopGenericRowDetailForField(genericMechanicsIndex, row?.field);
       const genericApplied = applyTokenShopGenericRowDetailToRow(row, genericRowDetail);
-      const subjectContract = getTokenShopDbSubjectMetadataForField(contractIndex, row?.field);
-      if (!subjectContract) {
-        return genericApplied;
+      const directContract = getTokenShopDbSubjectMetadataForField(contractIndex, row?.field);
+      const supportingContracts = getTokenShopSupportingContractsForField(contractIndex, row?.field);
+      const directApplied = directContract
+        ? applyTokenShopDbSubjectMetadataToRow(genericApplied, directContract)
+        : genericApplied;
+      if (!supportingContracts.length) {
+        return directApplied;
       }
-      return applyTokenShopDbSubjectMetadataToRow(genericApplied, subjectContract);
+      return supportingContracts.reduce(
+        (resolvedRow, contract) => applyTokenShopSupportingContractSignals(resolvedRow, contract),
+        directApplied
+      );
     }
   };
 }
