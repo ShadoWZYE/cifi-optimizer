@@ -5,11 +5,7 @@ import process from "node:process";
 
 import { chromium } from "playwright";
 
-const STORAGE_MARKERS = [
-  "cifi-suite.player-profile",
-  "cifi-suite.snapshot",
-  "cifi-suite.route"
-];
+const STORAGE_MARKERS = ["cifi-suite.player-profile", "cifi-suite.snapshot", "cifi-suite.route"];
 const STATE_CACHE_PATH = path.resolve("workbench", "capture-local-surface-state-cache.json");
 
 const BROWSER_TARGETS = [
@@ -92,9 +88,9 @@ async function pathExists(targetPath) {
 async function fetchServerBackedLocalStorageEntries(baseUrl) {
   try {
     const origin = new URL(baseUrl).origin;
-    const profileResponse = await fetch(`${origin}/api/player-profile`, { cache: "no-store" }).catch(
-      () => null
-    );
+    const profileResponse = await fetch(`${origin}/api/player-profile`, {
+      cache: "no-store"
+    }).catch(() => null);
     const entries = {};
     if (profileResponse?.ok) {
       const payload = await profileResponse.json();
@@ -164,7 +160,7 @@ function findJsonTokenEnd(content, startIndex) {
   if (!opener) {
     return -1;
   }
-  if (opener === "\"") {
+  if (opener === '"') {
     let escaped = false;
     for (let index = startIndex + 1; index < content.length; index += 1) {
       const char = content[index];
@@ -176,7 +172,7 @@ function findJsonTokenEnd(content, startIndex) {
         escaped = true;
         continue;
       }
-      if (char === "\"") {
+      if (char === '"') {
         return index + 1;
       }
     }
@@ -198,12 +194,12 @@ function findJsonTokenEnd(content, startIndex) {
           escaped = true;
           continue;
         }
-        if (char === "\"") {
+        if (char === '"') {
           inString = false;
         }
         continue;
       }
-      if (char === "\"") {
+      if (char === '"') {
         inString = true;
         continue;
       }
@@ -220,7 +216,9 @@ function findJsonTokenEnd(content, startIndex) {
     }
     return -1;
   }
-  const scalarMatch = content.slice(startIndex).match(/^(true|false|null|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/);
+  const scalarMatch = content
+    .slice(startIndex)
+    .match(/^(true|false|null|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/);
   return scalarMatch ? startIndex + scalarMatch[0].length : -1;
 }
 
@@ -235,7 +233,7 @@ function extractMarkerValues(content, marker) {
     let valueStart = markerIndex + marker.length;
     while (valueStart < content.length) {
       const char = content[valueStart];
-      if (char === "{" || char === "[" || char === "\"" || /[tfn0-9-]/.test(char)) {
+      if (char === "{" || char === "[" || char === '"' || /[tfn0-9-]/.test(char)) {
         break;
       }
       valueStart += 1;
@@ -257,10 +255,7 @@ function extractMarkerValues(content, marker) {
           }
         }
         if (marker === "cifi-suite.snapshot") {
-          const isSnapshotObject =
-            parsed &&
-            typeof parsed === "object" &&
-            !Array.isArray(parsed);
+          const isSnapshotObject = parsed && typeof parsed === "object" && !Array.isArray(parsed);
           if (!isSnapshotObject) {
             searchIndex = markerIndex + marker.length;
             continue;
@@ -287,9 +282,12 @@ function scoreStoredValue(marker, candidate) {
     if (marker === "cifi-suite.player-profile" && parsed && typeof parsed === "object") {
       const tokens = parsed?.player?.resources?.tokens;
       const levels = parsed?.planning?.tokenShop?.checkedSubsetPlayerState;
-      const populatedLevels = levels && typeof levels === "object"
-        ? Object.values(levels).filter((value) => typeof value === "number" && Number.isFinite(value)).length
-        : 0;
+      const populatedLevels =
+        levels && typeof levels === "object"
+          ? Object.values(levels).filter(
+              (value) => typeof value === "number" && Number.isFinite(value)
+            ).length
+          : 0;
       const profileName = parsed?.meta?.profileName;
       if (typeof tokens === "number" && Number.isFinite(tokens)) {
         score += 10_000;
@@ -370,9 +368,12 @@ function describeStoredValue(marker, candidate) {
     if (marker === "cifi-suite.player-profile" && parsed && typeof parsed === "object") {
       const tokens = parsed?.player?.resources?.tokens;
       const levels = parsed?.planning?.tokenShop?.checkedSubsetPlayerState;
-      const populatedLevels = levels && typeof levels === "object"
-        ? Object.values(levels).filter((value) => typeof value === "number" && Number.isFinite(value)).length
-        : 0;
+      const populatedLevels =
+        levels && typeof levels === "object"
+          ? Object.values(levels).filter(
+              (value) => typeof value === "number" && Number.isFinite(value)
+            ).length
+          : 0;
       return `tokens=${tokens ?? "null"} populatedLevels=${populatedLevels} profile=${parsed?.meta?.profileName ?? "unknown"}`;
     }
     if (marker === "cifi-suite.route") {
@@ -453,8 +454,7 @@ async function extractStoredLocalStorageEntries(sourceUserDataDir, profileDirect
     .sort();
   for (const fileName of candidateFiles) {
     const content = (await readFile(path.join(levelDbDir, fileName))).toString("latin1");
-    const extractedProfileCountBefore =
-      candidateMap.get("cifi-suite.player-profile")?.length ?? 0;
+    const extractedProfileCountBefore = candidateMap.get("cifi-suite.player-profile")?.length ?? 0;
     for (const marker of STORAGE_MARKERS) {
       const values = extractMarkerValues(content, marker);
       if (values.length) {
@@ -462,8 +462,7 @@ async function extractStoredLocalStorageEntries(sourceUserDataDir, profileDirect
       }
     }
     const synthesizedProfile = synthesizePlayerProfileFromContent(content);
-    const extractedProfileCountAfter =
-      candidateMap.get("cifi-suite.player-profile")?.length ?? 0;
+    const extractedProfileCountAfter = candidateMap.get("cifi-suite.player-profile")?.length ?? 0;
     if (synthesizedProfile && extractedProfileCountAfter === extractedProfileCountBefore) {
       candidateMap.get("cifi-suite.player-profile")?.push(synthesizedProfile);
     }
@@ -541,21 +540,22 @@ async function main() {
   let browser = null;
 
   try {
-    const stateSource =
-      fresh
-        ? null
-        : explicitUserDataDir
-          ? {
-              userDataDir: explicitUserDataDir,
-              profileDirectory: explicitProfileDirectory
-            }
-          : await autoDetectStateSource(browserTarget);
+    const stateSource = fresh
+      ? null
+      : explicitUserDataDir
+        ? {
+            userDataDir: explicitUserDataDir,
+            profileDirectory: explicitProfileDirectory
+          }
+        : await autoDetectStateSource(browserTarget);
 
     const serverBackedEntries = fresh ? {} : await fetchServerBackedLocalStorageEntries(url);
-    const extractedEntries =
-      stateSource?.userDataDir
-        ? await extractStoredLocalStorageEntries(stateSource.userDataDir, stateSource.profileDirectory)
-        : {};
+    const extractedEntries = stateSource?.userDataDir
+      ? await extractStoredLocalStorageEntries(
+          stateSource.userDataDir,
+          stateSource.profileDirectory
+        )
+      : {};
     const cachedEntries = fresh ? {} : await loadCachedExtractedEntries();
     if (!fresh && !serverBackedEntries["cifi-suite.player-profile"]) {
       const seeded = await seedServerBackedPlayerProfileIfMissing(url, extractedEntries);
@@ -616,7 +616,9 @@ async function main() {
     }
 
     if (tier && subsystemTabName && /tokenshop|token-shop/i.test(String(subsystem))) {
-      await page.locator(`[data-token-shop-tier="${String(tier).trim().toLowerCase()}"]`).click({ force: true });
+      await page
+        .locator(`[data-token-shop-tier="${String(tier).trim().toLowerCase()}"]`)
+        .click({ force: true });
       await page.waitForTimeout(1500);
     }
 

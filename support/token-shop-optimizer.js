@@ -41,7 +41,8 @@ const PROGRESSION_FAMILY_META = Object.freeze({
     label: "Chest cells",
     impactWeight: 0.9,
     additiveUnitScale: 1,
-    reason: "Improves chest-derived Cells, which supports adjacent progression but not direct Token loops."
+    reason:
+      "Improves chest-derived Cells, which supports adjacent progression but not direct Token loops."
   }),
   "mod-points": Object.freeze({
     label: "Mod points",
@@ -59,7 +60,8 @@ const PROGRESSION_FAMILY_META = Object.freeze({
     label: "Daily Tokenium",
     impactWeight: 0.58,
     additiveUnitScale: 0.2,
-    reason: "Improves the separate Daily Tokenium lane, which is useful but not the main Token spend loop."
+    reason:
+      "Improves the separate Daily Tokenium lane, which is useful but not the main Token spend loop."
   }),
   "duo-booster": Object.freeze({
     label: "Duo chain",
@@ -71,7 +73,8 @@ const PROGRESSION_FAMILY_META = Object.freeze({
     label: "Trinity chain",
     impactWeight: 1.16,
     additiveUnitScale: 0.03,
-    reason: "Improves the Trinity progression chain and becomes relevant in the later visible tiers."
+    reason:
+      "Improves the Trinity progression chain and becomes relevant in the later visible tiers."
   }),
   "late-ultima": Object.freeze({
     label: "Ultima lane",
@@ -177,7 +180,8 @@ export function calculateUpgradeCost(row, currentLevel) {
   const startCost = row.startCost;
   const additiveCost = row.additiveCost;
   const costFormulaType = String(row?.costFormulaType || "linear").trim() || "linear";
-  const costFormulaConfidence = String(row?.costFormulaConfidence || "verified").trim() || "verified";
+  const costFormulaConfidence =
+    String(row?.costFormulaConfidence || "verified").trim() || "verified";
 
   if (typeof row.maxLevel === "number" && currentLevel >= row.maxLevel) {
     return { cost: null, isMaxed: true };
@@ -255,7 +259,8 @@ export function calculateUpgradeValue(row, currentLevel, availableTokens, contex
   const normalizedGain = getNormalizedProgressionGain(row, benefitInfo);
   const fallbackImpactWeight = familyMeta.impactWeight;
   const lensWeight =
-    typeof progressionLens?.scoreMultiplier === "number" && Number.isFinite(progressionLens.scoreMultiplier)
+    typeof progressionLens?.scoreMultiplier === "number" &&
+    Number.isFinite(progressionLens.scoreMultiplier)
       ? progressionLens.scoreMultiplier
       : 1;
   const progressionWeight =
@@ -283,7 +288,8 @@ export function calculateUpgradeValue(row, currentLevel, availableTokens, contex
     progressionNotes: Array.isArray(progressionLens?.notes) ? progressionLens.notes : [],
     progressionCarrierId: progressionLens?.carrierId || null,
     progressionCarrierLabel: progressionLens?.carrierLabel || null,
-    progressionObjectiveId: progressionLens?.objectiveId || context?.objectiveId || DEFAULT_SPEND_OBJECTIVE_ID,
+    progressionObjectiveId:
+      progressionLens?.objectiveId || context?.objectiveId || DEFAULT_SPEND_OBJECTIVE_ID,
     progressionObjectiveLabel: progressionLens?.objectiveLabel || "Short-run Token Acceleration",
     progressionConfidenceLabel: progressionLens?.confidenceLabel || "Heuristic fallback"
   };
@@ -291,7 +297,9 @@ export function calculateUpgradeValue(row, currentLevel, availableTokens, contex
 
 export function rankUpgradesByValue(upgradeList, availableTokens, context = {}) {
   const ranked = upgradeList
-    .map((upgrade) => calculateUpgradeValue(upgrade.row, upgrade.currentLevel, availableTokens, context))
+    .map((upgrade) =>
+      calculateUpgradeValue(upgrade.row, upgrade.currentLevel, availableTokens, context)
+    )
     .filter((v) => v !== null && v.canAfford)
     .sort((a, b) => b.value - a.value);
 
@@ -305,7 +313,9 @@ export function getNextBestUpgrade(upgradeList, availableTokens, context = {}) {
 
 export function getAffordableUpgrades(upgradeList, availableTokens, context = {}) {
   return upgradeList
-    .map((upgrade) => calculateUpgradeValue(upgrade.row, upgrade.currentLevel, availableTokens, context))
+    .map((upgrade) =>
+      calculateUpgradeValue(upgrade.row, upgrade.currentLevel, availableTokens, context)
+    )
     .filter((v) => v !== null && v.canAfford)
     .sort((a, b) => b.value - a.value);
 }

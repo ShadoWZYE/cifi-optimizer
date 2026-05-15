@@ -78,7 +78,7 @@ function buildRowDetailFromGenericScope(scopePayload, fieldName) {
         ? isGrounded
         : Boolean(
             String(valuesByKind.get("identity")?.[0] || "").trim() &&
-              String(valuesByKind.get("row-type-label")?.[0] || "").trim()
+            String(valuesByKind.get("row-type-label")?.[0] || "").trim()
           ),
     subjectId: subjectId || null,
     subjectKind,
@@ -134,7 +134,9 @@ function getSubjectEntity(scopePayload) {
 }
 
 function getScopeEntries(payload) {
-  return Object.entries(normalizeGenericScopesPayload(payload)).filter(([, scopePayload]) => scopePayload);
+  return Object.entries(normalizeGenericScopesPayload(payload)).filter(
+    ([, scopePayload]) => scopePayload
+  );
 }
 
 function getEntityLabel(entity) {
@@ -180,8 +182,8 @@ function getMissingEdgeKinds(scopePayload) {
 
 function getNextSeamPayload(scopePayload) {
   return (
-    getScopeGaps(scopePayload).find((gap) => String(gap?.gapKind || "").trim() === "next-seam")?.payload ??
-    null
+    getScopeGaps(scopePayload).find((gap) => String(gap?.gapKind || "").trim() === "next-seam")
+      ?.payload ?? null
   );
 }
 
@@ -244,7 +246,8 @@ export function getTokenShopGenericCoverageSummary(payload) {
   ).length;
   const subjectLabels = subjectEntities
     .map((entity) => {
-      const payloadObject = entity?.payload && typeof entity.payload === "object" ? entity.payload : {};
+      const payloadObject =
+        entity?.payload && typeof entity.payload === "object" ? entity.payload : {};
       return (
         String(payloadObject.subjectId || "").trim() ||
         String(entity?.entityId || "").trim() ||
@@ -253,7 +256,9 @@ export function getTokenShopGenericCoverageSummary(payload) {
     })
     .filter(Boolean);
   const blockedCount = scopeEntries.filter(([, scopePayload]) =>
-    normalizeArray(scopePayload?.gaps).some((gap) => String(gap?.gapKind || "").trim() === "missing-edge")
+    normalizeArray(scopePayload?.gaps).some(
+      (gap) => String(gap?.gapKind || "").trim() === "missing-edge"
+    )
   ).length;
   const unresolvedRowFieldCount = scopeEntries.reduce((count, [, scopePayload]) => {
     const rowDetailGaps = normalizeArray(scopePayload?.gaps).filter(
@@ -375,15 +380,19 @@ export function getTokenShopGenericActionLaneSummary(payload) {
   const rowLocalEntity = rowLocalScope ? getSubjectEntity(rowLocalScope) : null;
   const rangeFamilyEntity = rangeFamilyScope ? getSubjectEntity(rangeFamilyScope) : null;
   const actionMethods = rowLocalScope ? getFactValues(rowLocalScope, "action-method") : [];
-  const nonblockingEdges = rangeFamilyScope ? getEdgeKinds(rangeFamilyScope, "nonblocking-edge") : [];
+  const nonblockingEdges = rangeFamilyScope
+    ? getEdgeKinds(rangeFamilyScope, "nonblocking-edge")
+    : [];
   const nextSeam = rangeFamilyScope ? getNextSeamPayload(rangeFamilyScope) : null;
   const purchaseHook =
     (rowLocalScope && getFirstFactValue(rowLocalScope, "daily-tokenium-lane-purchase-hook")) ||
-    (rangeFamilyScope && getFirstFactValue(rangeFamilyScope, "daily-tokenium-lane-purchase-hook")) ||
+    (rangeFamilyScope &&
+      getFirstFactValue(rangeFamilyScope, "daily-tokenium-lane-purchase-hook")) ||
     null;
   const purchaseOwner =
     (rowLocalScope && getFirstFactValue(rowLocalScope, "daily-tokenium-lane-purchase-owner")) ||
-    (rangeFamilyScope && getFirstFactValue(rangeFamilyScope, "daily-tokenium-lane-purchase-owner")) ||
+    (rangeFamilyScope &&
+      getFirstFactValue(rangeFamilyScope, "daily-tokenium-lane-purchase-owner")) ||
     null;
 
   return {
@@ -394,7 +403,8 @@ export function getTokenShopGenericActionLaneSummary(payload) {
     diamondHook: rowLocalEntity?.entityKind || "row-local",
     loopModifierHook: actionMethods[0] || purchaseHook || "action-hook-unavailable",
     premiumModifierHook:
-      purchaseOwner || (rangeFamilyEntity ? getEntityLabel(rangeFamilyEntity) : "range-family action subject"),
+      purchaseOwner ||
+      (rangeFamilyEntity ? getEntityLabel(rangeFamilyEntity) : "range-family action subject"),
     dailyHookT2: purchaseHook || nonblockingEdges[0] || "nonblocking-edge-unavailable",
     dailyHookT3: String(nextSeam?.seamId || "").trim() || "next-seam-unavailable",
     rowLocalSubjectId: rowLocalEntity ? getEntityLabel(rowLocalEntity) : null,
@@ -406,7 +416,9 @@ export function getTokenShopGenericActionLaneSummary(payload) {
     rangeFamilyNonblockingEdges: nonblockingEdges,
     blockedInputReason:
       (rowLocalScope ? getFirstLaneBlockedReason(rowLocalScope, "dailyTokeniumLane") : null) ||
-      (rangeFamilyScope ? getFirstLaneBlockedReason(rangeFamilyScope, "dailyTokeniumLane") : null) ||
+      (rangeFamilyScope
+        ? getFirstLaneBlockedReason(rangeFamilyScope, "dailyTokeniumLane")
+        : null) ||
       null
   };
 }
@@ -429,12 +441,14 @@ export function getTokenShopGenericOwnerShellSummary(payload) {
     (rowLocalScope && getFirstFactValue(rowLocalScope, "action-method")) ||
     null;
   const notificationHook =
-    (rowLocalScope && getFirstFactValue(rowLocalScope, "token-bank-controller-notification-hook")) ||
+    (rowLocalScope &&
+      getFirstFactValue(rowLocalScope, "token-bank-controller-notification-hook")) ||
     (rowLocalScope && String(getNextSeamPayload(rowLocalScope)?.seamId || "").trim()) ||
     null;
   const deviceHook =
     (rowLocalScope && getFirstFactValue(rowLocalScope, "daily-tokenium-lane-purchase-owner")) ||
-    (rangeFamilyScope && getFirstFactValue(rangeFamilyScope, "daily-tokenium-lane-purchase-owner")) ||
+    (rangeFamilyScope &&
+      getFirstFactValue(rangeFamilyScope, "daily-tokenium-lane-purchase-owner")) ||
     null;
 
   if (!rowLocalEntity && !bankMethod && !notificationHook && !deviceHook) {
@@ -448,7 +462,8 @@ export function getTokenShopGenericOwnerShellSummary(payload) {
     bankMethod: bankMethod || "action-method-unavailable",
     notificationHook: notificationHook || "notification-hook-unavailable",
     deviceHook:
-      deviceHook || (rangeFamilyEntity ? getEntityLabel(rangeFamilyEntity) : "device-hook-unavailable"),
+      deviceHook ||
+      (rangeFamilyEntity ? getEntityLabel(rangeFamilyEntity) : "device-hook-unavailable"),
     rowLocalSubjectId: rowLocalEntity ? getEntityLabel(rowLocalEntity) : null,
     rangeFamilySubjectId: rangeFamilyEntity ? getEntityLabel(rangeFamilyEntity) : null,
     rowLocalSubjectKind: rowLocalEntity?.entityKind || null,
@@ -458,7 +473,9 @@ export function getTokenShopGenericOwnerShellSummary(payload) {
     rangeBlockedEdges: rangeFamilyScope ? getEdgeKinds(rangeFamilyScope, "blocked-edge") : [],
     blockedInputReason:
       (rowLocalScope ? getFirstLaneBlockedReason(rowLocalScope, "tokenBankController") : null) ||
-      (rangeFamilyScope ? getFirstLaneBlockedReason(rangeFamilyScope, "tokenBankController") : null) ||
+      (rangeFamilyScope
+        ? getFirstLaneBlockedReason(rangeFamilyScope, "tokenBankController")
+        : null) ||
       null
   };
 }
@@ -480,9 +497,12 @@ export function getTokenShopGenericSaveBoundarySummary(payload) {
   const rangeFamilyEntity = rangeFamilyScope ? getSubjectEntity(rangeFamilyScope) : null;
   const saveAnchor =
     (rowLocalScope && getFirstFactValue(rowLocalScope, "token-bank-state-cloud-save-shell")) ||
-    (rowLocalScope && getFirstFactValue(rowLocalScope, "token-bank-state-cloud-save-info-routine")) ||
-    (rowLocalScope && getFirstFactValue(rowLocalScope, "token-bank-state-cloud-save-profile-routine")) ||
-    (rowLocalScope && getFirstFactValue(rowLocalScope, "token-bank-state-cloud-save-state-machine")) ||
+    (rowLocalScope &&
+      getFirstFactValue(rowLocalScope, "token-bank-state-cloud-save-info-routine")) ||
+    (rowLocalScope &&
+      getFirstFactValue(rowLocalScope, "token-bank-state-cloud-save-profile-routine")) ||
+    (rowLocalScope &&
+      getFirstFactValue(rowLocalScope, "token-bank-state-cloud-save-state-machine")) ||
     null;
 
   if (!rowLocalEntity && !saveAnchor) {
@@ -560,15 +580,27 @@ export function getTokenShopGenericTokenBankStateSummary(payload) {
   const displayShell = getFirstFactValue(scopePayload, "token-bank-state-display-shell");
   const loopHandler = getFirstFactValue(scopePayload, "token-bank-state-loop-handler");
   const loopHook = getFirstFactValue(scopePayload, "token-bank-state-loop-hook");
-  const exactSaveOwnerType = getFirstFactValue(scopePayload, "token-bank-state-exact-save-owner-type");
+  const exactSaveOwnerType = getFirstFactValue(
+    scopePayload,
+    "token-bank-state-exact-save-owner-type"
+  );
   const storedAmountField = getFirstFactValue(scopePayload, "token-bank-state-stored-amount-field");
   const genericClaimableFieldOwner = getFirstFactValue(
     scopePayload,
     "token-bank-state-generic-claimable-field-owner"
   );
-  const genericClaimableField = getFirstFactValue(scopePayload, "token-bank-state-generic-claimable-field");
-  const profileBridgeOwner = getFirstFactValue(scopePayload, "token-bank-state-profile-bridge-owner");
-  const profileBridgeMethod = getFirstFactValue(scopePayload, "token-bank-state-profile-bridge-method");
+  const genericClaimableField = getFirstFactValue(
+    scopePayload,
+    "token-bank-state-generic-claimable-field"
+  );
+  const profileBridgeOwner = getFirstFactValue(
+    scopePayload,
+    "token-bank-state-profile-bridge-owner"
+  );
+  const profileBridgeMethod = getFirstFactValue(
+    scopePayload,
+    "token-bank-state-profile-bridge-method"
+  );
   const profileBridgeReturnType = getFirstFactValue(
     scopePayload,
     "token-bank-state-profile-bridge-return-type"
@@ -662,27 +694,35 @@ export function getTokenShopGenericDailyTokeniumLaneSummary(payload) {
     hasPlayerFacingBoundary:
       Boolean(getFirstFactValue(scopePayload, "daily-tokenium-lane-progress-string")) &&
       Boolean(getFirstFactValue(scopePayload, "daily-tokenium-lane-cap-description-string")) &&
-      Boolean(getFirstFactValue(scopePayload, "daily-tokenium-lane-collector-pack-description-string")),
+      Boolean(
+        getFirstFactValue(scopePayload, "daily-tokenium-lane-collector-pack-description-string")
+      ),
     coverageSource: "generic-mechanics",
     ownerFamilyLabel:
       getFirstFactValue(scopePayload, "daily-tokenium-lane-owner-family-label") || "SpaceAcademy",
     missionFamilyLabel:
       getFirstFactValue(scopePayload, "daily-tokenium-lane-mission-family-label") || "FarmMissions",
     academyController:
-      getFirstFactValue(scopePayload, "daily-tokenium-lane-academy-controller") || "SpaceAcademyMain",
+      getFirstFactValue(scopePayload, "daily-tokenium-lane-academy-controller") ||
+      "SpaceAcademyMain",
     textHandler:
-      getFirstFactValue(scopePayload, "daily-tokenium-lane-text-handler") || "TextHandlerSpaceAcademy",
-    loopHook: getFirstFactValue(scopePayload, "daily-tokenium-lane-loop-hook") || "SetLM244BonusText",
+      getFirstFactValue(scopePayload, "daily-tokenium-lane-text-handler") ||
+      "TextHandlerSpaceAcademy",
+    loopHook:
+      getFirstFactValue(scopePayload, "daily-tokenium-lane-loop-hook") || "SetLM244BonusText",
     purchaseHook:
       getFirstFactValue(scopePayload, "daily-tokenium-lane-purchase-hook") || "BuyLM244",
     finalBonusHook:
-      getFirstFactValue(scopePayload, "daily-tokenium-lane-final-bonus-hook") || "FinalDailyTokenBonus",
+      getFirstFactValue(scopePayload, "daily-tokenium-lane-final-bonus-hook") ||
+      "FinalDailyTokenBonus",
     purchaseOwner:
       getFirstFactValue(scopePayload, "daily-tokenium-lane-purchase-owner") || "BuyCollectorDevice",
     premiumCapBonus:
-      getFirstFactValue(scopePayload, "daily-tokenium-lane-premium-cap-bonus") || "CollectorCapBonus",
+      getFirstFactValue(scopePayload, "daily-tokenium-lane-premium-cap-bonus") ||
+      "CollectorCapBonus",
     premiumMatsBonus:
-      getFirstFactValue(scopePayload, "daily-tokenium-lane-premium-mats-bonus") || "CollectorMatsBonus",
+      getFirstFactValue(scopePayload, "daily-tokenium-lane-premium-mats-bonus") ||
+      "CollectorMatsBonus",
     progressString:
       getFirstFactValue(scopePayload, "daily-tokenium-lane-progress-string") ||
       "0 / 2000 Daily Tokenium (from blue farm missions)",
@@ -799,11 +839,17 @@ export function applyTokenShopGenericRowDetailToRow(row, rowDetail) {
   return {
     ...row,
     subjectId:
-      typeof rowDetail.subjectId === "string" && rowDetail.subjectId ? rowDetail.subjectId : row.subjectId,
+      typeof rowDetail.subjectId === "string" && rowDetail.subjectId
+        ? rowDetail.subjectId
+        : row.subjectId,
     subjectKind:
-      typeof rowDetail.subjectKind === "string" && rowDetail.subjectKind ? rowDetail.subjectKind : row.subjectKind,
+      typeof rowDetail.subjectKind === "string" && rowDetail.subjectKind
+        ? rowDetail.subjectKind
+        : row.subjectKind,
     identity:
-      typeof rowDetail.identity === "string" && rowDetail.identity ? rowDetail.identity : row.identity,
+      typeof rowDetail.identity === "string" && rowDetail.identity
+        ? rowDetail.identity
+        : row.identity,
     identitySource:
       typeof rowDetail.identitySource === "string" && rowDetail.identitySource
         ? rowDetail.identitySource
@@ -815,7 +861,9 @@ export function applyTokenShopGenericRowDetailToRow(row, rowDetail) {
         ? rowDetail.rowTypeLabel
         : row.rowTypeLabel,
     note:
-      typeof rowDetail.detailNote === "string" && rowDetail.detailNote ? rowDetail.detailNote : row.note,
+      typeof rowDetail.detailNote === "string" && rowDetail.detailNote
+        ? rowDetail.detailNote
+        : row.note,
     rowDetail,
     runtimeCostCoverage: runtimeCostCoverage || row.runtimeCostCoverage || null,
     costFormulaConfidence:
@@ -824,8 +872,11 @@ export function applyTokenShopGenericRowDetailToRow(row, rowDetail) {
         : row?.costFormulaConfidence,
     blockedInputReason:
       row.blockedInputReason ||
-      (typeof rowDetail?.blockedFields?.rowDetail === "string" ? rowDetail.blockedFields.rowDetail : null),
-    dbMetadataSourceLabel: row.dbMetadataSourceLabel || row.contractSourceLabel || "Generic mechanics model",
+      (typeof rowDetail?.blockedFields?.rowDetail === "string"
+        ? rowDetail.blockedFields.rowDetail
+        : null),
+    dbMetadataSourceLabel:
+      row.dbMetadataSourceLabel || row.contractSourceLabel || "Generic mechanics model",
     contractSourceLabel: row.contractSourceLabel || "Generic mechanics model",
     supportingEvidenceNote: row.supportingEvidenceNote || runtimeCoverageNote || boundedEvidenceNote
   };

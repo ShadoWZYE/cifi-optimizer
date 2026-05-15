@@ -84,10 +84,7 @@ test("getTokenShopBonusStripEntries keeps computable composite bonuses visible",
   assert.deepEqual(
     tokenShopUi.getTokenShopBonusStripEntries({
       bonusStepMode: "multi",
-      bonusValues: [
-        { value: 1.001 },
-        { value: 1.0005 }
-      ],
+      bonusValues: [{ value: 1.001 }, { value: 1.0005 }],
       storefrontBuffTargets: [
         { label: "Cells", tone: "cells", mode: "multiplier" },
         { label: "MP", tone: "mod", mode: "multiplier" }

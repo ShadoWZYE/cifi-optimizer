@@ -1,4 +1,10 @@
-export const SYSTEM_UNIT_IDS = ["app-meta", "player-state", "shards", "token-shop", "multiverse-market"];
+export const SYSTEM_UNIT_IDS = [
+  "app-meta",
+  "player-state",
+  "shards",
+  "token-shop",
+  "multiverse-market"
+];
 
 const STATIC_SYSTEM_UNIT_URLS = Object.freeze({
   "app-meta": "./data/system-units/app-meta.v1.json",
@@ -18,8 +24,7 @@ function shouldUseDbSystemBundleApi(origin, serverCapabilities) {
 
 function shouldUseSystemUnitRefreshApi(origin, serverCapabilities) {
   return (
-    String(origin || "").startsWith("http") &&
-    serverCapabilities?.systemUnitRefreshApi === true
+    String(origin || "").startsWith("http") && serverCapabilities?.systemUnitRefreshApi === true
   );
 }
 
@@ -32,7 +37,10 @@ function shouldAllowStaticFallback(origin, serverCapabilities, allowStaticFallba
 
 async function loadStaticSystemUnits(fetchJson, systemIds = SYSTEM_UNIT_IDS) {
   const entries = await Promise.all(
-    systemIds.map(async (systemId) => [systemId, await fetchJson(STATIC_SYSTEM_UNIT_URLS[systemId])])
+    systemIds.map(async (systemId) => [
+      systemId,
+      await fetchJson(STATIC_SYSTEM_UNIT_URLS[systemId])
+    ])
   );
   const unitsById = Object.fromEntries(entries);
   return {
@@ -129,10 +137,16 @@ export async function loadSystemUnits({
       const tokenShopScopes =
         resolvedSystemDbScopes.tokenShop ??
         Array.from(
-          new Set([
-            ...(Array.isArray(subjectContractScopes?.tokenShop) ? subjectContractScopes.tokenShop : []),
-            ...(Array.isArray(genericMechanicsScopes?.tokenShop) ? genericMechanicsScopes.tokenShop : [])
-          ].filter(Boolean))
+          new Set(
+            [
+              ...(Array.isArray(subjectContractScopes?.tokenShop)
+                ? subjectContractScopes.tokenShop
+                : []),
+              ...(Array.isArray(genericMechanicsScopes?.tokenShop)
+                ? genericMechanicsScopes.tokenShop
+                : [])
+            ].filter(Boolean)
+          )
         );
       const multiverseMarketScopes = resolvedSystemDbScopes.multiverseMarket ?? [];
       const shardScopes = resolvedSystemDbScopes.shards ?? [];
@@ -147,11 +161,9 @@ export async function loadSystemUnits({
           ? loadDbSystemBundle(fetchJson, "token-shop", tokenShopScopes).catch(() => null)
           : Promise.resolve(null),
         useGenericSystemDbBundleApi
-          ? loadDbSystemBundle(
-              fetchJson,
-              "multiverse-market",
-              multiverseMarketScopes
-            ).catch(() => null)
+          ? loadDbSystemBundle(fetchJson, "multiverse-market", multiverseMarketScopes).catch(
+              () => null
+            )
           : Promise.resolve(null),
         useGenericSystemDbBundleApi
           ? loadDbSystemBundle(fetchJson, "shards", shardScopes).catch(() => null)
@@ -169,36 +181,31 @@ export async function loadSystemUnits({
         },
         systemDb: {
           tokenShop: {
-            subjectMetadata:
-              resolvedTokenShopBundle?.subjectMetadata ?? null,
-            genericMechanics:
-              resolvedTokenShopBundle?.genericMechanics ?? null
+            subjectMetadata: resolvedTokenShopBundle?.subjectMetadata ?? null,
+            genericMechanics: resolvedTokenShopBundle?.genericMechanics ?? null
           },
           shards: {
             subjectMetadata: shardSystemDbBundle?.subjectMetadata ?? null,
             genericMechanics: shardSystemDbBundle?.genericMechanics ?? null
           },
           multiverseMarket: {
-            subjectMetadata:
-              multiverseMarketSystemDbBundle?.subjectMetadata ?? null,
+            subjectMetadata: multiverseMarketSystemDbBundle?.subjectMetadata ?? null,
             genericMechanics: multiverseMarketSystemDbBundle?.genericMechanics ?? null
           }
         },
         units: {
           appMeta: requestedSystemIds.includes("app-meta")
-            ? payload?.units?.["app-meta"] ?? null
+            ? (payload?.units?.["app-meta"] ?? null)
             : null,
           playerState: requestedSystemIds.includes("player-state")
-            ? payload?.units?.["player-state"] ?? null
+            ? (payload?.units?.["player-state"] ?? null)
             : null,
-          shards: requestedSystemIds.includes("shards")
-            ? payload?.units?.shards ?? null
-            : null,
+          shards: requestedSystemIds.includes("shards") ? (payload?.units?.shards ?? null) : null,
           tokenShop: requestedSystemIds.includes("token-shop")
-            ? payload?.units?.["token-shop"] ?? null
+            ? (payload?.units?.["token-shop"] ?? null)
             : null,
           multiverseMarket: requestedSystemIds.includes("multiverse-market")
-            ? payload?.units?.["multiverse-market"] ?? null
+            ? (payload?.units?.["multiverse-market"] ?? null)
             : null
         }
       };

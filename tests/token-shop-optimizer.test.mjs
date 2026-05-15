@@ -22,7 +22,7 @@ test("calculateUpgradeBenefit uses next-step delta for multiplier rows", () => {
 
   assert.equal(result.isMaxed, false);
   assert.equal(Number(result.benefit.toFixed(4)), Number((1.3 ** 2).toFixed(4)));
-  assert.equal(Number(result.incremental.toFixed(4)), Number(((1.3 ** 3) - (1.3 ** 2)).toFixed(4)));
+  assert.equal(Number(result.incremental.toFixed(4)), Number((1.3 ** 3 - 1.3 ** 2).toFixed(4)));
 });
 
 test("getFullUpgradeAnalysis ranks affordable grounded upgrades by next-step value", () => {
@@ -149,7 +149,9 @@ test("getFullUpgradeAnalysis exposes progression-model carrier context", () => {
 
   assert.equal(analysis.nextBest.progressionCarrierId, "carrier:mod-points-gain");
   assert.equal(analysis.nextBest.progressionObjectiveId, "objective:token-shop-short-run");
-  assert.ok(["Grounded", "Bounded", "Blocked"].includes(analysis.nextBest.progressionConfidenceLabel));
+  assert.ok(
+    ["Grounded", "Bounded", "Blocked"].includes(analysis.nextBest.progressionConfidenceLabel)
+  );
 });
 
 test("calculateUpgradeCost supports bounded start-only late rows", () => {
@@ -196,7 +198,7 @@ test("calculateUpgradeBenefit honors bonusStepMode fallback from progression row
   );
 
   assert.equal(result.bonusMode, "multiplier");
-  assert.equal(Number(result.incremental.toFixed(6)), Number(((1.02 ** 3) - (1.02 ** 2)).toFixed(6)));
+  assert.equal(Number(result.incremental.toFixed(6)), Number((1.02 ** 3 - 1.02 ** 2).toFixed(6)));
 });
 
 test("calculateUpgradeCost skips projected formulas until runtime cost verification exists", () => {

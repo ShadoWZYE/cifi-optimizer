@@ -295,7 +295,11 @@ test("supporting range-family contracts apply to late TokenShop rows by ATU rang
         subjectId: "range:token-shop:ATU24Button-ATU28Button",
         subjectKind: "range-family",
         targetAliases: ["token-shop-late-atu-family"],
-        knownEdges: ["runtime-next-cost-formula", "runtime-final-max-level", "exact-display-update-path"],
+        knownEdges: [
+          "runtime-next-cost-formula",
+          "runtime-final-max-level",
+          "exact-display-update-path"
+        ],
         missingEdges: [],
         blockedEdges: [],
         nonblockingEdges: [],

@@ -73,16 +73,7 @@ function createCarrier({
   };
 }
 
-function createTransform({
-  id,
-  from,
-  to,
-  kind,
-  status,
-  provenance,
-  sourceRefs,
-  notes = []
-}) {
+function createTransform({ id, from, to, kind, status, provenance, sourceRefs, notes = [] }) {
   return {
     id,
     from,
@@ -323,7 +314,9 @@ function buildCoreCarriers(tokenShopSystemUnit, multiverseMarketSystemUnit) {
       provenance: "row-effect-label",
       systems: ["token-shop"],
       sourceRefs: tokenRefs,
-      notes: ["Duo rows affect multiple carriers at once, but a canonical shared unit is not yet defined."]
+      notes: [
+        "Duo rows affect multiple carriers at once, but a canonical shared unit is not yet defined."
+      ]
     }),
     createCarrier({
       id: "carrier:late-tier-composite-growth",
@@ -333,7 +326,9 @@ function buildCoreCarriers(tokenShopSystemUnit, multiverseMarketSystemUnit) {
       provenance: "row-effect-label",
       systems: ["token-shop"],
       sourceRefs: tokenRefs,
-      notes: ["Trinity rows affect multiple later-game carriers at once, but cross-system normalization is unresolved."]
+      notes: [
+        "Trinity rows affect multiple later-game carriers at once, but cross-system normalization is unresolved."
+      ]
     }),
     createCarrier({
       id: "carrier:max-level-and-ultima-growth",
@@ -343,7 +338,9 @@ function buildCoreCarriers(tokenShopSystemUnit, multiverseMarketSystemUnit) {
       provenance: "compatibility-row-clue",
       systems: ["token-shop"],
       sourceRefs: tokenRefs,
-      notes: ["Late T4/T5 shelf remains partially compatibility-labeled and not ready for exact ROI."]
+      notes: [
+        "Late T4/T5 shelf remains partially compatibility-labeled and not ready for exact ROI."
+      ]
     }),
     createCarrier({
       id: "carrier:multiverse-market-progression",
@@ -353,7 +350,9 @@ function buildCoreCarriers(tokenShopSystemUnit, multiverseMarketSystemUnit) {
       provenance: "compatibility-safe-raw-import",
       systems: ["multiverse-market"],
       sourceRefs: multiverseRefs,
-      notes: ["Exact IS1-IS110 span is preserved, but canonical import-safe identity stays bounded."]
+      notes: [
+        "Exact IS1-IS110 span is preserved, but canonical import-safe identity stays bounded."
+      ]
     })
   ];
 }
@@ -405,7 +404,9 @@ function buildCoreTransforms(tokenShopSystemUnit, multiverseMarketSystemUnit) {
       status: "bounded",
       provenance: "bounded-runtime-lane",
       sourceRefs: tokenRefs,
-      notes: ["Stored DailyTokenium is exact, but claim/cap/reward cadence is still only partially reconstructed."]
+      notes: [
+        "Stored DailyTokenium is exact, but claim/cap/reward cadence is still only partially reconstructed."
+      ]
     }),
     createTransform({
       id: "transform:mid-tier-composite-normalization",
@@ -415,7 +416,9 @@ function buildCoreTransforms(tokenShopSystemUnit, multiverseMarketSystemUnit) {
       status: "blocked",
       provenance: "missing-shared-progression-unit",
       sourceRefs: tokenRefs,
-      notes: ["Duo-row effects span multiple outputs, but the shared objective unit is not defined yet."]
+      notes: [
+        "Duo-row effects span multiple outputs, but the shared objective unit is not defined yet."
+      ]
     }),
     createTransform({
       id: "transform:late-tier-composite-normalization",
@@ -425,7 +428,9 @@ function buildCoreTransforms(tokenShopSystemUnit, multiverseMarketSystemUnit) {
       status: "blocked",
       provenance: "missing-shared-progression-unit",
       sourceRefs: tokenRefs,
-      notes: ["Trinity-row effects span outputs and currencies whose exchange into progression is not yet grounded."]
+      notes: [
+        "Trinity-row effects span outputs and currencies whose exchange into progression is not yet grounded."
+      ]
     }),
     createTransform({
       id: "transform:max-level-cap-to-growth",
@@ -435,7 +440,9 @@ function buildCoreTransforms(tokenShopSystemUnit, multiverseMarketSystemUnit) {
       status: "blocked",
       provenance: "missing-cap-value-model",
       sourceRefs: tokenRefs,
-      notes: ["Max-level increasers need a canonical cap-value model before they can participate in ROI."]
+      notes: [
+        "Max-level increasers need a canonical cap-value model before they can participate in ROI."
+      ]
     }),
     createTransform({
       id: "transform:multiverse-market-to-shared-progress",
@@ -445,7 +452,9 @@ function buildCoreTransforms(tokenShopSystemUnit, multiverseMarketSystemUnit) {
       status: "blocked",
       provenance: "missing-cross-system-transform",
       sourceRefs: multiverseRefs,
-      notes: ["The Emporium progression block is preserved, but its shared progression weight is not canonicalized."]
+      notes: [
+        "The Emporium progression block is preserved, but its shared progression weight is not canonicalized."
+      ]
     })
   ];
 }
@@ -547,10 +556,7 @@ function buildObjectiveModes() {
   ];
 }
 
-export function buildSpendProgressionModel({
-  tokenShopSystemUnit,
-  multiverseMarketSystemUnit
-}) {
+export function buildSpendProgressionModel({ tokenShopSystemUnit, multiverseMarketSystemUnit }) {
   const carriers = buildCoreCarriers(tokenShopSystemUnit, multiverseMarketSystemUnit);
   const transforms = [
     ...buildTokenShopFamilyTransforms(tokenShopSystemUnit),
@@ -630,10 +636,12 @@ export function getTokenShopFamilyProgressionLens(
     const priority =
       typeof carrierPriority[transform.to] === "number"
         ? carrierPriority[transform.to]
-        : Array.isArray(objective?.primaryCarrierIds) && objective.primaryCarrierIds.includes(transform.to)
+        : Array.isArray(objective?.primaryCarrierIds) &&
+            objective.primaryCarrierIds.includes(transform.to)
           ? 1.05
           : 0.9;
-    const scoreMultiplier = priority * transformScale * carrierScale * objectiveScale * blockedPenalty;
+    const scoreMultiplier =
+      priority * transformScale * carrierScale * objectiveScale * blockedPenalty;
     lens.set(familyId, {
       familyId,
       carrierId: transform.to,

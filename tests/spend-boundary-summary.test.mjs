@@ -1425,10 +1425,9 @@ test("buildSpendSystemView keeps multiverse save-owner artifacts only as compati
 
   assert.equal(spendView.multiverseMarket.saveOwner.saveBoundary, null);
   assert.equal(spendView.multiverseMarket.saveOwner.marketMemberBoundary, null);
-  assert.deepEqual(
-    spendView.multiverseMarket.saveOwner.compatibilityBoundaries.saveBoundary,
-    { actionShellTermsChecked: ["TextHandlerMarkets"] }
-  );
+  assert.deepEqual(spendView.multiverseMarket.saveOwner.compatibilityBoundaries.saveBoundary, {
+    actionShellTermsChecked: ["TextHandlerMarkets"]
+  });
   assert.deepEqual(
     spendView.multiverseMarket.saveOwner.compatibilityBoundaries.marketMemberBoundary,
     { playerProfileAccessorClues: ["get_Market"] }
@@ -1441,7 +1440,9 @@ test("multiverse row-text, action-shell, and owner-family summaries prefer DB-ba
       genericMechanics: {
         scopes: {
           "multiverse-market-row-text-boundary": {
-            entities: [{ entityId: "family-graph:multiverse-market-row-text", entityKind: "family-graph" }],
+            entities: [
+              { entityId: "family-graph:multiverse-market-row-text", entityKind: "family-graph" }
+            ],
             facts: [
               { factKind: "owner-anchor", factValue: "TextHandlerMarkets" },
               { factKind: "owner-anchor", factValue: "SetAllChrystosEmporiumTexts" },
@@ -1456,7 +1457,12 @@ test("multiverse row-text, action-shell, and owner-family summaries prefer DB-ba
             gaps: [{ gapKind: "next-seam", payload: { seamId: "broad-row-identity-remap" } }]
           },
           "multiverse-market-action-shell-boundary": {
-            entities: [{ entityId: "family-graph:multiverse-market-action-shell", entityKind: "family-graph" }],
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-action-shell",
+                entityKind: "family-graph"
+              }
+            ],
             facts: [
               { factKind: "owner-anchor", factValue: "TextHandlerMarkets" },
               { factKind: "owner-anchor", factValue: "SetAllChrystosEmporiumTexts" },
@@ -1473,7 +1479,12 @@ test("multiverse row-text, action-shell, and owner-family summaries prefer DB-ba
             gaps: [{ gapKind: "next-seam", payload: { seamId: "broad-row-identity-remap" } }]
           },
           "multiverse-market-owner-family-boundary": {
-            entities: [{ entityId: "family-graph:multiverse-market-owner-family", entityKind: "family-graph" }],
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-owner-family",
+                entityKind: "family-graph"
+              }
+            ],
             facts: [
               { factKind: "owner-anchor", factValue: "MultiverseMarket" },
               { factKind: "owner-anchor", factValue: "TextHandlerMarkets" },
@@ -1487,9 +1498,21 @@ test("multiverse row-text, action-shell, and owner-family summaries prefer DB-ba
         }
       },
       boundaries: {
-        rowText: { subjectId: "family-graph:multiverse-market-row-text", boundaryKind: "subject-boundary", verdict: "quarantine" },
-        actionShell: { subjectId: "family-graph:multiverse-market-action-shell", boundaryKind: "subject-boundary", verdict: "quarantine" },
-        ownerFamily: { subjectId: "family-graph:multiverse-market-owner-family", boundaryKind: "subject-boundary", verdict: "quarantine" }
+        rowText: {
+          subjectId: "family-graph:multiverse-market-row-text",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        },
+        actionShell: {
+          subjectId: "family-graph:multiverse-market-action-shell",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        },
+        ownerFamily: {
+          subjectId: "family-graph:multiverse-market-owner-family",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        }
       }
     },
     saveOwner: {
@@ -1525,7 +1548,12 @@ test("multiverse row-text, action-shell, and owner-family summaries prefer DB-ba
         scopes: {
           ...market.db.genericMechanics.scopes,
           "multiverse-market-metadata-neighborhood": {
-            entities: [{ entityId: "family-graph:multiverse-market-metadata-neighborhood", entityKind: "family-graph" }],
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-metadata-neighborhood",
+                entityKind: "family-graph"
+              }
+            ],
             facts: [
               { factKind: "metadata-anchor", factValue: "PlayerProfileData" },
               { factKind: "metadata-anchor", factValue: "FillPlayerProfileData" },
@@ -1562,7 +1590,9 @@ test("multiverse row-text, action-shell, and owner-family summaries prefer DB-ba
         scopes: {
           ...market.db.genericMechanics.scopes,
           "multiverse-market-typed-owner-boundary": {
-            entities: [{ entityId: "family-graph:multiverse-market-typed-owner", entityKind: "family-graph" }],
+            entities: [
+              { entityId: "family-graph:multiverse-market-typed-owner", entityKind: "family-graph" }
+            ],
             facts: [
               { factKind: "typed-host-anchor", factValue: "PlayerProfileData" },
               { factKind: "typed-conversion-anchor", factValue: "FillPlayerProfileData" },
@@ -1598,7 +1628,9 @@ test("multiverse row-text, action-shell, and owner-family summaries prefer DB-ba
         scopes: {
           ...market.db.genericMechanics.scopes,
           "multiverse-market-typed-owner-boundary": {
-            entities: [{ entityId: "family-graph:multiverse-market-typed-owner", entityKind: "family-graph" }],
+            entities: [
+              { entityId: "family-graph:multiverse-market-typed-owner", entityKind: "family-graph" }
+            ],
             facts: [
               { factKind: "typed-host-anchor", factValue: "PlayerProfileHandler" },
               { factKind: "typed-host-anchor", factValue: "PlayerProfileData" },
@@ -1644,9 +1676,17 @@ test("multiverse row-text, action-shell, and owner-family summaries prefer DB-ba
         scopes: {
           ...market.db.genericMechanics.scopes,
           "multiverse-market-canonical-import-boundary": {
-            entities: [{ entityId: "family-graph:multiverse-market-canonical-import", entityKind: "family-graph" }],
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-canonical-import",
+                entityKind: "family-graph"
+              }
+            ],
             facts: [
-              { factKind: "compatibility-import-target-path", factValue: "compatibility.unmappedSystemState.multiverseMarket" },
+              {
+                factKind: "compatibility-import-target-path",
+                factValue: "compatibility.unmappedSystemState.multiverseMarket"
+              },
               { factKind: "canonical-import-safe-subset-label", factValue: "none" },
               { factKind: "ordered-overlap-row-id", factValue: "71" },
               { factKind: "ordered-overlap-row-id", factValue: "74" }
@@ -1685,9 +1725,18 @@ test("multiverse row-text, action-shell, and owner-family summaries prefer DB-ba
         scopes: {
           ...market.db.genericMechanics.scopes,
           "multiverse-market-broad-row-remap-boundary": {
-            entities: [{ entityId: "family-graph:multiverse-market-broad-row-remap", entityKind: "family-graph" }],
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-broad-row-remap",
+                entityKind: "family-graph"
+              }
+            ],
             facts: [
-              { factKind: "broader-row-remap-status", factValue: "Broader row identity or remap stays blocked outside the checked 71-74 ordered overlap." },
+              {
+                factKind: "broader-row-remap-status",
+                factValue:
+                  "Broader row identity or remap stays blocked outside the checked 71-74 ordered overlap."
+              },
               { factKind: "ordered-overlap-row-id", factValue: "71" },
               { factKind: "ordered-overlap-row-id", factValue: "74" },
               { factKind: "buy-hook-sample", factValue: "BuyIS71" },
@@ -1730,7 +1779,12 @@ test("multiverse row-text, action-shell, and owner-family summaries prefer DB-ba
         scopes: {
           ...market.db.genericMechanics.scopes,
           "multiverse-market-prefab-remap-boundary": {
-            entities: [{ entityId: "family-graph:multiverse-market-prefab-remap", entityKind: "family-graph" }],
+            entities: [
+              {
+                entityId: "family-graph:multiverse-market-prefab-remap",
+                entityKind: "family-graph"
+              }
+            ],
             facts: [
               { factKind: "prefab-sample", factValue: "ChrystosEmporiumUpgrade71" },
               { factKind: "prefab-sample", factValue: "ChrystosEmporiumUpgrade74" },
@@ -1742,13 +1796,19 @@ test("multiverse row-text, action-shell, and owner-family summaries prefer DB-ba
               { factKind: "serialized-id-row-id", factValue: "62" }
             ],
             relations: [],
-            gaps: [{ gapKind: "next-seam", payload: { seamId: "explicit-prefab-override-mapping" } }]
+            gaps: [
+              { gapKind: "next-seam", payload: { seamId: "explicit-prefab-override-mapping" } }
+            ]
           }
         }
       },
       boundaries: {
         ...market.db.boundaries,
-        prefabRemap: { subjectId: "family-graph:multiverse-market-prefab-remap", boundaryKind: "subject-boundary", verdict: "quarantine" }
+        prefabRemap: {
+          subjectId: "family-graph:multiverse-market-prefab-remap",
+          boundaryKind: "subject-boundary",
+          verdict: "quarantine"
+        }
       }
     }
   });
@@ -1767,7 +1827,9 @@ test("buildSpendSystemView keeps multiverse row and ui-shell artifacts only as c
     multiverseMarketSystemUnit: {
       sections: {
         rowIdentity: {
-          metadataNeighborhood: { data: { results: [{ anchor: "PlayerProfileData", matches: [] }] } },
+          metadataNeighborhood: {
+            data: { results: [{ anchor: "PlayerProfileData", matches: [] }] }
+          },
           rangeBoundary: { data: { validatedRowRanges: ["50-59 and 63-74"] } },
           rowTextCoverage: { data: { textHandlerAnchors: ["TextHandlerMarkets"] } },
           prefabRemapBoundary: { data: { directPrefabNumberMatches: [50, 68] } }
@@ -1783,37 +1845,61 @@ test("buildSpendSystemView keeps multiverse row and ui-shell artifacts only as c
         genericMechanics: {
           scopes: {
             "multiverse-market-save-owner-boundary": {
-              entities: [{ entityId: "multiverse-market-save-owner-boundary", entityKind: "family-graph" }],
+              entities: [
+                { entityId: "multiverse-market-save-owner-boundary", entityKind: "family-graph" }
+              ],
               facts: [],
               relations: [],
               gaps: []
             },
             "multiverse-market-row-text-boundary": {
-              entities: [{ entityId: "family-graph:multiverse-market-row-text", entityKind: "family-graph" }],
+              entities: [
+                { entityId: "family-graph:multiverse-market-row-text", entityKind: "family-graph" }
+              ],
               facts: [],
               relations: [],
               gaps: []
             },
             "multiverse-market-metadata-neighborhood": {
-              entities: [{ entityId: "family-graph:multiverse-market-metadata-neighborhood", entityKind: "family-graph" }],
+              entities: [
+                {
+                  entityId: "family-graph:multiverse-market-metadata-neighborhood",
+                  entityKind: "family-graph"
+                }
+              ],
               facts: [],
               relations: [],
               gaps: []
             },
             "multiverse-market-action-shell-boundary": {
-              entities: [{ entityId: "family-graph:multiverse-market-action-shell", entityKind: "family-graph" }],
+              entities: [
+                {
+                  entityId: "family-graph:multiverse-market-action-shell",
+                  entityKind: "family-graph"
+                }
+              ],
               facts: [],
               relations: [],
               gaps: []
             },
             "multiverse-market-owner-family-boundary": {
-              entities: [{ entityId: "family-graph:multiverse-market-owner-family", entityKind: "family-graph" }],
+              entities: [
+                {
+                  entityId: "family-graph:multiverse-market-owner-family",
+                  entityKind: "family-graph"
+                }
+              ],
               facts: [],
               relations: [],
               gaps: []
             },
             "multiverse-market-prefab-remap-boundary": {
-              entities: [{ entityId: "family-graph:multiverse-market-prefab-remap", entityKind: "family-graph" }],
+              entities: [
+                {
+                  entityId: "family-graph:multiverse-market-prefab-remap",
+                  entityKind: "family-graph"
+                }
+              ],
               facts: [],
               relations: [],
               gaps: []
@@ -1821,12 +1907,36 @@ test("buildSpendSystemView keeps multiverse row and ui-shell artifacts only as c
           }
         },
         boundaries: {
-          saveOwner: { subjectId: "multiverse-market-save-owner-boundary", boundaryKind: "subject-boundary", verdict: "quarantine" },
-          metadataNeighborhood: { subjectId: "family-graph:multiverse-market-metadata-neighborhood", boundaryKind: "subject-boundary", verdict: "quarantine" },
-          rowText: { subjectId: "family-graph:multiverse-market-row-text", boundaryKind: "subject-boundary", verdict: "quarantine" },
-          actionShell: { subjectId: "family-graph:multiverse-market-action-shell", boundaryKind: "subject-boundary", verdict: "quarantine" },
-          ownerFamily: { subjectId: "family-graph:multiverse-market-owner-family", boundaryKind: "subject-boundary", verdict: "quarantine" },
-          prefabRemap: { subjectId: "family-graph:multiverse-market-prefab-remap", boundaryKind: "subject-boundary", verdict: "quarantine" }
+          saveOwner: {
+            subjectId: "multiverse-market-save-owner-boundary",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          },
+          metadataNeighborhood: {
+            subjectId: "family-graph:multiverse-market-metadata-neighborhood",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          },
+          rowText: {
+            subjectId: "family-graph:multiverse-market-row-text",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          },
+          actionShell: {
+            subjectId: "family-graph:multiverse-market-action-shell",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          },
+          ownerFamily: {
+            subjectId: "family-graph:multiverse-market-owner-family",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          },
+          prefabRemap: {
+            subjectId: "family-graph:multiverse-market-prefab-remap",
+            boundaryKind: "subject-boundary",
+            verdict: "quarantine"
+          }
         }
       }
     }
@@ -1842,12 +1952,10 @@ test("buildSpendSystemView keeps multiverse row and ui-shell artifacts only as c
     spendView.multiverseMarket.rowIdentity.compatibilityBoundaries.metadataNeighborhood,
     { results: [{ anchor: "PlayerProfileData", matches: [] }] }
   );
-  assert.deepEqual(
-    spendView.multiverseMarket.rowIdentity.compatibilityBoundaries.rangeBoundary,
-    { validatedRowRanges: ["50-59 and 63-74"] }
-  );
-  assert.deepEqual(
-    spendView.multiverseMarket.uiShell.compatibilityBoundaries.ownerFamily,
-    { ownerAnchors: ["MultiverseMarket"] }
-  );
+  assert.deepEqual(spendView.multiverseMarket.rowIdentity.compatibilityBoundaries.rangeBoundary, {
+    validatedRowRanges: ["50-59 and 63-74"]
+  });
+  assert.deepEqual(spendView.multiverseMarket.uiShell.compatibilityBoundaries.ownerFamily, {
+    ownerAnchors: ["MultiverseMarket"]
+  });
 });

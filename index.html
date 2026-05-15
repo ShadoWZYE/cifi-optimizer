@@ -258,16 +258,42 @@
                 <details class="field-collapse" id="tokenShopHelper">
                   <summary>Open TokenShop player-state helper</summary>
                   <p class="meta">
-                    Enter checked TokenShop row levels with game-facing labels. These values feed the
-                    Progression-side TokenShop storefront while remaining planner-side support rather
-                    than canonical player truth.
+                    Enter checked TokenShop row levels with game-facing labels. These values feed
+                    the Progression-side TokenShop storefront while remaining planner-side support
+                    rather than canonical player truth.
                   </p>
-                  <p class="meta">Work one visible in-game tier at a time so the helper stays scannable.</p>
+                  <p class="meta">
+                    Work one visible in-game tier at a time so the helper stays scannable.
+                  </p>
                   <div class="tier-tabs">
-                    <button type="button" class="tier-tab token-shop-helper-tab active" data-token-shop-helper-tier="t1">T1</button>
-                    <button type="button" class="tier-tab token-shop-helper-tab" data-token-shop-helper-tier="t2">T2</button>
-                    <button type="button" class="tier-tab token-shop-helper-tab" data-token-shop-helper-tier="t3">T3</button>
-                    <button type="button" class="tier-tab token-shop-helper-tab" data-token-shop-helper-tier="t4">T4</button>
+                    <button
+                      type="button"
+                      class="tier-tab token-shop-helper-tab active"
+                      data-token-shop-helper-tier="t1"
+                    >
+                      T1
+                    </button>
+                    <button
+                      type="button"
+                      class="tier-tab token-shop-helper-tab"
+                      data-token-shop-helper-tier="t2"
+                    >
+                      T2
+                    </button>
+                    <button
+                      type="button"
+                      class="tier-tab token-shop-helper-tab"
+                      data-token-shop-helper-tier="t3"
+                    >
+                      T3
+                    </button>
+                    <button
+                      type="button"
+                      class="tier-tab token-shop-helper-tab"
+                      data-token-shop-helper-tier="t4"
+                    >
+                      T4
+                    </button>
                   </div>
                   <div class="field-grid tokenshop-levels-grid" id="tokenshopLevelsGrid">
                     <div class="field-group">
@@ -1003,21 +1029,12 @@
               <div class="module-controls trace-gap-launcher-controls">
                 <div class="field-group">
                   <label for="traceGapRepeat">Best-gap reruns</label>
-                  <input
-                    id="traceGapRepeat"
-                    type="number"
-                    min="1"
-                    max="50"
-                    step="1"
-                    value="1"
-                  />
+                  <input id="traceGapRepeat" type="number" min="1" max="50" step="1" value="1" />
                 </div>
               </div>
               <div class="profile-actions trace-gap-launcher-actions">
                 <button id="traceGapDryRunBtn" class="button">Plan best gap</button>
-                <button id="traceGapRunBtn" class="button button-primary">
-                  Run best gap
-                </button>
+                <button id="traceGapRunBtn" class="button button-primary">Run best gap</button>
                 <button id="traceGapRestartServerBtn" class="button button-ghost">
                   Restart local server
                 </button>

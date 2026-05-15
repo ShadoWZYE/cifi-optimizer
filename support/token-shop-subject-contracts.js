@@ -96,7 +96,9 @@ function getTokenShopSupportingRangeContracts(contractIndex, fieldName) {
       }
       return fieldIndex >= Math.min(start, end) && fieldIndex <= Math.max(start, end);
     })
-    .sort((left, right) => String(left?.traceScope || "").localeCompare(String(right?.traceScope || "")));
+    .sort((left, right) =>
+      String(left?.traceScope || "").localeCompare(String(right?.traceScope || ""))
+    );
 }
 
 export function getTokenShopSubjectContractForField(contractIndex, fieldName) {
@@ -133,7 +135,8 @@ export function applyTokenShopSubjectContractToRow(row, contract) {
       rowDetailsByField[row.field]) ||
     groundedFields.rowDetail ||
     {};
-  const existingRowDetail = row?.rowDetail && typeof row.rowDetail === "object" ? row.rowDetail : {};
+  const existingRowDetail =
+    row?.rowDetail && typeof row.rowDetail === "object" ? row.rowDetail : {};
   const genericPrimarySource = String(
     row?.dbMetadataSourceLabel || row?.contractSourceLabel || ""
   ).trim();
@@ -188,9 +191,12 @@ export function applyTokenShopSubjectContractToRow(row, contract) {
   const boundedEvidenceNote = boundedEvidenceTerms.length
     ? `Bounded row-remap evidence: ${boundedEvidenceTerms.join(", ")}.`
     : null;
-  const existingSourceLabel = String(row?.dbMetadataSourceLabel || row?.contractSourceLabel || "").trim();
+  const existingSourceLabel = String(
+    row?.dbMetadataSourceLabel || row?.contractSourceLabel || ""
+  ).trim();
   const mergedSourceLabel =
-    existingSourceLabel === "Generic mechanics model" || existingSourceLabel.startsWith("Generic mechanics +")
+    existingSourceLabel === "Generic mechanics model" ||
+    existingSourceLabel.startsWith("Generic mechanics +")
       ? contract?.subjectId && contract?.subjectKind
         ? `Generic mechanics + ${contract.subjectKind} subject metadata`
         : "Generic mechanics + DB subject metadata"
@@ -206,19 +212,19 @@ export function applyTokenShopSubjectContractToRow(row, contract) {
       ? "verified"
       : row?.costFormulaConfidence;
   const nextStorefrontBuffDisplayMode =
-    displayPathRecovered && String(row?.storefrontBuffDisplayMode || "").trim() === "runtime-unresolved"
+    displayPathRecovered &&
+    String(row?.storefrontBuffDisplayMode || "").trim() === "runtime-unresolved"
       ? null
       : row?.storefrontBuffDisplayMode;
 
   return {
     ...row,
     identity: shouldPromoteContractIdentity ? identity.identity : row.identity,
-    identitySource:
-      shouldPromoteContractIdentity ? identity.identitySource || row.identitySource : row.identitySource,
+    identitySource: shouldPromoteContractIdentity
+      ? identity.identitySource || row.identitySource
+      : row.identitySource,
     rowType:
-      shouldPromoteContractIdentity &&
-      typeof rowDetail.rowType === "string" &&
-      rowDetail.rowType
+      shouldPromoteContractIdentity && typeof rowDetail.rowType === "string" && rowDetail.rowType
         ? rowDetail.rowType
         : row.rowType,
     rowTypeLabel:
@@ -236,11 +242,11 @@ export function applyTokenShopSubjectContractToRow(row, contract) {
     subjectId:
       genericPrimary && typeof row?.subjectId === "string" && row.subjectId
         ? row.subjectId
-        : contract?.subjectId ?? row?.subjectId ?? null,
+        : (contract?.subjectId ?? row?.subjectId ?? null),
     subjectKind:
       genericPrimary && typeof row?.subjectKind === "string" && row.subjectKind
         ? row.subjectKind
-        : contract?.subjectKind ?? row?.subjectKind ?? null,
+        : (contract?.subjectKind ?? row?.subjectKind ?? null),
     knownEdges,
     missingEdges,
     blockedEdges,
@@ -286,10 +292,21 @@ export function applyTokenShopSupportingContractSignals(row, contract) {
     knownEdges.includes("exact-display-update-path") &&
     !missingEdges.includes("exact-display-update-path") &&
     !blockedEdges.includes("exact-display-update-path");
-  const mergedKnownEdges = [...new Set([...(Array.isArray(row?.knownEdges) ? row.knownEdges : []), ...knownEdges])];
-  const mergedMissingEdges = [...new Set([...(Array.isArray(row?.missingEdges) ? row.missingEdges : []), ...missingEdges])];
-  const mergedBlockedEdges = [...new Set([...(Array.isArray(row?.blockedEdges) ? row.blockedEdges : []), ...blockedEdges])];
-  const mergedNonblockingEdges = [...new Set([...(Array.isArray(row?.nonblockingEdges) ? row.nonblockingEdges : []), ...nonblockingEdges])];
+  const mergedKnownEdges = [
+    ...new Set([...(Array.isArray(row?.knownEdges) ? row.knownEdges : []), ...knownEdges])
+  ];
+  const mergedMissingEdges = [
+    ...new Set([...(Array.isArray(row?.missingEdges) ? row.missingEdges : []), ...missingEdges])
+  ];
+  const mergedBlockedEdges = [
+    ...new Set([...(Array.isArray(row?.blockedEdges) ? row.blockedEdges : []), ...blockedEdges])
+  ];
+  const mergedNonblockingEdges = [
+    ...new Set([
+      ...(Array.isArray(row?.nonblockingEdges) ? row.nonblockingEdges : []),
+      ...nonblockingEdges
+    ])
+  ];
   const supportingRows = Array.isArray(row?.supportingSubjectIds) ? row.supportingSubjectIds : [];
   return {
     ...row,
@@ -309,7 +326,9 @@ export function applyTokenShopSupportingContractSignals(row, contract) {
       displayPathRecovered && currentCapDisplayMode === "runtime-unresolved"
         ? null
         : row?.storefrontCapDisplayMode,
-    supportingSubjectIds: [...new Set([...supportingRows, String(contract?.subjectId || "").trim()].filter(Boolean))]
+    supportingSubjectIds: [
+      ...new Set([...supportingRows, String(contract?.subjectId || "").trim()].filter(Boolean))
+    ]
   };
 }
 

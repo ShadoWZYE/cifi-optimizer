@@ -113,7 +113,9 @@ export function buildShardSystemView(shardsSystemUnit, shardDb) {
       boundaries: {
         ownerFamily: hasDbOwnerFamilyCoverage ? null : staticOwnerFamilyBoundary,
         finalSuBonus: hasDbShardFinalSuCoverage ? null : staticFinalSuBonusBoundary,
-        milestonePayload: hasDbShardMilestonePayloadCoverage ? null : staticMilestonePayloadBoundary,
+        milestonePayload: hasDbShardMilestonePayloadCoverage
+          ? null
+          : staticMilestonePayloadBoundary,
         rowModel: hasDbShardRowModelCoverage ? null : staticRowModelBoundary,
         titleEffect: hasDbShardTitleEffectCoverage ? null : staticTitleEffectBoundary,
         effectTextHandler: hasDbShardEffectTextCoverage ? null : staticEffectTextHandlerBoundary,
@@ -268,19 +270,19 @@ export function buildSpendSystemView({
       tokenBank: {
         namingClues: hasDbTokenShopBundle
           ? null
-          : tokenShopSystemUnit?.sections?.tokenBank?.namingClues?.data ?? null,
+          : (tokenShopSystemUnit?.sections?.tokenBank?.namingClues?.data ?? null),
         stateClues: hasDbTokenShopTokenBankCoverage
           ? null
-          : tokenShopSystemUnit?.sections?.tokenBank?.stateClues?.data ?? null,
+          : (tokenShopSystemUnit?.sections?.tokenBank?.stateClues?.data ?? null),
         formulaBoundary: hasDbTokenShopTokenBankCoverage
           ? null
-          : tokenShopSystemUnit?.sections?.tokenBank?.formulaBoundary?.data ?? null,
+          : (tokenShopSystemUnit?.sections?.tokenBank?.formulaBoundary?.data ?? null),
         ownerShell: hasDbTokenShopTokenBankCoverage
           ? null
-          : tokenShopSystemUnit?.sections?.tokenBank?.ownerShell?.data ?? null,
+          : (tokenShopSystemUnit?.sections?.tokenBank?.ownerShell?.data ?? null),
         controllerShell: hasDbTokenShopTokenBankCoverage
           ? null
-          : tokenShopSystemUnit?.sections?.tokenBank?.controllerShell?.data ?? null,
+          : (tokenShopSystemUnit?.sections?.tokenBank?.controllerShell?.data ?? null),
         compatibilityClues: {
           namingClues: tokenShopSystemUnit?.sections?.tokenBank?.namingClues?.data ?? null,
           stateClues: tokenShopSystemUnit?.sections?.tokenBank?.stateClues?.data ?? null,
@@ -292,7 +294,7 @@ export function buildSpendSystemView({
       dailyTokenium: {
         laneClues: hasDbTokenShopDailyTokeniumCoverage
           ? null
-          : tokenShopSystemUnit?.sections?.dailyTokenium?.laneClues?.data ?? null,
+          : (tokenShopSystemUnit?.sections?.dailyTokenium?.laneClues?.data ?? null),
         compatibilityClues: {
           laneClues: tokenShopSystemUnit?.sections?.dailyTokenium?.laneClues?.data ?? null
         }
@@ -323,10 +325,14 @@ export function buildSpendSystemView({
         traceBoundary: multiverseMarketSystemUnit?.sections?.saveOwner?.traceBoundary?.data ?? null
       },
       rowIdentity: {
-        metadataNeighborhood: hasDbMultiverseMetadataCoverage ? null : staticMultiverseMetadataNeighborhood,
+        metadataNeighborhood: hasDbMultiverseMetadataCoverage
+          ? null
+          : staticMultiverseMetadataNeighborhood,
         rangeBoundary: hasDbMultiverseSaveOwnerCoverage ? null : staticMultiverseRangeBoundary,
         rowTextCoverage: hasDbMultiverseRowTextCoverage ? null : staticMultiverseRowTextCoverage,
-        prefabRemapBoundary: hasDbMultiversePrefabRemapCoverage ? null : staticMultiversePrefabRemapBoundary,
+        prefabRemapBoundary: hasDbMultiversePrefabRemapCoverage
+          ? null
+          : staticMultiversePrefabRemapBoundary,
         compatibilityBoundaries: {
           metadataNeighborhood: staticMultiverseMetadataNeighborhood,
           rangeBoundary: staticMultiverseRangeBoundary,

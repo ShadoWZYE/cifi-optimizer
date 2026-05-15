@@ -24,5 +24,8 @@ test("runtime cost-owner coverage upgrades projected formulas when DB closure ex
   assert.equal(row.costFormulaConfidence, "verified");
   assert.equal(row.blockedInputReason, "runtime-cost-coverage");
   assert.equal(row.runtimeCostCoverage.isClosed, true);
-  assert.match(row.supportingEvidenceNote, /exact next-cost formula still follows formula-confidence/i);
+  assert.match(
+    row.supportingEvidenceNote,
+    /exact next-cost formula still follows formula-confidence/i
+  );
 });

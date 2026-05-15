@@ -53,7 +53,9 @@ function getShardGenericCoverageSummary(shardSystemOrBoundary) {
     boundaryCount: genericCoverage.boundaryCount || 0,
     factCount: genericCoverage.genericFactCount,
     gapCount: genericCoverage.genericGapCount,
-    hasOwnerFamilyBoundary: genericCoverage.subjectLabels.includes("family-graph:shards-owner-family"),
+    hasOwnerFamilyBoundary: genericCoverage.subjectLabels.includes(
+      "family-graph:shards-owner-family"
+    ),
     hasFinalSuBoundary: genericCoverage.subjectLabels.includes("family-graph:shards-finalsu-bonus"),
     hasTitleEffectBoundary: genericCoverage.subjectLabels.includes(
       "family-graph:shards-milestone-title-effect"
@@ -133,7 +135,10 @@ export function getShardOwnerFamilyBoundarySummary(boundary) {
     "family-graph:shards-owner-family",
     "subject-boundary"
   );
-  const genericSubject = getShardGenericSubjectSummary(boundary, "family-graph:shards-owner-family");
+  const genericSubject = getShardGenericSubjectSummary(
+    boundary,
+    "family-graph:shards-owner-family"
+  );
   if (inferredBoundary || genericSubject) {
     const factsByKind = genericSubject?.factsByKind || {};
     const screenControllers = Array.isArray(factsByKind["screen-controller-family"])
@@ -171,7 +176,8 @@ export function getShardOwnerFamilyBoundarySummary(boundary) {
       ? factsByKind["source-subject-id"]
       : [];
     return {
-      hasBoundary: screenControllers.length > 0 && dataCarriers.length > 0 && runtimeShells.length > 0,
+      hasBoundary:
+        screenControllers.length > 0 && dataCarriers.length > 0 && runtimeShells.length > 0,
       hasStructure: runtimeShells.length > 0 && ownerFields.length > 0 && rowModelTypes.length > 0,
       hasRowStateFields: rowStateFields.length > 0,
       hasSupportingEdges: supportingEdges.length > 0,
@@ -196,19 +202,17 @@ export function getShardOwnerFamilyBoundarySummary(boundary) {
       groundedConclusion: groundedConclusions[0] || null,
       outcomeStatement: outcomeStatements[0] || null,
       sourceTraceScope:
-        String(inferredBoundary?.sourceTraceScope || "").trim() ||
-        sourceTraceScopes[0] ||
-        null,
+        String(inferredBoundary?.sourceTraceScope || "").trim() || sourceTraceScopes[0] || null,
       sourceSubjectId:
-        String(inferredBoundary?.sourceSubjectId || "").trim() ||
-        sourceSubjectIds[0] ||
-        null,
+        String(inferredBoundary?.sourceSubjectId || "").trim() || sourceSubjectIds[0] || null,
       nextSeamId: String(inferredBoundary?.nextSeamId || "").trim() || null,
-      blockedInputReason:
-        String(inferredBoundary?.blockedInputReason || "").trim() || null,
-      subjectId: String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
-      genericFactCount: Number(inferredBoundary?.genericFactCount || 0) || genericSubject?.factCount || 0,
-      genericGapCount: Number(inferredBoundary?.genericGapCount || 0) || genericSubject?.gapCount || 0
+      blockedInputReason: String(inferredBoundary?.blockedInputReason || "").trim() || null,
+      subjectId:
+        String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
+      genericFactCount:
+        Number(inferredBoundary?.genericFactCount || 0) || genericSubject?.factCount || 0,
+      genericGapCount:
+        Number(inferredBoundary?.genericGapCount || 0) || genericSubject?.gapCount || 0
     };
   }
   const screenControllers = Array.isArray(compatibilityBoundary?.screenControllerFamilies)
@@ -225,44 +229,47 @@ export function getShardOwnerFamilyBoundarySummary(boundary) {
     : [];
   const genericLead = compatibilityBoundary?.downgradedGenericLead ?? {};
   const genericLeadReasons = Array.isArray(genericLead.reasons) ? genericLead.reasons : [];
-  return markLegacyShardCompatibilityFallback({
-    hasBoundary:
-      screenControllers.includes("ShardMining, Assembly-CSharp") &&
-      dataCarriers.includes("ShardMining|ShardUpgradeInfo"),
-    hasFastBuyHooks: [
-      "CheckFirstTimeShardMilestoneOpened",
-      "AttachFastBuyButton",
-      "FastBuyButtonMethodShards",
-      "StartFastBuyButtonHold"
-    ].every((name) => fastBuyHooks.includes(name)),
-    hasBonusAnchors: [
-      "TotalMilestoneLevels",
-      "get_IsUnlocked",
-      "FinalSU1Bonus1",
-      "FinalSU29Bonus2",
-      "FinalSU29Bonus3"
-    ].every((name) => bonusAnchors.includes(name)),
-    hasDowngradedGenericLead:
-      genericLead.family === "ConstructionMilestones, Assembly-CSharp" &&
-      genericLeadReasons.length > 0,
-    screenController: screenControllers[0] || "ShardMining, Assembly-CSharp",
-    dataCarrier: dataCarriers[0] || "ShardMining|ShardUpgradeInfo",
-    fastBuyHooksLabel: fastBuyHooks.slice(0, 4).join(", "),
-    bonusAnchorLabel: bonusAnchors
-      .filter((name) =>
-        [
-          "TotalMilestoneLevels",
-          "get_IsUnlocked",
-          "FinalSU1Bonus1",
-          "FinalSU29Bonus2",
-          "FinalSU29Bonus3"
-        ].includes(name)
-      )
-      .join(", "),
-    genericLead: genericLead.family || "ConstructionMilestones, Assembly-CSharp",
-    genericLeadReason:
-      genericLeadReasons[0] || "its current evidence is still generic rather than shard-specific"
-  }, "compatibility-owner-family");
+  return markLegacyShardCompatibilityFallback(
+    {
+      hasBoundary:
+        screenControllers.includes("ShardMining, Assembly-CSharp") &&
+        dataCarriers.includes("ShardMining|ShardUpgradeInfo"),
+      hasFastBuyHooks: [
+        "CheckFirstTimeShardMilestoneOpened",
+        "AttachFastBuyButton",
+        "FastBuyButtonMethodShards",
+        "StartFastBuyButtonHold"
+      ].every((name) => fastBuyHooks.includes(name)),
+      hasBonusAnchors: [
+        "TotalMilestoneLevels",
+        "get_IsUnlocked",
+        "FinalSU1Bonus1",
+        "FinalSU29Bonus2",
+        "FinalSU29Bonus3"
+      ].every((name) => bonusAnchors.includes(name)),
+      hasDowngradedGenericLead:
+        genericLead.family === "ConstructionMilestones, Assembly-CSharp" &&
+        genericLeadReasons.length > 0,
+      screenController: screenControllers[0] || "ShardMining, Assembly-CSharp",
+      dataCarrier: dataCarriers[0] || "ShardMining|ShardUpgradeInfo",
+      fastBuyHooksLabel: fastBuyHooks.slice(0, 4).join(", "),
+      bonusAnchorLabel: bonusAnchors
+        .filter((name) =>
+          [
+            "TotalMilestoneLevels",
+            "get_IsUnlocked",
+            "FinalSU1Bonus1",
+            "FinalSU29Bonus2",
+            "FinalSU29Bonus3"
+          ].includes(name)
+        )
+        .join(", "),
+      genericLead: genericLead.family || "ConstructionMilestones, Assembly-CSharp",
+      genericLeadReason:
+        genericLeadReasons[0] || "its current evidence is still generic rather than shard-specific"
+    },
+    "compatibility-owner-family"
+  );
 }
 
 export function getShardFinalSuBonusBoundarySummary(boundary) {
@@ -272,7 +279,10 @@ export function getShardFinalSuBonusBoundarySummary(boundary) {
     "family-graph:shards-finalsu-bonus",
     "subject-boundary"
   );
-  const genericSubject = getShardGenericSubjectSummary(boundary, "family-graph:shards-finalsu-bonus");
+  const genericSubject = getShardGenericSubjectSummary(
+    boundary,
+    "family-graph:shards-finalsu-bonus"
+  );
   if (inferredBoundary || genericSubject) {
     const factsByKind = genericSubject?.factsByKind || {};
     const dataCarriers = Array.isArray(factsByKind["data-carrier-candidate"])
@@ -310,9 +320,9 @@ export function getShardFinalSuBonusBoundarySummary(boundary) {
       bonusAccessorLabel: bonusAccessorSamples.join(", "),
       adjacentFieldLabel: adjacentFields.join(", "),
       boundaryVerdict: String(inferredBoundary?.verdict || "").trim() || null,
-      subjectId: String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
-      blockedInputReason:
-        String(inferredBoundary?.blockedInputReason || "").trim() || null,
+      subjectId:
+        String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
+      blockedInputReason: String(inferredBoundary?.blockedInputReason || "").trim() || null,
       nextSeamId: String(inferredBoundary?.nextSeamId || "").trim() || null,
       genericFactCount:
         Number(inferredBoundary?.genericFactCount || 0) || genericSubject?.factCount || 0,
@@ -320,7 +330,9 @@ export function getShardFinalSuBonusBoundarySummary(boundary) {
         Number(inferredBoundary?.genericGapCount || 0) || genericSubject?.gapCount || 0
     };
   }
-  const unlockRequirementAccessors = Array.isArray(compatibilityBoundary?.unlockRequirementAccessors)
+  const unlockRequirementAccessors = Array.isArray(
+    compatibilityBoundary?.unlockRequirementAccessors
+  )
     ? compatibilityBoundary.unlockRequirementAccessors
     : [];
   const bonusFieldSamples = Array.isArray(compatibilityBoundary?.bonusFieldSamples)
@@ -332,32 +344,35 @@ export function getShardFinalSuBonusBoundarySummary(boundary) {
   const adjacentFields = Array.isArray(compatibilityBoundary?.adjacentFields)
     ? compatibilityBoundary.adjacentFields
     : [];
-  return markLegacyShardCompatibilityFallback({
-    hasBoundary:
-      compatibilityBoundary?.dataCarrier === "ShardUpgradeInfo" &&
-      compatibilityBoundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
-      ["get_SU1FinalUnlockReq", "get_SU29FinalUnlockReq"].every((name) =>
-        unlockRequirementAccessors.includes(name)
-      ) &&
-      ["FinalSU1Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3"].every((name) =>
-        bonusFieldSamples.includes(name)
-      ) &&
-      ["get_FinalSU1Bonus1", "get_FinalSU29Bonus2", "get_FinalSU29Bonus3"].every((name) =>
-        bonusAccessorSamples.includes(name)
-      ),
-    hasAdjacentFields: [
-      "TotalMilestoneLevels",
-      "get_IsUnlocked",
-      "OverLevel100Exponent",
-      "OverLevel400Exponent",
-      "<FastBuyEnum>d__1429"
-    ].every((name) => adjacentFields.includes(name)),
-    dataCarrier: compatibilityBoundary?.dataCarrier || "ShardUpgradeInfo",
-    unlockRangeLabel: unlockRequirementAccessors.join(", "),
-    bonusFieldLabel: bonusFieldSamples.join(", "),
-    bonusAccessorLabel: bonusAccessorSamples.join(", "),
-    adjacentFieldLabel: adjacentFields.join(", ")
-  }, "compatibility-finalsu-bonus");
+  return markLegacyShardCompatibilityFallback(
+    {
+      hasBoundary:
+        compatibilityBoundary?.dataCarrier === "ShardUpgradeInfo" &&
+        compatibilityBoundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
+        ["get_SU1FinalUnlockReq", "get_SU29FinalUnlockReq"].every((name) =>
+          unlockRequirementAccessors.includes(name)
+        ) &&
+        ["FinalSU1Bonus1", "FinalSU29Bonus2", "FinalSU29Bonus3"].every((name) =>
+          bonusFieldSamples.includes(name)
+        ) &&
+        ["get_FinalSU1Bonus1", "get_FinalSU29Bonus2", "get_FinalSU29Bonus3"].every((name) =>
+          bonusAccessorSamples.includes(name)
+        ),
+      hasAdjacentFields: [
+        "TotalMilestoneLevels",
+        "get_IsUnlocked",
+        "OverLevel100Exponent",
+        "OverLevel400Exponent",
+        "<FastBuyEnum>d__1429"
+      ].every((name) => adjacentFields.includes(name)),
+      dataCarrier: compatibilityBoundary?.dataCarrier || "ShardUpgradeInfo",
+      unlockRangeLabel: unlockRequirementAccessors.join(", "),
+      bonusFieldLabel: bonusFieldSamples.join(", "),
+      bonusAccessorLabel: bonusAccessorSamples.join(", "),
+      adjacentFieldLabel: adjacentFields.join(", ")
+    },
+    "compatibility-finalsu-bonus"
+  );
 }
 
 export function getShardMilestonePayloadBoundarySummary(boundary) {
@@ -417,9 +432,9 @@ export function getShardMilestonePayloadBoundarySummary(boundary) {
       rowParameterLabel: parameterShellFields.join(", "),
       saveCandidateLabel: saveCandidates.join(", "),
       boundaryVerdict: String(inferredBoundary?.verdict || "").trim() || null,
-      subjectId: String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
-      blockedInputReason:
-        String(inferredBoundary?.blockedInputReason || "").trim() || null,
+      subjectId:
+        String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
+      blockedInputReason: String(inferredBoundary?.blockedInputReason || "").trim() || null,
       nextSeamId: String(inferredBoundary?.nextSeamId || "").trim() || null,
       genericFactCount:
         Number(inferredBoundary?.genericFactCount || 0) || genericSubject?.factCount || 0,
@@ -442,42 +457,45 @@ export function getShardMilestonePayloadBoundarySummary(boundary) {
   const sampleCostAccessors = Array.isArray(compatibilityBoundary?.sampleCostAccessors)
     ? compatibilityBoundary.sampleCostAccessors
     : [];
-  return markLegacyShardCompatibilityFallback({
-    hasBoundary:
-      compatibilityBoundary?.dataCarrier === "ShardUpgradeInfo" &&
-      compatibilityBoundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
-      [
-        "TotalMilestoneLevels",
-        "get_IsUnlocked",
-        "set_IsUnlocked",
-        "<IsUnlocked>k__BackingField"
-      ].every((name) => milestoneStateFields.includes(name)),
-    hasCostAndListHooks: [
-      "get_TotalMilestoneLevels",
-      "UpdateShardCostList",
-      "GetShardCostList",
-      "CountAffordableShard",
-      "InitializeShards"
-    ].every((name) => costAndListHooks.includes(name)),
-    hasProgressFillHooks: [
-      "CheckAllMilestoneLevelFills",
-      "CheckMilestone0ProgressFill",
-      "CheckMilestone1ProgressFill",
-      "CheckMilestone9ProgressFill"
-    ].every((name) => progressFillHooks.includes(name)),
-    hasTickFields: ["Phase1Tick", "Phase6Tick", "CooldownTick"].every((name) =>
-      tickFields.includes(name)
-    ),
-    hasCostAccessorSamples: ["get_SU23Cost", "get_SU29Cost"].every((name) =>
-      sampleCostAccessors.includes(name)
-    ),
-    dataCarrier: compatibilityBoundary?.dataCarrier || "ShardUpgradeInfo",
-    milestoneStateLabel: milestoneStateFields.join(", "),
-    costHookLabel: costAndListHooks.join(", "),
-    progressHookLabel: progressFillHooks.join(", "),
-    tickFieldLabel: tickFields.join(", "),
-    costAccessorLabel: sampleCostAccessors.join(", ")
-  }, "compatibility-milestone-payload");
+  return markLegacyShardCompatibilityFallback(
+    {
+      hasBoundary:
+        compatibilityBoundary?.dataCarrier === "ShardUpgradeInfo" &&
+        compatibilityBoundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
+        [
+          "TotalMilestoneLevels",
+          "get_IsUnlocked",
+          "set_IsUnlocked",
+          "<IsUnlocked>k__BackingField"
+        ].every((name) => milestoneStateFields.includes(name)),
+      hasCostAndListHooks: [
+        "get_TotalMilestoneLevels",
+        "UpdateShardCostList",
+        "GetShardCostList",
+        "CountAffordableShard",
+        "InitializeShards"
+      ].every((name) => costAndListHooks.includes(name)),
+      hasProgressFillHooks: [
+        "CheckAllMilestoneLevelFills",
+        "CheckMilestone0ProgressFill",
+        "CheckMilestone1ProgressFill",
+        "CheckMilestone9ProgressFill"
+      ].every((name) => progressFillHooks.includes(name)),
+      hasTickFields: ["Phase1Tick", "Phase6Tick", "CooldownTick"].every((name) =>
+        tickFields.includes(name)
+      ),
+      hasCostAccessorSamples: ["get_SU23Cost", "get_SU29Cost"].every((name) =>
+        sampleCostAccessors.includes(name)
+      ),
+      dataCarrier: compatibilityBoundary?.dataCarrier || "ShardUpgradeInfo",
+      milestoneStateLabel: milestoneStateFields.join(", "),
+      costHookLabel: costAndListHooks.join(", "),
+      progressHookLabel: progressFillHooks.join(", "),
+      tickFieldLabel: tickFields.join(", "),
+      costAccessorLabel: sampleCostAccessors.join(", ")
+    },
+    "compatibility-milestone-payload"
+  );
 }
 
 export function getShardCostModelBoundarySummary(boundary) {
@@ -498,7 +516,9 @@ export function getShardCostModelBoundarySummary(boundary) {
   const shardCostAccessor = String(
     shardCostGeneric?.factsByKind?.["cost-accessor"]?.[0] || "get_SU0Cost"
   ).trim();
-  const shardParameterShell = Array.isArray(shardCostGeneric?.factsByKind?.["parameter-shell-field"])
+  const shardParameterShell = Array.isArray(
+    shardCostGeneric?.factsByKind?.["parameter-shell-field"]
+  )
     ? shardCostGeneric.factsByKind["parameter-shell-field"]
     : [];
   const costBoundaryPayload =
@@ -521,8 +541,7 @@ export function getShardCostModelBoundarySummary(boundary) {
     ].filter(Boolean);
     return {
       hasBoundary:
-        knownEdges.includes("getter-family") &&
-        knownEdges.includes("getter-to-parameter-shell"),
+        knownEdges.includes("getter-family") && knownEdges.includes("getter-to-parameter-shell"),
       hasSampledCostWindows: knownEdges.includes("getter-family"),
       hasRow0FormulaShell: knownEdges.includes("metadata-row0-parameter-shell"),
       coverageSource: composeDbCoverageSource({
@@ -535,7 +554,8 @@ export function getShardCostModelBoundarySummary(boundary) {
         ? `${shardCostAccessor} through get_SU29Cost family shell`
         : "get_SU0Cost through get_SU29Cost family shell",
       row0FieldLabel:
-        shardParameterShell.slice(0, 3).join(", ") || "SU0StartCost, SU0CostExponent, SU0GrowthExponent",
+        shardParameterShell.slice(0, 3).join(", ") ||
+        "SU0StartCost, SU0CostExponent, SU0GrowthExponent",
       row0FillLabel: "SU0Level1Fill through SU0Level8Fill",
       row0BonusLabel: "SU0Bonus1 through SU0Bonus8",
       supportedOptimizerLabel: knownEdges.includes("deterministic-evaluator")
@@ -549,8 +569,8 @@ export function getShardCostModelBoundarySummary(boundary) {
         typeof costBoundaryPayload?.blockedInputReason === "string"
           ? costBoundaryPayload.blockedInputReason
           : typeof shardCostMetadata?.blockedInputReason === "string"
-          ? shardCostMetadata.blockedInputReason
-          : null,
+            ? shardCostMetadata.blockedInputReason
+            : null,
       nextSeamId: combinedNextSeamIds[0] || null,
       genericFactCount:
         Number(costBoundaryPayload?.genericFactCount || 0) || shardCostGeneric?.factCount || 0,
@@ -571,7 +591,8 @@ export function getShardCostModelBoundarySummary(boundary) {
     ? compatibilityBoundary.row0BonusFields
     : [];
   const optimizerBoundary =
-    typeof compatibilityBoundary?.optimizerBoundary === "object" && compatibilityBoundary.optimizerBoundary
+    typeof compatibilityBoundary?.optimizerBoundary === "object" &&
+    compatibilityBoundary.optimizerBoundary
       ? compatibilityBoundary.optimizerBoundary
       : {};
   const supportedNow = Array.isArray(optimizerBoundary.supportedNow)
@@ -586,39 +607,42 @@ export function getShardCostModelBoundarySummary(boundary) {
     sampleCostAccessorWindows.find((window) => window?.label === "lateWindow") || {};
   const earlyAccessors = Array.isArray(earlyWindow.accessors) ? earlyWindow.accessors : [];
   const lateAccessors = Array.isArray(lateWindow.accessors) ? lateWindow.accessors : [];
-  return markLegacyShardCompatibilityFallback({
-    hasBoundary:
-      compatibilityBoundary?.dataCarrier === "ShardUpgradeInfo" &&
-      compatibilityBoundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo",
-    hasSampledCostWindows:
-      earlyWindow.start === 0 &&
-      earlyWindow.end === 9 &&
-      earlyWindow.count === 10 &&
-      ["get_SU0Cost", "get_SU9Cost"].every((name) => earlyAccessors.includes(name)) &&
-      lateWindow.start === 23 &&
-      lateWindow.end === 29 &&
-      lateWindow.count === 7 &&
-      ["get_SU23Cost", "get_SU29Cost"].every((name) => lateAccessors.includes(name)),
-    hasRow0FormulaShell:
-      [
-        "SU0StartCost",
-        "SU0CostExponent",
-        "SU0GrowthExponent",
-        "SU0GrowthExponent2",
-        "SU0GrowthExponent3"
-      ].every((name) => row0CostFields.includes(name)) &&
-      ["SU0Level1Fill", "SU0Level8Fill"].every((name) => row0FillFields.includes(name)) &&
-      ["SU0Bonus1", "SU0Bonus8"].every((name) => row0BonusFields.includes(name)),
-    dataCarrier: compatibilityBoundary?.dataCarrier || "ShardUpgradeInfo",
-    costWindowLabel: [earlyAccessors.join(", "), lateAccessors.join(", ")]
-      .filter(Boolean)
-      .join(" | "),
-    row0FieldLabel: row0CostFields.join(", "),
-    row0FillLabel: row0FillFields.join(", "),
-    row0BonusLabel: row0BonusFields.join(", "),
-    supportedOptimizerLabel: supportedNow.join(", "),
-    blockedOptimizerLabel: blockedNow.join(", ")
-  }, "compatibility-cost-model");
+  return markLegacyShardCompatibilityFallback(
+    {
+      hasBoundary:
+        compatibilityBoundary?.dataCarrier === "ShardUpgradeInfo" &&
+        compatibilityBoundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo",
+      hasSampledCostWindows:
+        earlyWindow.start === 0 &&
+        earlyWindow.end === 9 &&
+        earlyWindow.count === 10 &&
+        ["get_SU0Cost", "get_SU9Cost"].every((name) => earlyAccessors.includes(name)) &&
+        lateWindow.start === 23 &&
+        lateWindow.end === 29 &&
+        lateWindow.count === 7 &&
+        ["get_SU23Cost", "get_SU29Cost"].every((name) => lateAccessors.includes(name)),
+      hasRow0FormulaShell:
+        [
+          "SU0StartCost",
+          "SU0CostExponent",
+          "SU0GrowthExponent",
+          "SU0GrowthExponent2",
+          "SU0GrowthExponent3"
+        ].every((name) => row0CostFields.includes(name)) &&
+        ["SU0Level1Fill", "SU0Level8Fill"].every((name) => row0FillFields.includes(name)) &&
+        ["SU0Bonus1", "SU0Bonus8"].every((name) => row0BonusFields.includes(name)),
+      dataCarrier: compatibilityBoundary?.dataCarrier || "ShardUpgradeInfo",
+      costWindowLabel: [earlyAccessors.join(", "), lateAccessors.join(", ")]
+        .filter(Boolean)
+        .join(" | "),
+      row0FieldLabel: row0CostFields.join(", "),
+      row0FillLabel: row0FillFields.join(", "),
+      row0BonusLabel: row0BonusFields.join(", "),
+      supportedOptimizerLabel: supportedNow.join(", "),
+      blockedOptimizerLabel: blockedNow.join(", ")
+    },
+    "compatibility-cost-model"
+  );
 }
 
 export function getShardMilestoneRowModelBoundarySummary(boundary) {
@@ -662,9 +686,9 @@ export function getShardMilestoneRowModelBoundarySummary(boundary) {
       runtimeShell: runtimeShells[0] || null,
       rowModelType: rowModelTypes[0] || null,
       boundaryVerdict: String(inferredBoundary?.verdict || "").trim() || null,
-      subjectId: String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
-      blockedInputReason:
-        String(inferredBoundary?.blockedInputReason || "").trim() || null,
+      subjectId:
+        String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
+      blockedInputReason: String(inferredBoundary?.blockedInputReason || "").trim() || null,
       nextSeamId: String(inferredBoundary?.nextSeamId || "").trim() || null,
       genericFactCount:
         Number(inferredBoundary?.genericFactCount || 0) || genericSubject?.factCount || 0,
@@ -673,15 +697,18 @@ export function getShardMilestoneRowModelBoundarySummary(boundary) {
     };
   }
   const textCheckerRange =
-    typeof compatibilityBoundary?.textCheckerRange === "object" && compatibilityBoundary.textCheckerRange
+    typeof compatibilityBoundary?.textCheckerRange === "object" &&
+    compatibilityBoundary.textCheckerRange
       ? compatibilityBoundary.textCheckerRange
       : {};
   const unlockRequirementRange =
-    typeof compatibilityBoundary?.unlockRequirementRange === "object" && compatibilityBoundary.unlockRequirementRange
+    typeof compatibilityBoundary?.unlockRequirementRange === "object" &&
+    compatibilityBoundary.unlockRequirementRange
       ? compatibilityBoundary.unlockRequirementRange
       : {};
   const buyHookEvidence =
-    typeof compatibilityBoundary?.buyHookEvidence === "object" && compatibilityBoundary.buyHookEvidence
+    typeof compatibilityBoundary?.buyHookEvidence === "object" &&
+    compatibilityBoundary.buyHookEvidence
       ? compatibilityBoundary.buyHookEvidence
       : {};
   const shardLocalDirectHooks = Array.isArray(buyHookEvidence.shardLocalDirectHooks)
@@ -692,26 +719,29 @@ export function getShardMilestoneRowModelBoundarySummary(boundary) {
     buyHookEvidence.genericNumberedFamily
       ? buyHookEvidence.genericNumberedFamily
       : {};
-  return markLegacyShardCompatibilityFallback({
-    hasBoundary:
-      compatibilityBoundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
-      textCheckerRange.start === 0 &&
-      textCheckerRange.end === 29 &&
-      textCheckerRange.count === 30 &&
-      unlockRequirementRange.start === 0 &&
-      unlockRequirementRange.end === 29 &&
-      unlockRequirementRange.count === 30,
-    hasShardLocalBuySample: shardLocalDirectHooks.includes("BuyMilestone0"),
-    hasGenericBuyFamily:
-      genericNumberedFamily.family === "ConstructionMilestones, Assembly-CSharp" &&
-      genericNumberedFamily.start === 1 &&
-      genericNumberedFamily.end === 57 &&
-      genericNumberedFamily.count === 57,
-    textCheckerRangeLabel: `${textCheckerRange.start ?? "?"}-${textCheckerRange.end ?? "?"}`,
-    unlockRangeLabel: `${unlockRequirementRange.start ?? "?"}-${unlockRequirementRange.end ?? "?"}`,
-    shardLocalBuyLabel: shardLocalDirectHooks.join(", "),
-    genericBuyLabel: `${genericNumberedFamily.family || "ConstructionMilestones, Assembly-CSharp"} ${genericNumberedFamily.start ?? "?"}-${genericNumberedFamily.end ?? "?"}`
-  }, "compatibility-row-model");
+  return markLegacyShardCompatibilityFallback(
+    {
+      hasBoundary:
+        compatibilityBoundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
+        textCheckerRange.start === 0 &&
+        textCheckerRange.end === 29 &&
+        textCheckerRange.count === 30 &&
+        unlockRequirementRange.start === 0 &&
+        unlockRequirementRange.end === 29 &&
+        unlockRequirementRange.count === 30,
+      hasShardLocalBuySample: shardLocalDirectHooks.includes("BuyMilestone0"),
+      hasGenericBuyFamily:
+        genericNumberedFamily.family === "ConstructionMilestones, Assembly-CSharp" &&
+        genericNumberedFamily.start === 1 &&
+        genericNumberedFamily.end === 57 &&
+        genericNumberedFamily.count === 57,
+      textCheckerRangeLabel: `${textCheckerRange.start ?? "?"}-${textCheckerRange.end ?? "?"}`,
+      unlockRangeLabel: `${unlockRequirementRange.start ?? "?"}-${unlockRequirementRange.end ?? "?"}`,
+      shardLocalBuyLabel: shardLocalDirectHooks.join(", "),
+      genericBuyLabel: `${genericNumberedFamily.family || "ConstructionMilestones, Assembly-CSharp"} ${genericNumberedFamily.start ?? "?"}-${genericNumberedFamily.end ?? "?"}`
+    },
+    "compatibility-row-model"
+  );
 }
 
 export function getShardMilestoneTitleEffectBoundarySummary(boundary) {
@@ -745,14 +775,16 @@ export function getShardMilestoneTitleEffectBoundarySummary(boundary) {
         hasBoundaryModel: Boolean(inferredBoundary),
         hasSubjectMetadata: false
       }),
-      titleRangeLabel: titleAssetCandidates.length ? titleAssetCandidates.join(", ") : "unrecovered",
+      titleRangeLabel: titleAssetCandidates.length
+        ? titleAssetCandidates.join(", ")
+        : "unrecovered",
       effectSlotLabel: effectPresentationSlots.join(", "),
       bonusCalcLabel: sampleBonusCalcAccessors.join(", "),
       row28ConflictLabel: "",
       boundaryVerdict: String(inferredBoundary?.verdict || "").trim() || null,
-      subjectId: String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
-      blockedInputReason:
-        String(inferredBoundary?.blockedInputReason || "").trim() || null,
+      subjectId:
+        String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
+      blockedInputReason: String(inferredBoundary?.blockedInputReason || "").trim() || null,
       nextSeamId: String(inferredBoundary?.nextSeamId || "").trim() || null,
       genericFactCount:
         Number(inferredBoundary?.genericFactCount || 0) || genericSubject?.factCount || 0,
@@ -777,21 +809,24 @@ export function getShardMilestoneTitleEffectBoundarySummary(boundary) {
   const row28Candidates = titleAssetCandidates
     .filter((entry) => entry?.row === 28)
     .map((entry) => entry.title);
-  return markLegacyShardCompatibilityFallback({
-    hasBoundary: uniqueRows.includes(0) && uniqueRows.includes(29) && uniqueRows.includes(30),
-    hasEffectPresentationFamily: ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].every((name) =>
-      effectPresentationSlots.includes(name)
-    ),
-    hasBonusCalcSamples: ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].every((name) =>
-      sampleBonusCalcAccessors.includes(name)
-    ),
-    titleRangeLabel: uniqueRows.length
-      ? `${uniqueRows[0]}-${uniqueRows[uniqueRows.length - 1]}`
-      : "unknown",
-    effectSlotLabel: effectPresentationSlots.join(", "),
-    bonusCalcLabel: sampleBonusCalcAccessors.join(", "),
-    row28ConflictLabel: row28Candidates.join(", ")
-  }, "compatibility-title-effect");
+  return markLegacyShardCompatibilityFallback(
+    {
+      hasBoundary: uniqueRows.includes(0) && uniqueRows.includes(29) && uniqueRows.includes(30),
+      hasEffectPresentationFamily: ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].every((name) =>
+        effectPresentationSlots.includes(name)
+      ),
+      hasBonusCalcSamples: ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].every((name) =>
+        sampleBonusCalcAccessors.includes(name)
+      ),
+      titleRangeLabel: uniqueRows.length
+        ? `${uniqueRows[0]}-${uniqueRows[uniqueRows.length - 1]}`
+        : "unknown",
+      effectSlotLabel: effectPresentationSlots.join(", "),
+      bonusCalcLabel: sampleBonusCalcAccessors.join(", "),
+      row28ConflictLabel: row28Candidates.join(", ")
+    },
+    "compatibility-title-effect"
+  );
 }
 
 export function getShardEffectTextHandlerBoundarySummary(boundary) {
@@ -832,17 +867,16 @@ export function getShardEffectTextHandlerBoundarySummary(boundary) {
         hasBoundaryModel: Boolean(inferredBoundary),
         hasSubjectMetadata: false
       }),
-      textHandlerLabel:
-        textHandlerTerms[0] || "unrecovered-explicit-handler",
+      textHandlerLabel: textHandlerTerms[0] || "unrecovered-explicit-handler",
       genericWriterLabel: genericWriterTerms[0] || "SetAllMilestoneTexts",
       presentationFamilyLabel: presentationFamily.join(", "),
       bonusCalcLabel: sampleBonusCalcAccessors.join(", "),
       uiContextLabel: uiContextAnchors.join(", "),
       rowCoverageLabel: "quarantined-generic-writer-lane",
       boundaryVerdict: String(inferredBoundary?.verdict || "").trim() || null,
-      subjectId: String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
-      blockedInputReason:
-        String(inferredBoundary?.blockedInputReason || "").trim() || null,
+      subjectId:
+        String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
+      blockedInputReason: String(inferredBoundary?.blockedInputReason || "").trim() || null,
       nextSeamId: String(inferredBoundary?.nextSeamId || "").trim() || null,
       genericFactCount:
         Number(inferredBoundary?.genericFactCount || 0) || genericSubject?.factCount || 0,
@@ -860,32 +894,38 @@ export function getShardEffectTextHandlerBoundarySummary(boundary) {
     ? compatibilityBoundary.uiContextAnchors
     : [];
   const rowModelCoverage =
-    typeof compatibilityBoundary?.rowModelCoverage === "object" && compatibilityBoundary?.rowModelCoverage
+    typeof compatibilityBoundary?.rowModelCoverage === "object" &&
+    compatibilityBoundary?.rowModelCoverage
       ? compatibilityBoundary.rowModelCoverage
       : {};
-  return markLegacyShardCompatibilityFallback({
-    hasBoundary:
-      compatibilityBoundary?.probableTextHandler === "TextHandlerShardMilestoneBonusesPerLevel/N" &&
-      compatibilityBoundary?.genericMilestoneWriter === "SetAllMilestoneTexts" &&
-      rowModelCoverage.start === 0 &&
-      rowModelCoverage.end === 29 &&
-      rowModelCoverage.count === 30,
-    hasPresentationFamily: ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].every((name) =>
-      presentationFamily.includes(name)
-    ),
-    hasBonusCalcSamples: ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].every((name) =>
-      sampleBonusCalcAccessors.includes(name)
-    ),
-    hasUiContextAnchors: ["LevelText", "DescText", "ValueText", "DescriptionText"].every((name) =>
-      uiContextAnchors.includes(name)
-    ),
-    textHandlerLabel: compatibilityBoundary?.probableTextHandler || "TextHandlerShardMilestoneBonusesPerLevel/N",
-    genericWriterLabel: compatibilityBoundary?.genericMilestoneWriter || "SetAllMilestoneTexts",
-    presentationFamilyLabel: presentationFamily.join(", "),
-    bonusCalcLabel: sampleBonusCalcAccessors.join(", "),
-    uiContextLabel: uiContextAnchors.join(", "),
-    rowCoverageLabel: `${rowModelCoverage.start ?? "?"}-${rowModelCoverage.end ?? "?"}`
-  }, "compatibility-effect-text-handler");
+  return markLegacyShardCompatibilityFallback(
+    {
+      hasBoundary:
+        compatibilityBoundary?.probableTextHandler ===
+          "TextHandlerShardMilestoneBonusesPerLevel/N" &&
+        compatibilityBoundary?.genericMilestoneWriter === "SetAllMilestoneTexts" &&
+        rowModelCoverage.start === 0 &&
+        rowModelCoverage.end === 29 &&
+        rowModelCoverage.count === 30,
+      hasPresentationFamily: ["ShardMilestoneBonus1", "ShardMilestoneBonus8"].every((name) =>
+        presentationFamily.includes(name)
+      ),
+      hasBonusCalcSamples: ["get_SU1Bonus1Calc", "get_SU5Bonus2Calc"].every((name) =>
+        sampleBonusCalcAccessors.includes(name)
+      ),
+      hasUiContextAnchors: ["LevelText", "DescText", "ValueText", "DescriptionText"].every((name) =>
+        uiContextAnchors.includes(name)
+      ),
+      textHandlerLabel:
+        compatibilityBoundary?.probableTextHandler || "TextHandlerShardMilestoneBonusesPerLevel/N",
+      genericWriterLabel: compatibilityBoundary?.genericMilestoneWriter || "SetAllMilestoneTexts",
+      presentationFamilyLabel: presentationFamily.join(", "),
+      bonusCalcLabel: sampleBonusCalcAccessors.join(", "),
+      uiContextLabel: uiContextAnchors.join(", "),
+      rowCoverageLabel: `${rowModelCoverage.start ?? "?"}-${rowModelCoverage.end ?? "?"}`
+    },
+    "compatibility-effect-text-handler"
+  );
 }
 
 export function getShardMilestoneRowShellBoundarySummary(boundary) {
@@ -914,7 +954,8 @@ export function getShardMilestoneRowShellBoundarySummary(boundary) {
       ? factsByKind["generic-buy-family"]
       : [];
     return {
-      hasBoundary: screenControllers.length > 0 && dataCarriers.length > 0 && runtimeShells.length > 0,
+      hasBoundary:
+        screenControllers.length > 0 && dataCarriers.length > 0 && runtimeShells.length > 0,
       hasUnlockHookSamples: false,
       hasBuyHookSamples: genericBuyFamilies.length > 0,
       hasTextCheckerSamples: false,
@@ -933,9 +974,9 @@ export function getShardMilestoneRowShellBoundarySummary(boundary) {
       buyHookLabel: genericBuyFamilies.join(", "),
       textCheckerLabel: "",
       boundaryVerdict: String(inferredBoundary?.verdict || "").trim() || null,
-      subjectId: String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
-      blockedInputReason:
-        String(inferredBoundary?.blockedInputReason || "").trim() || null,
+      subjectId:
+        String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
+      blockedInputReason: String(inferredBoundary?.blockedInputReason || "").trim() || null,
       nextSeamId: String(inferredBoundary?.nextSeamId || "").trim() || null,
       genericFactCount:
         Number(inferredBoundary?.genericFactCount || 0) || genericSubject?.factCount || 0,
@@ -955,29 +996,33 @@ export function getShardMilestoneRowShellBoundarySummary(boundary) {
   const textCheckerSamples = Array.isArray(compatibilityBoundary?.textCheckerSamples)
     ? compatibilityBoundary.textCheckerSamples
     : [];
-  return markLegacyShardCompatibilityFallback({
-    hasBoundary:
-      compatibilityBoundary?.screenControllerFamily === "ShardMining, Assembly-CSharp" &&
-      compatibilityBoundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
-      ["AttachFastBuyButton", "StartFastBuyButtonHold", "FastBuyButtonMethodShards"].every((name) =>
-        controllerShellAnchors.includes(name)
+  return markLegacyShardCompatibilityFallback(
+    {
+      hasBoundary:
+        compatibilityBoundary?.screenControllerFamily === "ShardMining, Assembly-CSharp" &&
+        compatibilityBoundary?.dataCarrierTieIn === "ShardMining|ShardUpgradeInfo" &&
+        ["AttachFastBuyButton", "StartFastBuyButtonHold", "FastBuyButtonMethodShards"].every(
+          (name) => controllerShellAnchors.includes(name)
+        ),
+      hasUnlockHookSamples: ["UnlockMilestone17", "UnlockMilestone29"].every((name) =>
+        unlockHookSamples.includes(name)
       ),
-    hasUnlockHookSamples: ["UnlockMilestone17", "UnlockMilestone29"].every((name) =>
-      unlockHookSamples.includes(name)
-    ),
-    hasBuyHookSamples: buyHookSamples.includes("BuyMilestone0"),
-    hasTextCheckerSamples: [
-      "Milestone0TextChecker",
-      "Milestone9TextChecker",
-      "Milestone12TextChecker"
-    ].every((name) => textCheckerSamples.includes(name)),
-    screenController: compatibilityBoundary?.screenControllerFamily || "ShardMining, Assembly-CSharp",
-    tieIn: compatibilityBoundary?.dataCarrierTieIn || "ShardMining|ShardUpgradeInfo",
-    controllerHookLabel: controllerShellAnchors.join(", "),
-    unlockHookLabel: unlockHookSamples.join(", "),
-    buyHookLabel: buyHookSamples.join(", "),
-    textCheckerLabel: textCheckerSamples.join(", ")
-  }, "compatibility-row-shell");
+      hasBuyHookSamples: buyHookSamples.includes("BuyMilestone0"),
+      hasTextCheckerSamples: [
+        "Milestone0TextChecker",
+        "Milestone9TextChecker",
+        "Milestone12TextChecker"
+      ].every((name) => textCheckerSamples.includes(name)),
+      screenController:
+        compatibilityBoundary?.screenControllerFamily || "ShardMining, Assembly-CSharp",
+      tieIn: compatibilityBoundary?.dataCarrierTieIn || "ShardMining|ShardUpgradeInfo",
+      controllerHookLabel: controllerShellAnchors.join(", "),
+      unlockHookLabel: unlockHookSamples.join(", "),
+      buyHookLabel: buyHookSamples.join(", "),
+      textCheckerLabel: textCheckerSamples.join(", ")
+    },
+    "compatibility-row-shell"
+  );
 }
 
 export function getShardMilestoneRowAlignmentBoundarySummary(boundary) {
@@ -1014,9 +1059,9 @@ export function getShardMilestoneRowAlignmentBoundarySummary(boundary) {
       unlockTextOverlapLabel: "unrecovered",
       buyTextOverlapLabel: "unrecovered",
       boundaryVerdict: String(inferredBoundary?.verdict || "").trim() || null,
-      subjectId: String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
-      blockedInputReason:
-        String(inferredBoundary?.blockedInputReason || "").trim() || null,
+      subjectId:
+        String(inferredBoundary?.subjectId || genericSubject?.subjectId || "").trim() || null,
+      blockedInputReason: String(inferredBoundary?.blockedInputReason || "").trim() || null,
       nextSeamId: String(inferredBoundary?.nextSeamId || "").trim() || null,
       genericFactCount:
         Number(inferredBoundary?.genericFactCount || 0) || genericSubject?.factCount || 0,
@@ -1025,47 +1070,54 @@ export function getShardMilestoneRowAlignmentBoundarySummary(boundary) {
     };
   }
   const unlockHookRange =
-    typeof compatibilityBoundary?.unlockHookRange === "object" && compatibilityBoundary.unlockHookRange
+    typeof compatibilityBoundary?.unlockHookRange === "object" &&
+    compatibilityBoundary.unlockHookRange
       ? compatibilityBoundary.unlockHookRange
       : {};
   const textCheckerRange =
-    typeof compatibilityBoundary?.textCheckerRange === "object" && compatibilityBoundary.textCheckerRange
+    typeof compatibilityBoundary?.textCheckerRange === "object" &&
+    compatibilityBoundary.textCheckerRange
       ? compatibilityBoundary.textCheckerRange
       : {};
   const buyHookRange =
     typeof compatibilityBoundary?.buyHookRange === "object" && compatibilityBoundary.buyHookRange
       ? compatibilityBoundary.buyHookRange
       : {};
-  const unlockTextCheckerOverlapIds = Array.isArray(compatibilityBoundary?.unlockTextCheckerOverlapIds)
+  const unlockTextCheckerOverlapIds = Array.isArray(
+    compatibilityBoundary?.unlockTextCheckerOverlapIds
+  )
     ? compatibilityBoundary.unlockTextCheckerOverlapIds
     : [];
   const buyTextCheckerOverlapIds = Array.isArray(compatibilityBoundary?.buyTextCheckerOverlapIds)
     ? compatibilityBoundary.buyTextCheckerOverlapIds
     : [];
-  return markLegacyShardCompatibilityFallback({
-    hasBoundary:
-      compatibilityBoundary?.screenControllerFamily === "ShardMining, Assembly-CSharp" &&
-      unlockHookRange.start === 17 &&
-      unlockHookRange.end === 29 &&
-      unlockHookRange.count === 13 &&
-      textCheckerRange.start === 0 &&
-      textCheckerRange.end === 12 &&
-      textCheckerRange.count === 13 &&
-      buyHookRange.start === 0 &&
-      buyHookRange.end === 0 &&
-      buyHookRange.count === 1,
-    hasZeroUnlockTextOverlap: unlockTextCheckerOverlapIds.length === 0,
-    hasBuyTextOverlap: buyTextCheckerOverlapIds.length === 1 && buyTextCheckerOverlapIds[0] === 0,
-    unlockRangeLabel: `${unlockHookRange.start ?? "?"}-${unlockHookRange.end ?? "?"}`,
-    textCheckerRangeLabel: `${textCheckerRange.start ?? "?"}-${textCheckerRange.end ?? "?"}`,
-    buyRangeLabel: `${buyHookRange.start ?? "?"}-${buyHookRange.end ?? "?"}`,
-    unlockTextOverlapLabel: unlockTextCheckerOverlapIds.length
-      ? unlockTextCheckerOverlapIds.join(", ")
-      : "none",
-    buyTextOverlapLabel: buyTextCheckerOverlapIds.length
-      ? buyTextCheckerOverlapIds.join(", ")
-      : "none"
-  }, "compatibility-row-alignment");
+  return markLegacyShardCompatibilityFallback(
+    {
+      hasBoundary:
+        compatibilityBoundary?.screenControllerFamily === "ShardMining, Assembly-CSharp" &&
+        unlockHookRange.start === 17 &&
+        unlockHookRange.end === 29 &&
+        unlockHookRange.count === 13 &&
+        textCheckerRange.start === 0 &&
+        textCheckerRange.end === 12 &&
+        textCheckerRange.count === 13 &&
+        buyHookRange.start === 0 &&
+        buyHookRange.end === 0 &&
+        buyHookRange.count === 1,
+      hasZeroUnlockTextOverlap: unlockTextCheckerOverlapIds.length === 0,
+      hasBuyTextOverlap: buyTextCheckerOverlapIds.length === 1 && buyTextCheckerOverlapIds[0] === 0,
+      unlockRangeLabel: `${unlockHookRange.start ?? "?"}-${unlockHookRange.end ?? "?"}`,
+      textCheckerRangeLabel: `${textCheckerRange.start ?? "?"}-${textCheckerRange.end ?? "?"}`,
+      buyRangeLabel: `${buyHookRange.start ?? "?"}-${buyHookRange.end ?? "?"}`,
+      unlockTextOverlapLabel: unlockTextCheckerOverlapIds.length
+        ? unlockTextCheckerOverlapIds.join(", ")
+        : "none",
+      buyTextOverlapLabel: buyTextCheckerOverlapIds.length
+        ? buyTextCheckerOverlapIds.join(", ")
+        : "none"
+    },
+    "compatibility-row-alignment"
+  );
 }
 
 export function getShardSaveBoundarySummary(boundary) {
@@ -1163,8 +1215,8 @@ export function getShardSaveBoundarySummary(boundary) {
         typeof ownedStateBoundaryPayload?.blockedInputReason === "string"
           ? ownedStateBoundaryPayload.blockedInputReason
           : typeof shardOwnedStateMetadata?.blockedInputReason === "string"
-          ? shardOwnedStateMetadata.blockedInputReason
-          : null,
+            ? shardOwnedStateMetadata.blockedInputReason
+            : null,
       nextSeamId: combinedNextSeamIds[0] || null,
       genericFactCount:
         Number(ownedStateBoundaryPayload?.genericFactCount || 0) ||
@@ -1184,7 +1236,8 @@ export function getShardSaveBoundarySummary(boundary) {
     ? compatibilityBoundary.saveFamilyTermsChecked
     : [];
   const stateRecoveryChecks =
-    typeof compatibilityBoundary?.boundaryEvidence === "object" && compatibilityBoundary.boundaryEvidence
+    typeof compatibilityBoundary?.boundaryEvidence === "object" &&
+    compatibilityBoundary.boundaryEvidence
       ? compatibilityBoundary.boundaryEvidence
       : {};
   const recoveredDirectRowDefinitionPayload =
@@ -1197,34 +1250,39 @@ export function getShardSaveBoundarySummary(boundary) {
     compatibilityBoundary.recoveredDeclaringRowModel
       ? compatibilityBoundary.recoveredDeclaringRowModel
       : {};
-  return markLegacyShardCompatibilityFallback({
-    hasSeparationBoundary:
-      stateRecoveryChecks.metadataNeighborhoodHasSaveTerms === false &&
-      stateRecoveryChecks.level0HasSaveTerms === false &&
-      stateRecoveryChecks.ownerShellWithSaveOverlapCount === 0 &&
-      stateRecoveryChecks.directShardPlayerProfileContext === false &&
-      saveFamilyTermsChecked.includes("PlayerProfileData") &&
-      saveFamilyTermsChecked.includes("CloudSavePlayerProfile"),
-    hasDirectRowDefinitionPayload:
-      stateRecoveryChecks.directSerializedRowDefinitionRecovered === true,
-    hasRuntimeOwnedStateShell: stateRecoveryChecks.runtimeOwnedStateShellRecovered === true,
-    hasOwnedStateTarget: stateRecoveryChecks.ownedStateTargetRecovered === true,
-    hasOwnedStatePopulationBridge: stateRecoveryChecks.ownedStatePopulationBridgeRecovered === true,
-    ownedStateOutcomeKind: stateRecoveryChecks.ownedStateOutcomeKind || "non-local-injection-seam",
-    ownerAnchor: "ShardMining / ShardUpgradeInfo",
-    saveAnchor: "PlayerProfileData",
-    cloudSaveAnchor: "CloudSavePlayerProfile",
-    directPayloadAnchor: recoveredDirectRowDefinitionPayload.ownerType || "ShardMining",
-    runtimeShellAnchor: recoveredDeclaringRowModel.ownerType
-      ? `${recoveredDeclaringRowModel.ownerType}.upgradeInfoList`
-      : "ShardMining.upgradeInfoList",
-    ownedStateStatusLabel:
-      stateRecoveryChecks.ownedStatePopulationBridgeRecovered === true
-        ? "Owned-state population bridge recovered"
-        : stateRecoveryChecks.ownedStateOutcomeKind === "deeper-wrapper-handoff"
-          ? "The current evidence does not recover a local bridge, but it does preserve a deeper wrapper handoff for owned state"
-        : "Trace rules out a local upgradeInfoList bridge and still cannot name a deeper wrapper handoff; owned state stays at a non-local injection seam",
-    overlapLabel: "zero direct overlap",
-    ownerTermCount: ownerShellTermsChecked.length
-  }, "compatibility-save-boundary");
+  return markLegacyShardCompatibilityFallback(
+    {
+      hasSeparationBoundary:
+        stateRecoveryChecks.metadataNeighborhoodHasSaveTerms === false &&
+        stateRecoveryChecks.level0HasSaveTerms === false &&
+        stateRecoveryChecks.ownerShellWithSaveOverlapCount === 0 &&
+        stateRecoveryChecks.directShardPlayerProfileContext === false &&
+        saveFamilyTermsChecked.includes("PlayerProfileData") &&
+        saveFamilyTermsChecked.includes("CloudSavePlayerProfile"),
+      hasDirectRowDefinitionPayload:
+        stateRecoveryChecks.directSerializedRowDefinitionRecovered === true,
+      hasRuntimeOwnedStateShell: stateRecoveryChecks.runtimeOwnedStateShellRecovered === true,
+      hasOwnedStateTarget: stateRecoveryChecks.ownedStateTargetRecovered === true,
+      hasOwnedStatePopulationBridge:
+        stateRecoveryChecks.ownedStatePopulationBridgeRecovered === true,
+      ownedStateOutcomeKind:
+        stateRecoveryChecks.ownedStateOutcomeKind || "non-local-injection-seam",
+      ownerAnchor: "ShardMining / ShardUpgradeInfo",
+      saveAnchor: "PlayerProfileData",
+      cloudSaveAnchor: "CloudSavePlayerProfile",
+      directPayloadAnchor: recoveredDirectRowDefinitionPayload.ownerType || "ShardMining",
+      runtimeShellAnchor: recoveredDeclaringRowModel.ownerType
+        ? `${recoveredDeclaringRowModel.ownerType}.upgradeInfoList`
+        : "ShardMining.upgradeInfoList",
+      ownedStateStatusLabel:
+        stateRecoveryChecks.ownedStatePopulationBridgeRecovered === true
+          ? "Owned-state population bridge recovered"
+          : stateRecoveryChecks.ownedStateOutcomeKind === "deeper-wrapper-handoff"
+            ? "The current evidence does not recover a local bridge, but it does preserve a deeper wrapper handoff for owned state"
+            : "Trace rules out a local upgradeInfoList bridge and still cannot name a deeper wrapper handoff; owned state stays at a non-local injection seam",
+      overlapLabel: "zero direct overlap",
+      ownerTermCount: ownerShellTermsChecked.length
+    },
+    "compatibility-save-boundary"
+  );
 }

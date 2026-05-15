@@ -45,9 +45,7 @@ function markLegacyTokenShopFallback(summary, coverageSource) {
 }
 
 export function getTokenShopCostLaneSummary(clues) {
-  const genericSummary = getTokenShopGenericCostLaneSummary(
-    getTokenShopDbGenericScopes(clues)
-  );
+  const genericSummary = getTokenShopGenericCostLaneSummary(getTokenShopDbGenericScopes(clues));
   const contracts = normalizeTokenShopSubjectMetadata(clues);
   if (genericSummary) {
     return genericSummary;
@@ -676,9 +674,7 @@ export function calculateDailyTokeniumCap(tierUnlocks, upgradeLevels = {}) {
 
 export function getMultiverseMarketRangeBoundarySummary(boundary, multiverseMarket = null) {
   const fallbackBoundary =
-    boundary ??
-    multiverseMarket?.rowIdentity?.compatibilityBoundaries?.rangeBoundary ??
-    null;
+    boundary ?? multiverseMarket?.rowIdentity?.compatibilityBoundaries?.rangeBoundary ?? null;
   const genericBoundary = getMultiverseMarketGenericBoundarySummary(multiverseMarket);
   const validatedCoverage = getMultiverseMarketValidatedCoverage(
     multiverseMarket?.saveOwner?.extract ?? multiverseMarket
@@ -755,9 +751,7 @@ export function getMultiverseMarketRowTextCoverageSummary(coverage, multiverseMa
     };
   }
   const fallbackCoverage =
-    coverage ??
-    multiverseMarket?.rowIdentity?.compatibilityBoundaries?.rowTextCoverage ??
-    null;
+    coverage ?? multiverseMarket?.rowIdentity?.compatibilityBoundaries?.rowTextCoverage ?? null;
   const textHandlerAnchors = Array.isArray(fallbackCoverage?.textHandlerAnchors)
     ? fallbackCoverage.textHandlerAnchors
     : [];
@@ -825,9 +819,7 @@ export function getMultiverseMarketActionShellSummary(shell, multiverseMarket = 
     };
   }
   const fallbackShell =
-    shell ??
-    multiverseMarket?.uiShell?.compatibilityBoundaries?.actionShell ??
-    null;
+    shell ?? multiverseMarket?.uiShell?.compatibilityBoundaries?.actionShell ?? null;
   const textHandlerAnchors = Array.isArray(fallbackShell?.textHandlerAnchors)
     ? fallbackShell.textHandlerAnchors
     : [];
@@ -897,9 +889,7 @@ export function getMultiverseMarketPrefabRemapBoundarySummary(boundary, multiver
     };
   }
   const fallbackBoundary =
-    boundary ??
-    multiverseMarket?.rowIdentity?.compatibilityBoundaries?.prefabRemapBoundary ??
-    null;
+    boundary ?? multiverseMarket?.rowIdentity?.compatibilityBoundaries?.prefabRemapBoundary ?? null;
   const directPrefabNumberMatches = Array.isArray(fallbackBoundary?.directPrefabNumberMatches)
     ? fallbackBoundary.directPrefabNumberMatches
     : [];
@@ -965,17 +955,19 @@ export function getMultiverseMarketOwnerFamilySummary(family, multiverseMarket =
     };
   }
   const fallbackFamily =
-    family ??
-    multiverseMarket?.uiShell?.compatibilityBoundaries?.ownerFamily ??
-    null;
-  const ownerAnchors = Array.isArray(fallbackFamily?.ownerAnchors) ? fallbackFamily.ownerAnchors : [];
+    family ?? multiverseMarket?.uiShell?.compatibilityBoundaries?.ownerFamily ?? null;
+  const ownerAnchors = Array.isArray(fallbackFamily?.ownerAnchors)
+    ? fallbackFamily.ownerAnchors
+    : [];
   const costLaneAnchors = Array.isArray(fallbackFamily?.costLaneAnchors)
     ? fallbackFamily.costLaneAnchors
     : [];
   const validatedCurrencyBoxes = Array.isArray(fallbackFamily?.validatedCurrencyBoxes)
     ? fallbackFamily.validatedCurrencyBoxes
     : [];
-  const sampleBuyHooks = Array.isArray(fallbackFamily?.sampleBuyHooks) ? fallbackFamily.sampleBuyHooks : [];
+  const sampleBuyHooks = Array.isArray(fallbackFamily?.sampleBuyHooks)
+    ? fallbackFamily.sampleBuyHooks
+    : [];
   const currencyBoxRange =
     typeof fallbackFamily?.currencyBoxRange === "object" && fallbackFamily.currencyBoxRange
       ? fallbackFamily.currencyBoxRange
@@ -1013,9 +1005,7 @@ export function getMultiverseMarketOwnerFamilySummary(family, multiverseMarket =
 }
 
 export function getTokenShopOwnerShellSummary(shell) {
-  const genericSummary = getTokenShopGenericOwnerShellSummary(
-    getTokenShopDbGenericScopes(shell)
-  );
+  const genericSummary = getTokenShopGenericOwnerShellSummary(getTokenShopDbGenericScopes(shell));
   const contracts = normalizeTokenShopSubjectMetadata(shell);
   if (genericSummary) {
     return genericSummary;
@@ -1268,8 +1258,16 @@ export function getMultiverseMarketSaveBoundarySummary(boundary) {
     boundary;
   const genericBoundary = getMultiverseMarketGenericBoundarySummary(boundary);
   const inferredBoundary =
-    getDbSystemBoundaryEntry(boundary, "multiverse-market-save-owner-boundary", "subject-boundary") ||
-    getDbSystemBoundaryEntry(boundary, "family-graph:multiverse-market-save-owner", "subject-boundary");
+    getDbSystemBoundaryEntry(
+      boundary,
+      "multiverse-market-save-owner-boundary",
+      "subject-boundary"
+    ) ||
+    getDbSystemBoundaryEntry(
+      boundary,
+      "family-graph:multiverse-market-save-owner",
+      "subject-boundary"
+    );
   const saveOwnerMetadata =
     getDbSystemSubjectMetadataEntry(boundary, "multiverse-market-save-owner-boundary") ||
     getDbSystemSubjectMetadataEntry(boundary, "family-graph:multiverse-market-save-owner");
@@ -1291,9 +1289,7 @@ export function getMultiverseMarketSaveBoundarySummary(boundary) {
     const saveAnchor = String(
       genericBoundary?.factsByKind?.["save-owner"]?.[0] || "SaveData"
     ).trim();
-    const typedSpanLabel = String(
-      genericBoundary?.factsByKind?.["typed-span"]?.[0] || ""
-    ).trim();
+    const typedSpanLabel = String(genericBoundary?.factsByKind?.["typed-span"]?.[0] || "").trim();
     return {
       hasSeparationBoundary:
         knownEdges.includes("accessor-bridge") && knownEdges.includes("typed-save-owner"),
@@ -1309,23 +1305,28 @@ export function getMultiverseMarketSaveBoundarySummary(boundary) {
       overlapLabel: knownEdges.includes("ordered-row-overlap")
         ? "ordered overlap only"
         : "overlap-unavailable",
-      subjectId: inferredBoundary?.subjectId || (useMetadataFallback ? saveOwnerMetadata?.subjectId : null) || null,
+      subjectId:
+        inferredBoundary?.subjectId ||
+        (useMetadataFallback ? saveOwnerMetadata?.subjectId : null) ||
+        null,
       subjectKind:
-        inferredBoundary?.subjectKind || (useMetadataFallback ? saveOwnerMetadata?.subjectKind : null) || null,
+        inferredBoundary?.subjectKind ||
+        (useMetadataFallback ? saveOwnerMetadata?.subjectKind : null) ||
+        null,
       knownEdges,
       missingEdges,
       blockedInputReason:
         typeof inferredBoundary?.blockedInputReason === "string"
           ? inferredBoundary.blockedInputReason
           : useMetadataFallback && typeof saveOwnerMetadata?.blockedInputReason === "string"
-          ? saveOwnerMetadata.blockedInputReason
-          : null,
+            ? saveOwnerMetadata.blockedInputReason
+            : null,
       nextSeamId:
         (typeof inferredBoundary?.nextSeamId === "string"
           ? inferredBoundary.nextSeamId
           : useMetadataFallback && typeof saveOwnerMetadata?.nextSeam?.id === "string"
-          ? saveOwnerMetadata.nextSeam.id
-          : null) ||
+            ? saveOwnerMetadata.nextSeam.id
+            : null) ||
         genericBoundary?.nextSeamIds?.[0] ||
         null,
       genericFactCount:
@@ -1341,7 +1342,8 @@ export function getMultiverseMarketSaveBoundarySummary(boundary) {
     ? compatibilityBoundary.saveFamilyTermsChecked
     : [];
   const boundaryEvidence =
-    typeof compatibilityBoundary?.boundaryEvidence === "object" && compatibilityBoundary.boundaryEvidence
+    typeof compatibilityBoundary?.boundaryEvidence === "object" &&
+    compatibilityBoundary.boundaryEvidence
       ? compatibilityBoundary.boundaryEvidence
       : {};
 
@@ -1367,8 +1369,16 @@ export function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
     boundary;
   const genericBoundary = getMultiverseMarketGenericBoundarySummary(boundary);
   const inferredBoundary =
-    getDbSystemBoundaryEntry(boundary, "multiverse-market-save-owner-boundary", "subject-boundary") ||
-    getDbSystemBoundaryEntry(boundary, "family-graph:multiverse-market-save-owner", "subject-boundary");
+    getDbSystemBoundaryEntry(
+      boundary,
+      "multiverse-market-save-owner-boundary",
+      "subject-boundary"
+    ) ||
+    getDbSystemBoundaryEntry(
+      boundary,
+      "family-graph:multiverse-market-save-owner",
+      "subject-boundary"
+    );
   const saveOwnerMetadata =
     getDbSystemSubjectMetadataEntry(boundary, "multiverse-market-save-owner-boundary") ||
     getDbSystemSubjectMetadataEntry(boundary, "family-graph:multiverse-market-save-owner");
@@ -1419,26 +1429,31 @@ export function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
         typedOwnerSummary.coverageSource !== "compatibility-boundary-export"
           ? typedOwnerSummary.negativeTypedOwnerLabel
           : missingEdges.includes("typed-market-field-recovery")
-          ? "typed-market-field-recovery remains open"
-          : "typed market field recovery status unavailable",
-      subjectId: inferredBoundary?.subjectId || (useMetadataFallback ? saveOwnerMetadata?.subjectId : null) || null,
+            ? "typed-market-field-recovery remains open"
+            : "typed market field recovery status unavailable",
+      subjectId:
+        inferredBoundary?.subjectId ||
+        (useMetadataFallback ? saveOwnerMetadata?.subjectId : null) ||
+        null,
       subjectKind:
-        inferredBoundary?.subjectKind || (useMetadataFallback ? saveOwnerMetadata?.subjectKind : null) || null,
+        inferredBoundary?.subjectKind ||
+        (useMetadataFallback ? saveOwnerMetadata?.subjectKind : null) ||
+        null,
       knownEdges,
       missingEdges,
       blockedInputReason:
         typeof inferredBoundary?.blockedInputReason === "string"
           ? inferredBoundary.blockedInputReason
           : useMetadataFallback && typeof saveOwnerMetadata?.blockedInputReason === "string"
-          ? saveOwnerMetadata.blockedInputReason
-          : null,
+            ? saveOwnerMetadata.blockedInputReason
+            : null,
       nextSeamId:
         typedOwnerSummary.nextSeamId ||
         (typeof inferredBoundary?.nextSeamId === "string"
           ? inferredBoundary.nextSeamId
           : useMetadataFallback && typeof saveOwnerMetadata?.nextSeam?.id === "string"
-          ? saveOwnerMetadata.nextSeam.id
-          : null) ||
+            ? saveOwnerMetadata.nextSeam.id
+            : null) ||
         genericBoundary?.nextSeamIds?.[0] ||
         null,
       genericFactCount:
@@ -1462,7 +1477,9 @@ export function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
   const typedSiblingContrastClues = Array.isArray(compatibilityBoundary?.typedSiblingContrastClues)
     ? compatibilityBoundary.typedSiblingContrastClues
     : [];
-  const progressionPayloadFieldClues = Array.isArray(compatibilityBoundary?.progressionPayloadFieldClues)
+  const progressionPayloadFieldClues = Array.isArray(
+    compatibilityBoundary?.progressionPayloadFieldClues
+  )
     ? compatibilityBoundary.progressionPayloadFieldClues
     : [];
   const cloudSaveBridgeClues = Array.isArray(compatibilityBoundary?.cloudSaveBridgeClues)
@@ -1476,7 +1493,9 @@ export function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
   )
     ? compatibilityBoundary.negativeTypedDirectPlayerProfileProgressionChecks
     : [];
-  const negativeTypedDirectMemberChecks = Array.isArray(compatibilityBoundary?.negativeTypedDirectMemberChecks)
+  const negativeTypedDirectMemberChecks = Array.isArray(
+    compatibilityBoundary?.negativeTypedDirectMemberChecks
+  )
     ? compatibilityBoundary.negativeTypedDirectMemberChecks
     : [];
   const negativeTypedSaveDataMarketChecks = Array.isArray(
@@ -1485,11 +1504,13 @@ export function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
     ? compatibilityBoundary.negativeTypedSaveDataMarketChecks
     : [];
   const typedBridgeRecovery =
-    typeof compatibilityBoundary?.typedBridgeRecovery === "object" && compatibilityBoundary.typedBridgeRecovery
+    typeof compatibilityBoundary?.typedBridgeRecovery === "object" &&
+    compatibilityBoundary.typedBridgeRecovery
       ? compatibilityBoundary.typedBridgeRecovery
       : {};
   const typedHandlerFieldRecovery =
-    typeof compatibilityBoundary?.typedHandlerFieldRecovery === "object" && compatibilityBoundary.typedHandlerFieldRecovery
+    typeof compatibilityBoundary?.typedHandlerFieldRecovery === "object" &&
+    compatibilityBoundary.typedHandlerFieldRecovery
       ? compatibilityBoundary.typedHandlerFieldRecovery
       : {};
   const typedPlayerProfileFieldTableRecovery =
@@ -1736,7 +1757,8 @@ export function getMultiverseMarketMetadataSummary(neighborhood, multiverseMarke
   if (genericSummary || typedOwnerSummary) {
     const metadataAnchors = genericSummary?.factsByKind?.["metadata-anchor"] || [];
     const typedHostAnchors = typedOwnerSummary?.factsByKind?.["typed-host-anchor"] || [];
-    const typedConversionAnchors = typedOwnerSummary?.factsByKind?.["typed-conversion-anchor"] || [];
+    const typedConversionAnchors =
+      typedOwnerSummary?.factsByKind?.["typed-conversion-anchor"] || [];
     const typedFieldSamples = typedOwnerSummary?.factsByKind?.["typed-field-sample"] || [];
     const typedSpan =
       String(typedOwnerSummary?.factsByKind?.["typed-span"]?.[0] || "") ||
@@ -1822,7 +1844,9 @@ export function getMultiverseMarketTypedOwnerSummary(multiverseMarket = null) {
     const conversionAnchors = genericSummary.factsByKind?.["typed-conversion-anchor"] || [];
     const fieldSamples = genericSummary.factsByKind?.["typed-field-sample"] || [];
     const typedSpan = String(genericSummary.factsByKind?.["typed-span"]?.[0] || "");
-    const missingEdges = Array.isArray(genericSummary.missingEdges) ? genericSummary.missingEdges : [];
+    const missingEdges = Array.isArray(genericSummary.missingEdges)
+      ? genericSummary.missingEdges
+      : [];
     const nextSeamId = genericSummary.nextSeamIds?.[0] || null;
     return {
       hasTypedOwnerAnchors: hostAnchors.length > 0,
@@ -1835,9 +1859,10 @@ export function getMultiverseMarketTypedOwnerSummary(multiverseMarket = null) {
       recoveredIsRangeLabel: typedSpan,
       nextSeamId,
       negativeTypedOwnerLabel:
-        missingEdges.includes("typed-market-field-recovery") || nextSeamId === "typed-market-field-recovery"
-        ? "exact typed Market or MultiverseMarket field host remains unrecovered"
-        : "typed market field recovery status unavailable",
+        missingEdges.includes("typed-market-field-recovery") ||
+        nextSeamId === "typed-market-field-recovery"
+          ? "exact typed Market or MultiverseMarket field host remains unrecovered"
+          : "typed market field recovery status unavailable",
       genericFactCount: genericSummary.factCount || 0,
       genericGapCount: genericSummary.gapCount || 0
     };
@@ -1927,7 +1952,9 @@ export function getMultiverseMarketCanonicalImportSummary(multiverseMarket = nul
     )
       ? genericSummary.relationsByKind["bounded-import-lane"]
       : [];
-    const missingEdges = Array.isArray(genericSummary.missingEdges) ? genericSummary.missingEdges : [];
+    const missingEdges = Array.isArray(genericSummary.missingEdges)
+      ? genericSummary.missingEdges
+      : [];
     const nextSeamId = genericSummary.nextSeamIds?.[0] || null;
     return {
       hasCanonicalImportBoundary: true,
@@ -2003,28 +2030,40 @@ export function getMultiverseMarketBroadRowRemapSummary(multiverseMarket = null)
     const overlapIds = (genericSummary.factsByKind?.["ordered-overlap-row-id"] || [])
       .map((value) => Number(value))
       .filter((value) => Number.isFinite(value));
-    const candidateRowRemaps = Array.isArray(genericSummary.relationsByKind?.["candidate-row-remap"])
+    const candidateRowRemaps = Array.isArray(
+      genericSummary.relationsByKind?.["candidate-row-remap"]
+    )
       ? genericSummary.relationsByKind["candidate-row-remap"]
       : [];
     const supportRowRemaps = Array.isArray(genericSummary.relationsByKind?.["supports-row-remap"])
       ? genericSummary.relationsByKind["supports-row-remap"]
       : [];
-    const supportRowTextLanes = Array.isArray(genericSummary.relationsByKind?.["supports-row-text-lane"])
+    const supportRowTextLanes = Array.isArray(
+      genericSummary.relationsByKind?.["supports-row-text-lane"]
+    )
       ? genericSummary.relationsByKind["supports-row-text-lane"]
       : [];
-    const overrideIdRemaps = Array.isArray(genericSummary.relationsByKind?.["candidate-override-id-remap"])
+    const overrideIdRemaps = Array.isArray(
+      genericSummary.relationsByKind?.["candidate-override-id-remap"]
+    )
       ? genericSummary.relationsByKind["candidate-override-id-remap"]
       : [];
-    const boundedRowRemapSupport = Array.isArray(genericSummary.relationsByKind?.["supports-bounded-row-remap"])
+    const boundedRowRemapSupport = Array.isArray(
+      genericSummary.relationsByKind?.["supports-bounded-row-remap"]
+    )
       ? genericSummary.relationsByKind["supports-bounded-row-remap"]
       : [];
     const boundedRowRemaps = Array.isArray(genericSummary.relationsByKind?.["bounded-row-remap"])
       ? genericSummary.relationsByKind["bounded-row-remap"]
       : [];
-    const boundedRowTextLanes = Array.isArray(genericSummary.relationsByKind?.["bounded-row-text-lane"])
+    const boundedRowTextLanes = Array.isArray(
+      genericSummary.relationsByKind?.["bounded-row-text-lane"]
+    )
       ? genericSummary.relationsByKind["bounded-row-text-lane"]
       : [];
-    const missingEdges = Array.isArray(genericSummary.missingEdges) ? genericSummary.missingEdges : [];
+    const missingEdges = Array.isArray(genericSummary.missingEdges)
+      ? genericSummary.missingEdges
+      : [];
     const nextSeamId = genericSummary.nextSeamIds?.[0] || null;
     return {
       hasBroadRowRemapBoundary: true,
@@ -2110,7 +2149,7 @@ import {
 } from "./db-system-bundle.js";
 import {
   getTokenShopDbGenericScopes,
-  getTokenShopDbSubjectMetadata,
+  getTokenShopDbSubjectMetadata
 } from "./token-shop-db-bundle.js";
 import { getQuarantinedMultiverseMarketImportedState } from "../player-profile.js";
 
@@ -2266,7 +2305,9 @@ export function getTokenShopCoverageSummary(tokenShop) {
   if (genericCoverage.hasCoverage) {
     return genericCoverage;
   }
-  const rowLocalEntries = subjectMetadataEntries.filter((contract) => contract?.subjectKind === "row-local");
+  const rowLocalEntries = subjectMetadataEntries.filter(
+    (contract) => contract?.subjectKind === "row-local"
+  );
   const rangeFamilyEntries = subjectMetadataEntries.filter(
     (contract) => contract?.subjectKind === "range-family"
   );
@@ -2395,7 +2436,10 @@ export function getImportedMultiverseMarketPreview(
   const previewRows = importedSpanRows.slice(0, 12);
   const trailingPreviewRows = importedSpanRows.slice(-4);
   const supportedTextModel = {
-    effectLabelLane: getGenericBoundaryFact("grounded-text-lane-effect-label", "BonusDescriptionText"),
+    effectLabelLane: getGenericBoundaryFact(
+      "grounded-text-lane-effect-label",
+      "BonusDescriptionText"
+    ),
     effectLabelSourceLane: getGenericBoundaryFact(
       "grounded-text-lane-effect-source",
       "SetAllBonusTexts -> SetISNBonusText"

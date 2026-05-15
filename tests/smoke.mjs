@@ -637,7 +637,12 @@ assert.match(appJs, /These are the only spend-side values this panel consumes to
 assert.match(appJs, /TokenShop row levels and recommendation math/);
 assertTextIncludesAllConcepts(
   appJs,
-  ["does not read", "checked TokenShop row levels", "ATU imports", "Progression-side storefront lane"],
+  [
+    "does not read",
+    "checked TokenShop row levels",
+    "ATU imports",
+    "Progression-side storefront lane"
+  ],
   "app spend planner exclusions"
 );
 assert.match(appJs, /buildAppMetaSystemView/);
@@ -714,10 +719,7 @@ assert.match(
   appJs,
   /purchase plates write back into checked player state and deduct Tokens from the profile/i
 );
-assert.match(
-  appJs,
-  /exact runtime display-update path and runtime model for the ATU4 row/i
-);
+assert.match(appJs, /exact runtime display-update path and runtime model for the ATU4 row/i);
 assert.match(tokenShopUiSupport, /function sanitizeTokenShopRichText/);
 assert.match(appJs, /<details class="token-shop-evidence-note">/);
 assert.match(appJs, /boundary\?\.atu3CrossSystemEffectTrace\?\.recoveredActionEffectChain/);
@@ -6224,7 +6226,9 @@ assert.ok(
 );
 assert.ok(
   tokenShopRowRemapTrack?.verified?.some((line) =>
-    /late ATU24-ATU28 shell neighborhood now also has a (tighter bounded negative result|stronger family-level bounded negative result)/.test(line)
+    /late ATU24-ATU28 shell neighborhood now also has a (tighter bounded negative result|stronger family-level bounded negative result)/.test(
+      line
+    )
   )
 );
 assert.match(
@@ -6967,7 +6971,10 @@ assert.match(
 assert.match(appJs, /modifier-side reward lane|budget lane/);
 assert.match(spendBoundarySummaryJs, /function getSpendActionLaneSummary/);
 assert.match(appJs, /Spend action-lane split/);
-assert.match(appJs, /DB-backed TokenShop action coverage or legacy spend action-lane clues preserved/);
+assert.match(
+  appJs,
+  /DB-backed TokenShop action coverage or legacy spend action-lane clues preserved/
+);
 assert.match(
   appJs,
   /Canonical TokenShop action coverage now preserves \${spendActionLaneSummary\.rowLocalSubjectId} via \${spendActionLaneSummary\.loopModifierHook}, while \${spendActionLaneSummary\.rangeFamilySubjectId} keeps \${spendActionLaneSummary\.dailyHookT2} recorded with blocked input \${spendActionLaneSummary\.blockedInputReason \|\| "explicitly de-scoped"}|Action-lane clues preserve \${spendActionLaneSummary\.tokenHook}, \${spendActionLaneSummary\.diamondHook}, \${spendActionLaneSummary\.loopModifierHook}, and \${spendActionLaneSummary\.premiumModifierHook}/
@@ -7009,10 +7016,7 @@ assert.match(
 );
 assert.match(spendBoundarySummaryJs, /function getTokenBankControllerShellSummary/);
 assert.match(appJs, /Token-bank controller shell/);
-assert.match(
-  appJs,
-  /const hasTokenShopDbRead = hasTokenShopDbSurface\(tokenShop\);/
-);
+assert.match(appJs, /const hasTokenShopDbRead = hasTokenShopDbSurface\(tokenShop\);/);
 assert.match(appJs, /const hasTokeniumNamingRead =/);
 assert.match(appJs, /const hasTokenShopCostLaneRead =/);
 assert.match(appJs, /const hasSpendActionLaneRead =/);
@@ -7056,7 +7060,10 @@ assert.match(
   appJs,
   /\$\{dailyTokeniumSummary\.loopHook\}, \$\{dailyTokeniumSummary\.purchaseHook\}, \$\{dailyTokeniumSummary\.finalBonusHook\}, \$\{dailyTokeniumSummary\.purchaseOwner\}, and collector-pack copy are now grounded on the canonical Daily Tokenium lane contract rather than read from legacy clue bundles\./
 );
-assert.match(appJs, /DB-backed TokenShop controller shell or legacy token-bank controller shell preserved/);
+assert.match(
+  appJs,
+  /DB-backed TokenShop controller shell or legacy token-bank controller shell preserved/
+);
 assert.match(
   appJs,
   /Canonical TokenShop contracts now preserve token-bank controller shell on \${tokenBankControllerShellSummary\.rowLocalSubjectId}, with \${tokenBankControllerShellSummary\.claimMethod}, \${tokenBankControllerShellSummary\.fillMethod}, \${tokenBankControllerShellSummary\.fillField}, \${tokenBankControllerShellSummary\.descriptionShell}, and \${tokenBankControllerShellSummary\.notificationHook}|The token-bank controller shell preserves \${tokenBankControllerShellSummary\.claimMethod}, \${tokenBankControllerShellSummary\.fillMethod}, \${tokenBankControllerShellSummary\.fillField}, \${tokenBankControllerShellSummary\.descriptionShell}, and \${tokenBankControllerShellSummary\.notificationHook}/
@@ -8222,7 +8229,9 @@ print(json.dumps({"state": state, "contract": contract}))
     "Daily Tokenium contract should not regress the academy tokenium label when it is present"
   );
   assert.ok(
-    [undefined, "CostBox-Tokens"].includes(contract.groundedFields?.tokeniumNaming?.tokenShellLabel),
+    [undefined, "CostBox-Tokens"].includes(
+      contract.groundedFields?.tokeniumNaming?.tokenShellLabel
+    ),
     "Daily Tokenium contract should not regress the token shell label when it is present"
   );
   assert.ok(

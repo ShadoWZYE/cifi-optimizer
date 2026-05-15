@@ -42,8 +42,8 @@ export function normalizeDbSystemBundle(input = {}) {
   const boundaries = unwrapEntryMap(boundariesPayload);
   const hasAny = Boolean(
     (subjectMetadata && Object.keys(subjectMetadata).length) ||
-      (genericScopes && Object.keys(genericScopes).length) ||
-      (boundaries && Object.keys(boundaries).length)
+    (genericScopes && Object.keys(genericScopes).length) ||
+    (boundaries && Object.keys(boundaries).length)
   );
 
   return {
@@ -193,7 +193,10 @@ export function getDbSystemBoundaryEntry(input, subjectId, boundaryKind = "") {
     getDbSystemBoundaryEntries(input).find((entry) => {
       const entrySubjectId = String(entry?.subjectId || "").trim();
       const entryBoundaryKind = String(entry?.boundaryKind || "").trim();
-      return entrySubjectId === normalizedSubjectId && (!normalizedBoundaryKind || entryBoundaryKind === normalizedBoundaryKind);
+      return (
+        entrySubjectId === normalizedSubjectId &&
+        (!normalizedBoundaryKind || entryBoundaryKind === normalizedBoundaryKind)
+      );
     }) ?? null
   );
 }
@@ -207,7 +210,9 @@ export function getDbSystemCoverageSummary(input, options = {}) {
   const boundaryEntries = getDbSystemBoundaryEntries(input);
   const subjectFilter =
     typeof options.subjectFilter === "function" ? options.subjectFilter : () => true;
-  const filteredMetadata = subjectMetadataEntries.filter((entry) => subjectFilter(entry?.subjectId, entry));
+  const filteredMetadata = subjectMetadataEntries.filter((entry) =>
+    subjectFilter(entry?.subjectId, entry)
+  );
   const filteredGeneric = genericSubjectSummaries.filter((entry) =>
     subjectFilter(entry?.subjectId, entry)
   );
@@ -230,9 +235,7 @@ export function getDbSystemCoverageSummary(input, options = {}) {
         .filter(Boolean)
         .concat(filteredGeneric.flatMap((entry) => entry.nextSeamIds || []))
         .concat(
-          filteredBoundaries
-            .map((entry) => String(entry?.nextSeamId || "").trim())
-            .filter(Boolean)
+          filteredBoundaries.map((entry) => String(entry?.nextSeamId || "").trim()).filter(Boolean)
         )
     )
   ];
@@ -267,13 +270,7 @@ export function getDbSystemCoverageSummary(input, options = {}) {
   };
 }
 
-export function hasDbSystemCoverageForSubjects(
-  input,
-  {
-    subjectIds = [],
-    traceScopes = []
-  } = {}
-) {
+export function hasDbSystemCoverageForSubjects(input, { subjectIds = [], traceScopes = [] } = {}) {
   const normalizedSubjectIds = new Set(
     (Array.isArray(subjectIds) ? subjectIds : [])
       .map((value) => String(value || "").trim())
@@ -288,10 +285,8 @@ export function hasDbSystemCoverageForSubjects(
     return false;
   }
 
-  const matchesSubject = (value) =>
-    normalizedSubjectIds.has(String(value || "").trim());
-  const matchesTraceScope = (value) =>
-    normalizedTraceScopes.has(String(value || "").trim());
+  const matchesSubject = (value) => normalizedSubjectIds.has(String(value || "").trim());
+  const matchesTraceScope = (value) => normalizedTraceScopes.has(String(value || "").trim());
 
   const genericScopes = getDbSystemGenericScopes(input) || {};
   for (const [traceScope, scopePayload] of Object.entries(genericScopes)) {

@@ -24,10 +24,16 @@ export function buildTokenShopDbRowDetailResolver(input = {}) {
 
   return {
     apply(row) {
-      const genericRowDetail = getTokenShopGenericRowDetailForField(genericMechanicsIndex, row?.field);
+      const genericRowDetail = getTokenShopGenericRowDetailForField(
+        genericMechanicsIndex,
+        row?.field
+      );
       const genericApplied = applyTokenShopGenericRowDetailToRow(row, genericRowDetail);
       const directContract = getTokenShopDbSubjectMetadataForField(contractIndex, row?.field);
-      const supportingContracts = getTokenShopSupportingContractsForField(contractIndex, row?.field);
+      const supportingContracts = getTokenShopSupportingContractsForField(
+        contractIndex,
+        row?.field
+      );
       const directApplied = directContract
         ? applyTokenShopDbSubjectMetadataToRow(genericApplied, directContract)
         : genericApplied;

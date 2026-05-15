@@ -97,21 +97,63 @@ test("shard owner-family summary prefers DB-backed generic mechanics and inferre
           ],
           facts: [
             { factKind: "screen-controller-family", factValue: "ShardMining", payload: {} },
-            { factKind: "data-carrier-candidate", factValue: "ShardMining|ShardUpgradeInfo", payload: {} },
-            { factKind: "runtime-shell", factValue: "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo", payload: {} },
+            {
+              factKind: "data-carrier-candidate",
+              factValue: "ShardMining|ShardUpgradeInfo",
+              payload: {}
+            },
+            {
+              factKind: "runtime-shell",
+              factValue: "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo",
+              payload: {}
+            },
             { factKind: "owner-field", factValue: "upgradeInfoList", payload: {} },
             { factKind: "row-model-type", factValue: "ShardMining+ShardUpgradeInfo", payload: {} },
             { factKind: "row-state-field", factValue: "<Cost>k__BackingField", payload: {} },
             { factKind: "row-state-field", factValue: "<MaxLevel>k__BackingField", payload: {} },
             { factKind: "row-state-field", factValue: "<IsUnlocked>k__BackingField", payload: {} },
-            { factKind: "supporting-edge-type", factValue: "definition-to-runtime-shell", payload: {} },
-            { factKind: "supporting-edge-type", factValue: "runtime-shell-to-owner-lists", payload: {} },
-            { factKind: "blocked-edge-type", factValue: "local-runtime-population-bridge", payload: {} },
-            { factKind: "blocked-edge-type", factValue: "deeper-wrapper-handoff-recovery", payload: {} },
-            { factKind: "grounded-conclusion", factValue: "Automatic native reconstruction ties this lane to InitializeShards via isUnlocked, get_isUnlocked, get_maxLevel and MaxLevel.", payload: {} },
-            { factKind: "outcome-statement", factValue: "The raw trace now narrows the owned-state path to a non-local seam: direct definitions and the runtime shell are recovered locally, but owned-state values still arrive from a source the repo cannot yet name.", payload: {} },
-            { factKind: "source-trace-scope", factValue: "shard-owned-state-upgradeinfolist-population", payload: {} },
-            { factKind: "source-subject-id", factValue: "shard-owned-state-upgradeinfolist-population", payload: {} }
+            {
+              factKind: "supporting-edge-type",
+              factValue: "definition-to-runtime-shell",
+              payload: {}
+            },
+            {
+              factKind: "supporting-edge-type",
+              factValue: "runtime-shell-to-owner-lists",
+              payload: {}
+            },
+            {
+              factKind: "blocked-edge-type",
+              factValue: "local-runtime-population-bridge",
+              payload: {}
+            },
+            {
+              factKind: "blocked-edge-type",
+              factValue: "deeper-wrapper-handoff-recovery",
+              payload: {}
+            },
+            {
+              factKind: "grounded-conclusion",
+              factValue:
+                "Automatic native reconstruction ties this lane to InitializeShards via isUnlocked, get_isUnlocked, get_maxLevel and MaxLevel.",
+              payload: {}
+            },
+            {
+              factKind: "outcome-statement",
+              factValue:
+                "The raw trace now narrows the owned-state path to a non-local seam: direct definitions and the runtime shell are recovered locally, but owned-state values still arrive from a source the repo cannot yet name.",
+              payload: {}
+            },
+            {
+              factKind: "source-trace-scope",
+              factValue: "shard-owned-state-upgradeinfolist-population",
+              payload: {}
+            },
+            {
+              factKind: "source-subject-id",
+              factValue: "shard-owned-state-upgradeinfolist-population",
+              payload: {}
+            }
           ],
           relations: [],
           gaps: [{ gapKind: "next-seam", payload: { seamId: "local-runtime-population-bridge" } }]
@@ -197,7 +239,9 @@ test("buildShardSystemView keeps shard owner-family artifact only as compatibili
       genericMechanics: {
         scopes: {
           "shard-owner-family-boundary": {
-            entities: [{ entityId: "family-graph:shards-owner-family", entityKind: "family-graph" }],
+            entities: [
+              { entityId: "family-graph:shards-owner-family", entityKind: "family-graph" }
+            ],
             facts: [],
             relations: [],
             gaps: []
@@ -215,10 +259,9 @@ test("buildShardSystemView keeps shard owner-family artifact only as compatibili
   );
 
   assert.equal(shardSystem.family.boundaries.ownerFamily, null);
-  assert.deepEqual(
-    shardSystem.family.compatibilityBoundaries.ownerFamily,
-    { screenControllerFamilies: ["ShardMining, Assembly-CSharp"] }
-  );
+  assert.deepEqual(shardSystem.family.compatibilityBoundaries.ownerFamily, {
+    screenControllerFamilies: ["ShardMining, Assembly-CSharp"]
+  });
 });
 
 test("shard save and cost summaries still fall back through a system view when DB coverage is absent", () => {
@@ -319,7 +362,12 @@ test("buildShardSystemView keeps shard save and cost artifacts only as compatibi
       genericMechanics: {
         scopes: {
           "shard-owned-state-upgradeinfolist-population": {
-            entities: [{ entityId: "shard-owned-state-upgradeinfolist-population", entityKind: "family-graph" }],
+            entities: [
+              {
+                entityId: "shard-owned-state-upgradeinfolist-population",
+                entityKind: "family-graph"
+              }
+            ],
             facts: [],
             relations: [],
             gaps: []
@@ -349,14 +397,12 @@ test("buildShardSystemView keeps shard save and cost artifacts only as compatibi
 
   assert.equal(shardSystem.ownedState.saveBoundary, null);
   assert.equal(shardSystem.cost.costModelBoundary, null);
-  assert.deepEqual(
-    shardSystem.ownedState.compatibilityBoundaries.saveBoundary,
-    { ownerShellTermsChecked: ["ShardMining"] }
-  );
-  assert.deepEqual(
-    shardSystem.cost.compatibilityBoundaries.costModelBoundary,
-    { dataCarrier: "ShardUpgradeInfo" }
-  );
+  assert.deepEqual(shardSystem.ownedState.compatibilityBoundaries.saveBoundary, {
+    ownerShellTermsChecked: ["ShardMining"]
+  });
+  assert.deepEqual(shardSystem.cost.compatibilityBoundaries.costModelBoundary, {
+    dataCarrier: "ShardUpgradeInfo"
+  });
 });
 
 test("shard milestone payload and row-model summaries prefer DB-backed generic mechanics and inferred boundaries when present", () => {
@@ -364,26 +410,50 @@ test("shard milestone payload and row-model summaries prefer DB-backed generic m
     genericMechanics: {
       scopes: {
         "shard-milestone-payload-boundary": {
-          entities: [{ entityId: "family-graph:shards-milestone-payload", entityKind: "family-graph" }],
+          entities: [
+            { entityId: "family-graph:shards-milestone-payload", entityKind: "family-graph" }
+          ],
           facts: [
-            { factKind: "data-carrier-candidate", factValue: "ShardMining|ShardUpgradeInfo", payload: {} },
+            {
+              factKind: "data-carrier-candidate",
+              factValue: "ShardMining|ShardUpgradeInfo",
+              payload: {}
+            },
             { factKind: "row-state-field", factValue: "<IsUnlocked>k__BackingField", payload: {} },
             { factKind: "milestone-payload-hook", factValue: "UpdateShardCostList", payload: {} },
             { factKind: "progress-hook", factValue: "CheckAllMilestoneLevelFills", payload: {} },
             { factKind: "cost-accessor", factValue: "get_SU0Cost", payload: {} },
             { factKind: "parameter-shell-field", factValue: "SU0StartCost", payload: {} },
-            { factKind: "save-candidate", factValue: "PlayerProfile-side shard member shell", payload: {} }
+            {
+              factKind: "save-candidate",
+              factValue: "PlayerProfile-side shard member shell",
+              payload: {}
+            }
           ],
           relations: [],
           gaps: [{ gapKind: "next-seam", payload: { seamId: "local-runtime-population-bridge" } }]
         },
         "shard-milestone-row-model-boundary": {
-          entities: [{ entityId: "family-graph:shards-milestone-row-model", entityKind: "family-graph" }],
+          entities: [
+            { entityId: "family-graph:shards-milestone-row-model", entityKind: "family-graph" }
+          ],
           facts: [
-            { factKind: "data-carrier-candidate", factValue: "ShardMining|ShardUpgradeInfo", payload: {} },
-            { factKind: "runtime-shell", factValue: "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo", payload: {} },
+            {
+              factKind: "data-carrier-candidate",
+              factValue: "ShardMining|ShardUpgradeInfo",
+              payload: {}
+            },
+            {
+              factKind: "runtime-shell",
+              factValue: "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo",
+              payload: {}
+            },
             { factKind: "row-model-type", factValue: "ShardMining+ShardUpgradeInfo", payload: {} },
-            { factKind: "generic-buy-family", factValue: "ConstructionMilestones, Assembly-CSharp", payload: {} }
+            {
+              factKind: "generic-buy-family",
+              factValue: "ConstructionMilestones, Assembly-CSharp",
+              payload: {}
+            }
           ],
           relations: [],
           gaps: [{ gapKind: "next-seam", payload: { seamId: "local-runtime-population-bridge" } }]
@@ -396,7 +466,8 @@ test("shard milestone payload and row-model summaries prefer DB-backed generic m
         boundaryKind: "subject-boundary",
         verdict: "quarantine",
         nextSeamId: "local-runtime-population-bridge",
-        blockedInputReason: "Shard milestone payload still lacks dedicated row-local trace coverage",
+        blockedInputReason:
+          "Shard milestone payload still lacks dedicated row-local trace coverage",
         genericFactCount: 7,
         genericGapCount: 1
       },
@@ -405,7 +476,8 @@ test("shard milestone payload and row-model summaries prefer DB-backed generic m
         boundaryKind: "subject-boundary",
         verdict: "quarantine",
         nextSeamId: "local-runtime-population-bridge",
-        blockedInputReason: "Shard milestone row model still lacks dedicated row-local trace coverage",
+        blockedInputReason:
+          "Shard milestone row model still lacks dedicated row-local trace coverage",
         genericFactCount: 4,
         genericGapCount: 1
       }
@@ -422,7 +494,10 @@ test("shard milestone payload and row-model summaries prefer DB-backed generic m
   assert.equal(rowModelSummary.coverageSource, "generic-mechanics+boundary-model");
   assert.equal(rowModelSummary.hasBoundary, true);
   assert.equal(rowModelSummary.hasGenericBuyFamily, true);
-  assert.equal(rowModelSummary.runtimeShell, "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo");
+  assert.equal(
+    rowModelSummary.runtimeShell,
+    "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo"
+  );
 });
 
 test("buildShardSystemView keeps shard milestone payload and row-model artifacts only as compatibility fallback when DB coverage exists", () => {
@@ -445,13 +520,17 @@ test("buildShardSystemView keeps shard milestone payload and row-model artifacts
       genericMechanics: {
         scopes: {
           "shard-milestone-payload-boundary": {
-            entities: [{ entityId: "family-graph:shards-milestone-payload", entityKind: "family-graph" }],
+            entities: [
+              { entityId: "family-graph:shards-milestone-payload", entityKind: "family-graph" }
+            ],
             facts: [],
             relations: [],
             gaps: []
           },
           "shard-milestone-row-model-boundary": {
-            entities: [{ entityId: "family-graph:shards-milestone-row-model", entityKind: "family-graph" }],
+            entities: [
+              { entityId: "family-graph:shards-milestone-row-model", entityKind: "family-graph" }
+            ],
             facts: [],
             relations: [],
             gaps: []
@@ -488,21 +567,41 @@ test("shard row-shell and row-alignment summaries prefer DB-backed generic mecha
     genericMechanics: {
       scopes: {
         "shard-milestone-row-shell-boundary": {
-          entities: [{ entityId: "family-graph:shards-milestone-row-shell", entityKind: "family-graph" }],
+          entities: [
+            { entityId: "family-graph:shards-milestone-row-shell", entityKind: "family-graph" }
+          ],
           facts: [
             { factKind: "screen-controller-family", factValue: "ShardMining", payload: {} },
-            { factKind: "data-carrier-candidate", factValue: "ShardMining|ShardUpgradeInfo", payload: {} },
-            { factKind: "runtime-shell", factValue: "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo", payload: {} },
-            { factKind: "generic-buy-family", factValue: "ConstructionMilestones, Assembly-CSharp", payload: {} }
+            {
+              factKind: "data-carrier-candidate",
+              factValue: "ShardMining|ShardUpgradeInfo",
+              payload: {}
+            },
+            {
+              factKind: "runtime-shell",
+              factValue: "ShardMining.upgradeInfoList -> ShardMining+ShardUpgradeInfo",
+              payload: {}
+            },
+            {
+              factKind: "generic-buy-family",
+              factValue: "ConstructionMilestones, Assembly-CSharp",
+              payload: {}
+            }
           ],
           relations: [],
           gaps: [{ gapKind: "next-seam", payload: { seamId: "local-runtime-population-bridge" } }]
         },
         "shard-milestone-row-alignment-boundary": {
-          entities: [{ entityId: "family-graph:shards-milestone-row-alignment", entityKind: "family-graph" }],
+          entities: [
+            { entityId: "family-graph:shards-milestone-row-alignment", entityKind: "family-graph" }
+          ],
           facts: [
             { factKind: "screen-controller-family", factValue: "ShardMining", payload: {} },
-            { factKind: "generic-buy-family", factValue: "ConstructionMilestones, Assembly-CSharp", payload: {} }
+            {
+              factKind: "generic-buy-family",
+              factValue: "ConstructionMilestones, Assembly-CSharp",
+              payload: {}
+            }
           ],
           relations: [],
           gaps: [{ gapKind: "next-seam", payload: { seamId: "local-runtime-population-bridge" } }]
@@ -515,7 +614,8 @@ test("shard row-shell and row-alignment summaries prefer DB-backed generic mecha
         boundaryKind: "subject-boundary",
         verdict: "quarantine",
         nextSeamId: "local-runtime-population-bridge",
-        blockedInputReason: "Shard milestone row shell still lacks dedicated row-local trace coverage",
+        blockedInputReason:
+          "Shard milestone row shell still lacks dedicated row-local trace coverage",
         genericFactCount: 4,
         genericGapCount: 1
       },
@@ -524,7 +624,8 @@ test("shard row-shell and row-alignment summaries prefer DB-backed generic mecha
         boundaryKind: "subject-boundary",
         verdict: "quarantine",
         nextSeamId: "local-runtime-population-bridge",
-        blockedInputReason: "Shard milestone row alignment still lacks dedicated row-local trace coverage",
+        blockedInputReason:
+          "Shard milestone row alignment still lacks dedicated row-local trace coverage",
         genericFactCount: 2,
         genericGapCount: 1
       }
@@ -562,13 +663,20 @@ test("buildShardSystemView keeps shard row-shell and row-alignment artifacts onl
       genericMechanics: {
         scopes: {
           "shard-milestone-row-shell-boundary": {
-            entities: [{ entityId: "family-graph:shards-milestone-row-shell", entityKind: "family-graph" }],
+            entities: [
+              { entityId: "family-graph:shards-milestone-row-shell", entityKind: "family-graph" }
+            ],
             facts: [],
             relations: [],
             gaps: []
           },
           "shard-milestone-row-alignment-boundary": {
-            entities: [{ entityId: "family-graph:shards-milestone-row-alignment", entityKind: "family-graph" }],
+            entities: [
+              {
+                entityId: "family-graph:shards-milestone-row-alignment",
+                entityKind: "family-graph"
+              }
+            ],
             facts: [],
             relations: [],
             gaps: []
@@ -607,8 +715,16 @@ test("shard FinalSU, title/effect, and text-handler summaries prefer DB-backed g
         "shard-finalsu-bonus-boundary": {
           entities: [{ entityId: "family-graph:shards-finalsu-bonus", entityKind: "family-graph" }],
           facts: [
-            { factKind: "data-carrier-candidate", factValue: "ShardMining|ShardUpgradeInfo", payload: {} },
-            { factKind: "unlock-requirement-accessor", factValue: "get_SU1FinalUnlockReq", payload: {} },
+            {
+              factKind: "data-carrier-candidate",
+              factValue: "ShardMining|ShardUpgradeInfo",
+              payload: {}
+            },
+            {
+              factKind: "unlock-requirement-accessor",
+              factValue: "get_SU1FinalUnlockReq",
+              payload: {}
+            },
             { factKind: "bonus-field-sample", factValue: "FinalSU29Bonus2", payload: {} },
             { factKind: "bonus-accessor-sample", factValue: "get_FinalSU29Bonus2", payload: {} },
             { factKind: "adjacent-field", factValue: "OverLevel100Exponent", payload: {} }
@@ -617,7 +733,9 @@ test("shard FinalSU, title/effect, and text-handler summaries prefer DB-backed g
           gaps: [{ gapKind: "next-seam", payload: { seamId: "local-runtime-population-bridge" } }]
         },
         "shard-milestone-title-effect-boundary": {
-          entities: [{ entityId: "family-graph:shards-milestone-title-effect", entityKind: "family-graph" }],
+          entities: [
+            { entityId: "family-graph:shards-milestone-title-effect", entityKind: "family-graph" }
+          ],
           facts: [
             { factKind: "bonus-calc-accessor", factValue: "get_SU29Bonus2Calc", payload: {} }
           ],
@@ -625,9 +743,15 @@ test("shard FinalSU, title/effect, and text-handler summaries prefer DB-backed g
           gaps: [{ gapKind: "next-seam", payload: { seamId: "local-runtime-population-bridge" } }]
         },
         "shard-effect-text-handler-boundary": {
-          entities: [{ entityId: "family-graph:shards-effect-text-handler", entityKind: "family-graph" }],
+          entities: [
+            { entityId: "family-graph:shards-effect-text-handler", entityKind: "family-graph" }
+          ],
           facts: [
-            { factKind: "generic-milestone-writer", factValue: "SetAllMilestoneTexts", payload: {} },
+            {
+              factKind: "generic-milestone-writer",
+              factValue: "SetAllMilestoneTexts",
+              payload: {}
+            },
             { factKind: "bonus-calc-accessor", factValue: "get_SU29Bonus2Calc", payload: {} },
             { factKind: "ui-context-anchor", factValue: "DescriptionText", payload: {} }
           ],
@@ -702,19 +826,25 @@ test("buildShardSystemView keeps shard FinalSU, title/effect, and text-handler a
       genericMechanics: {
         scopes: {
           "shard-finalsu-bonus-boundary": {
-            entities: [{ entityId: "family-graph:shards-finalsu-bonus", entityKind: "family-graph" }],
+            entities: [
+              { entityId: "family-graph:shards-finalsu-bonus", entityKind: "family-graph" }
+            ],
             facts: [],
             relations: [],
             gaps: []
           },
           "shard-milestone-title-effect-boundary": {
-            entities: [{ entityId: "family-graph:shards-milestone-title-effect", entityKind: "family-graph" }],
+            entities: [
+              { entityId: "family-graph:shards-milestone-title-effect", entityKind: "family-graph" }
+            ],
             facts: [],
             relations: [],
             gaps: []
           },
           "shard-effect-text-handler-boundary": {
-            entities: [{ entityId: "family-graph:shards-effect-text-handler", entityKind: "family-graph" }],
+            entities: [
+              { entityId: "family-graph:shards-effect-text-handler", entityKind: "family-graph" }
+            ],
             facts: [],
             relations: [],
             gaps: []

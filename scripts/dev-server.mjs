@@ -21,7 +21,13 @@ const appStateDbPath = process.env.CIFI_APP_STATE_DB_PATH
 const systemUnitsDir = join(root, "data", "system-units");
 const launcherMode =
   process.env.CIFI_LAUNCH_MODE === "1" || process.argv.includes("--launcher-mode");
-const servedSystemUnitIds = ["app-meta", "player-state", "shards", "token-shop", "multiverse-market"];
+const servedSystemUnitIds = [
+  "app-meta",
+  "player-state",
+  "shards",
+  "token-shop",
+  "multiverse-market"
+];
 const clientLeaseTtlMs = 60000;
 const launcherIdleCheckMs = 2000;
 const clientSessions = new Map();
@@ -358,9 +364,7 @@ function handleSystemUnits(response, requestUrl) {
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean);
-  const systemIds = requestedIds.length
-    ? requestedIds
-    : servedSystemUnitIds;
+  const systemIds = requestedIds.length ? requestedIds : servedSystemUnitIds;
   const loadFromDb = () =>
     withCacheDb((db) => {
       const statement = db.prepare(`
@@ -436,7 +440,9 @@ async function handleSystemUnitsRefresh(request, response) {
           .filter(Boolean)
       )
     );
-    const refreshResult = await runProcess(execPath, ["scripts/contracts/generate-system-units.mjs"]);
+    const refreshResult = await runProcess(execPath, [
+      "scripts/contracts/generate-system-units.mjs"
+    ]);
     const refreshed = withCacheDb((db) => {
       const filteredSystemIds = requestedSystemIds.length
         ? requestedSystemIds.filter((systemId) => servedSystemUnitIds.includes(systemId))
@@ -446,9 +452,7 @@ async function handleSystemUnitsRefresh(request, response) {
         FROM materialized_system_unit_views
         WHERE version = 'v1' AND system_id = ?
       `);
-      return filteredSystemIds
-        .map((systemId) => statement.get(systemId))
-        .filter(Boolean);
+      return filteredSystemIds.map((systemId) => statement.get(systemId)).filter(Boolean);
     });
     writeJson(response, 200, {
       ok: true,
@@ -468,12 +472,14 @@ async function handleSystemUnitsRefresh(request, response) {
 }
 
 function maxBuiltAt(...values) {
-  return values
-    .flat()
-    .map((value) => String(value || "").trim())
-    .filter(Boolean)
-    .sort()
-    .at(-1) || null;
+  return (
+    values
+      .flat()
+      .map((value) => String(value || "").trim())
+      .filter(Boolean)
+      .sort()
+      .at(-1) || null
+  );
 }
 
 function handlePlayerProfileGet(response) {
@@ -567,7 +573,9 @@ function querySystemSubjectMetadata(requestUrl) {
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean);
-  const mode = String(requestUrl.searchParams.get("mode") || "core").trim().toLowerCase();
+  const mode = String(requestUrl.searchParams.get("mode") || "core")
+    .trim()
+    .toLowerCase();
   if (!systemId) {
     return {
       statusCode: 400,
@@ -584,8 +592,8 @@ function querySystemSubjectMetadata(requestUrl) {
   try {
     if (!existsSync(cacheDbPath)) {
       return {
-      statusCode: 503,
-      body: { error: "Missing cache DB for subject-metadata API." }
+        statusCode: 503,
+        body: { error: "Missing cache DB for subject-metadata API." }
       };
     }
     const result = withCacheDb((db) => {
@@ -606,8 +614,7 @@ function querySystemSubjectMetadata(requestUrl) {
           continue;
         }
         const payload = JSON.parse(row.payload_json);
-        contracts[traceScope] =
-          mode === "full" ? payload : payload?.core || payload;
+        contracts[traceScope] = mode === "full" ? payload : payload?.core || payload;
         if (!latestBuiltAt || String(row.built_at) > latestBuiltAt) {
           latestBuiltAt = String(row.built_at);
         }
@@ -828,7 +835,11 @@ function querySystemDbBundle(requestUrl) {
   const contractResult = querySystemSubjectMetadata(contractsUrl);
   const genericResult = querySystemGenericMechanics(requestUrl);
   const boundaryResult = querySystemBoundaries(requestUrl);
-  if (genericResult.statusCode >= 400 && contractResult.statusCode >= 400 && boundaryResult.statusCode >= 400) {
+  if (
+    genericResult.statusCode >= 400 &&
+    contractResult.statusCode >= 400 &&
+    boundaryResult.statusCode >= 400
+  ) {
     return {
       statusCode:
         contractResult.statusCode >= 400
@@ -851,9 +862,9 @@ function querySystemDbBundle(requestUrl) {
       systemId: String(requestUrl.searchParams.get("systemId") || "").trim(),
       mode: "db",
       builtAt: maxBuiltAt(
-        contractResult.statusCode < 400 ? contractResult.body?.builtAt ?? null : null,
-        genericResult.statusCode < 400 ? genericResult.body?.builtAt ?? null : null,
-        boundaryResult.statusCode < 400 ? boundaryResult.body?.builtAt ?? null : null
+        contractResult.statusCode < 400 ? (contractResult.body?.builtAt ?? null) : null,
+        genericResult.statusCode < 400 ? (genericResult.body?.builtAt ?? null) : null,
+        boundaryResult.statusCode < 400 ? (boundaryResult.body?.builtAt ?? null) : null
       ),
       subjectMetadata: contractResult.statusCode < 400 ? contractResult.body : null,
       genericMechanics: genericResult.statusCode < 400 ? genericResult.body : null,
@@ -1024,27 +1035,44 @@ function formatTraceGapSummaryList(values) {
 
 function updateTraceGapCumulativeSummary(fields) {
   if ("recovered" in fields) {
-    traceGapRun.cumulativeRecovered = mergeTraceGapSummaryList(traceGapRun.cumulativeRecovered, fields.recovered);
+    traceGapRun.cumulativeRecovered = mergeTraceGapSummaryList(
+      traceGapRun.cumulativeRecovered,
+      fields.recovered
+    );
     traceGapRun.recoveredSummary = formatTraceGapSummaryList(traceGapRun.cumulativeRecovered);
   }
   if ("traced" in fields) {
-    traceGapRun.cumulativeTraced = mergeTraceGapSummaryList(traceGapRun.cumulativeTraced, fields.traced);
+    traceGapRun.cumulativeTraced = mergeTraceGapSummaryList(
+      traceGapRun.cumulativeTraced,
+      fields.traced
+    );
     traceGapRun.tracedSummary = formatTraceGapSummaryList(traceGapRun.cumulativeTraced);
   }
   if ("attempted" in fields) {
-    traceGapRun.cumulativeAttempted = mergeTraceGapSummaryList(traceGapRun.cumulativeAttempted, fields.attempted);
+    traceGapRun.cumulativeAttempted = mergeTraceGapSummaryList(
+      traceGapRun.cumulativeAttempted,
+      fields.attempted
+    );
     traceGapRun.attemptedSummary = formatTraceGapSummaryList(traceGapRun.cumulativeAttempted);
   }
   if ("missing" in fields) {
-    traceGapRun.cumulativeMissing = mergeTraceGapSummaryList(traceGapRun.cumulativeMissing, fields.missing);
+    traceGapRun.cumulativeMissing = mergeTraceGapSummaryList(
+      traceGapRun.cumulativeMissing,
+      fields.missing
+    );
     traceGapRun.missingSummary = formatTraceGapSummaryList(traceGapRun.cumulativeMissing);
   }
   if ("newEdges" in fields) {
-    traceGapRun.cumulativeNewEdges = mergeTraceGapSummaryList(traceGapRun.cumulativeNewEdges, fields.newEdges);
+    traceGapRun.cumulativeNewEdges = mergeTraceGapSummaryList(
+      traceGapRun.cumulativeNewEdges,
+      fields.newEdges
+    );
     traceGapRun.newEdgesSummary = formatTraceGapSummaryList(traceGapRun.cumulativeNewEdges);
   }
   if ("netProgress" in fields) {
-    const nextProgress = String(fields.netProgress || "").trim().toLowerCase();
+    const nextProgress = String(fields.netProgress || "")
+      .trim()
+      .toLowerCase();
     if (nextProgress === "yes") {
       traceGapRun.progressDetected = true;
     }
@@ -1057,12 +1085,7 @@ function updateTraceGapCumulativeSummary(fields) {
 }
 
 function getPublicTraceGapRun() {
-  const {
-    child,
-    stdoutBuffer,
-    stderrBuffer,
-    ...publicRun
-  } = traceGapRun;
+  const { child, stdoutBuffer, stderrBuffer, ...publicRun } = traceGapRun;
   return {
     ...publicRun,
     isRunning: publicRun.status === "running",
@@ -1176,7 +1199,8 @@ function updateTraceGapRunSummary(line) {
     return;
   }
   if (trimmed.startsWith("[progress] ")) {
-    traceGapRun.activityLabel = trimmed.replace(/^\[progress\]\s*/, "").trim() || traceGapRun.activityLabel;
+    traceGapRun.activityLabel =
+      trimmed.replace(/^\[progress\]\s*/, "").trim() || traceGapRun.activityLabel;
     return;
   }
   if (trimmed.startsWith("Best current acquisition gap:")) {
@@ -1567,48 +1591,52 @@ function handleTraceGapOverview(response, requestUrl) {
             }
             return result;
           })();
-          const gapKindCounts = (scopeHint
-            ? db
-                .prepare(
-                  `SELECT gap_kind, COUNT(*) AS count
+          const gapKindCounts = (
+            scopeHint
+              ? db
+                  .prepare(
+                    `SELECT gap_kind, COUNT(*) AS count
                    FROM materialized_gap_views
                    WHERE project_name = ? AND project_file = ? AND trace_scope = ?
                    GROUP BY gap_kind
                    ORDER BY count DESC, gap_kind ASC`
-                )
-                .all("cifi-full", "libil2cpp.so", scopeHint)
-            : db
-                .prepare(
-                  `SELECT gap_kind, COUNT(*) AS count
+                  )
+                  .all("cifi-full", "libil2cpp.so", scopeHint)
+              : db
+                  .prepare(
+                    `SELECT gap_kind, COUNT(*) AS count
                    FROM materialized_gap_views
                    WHERE project_name = ? AND project_file = ?
                    GROUP BY gap_kind
                    ORDER BY count DESC, gap_kind ASC
                    LIMIT 12`
-                )
-                .all("cifi-full", "libil2cpp.so")).map((row) => ({
+                  )
+                  .all("cifi-full", "libil2cpp.so")
+          ).map((row) => ({
             gapKind: row.gap_kind,
             count: Number(row.count || 0)
           }));
-          const latestGapRows = (scopeHint
-            ? db
-                .prepare(
-                  `SELECT entity_id, field_key, gap_kind, payload_json, built_at
+          const latestGapRows = (
+            scopeHint
+              ? db
+                  .prepare(
+                    `SELECT entity_id, field_key, gap_kind, payload_json, built_at
                    FROM materialized_gap_views
                    WHERE project_name = ? AND project_file = ? AND trace_scope = ?
                    ORDER BY built_at DESC, entity_id ASC, field_key ASC, gap_kind ASC
                    LIMIT 12`
-                )
-                .all("cifi-full", "libil2cpp.so", scopeHint)
-            : db
-                .prepare(
-                  `SELECT trace_scope, entity_id, field_key, gap_kind, payload_json, built_at
+                  )
+                  .all("cifi-full", "libil2cpp.so", scopeHint)
+              : db
+                  .prepare(
+                    `SELECT trace_scope, entity_id, field_key, gap_kind, payload_json, built_at
                    FROM materialized_gap_views
                    WHERE project_name = ? AND project_file = ?
                    ORDER BY built_at DESC, trace_scope ASC, entity_id ASC, field_key ASC, gap_kind ASC
                    LIMIT 12`
-                )
-                .all("cifi-full", "libil2cpp.so")).map((row) => ({
+                  )
+                  .all("cifi-full", "libil2cpp.so")
+          ).map((row) => ({
             traceScope: row.trace_scope || scopeHint || null,
             entityId: row.entity_id,
             fieldKey: row.field_key || null,
@@ -1616,25 +1644,27 @@ function handleTraceGapOverview(response, requestUrl) {
             payload: JSON.parse(row.payload_json || "{}"),
             builtAt: row.built_at || null
           }));
-          const latestFactRows = (scopeHint
-            ? db
-                .prepare(
-                  `SELECT entity_id, field_key, fact_kind, fact_value, built_at
+          const latestFactRows = (
+            scopeHint
+              ? db
+                  .prepare(
+                    `SELECT entity_id, field_key, fact_kind, fact_value, built_at
                    FROM materialized_fact_views
                    WHERE project_name = ? AND project_file = ? AND trace_scope = ?
                    ORDER BY built_at DESC, entity_id ASC, field_key ASC, fact_kind ASC
                    LIMIT 12`
-                )
-                .all("cifi-full", "libil2cpp.so", scopeHint)
-            : db
-                .prepare(
-                  `SELECT trace_scope, entity_id, field_key, fact_kind, fact_value, built_at
+                  )
+                  .all("cifi-full", "libil2cpp.so", scopeHint)
+              : db
+                  .prepare(
+                    `SELECT trace_scope, entity_id, field_key, fact_kind, fact_value, built_at
                    FROM materialized_fact_views
                    WHERE project_name = ? AND project_file = ?
                    ORDER BY built_at DESC, trace_scope ASC, entity_id ASC, field_key ASC, fact_kind ASC
                    LIMIT 12`
-                )
-                .all("cifi-full", "libil2cpp.so")).map((row) => ({
+                  )
+                  .all("cifi-full", "libil2cpp.so")
+          ).map((row) => ({
             traceScope: row.trace_scope || scopeHint || null,
             entityId: row.entity_id,
             fieldKey: row.field_key || null,
@@ -1652,12 +1682,9 @@ function handleTraceGapOverview(response, requestUrl) {
         })()
       };
     });
-    writeJson(
-      response,
-      200,
-      overview,
-      { "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate" }
-    );
+    writeJson(response, 200, overview, {
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate"
+    });
   } catch (error) {
     writeJson(response, 500, {
       error: error instanceof Error ? error.message : String(error)
@@ -1812,12 +1839,20 @@ async function handleTraceGapRun(request, response) {
     child.on("close", (code) => {
       flushTraceGapLogBuffer("stdout");
       flushTraceGapLogBuffer("stderr");
-      traceGapRun.status = traceGapRun.stopRequestedAt ? "stopped" : code === 0 ? "completed" : "failed";
+      traceGapRun.status = traceGapRun.stopRequestedAt
+        ? "stopped"
+        : code === 0
+          ? "completed"
+          : "failed";
       traceGapRun.exitCode = code ?? 1;
       traceGapRun.finishedAt = new Date().toISOString();
       if (traceGapRun.status === "stopped") {
         traceGapRun.activityLabel = "Trace-gap run stopped";
-      } else if (!traceGapRun.summary && traceGapRun.mode === "dry-run" && !traceGapRun.selectedTarget) {
+      } else if (
+        !traceGapRun.summary &&
+        traceGapRun.mode === "dry-run" &&
+        !traceGapRun.selectedTarget
+      ) {
         traceGapRun.activityLabel = "Dry-run completed without a selected target";
       } else if (traceGapRun.status === "completed") {
         traceGapRun.activityLabel =

@@ -144,12 +144,13 @@ const DEFAULT_SERVER_CAPABILITIES = Object.freeze({
   playerProfileApi: false
 });
 
-
 function hasDbCoverage(summary) {
   const coverageSource = String(summary?.coverageSource || "").trim();
-  return coverageSource === "db-subject-metadata" ||
+  return (
+    coverageSource === "db-subject-metadata" ||
     coverageSource.includes("boundary-model") ||
-    coverageSource.includes("generic-mechanics");
+    coverageSource.includes("generic-mechanics")
+  );
 }
 
 function hasTokenShopDbCoverage(summary) {
@@ -327,7 +328,10 @@ function calculateTokenShopTierUnlockStates(thresholds, levelMap = {}) {
   };
 
   const totalForTier = (tierKey) =>
-    (TOKEN_SHOP_TIER_CONFIG[tierKey]?.rows || []).reduce((sum, field) => sum + levelForField(field), 0);
+    (TOKEN_SHOP_TIER_CONFIG[tierKey]?.rows || []).reduce(
+      (sum, field) => sum + levelForField(field),
+      0
+    );
 
   const t1Total = totalForTier("t1");
   const t2Total = totalForTier("t2");
@@ -889,10 +893,7 @@ function fetchJson(url) {
 }
 
 function hasPlayerProfileServerCapability() {
-  return (
-    window.location.origin.startsWith("http") &&
-    SERVER_CAPABILITIES.playerProfileApi === true
-  );
+  return window.location.origin.startsWith("http") && SERVER_CAPABILITIES.playerProfileApi === true;
 }
 
 async function loadServerPlayerProfile() {
@@ -961,16 +962,12 @@ function getRouteSystemRefreshContext(route = state.route) {
 }
 
 function hasSystemRefreshCapability() {
-  return (
-    window.location.origin.startsWith("http") &&
-    SERVER_CAPABILITIES.systemUnitApi === true
-  );
+  return window.location.origin.startsWith("http") && SERVER_CAPABILITIES.systemUnitApi === true;
 }
 
 function hasSystemUnitRematerializeCapability() {
   return (
-    window.location.origin.startsWith("http") &&
-    SERVER_CAPABILITIES.systemUnitRefreshApi === true
+    window.location.origin.startsWith("http") && SERVER_CAPABILITIES.systemUnitRefreshApi === true
   );
 }
 
@@ -1006,7 +1003,9 @@ function getSystemFreshnessSummary(systemId) {
     source: state.systemUnitSource || "unknown",
     unitBuiltAt,
     dbBuiltAt,
-    dbBundleLoaded: Boolean(dbBundle?.subjectMetadata || dbBundle?.genericMechanics || dbBundle?.boundaries)
+    dbBundleLoaded: Boolean(
+      dbBundle?.subjectMetadata || dbBundle?.genericMechanics || dbBundle?.boundaries
+    )
   };
 }
 
@@ -2755,7 +2754,16 @@ function renderTraceGapPanel() {
   const summary = $("#traceGapSummary");
   const dbOverview = $("#traceGapDbOverview");
   const diagnostics = $("#traceGapDiagnostics");
-  if (!repeatInput || !dryRunBtn || !runBtn || !restartServerBtn || !pills || !summary || !dbOverview || !diagnostics) {
+  if (
+    !repeatInput ||
+    !dryRunBtn ||
+    !runBtn ||
+    !restartServerBtn ||
+    !pills ||
+    !summary ||
+    !dbOverview ||
+    !diagnostics
+  ) {
     return;
   }
 
@@ -2820,7 +2828,9 @@ function renderTraceGapPanel() {
     `<span class="pill ${run.status === "running" ? "" : "pill-neutral"}">${escapeHtml(run.status || "idle")}</span>`,
     `<span class="pill pill-neutral">${escapeHtml(run.mode || "execute")}</span>`,
     `<span class="pill pill-neutral">repeat ${escapeHtml(String(run.repeat || 1))}</span>`,
-    run.selectedSeam ? `<span class="pill pill-neutral">${escapeHtml(run.selectedSeam)}</span>` : "",
+    run.selectedSeam
+      ? `<span class="pill pill-neutral">${escapeHtml(run.selectedSeam)}</span>`
+      : "",
     run.verdict ? `<span class="pill pill-neutral">${escapeHtml(run.verdict)}</span>` : ""
   ]
     .filter(Boolean)
@@ -2875,7 +2885,9 @@ function renderTraceGapDiagnostics(container, run, commandText) {
   if (!container) {
     return;
   }
-  const existingDiagnostics = container.querySelector('details[data-trace-gap-section="diagnostics"]');
+  const existingDiagnostics = container.querySelector(
+    'details[data-trace-gap-section="diagnostics"]'
+  );
   const existingCommand = container.querySelector('details[data-trace-gap-section="command"]');
   if (existingDiagnostics) {
     state.traceGapUi.diagnosticsOpen = existingDiagnostics.open;
@@ -2884,14 +2896,15 @@ function renderTraceGapDiagnostics(container, run, commandText) {
     state.traceGapUi.commandOpen = existingCommand.open;
   }
   if (!existingDiagnostics || !existingCommand) {
-    const logMarkup = Array.isArray(run.logEntries) && run.logEntries.length
-      ? run.logEntries
-          .map(
-            (entry) =>
-              `<div class="trace-gap-log-line ${entry.stream === "stderr" ? "is-stderr" : ""}"><span class="trace-gap-log-meta">${escapeHtml(String(entry.index))} ${escapeHtml(entry.stream)}</span><span>${escapeHtml(entry.text)}</span></div>`
-          )
-          .join("")
-      : `<p class="meta">No diagnostic lines captured yet.</p>`;
+    const logMarkup =
+      Array.isArray(run.logEntries) && run.logEntries.length
+        ? run.logEntries
+            .map(
+              (entry) =>
+                `<div class="trace-gap-log-line ${entry.stream === "stderr" ? "is-stderr" : ""}"><span class="trace-gap-log-meta">${escapeHtml(String(entry.index))} ${escapeHtml(entry.stream)}</span><span>${escapeHtml(entry.text)}</span></div>`
+            )
+            .join("")
+        : `<p class="meta">No diagnostic lines captured yet.</p>`;
     setContainerHtmlPreserveSelection(
       container,
       `
@@ -2926,14 +2939,15 @@ function renderTraceGapDiagnostics(container, run, commandText) {
   if (logContainer) {
     const wasNearBottom =
       logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight < 24;
-    const nextMarkup = Array.isArray(run.logEntries) && run.logEntries.length
-      ? run.logEntries
-          .map(
-            (entry) =>
-              `<div class="trace-gap-log-line ${entry.stream === "stderr" ? "is-stderr" : ""}"><span class="trace-gap-log-meta">${escapeHtml(String(entry.index))} ${escapeHtml(entry.stream)}</span><span>${escapeHtml(entry.text)}</span></div>`
-          )
-          .join("")
-      : `<p class="meta">No diagnostic lines captured yet.</p>`;
+    const nextMarkup =
+      Array.isArray(run.logEntries) && run.logEntries.length
+        ? run.logEntries
+            .map(
+              (entry) =>
+                `<div class="trace-gap-log-line ${entry.stream === "stderr" ? "is-stderr" : ""}"><span class="trace-gap-log-meta">${escapeHtml(String(entry.index))} ${escapeHtml(entry.stream)}</span><span>${escapeHtml(entry.text)}</span></div>`
+            )
+            .join("")
+        : `<p class="meta">No diagnostic lines captured yet.</p>`;
     if (logContainer.innerHTML !== nextMarkup) {
       setContainerHtmlPreserveSelection(logContainer, nextMarkup);
       if (wasNearBottom) {
@@ -2968,25 +2982,23 @@ function bindTraceGapDiagnosticsUi(container) {
   if (!container) {
     return;
   }
-  container
-    .querySelectorAll("details[data-trace-gap-section]")
-    .forEach((details) => {
-      if (details.dataset.traceGapBound === "true") {
+  container.querySelectorAll("details[data-trace-gap-section]").forEach((details) => {
+    if (details.dataset.traceGapBound === "true") {
+      return;
+    }
+    details.addEventListener("toggle", () => {
+      const section = details.dataset.traceGapSection;
+      if (section === "diagnostics") {
+        state.traceGapUi.diagnosticsOpen = details.open;
+      } else if (section === "command") {
+        state.traceGapUi.commandOpen = details.open;
+      } else {
         return;
       }
-      details.addEventListener("toggle", () => {
-        const section = details.dataset.traceGapSection;
-        if (section === "diagnostics") {
-          state.traceGapUi.diagnosticsOpen = details.open;
-        } else if (section === "command") {
-          state.traceGapUi.commandOpen = details.open;
-        } else {
-          return;
-        }
-        persistTraceGapUiState();
-      });
-      details.dataset.traceGapBound = "true";
+      persistTraceGapUiState();
     });
+    details.dataset.traceGapBound = "true";
+  });
 }
 
 function renderTraceGapDbOverview() {
@@ -3015,7 +3027,8 @@ function renderTraceGapDbOverview() {
         table.scopeHint && table.scopeCount !== null
           ? `Scope ${table.scopeHint}: ${table.scopeCount} row${table.scopeCount === 1 ? "" : "s"}`
           : "No active scope filter";
-      const latestScope = table.latestTraceScope || table.latestSubjectId || table.latestRequestSignature || "n/a";
+      const latestScope =
+        table.latestTraceScope || table.latestSubjectId || table.latestRequestSignature || "n/a";
       return `
         <article class="validation-card">
           <strong>${escapeHtml(table.label || "Trace table")}</strong>
@@ -3072,7 +3085,9 @@ function renderTraceGapDbOverview() {
             <p class="meta">Latest facts: ${escapeHtml(
               genericFactRows
                 .slice(0, 5)
-                .map((item) => `${item.fieldKey || item.entityId}:${item.factKind}=${item.factValue}`)
+                .map(
+                  (item) => `${item.fieldKey || item.entityId}:${item.factKind}=${item.factValue}`
+                )
                 .join(" | ") || "none"
             )}</p>
           </article>
@@ -3282,7 +3297,7 @@ function renderSpendSaveSideBoundary() {
         <article class="validation-card ${multiverseMarketPrefabRemapSummary.hasOverrideBoundary ? "pass" : "warn"}">
           <strong>Prefab remap boundary</strong>
           <p class="meta">${multiverseMarketPrefabRemapSummary.hasDirectMatchBand ? `The checked prefab shell now keeps direct ChrystosEmporiumUpgrade names through ${multiverseMarketPrefabRemapSummary.lastDirectPrefab}.` : "Direct ChrystosEmporiumUpgrade name coverage is incomplete in the checked-in prefab-remap bundle."}</p>
-          <p class="meta">${multiverseMarketPrefabRemapSummary.hasOverrideBoundary ? multiverseMarketPrefabRemapSummary.overridePairs?.length ? `The DB-backed remap slice now preserves bounded override pairs ${multiverseMarketPrefabRemapSummary.overridePairs.join(", ")}, so validated ids ${multiverseMarketPrefabRemapSummary.validatedMismatchLabel} stay explicitly quarantined instead of implied from archived remap notes.` : `The same asset then switches to ${multiverseMarketPrefabRemapSummary.firstOverride} through ${multiverseMarketPrefabRemapSummary.lastOverride}, so validated ids ${multiverseMarketPrefabRemapSummary.validatedMismatchLabel} still do not have direct prefab-number label matches.` : "The checked prefab-remap bundle no longer preserves the expected 69-74 override band."}</p>
+          <p class="meta">${multiverseMarketPrefabRemapSummary.hasOverrideBoundary ? (multiverseMarketPrefabRemapSummary.overridePairs?.length ? `The DB-backed remap slice now preserves bounded override pairs ${multiverseMarketPrefabRemapSummary.overridePairs.join(", ")}, so validated ids ${multiverseMarketPrefabRemapSummary.validatedMismatchLabel} stay explicitly quarantined instead of implied from archived remap notes.` : `The same asset then switches to ${multiverseMarketPrefabRemapSummary.firstOverride} through ${multiverseMarketPrefabRemapSummary.lastOverride}, so validated ids ${multiverseMarketPrefabRemapSummary.validatedMismatchLabel} still do not have direct prefab-number label matches.`) : "The checked prefab-remap bundle no longer preserves the expected 69-74 override band."}</p>
         </article>
         <article class="validation-card ${multiverseCanonicalImportSummary.hasCanonicalImportBoundary ? "pass" : "warn"}">
           <strong>Canonical import admissibility</strong>
@@ -3790,10 +3805,12 @@ function renderResearchTrackSupport(track) {
         : "The current build does not yet expose the live source trace for shard owner-family.",
       ownerBoundary.hasSupportingEdges
         ? `Supporting edges such as ${ownerBoundary.supportingEdgeLabel} are grounded, while blocked seams remain ${ownerBoundary.blockedEdgeLabel || ownerBoundary.nextSeamId || "unrecorded"}.`
-        : ownerBoundary.outcomeStatement || "The shard owner-family blocker surface is incomplete in this build.",
+        : ownerBoundary.outcomeStatement ||
+          "The shard owner-family blocker surface is incomplete in this build.",
       ownerBoundary.groundedConclusion
         ? ownerBoundary.groundedConclusion
-        : ownerBoundary.outcomeStatement || "The current build still lacks a grounded shard owner-family conclusion."
+        : ownerBoundary.outcomeStatement ||
+          "The current build still lacks a grounded shard owner-family conclusion."
     ];
     const shardBoundaryNotes = [
       finalSuBoundary.hasBoundary
@@ -3984,8 +4001,7 @@ function renderResearchTrackSupport(track) {
         ? hasTokenShopDbCoverage(tokenBankStateSummary)
           ? `DB-backed TokenShop mechanics now preserve token-bank state on ${tokenBankStateSummary.rowLocalSubjectId || tokenBankStateSummary.rangeFamilySubjectId || "the current TokenShop subject"}, with ${tokenBankStateSummary.claimMethod}, ${tokenBankStateSummary.capMethod}, ${tokenBankStateSummary.displayShell}, and ${tokenBankStateSummary.loopHook}.`
           : `Display clues such as ${tokenBankStateSummary.displayShell} and ${tokenBankStateSummary.loopHook} stay beside controller methods like ${tokenBankStateSummary.capMethod}.`
-        : "Token-bank controller or display split clues are not available in this build."
-      ,
+        : "Token-bank controller or display split clues are not available in this build.",
       tokenBankStateSummary.hasExactStoredAmountOwner
         ? hasTokenShopDbCoverage(tokenBankStateSummary)
           ? `DB-backed TokenShop state now keeps ${tokenBankStateSummary.exactSaveOwnerLabel} as the exact stored-amount owner for this lane without promoting cap or ready-state ownership.`
@@ -4888,7 +4904,7 @@ function renderShardGroundingBoundary() {
         <strong>${escapeHtml(ownerBoundary.screenController || "Shard owner-family")} owns the reachable definition family</strong>
         <div class="meta-stack">
           <p class="meta">${ownerBoundary.hasBoundary ? "Recovered ownership clues consistently point at a shard-specific family instead of the generic milestone shell." : "The current build still lacks enough shard-specific ownership evidence to map milestone rows safely."}</p>
-          <p class="meta">${ownerBoundary.hasBoundary ? hasDbCoverage(ownerBoundary) ? `DB-backed shard owner-family coverage now preserves ${escapeHtml(ownerBoundary.subjectId || "family-graph:shards-owner-family")} through ${escapeHtml(ownerBoundary.runtimeShell || ownerBoundary.dataCarrier || "its runtime shell")}, with next seam ${escapeHtml(ownerBoundary.nextSeamId || "unrecorded")}${ownerBoundary.boundaryVerdict ? ` under ${escapeHtml(ownerBoundary.boundaryVerdict)} verdict` : ""}.` : "That closes the row-definition carrier at the shard side instead of leaving the family on a generic academy milestone path." : "Until ownership mapping is resolved, row-level shard cost recovery stays descriptive only."}</p>
+          <p class="meta">${ownerBoundary.hasBoundary ? (hasDbCoverage(ownerBoundary) ? `DB-backed shard owner-family coverage now preserves ${escapeHtml(ownerBoundary.subjectId || "family-graph:shards-owner-family")} through ${escapeHtml(ownerBoundary.runtimeShell || ownerBoundary.dataCarrier || "its runtime shell")}, with next seam ${escapeHtml(ownerBoundary.nextSeamId || "unrecorded")}${ownerBoundary.boundaryVerdict ? ` under ${escapeHtml(ownerBoundary.boundaryVerdict)} verdict` : ""}.` : "That closes the row-definition carrier at the shard side instead of leaving the family on a generic academy milestone path.") : "Until ownership mapping is resolved, row-level shard cost recovery stays descriptive only."}</p>
           <p class="meta">${ownerBoundary.hasStructure ? `The live fragment structure keeps ${escapeHtml(ownerBoundary.ownerField || "the owner field")} attached to ${escapeHtml(ownerBoundary.rowModelType || ownerBoundary.dataCarrier || "the shard row model")}, with ${escapeHtml(ownerBoundary.rowStateFieldLabel || "unrecorded row-state fields")} preserved for future owner binding.` : ownerBoundary.outcomeStatement ? escapeHtml(ownerBoundary.outcomeStatement) : "Shard owner-family structure still needs deeper recovery."}</p>
           <p class="meta">${ownerBoundary.sourceTraceScope || ownerBoundary.sourceSubjectId ? `This owner-family model is derived from ${escapeHtml(ownerBoundary.sourceTraceScope || "a live trace scope")}${ownerBoundary.sourceSubjectId ? ` via ${escapeHtml(ownerBoundary.sourceSubjectId)}` : ""}, rather than from the archived shard boundary artifact.` : "The current build does not yet expose the live source trace for shard owner-family."}</p>
         </div>
@@ -4900,9 +4916,9 @@ function renderShardGroundingBoundary() {
         </div>
         <strong>Recovered cost data now supports evidence cards</strong>
         <div class="meta-stack">
-          <p class="meta">${costModelBoundary.hasSampledCostWindows ? hasDbCoverage(costModelBoundary) ? `DB-backed shard boundary coverage now preserves ${costModelBoundary.subjectId || "the shard cost boundary"} with ${costModelBoundary.costWindowLabel}${costModelBoundary.boundaryVerdict ? ` under ${costModelBoundary.boundaryVerdict} verdict` : ""}.` : "Recovered cost samples now show that shard costs follow row-local runtime data instead of a generic UI-only path." : "The current build does not yet recover enough row-local cost evidence to describe shard costs beyond generic breakpoint notes."}</p>
-          <p class="meta">${costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell ? hasDbCoverage(costModelBoundary) ? `The same shard DB surface keeps ${costModelBoundary.row0FieldLabel} attached to ${costModelBoundary.dataCarrier}, with next seam ${costModelBoundary.nextSeamId || "unrecorded"}${costModelBoundary.genericGapCount ? ` and ${costModelBoundary.genericGapCount} explicit generic gap row${costModelBoundary.genericGapCount === 1 ? "" : "s"}` : ""}.` : "That is enough to show row evidence and status per milestone card without claiming exact affordability or formula certainty." : "Until that recovery exists, player-facing cost views should remain blocked."}</p>
-          <p class="meta">${costModelBoundary.hasSampledCostWindows ? hasDbCoverage(costModelBoundary) ? `Planner-safe shard cost output remains blocked at ${costModelBoundary.blockedOptimizerLabel || "an explicit metadata seam"}, so the app still does not claim exact next-cost math or best-buy order.` : "The app still does not claim exact next-cost math, best-buy order, or recommendation-grade certainty from this contract." : "No recommendation-grade shard cost behavior is enabled from this path."}</p>
+          <p class="meta">${costModelBoundary.hasSampledCostWindows ? (hasDbCoverage(costModelBoundary) ? `DB-backed shard boundary coverage now preserves ${costModelBoundary.subjectId || "the shard cost boundary"} with ${costModelBoundary.costWindowLabel}${costModelBoundary.boundaryVerdict ? ` under ${costModelBoundary.boundaryVerdict} verdict` : ""}.` : "Recovered cost samples now show that shard costs follow row-local runtime data instead of a generic UI-only path.") : "The current build does not yet recover enough row-local cost evidence to describe shard costs beyond generic breakpoint notes."}</p>
+          <p class="meta">${costModelBoundary.hasSampledCostWindows && costModelBoundary.hasRow0FormulaShell ? (hasDbCoverage(costModelBoundary) ? `The same shard DB surface keeps ${costModelBoundary.row0FieldLabel} attached to ${costModelBoundary.dataCarrier}, with next seam ${costModelBoundary.nextSeamId || "unrecorded"}${costModelBoundary.genericGapCount ? ` and ${costModelBoundary.genericGapCount} explicit generic gap row${costModelBoundary.genericGapCount === 1 ? "" : "s"}` : ""}.` : "That is enough to show row evidence and status per milestone card without claiming exact affordability or formula certainty.") : "Until that recovery exists, player-facing cost views should remain blocked."}</p>
+          <p class="meta">${costModelBoundary.hasSampledCostWindows ? (hasDbCoverage(costModelBoundary) ? `Planner-safe shard cost output remains blocked at ${costModelBoundary.blockedOptimizerLabel || "an explicit metadata seam"}, so the app still does not claim exact next-cost math or best-buy order.` : "The app still does not claim exact next-cost math, best-buy order, or recommendation-grade certainty from this contract.") : "No recommendation-grade shard cost behavior is enabled from this path."}</p>
         </div>
       </article>
       <article class="snapshot-card shard-status-card ${rowEvidenceStatus.cardClass}">
@@ -4924,8 +4940,8 @@ function renderShardGroundingBoundary() {
         </div>
         <strong>Player-owned shard state is still not recovered</strong>
         <div class="meta-stack">
-          <p class="meta">${saveBoundary.hasSeparationBoundary ? hasDbCoverage(saveBoundary) ? `DB-backed shard boundary coverage now preserves ${saveBoundary.subjectId || "the shard owned-state boundary"} and still separates ${saveBoundary.ownerAnchor} from ${saveBoundary.saveAnchor}${saveBoundary.boundaryVerdict ? ` under ${saveBoundary.boundaryVerdict} verdict` : ""}.` : "Recovered shard-local evidence still separates direct row definitions from unresolved PlayerProfile save ownership." : "The current build does not yet preserve a clean shard-to-save separation result."}</p>
-          <p class="meta">${saveBoundary.hasSeparationBoundary && saveBoundary.hasDirectRowDefinitionPayload && saveBoundary.hasRuntimeOwnedStateShell ? hasDbCoverage(saveBoundary) ? `Direct ${saveBoundary.directPayloadAnchor} payload reaches ${saveBoundary.runtimeShellAnchor}, but the owned-state bridge is still blocked at ${saveBoundary.nextSeamId || "an unrecorded seam"}${saveBoundary.genericGapCount ? ` with ${saveBoundary.genericGapCount} explicit generic gap row${saveBoundary.genericGapCount === 1 ? "" : "s"}` : ""}.` : `Direct ${saveBoundary.directPayloadAnchor || "shard"} payload names the reachable row family, but player-owned row state still stops at ${saveBoundary.runtimeShellAnchor || "the runtime shell"}.` : "The current split between shard row definitions and owned-state recovery is not yet preserved in this build."}</p>
+          <p class="meta">${saveBoundary.hasSeparationBoundary ? (hasDbCoverage(saveBoundary) ? `DB-backed shard boundary coverage now preserves ${saveBoundary.subjectId || "the shard owned-state boundary"} and still separates ${saveBoundary.ownerAnchor} from ${saveBoundary.saveAnchor}${saveBoundary.boundaryVerdict ? ` under ${saveBoundary.boundaryVerdict} verdict` : ""}.` : "Recovered shard-local evidence still separates direct row definitions from unresolved PlayerProfile save ownership.") : "The current build does not yet preserve a clean shard-to-save separation result."}</p>
+          <p class="meta">${saveBoundary.hasSeparationBoundary && saveBoundary.hasDirectRowDefinitionPayload && saveBoundary.hasRuntimeOwnedStateShell ? (hasDbCoverage(saveBoundary) ? `Direct ${saveBoundary.directPayloadAnchor} payload reaches ${saveBoundary.runtimeShellAnchor}, but the owned-state bridge is still blocked at ${saveBoundary.nextSeamId || "an unrecorded seam"}${saveBoundary.genericGapCount ? ` with ${saveBoundary.genericGapCount} explicit generic gap row${saveBoundary.genericGapCount === 1 ? "" : "s"}` : ""}.` : `Direct ${saveBoundary.directPayloadAnchor || "shard"} payload names the reachable row family, but player-owned row state still stops at ${saveBoundary.runtimeShellAnchor || "the runtime shell"}.`) : "The current split between shard row definitions and owned-state recovery is not yet preserved in this build."}</p>
           <p class="meta">${saveBoundary.hasSeparationBoundary ? escapeHtml(saveBoundary.ownedStateStatusLabel) : "The current build does not yet preserve a shard owned-state population boundary."}</p>
           <p class="meta">${saveBoundary.hasSeparationBoundary ? "That is useful because it blocks the UI from implying imported shard milestone ownership that the contract does not support." : "Until separation is verified, shard evidence should be treated as even more provisional."}</p>
           <p class="meta">Manual inputs can guide descriptive watch cards, but they do not turn this flow into recovered save-state truth or a grounded import path.</p>
@@ -5287,10 +5303,8 @@ function buildApkGroundingValidationCases() {
   const tokenBankStateSummary = getTokenBankStateSummary(tokenShop);
   const dailyTokeniumSummary = getDailyTokeniumLaneSummary(tokenShop);
   const tokenBankFormulaSummary = getTokenBankFormulaBoundarySummary(tokenShop);
-  const hasTokeniumNamingRead =
-    hasTokenShopDbRead || Boolean(tokenShop?.tokenBank?.namingClues);
-  const hasTokenShopCostLaneRead =
-    hasTokenShopDbRead || Boolean(tokenShop?.spendLanes?.costLanes);
+  const hasTokeniumNamingRead = hasTokenShopDbRead || Boolean(tokenShop?.tokenBank?.namingClues);
+  const hasTokenShopCostLaneRead = hasTokenShopDbRead || Boolean(tokenShop?.spendLanes?.costLanes);
   const hasSpendActionLaneRead =
     hasTokenShopDbRead || Boolean(tokenShop?.spendLanes?.actionLaneClues);
   const hasTokenShopOwnerShellRead =
@@ -5299,8 +5313,7 @@ function buildApkGroundingValidationCases() {
     hasTokenShopDbRead || Boolean(tokenShop?.rows?.boundaries?.save);
   const hasTokenBankControllerShellRead =
     hasTokenShopDbRead || Boolean(tokenShop?.tokenBank?.controllerShell);
-  const hasTokenBankStateRead =
-    hasTokenShopDbRead || Boolean(tokenShop?.tokenBank?.stateClues);
+  const hasTokenBankStateRead = hasTokenShopDbRead || Boolean(tokenShop?.tokenBank?.stateClues);
   const hasDailyTokeniumLaneRead =
     hasTokenShopDbRead || Boolean(tokenShop?.dailyTokenium?.laneClues);
   const hasTokenBankFormulaRead =
@@ -5337,8 +5350,7 @@ function buildApkGroundingValidationCases() {
     const ownerBoundary = getShardOwnerFamilyBoundarySummary(shardSystem);
     cases.push({
       title: "Shard owner-family boundary",
-      expected:
-        `${ownerBoundary.screenController} keeps ${ownerBoundary.ownerField || "the owner field"} attached to ${ownerBoundary.rowModelType || ownerBoundary.dataCarrier} while ${ownerBoundary.nextSeamId || ownerBoundary.blockedEdgeLabel || "the current owner seam"} remains blocked`,
+      expected: `${ownerBoundary.screenController} keeps ${ownerBoundary.ownerField || "the owner field"} attached to ${ownerBoundary.rowModelType || ownerBoundary.dataCarrier} while ${ownerBoundary.nextSeamId || ownerBoundary.blockedEdgeLabel || "the current owner seam"} remains blocked`,
       actual:
         ownerBoundary.hasBoundary && ownerBoundary.hasStructure
           ? `${ownerBoundary.screenController} keeps ${ownerBoundary.ownerField || "the owner field"} attached to ${ownerBoundary.rowModelType || ownerBoundary.dataCarrier} while ${ownerBoundary.nextSeamId || ownerBoundary.blockedEdgeLabel || "the current owner seam"} remains blocked`
@@ -5351,8 +5363,7 @@ function buildApkGroundingValidationCases() {
     const finalSuBoundary = getShardFinalSuBonusBoundarySummary(shardSystem);
     cases.push({
       title: "Shard FinalSU bonus boundary",
-      expected:
-        `${finalSuBoundary.dataCarrier} preserves SU final-unlock and FinalSU bonus-field families without row mapping claims`,
+      expected: `${finalSuBoundary.dataCarrier} preserves SU final-unlock and FinalSU bonus-field families without row mapping claims`,
       actual: finalSuBoundary.hasBoundary
         ? `${finalSuBoundary.dataCarrier} preserves ${finalSuBoundary.unlockRangeLabel} plus ${finalSuBoundary.bonusFieldLabel}`
         : "Shard FinalSU bonus-field boundary drifted",
@@ -5364,8 +5375,7 @@ function buildApkGroundingValidationCases() {
     const payloadBoundary = getShardMilestonePayloadBoundarySummary(shardSystem);
     cases.push({
       title: "Shard milestone payload boundary",
-      expected:
-        `${payloadBoundary.dataCarrier} preserves milestone-total, cost-list, progress-fill, and phase-tick hooks without claiming saved player rows`,
+      expected: `${payloadBoundary.dataCarrier} preserves milestone-total, cost-list, progress-fill, and phase-tick hooks without claiming saved player rows`,
       actual:
         payloadBoundary.hasBoundary &&
         payloadBoundary.hasCostAndListHooks &&
@@ -5386,8 +5396,7 @@ function buildApkGroundingValidationCases() {
     const costModelBoundary = getShardCostModelBoundarySummary(shardSystem);
     cases.push({
       title: "Shard cost-model boundary",
-      expected:
-        `${costModelBoundary.dataCarrier} preserves sampled SU cost accessors plus a row-local SU0 cost parameter shell without formula claims`,
+      expected: `${costModelBoundary.dataCarrier} preserves sampled SU cost accessors plus a row-local SU0 cost parameter shell without formula claims`,
       actual:
         costModelBoundary.hasBoundary &&
         costModelBoundary.hasSampledCostWindows &&
@@ -5464,8 +5473,7 @@ function buildApkGroundingValidationCases() {
     const rowShellBoundary = getShardMilestoneRowShellBoundarySummary(shardSystem);
     cases.push({
       title: "Shard milestone row shell",
-      expected:
-        `${rowShellBoundary.screenController} preserves partial UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell without row-owner claims`,
+      expected: `${rowShellBoundary.screenController} preserves partial UnlockMilestone, BuyMilestone, and MilestoneTextChecker row shell without row-owner claims`,
       actual:
         rowShellBoundary.hasBoundary &&
         rowShellBoundary.hasUnlockHookSamples &&
@@ -5565,14 +5573,13 @@ function buildApkGroundingValidationCases() {
           ? `${tokenShopCoverage.subjectCount} DB-backed subjects with ${tokenShopCoverage.rowLocalCount} row-local / ${tokenShopCoverage.rangeFamilyCount} range-family entries${tokenShopCoverage.hasControllerAnchors ? " plus DB-grounded action/controller anchors" : " but missing DB-grounded action/controller anchors"}`
           : `${tokenShopCoverage.numericGroupCount} numeric groups with ${tokenShopCoverage.namedLaneLabel}${tokenShopCoverage.hasControllerAnchors ? " plus token-bank controller anchors" : " but missing token-bank controller anchors"}`
         : "Missing TokenShop extracted family coverage",
-      pass:
-        hasTokenShopDbCoverage(tokenShopCoverage)
-          ? tokenShopCoverage.subjectCount >= 2 &&
-            tokenShopCoverage.rowLocalCount >= 1 &&
-            tokenShopCoverage.rangeFamilyCount >= 1
-          : tokenShopCoverage.numericGroupCount === 32 &&
-            tokenShopCoverage.hasControllerAnchors &&
-            tokenShopCoverage.hasNamedLanes,
+      pass: hasTokenShopDbCoverage(tokenShopCoverage)
+        ? tokenShopCoverage.subjectCount >= 2 &&
+          tokenShopCoverage.rowLocalCount >= 1 &&
+          tokenShopCoverage.rangeFamilyCount >= 1
+        : tokenShopCoverage.numericGroupCount === 32 &&
+          tokenShopCoverage.hasControllerAnchors &&
+          tokenShopCoverage.hasNamedLanes,
       scope: "APK"
     });
     cases.push({
@@ -6577,10 +6584,9 @@ function getTokenShopGroundedSubsetPreviewSummary(boundary, tokenShopState) {
   const resolvedTokenShopState =
     tokenShopState && typeof tokenShopState === "object" ? tokenShopState : {};
   const rows = getTokenShopGroundedSubsetDefinitions(boundary).map((row) => ({
-    label:
-      row?.rowDetail?.isGrounded
-        ? `${row.dbMetadataSourceLabel || row.contractSourceLabel || "DB-backed TokenShop mechanics"} with compatibility level import: ${row.identity} (${row.slot})`
-        : `Compatibility-only subset level: ${row.identity} (${row.slot})`,
+    label: row?.rowDetail?.isGrounded
+      ? `${row.dbMetadataSourceLabel || row.contractSourceLabel || "DB-backed TokenShop mechanics"} with compatibility level import: ${row.identity} (${row.slot})`
+      : `Compatibility-only subset level: ${row.identity} (${row.slot})`,
     value: resolvedTokenShopState[row.field],
     path: `compatibility.unmappedSystemState.tokenShop.${row.field}`,
     note: row.note
@@ -6642,17 +6648,19 @@ function getTokenShopRowCoverageSummary(rows) {
     /compatibility-mapped/i.test(String(row?.note || "").trim());
 
   const exactCount = normalizedRows.filter(
-    (row) => row?.rowDetail?.isGrounded === true && !row?.blockedInputReason && !isCompatibilityMapped(row)
+    (row) =>
+      row?.rowDetail?.isGrounded === true && !row?.blockedInputReason && !isCompatibilityMapped(row)
   ).length;
-  const boundedCount = normalizedRows.filter((row) => {
-    if (isCompatibilityMapped(row)) {
-      return false;
-    }
-    if (row?.rowDetail?.isGrounded === true && row?.blockedInputReason) {
-      return true;
-    }
-    return Boolean(row?.subjectId);
-  }).length - exactCount;
+  const boundedCount =
+    normalizedRows.filter((row) => {
+      if (isCompatibilityMapped(row)) {
+        return false;
+      }
+      if (row?.rowDetail?.isGrounded === true && row?.blockedInputReason) {
+        return true;
+      }
+      return Boolean(row?.subjectId);
+    }).length - exactCount;
   const compatibilityCount = normalizedRows.filter(isCompatibilityMapped).length;
 
   return {
@@ -6666,8 +6674,9 @@ function getTokenShopTierRecommendationModel(summary, tierRows, tierUnlocked) {
   const spendSystem = getCurrentSpendSystemView();
   const progressionModel = spendSystem?.progressionModel || null;
   const activeObjective =
-    progressionModel?.objectiveModes?.find((mode) => mode.id === "objective:token-shop-short-run") ||
-    null;
+    progressionModel?.objectiveModes?.find(
+      (mode) => mode.id === "objective:token-shop-short-run"
+    ) || null;
   const { states, thresholds } = getTokenShopTierUnlockSummary(summary);
   if (!tierUnlocked) {
     return {
@@ -6705,14 +6714,18 @@ function getTokenShopTierRecommendationModel(summary, tierRows, tierUnlocked) {
   }));
   return {
     activeObjective,
-    blockedReason: ranked.length ? "" : "No affordable grounded next level is currently available in this tier.",
+    blockedReason: ranked.length
+      ? ""
+      : "No affordable grounded next level is currently available in this tier.",
     nextBest: ranked[0] || null,
     ranked
   };
 }
 
 function getTokenShopTierLevelsRemaining(summary, thresholds) {
-  const levelByField = Object.fromEntries((summary?.rows || []).map((row) => [row.field, row.currentLevel]));
+  const levelByField = Object.fromEntries(
+    (summary?.rows || []).map((row) => [row.field, row.currentLevel])
+  );
   const totalForTier = (tierKey) =>
     (TOKEN_SHOP_TIER_CONFIG[tierKey]?.rows || []).reduce((sum, field) => {
       const value = levelByField[field];
@@ -6732,12 +6745,14 @@ function getTokenShopStorefrontRecommendationModel(summary) {
   const spendSystem = getCurrentSpendSystemView();
   const progressionModel = spendSystem?.progressionModel || null;
   const activeObjective =
-    progressionModel?.objectiveModes?.find((mode) => mode.id === "objective:token-shop-short-run") ||
-    null;
+    progressionModel?.objectiveModes?.find(
+      (mode) => mode.id === "objective:token-shop-short-run"
+    ) || null;
   const { states, thresholds } = getTokenShopTierUnlockSummary(summary);
   if (typeof summary?.currentTokens !== "number" || !Number.isFinite(summary.currentTokens)) {
     return {
-      blockedReason: "Tokens are missing from the profile, so no grounded recommendation can be applied.",
+      blockedReason:
+        "Tokens are missing from the profile, so no grounded recommendation can be applied.",
       nextBest: null,
       ranked: [],
       states
@@ -6769,7 +6784,9 @@ function getTokenShopStorefrontRecommendationModel(summary) {
   }));
   return {
     activeObjective,
-    blockedReason: ranked.length ? "" : "No affordable grounded next level is currently available in the visible unlocked store tiers.",
+    blockedReason: ranked.length
+      ? ""
+      : "No affordable grounded next level is currently available in the visible unlocked store tiers.",
     nextBest: ranked[0] || null,
     ranked,
     states
@@ -6792,20 +6809,36 @@ function applyTokenShopRecommendedPurchase(rowField) {
   }
   const tierKey = getTokenShopTierForField(rowField);
   if (tierKey !== "t1" && !states[tierKey]) {
-    setStatus("profileStatus", `${TOKEN_SHOP_TIER_CONFIG[tierKey].label} is still gated.`, "warning");
+    setStatus(
+      "profileStatus",
+      `${TOKEN_SHOP_TIER_CONFIG[tierKey].label} is still gated.`,
+      "warning"
+    );
     return;
   }
   if (row.isMaxed) {
-    setStatus("profileStatus", `${getTokenShopRowLabel(row)} is already at its known cap.`, "warning");
+    setStatus(
+      "profileStatus",
+      `${getTokenShopRowLabel(row)} is already at its known cap.`,
+      "warning"
+    );
     return;
   }
   if (typeof row.nextKnownCost !== "number" || !Number.isFinite(row.nextKnownCost)) {
-    setStatus("profileStatus", `No grounded next cost is available for ${getTokenShopRowLabel(row)}.`, "warning");
+    setStatus(
+      "profileStatus",
+      `No grounded next cost is available for ${getTokenShopRowLabel(row)}.`,
+      "warning"
+    );
     return;
   }
   const currentTokens = summary.currentTokens;
   if (typeof currentTokens !== "number" || currentTokens < row.nextKnownCost) {
-    setStatus("profileStatus", `${getTokenShopRowLabel(row)} needs ${formatBoundaryValue(row.nextKnownCost)} Tokens.`, "warning");
+    setStatus(
+      "profileStatus",
+      `${getTokenShopRowLabel(row)} needs ${formatBoundaryValue(row.nextKnownCost)} Tokens.`,
+      "warning"
+    );
     return;
   }
 
@@ -6814,7 +6847,11 @@ function applyTokenShopRecommendedPurchase(rowField) {
     row.currentLevel + 1,
     state.playerProfile
   );
-  setProfileValue(["player", "resources", "tokens"], currentTokens - row.nextKnownCost, state.playerProfile);
+  setProfileValue(
+    ["player", "resources", "tokens"],
+    currentTokens - row.nextKnownCost,
+    state.playerProfile
+  );
   persistPlayerProfile();
   fillProfileForm();
   renderAll();
@@ -6883,7 +6920,7 @@ function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recom
         ? `${formatBoundaryValue(row.nextKnownCost - summary.currentTokens)} more Tokens needed.`
         : typeof row.nextKnownCost === "number"
           ? "Tokens unavailable in checked profile."
-        : "Waiting on grounded runtime cost coverage.";
+          : "Waiting on grounded runtime cost coverage.";
   const costFormulaLine =
     typeof row.costFormulaLabel === "string" && row.costFormulaLabel
       ? row.costFormulaLabel
@@ -6891,7 +6928,11 @@ function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recom
         ? `Known cost inputs: start ${formatBoundaryValue(row.startCost)} + additive ${formatBoundaryValue(row.additiveCost)} x current level.`
         : "Known cost inputs are incomplete in this build.";
   const actionLabel = tierUnlocked
-    ? (displayIsMaxed ? "MAXED" : typeof row.nextKnownCost === "number" ? "NEXT" : "RESEARCH")
+    ? displayIsMaxed
+      ? "MAXED"
+      : typeof row.nextKnownCost === "number"
+        ? "NEXT"
+        : "RESEARCH"
     : "LOCKED";
   const tierGateLine = tierUnlocked
     ? `${TOKEN_SHOP_TIER_CONFIG[tierKey]?.label || tierKey.toUpperCase()} is currently available under the checked tier policy.`
@@ -6902,7 +6943,7 @@ function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recom
   const isResearchPanel =
     tierUnlocked && !displayIsMaxed && !canPurchase && typeof row.nextKnownCost !== "number";
   const buyPanelAttrs = canPurchase
-    ? ` data-token-shop-apply-row="${escapeHtml(row.field)}" role="button" tabindex="0" aria-label="${escapeHtml(`Buy ${displayTitle} next level`) }"`
+    ? ` data-token-shop-apply-row="${escapeHtml(row.field)}" role="button" tabindex="0" aria-label="${escapeHtml(`Buy ${displayTitle} next level`)}"`
     : "";
   const requirementOverlay = !tierUnlocked
     ? `<div class="token-shop-overlay-ribbon"><span class="token-shop-overlay-label">LOCKED</span><p>${escapeHtml(getTokenShopTierThresholdLabel(tierKey, getTokenShopTierUnlockSummary(summary).thresholds))}</p></div>`
@@ -6936,7 +6977,7 @@ function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recom
       <strong>Unresolved</strong>
       <span class="token-shop-buy-hint">${escapeHtml(affordabilityLine)}</span>
     `
-    : `
+      : `
       <span class="token-shop-buy-label">${escapeHtml(canPurchase ? "BUY" : actionLabel)}</span>
       <strong>${escapeHtml(nextKnownCostLabel)}</strong>
       ${canPurchase ? `<span class="token-shop-buy-cta">${escapeHtml(isRecommended ? "BEST PICK" : "AVAILABLE")}</span>` : `<span class="token-shop-buy-hint">${escapeHtml(tierUnlocked ? affordabilityLine : tierGateLine)}</span>`}
@@ -6989,9 +7030,18 @@ function renderTokenShopStorefrontRow(row, summary, tierKey, tierUnlocked, recom
   `;
 }
 
-function renderTokenShopTierSection(tierKey, tierRows, tierUnlocked, thresholds, summary, storefrontRecommendation) {
+function renderTokenShopTierSection(
+  tierKey,
+  tierRows,
+  tierUnlocked,
+  thresholds,
+  summary,
+  storefrontRecommendation
+) {
   const tierRecommendation = getTokenShopTierRecommendationModel(summary, tierRows, tierUnlocked);
-  const nextBestTitle = storefrontRecommendation?.nextBest?.row ? getTokenShopRowLabel(storefrontRecommendation.nextBest.row) : "";
+  const nextBestTitle = storefrontRecommendation?.nextBest?.row
+    ? getTokenShopRowLabel(storefrontRecommendation.nextBest.row)
+    : "";
   const bestBuyTierKey = storefrontRecommendation?.nextBest?.row
     ? getTokenShopTierForField(storefrontRecommendation.nextBest.row.field)
     : "";
@@ -7000,9 +7050,7 @@ function renderTokenShopTierSection(tierKey, tierRows, tierUnlocked, thresholds,
       ? ""
       : `Best next purchase currently lives in ${TOKEN_SHOP_TIER_CONFIG[bestBuyTierKey]?.label || "another tier"}: ${nextBestTitle}.`
     : tierRecommendation.blockedReason;
-  const tierGateNote = tierUnlocked
-    ? ""
-    : getTokenShopTierThresholdLabel(tierKey, thresholds);
+  const tierGateNote = tierUnlocked ? "" : getTokenShopTierThresholdLabel(tierKey, thresholds);
   const tierLead = recommendationNote || tierGateNote;
 
   return `
@@ -7059,8 +7107,12 @@ function sortTokenShopTierRows(tierKey, rows) {
   const configuredOrder = TOKEN_SHOP_TIER_CONFIG[tierKey]?.rows || [];
   const indexByField = new Map(configuredOrder.map((field, index) => [field, index]));
   return [...(Array.isArray(rows) ? rows : [])].sort((left, right) => {
-    const leftIndex = indexByField.has(left?.field) ? indexByField.get(left.field) : Number.MAX_SAFE_INTEGER;
-    const rightIndex = indexByField.has(right?.field) ? indexByField.get(right.field) : Number.MAX_SAFE_INTEGER;
+    const leftIndex = indexByField.has(left?.field)
+      ? indexByField.get(left.field)
+      : Number.MAX_SAFE_INTEGER;
+    const rightIndex = indexByField.has(right?.field)
+      ? indexByField.get(right.field)
+      : Number.MAX_SAFE_INTEGER;
     if (leftIndex !== rightIndex) {
       return leftIndex - rightIndex;
     }
@@ -8158,7 +8210,10 @@ function renderTokenShopEffectLineHtml(effectLine) {
     );
   }
   return html
-    .replace(/<\/span>\s+(?=<span class="token-shop-effect-key token-shop-effect-key--qualifier">)/g, " ")
+    .replace(
+      /<\/span>\s+(?=<span class="token-shop-effect-key token-shop-effect-key--qualifier">)/g,
+      " "
+    )
     .replace(/\s+([,.;:!?])/g, "$1")
     .replace(/([,.;:!?])(?=<span class="token-shop-effect-key")/g, "$1 ");
 }
