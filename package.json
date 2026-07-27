@@ -29,7 +29,7 @@
     "test:unit": "node ./scripts/tests/run-unit-tests.mjs"
   },
   "devDependencies": {
-    "eslint": "^10.2.1",
+    "eslint": "^10.8.0",
     "playwright": "^1.59.1",
     "prettier": "^3.8.3"
   }
