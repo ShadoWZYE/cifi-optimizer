@@ -1,6 +1,7 @@
 import {
   composeDbCoverageSource,
   getDbSystemBoundaryEntry,
+  getDbSystemConsumerProjections,
   getDbSystemCoverageSummary,
   getDbSystemGenericSubjectSummary,
   getDbSystemSubjectMetadataEntry,
@@ -13,6 +14,61 @@ function getShardSubjectMetadata(shardSystemOrBoundary) {
 
 function getShardGenericSubjectSummary(shardSystemOrBoundary, expectedSubjectId) {
   return getDbSystemGenericSubjectSummary(shardSystemOrBoundary, expectedSubjectId);
+}
+
+function getActiveShardConsumerProjections(shardSystemOrBoundary) {
+  return (
+    Array.isArray(getDbSystemConsumerProjections(shardSystemOrBoundary))
+      ? getDbSystemConsumerProjections(shardSystemOrBoundary)
+      : []
+  ).filter((entry) => String(entry?.projectionStatus || "").trim() !== "closed");
+}
+
+function getShardCostProjection(shardSystemOrBoundary) {
+  return getActiveShardConsumerProjections(shardSystemOrBoundary).find(
+    (entry) => String(entry?.projectionKind || "").trim() === "shard-cost-structure"
+  );
+}
+
+function getShardRuntimeProjection(shardSystemOrBoundary, subjectId = "UpdateShardCostList") {
+  return getActiveShardConsumerProjections(shardSystemOrBoundary).find((entry) => {
+    if (String(entry?.projectionKind || "").trim() !== "runtime-bridge-structure") {
+      return false;
+    }
+    return String(entry?.subjectId || "").trim() === String(subjectId || "").trim();
+  });
+}
+
+function getShardRuntimeFinalProjection(shardSystemOrBoundary) {
+  return getActiveShardConsumerProjections(shardSystemOrBoundary).find((entry) => {
+    if (String(entry?.projectionKind || "").trim() !== "runtime-bridge-structure") {
+      return false;
+    }
+    const payload = entry?.payload && typeof entry.payload === "object" ? entry.payload : {};
+    const bridgeTargets = Array.isArray(payload.bridgeTargets)
+      ? payload.bridgeTargets.filter(Boolean)
+      : [];
+    return bridgeTargets.some((value) => /^FinalSU\d+Bonus\d+$/u.test(String(value || "").trim()));
+  });
+}
+
+function getShardSaveOwnerProjection(shardSystemOrBoundary) {
+  return (
+    getActiveShardConsumerProjections(shardSystemOrBoundary).find(
+      (entry) =>
+        String(entry?.projectionKind || "").trim() === "shard-save-owner-structure" &&
+        String(entry?.subjectId || "").trim() === "ShardUpgradeInfo"
+    ) ??
+    getActiveShardConsumerProjections(shardSystemOrBoundary).find(
+      (entry) =>
+        String(entry?.projectionKind || "").trim() === "save-owner-structure" &&
+        String(entry?.subjectId || "").trim() === "ShardUpgradeInfo"
+    )
+  );
+}
+
+function getProjectionPayload(projection) {
+  return projection?.payload && typeof projection.payload === "object" ? projection.payload : {};
 }
 
 function getShardCompatibilityBoundary(shardSystemOrBoundary, boundaryKey) {
@@ -130,6 +186,99 @@ export function getShardOwnerFamilyBoundarySummary(boundary) {
     boundary?.family?.compatibilityBoundaries?.ownerFamily ??
     boundary?.family?.boundaries?.ownerFamily ??
     boundary;
+  const shardCostProjection = getShardCostProjection(boundary);
+  const shardCostPayload = getProjectionPayload(shardCostProjection);
+  const shardRuntimeProjection = getShardRuntimeProjection(boundary, "UpdateShardCostList");
+  const shardRuntimePayload = getProjectionPayload(shardRuntimeProjection);
+  const shardSaveProjection = getShardSaveOwnerProjection(boundary);
+  const shardSavePayload = getProjectionPayload(shardSaveProjection);
+  const shardFormulaProjection = getActiveShardConsumerProjections(boundary).find(
+    (entry) => String(entry?.projectionKind || "").trim() === "value-formula-structure"
+  );
+  const shardFormulaPayload = getProjectionPayload(shardFormulaProjection);
+  if (
+    shardCostProjection ||
+    shardRuntimeProjection ||
+    shardSaveProjection ||
+    shardFormulaProjection
+  ) {
+    const bridgeAnchors = Array.isArray(shardRuntimePayload.bridgeAnchors)
+      ? shardRuntimePayload.bridgeAnchors.filter(Boolean)
+      : [];
+    const bridgeTargets = Array.isArray(shardRuntimePayload.bridgeTargets)
+      ? shardRuntimePayload.bridgeTargets.filter(Boolean)
+      : [];
+    const saveTargets = Array.isArray(shardSavePayload.recoveredTargets)
+      ? shardSavePayload.recoveredTargets.filter(Boolean)
+      : [];
+    const parameterShells = Array.isArray(shardCostPayload.parameterShells)
+      ? shardCostPayload.parameterShells.filter(Boolean)
+      : [];
+    const formulaFields = Array.isArray(shardFormulaPayload.formulaFields)
+      ? shardFormulaPayload.formulaFields.filter(Boolean)
+      : [];
+    const supportingEdges = [
+      shardCostPayload.costGetter ? "getter-family" : "",
+      bridgeTargets.length ? "runtime-bridge-structure" : "",
+      saveTargets.length ? "save-owner-recovery" : "",
+      bridgeTargets.includes("get_IsUnlocked") ? "unlock-hook-recovered" : ""
+    ].filter(Boolean);
+    const blockedEdges = ["local-runtime-population-bridge"];
+    const runtimeShellCandidates = [
+      ...bridgeAnchors,
+      ...saveTargets,
+      ...(Array.isArray(shardFormulaPayload.deterministicEvaluators)
+        ? shardFormulaPayload.deterministicEvaluators.filter(Boolean)
+        : [])
+    ];
+    return {
+      hasBoundary: true,
+      hasStructure:
+        parameterShells.length > 0 || formulaFields.length > 0 || runtimeShellCandidates.length > 0,
+      hasRowStateFields:
+        formulaFields.length > 0 ||
+        bridgeTargets.some((value) =>
+          ["TotalMilestoneLevels", "get_IsUnlocked"].includes(String(value || "").trim())
+        ),
+      hasSupportingEdges: supportingEdges.length > 0,
+      hasBlockedEdges: blockedEdges.length > 0,
+      coverageSource: "consumer-projection-v2",
+      boundaryVerdict: "consumer-projection-v2",
+      screenController: "ShardMining",
+      dataCarrier: String(
+        shardSavePayload.ownerAnchor || shardCostPayload.owner || "ShardUpgradeInfo"
+      ).trim(),
+      runtimeShell:
+        runtimeShellCandidates.find((value) => String(value || "").trim()) || "UpdateShardCostList",
+      ownerField: parameterShells[0] || formulaFields[0] || null,
+      rowModelType: "ShardUpgradeInfo",
+      rowStateFieldLabel: [...new Set([...formulaFields, ...parameterShells])]
+        .slice(0, 5)
+        .join(", "),
+      supportingEdgeLabel: supportingEdges.join(", "),
+      blockedEdgeLabel: blockedEdges.join(", "),
+      groundedConclusion:
+        "V2 shard projections recover the owner/data-carrier side but still stop short of a local runtime population bridge.",
+      outcomeStatement:
+        "Shard owner-family structure is partially grounded from shard cost, runtime bridge, save-owner, and value-formula projections.",
+      sourceTraceScope:
+        (Array.isArray(shardSavePayload.traceScopes) && shardSavePayload.traceScopes[0]) ||
+        (Array.isArray(shardFormulaPayload.traceScopes) && shardFormulaPayload.traceScopes[0]) ||
+        "shard-cost-su0-structure",
+      sourceSubjectId: String(
+        shardSaveProjection?.subjectId ||
+          shardFormulaProjection?.subjectId ||
+          shardRuntimeProjection?.subjectId ||
+          shardCostProjection?.subjectId ||
+          "ShardUpgradeInfo"
+      ).trim(),
+      nextSeamId: null,
+      blockedInputReason: "partial V2 shard owner-family projection",
+      subjectId: "ShardUpgradeInfo",
+      genericFactCount: 0,
+      genericGapCount: 0
+    };
+  }
   const inferredBoundary = getDbSystemBoundaryEntry(
     boundary,
     "family-graph:shards-owner-family",
@@ -274,6 +423,54 @@ export function getShardOwnerFamilyBoundarySummary(boundary) {
 
 export function getShardFinalSuBonusBoundarySummary(boundary) {
   const compatibilityBoundary = getShardCompatibilityBoundary(boundary, "finalSuBonus");
+  const shardRuntimeFinalProjection = getShardRuntimeFinalProjection(boundary);
+  const shardRuntimeFinalPayload = getProjectionPayload(shardRuntimeFinalProjection);
+  if (shardRuntimeFinalProjection) {
+    const bridgeTargets = Array.isArray(shardRuntimeFinalPayload.bridgeTargets)
+      ? shardRuntimeFinalPayload.bridgeTargets.filter(Boolean)
+      : [];
+    const bonusFieldSamples = bridgeTargets.filter((value) =>
+      /^FinalSU\d+Bonus\d+$/u.test(String(value || "").trim())
+    );
+    const adjacentFields = bridgeTargets.filter((value) =>
+      [
+        "TotalMilestoneLevels",
+        "get_IsUnlocked",
+        "OverLevel100Exponent",
+        "OverLevel200Exponent",
+        "OverLevel300Exponent",
+        "OverLevel400Exponent"
+      ].includes(String(value || "").trim())
+    );
+    const dataCarrierCandidates = [
+      ...(Array.isArray(shardRuntimeFinalPayload.requestedTerms)
+        ? shardRuntimeFinalPayload.requestedTerms.filter(Boolean)
+        : []),
+      ...(Array.isArray(shardRuntimeFinalPayload.bridgeAnchors)
+        ? shardRuntimeFinalPayload.bridgeAnchors.filter(Boolean)
+        : [])
+    ];
+    const dataCarrier =
+      dataCarrierCandidates.find((value) => String(value || "").includes("ShardUpgradeInfo")) ||
+      "ShardUpgradeInfo";
+    return {
+      hasBoundary: bonusFieldSamples.length > 0,
+      hasAdjacentFields: adjacentFields.length > 0,
+      coverageSource: "consumer-projection-v2",
+      dataCarrier,
+      unlockRangeLabel: "get_IsUnlocked",
+      bonusFieldLabel: bonusFieldSamples.join(", "),
+      bonusAccessorLabel: "",
+      adjacentFieldLabel: adjacentFields.join(", "),
+      boundaryVerdict: "consumer-projection-v2",
+      subjectId: String(shardRuntimeFinalProjection.subjectId || "").trim() || "ShardUpgradeInfo",
+      subjectKind: "runtime-bridge-structure",
+      blockedInputReason: "partial V2 shard final-bonus runtime bridge projection",
+      nextSeamId: null,
+      genericFactCount: 0,
+      genericGapCount: 0
+    };
+  }
   const inferredBoundary = getDbSystemBoundaryEntry(
     boundary,
     "family-graph:shards-finalsu-bonus",
@@ -377,6 +574,72 @@ export function getShardFinalSuBonusBoundarySummary(boundary) {
 
 export function getShardMilestonePayloadBoundarySummary(boundary) {
   const compatibilityBoundary = getShardCompatibilityBoundary(boundary, "milestonePayload");
+  const shardCostProjection = getShardCostProjection(boundary);
+  const shardCostPayload = getProjectionPayload(shardCostProjection);
+  const shardRuntimePayloadProjection =
+    getShardRuntimeProjection(boundary, "UpdateShardCostList") ??
+    getShardRuntimeProjection(boundary, "ShardUpgradeInfo");
+  const shardRuntimePayload = getProjectionPayload(shardRuntimePayloadProjection);
+  const shardSaveProjection = getShardSaveOwnerProjection(boundary);
+  const shardSavePayload = getProjectionPayload(shardSaveProjection);
+  if (shardCostProjection || shardRuntimePayloadProjection) {
+    const bridgeTargets = Array.isArray(shardRuntimePayload.bridgeTargets)
+      ? shardRuntimePayload.bridgeTargets.filter(Boolean)
+      : [];
+    const rowStateFields = bridgeTargets.filter((value) =>
+      ["TotalMilestoneLevels", "get_IsUnlocked"].includes(String(value || "").trim())
+    );
+    const payloadHooks = [
+      String(shardRuntimePayloadProjection?.subjectId || "").trim(),
+      ...bridgeTargets.filter((value) =>
+        [
+          "GetShardCostList",
+          "UpdateShardCostList",
+          "CountAffordableShard",
+          "InitializeShards",
+          "SortCostAndBools"
+        ].includes(String(value || "").trim())
+      )
+    ].filter(Boolean);
+    const progressHooks = bridgeTargets.filter((value) =>
+      String(value || "")
+        .trim()
+        .startsWith("CheckAll")
+    );
+    const saveCandidates = Array.isArray(shardSavePayload.recoveredTargets)
+      ? shardSavePayload.recoveredTargets.filter(Boolean)
+      : [];
+    const parameterShellFields = Array.isArray(shardCostPayload.parameterShells)
+      ? shardCostPayload.parameterShells.filter(Boolean)
+      : [];
+    const costAccessors = [String(shardCostPayload.costGetter || "").trim()].filter(Boolean);
+    return {
+      hasBoundary: costAccessors.length > 0 || rowStateFields.length > 0,
+      hasCostAndListHooks: payloadHooks.length > 0,
+      hasProgressFillHooks: progressHooks.length > 0,
+      hasTickFields: false,
+      hasCostAccessorSamples: costAccessors.length > 0,
+      coverageSource: "consumer-projection-v2",
+      dataCarrier: String(shardCostPayload.owner || "ShardUpgradeInfo").trim(),
+      milestoneStateLabel: rowStateFields.join(", "),
+      costHookLabel: payloadHooks.join(", "),
+      progressHookLabel: progressHooks.join(", "),
+      tickFieldLabel: "",
+      costAccessorLabel: costAccessors.join(", "),
+      rowParameterLabel: parameterShellFields.join(", "),
+      saveCandidateLabel: saveCandidates.join(", "),
+      boundaryVerdict: "consumer-projection-v2",
+      subjectId:
+        String(
+          shardRuntimePayloadProjection?.subjectId || shardCostProjection?.subjectId || ""
+        ).trim() || "ShardUpgradeInfo",
+      subjectKind: "runtime-bridge-structure",
+      blockedInputReason: "partial V2 shard milestone payload projection",
+      nextSeamId: null,
+      genericFactCount: 0,
+      genericGapCount: 0
+    };
+  }
   const inferredBoundary = getDbSystemBoundaryEntry(
     boundary,
     "family-graph:shards-milestone-payload",
@@ -503,6 +766,19 @@ export function getShardCostModelBoundarySummary(boundary) {
     boundary?.cost?.compatibilityBoundaries?.costModelBoundary ??
     boundary?.cost?.costModelBoundary ??
     boundary;
+  const shardCostProjection = (
+    Array.isArray(getDbSystemConsumerProjections(boundary))
+      ? getDbSystemConsumerProjections(boundary)
+      : []
+  ).find(
+    (entry) =>
+      String(entry?.projectionKind || "").trim() === "shard-cost-structure" &&
+      String(entry?.projectionStatus || "").trim() !== "closed"
+  );
+  const shardCostProjectionPayload =
+    shardCostProjection?.payload && typeof shardCostProjection.payload === "object"
+      ? shardCostProjection.payload
+      : {};
   const shardCostBoundary = getDbSystemBoundaryEntry(
     boundary,
     "shard-cost-su0-structure",
@@ -533,6 +809,39 @@ export function getShardCostModelBoundarySummary(boundary) {
     : Array.isArray(shardCostMetadata?.missingEdges)
       ? shardCostMetadata.missingEdges
       : [];
+  if (shardCostProjection) {
+    const parameterShells = Array.isArray(shardCostProjectionPayload.parameterShells)
+      ? shardCostProjectionPayload.parameterShells.filter(Boolean)
+      : [];
+    const deterministicEvaluators = Array.isArray(
+      shardCostProjectionPayload.deterministicEvaluators
+    )
+      ? shardCostProjectionPayload.deterministicEvaluators.filter(Boolean)
+      : [];
+    const costGetter = String(shardCostProjectionPayload.costGetter || "").trim();
+    return {
+      hasBoundary: Boolean(costGetter),
+      hasSampledCostWindows: Boolean(costGetter),
+      hasRow0FormulaShell: parameterShells.length > 0,
+      coverageSource: "consumer-projection-v2",
+      dataCarrier: String(shardCostProjectionPayload.owner || "ShardUpgradeInfo").trim(),
+      costWindowLabel: costGetter
+        ? `${costGetter} via V2 shard-cost projection`
+        : "V2 shard-cost projection",
+      row0FieldLabel: parameterShells.slice(0, 4).join(", ") || "parameter shells unavailable",
+      row0FillLabel: parameterShells.filter((value) => /Fill/i.test(String(value))).join(", "),
+      row0BonusLabel: deterministicEvaluators.join(", "),
+      supportedOptimizerLabel: deterministicEvaluators.join(", "),
+      blockedOptimizerLabel: "",
+      boundaryVerdict: "consumer-projection-v2",
+      subjectId: String(shardCostProjection.subjectId || "").trim() || "SU0",
+      subjectKind: "shard-cost-structure",
+      blockedInputReason: null,
+      nextSeamId: null,
+      genericFactCount: 0,
+      genericGapCount: 0
+    };
+  }
   if (shardCostMetadata || shardCostBoundary) {
     const combinedNextSeamIds = [
       typeof costBoundaryPayload?.nextSeamId === "string" ? costBoundaryPayload.nextSeamId : null,
@@ -647,6 +956,54 @@ export function getShardCostModelBoundarySummary(boundary) {
 
 export function getShardMilestoneRowModelBoundarySummary(boundary) {
   const compatibilityBoundary = getShardCompatibilityBoundary(boundary, "rowModel");
+  const shardCostProjection = getShardCostProjection(boundary);
+  const shardCostPayload = getProjectionPayload(shardCostProjection);
+  const shardRuntimeProjection = getShardRuntimeProjection(boundary, "UpdateShardCostList");
+  const shardRuntimePayload = getProjectionPayload(shardRuntimeProjection);
+  if (shardCostProjection || shardRuntimeProjection) {
+    const parameterShells = Array.isArray(shardCostPayload.parameterShells)
+      ? shardCostPayload.parameterShells.filter(Boolean)
+      : [];
+    const bridgeTargets = Array.isArray(shardRuntimePayload.bridgeTargets)
+      ? shardRuntimePayload.bridgeTargets.filter(Boolean)
+      : [];
+    const runtimeShellCandidates = Array.isArray(shardRuntimePayload.requestedTerms)
+      ? shardRuntimePayload.requestedTerms.filter(Boolean)
+      : [];
+    const rowModelTypes = ["ShardUpgradeInfo"];
+    const genericBuyFamilies = bridgeTargets.filter((value) =>
+      ["CountAffordableShard", "InitializeShards", "SortCostAndBools"].includes(
+        String(value || "").trim()
+      )
+    );
+    return {
+      hasBoundary: parameterShells.length > 0 || runtimeShellCandidates.length > 0,
+      hasShardLocalBuySample: false,
+      hasGenericBuyFamily: genericBuyFamilies.length > 0,
+      coverageSource: "consumer-projection-v2",
+      textCheckerRangeLabel: bridgeTargets.some((value) =>
+        /CheckAll/i.test(String(value || "").trim())
+      )
+        ? "runtime fill checker family recovered"
+        : "unrecovered",
+      unlockRangeLabel: bridgeTargets.includes("get_IsUnlocked") ? "get_IsUnlocked" : "unrecovered",
+      shardLocalBuyLabel: "",
+      genericBuyLabel: genericBuyFamilies.join(", "),
+      runtimeShell:
+        runtimeShellCandidates.find((value) => String(value || "").includes("ShardUpgradeInfo")) ||
+        "ShardUpgradeInfo",
+      rowModelType: rowModelTypes[0],
+      boundaryVerdict: "consumer-projection-v2",
+      subjectId:
+        String(shardRuntimeProjection?.subjectId || shardCostProjection?.subjectId || "").trim() ||
+        "ShardUpgradeInfo",
+      subjectKind: "runtime-bridge-structure",
+      blockedInputReason: "partial V2 shard row-model projection",
+      nextSeamId: null,
+      genericFactCount: 0,
+      genericGapCount: 0
+    };
+  }
   const inferredBoundary = getDbSystemBoundaryEntry(
     boundary,
     "family-graph:shards-milestone-row-model",
@@ -746,6 +1103,46 @@ export function getShardMilestoneRowModelBoundarySummary(boundary) {
 
 export function getShardMilestoneTitleEffectBoundarySummary(boundary) {
   const compatibilityBoundary = getShardCompatibilityBoundary(boundary, "titleEffect");
+  const shardRuntimeFinalProjection = getShardRuntimeFinalProjection(boundary);
+  const shardRuntimeFinalPayload = getProjectionPayload(shardRuntimeFinalProjection);
+  const shardCostProjection = getShardCostProjection(boundary);
+  const shardCostPayload = getProjectionPayload(shardCostProjection);
+  if (shardRuntimeFinalProjection || shardCostProjection) {
+    const bridgeTargets = Array.isArray(shardRuntimeFinalPayload.bridgeTargets)
+      ? shardRuntimeFinalPayload.bridgeTargets.filter(Boolean)
+      : [];
+    const titleAssetCandidates = bridgeTargets.filter((value) =>
+      /^FinalSU\d+Bonus\d+$/u.test(String(value || "").trim())
+    );
+    const effectPresentationSlots = Array.isArray(shardCostPayload.parameterShells)
+      ? shardCostPayload.parameterShells.filter((value) =>
+          /Bonus|Exponent|StartCost/i.test(String(value || "").trim())
+        )
+      : [];
+    const sampleBonusCalcAccessors = Array.isArray(shardCostPayload.deterministicEvaluators)
+      ? shardCostPayload.deterministicEvaluators.filter(Boolean)
+      : [];
+    return {
+      hasBoundary: titleAssetCandidates.length > 0 || sampleBonusCalcAccessors.length > 0,
+      hasEffectPresentationFamily: effectPresentationSlots.length > 0,
+      hasBonusCalcSamples: sampleBonusCalcAccessors.length > 0,
+      coverageSource: "consumer-projection-v2",
+      titleRangeLabel: titleAssetCandidates.join(", ") || "runtime final bonus targets recovered",
+      effectSlotLabel: effectPresentationSlots.join(", "),
+      bonusCalcLabel: sampleBonusCalcAccessors.join(", "),
+      row28ConflictLabel: "",
+      boundaryVerdict: "consumer-projection-v2",
+      subjectId:
+        String(
+          shardRuntimeFinalProjection?.subjectId || shardCostProjection?.subjectId || ""
+        ).trim() || "ShardUpgradeInfo",
+      subjectKind: "runtime-bridge-structure",
+      blockedInputReason: "partial V2 shard title/effect projection",
+      nextSeamId: null,
+      genericFactCount: 0,
+      genericGapCount: 0
+    };
+  }
   const inferredBoundary = getDbSystemBoundaryEntry(
     boundary,
     "family-graph:shards-milestone-title-effect",
@@ -831,6 +1228,44 @@ export function getShardMilestoneTitleEffectBoundarySummary(boundary) {
 
 export function getShardEffectTextHandlerBoundarySummary(boundary) {
   const compatibilityBoundary = getShardCompatibilityBoundary(boundary, "effectTextHandler");
+  const shardRuntimeProjection = getShardRuntimeProjection(boundary, "UpdateShardCostList");
+  const shardRuntimePayload = getProjectionPayload(shardRuntimeProjection);
+  const shardCostProjection = getShardCostProjection(boundary);
+  const shardCostPayload = getProjectionPayload(shardCostProjection);
+  if (shardRuntimeProjection || shardCostProjection) {
+    const bridgeTargets = Array.isArray(shardRuntimePayload.bridgeTargets)
+      ? shardRuntimePayload.bridgeTargets.filter(Boolean)
+      : [];
+    const presentationFamily = bridgeTargets.filter((value) =>
+      /^FinalSU\d+Bonus\d+$/u.test(String(value || "").trim())
+    );
+    const sampleBonusCalcAccessors = Array.isArray(shardCostPayload.deterministicEvaluators)
+      ? shardCostPayload.deterministicEvaluators.filter(Boolean)
+      : [];
+    const uiContextAnchors = ["LevelText", "DescText", "ValueText", "DescriptionText"];
+    return {
+      hasBoundary: sampleBonusCalcAccessors.length > 0,
+      hasPresentationFamily: presentationFamily.length > 0,
+      hasBonusCalcSamples: sampleBonusCalcAccessors.length > 0,
+      hasUiContextAnchors: true,
+      coverageSource: "consumer-projection-v2",
+      textHandlerLabel: String(shardRuntimeProjection?.subjectId || "UpdateShardCostList").trim(),
+      genericWriterLabel: "UpdateShardCostList",
+      presentationFamilyLabel: presentationFamily.join(", "),
+      bonusCalcLabel: sampleBonusCalcAccessors.join(", "),
+      uiContextLabel: uiContextAnchors.join(", "),
+      rowCoverageLabel: "runtime shard row family recovered",
+      boundaryVerdict: "consumer-projection-v2",
+      subjectId:
+        String(shardRuntimeProjection?.subjectId || shardCostProjection?.subjectId || "").trim() ||
+        "ShardUpgradeInfo",
+      subjectKind: "runtime-bridge-structure",
+      blockedInputReason: "partial V2 shard effect-text projection",
+      nextSeamId: null,
+      genericFactCount: 0,
+      genericGapCount: 0
+    };
+  }
   const inferredBoundary = getDbSystemBoundaryEntry(
     boundary,
     "family-graph:shards-effect-text-handler",
@@ -930,6 +1365,55 @@ export function getShardEffectTextHandlerBoundarySummary(boundary) {
 
 export function getShardMilestoneRowShellBoundarySummary(boundary) {
   const compatibilityBoundary = getShardCompatibilityBoundary(boundary, "rowShell");
+  const shardRuntimeProjection = getShardRuntimeProjection(boundary, "UpdateShardCostList");
+  const shardRuntimePayload = getProjectionPayload(shardRuntimeProjection);
+  const shardSaveProjection = getShardSaveOwnerProjection(boundary);
+  const shardSavePayload = getProjectionPayload(shardSaveProjection);
+  if (shardRuntimeProjection || shardSaveProjection) {
+    const bridgeAnchors = Array.isArray(shardRuntimePayload.bridgeAnchors)
+      ? shardRuntimePayload.bridgeAnchors.filter(Boolean)
+      : [];
+    const bridgeTargets = Array.isArray(shardRuntimePayload.bridgeTargets)
+      ? shardRuntimePayload.bridgeTargets.filter(Boolean)
+      : [];
+    const recoveredTargets = Array.isArray(shardSavePayload.recoveredTargets)
+      ? shardSavePayload.recoveredTargets.filter(Boolean)
+      : [];
+    const buyHookSamples = bridgeTargets.filter((value) =>
+      ["CountAffordableShard", "InitializeShards", "SortCostAndBools"].includes(
+        String(value || "").trim()
+      )
+    );
+    const textCheckerSamples = bridgeTargets.filter((value) =>
+      String(value || "")
+        .trim()
+        .startsWith("CheckAll")
+    );
+    return {
+      hasBoundary: bridgeAnchors.length > 0 || recoveredTargets.length > 0,
+      hasUnlockHookSamples: bridgeTargets.includes("get_IsUnlocked"),
+      hasBuyHookSamples: buyHookSamples.length > 0,
+      hasTextCheckerSamples: textCheckerSamples.length > 0,
+      coverageSource: "consumer-projection-v2",
+      screenController: "ShardMining",
+      tieIn:
+        bridgeAnchors.find((value) => String(value || "").includes("ShardUpgradeInfo")) ||
+        "ShardMining|ShardUpgradeInfo",
+      controllerHookLabel: bridgeAnchors.join(", "),
+      unlockHookLabel: bridgeTargets.includes("get_IsUnlocked") ? "get_IsUnlocked" : "",
+      buyHookLabel: buyHookSamples.join(", "),
+      textCheckerLabel: textCheckerSamples.join(", "),
+      boundaryVerdict: "consumer-projection-v2",
+      subjectId:
+        String(shardRuntimeProjection?.subjectId || shardSaveProjection?.subjectId || "").trim() ||
+        "ShardUpgradeInfo",
+      subjectKind: "runtime-bridge-structure",
+      blockedInputReason: "partial V2 shard row-shell projection",
+      nextSeamId: null,
+      genericFactCount: 0,
+      genericGapCount: 0
+    };
+  }
   const inferredBoundary = getDbSystemBoundaryEntry(
     boundary,
     "family-graph:shards-milestone-row-shell",
@@ -1027,6 +1511,42 @@ export function getShardMilestoneRowShellBoundarySummary(boundary) {
 
 export function getShardMilestoneRowAlignmentBoundarySummary(boundary) {
   const compatibilityBoundary = getShardCompatibilityBoundary(boundary, "rowAlignment");
+  const shardRuntimeProjection = getShardRuntimeProjection(boundary, "UpdateShardCostList");
+  const shardRuntimePayload = getProjectionPayload(shardRuntimeProjection);
+  if (shardRuntimeProjection) {
+    const bridgeTargets = Array.isArray(shardRuntimePayload.bridgeTargets)
+      ? shardRuntimePayload.bridgeTargets.filter(Boolean)
+      : [];
+    const hasUnlock = bridgeTargets.includes("get_IsUnlocked");
+    const hasTextChecks = bridgeTargets.some((value) =>
+      String(value || "")
+        .trim()
+        .startsWith("CheckAll")
+    );
+    const hasBuyHooks = bridgeTargets.some((value) =>
+      ["CountAffordableShard", "InitializeShards", "SortCostAndBools"].includes(
+        String(value || "").trim()
+      )
+    );
+    return {
+      hasBoundary: hasUnlock || hasTextChecks || hasBuyHooks,
+      hasZeroUnlockTextOverlap: hasUnlock && !hasTextChecks,
+      hasBuyTextOverlap: hasBuyHooks && hasTextChecks,
+      coverageSource: "consumer-projection-v2",
+      unlockRangeLabel: hasUnlock ? "get_IsUnlocked" : "unrecovered",
+      textCheckerRangeLabel: hasTextChecks ? "runtime fill checker family" : "unrecovered",
+      buyRangeLabel: hasBuyHooks ? "runtime buy/list hook family" : "unrecovered",
+      unlockTextOverlapLabel: hasUnlock && !hasTextChecks ? "none" : "unrecovered",
+      buyTextOverlapLabel: hasBuyHooks && hasTextChecks ? "runtime overlap present" : "unrecovered",
+      boundaryVerdict: "consumer-projection-v2",
+      subjectId: String(shardRuntimeProjection.subjectId || "").trim() || "UpdateShardCostList",
+      subjectKind: "runtime-bridge-structure",
+      blockedInputReason: "partial V2 shard row-alignment projection",
+      nextSeamId: null,
+      genericFactCount: 0,
+      genericGapCount: 0
+    };
+  }
   const inferredBoundary = getDbSystemBoundaryEntry(
     boundary,
     "family-graph:shards-milestone-row-alignment",
@@ -1125,6 +1645,25 @@ export function getShardSaveBoundarySummary(boundary) {
     boundary?.ownedState?.compatibilityBoundaries?.saveBoundary ??
     boundary?.ownedState?.saveBoundary ??
     boundary;
+  const shardConsumerProjections = Array.isArray(getDbSystemConsumerProjections(boundary))
+    ? getDbSystemConsumerProjections(boundary)
+    : [];
+  const shardSaveProjection =
+    shardConsumerProjections.find(
+      (entry) =>
+        String(entry?.projectionKind || "").trim() === "shard-save-owner-structure" &&
+        String(entry?.projectionStatus || "").trim() !== "closed"
+    ) ??
+    shardConsumerProjections.find(
+      (entry) =>
+        String(entry?.projectionKind || "").trim() === "save-owner-structure" &&
+        String(entry?.projectionStatus || "").trim() !== "closed" &&
+        String(entry?.subjectId || "").trim() === "ShardUpgradeInfo"
+    );
+  const shardSaveProjectionPayload =
+    shardSaveProjection?.payload && typeof shardSaveProjection.payload === "object"
+      ? shardSaveProjection.payload
+      : {};
   const shardOwnedStateBoundary = getDbSystemBoundaryEntry(
     boundary,
     "shard-owned-state-upgradeinfolist-population",
@@ -1162,6 +1701,51 @@ export function getShardSaveBoundarySummary(boundary) {
     : Array.isArray(shardOwnedStateMetadata?.missingEdges)
       ? shardOwnedStateMetadata.missingEdges
       : [];
+  if (shardSaveProjection) {
+    const recoveredTargets = Array.isArray(shardSaveProjectionPayload.recoveredTargets)
+      ? shardSaveProjectionPayload.recoveredTargets.filter(Boolean)
+      : [];
+    const projectionKind = String(shardSaveProjection.projectionKind || "").trim();
+    const projectionLabel =
+      projectionKind === "save-owner-structure"
+        ? "V2 generic save-owner projection"
+        : "V2 shard save-owner projection";
+    return {
+      hasSeparationBoundary: recoveredTargets.length > 0,
+      hasDirectRowDefinitionPayload: false,
+      hasRuntimeOwnedStateShell: false,
+      hasOwnedStateTarget: recoveredTargets.length > 0,
+      hasOwnedStatePopulationBridge: false,
+      coverageSource: "consumer-projection-v2",
+      ownedStateOutcomeKind: String(
+        shardSaveProjectionPayload.ownedStateOutcomeKind || "non-local-injection-seam"
+      ).trim(),
+      boundaryVerdict: "consumer-projection-v2",
+      ownerAnchor: String(shardSaveProjectionPayload.ownerAnchor || "ShardUpgradeInfo").trim(),
+      saveAnchor: String(shardSaveProjectionPayload.saveAnchor || "PlayerProfileData").trim(),
+      cloudSaveAnchor: String(
+        shardSaveProjectionPayload.cloudSaveAnchor || "CloudSavePlayerProfile"
+      ).trim(),
+      directPayloadAnchor: String(
+        shardSaveProjectionPayload.ownerAnchor || "ShardUpgradeInfo"
+      ).trim(),
+      runtimeShellAnchor: "",
+      unresolvedSaveCandidateLabel: recoveredTargets.join(", ") || null,
+      ownedStateStatusLabel:
+        recoveredTargets.length > 0
+          ? `${projectionLabel} recovered evaluator-side save-owner targets but still stops before a local owned-state population bridge`
+          : `${projectionLabel} has not recovered a local owned-state bridge yet`,
+      overlapLabel: "zero direct overlap",
+      ownerTermCount: recoveredTargets.length,
+      subjectId: String(shardSaveProjection.subjectId || "").trim() || "ShardUpgradeInfo",
+      subjectKind: projectionKind || "shard-save-owner-structure",
+      blockedInputReason: `partial ${projectionLabel}`,
+      nextSeamId: null,
+      genericFactCount: 0,
+      genericGapCount: 0,
+      missingEdges: []
+    };
+  }
   if (shardOwnedStateMetadata || shardOwnedStateBoundary) {
     const hasOwnedStatePopulationBridge = knownEdges.includes("local-runtime-population-bridge");
     const combinedNextSeamIds = [

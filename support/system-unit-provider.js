@@ -182,15 +182,18 @@ export async function loadSystemUnits({
         systemDb: {
           tokenShop: {
             subjectMetadata: resolvedTokenShopBundle?.subjectMetadata ?? null,
-            genericMechanics: resolvedTokenShopBundle?.genericMechanics ?? null
+            genericMechanics: resolvedTokenShopBundle?.genericMechanics ?? null,
+            consumerProjections: resolvedTokenShopBundle?.consumerProjections ?? null
           },
           shards: {
             subjectMetadata: shardSystemDbBundle?.subjectMetadata ?? null,
-            genericMechanics: shardSystemDbBundle?.genericMechanics ?? null
+            genericMechanics: shardSystemDbBundle?.genericMechanics ?? null,
+            consumerProjections: shardSystemDbBundle?.consumerProjections ?? null
           },
           multiverseMarket: {
             subjectMetadata: multiverseMarketSystemDbBundle?.subjectMetadata ?? null,
-            genericMechanics: multiverseMarketSystemDbBundle?.genericMechanics ?? null
+            genericMechanics: multiverseMarketSystemDbBundle?.genericMechanics ?? null,
+            consumerProjections: multiverseMarketSystemDbBundle?.consumerProjections ?? null
           }
         },
         units: {
@@ -234,15 +237,18 @@ export async function loadSystemUnits({
     systemDb: {
       tokenShop: {
         subjectMetadata: null,
-        genericMechanics: null
+        genericMechanics: null,
+        consumerProjections: null
       },
       shards: {
         subjectMetadata: null,
-        genericMechanics: null
+        genericMechanics: null,
+        consumerProjections: null
       },
       multiverseMarket: {
         subjectMetadata: null,
-        genericMechanics: null
+        genericMechanics: null,
+        consumerProjections: null
       }
     }
   };

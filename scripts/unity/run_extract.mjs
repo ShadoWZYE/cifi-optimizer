@@ -46,7 +46,7 @@ const commandTemplates = {
 
   // Generic trace bundle with full parameterization
   trace: {
-    steps: [["python", ["scripts/unity/unity_trace_bundle.py"]]],
+    steps: [["python", ["scripts/unity/unity_trace_bundle_v2.py", "run-best-gap-v2"]]],
     passThrough: true // Pass all args through to script
   },
 
@@ -269,7 +269,7 @@ function printUsage() {
   console.error("  uabea                 - Run the built C# asset extractor");
   console.error("  asset                 - Run C# asset extraction directly (requires build)");
   console.error("  asset:run             - Build and run C# asset extraction in one command");
-  console.error("  trace                 - Materialize a DB-backed target bundle");
+  console.error("  trace                 - Run the V2 graph-obligation trace lane");
   console.error("  compile               - Export active system-unit datasets");
   console.error("");
   console.error("C# asset extraction performance flags (use with asset/asset:run):");
@@ -278,19 +278,17 @@ function printUsage() {
   console.error("  --term <name>          - Only process types matching name");
   console.error("");
   console.error("Options:");
-  console.error("  --target <id>         - Target identifier (e.g., token-shop-atu3-cells-effect)");
-  console.error("  --family <name>       - Family shortcut (e.g., token-shop, shard-cost)");
-  console.error("  --anchor <value>      - Anchor to trace (can be specified multiple times)");
-  console.error("  --level <level>       - Output level: raw, structured, both (default: both)");
+  console.error("  --target <id>         - Target identifier for compatibility/migration helpers");
+  console.error("  --family <name>       - Family filter for compatibility/migration helpers");
+  console.error("  --anchor <value>      - Anchor hint for compatibility/migration helpers");
+  console.error("  --level <level>       - Output level for compatibility helpers");
   console.error("  --output <path>       - Output file path");
   console.error("  --force               - Force regeneration even if output exists");
   console.error("  --resume              - Resume from previous output if available");
   console.error("");
   console.error("Examples:");
-  console.error(
-    "  node scripts/unity/run_extract.mjs trace --target token-shop-atu3-cells-effect --anchor ATU3Button --family token-shop"
-  );
-  console.error("  node scripts/unity/run_extract.mjs trace --family token-shop");
+  console.error("  node scripts/unity/run_extract.mjs trace --dry-run");
+  console.error("  node scripts/unity/run_extract.mjs trace --repeat 5 --native-timeout 10");
   console.error("  node scripts/unity/run_extract.mjs compile");
   console.error(
     "  node scripts/unity/run_extract.mjs asset:run --quick -- --report data/archive/uabea-extract-report.json"

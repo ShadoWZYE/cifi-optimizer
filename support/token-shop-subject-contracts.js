@@ -4,6 +4,51 @@ function normalizeArray(value) {
   return Array.isArray(value) ? value.filter(Boolean) : [];
 }
 
+function getRuntimeProjection(row, contract) {
+  const rowDetail = row?.rowDetail && typeof row.rowDetail === "object" ? row.rowDetail : {};
+  const groundedFields = contract?.groundedFields ?? {};
+  const groundedRuntimeProjection =
+    groundedFields.runtimeProjection && typeof groundedFields.runtimeProjection === "object"
+      ? groundedFields.runtimeProjection
+      : {};
+  const rowRuntimeProjection =
+    rowDetail.runtimeProjection && typeof rowDetail.runtimeProjection === "object"
+      ? rowDetail.runtimeProjection
+      : {};
+  return {
+    ...groundedRuntimeProjection,
+    ...rowRuntimeProjection
+  };
+}
+
+function hasResolvedRuntimeDisplay(runtimeProjection) {
+  if (!runtimeProjection || typeof runtimeProjection !== "object") {
+    return false;
+  }
+  if (
+    Array.isArray(runtimeProjection.displayEntries) &&
+    runtimeProjection.displayEntries.some((entry) => entry && typeof entry === "object")
+  ) {
+    return true;
+  }
+  if (
+    typeof runtimeProjection.displayValueLabel === "string" &&
+    runtimeProjection.displayValueLabel.trim()
+  ) {
+    return true;
+  }
+  if (Number.isFinite(Number(runtimeProjection.displayValue))) {
+    return true;
+  }
+  return Boolean(
+    runtimeProjection.displayFormula && typeof runtimeProjection.displayFormula === "object"
+  );
+}
+
+function hasResolvedRuntimeCap(runtimeProjection) {
+  return Number.isFinite(Number(runtimeProjection?.effectiveMaxLevel));
+}
+
 function getCanonicalIdentity(contract, fallbackIdentity, rowDetail = null) {
   const groundedFields = contract?.groundedFields ?? {};
   const effectiveRowDetail = rowDetail ?? groundedFields.rowDetail ?? {};
@@ -206,13 +251,15 @@ export function applyTokenShopSubjectContractToRow(row, contract) {
   const currentCostFormulaConfidence =
     String(row?.costFormulaConfidence || "verified").trim() || "verified";
   const runtimeFormulaRecovered = hasClosedEdge("runtime-next-cost-formula");
-  const displayPathRecovered = hasClosedEdge("exact-display-update-path");
+  const runtimeProjection = getRuntimeProjection(row, contract);
+  const runtimeDisplayRecovered = hasResolvedRuntimeDisplay(runtimeProjection);
+  const runtimeCapRecovered = hasResolvedRuntimeCap(runtimeProjection);
   const nextCostFormulaConfidence =
     runtimeFormulaRecovered && currentCostFormulaConfidence === "projected"
       ? "verified"
       : row?.costFormulaConfidence;
   const nextStorefrontBuffDisplayMode =
-    displayPathRecovered &&
+    runtimeDisplayRecovered &&
     String(row?.storefrontBuffDisplayMode || "").trim() === "runtime-unresolved"
       ? null
       : row?.storefrontBuffDisplayMode;
@@ -254,8 +301,17 @@ export function applyTokenShopSubjectContractToRow(row, contract) {
     nextSeam,
     groundedFields,
     rowDetail,
+    runtimeProjection,
+    runtimeEffectiveMaxLevel: Number.isFinite(Number(runtimeProjection?.effectiveMaxLevel))
+      ? Number(runtimeProjection.effectiveMaxLevel)
+      : row?.runtimeEffectiveMaxLevel,
     costFormulaConfidence: nextCostFormulaConfidence,
     storefrontBuffDisplayMode: nextStorefrontBuffDisplayMode,
+    storefrontCapDisplayMode:
+      runtimeCapRecovered &&
+      String(row?.storefrontCapDisplayMode || "").trim() === "runtime-unresolved"
+        ? null
+        : row?.storefrontCapDisplayMode,
     supportSummary,
     provenanceSummary,
     blockedInputReason,
@@ -284,14 +340,13 @@ export function applyTokenShopSupportingContractSignals(row, contract) {
     String(row?.costFormulaConfidence || "verified").trim() || "verified";
   const currentBuffDisplayMode = String(row?.storefrontBuffDisplayMode || "").trim();
   const currentCapDisplayMode = String(row?.storefrontCapDisplayMode || "").trim();
+  const runtimeProjection = getRuntimeProjection(row, contract);
   const runtimeFormulaRecovered =
     knownEdges.includes("runtime-next-cost-formula") &&
     !missingEdges.includes("runtime-next-cost-formula") &&
     !blockedEdges.includes("runtime-next-cost-formula");
-  const displayPathRecovered =
-    knownEdges.includes("exact-display-update-path") &&
-    !missingEdges.includes("exact-display-update-path") &&
-    !blockedEdges.includes("exact-display-update-path");
+  const runtimeDisplayRecovered = hasResolvedRuntimeDisplay(runtimeProjection);
+  const runtimeCapRecovered = hasResolvedRuntimeCap(runtimeProjection);
   const mergedKnownEdges = [
     ...new Set([...(Array.isArray(row?.knownEdges) ? row.knownEdges : []), ...knownEdges])
   ];
@@ -314,16 +369,20 @@ export function applyTokenShopSupportingContractSignals(row, contract) {
     missingEdges: mergedMissingEdges,
     blockedEdges: mergedBlockedEdges,
     nonblockingEdges: mergedNonblockingEdges,
+    runtimeProjection,
+    runtimeEffectiveMaxLevel: Number.isFinite(Number(runtimeProjection?.effectiveMaxLevel))
+      ? Number(runtimeProjection.effectiveMaxLevel)
+      : row?.runtimeEffectiveMaxLevel,
     costFormulaConfidence:
       runtimeFormulaRecovered && currentCostFormulaConfidence === "projected"
         ? "verified"
         : row?.costFormulaConfidence,
     storefrontBuffDisplayMode:
-      displayPathRecovered && currentBuffDisplayMode === "runtime-unresolved"
+      runtimeDisplayRecovered && currentBuffDisplayMode === "runtime-unresolved"
         ? null
         : row?.storefrontBuffDisplayMode,
     storefrontCapDisplayMode:
-      displayPathRecovered && currentCapDisplayMode === "runtime-unresolved"
+      runtimeCapRecovered && currentCapDisplayMode === "runtime-unresolved"
         ? null
         : row?.storefrontCapDisplayMode,
     supportingSubjectIds: [

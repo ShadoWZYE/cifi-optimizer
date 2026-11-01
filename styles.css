@@ -378,35 +378,61 @@ h3 {
 }
 
 .token-shop-storefront-tabs {
-  margin-top: 2px;
-  margin-bottom: 2px;
+  margin-top: 4px;
+  margin-bottom: 4px;
   justify-content: center;
-  padding: 8px 12px 4px;
-  border: 2px solid rgba(188, 145, 45, 0.72);
-  background: linear-gradient(180deg, rgba(106, 84, 31, 0.72), rgba(67, 48, 12, 0.72));
+  padding: 6px 10px 4px;
+  border: 2px solid rgba(188, 145, 45, 0.82);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(108, 110, 101, 0.72),
+      rgba(75, 63, 32, 0.74) 34%,
+      rgba(82, 59, 14, 0.92) 35%,
+      rgba(59, 39, 10, 0.92)
+    ),
+    linear-gradient(90deg, rgba(255, 225, 142, 0.12), transparent 72%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 245, 212, 0.28),
+    inset 0 -1px 0 rgba(36, 24, 6, 0.55);
 }
 
 .token-shop-storefront-tabs .tier-tab {
   display: grid;
   justify-items: center;
-  min-width: 86px;
+  min-width: 92px;
   border-radius: 0;
-  padding: 6px 10px 5px;
+  padding: 5px 10px 4px;
   font-family: "IBM Plex Mono", monospace;
   letter-spacing: 0.02em;
-  background: rgba(49, 44, 35, 0.9);
-  border-color: rgba(198, 160, 78, 0.62);
-  color: rgba(244, 234, 211, 0.92);
+  background: linear-gradient(
+    180deg,
+    rgba(95, 99, 93, 0.92),
+    rgba(63, 56, 42, 0.92) 44%,
+    rgba(55, 46, 28, 0.94) 45%,
+    rgba(42, 35, 24, 0.96)
+  );
+  border-color: rgba(198, 160, 78, 0.74);
+  color: rgba(247, 238, 219, 0.94);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 249, 224, 0.16),
+    inset 0 -1px 0 rgba(20, 16, 9, 0.52);
 }
 
 .token-shop-storefront-tabs .tier-tab.active {
-  background: linear-gradient(180deg, rgba(115, 233, 157, 0.2), rgba(64, 132, 74, 0.22));
-  border-color: rgba(164, 255, 172, 0.72);
-  color: #d3ffd8;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 206, 102, 0.42),
+    rgba(167, 116, 22, 0.36) 44%,
+    rgba(73, 55, 26, 0.96) 45%,
+    rgba(45, 34, 18, 0.98)
+  );
+  border-color: rgba(255, 214, 118, 0.92);
+  color: #fff0c9;
 }
 
 .token-shop-tier-index {
-  font-size: 2.6rem;
+  font-size: 3rem;
   line-height: 0.86;
   font-weight: 800;
   text-shadow: 0 1px 0 rgba(20, 14, 4, 0.7);
@@ -740,6 +766,21 @@ textarea {
   gap: 14px;
 }
 
+.trace-gap-session-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.trace-gap-detail-card {
+  gap: 8px;
+}
+
+.trace-gap-detail-card .meta strong {
+  color: #d9e7fb;
+  font-weight: 600;
+}
+
 .trace-gap-launcher-controls {
   gap: 16px;
   margin-top: 8px;
@@ -793,8 +834,12 @@ textarea {
   color: #d9e7fb;
 }
 
-.trace-gap-log-line.is-stderr {
+.trace-gap-log-line.is-error {
   color: #ffd07a;
+}
+
+.trace-gap-log-line.is-status {
+  color: #8fd2ff;
 }
 
 .trace-gap-log-meta {
@@ -948,7 +993,7 @@ details[data-trace-gap-section] pre {
 
 .token-shop-shell-card {
   display: grid;
-  grid-template-columns: 82px minmax(0, 1fr) 88px;
+  grid-template-columns: 92px minmax(0, 1fr) 118px;
   grid-template-areas:
     "overlay overlay overlay"
     "progress title buy"
@@ -956,11 +1001,11 @@ details[data-trace-gap-section] pre {
     "details details details";
   align-items: stretch;
   min-height: 100%;
-  border: 2px solid rgba(195, 146, 32, 0.72);
+  border: 2px solid rgba(211, 165, 46, 0.76);
   border-radius: 0;
   background:
-    linear-gradient(180deg, rgba(46, 31, 8, 0.96), rgba(29, 20, 5, 0.97)),
-    linear-gradient(90deg, rgba(255, 222, 116, 0.06), transparent 68%);
+    linear-gradient(180deg, rgba(52, 34, 7, 0.97), rgba(27, 19, 6, 0.98)),
+    linear-gradient(90deg, rgba(255, 222, 116, 0.08), transparent 68%);
   box-shadow:
     inset 0 0 0 1px rgba(255, 219, 130, 0.12),
     0 6px 22px rgba(0, 0, 0, 0.28);
@@ -971,18 +1016,18 @@ details[data-trace-gap-section] pre {
   display: grid;
   gap: 2px;
   align-content: center;
-  min-height: 28px;
-  padding: 3px 7px 2px 4px;
-  border-bottom: 1px solid rgba(209, 166, 64, 0.52);
+  min-height: 30px;
+  padding: 4px 8px 3px 6px;
+  border-bottom: 1px solid rgba(223, 181, 73, 0.62);
   background:
-    linear-gradient(180deg, rgba(103, 72, 20, 0.38), rgba(64, 41, 13, 0.1)),
-    linear-gradient(90deg, rgba(244, 205, 110, 0.08), transparent 72%);
+    linear-gradient(180deg, rgba(111, 80, 24, 0.44), rgba(72, 47, 15, 0.14)),
+    linear-gradient(90deg, rgba(244, 205, 110, 0.12), transparent 72%);
 }
 
 .token-shop-title-box strong {
-  font-size: 0.78rem;
-  line-height: 1.04;
-  font-weight: 600;
+  font-size: 0.84rem;
+  line-height: 1.02;
+  font-weight: 700;
   color: #f3ead7;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
 }
@@ -994,18 +1039,18 @@ details[data-trace-gap-section] pre {
 .token-shop-shell-content {
   grid-area: content;
   display: grid;
-  gap: 4px;
-  padding: 3px 6px 5px 4px;
-  border-right: 1px solid rgba(246, 210, 125, 0.16);
+  gap: 6px;
+  padding: 5px 8px 7px 6px;
+  border-right: 1px solid rgba(246, 210, 125, 0.2);
 }
 
 .token-shop-progress-cluster {
   grid-area: progress;
   display: grid;
-  gap: 4px;
+  gap: 6px;
   justify-items: center;
   align-content: start;
-  padding: 6px 0 4px 4px;
+  padding: 8px 0 6px 6px;
 }
 
 .token-shop-level-ring {
@@ -1013,8 +1058,8 @@ details[data-trace-gap-section] pre {
   align-content: center;
   justify-items: center;
   gap: 1px;
-  width: 74px;
-  min-height: 74px;
+  width: 82px;
+  min-height: 82px;
   padding: 4px 4px;
   border-radius: 999px;
   border: 3px solid rgba(241, 186, 65, 0.95);
@@ -1024,7 +1069,7 @@ details[data-trace-gap-section] pre {
   box-shadow:
     inset 0 0 0 2px rgba(255, 238, 173, 0.14),
     0 0 0 2px rgba(105, 66, 9, 0.5);
-  transform: translateX(-3px);
+  transform: translateX(-2px);
 }
 
 .token-shop-level-caption {
@@ -1043,7 +1088,7 @@ details[data-trace-gap-section] pre {
 
 .token-shop-level-value,
 .token-shop-level-cap {
-  font-size: 0.93rem;
+  font-size: 1.02rem;
   line-height: 1;
   font-weight: 700;
 }
@@ -1056,8 +1101,8 @@ details[data-trace-gap-section] pre {
 .token-shop-fill-track {
   position: relative;
   width: 100%;
-  max-width: 84px;
-  height: 9px;
+  max-width: 88px;
+  height: 10px;
   padding: 2px;
   border-radius: 3px;
   background: rgba(18, 25, 39, 0.92);
@@ -1150,15 +1195,15 @@ details[data-trace-gap-section] pre {
 }
 
 .token-shop-effect-line {
-  font-size: 0.78rem;
-  line-height: 1.1;
+  font-size: 0.86rem;
+  line-height: 1.12;
   color: rgba(246, 234, 212, 0.96);
   letter-spacing: 0;
   margin: 0;
 }
 
 .token-shop-effect-line-secondary {
-  font-size: 0.74rem;
+  font-size: 0.8rem;
   opacity: 0.96;
 }
 
@@ -1246,11 +1291,11 @@ details[data-trace-gap-section] pre {
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   align-items: center;
-  gap: 3px;
-  padding: 4px 4px;
+  gap: 4px;
+  padding: 8px 8px 7px;
   border-left: 1px solid rgba(246, 210, 125, 0.16);
   background:
-    linear-gradient(180deg, rgba(40, 158, 186, 0.98), rgba(20, 100, 126, 0.98)),
+    linear-gradient(180deg, rgba(44, 165, 194, 0.98), rgba(18, 95, 121, 0.98)),
     linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent 70%);
   text-align: center;
 }
@@ -1292,7 +1337,7 @@ details[data-trace-gap-section] pre {
 }
 
 .token-shop-buy-label {
-  font-size: 0.62rem;
+  font-size: 0.74rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: #effcff;
@@ -1308,7 +1353,7 @@ details[data-trace-gap-section] pre {
 }
 
 .token-shop-buy-panel strong {
-  font-size: 0.86rem;
+  font-size: 1rem;
   line-height: 1;
 }
 
@@ -1318,7 +1363,7 @@ details[data-trace-gap-section] pre {
 }
 
 .token-shop-buy-panel .meta {
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   color: rgba(232, 249, 255, 0.88);
   margin: 0;
 }
@@ -1328,19 +1373,19 @@ details[data-trace-gap-section] pre {
   justify-content: center;
   align-items: center;
   margin-top: 2px;
-  min-height: 22px;
+  min-height: 24px;
   padding: 4px 6px;
   border-radius: 6px;
   background: linear-gradient(180deg, rgba(255, 231, 168, 0.98), rgba(231, 177, 55, 0.98));
   color: #17313d;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .token-shop-buy-hint {
-  font-size: 0.52rem;
+  font-size: 0.58rem;
   color: rgba(232, 249, 255, 0.82);
   align-self: end;
   line-height: 1.14;
@@ -1367,7 +1412,7 @@ details[data-trace-gap-section] pre {
 
 .token-shop-buff-strip {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   align-items: stretch;
   margin-top: 0;
 }
@@ -1389,8 +1434,8 @@ details[data-trace-gap-section] pre {
   display: grid;
   gap: 3px;
   align-content: center;
-  min-height: 48px;
-  padding: 5px 8px 6px;
+  min-height: 56px;
+  padding: 6px 8px 8px;
   border: 1px solid rgba(82, 112, 154, 0.46);
   background: linear-gradient(180deg, rgba(29, 40, 59, 0.98), rgba(20, 29, 43, 0.98));
   box-shadow:
@@ -1418,7 +1463,7 @@ details[data-trace-gap-section] pre {
 }
 
 .token-shop-buff-value {
-  font-size: 0.94rem;
+  font-size: 1.02rem;
   line-height: 1;
   color: #dff3ff;
   order: 1;
@@ -1499,28 +1544,30 @@ details[data-trace-gap-section] pre {
 
 .token-shop-bank-shell {
   display: grid;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 12px 12px 14px;
-  border: 3px solid rgba(169, 123, 28, 0.8);
+  padding: 12px 12px 16px;
+  border: 3px solid rgba(189, 142, 35, 0.84);
   background:
     linear-gradient(
       180deg,
-      rgba(132, 88, 18, 0.62),
-      rgba(73, 45, 8, 0.62) 18%,
-      rgba(40, 24, 6, 0.95) 18%,
-      rgba(34, 21, 7, 0.98)
+      rgba(138, 98, 23, 0.72),
+      rgba(96, 63, 17, 0.72) 16%,
+      rgba(46, 30, 8, 0.96) 16%,
+      rgba(31, 21, 8, 0.99)
     ),
-    linear-gradient(90deg, rgba(255, 208, 108, 0.08), transparent 72%);
-  box-shadow: inset 0 0 0 2px rgba(255, 221, 132, 0.1);
+    linear-gradient(90deg, rgba(255, 208, 108, 0.1), transparent 72%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 221, 132, 0.12),
+    inset 0 1px 0 rgba(255, 243, 199, 0.18);
 }
 
 .token-shop-bank-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 250px);
-  gap: 6px;
+  grid-template-columns: minmax(0, 1fr) minmax(186px, 220px);
+  gap: 8px;
   align-items: stretch;
 }
 
@@ -1528,9 +1575,11 @@ details[data-trace-gap-section] pre {
 .token-shop-bank-hero {
   display: grid;
   gap: 4px;
-  padding: 7px 9px;
-  border: 2px solid rgba(196, 149, 46, 0.72);
-  background: rgba(31, 27, 24, 0.88);
+  padding: 9px 10px 8px;
+  border: 2px solid rgba(196, 149, 46, 0.78);
+  background:
+    linear-gradient(180deg, rgba(37, 52, 78, 0.9), rgba(24, 34, 52, 0.94)),
+    linear-gradient(90deg, rgba(255, 248, 214, 0.04), transparent 68%);
 }
 
 .token-shop-bank-title {
@@ -1539,7 +1588,7 @@ details[data-trace-gap-section] pre {
 
 .token-shop-bank-title strong,
 .token-shop-bank-hero strong {
-  font-size: 1.24rem;
+  font-size: 1.34rem;
   line-height: 1;
   letter-spacing: 0.04em;
 }
@@ -1552,8 +1601,8 @@ details[data-trace-gap-section] pre {
 .token-shop-bank-meter-track {
   position: relative;
   height: 28px;
-  border: 2px solid rgba(242, 197, 87, 0.72);
-  background: rgba(233, 228, 188, 0.2);
+  border: 2px solid rgba(242, 197, 87, 0.84);
+  background: rgba(218, 201, 139, 0.24);
   box-shadow: inset 0 0 0 1px rgba(255, 238, 181, 0.18);
 }
 
@@ -1561,7 +1610,7 @@ details[data-trace-gap-section] pre {
   position: absolute;
   inset: 0 auto 0 0;
   min-width: 0;
-  background: linear-gradient(90deg, rgba(255, 196, 74, 0.98), rgba(255, 217, 100, 0.98));
+  background: linear-gradient(90deg, rgba(255, 193, 62, 0.98), rgba(255, 222, 116, 0.98));
 }
 
 .token-shop-bank-hero-label {

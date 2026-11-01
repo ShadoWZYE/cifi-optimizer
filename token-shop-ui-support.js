@@ -149,21 +149,22 @@ export function createTokenShopUiSupport({ formatValue }) {
           "This row preserves multiple grounded bonus lanes at once. The current storefront can show the late-shelf shell and first-purchase cost, but it does not yet invent a single compounded next-step formula across the mixed bonus lanes."
       };
     }
-    const stepLabel =
-      row?.rowType === "effect-driven" ? "checked effect step(s)" : "extracted bonus step(s)";
+    const currentMagnitude = getTokenShopDisplayedBonusMagnitude(row, currentLevel, bonusValue);
+    const nextLevel = currentLevel + 1;
+    const nextMagnitude = getTokenShopDisplayedBonusMagnitude(row, nextLevel, bonusValue);
+    const currentMagnitudeLabel = formatTokenShopBonusMagnitudeForRow(row, currentMagnitude);
+    const nextMagnitudeLabel = formatTokenShopBonusMagnitudeForRow(row, nextMagnitude);
     if (typeof maxLevel === "number" && Number.isFinite(maxLevel) && currentLevel >= maxLevel) {
       return {
-        currentLabel: `${formatValue(currentLevel)} ${stepLabel} of ${bonusStep}`,
+        currentLabel: `Current cumulative value ${currentMagnitudeLabel}`,
         nextLabel: "No next bonus within known cap",
-        detail: `The imported level already meets or exceeds the checked cap ${formatValue(maxLevel)}, so the row-detail tool stops at the current ${row?.rowType === "effect-driven" ? "checked effect-step" : "extracted bonus-step"} count instead of inventing overflow behavior.`
+        detail: `The imported level already meets or exceeds the checked cap ${formatValue(maxLevel)}, so the current cumulative row value stays ${currentMagnitudeLabel} from ${bonusStep}.`
       };
     }
-
-    const nextLevel = currentLevel + 1;
     return {
-      currentLabel: `${formatValue(currentLevel)} ${stepLabel} of ${bonusStep}`,
-      nextLabel: `${formatValue(nextLevel)} ${stepLabel} of ${bonusStep}`,
-      detail: `Current level ${formatValue(currentLevel)} to next level ${formatValue(nextLevel)} adds one more ${row?.rowType === "effect-driven" ? "checked effect step" : "extracted bonus step"} only. This view does not infer compounding, best-buy value, or optimizer math.`
+      currentLabel: `Current cumulative value ${currentMagnitudeLabel}`,
+      nextLabel: `Next cumulative value ${nextMagnitudeLabel}`,
+      detail: `Current level ${formatValue(currentLevel)} to next level ${formatValue(nextLevel)} moves the grounded cumulative row value from ${currentMagnitudeLabel} to ${nextMagnitudeLabel} based on ${bonusStep}.`
     };
   }
 
@@ -313,10 +314,10 @@ export function createTokenShopUiSupport({ formatValue }) {
     const blockedInputReason = String(row?.blockedInputReason || "").trim();
     const nextSeamId = String(row?.nextSeam?.seamId || "").trim();
     return (
-      /runtime-model-gap|runtime display|runtime formula|displayed-cost evaluator|finalSetValue|costExponent|calculationType/i.test(
+      /runtime-model-gap|runtime-final-max-level|exact-display-update-path|runtime display|runtime formula|displayed-cost evaluator|finalSetValue|costExponent|calculationType/i.test(
         blockedInputReason
       ) ||
-      nextSeamId === "runtime-model-gap"
+      ["runtime-model-gap", "runtime-final-max-level", "exact-display-update-path"].includes(nextSeamId)
     );
   }
 
@@ -359,6 +360,54 @@ export function createTokenShopUiSupport({ formatValue }) {
     return `${sign}${formatTokenShopPlateNumber(Math.abs(value))}`;
   }
 
+  function getTokenShopRuntimeDisplayEntries(row, buffTargets) {
+    const runtimeProjection =
+      row?.runtimeProjection && typeof row.runtimeProjection === "object" ? row.runtimeProjection : null;
+    const entries = Array.isArray(runtimeProjection?.displayEntries)
+      ? runtimeProjection.displayEntries.filter((entry) => entry && typeof entry === "object")
+      : [];
+    if (entries.length) {
+      return entries.map((entry, index) => {
+        const fallbackTarget = buffTargets[index] || buffTargets[0] || {};
+        const rawValue = Number(
+          entry.currentValue ?? entry.value ?? entry.displayValue ?? Number.NaN
+        );
+        const currentLabel =
+          sanitizeTokenShopRichText(
+            entry.currentLabel || entry.displayLabel || entry.valueLabel || entry.labelValue || ""
+          ) ||
+          (Number.isFinite(rawValue) ? formatTokenShopBonusMagnitudeForRow(row, rawValue) : "Research");
+        const nextValue = Number(entry.nextValue ?? Number.NaN);
+        const nextLabel =
+          sanitizeTokenShopRichText(entry.nextLabel || "") ||
+          (Number.isFinite(nextValue)
+            ? formatTokenShopBonusMagnitudeForRow(row, nextValue)
+            : currentLabel);
+        return {
+          label: sanitizeTokenShopRichText(entry.label || entry.targetLabel || fallbackTarget.label || `Bonus ${index + 1}`),
+          tone: String(entry.tone || fallbackTarget.tone || "neutral").trim(),
+          currentLabel,
+          nextLabel,
+          isPrimary: index === 0
+        };
+      });
+    }
+    const displayValueLabel = sanitizeTokenShopRichText(runtimeProjection?.displayValueLabel || "");
+    if (displayValueLabel) {
+      const fallbackTarget = buffTargets[0] || {};
+      return [
+        {
+          label: sanitizeTokenShopRichText(fallbackTarget.label || row?.bonusStepLabel || "Bonus"),
+          tone: String(fallbackTarget.tone || "neutral").trim(),
+          currentLabel: displayValueLabel,
+          nextLabel: displayValueLabel,
+          isPrimary: true
+        }
+      ];
+    }
+    return [];
+  }
+
   function getTokenShopBonusStripEntries(row) {
     const rowMeta = getTokenShopRowMeta(row?.field);
     const currentLevel =
@@ -396,6 +445,10 @@ export function createTokenShopUiSupport({ formatValue }) {
       row.bonusValues.length > 0 &&
       row.bonusValues.every((entry) => typeof entry?.value === "number" && Number.isFinite(entry.value));
     const canComputeBuffPresentation = hasDirectSingleBonusValue || hasDirectCompositeBonusValues;
+    const runtimeDisplayEntries = getTokenShopRuntimeDisplayEntries(row, buffTargets);
+    if (runtimeDisplayEntries.length) {
+      return runtimeDisplayEntries;
+    }
 
     if (
       row?.bonusStepMode === "multi" &&

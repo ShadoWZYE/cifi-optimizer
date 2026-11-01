@@ -1,3 +1,5 @@
+import { getTokenShopRowMeta } from "./support/token-shop-row-meta.js";
+
 export function getTokenShopNumericFieldValue(tokenShop, fieldName) {
   const fields = Array.isArray(tokenShop?.fields) ? tokenShop.fields : [];
   const entry = fields.find((field) => field?.field === fieldName && field?.kind === "number");
@@ -39,6 +41,20 @@ function getTokenShopNumericFieldValues(tokenShop, fieldNames) {
       value: getTokenShopNumericFieldValue(tokenShop, fieldName)
     }))
     .filter((entry) => typeof entry.field === "string" && entry.field);
+}
+
+function resolveTokenShopEffectiveMaxLevel(row, extractedMaxLevel, progressionState, tokenShop) {
+  const runtimeEffectiveMaxLevel = Number(row?.runtimeEffectiveMaxLevel ?? Number.NaN);
+  if (Number.isFinite(runtimeEffectiveMaxLevel)) {
+    return {
+      value: runtimeEffectiveMaxLevel,
+      sourceLabel: "Recovered runtime max level"
+    };
+  }
+  return {
+    value: extractedMaxLevel,
+    sourceLabel: "Extracted base max level"
+  };
 }
 
 function resolveTokenShopCostState(row, currentLevel, startCost, additiveCost, maxLevel) {
@@ -141,9 +157,21 @@ export function buildTokenShopProgressionModel({
       getTokenShopNumericFieldValue(tokenShop, row.bonusField) ??
       bonusValues.find((entry) => typeof entry?.value === "number")?.value ??
       null;
-    const maxLevel = getTokenShopNumericFieldValue(tokenShop, row.maxLevelField);
+    const extractedMaxLevel = getTokenShopNumericFieldValue(tokenShop, row.maxLevelField);
+    const effectiveMaxLevel = resolveTokenShopEffectiveMaxLevel(
+      row,
+      extractedMaxLevel,
+      progressionState,
+      tokenShop
+    );
     const bonusMode = String(row?.bonusMode || row?.bonusStepMode || "additive").trim() || "additive";
-    const costState = resolveTokenShopCostState(row, currentLevel, startCost, additiveCost, maxLevel);
+    const costState = resolveTokenShopCostState(
+      row,
+      currentLevel,
+      startCost,
+      additiveCost,
+      effectiveMaxLevel.value
+    );
     const nextKnownCost = costState.nextKnownCost;
     const isAffordable =
       typeof nextKnownCost === "number" && typeof currentTokens === "number"
@@ -164,14 +192,21 @@ export function buildTokenShopProgressionModel({
       projectedNextCost: costState.projectedNextCost,
       isAffordable,
       isMaxed: costState.isMaxed,
-      maxLevel,
+      maxLevel: effectiveMaxLevel.value,
+      extractedMaxLevel,
+      maxLevelSourceLabel: effectiveMaxLevel.sourceLabel,
       costFormulaType: costState.costFormulaType,
       costFormulaConfidence: costState.costFormulaConfidence,
       costFormulaKnown: costState.costFormulaKnown,
       costFormulaProjected: costState.costFormulaProjected,
       costFormulaLabel: costState.costFormulaLabel,
-      maxStatus: getKnownMaxStatus(currentLevel, maxLevel),
-      currentVsNextBonus: getCurrentVsNextBonusSummary(row, currentLevel, maxLevel, bonusValue)
+      maxStatus: getKnownMaxStatus(currentLevel, effectiveMaxLevel.value),
+      currentVsNextBonus: getCurrentVsNextBonusSummary(
+        row,
+        currentLevel,
+        effectiveMaxLevel.value,
+        bonusValue
+      )
     };
   });
 

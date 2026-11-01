@@ -7,6 +7,80 @@ Scope:
 - Extracted file locations from the emulator
 - Manual raw-report helpers such as `scripts/unity/unity_extract_report.py`, `scripts/unity/unity_textasset_dump.py`, and `scripts/unity/unity_targeted_string_report.py` when DB-backed/system-unit surfaces do not answer the question directly
 
+## LDPlayer ADB bridge
+
+Current known local bridge path:
+
+- `adb`
+
+Minimum validation flow against the running LD instance:
+
+```powershell
+$adb = (Get-Command adb -ErrorAction Stop).Source
+& $adb devices
+& $adb shell pm list packages | Select-String 'Octocube|CIFI|cifi'
+& $adb shell dumpsys window windows | Select-String 'mCurrentFocus|mFocusedApp'
+```
+
+Expected healthy state:
+
+- one attached device such as `emulator-5554`
+- installed package `com.OctocubeGamesCompany.CIFI`
+- current focus on `com.OctocubeGamesCompany.CIFI/com.unity3d.player.UnityPlayerActivity`
+
+Validation-only screenshot and UI dump capture:
+
+```powershell
+$adb = (Get-Command adb -ErrorAction Stop).Source
+& $adb shell screencap -p /sdcard/Download/cifi-live.png
+Start-Sleep -Milliseconds 500
+& $adb shell uiautomator dump /sdcard/Download/cifi-live-ui.xml
+& $adb pull /sdcard/Download/cifi-live.png workbench\cifi-live.png
+& $adb pull /sdcard/Download/cifi-live-ui.xml workbench\cifi-live-ui.xml
+```
+
+Notes:
+
+- use these captures only to validate current UI wording, row order, and visible shelf state
+- do not treat the screenshot or UI dump as canonical mechanic truth
+- if the screenshot is not on the intended surface, navigate in the emulator first, then rerun the same capture commands
+
+### Working token-shop navigation on the current LD instance
+
+The Unity view does not expose useful accessibility nodes beyond the root `unitySurfaceView`, so reliable navigation is coordinate-driven.
+
+Current working coordinates on the attached `900x1600` portrait LDPlayer surface:
+
+- bottom-right nav icon: `823,1535`
+- token shop tile in `NAV CONSOLE`: `170,920`
+
+Example:
+
+```powershell
+$adb = (Get-Command adb -ErrorAction Stop).Source
+& $adb shell input tap 823 1535
+Start-Sleep -Milliseconds 1200
+& $adb shell input tap 170 920
+Start-Sleep -Milliseconds 1600
+```
+
+Important behavior:
+
+- the Token Bank opens at the last in-shop position for the current profile
+- do not assume the first visible rows are the top of Tier 1
+- validate Tier 1 by scrolling inside the shop list, not by assuming the initial viewport is the shelf head
+
+Useful in-shop swipe pattern on the current device:
+
+```powershell
+$adb = (Get-Command adb -ErrorAction Stop).Source
+# move toward earlier rows within the open token-shop list
+& $adb shell input swipe 450 700 450 1150 350
+Start-Sleep -Milliseconds 900
+```
+
+On the current profile this returns the list from late MK rows toward earlier Duo / Token rows. Repeat as needed, then capture another validation screenshot.
+
 Screenshot and emulator-capture policy:
 - ADB or LDPlayer screenshots are validation-only surfaces.
 - Use them to test current UI rendering, compare wording, check row ordering, and calibrate presentation styling.
@@ -125,4 +199,3 @@ Recommended use for MVP:
 - Use the metadata and UI strings to ground manual import labels and internal field names.
 - Do not assume the save blobs are safely parseable yet.
 - If deeper extraction is needed, the next step is targeted Unity asset parsing or an IL2CPP-oriented decoder for the `ObscuredFilePrefs` save path.
-

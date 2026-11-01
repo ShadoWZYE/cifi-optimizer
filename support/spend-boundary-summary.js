@@ -47,6 +47,7 @@ function markLegacyTokenShopFallback(summary, coverageSource) {
 export function getTokenShopCostLaneSummary(clues) {
   const genericSummary = getTokenShopGenericCostLaneSummary(getTokenShopDbGenericScopes(clues));
   const contracts = normalizeTokenShopSubjectMetadata(clues);
+  const structuredProjectionRows = getTokenShopStructuredProjectionRows(clues);
   if (genericSummary) {
     return genericSummary;
   }
@@ -103,6 +104,44 @@ export function getTokenShopCostLaneSummary(clues) {
     };
   }
 
+  if (structuredProjectionRows.length) {
+    const firstStructuredRow = structuredProjectionRows[0] || {};
+    const firstPayload =
+      firstStructuredRow?.payload && typeof firstStructuredRow.payload === "object"
+        ? firstStructuredRow.payload
+        : {};
+    const displayUpdaters = Array.isArray(firstPayload.displayUpdaters)
+      ? firstPayload.displayUpdaters.filter(Boolean)
+      : [];
+    const uiSlots = Array.isArray(firstPayload.uiSlots) ? firstPayload.uiSlots.filter(Boolean) : [];
+    const prefabs = Array.isArray(firstPayload.prefabs) ? firstPayload.prefabs.filter(Boolean) : [];
+    return {
+      hasLaneSplit: structuredProjectionRows.length > 0,
+      coverageSource: getTokenShopDbCoverageSource(clues, false),
+      keepsDailyTokeniumSeparate: false,
+      tokenLaneLabel: String(
+        firstStructuredRow?.subjectId || firstPayload.rowButton || "token-shop-row"
+      ).trim(),
+      diamondLaneLabel: "consumer-projection-v2",
+      dailyLaneLabel:
+        structuredProjectionRows
+          .slice(1, 3)
+          .map((entry) => String(entry?.subjectId || "").trim())
+          .filter(Boolean)
+          .join(", ") || "projection-neighbors-unavailable",
+      costShellLabel: displayUpdaters[0] || "display-updater-unavailable",
+      costRenderLabel: uiSlots[0] || prefabs[0] || "projection-surface-unavailable",
+      descriptionRenderLabel: prefabs[0] || uiSlots[0] || "projection-surface-unavailable",
+      rowLocalSubjectId: String(firstStructuredRow?.subjectId || "").trim() || null,
+      rangeFamilySubjectId: null,
+      rowLocalSubjectKind: "consumer-projection-v2",
+      rangeFamilySubjectKind: null,
+      rowLocalBlockedEdges: [],
+      rangeFamilyKnownEdges: [],
+      blockedInputReason: null
+    };
+  }
+
   const tokenSpendGroups = Array.isArray(clues?.tokenSpendGroups) ? clues.tokenSpendGroups : [];
   const dailyTokeniumModifierGroups = Array.isArray(clues?.dailyTokeniumModifierGroups)
     ? clues.dailyTokeniumModifierGroups
@@ -144,6 +183,7 @@ export function getSpendActionLaneSummary(tokenShop) {
     getTokenShopDbGenericScopes(tokenShop)
   );
   const contracts = normalizeTokenShopSubjectMetadata(tokenShop);
+  const structuredProjectionRows = getTokenShopStructuredProjectionRows(tokenShop);
   if (genericSummary) {
     return genericSummary;
   }
@@ -208,6 +248,35 @@ export function getSpendActionLaneSummary(tokenShop) {
     };
   }
 
+  if (structuredProjectionRows.length) {
+    const actionHooks = structuredProjectionRows
+      .map((entry) => String(entry?.payload?.actionHook || "").trim())
+      .filter(Boolean);
+    const rowButtons = structuredProjectionRows
+      .map((entry) => String(entry?.subjectId || entry?.payload?.rowButton || "").trim())
+      .filter(Boolean);
+    const firstRow = structuredProjectionRows[0] || {};
+    return {
+      hasActionSplit: actionHooks.length > 0,
+      coverageSource: getTokenShopDbCoverageSource(tokenShop, false),
+      keepsDailyDirectHooksUnrecovered: false,
+      tokenHook: actionHooks[0] || "action-hook-unavailable",
+      diamondHook: rowButtons[0] || "row-button-unavailable",
+      loopModifierHook: actionHooks[1] || actionHooks[0] || "action-hook-unavailable",
+      premiumModifierHook: actionHooks[2] || "projection-neighbor-unavailable",
+      dailyHookT2: rowButtons[1] || "projection-neighbor-unavailable",
+      dailyHookT3: rowButtons[2] || "projection-neighbor-unavailable",
+      rowLocalSubjectId: String(firstRow?.subjectId || "").trim() || null,
+      rangeFamilySubjectId: null,
+      rowLocalSubjectKind: "consumer-projection-v2",
+      rangeFamilySubjectKind: null,
+      rowLocalKnownEdges: ["exact-shell-to-action-hook"],
+      rangeFamilyKnownEdges: [],
+      rangeFamilyNonblockingEdges: [],
+      blockedInputReason: null
+    };
+  }
+
   const clues = tokenShop?.spendLanes?.actionLaneClues ?? tokenShop;
   const tokenDirectBuyHooks = Array.isArray(clues?.tokenDirectBuyHooks)
     ? clues.tokenDirectBuyHooks
@@ -258,6 +327,7 @@ export function getTokenBankStateSummary(clues) {
     getTokenShopDbGenericScopes(clues)
   );
   const contracts = normalizeTokenShopSubjectMetadata(clues);
+  const stateProjection = getTokenBankStateProjection(clues);
   if (genericSummary) {
     return genericSummary;
   }
@@ -340,6 +410,94 @@ export function getTokenBankStateSummary(clues) {
         blockedInputReason
       };
     }
+  }
+
+  if (stateProjection) {
+    const projectionPayload =
+      stateProjection?.payload && typeof stateProjection.payload === "object"
+        ? stateProjection.payload
+        : {};
+    const supportingRows = Array.isArray(projectionPayload.supportingRowButtons)
+      ? projectionPayload.supportingRowButtons.filter(Boolean)
+      : [];
+    const hasStructuredState =
+      Boolean(String(projectionPayload.claimMethod || "").trim()) &&
+      Boolean(String(projectionPayload.capMethod || "").trim()) &&
+      Boolean(String(projectionPayload.displayShell || "").trim()) &&
+      Boolean(String(projectionPayload.loopHook || "").trim()) &&
+      Boolean(String(projectionPayload.cloudSaveShell || "").trim()) &&
+      Boolean(String(projectionPayload.cloudSaveInfoRoutine || "").trim()) &&
+      Boolean(String(projectionPayload.cloudSaveProfileRoutine || "").trim()) &&
+      Boolean(String(projectionPayload.cloudSaveStateMachine || "").trim());
+    return {
+      hasControllerSplit: hasStructuredState,
+      hasExactStoredAmountOwner:
+        Boolean(String(projectionPayload.exactSaveOwnerType || "").trim()) &&
+        Boolean(String(projectionPayload.storedAmountField || "").trim()),
+      hasGenericClaimableBoundary:
+        Boolean(String(projectionPayload.genericClaimableFieldOwner || "").trim()) &&
+        Boolean(String(projectionPayload.genericClaimableField || "").trim()),
+      hasPlayerProfileBridgeBoundary:
+        Boolean(String(projectionPayload.profileBridgeOwner || "").trim()) &&
+        Boolean(String(projectionPayload.profileBridgeMethod || "").trim()) &&
+        Boolean(String(projectionPayload.profileBridgeReturnType || "").trim()) &&
+        Boolean(String(projectionPayload.profileCacheField || "").trim()),
+      hasCloudSaveShellBoundary:
+        Boolean(String(projectionPayload.cloudSaveShell || "").trim()) &&
+        Boolean(String(projectionPayload.cloudSaveInfoRoutine || "").trim()) &&
+        Boolean(String(projectionPayload.cloudSaveProfileRoutine || "").trim()) &&
+        Boolean(String(projectionPayload.cloudSaveStateMachine || "").trim()),
+      coverageSource: "consumer-projection-v2",
+      claimMethod: String(projectionPayload.claimMethod || "claim-method-unavailable").trim(),
+      capMethod: String(projectionPayload.capMethod || "cap-method-unavailable").trim(),
+      displayShell: String(projectionPayload.displayShell || "display-shell-unavailable").trim(),
+      loopHandler: String(projectionPayload.loopHandler || "loop-handler-unavailable").trim(),
+      loopHook: String(projectionPayload.loopHook || "loop-hook-unavailable").trim(),
+      exactSaveOwnerType: String(
+        projectionPayload.exactSaveOwnerType || "save-owner-type-unavailable"
+      ).trim(),
+      storedAmountField: String(
+        projectionPayload.storedAmountField || "stored-amount-field-unavailable"
+      ).trim(),
+      exactSaveOwnerLabel: `${projectionPayload.exactSaveOwnerType || "save-owner-type-unavailable"}.${projectionPayload.storedAmountField || "stored-amount-field-unavailable"}`,
+      genericClaimableFieldOwner: String(
+        projectionPayload.genericClaimableFieldOwner || "claimable-owner-unavailable"
+      ).trim(),
+      genericClaimableField: String(
+        projectionPayload.genericClaimableField || "claimable-field-unavailable"
+      ).trim(),
+      genericClaimableLabel: `${projectionPayload.genericClaimableFieldOwner || "claimable-owner-unavailable"}.${projectionPayload.genericClaimableField || "claimable-field-unavailable"}`,
+      profileBridgeOwner: String(
+        projectionPayload.profileBridgeOwner || "profile-bridge-owner-unavailable"
+      ).trim(),
+      profileBridgeMethod: String(
+        projectionPayload.profileBridgeMethod || "profile-bridge-method-unavailable"
+      ).trim(),
+      profileBridgeReturnType: String(
+        projectionPayload.profileBridgeReturnType || "profile-return-type-unavailable"
+      ).trim(),
+      profileCacheField: String(
+        projectionPayload.profileCacheField || "profile-cache-field-unavailable"
+      ).trim(),
+      profileBridgeLabel: `${projectionPayload.profileBridgeOwner || "profile-bridge-owner-unavailable"}.${projectionPayload.profileCacheField || "profile-cache-field-unavailable"} + ${projectionPayload.profileBridgeMethod || "profile-bridge-method-unavailable"}(...) -> ${projectionPayload.profileBridgeReturnType || "profile-return-type-unavailable"}`,
+      cloudSaveShell: String(
+        projectionPayload.cloudSaveShell || "cloud-save-shell-unavailable"
+      ).trim(),
+      cloudSaveInfoRoutine: String(
+        projectionPayload.cloudSaveInfoRoutine || "cloud-save-info-routine-unavailable"
+      ).trim(),
+      cloudSaveProfileRoutine: String(
+        projectionPayload.cloudSaveProfileRoutine || "cloud-save-profile-routine-unavailable"
+      ).trim(),
+      cloudSaveStateMachine: String(
+        projectionPayload.cloudSaveStateMachine || "cloud-save-state-machine-unavailable"
+      ).trim(),
+      rowLocalSubjectId: supportingRows[0] || null,
+      rangeFamilySubjectId: String(stateProjection?.subjectId || "").trim() || null,
+      rowLocalSubjectKind: supportingRows.length ? "consumer-projection-v2" : null,
+      rangeFamilySubjectKind: "token-bank-state-structure",
+      blockedInputReason: hasStructuredState ? null : "partial V2 token-bank state projection"
+    };
   }
 
   const tokenShopMethods = Array.isArray(clues?.tokenShopMethods) ? clues.tokenShopMethods : [];
@@ -559,6 +717,7 @@ export function getDailyTokeniumLaneSummary(clues) {
 
 export function getTokenBankFormulaBoundarySummary(clues) {
   const contracts = normalizeTokenShopSubjectMetadata(clues);
+  const formulaProjection = getTokenBankFormulaProjection(clues);
   if (contracts.length) {
     const rowLocal =
       contracts.find(
@@ -611,6 +770,40 @@ export function getTokenBankFormulaBoundarySummary(clues) {
         blockedInputReason
       };
     }
+  }
+  if (formulaProjection) {
+    const projectionPayload =
+      formulaProjection?.payload && typeof formulaProjection.payload === "object"
+        ? formulaProjection.payload
+        : {};
+    const capAccessor = String(projectionPayload.capAccessor || "").trim();
+    const fillAccessor = String(projectionPayload.fillAccessor || "").trim();
+    const capField = String(projectionPayload.capField || "").trim();
+    const fillField = String(projectionPayload.fillField || "").trim();
+    const supportingRows = Array.isArray(projectionPayload.supportingRowButtons)
+      ? projectionPayload.supportingRowButtons.filter(Boolean)
+      : [];
+    const saveFamilyOverlapClear = projectionPayload.saveFamilyOverlapClear === true;
+    const hasStructuredBoundary =
+      Boolean(capAccessor) &&
+      Boolean(fillAccessor) &&
+      Boolean(capField) &&
+      Boolean(fillField) &&
+      saveFamilyOverlapClear;
+    return {
+      hasDerivedOutputBoundary: hasStructuredBoundary,
+      hasNoSaveJoinInDerivedContext: saveFamilyOverlapClear,
+      coverageSource: "consumer-projection-v2",
+      capAccessor: capAccessor || "cap-accessor-unavailable",
+      fillAccessor: fillAccessor || "fill-accessor-unavailable",
+      capField: capField || "cap-field-unavailable",
+      fillField: fillField || "fill-field-unavailable",
+      rowLocalSubjectId: supportingRows[0] || null,
+      rangeFamilySubjectId: String(formulaProjection?.subjectId || "").trim() || null,
+      rowLocalSubjectKind: supportingRows.length ? "consumer-projection-v2" : null,
+      rangeFamilySubjectKind: "token-bank-formula-structure",
+      blockedInputReason: hasStructuredBoundary ? null : "partial V2 token-bank formula projection"
+    };
   }
   const source = clues?.tokenBank?.formulaBoundary ?? clues;
   const derivedOutputCluster = Array.isArray(source?.derivedOutputCluster)
@@ -673,9 +866,13 @@ export function calculateDailyTokeniumCap(tierUnlocks, upgradeLevels = {}) {
 }
 
 export function getMultiverseMarketRangeBoundarySummary(boundary, multiverseMarket = null) {
+  const { genericSummary, subjectMetadata, useMetadataFallback, coverageSource } =
+    getMultiverseMarketDbSubjectSupport(multiverseMarket, "multiverse-market-save-owner-boundary", [
+      "multiverse-market-save-owner-boundary",
+      "family-graph:multiverse-market-save-owner"
+    ]);
   const fallbackBoundary =
     boundary ?? multiverseMarket?.rowIdentity?.compatibilityBoundaries?.rangeBoundary ?? null;
-  const genericBoundary = getMultiverseMarketGenericBoundarySummary(multiverseMarket);
   const validatedCoverage = getMultiverseMarketValidatedCoverage(
     multiverseMarket?.saveOwner?.extract ?? multiverseMarket
   );
@@ -686,13 +883,36 @@ export function getMultiverseMarketRangeBoundarySummary(boundary, multiverseMark
       : [];
   const overlapIds = Array.isArray(fallbackBoundary?.overlapIds)
     ? fallbackBoundary.overlapIds
-    : Array.isArray(genericBoundary?.factsByKind?.["ordered-overlap-row-id"])
-      ? genericBoundary.factsByKind["ordered-overlap-row-id"]
+    : Array.isArray(genericSummary?.factsByKind?.["ordered-overlap-row-id"])
+      ? genericSummary.factsByKind["ordered-overlap-row-id"]
       : [];
   const metadataIsRangeLabel =
     typeof fallbackBoundary?.metadataIsRangeLabel === "string"
       ? fallbackBoundary.metadataIsRangeLabel
-      : String(genericBoundary?.factsByKind?.["typed-span"]?.[0] || "");
+      : String(genericSummary?.factsByKind?.["typed-span"]?.[0] || "");
+
+  if (genericSummary || useMetadataFallback) {
+    const nextSeamId =
+      genericSummary?.nextSeamIds?.[0] ||
+      String(subjectMetadata?.nextSeam?.id || "").trim() ||
+      null;
+    return {
+      hasRangeBoundary: validatedRowRanges.length > 0 && metadataIsRangeLabel.length > 0,
+      hasValidatedRows: validatedRowRanges.length > 0,
+      hasOverlap: overlapIds.length > 0,
+      hasExplicitZeroOverlap:
+        validatedRowRanges.length > 0 && metadataIsRangeLabel.length > 0 && overlapIds.length === 0,
+      overlapLabel: formatNumericRanges(overlapIds),
+      validatedRangeLabel: validatedRowRanges.join(" and "),
+      metadataRangeLabel: metadataIsRangeLabel,
+      coverageSource,
+      nextSeamId,
+      genericFactCount:
+        Number(genericSummary?.factCount || subjectMetadata?.genericFactCount || 0) || 0,
+      genericGapCount:
+        Number(genericSummary?.gapCount || subjectMetadata?.genericGapCount || 0) || 0
+    };
+  }
 
   return {
     hasRangeBoundary: validatedRowRanges.length > 0 && metadataIsRangeLabel.length > 0,
@@ -707,14 +927,11 @@ export function getMultiverseMarketRangeBoundarySummary(boundary, multiverseMark
 }
 
 export function getMultiverseMarketRowTextCoverageSummary(coverage, multiverseMarket = null) {
-  const genericSummary = getDbSystemGenericSubjectSummary(
-    multiverseMarket,
-    "family-graph:multiverse-market-row-text"
-  );
-  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
-    includeSubjectMetadata: false,
-    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-row-text"
-  });
+  const { genericSummary, subjectMetadata, useMetadataFallback, coverageSource } =
+    getMultiverseMarketDbSubjectSupport(
+      multiverseMarket,
+      "family-graph:multiverse-market-row-text"
+    );
   if (genericSummary) {
     const textHandlerAnchors = genericSummary.factsByKind?.["owner-anchor"] || [];
     const validatedRowCostTexts = genericSummary.factsByKind?.["cost-text-sample"] || [];
@@ -735,7 +952,7 @@ export function getMultiverseMarketRowTextCoverageSummary(coverage, multiverseMa
         textHandlerAnchors.includes("SetAllChrystosEmporiumTexts") &&
         validatedTextIds.length > 0,
       hasBuyHookSamples: sampleBuyHooks.length > 0,
-      coverageSource: coverageSummary.coverageSource,
+      coverageSource,
       coveredCount: validatedRowCostTexts.length,
       validatedRangeLabel:
         validatedTextIds.length > 0
@@ -745,9 +962,27 @@ export function getMultiverseMarketRowTextCoverageSummary(coverage, multiverseMa
       textBatcher: "SetAllChrystosEmporiumTexts",
       firstBuyHook: sampleBuyHooks[0] || "",
       lastBuyHook: sampleBuyHooks[sampleBuyHooks.length - 1] || "",
-      subjectCount: coverageSummary.subjectCount,
-      genericFactCount: coverageSummary.genericFactCount,
-      genericGapCount: coverageSummary.genericGapCount
+      subjectCount: 1,
+      genericFactCount: genericSummary.factCount || 0,
+      genericGapCount: genericSummary.gapCount || 0
+    };
+  }
+  if (useMetadataFallback) {
+    const nextSeamId = String(subjectMetadata?.nextSeam?.id || "").trim() || null;
+    return {
+      hasValidatedTextCoverage: false,
+      hasBuyHookSamples: false,
+      coverageSource,
+      coveredCount: 0,
+      validatedRangeLabel: "",
+      textHandler: "TextHandlerMarkets",
+      textBatcher: "SetAllChrystosEmporiumTexts",
+      firstBuyHook: "",
+      lastBuyHook: "",
+      subjectCount: 1,
+      genericFactCount: Number(subjectMetadata?.genericFactCount || 0) || 0,
+      genericGapCount: Number(subjectMetadata?.genericGapCount || 0) || 0,
+      nextSeamId
     };
   }
   const fallbackCoverage =
@@ -780,14 +1015,11 @@ export function getMultiverseMarketRowTextCoverageSummary(coverage, multiverseMa
 }
 
 export function getMultiverseMarketActionShellSummary(shell, multiverseMarket = null) {
-  const genericSummary = getDbSystemGenericSubjectSummary(
-    multiverseMarket,
-    "family-graph:multiverse-market-action-shell"
-  );
-  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
-    includeSubjectMetadata: false,
-    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-action-shell"
-  });
+  const { genericSummary, subjectMetadata, useMetadataFallback, coverageSource } =
+    getMultiverseMarketDbSubjectSupport(
+      multiverseMarket,
+      "family-graph:multiverse-market-action-shell"
+    );
   if (genericSummary) {
     const textHandlerAnchors = genericSummary.factsByKind?.["owner-anchor"] || [];
     const validatedBuyHooks = genericSummary.factsByKind?.["buy-hook-sample"] || [];
@@ -804,18 +1036,35 @@ export function getMultiverseMarketActionShellSummary(shell, multiverseMarket = 
         textHandlerAnchors.includes("SetAllChrystosEmporiumTexts") &&
         buyHookRowIds.length > 0 &&
         costTextRowIds.length > 0,
-      coverageSource: coverageSummary.coverageSource,
+      coverageSource,
       buyRangeLabel: buyHookRowIds.length ? `BuyIS${formatNumericRanges(buyHookRowIds)}` : "",
       costTextRangeLabel: costTextRowIds.length
         ? `SetIS${formatNumericRanges(costTextRowIds)}CostText`
         : "",
       validatedRangeLabel: buyHookRowIds.length ? formatNumericRanges(buyHookRowIds) : "",
-      subjectCount: coverageSummary.subjectCount,
-      genericFactCount: coverageSummary.genericFactCount,
-      genericGapCount: coverageSummary.genericGapCount,
+      subjectCount: 1,
+      genericFactCount: genericSummary.factCount || 0,
+      genericGapCount: genericSummary.gapCount || 0,
       firstBuyHook: validatedBuyHooks[0] || "",
       lastBuyHook: validatedBuyHooks[validatedBuyHooks.length - 1] || "",
       coveredCount: validatedCostTexts.length
+    };
+  }
+  if (useMetadataFallback) {
+    const nextSeamId = String(subjectMetadata?.nextSeam?.id || "").trim() || null;
+    return {
+      hasActionShell: false,
+      coverageSource,
+      buyRangeLabel: "",
+      costTextRangeLabel: "",
+      validatedRangeLabel: "",
+      subjectCount: 1,
+      genericFactCount: Number(subjectMetadata?.genericFactCount || 0) || 0,
+      genericGapCount: Number(subjectMetadata?.genericGapCount || 0) || 0,
+      firstBuyHook: "",
+      lastBuyHook: "",
+      coveredCount: 0,
+      nextSeamId
     };
   }
   const fallbackShell =
@@ -855,14 +1104,11 @@ export function getMultiverseMarketActionShellSummary(shell, multiverseMarket = 
 }
 
 export function getMultiverseMarketPrefabRemapBoundarySummary(boundary, multiverseMarket = null) {
-  const genericSummary = getDbSystemGenericSubjectSummary(
-    multiverseMarket,
-    "family-graph:multiverse-market-prefab-remap"
-  );
-  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
-    includeSubjectMetadata: false,
-    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-prefab-remap"
-  });
+  const { genericSummary, subjectMetadata, useMetadataFallback, coverageSource } =
+    getMultiverseMarketDbSubjectSupport(
+      multiverseMarket,
+      "family-graph:multiverse-market-prefab-remap"
+    );
   if (genericSummary) {
     const prefabRowIds = (genericSummary.factsByKind?.["prefab-row-id"] || [])
       .map((value) => Number(value))
@@ -875,7 +1121,7 @@ export function getMultiverseMarketPrefabRemapBoundarySummary(boundary, multiver
     return {
       hasDirectMatchBand: false,
       hasOverrideBoundary: prefabRowIds.length > 0 && serializedIds.length > 0,
-      coverageSource: coverageSummary.coverageSource,
+      coverageSource,
       lastDirectPrefab: "",
       firstOverride: prefabSamples[0] || "",
       lastOverride: prefabSamples[prefabSamples.length - 1] || "",
@@ -883,9 +1129,28 @@ export function getMultiverseMarketPrefabRemapBoundarySummary(boundary, multiver
       firstSerializedId: serializedIds.length ? `ID${serializedIds[0]}` : "",
       lastSerializedId: serializedIds.length ? `ID${serializedIds[serializedIds.length - 1]}` : "",
       overridePairs,
-      subjectCount: coverageSummary.subjectCount,
-      genericFactCount: coverageSummary.genericFactCount,
-      genericGapCount: coverageSummary.genericGapCount
+      subjectCount: 1,
+      genericFactCount: genericSummary.factCount || 0,
+      genericGapCount: genericSummary.gapCount || 0
+    };
+  }
+  if (useMetadataFallback) {
+    const nextSeamId = String(subjectMetadata?.nextSeam?.id || "").trim() || null;
+    return {
+      hasDirectMatchBand: false,
+      hasOverrideBoundary: false,
+      coverageSource,
+      lastDirectPrefab: "",
+      firstOverride: "",
+      lastOverride: "",
+      validatedMismatchLabel: "",
+      firstSerializedId: "",
+      lastSerializedId: "",
+      overridePairs: [],
+      subjectCount: 1,
+      genericFactCount: Number(subjectMetadata?.genericFactCount || 0) || 0,
+      genericGapCount: Number(subjectMetadata?.genericGapCount || 0) || 0,
+      nextSeamId
     };
   }
   const fallbackBoundary =
@@ -918,14 +1183,11 @@ export function getMultiverseMarketPrefabRemapBoundarySummary(boundary, multiver
 }
 
 export function getMultiverseMarketOwnerFamilySummary(family, multiverseMarket = null) {
-  const genericSummary = getDbSystemGenericSubjectSummary(
-    multiverseMarket,
-    "family-graph:multiverse-market-owner-family"
-  );
-  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
-    includeSubjectMetadata: false,
-    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-owner-family"
-  });
+  const { genericSummary, subjectMetadata, useMetadataFallback, coverageSource } =
+    getMultiverseMarketDbSubjectSupport(
+      multiverseMarket,
+      "family-graph:multiverse-market-owner-family"
+    );
   if (genericSummary) {
     const ownerAnchors = genericSummary.factsByKind?.["owner-anchor"] || [];
     const resourceAnchors = genericSummary.factsByKind?.["resource-anchor"] || [];
@@ -938,7 +1200,7 @@ export function getMultiverseMarketOwnerFamilySummary(family, multiverseMarket =
         ownerAnchors.includes("TextHandlerMarkets") &&
         ownerAnchors.includes("SetAllChrystosEmporiumTexts"),
       hasCurrencyShell: false,
-      coverageSource: coverageSummary.coverageSource,
+      coverageSource,
       ownerAnchor: "MultiverseMarket",
       inscryptionsLabel: wrapperField,
       textHandler: "TextHandlerMarkets",
@@ -949,9 +1211,31 @@ export function getMultiverseMarketOwnerFamilySummary(family, multiverseMarket =
       currencyRangeLabel: "",
       firstValidatedCurrencyBox: "",
       lastValidatedCurrencyBox: "",
-      subjectCount: coverageSummary.subjectCount,
-      genericFactCount: coverageSummary.genericFactCount,
-      genericGapCount: coverageSummary.genericGapCount
+      subjectCount: 1,
+      genericFactCount: genericSummary.factCount || 0,
+      genericGapCount: genericSummary.gapCount || 0
+    };
+  }
+  if (useMetadataFallback) {
+    const nextSeamId = String(subjectMetadata?.nextSeam?.id || "").trim() || null;
+    return {
+      hasOwnerFamily: false,
+      hasCurrencyShell: false,
+      coverageSource,
+      ownerAnchor: "MultiverseMarket",
+      inscryptionsLabel: "",
+      textHandler: "TextHandlerMarkets",
+      batcher: "SetAllChrystosEmporiumTexts",
+      resourceText: "",
+      achievementBar: "",
+      costBox: "",
+      currencyRangeLabel: "",
+      firstValidatedCurrencyBox: "",
+      lastValidatedCurrencyBox: "",
+      subjectCount: 1,
+      genericFactCount: Number(subjectMetadata?.genericFactCount || 0) || 0,
+      genericGapCount: Number(subjectMetadata?.genericGapCount || 0) || 0,
+      nextSeamId
     };
   }
   const fallbackFamily =
@@ -1007,6 +1291,7 @@ export function getMultiverseMarketOwnerFamilySummary(family, multiverseMarket =
 export function getTokenShopOwnerShellSummary(shell) {
   const genericSummary = getTokenShopGenericOwnerShellSummary(getTokenShopDbGenericScopes(shell));
   const contracts = normalizeTokenShopSubjectMetadata(shell);
+  const structuredProjectionRows = getTokenShopStructuredProjectionRows(shell);
   if (genericSummary) {
     return genericSummary;
   }
@@ -1051,6 +1336,56 @@ export function getTokenShopOwnerShellSummary(shell) {
         blockedInputReason
       };
     }
+  }
+
+  if (structuredProjectionRows.length) {
+    const firstStructuredRow = structuredProjectionRows[0] || {};
+    const firstPayload =
+      firstStructuredRow?.payload && typeof firstStructuredRow.payload === "object"
+        ? firstStructuredRow.payload
+        : {};
+    const displayUpdaters = Array.isArray(firstPayload.displayUpdaters)
+      ? firstPayload.displayUpdaters.filter(Boolean)
+      : [];
+    const uiSlots = Array.isArray(firstPayload.uiSlots) ? firstPayload.uiSlots.filter(Boolean) : [];
+    const prefabs = Array.isArray(firstPayload.prefabs) ? firstPayload.prefabs.filter(Boolean) : [];
+    const resolvedPrefab = String(firstPayload.resolvedPrefab || "").trim();
+    const resolvedDisplayUpdater = String(firstPayload.resolvedDisplayUpdater || "").trim();
+    const resolvedUiSlot = String(firstPayload.resolvedUiSlot || "").trim();
+    const rowLocalKnownEdges = ["exact-shell-to-action-hook"];
+    if (resolvedPrefab) {
+      rowLocalKnownEdges.push("exact-shell-to-prefab");
+    }
+    if (resolvedDisplayUpdater || resolvedUiSlot) {
+      rowLocalKnownEdges.push("exact-display-update-path");
+    }
+    return {
+      hasOwnerShell: Boolean(
+        String(firstStructuredRow?.subjectId || firstPayload.rowButton || "").trim() &&
+        String(firstPayload.actionHook || "").trim()
+      ),
+      coverageSource: getTokenShopDbCoverageSource(shell, false),
+      ownerAnchor: String(
+        firstStructuredRow?.subjectId || firstPayload.rowButton || "token-shop-row"
+      ).trim(),
+      bankMethod: String(firstPayload.actionHook || "action-hook-unavailable").trim(),
+      notificationHook: String(
+        resolvedDisplayUpdater || resolvedUiSlot || "projection-surface-unavailable"
+      ).trim(),
+      deviceHook: String(
+        resolvedPrefab ||
+          structuredProjectionRows[1]?.subjectId ||
+          "projection-neighbor-unavailable"
+      ).trim(),
+      rowLocalSubjectId: String(firstStructuredRow?.subjectId || "").trim() || null,
+      rangeFamilySubjectId: null,
+      rowLocalSubjectKind: "consumer-projection-v2",
+      rangeFamilySubjectKind: null,
+      rowLocalKnownEdges,
+      rangeKnownEdges: [],
+      rangeBlockedEdges: [],
+      blockedInputReason: null
+    };
   }
 
   const ownerAnchors = Array.isArray(shell?.ownerAnchors) ? shell.ownerAnchors : [];
@@ -1158,6 +1493,7 @@ export function getTokenBankControllerShellSummary(shell) {
     getTokenShopDbGenericScopes(shell)
   );
   const contracts = normalizeTokenShopSubjectMetadata(shell);
+  const controllerProjection = getTokenBankControllerProjection(shell);
   if (genericSummary) {
     return genericSummary;
   }
@@ -1222,6 +1558,56 @@ export function getTokenBankControllerShellSummary(shell) {
     }
   }
 
+  if (controllerProjection) {
+    const projectionPayload =
+      controllerProjection?.payload && typeof controllerProjection.payload === "object"
+        ? controllerProjection.payload
+        : {};
+    const supportingRows = Array.isArray(projectionPayload.supportingRowButtons)
+      ? projectionPayload.supportingRowButtons.filter(Boolean)
+      : [];
+    const adjacentTerms = [
+      ...(Array.isArray(projectionPayload.adjacentTerms)
+        ? projectionPayload.adjacentTerms.filter(Boolean)
+        : []),
+      ...(Array.isArray(projectionPayload.sampleActionHooks)
+        ? projectionPayload.sampleActionHooks.filter(Boolean)
+        : []),
+      ...(Array.isArray(projectionPayload.supportingPrefabs)
+        ? projectionPayload.supportingPrefabs.filter(Boolean)
+        : [])
+    ].filter(Boolean);
+    const claimMethod = String(projectionPayload.claimMethod || "").trim();
+    const fillMethod = String(projectionPayload.fillMethod || "").trim();
+    const fillField = String(projectionPayload.fillField || "").trim();
+    const descriptionShell = String(projectionPayload.descriptionShell || "").trim();
+    const notificationHook = String(projectionPayload.notificationHook || "").trim();
+    const hasStructuredController =
+      Boolean(String(projectionPayload.capMethod || "").trim()) &&
+      Boolean(claimMethod) &&
+      Boolean(fillMethod) &&
+      Boolean(fillField) &&
+      Boolean(descriptionShell) &&
+      Boolean(notificationHook);
+    return {
+      hasControllerShell: hasStructuredController,
+      coverageSource: "consumer-projection-v2",
+      claimMethod: claimMethod || "claim-method-unavailable",
+      fillMethod: fillMethod || "fill-method-unavailable",
+      fillField: fillField || "fill-field-unavailable",
+      descriptionShell: descriptionShell || "description-shell-unavailable",
+      notificationHook: notificationHook || "notification-hook-unavailable",
+      rowLocalSubjectId: supportingRows[0] || null,
+      rangeFamilySubjectId: String(controllerProjection?.subjectId || "").trim() || null,
+      rowLocalSubjectKind: supportingRows.length ? "consumer-projection-v2" : null,
+      rangeFamilySubjectKind: "token-bank-controller-structure",
+      adjacentTerms,
+      blockedInputReason: hasStructuredController
+        ? null
+        : "partial V2 token-bank controller projection"
+    };
+  }
+
   const controllerAnchors = Array.isArray(shell?.controllerAnchors) ? shell.controllerAnchors : [];
   const adjacentControllerMethods = Array.isArray(shell?.adjacentControllerMethods)
     ? shell.adjacentControllerMethods
@@ -1252,6 +1638,35 @@ export function getTokenBankControllerShellSummary(shell) {
 }
 
 export function getMultiverseMarketSaveBoundarySummary(boundary) {
+  const saveOwnerProjection = getMultiverseSaveOwnerProjection(boundary);
+  if (saveOwnerProjection) {
+    const payload = saveOwnerProjection.payload || {};
+    const recoveredTargets = Array.isArray(payload?.recoveredTargets)
+      ? payload.recoveredTargets.map((value) => String(value || "").trim()).filter(Boolean)
+      : [];
+    return {
+      hasSeparationBoundary:
+        recoveredTargets.includes("SaveData") ||
+        recoveredTargets.includes("PlayerProfileData") ||
+        String(payload?.saveAnchor || "").trim() === "SaveData",
+      coverageSource: "consumer-projection-v2",
+      boundaryVerdict: String(payload?.projectionCompleteness || "").trim() || "partial",
+      actionAnchor: String(payload?.ownerAnchor || "").trim() || "get_Market",
+      saveAnchor: String(payload?.saveAnchor || "").trim() || "SaveData",
+      typedSpanLabel:
+        recoveredTargets.find((value) => /^IS\d+Level$/i.test(String(value || "").trim())) || null,
+      overlapLabel: recoveredTargets.length > 0 ? "runtime overlap only" : "overlap-unavailable",
+      subjectId: saveOwnerProjection.subjectId || null,
+      subjectKind: saveOwnerProjection.projectionKind || null,
+      knownEdges: ["runtime-save-owner-recovery"],
+      missingEdges: [],
+      blockedInputReason:
+        recoveredTargets.length > 0 ? "partial V2 multiverse save-owner projection" : null,
+      nextSeamId: null,
+      genericFactCount: recoveredTargets.length,
+      genericGapCount: 0
+    };
+  }
   const compatibilityBoundary =
     boundary?.saveOwner?.compatibilityBoundaries?.saveBoundary ??
     boundary?.saveOwner?.saveBoundary ??
@@ -1363,6 +1778,58 @@ export function getMultiverseMarketSaveBoundarySummary(boundary) {
 }
 
 export function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
+  const saveOwnerProjection = getMultiverseSaveOwnerProjection(boundary);
+  const runtimeBridgeProjection = getMultiverseRuntimeBridgeProjection(boundary);
+  if (saveOwnerProjection || runtimeBridgeProjection) {
+    const savePayload = saveOwnerProjection?.payload || {};
+    const runtimePayload = runtimeBridgeProjection?.payload || {};
+    const recoveredTargets = Array.isArray(savePayload?.recoveredTargets)
+      ? savePayload.recoveredTargets.map((value) => String(value || "").trim()).filter(Boolean)
+      : [];
+    const bridgeTargets = Array.isArray(runtimePayload?.bridgeTargets)
+      ? runtimePayload.bridgeTargets.map((value) => String(value || "").trim()).filter(Boolean)
+      : [];
+    return {
+      coverageSource: "consumer-projection-v2",
+      boundaryVerdict:
+        String(
+          savePayload?.projectionCompleteness || runtimePayload?.projectionCompleteness || ""
+        ).trim() || "partial",
+      hasSiblingAccessorCluster:
+        bridgeTargets.includes("get_Market") ||
+        String(savePayload?.ownerAnchor || "").trim() === "get_Market",
+      favorsPlayerProfileMemberHost:
+        recoveredTargets.includes("PlayerProfileData") ||
+        recoveredTargets.includes("ConvertSaveDataToProfileData"),
+      favorsDirectMemberBoundary:
+        bridgeTargets.some((value) => value.includes("MultiverseMarket")) ||
+        recoveredTargets.some((value) => value.includes("MultiverseMarket")),
+      hasCloudBridge:
+        String(savePayload?.cloudSaveAnchor || "").trim() === "CloudSavePlayerProfile" ||
+        bridgeTargets.includes("CloudSavePlayerProfile"),
+      hasExactSaveDataProgressionOwner:
+        String(savePayload?.saveAnchor || "").trim() === "SaveData" &&
+        recoveredTargets.some((value) => value.includes("Inscrypt")),
+      accessorLabel:
+        String(savePayload?.ownerAnchor || runtimePayload?.ownerAnchor || "").trim() ||
+        "get_Market",
+      memberLabel: "Market",
+      canonicalHostLabel: "V2 runtime save-owner bridge",
+      siblingAccessorLabel: bridgeTargets.slice(0, 6).join(", "),
+      exactSaveOwnerLabel: String(savePayload?.saveAnchor || "").trim() || "SaveData",
+      compatibilityImportTargetPath: null,
+      negativeMultiverseFieldLabel: "typed market field recovery remains unrecovered",
+      subjectId: saveOwnerProjection?.subjectId || runtimeBridgeProjection?.subjectId || null,
+      subjectKind:
+        saveOwnerProjection?.projectionKind || runtimeBridgeProjection?.projectionKind || null,
+      knownEdges: ["runtime-save-owner-recovery"],
+      missingEdges: [],
+      blockedInputReason: "partial V2 multiverse market-member projection",
+      nextSeamId: null,
+      genericFactCount: recoveredTargets.length + bridgeTargets.length,
+      genericGapCount: 0
+    };
+  }
   const compatibilityBoundary =
     boundary?.saveOwner?.compatibilityBoundaries?.marketMemberBoundary ??
     boundary?.saveOwner?.marketMemberBoundary ??
@@ -1746,6 +2213,35 @@ export function getMultiverseMarketMarketMemberBoundarySummary(boundary) {
 }
 
 export function getMultiverseMarketMetadataSummary(neighborhood, multiverseMarket = null) {
+  const saveOwnerProjection = getMultiverseSaveOwnerProjection(multiverseMarket);
+  const runtimeBridgeProjection = getMultiverseRuntimeBridgeProjection(multiverseMarket);
+  if (saveOwnerProjection || runtimeBridgeProjection) {
+    const savePayload = saveOwnerProjection?.payload || {};
+    const runtimePayload = runtimeBridgeProjection?.payload || {};
+    const recoveredTargets = Array.isArray(savePayload?.recoveredTargets)
+      ? savePayload.recoveredTargets.map((value) => String(value || "").trim()).filter(Boolean)
+      : [];
+    const bridgeTargets = Array.isArray(runtimePayload?.bridgeTargets)
+      ? runtimePayload.bridgeTargets.map((value) => String(value || "").trim()).filter(Boolean)
+      : [];
+    const allTargets = [...recoveredTargets, ...bridgeTargets];
+    const isTerms = allTargets.filter((value) => /^IS\d+Level$/i.test(value));
+    return {
+      hasCloudSavePathClues:
+        String(savePayload?.cloudSaveAnchor || "").trim() === "CloudSavePlayerProfile" ||
+        bridgeTargets.includes("CloudSavePlayerProfile") ||
+        bridgeTargets.includes("GetPlayerProfileInfo"),
+      hasSaveFamilyClues:
+        recoveredTargets.includes("PlayerProfileData") ||
+        recoveredTargets.includes("ConvertSaveDataToProfileData") ||
+        recoveredTargets.includes("FillPlayerProfileData"),
+      hasProgressionFieldCluster:
+        allTargets.some((value) => value.includes("Inscrypt")) &&
+        allTargets.some((value) => value.includes("Trades")),
+      recoveredIsRangeLabel: isTerms.length ? isTerms.slice(0, 4).join(", ") : "",
+      coverageSource: "consumer-projection-v2"
+    };
+  }
   const genericSummary = getDbSystemGenericSubjectSummary(
     multiverseMarket,
     "family-graph:multiverse-market-metadata-neighborhood"
@@ -1831,14 +2327,51 @@ export function getMultiverseMarketMetadataSummary(neighborhood, multiverseMarke
 }
 
 export function getMultiverseMarketTypedOwnerSummary(multiverseMarket = null) {
-  const genericSummary = getDbSystemGenericSubjectSummary(
-    multiverseMarket,
-    "family-graph:multiverse-market-typed-owner"
-  );
-  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
-    includeSubjectMetadata: false,
-    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-typed-owner"
-  });
+  const saveOwnerProjection = getMultiverseSaveOwnerProjection(multiverseMarket);
+  const structuralProjection = getMultiverseStructuralNeighborhoodProjection(multiverseMarket);
+  if (saveOwnerProjection || structuralProjection) {
+    const savePayload = saveOwnerProjection?.payload || {};
+    const structuralPayload = structuralProjection?.payload || {};
+    const recoveredTargets = Array.isArray(savePayload?.recoveredTargets)
+      ? savePayload.recoveredTargets.map((value) => String(value || "").trim()).filter(Boolean)
+      : [];
+    const getterTargets = Array.isArray(structuralPayload?.getterTargets)
+      ? structuralPayload.getterTargets.map((value) => String(value || "").trim()).filter(Boolean)
+      : [];
+    const ownerTargets = Array.isArray(structuralPayload?.ownerTargets)
+      ? structuralPayload.ownerTargets.map((value) => String(value || "").trim()).filter(Boolean)
+      : [];
+    const typedLikeTargets = [...recoveredTargets, ...getterTargets, ...ownerTargets];
+    return {
+      hasTypedOwnerAnchors:
+        String(savePayload?.ownerAnchor || "").trim().length > 0 ||
+        String(structuralPayload?.sourceAnchor || "").trim().length > 0,
+      hasTypedConversionAnchors:
+        recoveredTargets.includes("ConvertSaveDataToProfileData") ||
+        recoveredTargets.includes("FillPlayerProfileData"),
+      hasTypedFieldSamples: typedLikeTargets.length > 0,
+      coverageSource: "consumer-projection-v2",
+      typedHostLabel: String(
+        savePayload?.ownerAnchor || structuralPayload?.sourceAnchor || ""
+      ).trim(),
+      typedConversionLabel: recoveredTargets
+        .filter((value) => value.includes("Convert") || value.includes("FillPlayerProfileData"))
+        .join(", "),
+      typedFieldSampleLabel: typedLikeTargets.slice(0, 6).join(", "),
+      recoveredIsRangeLabel:
+        typedLikeTargets.find((value) => /^IS\d+Level$/i.test(String(value || "").trim())) || "",
+      nextSeamId: null,
+      negativeTypedOwnerLabel:
+        "exact typed Market or MultiverseMarket field host remains unrecovered",
+      genericFactCount: typedLikeTargets.length,
+      genericGapCount: 0
+    };
+  }
+  const { genericSummary, subjectMetadata, useMetadataFallback, coverageSource } =
+    getMultiverseMarketDbSubjectSupport(
+      multiverseMarket,
+      "family-graph:multiverse-market-typed-owner"
+    );
   if (genericSummary) {
     const hostAnchors = genericSummary.factsByKind?.["typed-host-anchor"] || [];
     const conversionAnchors = genericSummary.factsByKind?.["typed-conversion-anchor"] || [];
@@ -1852,7 +2385,7 @@ export function getMultiverseMarketTypedOwnerSummary(multiverseMarket = null) {
       hasTypedOwnerAnchors: hostAnchors.length > 0,
       hasTypedConversionAnchors: conversionAnchors.length > 0,
       hasTypedFieldSamples: fieldSamples.length > 0,
-      coverageSource: coverageSummary.coverageSource,
+      coverageSource,
       typedHostLabel: hostAnchors.join(", "),
       typedConversionLabel: conversionAnchors.join(", "),
       typedFieldSampleLabel: fieldSamples.slice(0, 6).join(", "),
@@ -1865,6 +2398,30 @@ export function getMultiverseMarketTypedOwnerSummary(multiverseMarket = null) {
           : "typed market field recovery status unavailable",
       genericFactCount: genericSummary.factCount || 0,
       genericGapCount: genericSummary.gapCount || 0
+    };
+  }
+  if (useMetadataFallback) {
+    const missingEdges = Array.isArray(subjectMetadata?.missingEdges)
+      ? subjectMetadata.missingEdges
+      : [];
+    const nextSeamId = String(subjectMetadata?.nextSeam?.id || "").trim() || null;
+    return {
+      hasTypedOwnerAnchors: false,
+      hasTypedConversionAnchors: false,
+      hasTypedFieldSamples: false,
+      coverageSource,
+      typedHostLabel: "",
+      typedConversionLabel: "",
+      typedFieldSampleLabel: "",
+      recoveredIsRangeLabel: "",
+      nextSeamId,
+      negativeTypedOwnerLabel:
+        missingEdges.includes("typed-market-field-recovery") ||
+        nextSeamId === "typed-market-field-recovery"
+          ? "exact typed Market or MultiverseMarket field host remains unrecovered"
+          : "typed market field recovery remains DB-tracked but unresolved",
+      genericFactCount: Number(subjectMetadata?.genericFactCount || 0) || 0,
+      genericGapCount: Number(subjectMetadata?.genericGapCount || 0) || 0
     };
   }
   return {
@@ -1884,14 +2441,11 @@ export function getMultiverseMarketTypedOwnerSummary(multiverseMarket = null) {
 }
 
 export function getMultiverseMarketCanonicalImportSummary(multiverseMarket = null) {
-  const genericSummary = getDbSystemGenericSubjectSummary(
-    multiverseMarket,
-    "family-graph:multiverse-market-canonical-import"
-  );
-  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
-    includeSubjectMetadata: false,
-    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-canonical-import"
-  });
+  const { genericSummary, subjectMetadata, useMetadataFallback, coverageSource } =
+    getMultiverseMarketDbSubjectSupport(
+      multiverseMarket,
+      "family-graph:multiverse-market-canonical-import"
+    );
   if (genericSummary) {
     const compatibilityImportTargetPath = String(
       genericSummary.factsByKind?.["compatibility-import-target-path"]?.[0] || ""
@@ -1958,7 +2512,7 @@ export function getMultiverseMarketCanonicalImportSummary(multiverseMarket = nul
     const nextSeamId = genericSummary.nextSeamIds?.[0] || null;
     return {
       hasCanonicalImportBoundary: true,
-      coverageSource: coverageSummary.coverageSource,
+      coverageSource,
       compatibilityImportTargetPath: compatibilityImportTargetPath || null,
       safeSubsetLabel: safeSubsetLabel || "none",
       overlapLabel: formatNumericRanges(overlapIds),
@@ -1991,6 +2545,35 @@ export function getMultiverseMarketCanonicalImportSummary(multiverseMarket = nul
       genericGapCount: genericSummary.gapCount || 0
     };
   }
+  if (useMetadataFallback) {
+    const missingEdges = Array.isArray(subjectMetadata?.missingEdges)
+      ? subjectMetadata.missingEdges
+      : [];
+    const nextSeamId = String(subjectMetadata?.nextSeam?.id || "").trim() || null;
+    return {
+      hasCanonicalImportBoundary: false,
+      coverageSource,
+      compatibilityImportTargetPath: null,
+      safeSubsetLabel: "none",
+      overlapLabel: "",
+      candidateImportTargetCount: 0,
+      candidateImportAnchorCount: 0,
+      candidateImportAnchorLabel: "",
+      candidateCanonicalHostFieldCount: 0,
+      candidateCanonicalHostFieldLabel: "",
+      candidateImportLaneCount: 0,
+      candidateImportOverlapCount: 0,
+      nextSeamId,
+      negativeCanonicalImportLabel:
+        missingEdges.includes("canonical-import-admissibility") ||
+        nextSeamId === "canonical-import-admissibility"
+          ? "canonical import admissibility remains unrecovered"
+          : "canonical import boundary remains DB-tracked but unresolved",
+      genericFactCount: Number(subjectMetadata?.genericFactCount || 0) || 0,
+      genericRelationCount: 0,
+      genericGapCount: Number(subjectMetadata?.genericGapCount || 0) || 0
+    };
+  }
   return {
     hasCanonicalImportBoundary: false,
     coverageSource: "compatibility-boundary-export",
@@ -2013,14 +2596,11 @@ export function getMultiverseMarketCanonicalImportSummary(multiverseMarket = nul
 }
 
 export function getMultiverseMarketBroadRowRemapSummary(multiverseMarket = null) {
-  const genericSummary = getDbSystemGenericSubjectSummary(
-    multiverseMarket,
-    "family-graph:multiverse-market-broad-row-remap"
-  );
-  const coverageSummary = getDbSystemCoverageSummary(multiverseMarket, {
-    includeSubjectMetadata: false,
-    subjectFilter: (subjectId) => subjectId === "family-graph:multiverse-market-broad-row-remap"
-  });
+  const { genericSummary, subjectMetadata, useMetadataFallback, coverageSource } =
+    getMultiverseMarketDbSubjectSupport(
+      multiverseMarket,
+      "family-graph:multiverse-market-broad-row-remap"
+    );
   if (genericSummary) {
     const buyHooks = genericSummary.factsByKind?.["buy-hook-sample"] || [];
     const costTexts = genericSummary.factsByKind?.["cost-text-sample"] || [];
@@ -2067,7 +2647,7 @@ export function getMultiverseMarketBroadRowRemapSummary(multiverseMarket = null)
     const nextSeamId = genericSummary.nextSeamIds?.[0] || null;
     return {
       hasBroadRowRemapBoundary: true,
-      coverageSource: coverageSummary.coverageSource,
+      coverageSource,
       overlapLabel: formatNumericRanges(overlapIds),
       buyRangeLabel: formatNumericRanges(
         buyHooks
@@ -2107,6 +2687,35 @@ export function getMultiverseMarketBroadRowRemapSummary(multiverseMarket = null)
       genericGapCount: genericSummary.gapCount || 0
     };
   }
+  if (useMetadataFallback) {
+    const missingEdges = Array.isArray(subjectMetadata?.missingEdges)
+      ? subjectMetadata.missingEdges
+      : [];
+    const nextSeamId = String(subjectMetadata?.nextSeam?.id || "").trim() || null;
+    return {
+      hasBroadRowRemapBoundary: false,
+      coverageSource,
+      overlapLabel: "",
+      buyRangeLabel: "",
+      costTextRangeLabel: "",
+      remapStatusLabel: "broad row remap remains DB-tracked but unresolved",
+      candidateRowRemapCount: 0,
+      supportRowRemapCount: 0,
+      supportRowTextLaneCount: 0,
+      candidateOverrideIdRemapCount: 0,
+      candidateOverrideIdRemapLabel: "",
+      candidateRowRemapLabel: "",
+      nextSeamId,
+      negativeBroadRemapLabel:
+        missingEdges.includes("broad-row-identity-remap") ||
+        nextSeamId === "broad-row-identity-remap"
+          ? "broader row identity remap remains unrecovered outside the checked overlap"
+          : "broad row remap remains DB-tracked but unresolved",
+      genericFactCount: Number(subjectMetadata?.genericFactCount || 0) || 0,
+      genericRelationCount: 0,
+      genericGapCount: Number(subjectMetadata?.genericGapCount || 0) || 0
+    };
+  }
   return {
     hasBroadRowRemapBoundary: false,
     coverageSource: "compatibility-boundary-export",
@@ -2142,6 +2751,7 @@ import {
 import {
   composeDbCoverageSource,
   getDbSystemBoundaryEntry,
+  getDbSystemConsumerProjections,
   getDbSystemCoverageSummary,
   getDbSystemGenericSubjectSummary,
   getDbSystemSubjectMetadataEntry,
@@ -2149,6 +2759,7 @@ import {
 } from "./db-system-bundle.js";
 import {
   getTokenShopDbGenericScopes,
+  getTokenShopDbConsumerProjections,
   getTokenShopDbSubjectMetadata
 } from "./token-shop-db-bundle.js";
 import { getQuarantinedMultiverseMarketImportedState } from "../player-profile.js";
@@ -2276,6 +2887,29 @@ function getMultiverseMarketGenericBoundarySummary(multiverseMarket) {
   );
 }
 
+function getMultiverseMarketDbSubjectSupport(
+  multiverseMarket,
+  genericSubjectId,
+  metadataSubjectIds = [genericSubjectId]
+) {
+  const genericSummary = getDbSystemGenericSubjectSummary(multiverseMarket, genericSubjectId);
+  const subjectMetadata =
+    metadataSubjectIds
+      .map((subjectId) => getDbSystemSubjectMetadataEntry(multiverseMarket, subjectId))
+      .find(Boolean) || null;
+  const useMetadataFallback = !genericSummary && Boolean(subjectMetadata);
+  return {
+    genericSummary,
+    subjectMetadata,
+    useMetadataFallback,
+    coverageSource: composeDbCoverageSource({
+      hasGenericMechanics: Boolean(genericSummary),
+      hasBoundaryModel: false,
+      hasSubjectMetadata: useMetadataFallback
+    })
+  };
+}
+
 export function getMultiverseMarketDbCoverageSummary(multiverseMarket) {
   return getDbSystemCoverageSummary(multiverseMarket, {
     subjectFilter: (subjectId) =>
@@ -2284,14 +2918,108 @@ export function getMultiverseMarketDbCoverageSummary(multiverseMarket) {
   });
 }
 
+function getActiveMultiverseConsumerProjections(multiverseMarket) {
+  return (
+    Array.isArray(getDbSystemConsumerProjections(multiverseMarket))
+      ? getDbSystemConsumerProjections(multiverseMarket)
+      : []
+  ).filter((entry) => {
+    if (String(entry?.projectionStatus || "").trim() === "closed") {
+      return false;
+    }
+    const scope = String(entry?.traceScope || "").trim();
+    const payloadText = JSON.stringify(entry?.payload || {});
+    return (
+      scope.startsWith("multiverse-") ||
+      payloadText.includes("Multiverse") ||
+      payloadText.includes("Market") ||
+      payloadText.includes("Inscrypt")
+    );
+  });
+}
+
+function getMultiverseSaveOwnerProjection(multiverseMarket) {
+  return getActiveMultiverseConsumerProjections(multiverseMarket).find(
+    (entry) => String(entry?.projectionKind || "").trim() === "save-owner-structure"
+  );
+}
+
+function getMultiverseRuntimeBridgeProjection(multiverseMarket) {
+  return getActiveMultiverseConsumerProjections(multiverseMarket).find(
+    (entry) => String(entry?.projectionKind || "").trim() === "runtime-bridge-structure"
+  );
+}
+
+function getMultiverseStructuralNeighborhoodProjection(multiverseMarket) {
+  return getActiveMultiverseConsumerProjections(multiverseMarket).find(
+    (entry) => String(entry?.projectionKind || "").trim() === "structural-neighborhood-structure"
+  );
+}
+
 function hasTokenShopGenericMechanics(tokenShop) {
   const scopes = getTokenShopDbGenericScopes(tokenShop);
   return Boolean(scopes && typeof scopes === "object" && Object.keys(scopes).length > 0);
 }
 
+function getTokenShopConsumerProjectionRows(tokenShop) {
+  return (
+    Array.isArray(getTokenShopDbConsumerProjections(tokenShop))
+      ? getTokenShopDbConsumerProjections(tokenShop)
+      : []
+  ).filter((entry) => String(entry?.projectionKind || "").trim() === "token-shop-row-structure");
+}
+
+function hasTokenShopConsumerProjections(tokenShop) {
+  return getTokenShopConsumerProjectionRows(tokenShop).length > 0;
+}
+
+function getTokenShopStructuredProjectionRows(tokenShop) {
+  return getTokenShopConsumerProjectionRows(tokenShop).filter(
+    (entry) => String(entry?.payload?.projectionCompleteness || "").trim() === "structured"
+  );
+}
+
+function getTokenBankControllerProjection(tokenShop) {
+  return (
+    Array.isArray(getTokenShopDbConsumerProjections(tokenShop))
+      ? getTokenShopDbConsumerProjections(tokenShop)
+      : []
+  ).find(
+    (entry) =>
+      String(entry?.projectionKind || "").trim() === "token-bank-controller-structure" &&
+      String(entry?.projectionStatus || "").trim() !== "closed"
+  );
+}
+
+function getTokenBankFormulaProjection(tokenShop) {
+  return (
+    Array.isArray(getTokenShopDbConsumerProjections(tokenShop))
+      ? getTokenShopDbConsumerProjections(tokenShop)
+      : []
+  ).find(
+    (entry) =>
+      String(entry?.projectionKind || "").trim() === "token-bank-formula-structure" &&
+      String(entry?.projectionStatus || "").trim() !== "closed"
+  );
+}
+
+function getTokenBankStateProjection(tokenShop) {
+  return (
+    Array.isArray(getTokenShopDbConsumerProjections(tokenShop))
+      ? getTokenShopDbConsumerProjections(tokenShop)
+      : []
+  ).find(
+    (entry) =>
+      String(entry?.projectionKind || "").trim() === "token-bank-state-structure" &&
+      String(entry?.projectionStatus || "").trim() !== "closed"
+  );
+}
+
 function getTokenShopDbCoverageSource(tokenShop, hasSubjectMetadata = true) {
   const hasGeneric = hasTokenShopGenericMechanics(tokenShop);
+  const hasConsumer = hasTokenShopConsumerProjections(tokenShop);
   return composeDbCoverageSource({
+    hasConsumerProjections: hasConsumer,
     hasGenericMechanics: hasGeneric,
     hasSubjectMetadata
   });
@@ -2302,6 +3030,7 @@ export function getTokenShopCoverageSummary(tokenShop) {
   const genericCoverage = getTokenShopGenericCoverageSummary(
     getTokenShopDbGenericScopes(tokenShop)
   );
+  const consumerProjectionRows = getTokenShopConsumerProjectionRows(tokenShop);
   if (genericCoverage.hasCoverage) {
     return genericCoverage;
   }
@@ -2340,6 +3069,34 @@ export function getTokenShopCoverageSummary(tokenShop) {
       subjectLabels: subjectIds,
       genericScopeCount: genericCoverage.genericScopeCount || 0,
       unresolvedRowFieldCount: genericCoverage.unresolvedRowFieldCount || 0
+    };
+  }
+
+  if (consumerProjectionRows.length) {
+    const subjectIds = consumerProjectionRows
+      .map((entry) => String(entry?.subjectId || "").trim())
+      .filter(Boolean);
+    const structuredRows = consumerProjectionRows.filter(
+      (entry) => String(entry?.payload?.projectionCompleteness || "").trim() === "structured"
+    );
+    const actionRows = consumerProjectionRows.filter((entry) =>
+      Boolean(String(entry?.payload?.actionHook || "").trim())
+    );
+    return {
+      hasCoverage: true,
+      coverageSource: getTokenShopDbCoverageSource(tokenShop, false),
+      numericGroupCount: subjectIds.length,
+      hasNamedLanes: structuredRows.length > 0,
+      namedLaneLabel: subjectIds.slice(0, 4).join(", "),
+      tierLabel: `${structuredRows.length} structured and ${consumerProjectionRows.length - structuredRows.length} partial V2 token-shop row projection${consumerProjectionRows.length === 1 ? "" : "s"}`,
+      hasControllerAnchors: actionRows.length > 0,
+      subjectCount: subjectIds.length,
+      rowLocalCount: actionRows.length,
+      rangeFamilyCount: 0,
+      blockedCount: consumerProjectionRows.length - structuredRows.length,
+      subjectLabels: subjectIds,
+      genericScopeCount: 0,
+      unresolvedRowFieldCount: consumerProjectionRows.length - structuredRows.length
     };
   }
 

@@ -2,6 +2,8 @@
 
 This document records the active reconstruction architecture on the current branch.
 
+For the planned from-scratch replacement of the current trace planner and DB engine, see [Trace + DB Engine V2 Rebuild Plan](trace-db-v2-rebuild-plan.md).
+
 It exists to keep future work inside the DB-native loop that now owns subject identity, seam state, metadata projection, and evidence acquisition. TokenShop is the most advanced migrated system today, but new work should extend this framework for other systems as well, rather than reintroducing target-shaped Python policy or treating generated system-unit rows as the primary runtime model.
 
 ## Core idea
@@ -15,9 +17,16 @@ The active reconstruction cycle is:
 5. app/tool read surfaces update from canonical DB views
 6. generated system units and bundle-shaped exports remain compatibility, debug, or distribution artifacts
 
+The current Trace Gap Deck UI is part of that runtime loop:
+
+- its DB overview reads the central workflow/runtime surfaces exposed by `GET /api/trace-gap/overview`
+- it should be validated against those central tables/views, not against removed `materialized_*` compatibility tables
+- local visual checks should prefer the repo capture/browser workflow over ad hoc Playwright setup
+
 Grounding rule for live behavior:
 - When a subject already has DB-backed materialized views, target bundles, subject-state, or system-unit projections, use those DB surfaces as the source of truth for app wiring and UI display behavior.
 - Do not re-ground runtime titles, formulas, or row mappings from stored fixed JSON files under `data/` if the DB-native lane already exists.
+- TokenShop storefront rows must only clear `runtime-unresolved` display or cap states when the DB exposes explicit runtime projection facts such as `runtime-display-value`, `runtime-display-entry`, `runtime-display-formula`, or `runtime-effective-max-level`. Do not synthesize cumulative display values or effective caps in app code.
 
 The primary runtime model is no longer:
 
@@ -31,6 +40,37 @@ Those still exist, but only as:
 - adapter inputs
 - fallback surfaces when the DB cannot yet ground a lane honestly
 - export/debug artifacts
+
+## Typed evidence graph
+
+The DB graph layer must be a real typed graph, not only a term-neighborhood cache.
+
+Active runtime reconstruction now distinguishes:
+
+- fuzzy term links in `graph_links`
+- curated normalized relations in `knowledge_edges`
+- typed raw evidence edges in `evidence_graph_edges`
+
+`evidence_graph_edges` is the DB-native wiring layer built directly from live `traceGraph` and `semanticGraph` edges. It records:
+
+- `source_node_id`
+- `edge_kind`
+- `target_node_id`
+- `edge_status`
+- `relation_role`
+- `value_semantics`
+- `source_layer`
+- `graph_scope`
+
+This layer exists so the planner and reducers can answer questions like:
+
+- what owns what
+- what updates what
+- what is only a pointer/reference
+- what is value-carrying
+- what UI/title/display lane is still structurally open
+
+Future work should prefer this typed evidence graph over payload/bundle archaeology whenever a mechanic depends on wiring or dataflow reconstruction.
 
 ## Canonical DB subjects
 
@@ -196,6 +236,20 @@ Protected TokenShop example:
   - `nextSeam.status='clear'`
 
 This prevents the Daily Tokenium drift where a repeated acquisition run produced a newer repeated-gap projection that was weaker than the already-grounded clear state.
+
+### Runtime seam recovery
+
+Subject state remains the main planner projection, but it is not the only runtime-seam signal.
+
+For TokenShop runtime-display and runtime-cap lanes, the planner must also consult canonical gap rows when they still preserve open seams like:
+
+- `runtime-final-max-level`
+- `exact-display-update-path`
+- `runtime-model-gap`
+
+even if the current subject-state projection says `nextSeam.status='clear'`.
+
+That case already exists in the live DB: generic gap materialization can honestly preserve a missing runtime seam before subject-state catches up. Best-gap should reopen the seam from `knowledge_gaps` rather than treating the row family as fully closed.
 
 ## Subject metadata
 
@@ -568,6 +622,37 @@ Both resolve to:
   - `runtime-model-gap`
 
 Its contract also now accumulates grounded tokenium naming and token-bank formula fields without regressing the stronger clear state.
+
+## Asset-first redesign slice
+
+The current redesign direction is to stop treating existing subject seams as the only entrypoint for new work.
+
+The DB now carries an intermediate asset-backed seed layer:
+
+- `asset_probe_seed_views`
+- `asset_probe_seed_term_fragments`
+- `db_central_asset_probe_seeds_v`
+- `db_central_asset_probe_seed_terms_v`
+
+These seeds are derived inside the DB layer from:
+
+- resolver `supportSurfaces`
+- subject-contract grounded fields
+- subject-contract row-detail blockers
+
+The intent is:
+
+- local assets first identify where a mechanic still has unresolved ownership/title/effect/action/prefab structure
+- those unresolved asset-backed surfaces become planner-visible work even when subject-state has gone prematurely `clear`
+- best-gap can then ask for the missing knowledge directly instead of waiting for a handcrafted seam promotion path
+
+Current rule:
+
+- a seed must stay attached to the gap it came from
+- support-surface seeds do not get retargeted onto unrelated open seams
+- row-detail blocker seeds are allowed to reopen work directly when the contract still says the row is incomplete
+
+This is the first step toward a generic asset-first reverse-engineering planner rather than a seam-first patchwork planner.
 
 ## What to do next
 

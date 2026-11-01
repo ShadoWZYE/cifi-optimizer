@@ -6,6 +6,7 @@ import json
 import re
 import sqlite3
 import time
+from collections import defaultdict
 from contextlib import contextmanager, nullcontext
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -14,16 +15,17 @@ from typing import Any, Iterator
 ROOT = Path(__file__).resolve().parents[2]
 
 
-DB_SCHEMA_VERSION = 7
+DB_SCHEMA_VERSION = 8
 SCHEMA_VERSION_FLOOR = 7
 SQLITE_CACHE_SIZE_KIB = 262144
 SQLITE_MMAP_SIZE_BYTES = 268435456
 SQLITE_WAL_AUTOCHECKPOINT_PAGES = 20000
 JOBS_DIR_SCAN_CACHE_SECONDS = 1.0
-TRACE_SUPERSEDED_HISTORY_LIMIT = 32
-TRACE_CANONICAL_CACHE_HISTORY_LIMIT = 8
-TRACE_MATERIALIZED_SCOPE_HISTORY_LIMIT = 8
-EVIDENCE_SUPERSEDED_HISTORY_LIMIT = 32
+TRACE_SUPERSEDED_HISTORY_LIMIT = 4
+TRACE_CANONICAL_CACHE_HISTORY_LIMIT = 2
+TRACE_MATERIALIZED_SCOPE_HISTORY_LIMIT = 2
+EVIDENCE_SUPERSEDED_HISTORY_LIMIT = 8
+NATIVE_TRACE_SEARCH_HISTORY_LIMIT = 1
 ACQUISITION_DIAGNOSTIC_STALE_MINUTES = 10
 CONTRACT_LITERAL_EXCLUDED_TRACE_FRAGMENT_KINDS = (
     "plannerResolution",
@@ -122,6 +124,11 @@ LEGACY_DATASET_MARKERS = (
     ".v1.json",
 )
 
+WRITE_SQL_RE = re.compile(
+    r"^\s*(INSERT(?:\s+OR\s+REPLACE)?|REPLACE|UPDATE|DELETE)\s+(?:INTO\s+|FROM\s+)?([A-Za-z_][A-Za-z0-9_]*)",
+    re.IGNORECASE,
+)
+
 
 def _collect_payload_provenance_signals(value: Any) -> dict[str, Any]:
     text = _payload_key(value)
@@ -175,6 +182,42 @@ def _json_loads(value: str | None, default: Any) -> Any:
         return json.loads(value)
     except json.JSONDecodeError:
         return default
+
+
+def _append_unique_sentence(base_text: str, sentence: str) -> str:
+    base = str(base_text or "").strip()
+    addition = str(sentence or "").strip()
+    if not addition:
+        return base
+    normalized_base = re.sub(r"\s+", " ", base).strip().lower()
+    normalized_addition = re.sub(r"\s+", " ", addition).strip().lower()
+    if normalized_base == normalized_addition:
+        return addition
+    if normalized_addition and normalized_addition in normalized_base:
+        return base
+    if not base:
+        return addition
+    joiner = "" if base.endswith((".", "!", "?")) else "."
+    return f"{base}{joiner} {addition}".strip()
+
+
+def _dedupe_repeated_sentences(text: str) -> str:
+    raw = str(text or "").strip()
+    if not raw:
+        return ""
+    sentence_pattern = re.compile(r"[^.!?]+[.!?]?")
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for match in sentence_pattern.findall(raw):
+        sentence = str(match or "").strip()
+        if not sentence:
+            continue
+        normalized = re.sub(r"\s+", " ", sentence).strip().lower()
+        if normalized in seen:
+            continue
+        seen.add(normalized)
+        deduped.append(sentence)
+    return " ".join(deduped).strip()
 
 
 def _materialized_target_bundle_payload_rank(
@@ -241,6 +284,245 @@ def _unique_strings(values: list[str]) -> list[str]:
         seen.add(trimmed)
         result.append(trimmed)
     return result
+
+
+def _materialized_fact_rows_signature(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for row in rows:
+        payload = dict(row.get("payload") or {})
+        normalized.append(
+            {
+                "entityId": str(row.get("entityId") or "").strip(),
+                "fieldKey": str(row.get("fieldKey") or "").strip(),
+                "factKind": str(row.get("factKind") or "").strip(),
+                "factValue": str(row.get("factValue") or "").strip(),
+                "payload": payload,
+                "payloadHash": _dependency_hash_payload(payload),
+            }
+        )
+    normalized.sort(key=lambda item: (item["entityId"], item["fieldKey"], item["factKind"], item["factValue"]))
+    return normalized
+
+
+def _materialized_relation_rows_signature(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for row in rows:
+        payload = dict(row.get("payload") or {})
+        normalized.append(
+            {
+                "sourceEntityId": str(row.get("sourceEntityId") or "").strip(),
+                "fieldKey": str(row.get("fieldKey") or "").strip(),
+                "relationKind": str(row.get("relationKind") or "").strip(),
+                "targetEntityId": str(row.get("targetEntityId") or "").strip(),
+                "payload": payload,
+                "payloadHash": _dependency_hash_payload(payload),
+            }
+        )
+    normalized.sort(
+        key=lambda item: (
+            item["sourceEntityId"],
+            item["fieldKey"],
+            item["relationKind"],
+            item["targetEntityId"],
+        )
+    )
+    return normalized
+
+
+def _materialized_gap_rows_signature(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for row in rows:
+        payload = dict(row.get("payload") or {})
+        normalized.append(
+            {
+                "entityId": str(row.get("entityId") or "").strip(),
+                "fieldKey": str(row.get("fieldKey") or "").strip(),
+                "gapKind": str(row.get("gapKind") or "").strip(),
+                "payload": payload,
+                "payloadHash": _dependency_hash_payload(payload),
+            }
+        )
+    normalized.sort(key=lambda item: (item["entityId"], item["fieldKey"], item["gapKind"]))
+    return normalized
+
+
+def _materialized_boundary_rows_signature(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for row in rows:
+        payload = dict(row.get("payload") or {})
+        normalized.append(
+            {
+                "subjectId": str(row.get("subjectId") or "").strip(),
+                "boundaryKind": str(row.get("boundaryKind") or "").strip(),
+                "verdict": str(row.get("verdict") or "").strip(),
+                "payload": payload,
+                "payloadHash": _dependency_hash_payload(payload),
+            }
+        )
+    normalized.sort(key=lambda item: (item["subjectId"], item["boundaryKind"]))
+    return normalized
+
+
+def _fragment_signature(rows: list[dict[str, Any]], key_fields: list[str]) -> list[tuple[Any, ...]]:
+    normalized: list[tuple[Any, ...]] = []
+    for row in rows:
+        normalized.append(tuple(row.get(field) for field in key_fields))
+    normalized.sort()
+    return normalized
+
+
+def _is_planner_synthetic_subject_kind(subject_kind: str) -> bool:
+    normalized = str(subject_kind or "").strip()
+    if not normalized:
+        return False
+    if normalized in {
+        "open-gap-term",
+        "boundary-subject",
+        "db-graph-frontier-gap",
+        "consumer-surface-gap",
+        "evidence-frontier-term",
+        "runtime-display-term",
+        "target-reconstruction",
+        "raw-canonical-subject",
+    }:
+        return True
+    return (
+        "frontier" in normalized
+        or normalized.startswith("raw-")
+        or normalized.startswith("inferred-")
+    )
+
+
+def _sanitize_subject_identity_payload_fields(
+    payload: dict[str, Any] | None,
+    *,
+    fallback_subject_id: str = "",
+    fallback_subject_kind: str = "target",
+    fallback_subject_label: str = "",
+) -> dict[str, Any]:
+    sanitized = dict(payload or {})
+    subject_kind = str(sanitized.get("subjectKind") or "").strip()
+    if _is_planner_synthetic_subject_kind(subject_kind):
+        subject_id = str(sanitized.get("subjectId") or fallback_subject_id or "").strip()
+        sanitized["subjectKind"] = str(fallback_subject_kind or "target").strip() or "target"
+        sanitized["subjectId"] = subject_id
+        sanitized["subjectKey"] = str(sanitized.get("subjectKey") or subject_id or "").strip() or subject_id
+        sanitized["subjectLabel"] = (
+            str(sanitized.get("subjectLabel") or fallback_subject_label or subject_id).strip()
+            or subject_id
+        )
+    return sanitized
+
+
+def _should_persist_projection_component(value: Any) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(str(value).strip())
+    if isinstance(value, (list, tuple, set, dict)):
+        return bool(value)
+    return True
+
+
+def _sync_scoped_projection_rows(
+    conn: sqlite3.Connection,
+    *,
+    table_name: str,
+    scope_columns: list[str],
+    scope_values: tuple[Any, ...],
+    key_fields: list[str],
+    value_fields: list[str],
+    desired_rows: list[dict[str, Any]],
+    existing_rows: list[dict[str, Any]],
+    row_columns: list[str],
+    timestamp_column: str = "",
+    timestamp_value: Any = "",
+) -> None:
+    desired_by_key = {
+        tuple(row.get(field) for field in key_fields): dict(row)
+        for row in desired_rows
+    }
+    existing_by_key = {
+        tuple(row.get(field) for field in key_fields): dict(row)
+        for row in existing_rows
+    }
+    for key in sorted(set(existing_by_key.keys()) - set(desired_by_key.keys())):
+        where_columns = [*scope_columns, *key_fields]
+        where_clause = " AND ".join(f"{column} = ?" for column in where_columns)
+        conn.execute(
+            f"DELETE FROM {table_name} WHERE {where_clause}",
+            (*scope_values, *key),
+        )
+    insert_columns = [*scope_columns, *row_columns]
+    if timestamp_column:
+        insert_columns.append(timestamp_column)
+    conflict_columns = [*scope_columns, *key_fields]
+    update_columns = [field for field in [*value_fields, *( [timestamp_column] if timestamp_column else [] )] if field]
+    update_clause = ", ".join(f"{column}=excluded.{column}" for column in update_columns)
+    placeholders = ",".join("?" for _ in insert_columns)
+    for key, desired_row in desired_by_key.items():
+        existing_row = existing_by_key.get(key)
+        if existing_row is not None and all(existing_row.get(field) == desired_row.get(field) for field in [*row_columns, *value_fields]):
+            continue
+        values = [*scope_values, *[desired_row.get(column) for column in row_columns]]
+        if timestamp_column:
+            values.append(timestamp_value)
+        conn.execute(
+            f"""
+            INSERT INTO {table_name}({", ".join(insert_columns)})
+            VALUES({placeholders})
+            ON CONFLICT({", ".join(conflict_columns)}) DO UPDATE SET
+                {update_clause}
+            """,
+            tuple(values),
+        )
+
+
+def _stable_native_trace_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(payload or {})
+    result = dict(normalized.get("result") or {})
+    result.pop("timestamp", None)
+    normalized["result"] = result
+    return normalized
+
+
+def _stable_diagnostic_provenance(provenance: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(provenance or {})
+    normalized.pop("requestSignature", None)
+    return normalized
+
+
+def _extract_subject_row_slot(value: str) -> str:
+    match = re.search(r"(atu\d+)", str(value or ""), re.IGNORECASE)
+    return match.group(1).lower() if match else ""
+
+
+def _system_id_from_trace_scope(trace_scope: str) -> str:
+    normalized = str(trace_scope or "").strip().lower()
+    if normalized.startswith("token-shop"):
+        return "token-shop"
+    if normalized.startswith("shard"):
+        return "shards"
+    if normalized.startswith("multiverse-market"):
+        return "multiverse-market"
+    if normalized.startswith("player-"):
+        return "player-state"
+    return "unknown"
+
+
+def _normalize_row_local_next_seam_terms(subject_id: str, terms: list[str] | None) -> list[str]:
+    normalized_terms = _unique_strings([str(value).strip() for value in (terms or []) if str(value).strip()])
+    subject_id = str(subject_id or "").strip()
+    subject_slot = _extract_subject_row_slot(subject_id)
+    if not subject_slot or not subject_id.startswith("row:"):
+        return normalized_terms
+    filtered_terms: list[str] = []
+    for term in normalized_terms:
+        term_slot = _extract_subject_row_slot(term)
+        if term_slot and term_slot != subject_slot:
+            continue
+        filtered_terms.append(term)
+    return _unique_strings(filtered_terms or normalized_terms)
 
 
 def _bounded_evidence_term_sort_key(term: str) -> tuple[int, str]:
@@ -727,6 +1009,686 @@ def _prune_managed_graph(payload: dict[str, Any], family_hint: str | None, allow
         "owners": owner_nodes,
         "edges": edges,
     }
+
+
+def _normalize_graph_endpoint_id(value: Any) -> str:
+    return str(value or "").strip()
+
+
+def _classify_evidence_graph_edge(edge_kind: str, source_id: str, target_id: str) -> dict[str, str]:
+    candidate = str(edge_kind or "").strip().lower()
+    source_lower = str(source_id or "").strip().lower()
+    target_lower = str(target_id or "").strip().lower()
+    combined = " ".join(part for part in (candidate, source_lower, target_lower) if part)
+    if any(token in candidate for token in ("owns-", "owner", "controller", "shell-to-", "identity")):
+        relation_role = "ownership"
+    elif any(token in candidate for token in ("bind", "render", "display", "title", "text", "slot", "ui", "present")):
+        relation_role = "ui-binding"
+    elif any(token in candidate for token in ("read", "load", "value", "formula", "cost", "getter", "runtime", "constant")):
+        relation_role = "value-flow"
+    elif any(token in candidate for token in ("write", "update", "setter", "apply")):
+        relation_role = "write-flow"
+    elif any(token in candidate for token in ("param", "arg", "handoff", "bridge", "consumer")):
+        relation_role = "dataflow"
+    elif any(token in candidate for token in ("prefab", "pointer", "ref", "object", "adjacency", "neighborhood")):
+        relation_role = "reference"
+    else:
+        relation_role = "structural"
+    if any(token in combined for token in ("literal", "value", "cost", "bonus", "title", "text", "label", "content")):
+        value_semantics = "value"
+    elif any(token in combined for token in ("prefab", "pointer", "ref", "object", "button", "controller", "owner")):
+        value_semantics = "pointer"
+    else:
+        value_semantics = "unknown"
+    return {
+        "relationRole": relation_role,
+        "valueSemantics": value_semantics,
+    }
+
+
+def _looks_like_concrete_graph_term(term: str) -> bool:
+    candidate = str(term or "").strip()
+    if not candidate:
+        return False
+    if candidate.startswith("canonical-term:"):
+        return False
+    lowered = candidate.lower()
+    if lowered in {
+        "atu",
+        "du",
+        "su",
+        "mk",
+        "owner",
+        "effect",
+        "prefab",
+        "unresolved",
+        "late",
+        "title and text surfaces",
+        "late title roster",
+        "localtitlecluster",
+        "localprefabcluster",
+        "preservedeffectclues",
+        "owner-order recovery",
+    }:
+        return False
+    if any(
+        token in lowered
+        for token in (
+            "unresolved seam",
+            "owner-order",
+            "family shell",
+            "title roster",
+            "prefab roster",
+            "effect lane",
+            "text-hook cluster",
+            "presentation slot",
+            "row-local graph is closed",
+        )
+    ):
+        return False
+    if candidate.startswith(("Buy", "Set", "Update", "Initialize", "Check", "Fill", "get_", "set_", "NewTokenUPGPrefab.")):
+        return True
+    if re.fullmatch(r"ATU\d+(?:Button|Level)", candidate, re.IGNORECASE):
+        return True
+    if (
+        " " in candidate
+        and not candidate.startswith(("NewTokenUPGPrefab.", "Buy", "Set", "Update", "get_", "set_"))
+        and any(
+            token in lowered
+            for token in (
+                "booster",
+                "token",
+                "tokens",
+                "fragments",
+                "daily",
+                "academy",
+                "generator",
+                "level",
+                "campaign",
+                "trinity",
+                "title",
+                "label",
+                "description",
+            )
+        )
+    ):
+        return True
+    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", candidate):
+        return True
+    return False
+
+
+def _graph_node_role(node: dict[str, Any] | None, node_id: str = "") -> str:
+    payload = dict(node or {})
+    combined = " ".join(
+        [
+            str(payload.get("type") or "").strip().lower(),
+            str(payload.get("label") or "").strip().lower(),
+            str(node_id or "").strip().lower(),
+        ]
+    )
+    if any(token in combined for token in ("shell", "button", "row")):
+        return "shell"
+    if any(token in combined for token in ("action-hook", "consumer-method", "setter", "updater", "method")):
+        return "action"
+    if any(token in combined for token in ("prefab",)):
+        return "prefab"
+    if any(token in combined for token in ("title", "label", "localiz")):
+        return "title"
+    if any(token in combined for token in ("text-hook", "texts", "description", "display")):
+        return "text-hook"
+    if any(token in combined for token in ("owner", "controller")):
+        return "owner"
+    if any(token in combined for token in ("field", "cost", "bonus", "parameter", "value")):
+        return "field"
+    return ""
+
+
+def _term_matches_graph_role(term: str, role: str) -> bool:
+    candidate = str(term or "").strip()
+    lowered = candidate.lower()
+    role = str(role or "").strip().lower()
+    if not candidate:
+        return False
+    if role == "shell":
+        return bool(re.fullmatch(r"ATU\d+(?:Button|Level)", candidate, re.IGNORECASE) or "button" in lowered)
+    if role == "action":
+        return bool(
+            candidate.startswith(("Buy", "Set", "Update", "Initialize", "Check", "Fill", "get_", "set_"))
+            or lowered.endswith(("texts", "text"))
+        )
+    if role == "prefab":
+        return candidate.startswith("NewTokenUPGPrefab.") or "prefab" in lowered
+    if role == "title":
+        return (
+            " " in candidate
+            and not candidate.startswith(("NewTokenUPGPrefab.", "Buy", "Set", "Update", "get_", "set_"))
+            and any(
+                token in lowered
+                for token in (
+                    "booster",
+                    "token",
+                    "tokens",
+                    "fragments",
+                    "daily",
+                    "academy",
+                    "generator",
+                    "campaign",
+                    "trinity",
+                    "title",
+                    "label",
+                    "description",
+                )
+            )
+        )
+    if role == "text-hook":
+        return candidate in {"SetAllTokenShopTexts", "SetTokenTexts", "SetTokenText", "SetAdChestTexts", "SetDiamondTexts"} or "text" in lowered
+    if role == "owner":
+        return bool(re.fullmatch(r"[A-Z][A-Za-z0-9_]*", candidate) and not candidate.startswith(("ATU", "Buy", "Set", "Update", "get_", "set_")))
+    if role == "field":
+        return bool(
+            candidate.endswith(("Cost", "Bonus", "Level", "Price", "Exponent"))
+            or "bonus" in lowered
+            or "cost" in lowered
+            or "level" in lowered
+            or "fill" in lowered
+        )
+    return True
+
+
+def _extract_proved_by_terms(citations: list[dict[str, Any]] | None) -> list[str]:
+    terms: list[str] = []
+    for citation in (citations or []):
+        if not isinstance(citation, dict):
+            continue
+        for value in [citation.get("term"), *(citation.get("matchedTerms") or [])]:
+            normalized = str(value or "").strip()
+            if normalized and _looks_like_concrete_graph_term(normalized):
+                terms.append(normalized)
+    return _unique_strings(terms)
+
+
+def _extract_concrete_graph_label_terms(label: str) -> list[str]:
+    candidate = str(label or "").strip()
+    if not candidate:
+        return []
+    split_terms: list[str] = []
+    for piece in re.split(r"[\/|,;]+", candidate):
+        normalized_piece = str(piece or "").strip().lstrip(":").strip()
+        if normalized_piece and _looks_like_concrete_graph_term(normalized_piece):
+            split_terms.append(normalized_piece)
+    symbol_terms = [
+        match.group(0)
+        for match in re.finditer(r"(?:NewTokenUPGPrefab\.[A-Za-z0-9_.]+|get_[A-Za-z0-9_]+|set_[A-Za-z0-9_]+|[A-Z][A-Za-z0-9_]{2,})", candidate)
+    ]
+    split_terms.extend(
+        normalized
+        for normalized in (str(value or "").strip() for value in symbol_terms)
+        if normalized and _looks_like_concrete_graph_term(normalized)
+    )
+    normalized_label = candidate.lstrip(":").strip()
+    if normalized_label and _looks_like_concrete_graph_term(normalized_label):
+        split_terms.append(normalized_label)
+    return _unique_strings(split_terms)
+
+
+def _resolve_concrete_node_terms(
+    node: dict[str, Any] | None,
+    node_id: str,
+    *,
+    role_hint: str,
+    local_terms: list[str] | None = None,
+) -> list[str]:
+    payload = dict(node or {})
+    label = str(payload.get("label") or "").strip()
+    candidates = _unique_strings(
+        [
+            *_extract_concrete_graph_label_terms(label),
+            *[str(value).strip() for value in (local_terms or []) if _looks_like_concrete_graph_term(str(value).strip())],
+        ]
+    )
+    if role_hint:
+        matched = [term for term in candidates if _term_matches_graph_role(term, role_hint)]
+        if matched:
+            return _unique_strings(matched)
+    return candidates
+
+
+def _extract_evidence_graph_edges_from_row_recovery(
+    trace_scope: str,
+    row_recovery: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    trace_scope = str(trace_scope or "").strip()
+    row_recovery = dict(row_recovery or {})
+    if not trace_scope or not row_recovery:
+        return []
+    shell_field = str(row_recovery.get("shellField") or "").strip()
+    field_key = shell_field
+    action_methods = _unique_strings(
+        [str(value).strip() for value in (row_recovery.get("recoveredActionMethods") or []) if str(value).strip()]
+    )
+    prefab_candidates = _unique_strings(
+        [str(value).strip() for value in (row_recovery.get("prefabCandidates") or []) if str(value).strip()]
+    )
+    recovered_formula_fields = _unique_strings(
+        [str(value).strip() for value in (row_recovery.get("recoveredFormulaFields") or []) if str(value).strip()]
+    )
+    recovered_formula_values = [
+        dict(value)
+        for value in (row_recovery.get("recoveredFormulaValues") or [])
+        if isinstance(value, dict)
+    ]
+    presentation_update = dict(row_recovery.get("presentationUpdatePath") or {})
+    update_hooks = _unique_strings(
+        [str(value).strip() for value in (presentation_update.get("updateHookCandidates") or []) if str(value).strip()]
+    )
+    interaction_paths = [
+        dict(value)
+        for value in (presentation_update.get("interactionToRenderPaths") or [])
+        if isinstance(value, dict)
+    ]
+    slots = {
+        str(role).strip(): [dict(item) for item in values if isinstance(item, dict)]
+        for role, values in dict(presentation_update.get("slots") or {}).items()
+        if str(role).strip()
+    }
+    literal_text_recovery = dict(row_recovery.get("literalTextRecovery") or {})
+    detached_text_candidates = _unique_strings(
+        [str(value).strip() for value in (row_recovery.get("detachedTextCandidates") or []) if str(value).strip()]
+    )
+    edge_rows: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+
+    def append_edge(source_id: str, edge_kind: str, target_id: str, payload_extra: dict[str, Any]) -> None:
+        source_id = str(source_id or "").strip()
+        edge_kind = str(edge_kind or "").strip()
+        target_id = str(target_id or "").strip()
+        if not source_id or not edge_kind or not target_id:
+            return
+        key = (source_id, edge_kind, target_id, field_key)
+        if key in seen:
+            return
+        seen.add(key)
+        classification = _classify_evidence_graph_edge(edge_kind, source_id, target_id)
+        edge_rows.append(
+            {
+                "traceScope": trace_scope,
+                "graphScope": trace_scope,
+                "sourceNodeId": source_id,
+                "edgeKind": edge_kind,
+                "targetNodeId": target_id,
+                "fieldKey": field_key,
+                "edgeStatus": "present",
+                "sourceLayer": "rowRecovery-derived",
+                "relationRole": classification["relationRole"],
+                "valueSemantics": classification["valueSemantics"],
+                "payload": dict(payload_extra or {}),
+            }
+        )
+
+    for action_method in action_methods:
+        if shell_field:
+            append_edge(
+                shell_field,
+                "exact-shell-to-action-hook",
+                action_method,
+                {"derivedFrom": ["shellField", "recoveredActionMethods"]},
+            )
+        for update_hook in update_hooks:
+            append_edge(
+                action_method,
+                "exact-display-update-path",
+                update_hook,
+                {"derivedFrom": ["recoveredActionMethods", "presentationUpdatePath.updateHookCandidates"]},
+            )
+        for formula_field in recovered_formula_fields:
+            append_edge(
+                action_method,
+                "reads-field",
+                formula_field,
+                {"derivedFrom": ["recoveredActionMethods", "recoveredFormulaFields"]},
+            )
+
+    if shell_field:
+        for prefab_candidate in prefab_candidates:
+            append_edge(
+                shell_field,
+                "exact-shell-to-prefab",
+                prefab_candidate,
+                {"derivedFrom": ["shellField", "prefabCandidates"]},
+            )
+        for formula_field in recovered_formula_fields:
+            append_edge(
+                shell_field,
+                "serialized-adjacency",
+                formula_field,
+                {"derivedFrom": ["shellField", "recoveredFormulaFields"]},
+            )
+
+    for entry in recovered_formula_values:
+        formula_field = str(entry.get("field") or "").strip()
+        raw_value = str(entry.get("value") or "").strip()
+        if formula_field and raw_value and _looks_like_concrete_graph_term(raw_value):
+            append_edge(
+                formula_field,
+                "value-of",
+                raw_value,
+                {"derivedFrom": ["recoveredFormulaValues"], "objectOffset": entry.get("objectOffset"), "group": entry.get("group")},
+            )
+
+    slot_literals_by_role: dict[str, list[str]] = {
+        "title": _unique_strings(
+            [str(literal_text_recovery.get("title") or "").strip()]
+            + [value for value in detached_text_candidates if _looks_like_title_surface_term(value)]
+        ),
+        "description": _unique_strings([str(literal_text_recovery.get("description") or "").strip()]),
+        "bonus": _unique_strings(
+            [
+                str(literal_text_recovery.get("bonusLabel") or "").strip(),
+                str(literal_text_recovery.get("shortEffectLabel") or "").strip(),
+                str(literal_text_recovery.get("outputLabel") or "").strip(),
+            ]
+        ),
+    }
+    for role, slot_rows in slots.items():
+        slot_names = _unique_strings(
+            [
+                str(item.get("name") or "").strip()
+                for item in slot_rows
+                if str(item.get("name") or "").strip() and _looks_like_concrete_graph_term(str(item.get("name") or "").strip())
+            ]
+        )
+        for slot_name in slot_names:
+            for update_hook in update_hooks:
+                append_edge(
+                    update_hook,
+                    "binds-ui-slot",
+                    slot_name,
+                    {"derivedFrom": ["presentationUpdatePath.updateHookCandidates", f"presentationUpdatePath.slots.{role}"], "slotRole": role},
+                )
+            for interaction_path in interaction_paths:
+                interaction_name = str(interaction_path.get("interaction") or "").strip()
+                render_node = str(interaction_path.get("renderNode") or "").strip()
+                render_role = str(interaction_path.get("renderRole") or "").strip()
+                if interaction_name and render_node == slot_name:
+                    append_edge(
+                        interaction_name,
+                        "binds-ui-slot",
+                        slot_name,
+                        {"derivedFrom": ["presentationUpdatePath.interactionToRenderPaths"], "slotRole": render_role or role},
+                    )
+            for literal_value in slot_literals_by_role.get(role, []):
+                if literal_value and _looks_like_concrete_graph_term(literal_value):
+                    append_edge(
+                        slot_name,
+                        "renders-literal",
+                        literal_value,
+                        {"derivedFrom": [f"presentationUpdatePath.slots.{role}", "literalTextRecovery"], "slotRole": role},
+                    )
+            if role in {"cost", "level", "bonus", "requirement"}:
+                for formula_field in recovered_formula_fields:
+                    append_edge(
+                        slot_name,
+                        "reads-field",
+                        formula_field,
+                        {"derivedFrom": [f"presentationUpdatePath.slots.{role}", "recoveredFormulaFields"], "slotRole": role},
+                    )
+    return edge_rows
+
+
+def _extract_evidence_graph_edges_from_trace_payload(trace_scope: str, payload: dict[str, Any]) -> list[dict[str, Any]]:
+    trace_scope = str(trace_scope or "").strip()
+    payload = dict(payload or {})
+    if not trace_scope or not payload:
+        return []
+    trace_graph = dict(payload.get("traceGraph") or {})
+    row_recovery = dict(payload.get("rowRecovery") or {})
+    semantic_graph = dict(row_recovery.get("semanticGraph") or {})
+    node_map = {
+        str(node.get("id") or "").strip(): dict(node)
+        for node in (trace_graph.get("nodes") or [])
+        if isinstance(node, dict) and str(node.get("id") or "").strip()
+    }
+    incident_terms: dict[str, list[str]] = {}
+    edge_rows: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str, str, str, str]] = set()
+
+    def append_edge(
+        source_id: str,
+        edge_kind: str,
+        target_id: str,
+        *,
+        edge_status: str,
+        source_layer: str,
+        graph_scope: str,
+        field_key: str = "",
+        payload_extra: dict[str, Any] | None = None,
+    ) -> None:
+        source_id = _normalize_graph_endpoint_id(source_id)
+        edge_kind = str(edge_kind or "").strip()
+        target_id = _normalize_graph_endpoint_id(target_id)
+        graph_scope = str(graph_scope or "").strip() or trace_scope
+        field_key = str(field_key or "").strip()
+        if not source_id or not edge_kind or not target_id:
+            return
+        edge_key = (trace_scope, graph_scope, source_id, edge_kind, target_id, field_key, edge_status, source_layer)
+        if edge_key in seen:
+            return
+        seen.add(edge_key)
+        classification = _classify_evidence_graph_edge(edge_kind, source_id, target_id)
+        edge_rows.append(
+            {
+                "traceScope": trace_scope,
+                "graphScope": graph_scope,
+                "sourceNodeId": source_id,
+                "edgeKind": edge_kind,
+                "targetNodeId": target_id,
+                "fieldKey": field_key,
+                "edgeStatus": str(edge_status or "active").strip() or "active",
+                "sourceLayer": str(source_layer or "").strip() or "traceGraph",
+                "relationRole": classification["relationRole"],
+                "valueSemantics": classification["valueSemantics"],
+                "payload": dict(payload_extra or {}),
+            }
+        )
+
+    trace_edges = [dict(item) for item in (trace_graph.get("edges") or []) if isinstance(item, dict)]
+    negative_edges = [dict(item) for item in (trace_graph.get("negativeEdges") or []) if isinstance(item, dict)]
+    for edge in [*trace_edges, *negative_edges]:
+        concrete_terms = _extract_proved_by_terms(edge.get("provedBy") or [])
+        for endpoint in [str(edge.get("from") or "").strip(), str(edge.get("to") or "").strip()]:
+            if endpoint:
+                incident_terms.setdefault(endpoint, [])
+                incident_terms[endpoint].extend(concrete_terms)
+    for key, values in list(incident_terms.items()):
+        incident_terms[key] = _unique_strings(values)
+
+    for edge in trace_edges:
+        source_id = str(edge.get("from") or "").strip()
+        target_id = str(edge.get("to") or "").strip()
+        edge_kind = str(edge.get("type") or "").strip()
+        source_role = _graph_node_role(node_map.get(source_id), source_id)
+        target_role = _graph_node_role(node_map.get(target_id), target_id)
+        source_terms = _resolve_concrete_node_terms(
+            node_map.get(source_id),
+            source_id,
+            role_hint=source_role,
+            local_terms=incident_terms.get(source_id),
+        )
+        target_terms = _resolve_concrete_node_terms(
+            node_map.get(target_id),
+            target_id,
+            role_hint=target_role,
+            local_terms=incident_terms.get(target_id),
+        )
+        if not source_terms and _looks_like_concrete_graph_term(source_id):
+            source_terms = [source_id]
+        if not target_terms and _looks_like_concrete_graph_term(target_id):
+            target_terms = [target_id]
+        if not source_terms or not target_terms:
+            append_edge(
+                source_id,
+                edge_kind,
+                target_id,
+                edge_status=str(edge.get("status") or "active"),
+                source_layer="traceGraph-abstract",
+                graph_scope=trace_scope,
+                field_key=str(edge.get("fieldKey") or ""),
+                payload_extra={
+                    **edge,
+                    "abstractSourceNodeId": source_id,
+                    "abstractTargetNodeId": target_id,
+                    "sourceRole": source_role,
+                    "targetRole": target_role,
+                },
+            )
+            continue
+        for source_term in source_terms[:4]:
+            for target_term in target_terms[:4]:
+                append_edge(
+                    source_term,
+                    edge_kind,
+                    target_term,
+                    edge_status=str(edge.get("status") or "active"),
+                    source_layer="traceGraph",
+                    graph_scope=trace_scope,
+                    field_key=str(edge.get("fieldKey") or ""),
+                    payload_extra={
+                        **edge,
+                        "abstractSourceNodeId": source_id,
+                        "abstractTargetNodeId": target_id,
+                        "sourceRole": source_role,
+                        "targetRole": target_role,
+                    },
+                )
+    for edge in negative_edges:
+        source_id = str(edge.get("from") or "").strip()
+        target_id = str(edge.get("to") or "").strip()
+        edge_kind = str(edge.get("type") or "").strip()
+        source_role = _graph_node_role(node_map.get(source_id), source_id)
+        target_role = _graph_node_role(node_map.get(target_id), target_id)
+        source_terms = _resolve_concrete_node_terms(
+            node_map.get(source_id),
+            source_id,
+            role_hint=source_role,
+            local_terms=incident_terms.get(source_id),
+        )
+        target_terms = _resolve_concrete_node_terms(
+            node_map.get(target_id),
+            target_id,
+            role_hint=target_role,
+            local_terms=incident_terms.get(target_id),
+        )
+        if not source_terms and _looks_like_concrete_graph_term(source_id):
+            source_terms = [source_id]
+        if not target_terms and _looks_like_concrete_graph_term(target_id):
+            target_terms = [target_id]
+        if not source_terms or not target_terms:
+            append_edge(
+                source_id,
+                edge_kind,
+                target_id,
+                edge_status="negative",
+                source_layer="traceGraph-abstract",
+                graph_scope=trace_scope,
+                field_key=str(edge.get("fieldKey") or ""),
+                payload_extra={
+                    **edge,
+                    "abstractSourceNodeId": source_id,
+                    "abstractTargetNodeId": target_id,
+                    "sourceRole": source_role,
+                    "targetRole": target_role,
+                },
+            )
+            continue
+        for source_term in source_terms[:4]:
+            for target_term in target_terms[:4]:
+                append_edge(
+                    source_term,
+                    edge_kind,
+                    target_term,
+                    edge_status="negative",
+                    source_layer="traceGraph",
+                    graph_scope=trace_scope,
+                    field_key=str(edge.get("fieldKey") or ""),
+                    payload_extra={
+                        **edge,
+                        "abstractSourceNodeId": source_id,
+                        "abstractTargetNodeId": target_id,
+                        "sourceRole": source_role,
+                        "targetRole": target_role,
+                    },
+                )
+    for edge in [dict(item) for item in (semantic_graph.get("edges") or []) if isinstance(item, dict)]:
+        append_edge(
+            str(edge.get("from") or ""),
+            str(edge.get("type") or ""),
+            str(edge.get("to") or ""),
+            edge_status=str(edge.get("status") or "active"),
+            source_layer="semanticGraph",
+            graph_scope=str(semantic_graph.get("semanticKey") or trace_scope),
+            field_key=str(edge.get("fieldKey") or ""),
+            payload_extra=edge,
+        )
+    for row in _extract_evidence_graph_edges_from_row_recovery(trace_scope, row_recovery):
+        append_edge(
+            str(row.get("sourceNodeId") or ""),
+            str(row.get("edgeKind") or ""),
+            str(row.get("targetNodeId") or ""),
+            edge_status=str(row.get("edgeStatus") or "present"),
+            source_layer=str(row.get("sourceLayer") or "rowRecovery-derived"),
+            graph_scope=str(row.get("graphScope") or trace_scope),
+            field_key=str(row.get("fieldKey") or ""),
+            payload_extra=dict(row.get("payload") or {}),
+        )
+    native_summary = dict(payload.get("nativeReconstruction") or ((payload.get("nativeTrace") or {}).get("summary") or {}))
+    promoted_owner = str(native_summary.get("promotedOwner") or "").strip()
+    promoted_methods = _unique_strings([str(value).strip() for value in (native_summary.get("promotedMethods") or native_summary.get("reconstructedMethods") or []) if str(value).strip()])
+    promoted_fields = _unique_strings([str(value).strip() for value in (native_summary.get("promotedFields") or native_summary.get("reconstructedFields") or []) if str(value).strip()])
+    promoted_raw_values = _unique_strings([str(value).strip() for value in (native_summary.get("promotedRawValues") or native_summary.get("rawValueTerms") or []) if str(value).strip()])
+    if promoted_owner:
+        for method in promoted_methods:
+            append_edge(
+                promoted_owner,
+                "owns-method",
+                method,
+                edge_status="present",
+                source_layer="nativeSummary",
+                graph_scope=trace_scope,
+                payload_extra={"promotedOwner": promoted_owner},
+            )
+        for field in promoted_fields:
+            append_edge(
+                promoted_owner,
+                "owns-field",
+                field,
+                edge_status="present",
+                source_layer="nativeSummary",
+                graph_scope=trace_scope,
+                payload_extra={"promotedOwner": promoted_owner},
+            )
+        for value in promoted_raw_values:
+            append_edge(
+                promoted_owner,
+                "uses-raw-value",
+                value,
+                edge_status="present",
+                source_layer="nativeSummary",
+                graph_scope=trace_scope,
+                payload_extra={"promotedOwner": promoted_owner},
+            )
+    return edge_rows
+
+
+def _trace_graph_richness_score(payload: dict[str, Any] | None) -> int:
+    trace_graph = dict((dict(payload or {})).get("traceGraph") or {})
+    nodes = [dict(item) for item in (trace_graph.get("nodes") or []) if isinstance(item, dict)]
+    edges = [dict(item) for item in (trace_graph.get("edges") or []) if isinstance(item, dict)]
+    negative_edges = [dict(item) for item in (trace_graph.get("negativeEdges") or []) if isinstance(item, dict)]
+    proofs = 0
+    for edge in [*edges, *negative_edges]:
+        proofs += len([dict(item) for item in (edge.get("provedBy") or []) if isinstance(item, dict)])
+    return len(edges) * 8 + len(negative_edges) * 8 + len(nodes) * 2 + proofs
 
 
 SYSTEM_TRACE_FRAGMENT_KINDS = {
@@ -1574,7 +2536,7 @@ def _load_materialized_term_payload(
     row = conn.execute(
         """
         SELECT payload_json, provenance_json
-        FROM materialized_term_views
+        FROM term_views
         WHERE term = ?
         ORDER BY updated_at DESC
         LIMIT 1
@@ -1674,6 +2636,25 @@ def _count_literal_candidates(literal_text_recovery: dict[str, Any]) -> int:
     return count
 
 
+def _graph_name_tokens(value: str) -> set[str]:
+    cleaned = re.sub(r"[^A-Za-z0-9]+", " ", str(value or ""))
+    parts = [part.lower() for part in cleaned.split() if part]
+    return {part for part in parts if len(part) > 2}
+
+
+def _graph_names_overlap(left: str, right: str) -> bool:
+    left_tokens = _graph_name_tokens(left)
+    right_tokens = _graph_name_tokens(right)
+    if not left_tokens or not right_tokens:
+        return False
+    overlap = left_tokens & right_tokens
+    if overlap:
+        return True
+    normalized_left = re.sub(r"[^a-z0-9]", "", str(left or "").lower())
+    normalized_right = re.sub(r"[^a-z0-9]", "", str(right or "").lower())
+    return bool(normalized_left and normalized_right and (normalized_left in normalized_right or normalized_right in normalized_left))
+
+
 def _sanitize_row_recovery_for_persistence(row_recovery: dict[str, Any]) -> dict[str, Any]:
     sanitized = dict(row_recovery or {})
     literal_summary = dict(sanitized.get("literalRecoverySummary") or {})
@@ -1706,6 +2687,127 @@ def _sanitize_row_recovery_for_persistence(row_recovery: dict[str, Any]) -> dict
     sanitized.pop("literalSchemaRecovery", None)
     sanitized.pop("literalTextRecovery", None)
     return sanitized
+
+
+def _trace_dataset_semantic_key(prefix: str, *parts: Any) -> str:
+    cleaned = [str(part).strip() for part in parts if str(part).strip()]
+    return ":".join([prefix, *cleaned]) if cleaned else prefix
+
+
+def _synthesize_semantic_fragments_from_trace_dataset(
+    trace_scope: str,
+    dataset: dict[str, Any],
+) -> list[dict[str, Any]]:
+    target = dict(dataset.get("target") or {})
+    row_recovery = dict(dataset.get("rowRecovery") or {})
+    trace_payload = dict(dataset.get("tracePayload") or {})
+    target_id = str(target.get("id") or target.get("targetId") or trace_scope).strip()
+    family_id = str(target.get("familyId") or dataset.get("familyId") or "").strip()
+    if not target_id:
+        return []
+
+    fragments: list[dict[str, Any]] = []
+    seen_keys: set[tuple[str, str]] = set()
+
+    def append_fragment(fragment_kind: str, fragment_key: str, payload: dict[str, Any]) -> None:
+        fragment_kind = str(fragment_kind or "").strip()
+        fragment_key = str(fragment_key or "").strip()
+        if not fragment_kind or not fragment_key or not isinstance(payload, dict) or not payload:
+            return
+        key = (fragment_kind, fragment_key)
+        if key in seen_keys:
+            return
+        seen_keys.add(key)
+        fragments.append(
+            {
+                "fragment_kind": fragment_kind,
+                "fragment_key": fragment_key,
+                "payload": payload,
+            }
+        )
+
+    recovered_formula_fields = _unique_strings(
+        [str(value).strip() for value in (row_recovery.get("recoveredFormulaFields") or []) if str(value).strip()]
+    )
+    recovered_formula_values = [
+        dict(value)
+        for value in (row_recovery.get("recoveredFormulaValues") or [])
+        if isinstance(value, dict)
+    ]
+    formula_reconstruction = dict(row_recovery.get("formulaReconstruction") or {})
+    if recovered_formula_fields or recovered_formula_values or formula_reconstruction:
+        formula_key = _trace_dataset_semantic_key("formula", family_id or "generic", target_id)
+        append_fragment(
+            "formula_fragment",
+            formula_key,
+            {
+                "semanticKey": formula_key,
+                "targetId": target_id,
+                "familyId": family_id or None,
+                "recoveredFormulaFields": recovered_formula_fields,
+                "recoveredFormulaValues": recovered_formula_values,
+                "groundedConstants": dict(formula_reconstruction.get("groundedConstants") or {}),
+                "inferredCostModel": formula_reconstruction.get("inferredCostModel"),
+                "runtimeCostModel": formula_reconstruction.get("runtimeCostModel"),
+            },
+        )
+
+    presentation_update = dict(row_recovery.get("presentationUpdatePath") or {})
+    trace_shell = dict(trace_payload.get("shellWindow") or {})
+    shell_window = {
+        "shellField": row_recovery.get("shellField") or trace_shell.get("shellField"),
+        "shellPathId": row_recovery.get("shellPathId") or trace_shell.get("shellPathId"),
+        "ownerFieldBlock": list(
+            row_recovery.get("ownerFieldBlock")
+            or trace_shell.get("ownerFieldBlock")
+            or []
+        ),
+    }
+    if not any(shell_window.get(key) for key in ("shellField", "shellPathId", "ownerFieldBlock")):
+        shell_window = {}
+    slots = dict(presentation_update.get("slots") or {})
+    for role, values in slots.items():
+        role_name = str(role or "").strip()
+        value_rows = [dict(item) for item in values if isinstance(item, dict)]
+        if not role_name or not value_rows:
+            continue
+        role_key = _trace_dataset_semantic_key("ui-binding", family_id or "generic", target_id, role_name)
+        append_fragment(
+            "ui_binding_fragment",
+            role_key,
+            {
+                "semanticKey": role_key,
+                "targetId": target_id,
+                "familyId": family_id or None,
+                "role": role_name,
+                "values": value_rows,
+                "presentationUpdatePath": presentation_update,
+                "shellField": row_recovery.get("shellField"),
+                "shellWindow": shell_window,
+            },
+        )
+
+    owner_controller_payload = {
+        "ownerFieldBlock": row_recovery.get("ownerFieldBlock"),
+        "controllerBlock": row_recovery.get("controllerBlock"),
+        "ownerBlobRow": row_recovery.get("ownerBlobRow"),
+        "runtimeEvaluatorRecovery": row_recovery.get("runtimeEvaluatorRecovery"),
+        "runtimeInstanceRecovery": row_recovery.get("runtimeInstanceRecovery"),
+    }
+    if any(owner_controller_payload.values()):
+        owner_key = _trace_dataset_semantic_key("owner-controller", family_id or "generic", target_id)
+        append_fragment(
+            "owner_controller_fragment",
+            owner_key,
+            {
+                "semanticKey": owner_key,
+                "targetId": target_id,
+                "familyId": family_id or None,
+                "owner": str(row_recovery.get("nativePromotedOwner") or "").strip() or None,
+                **owner_controller_payload,
+            },
+        )
+    return fragments
 
 
 def _derive_token_shop_row_local_graph(row_recovery: dict[str, Any]) -> dict[str, Any]:
@@ -2095,16 +3197,36 @@ def _derive_token_shop_reconstruction_fragment(
     row_scope = dict(token_shop_scope or {})
     if not row_scope and row_scope_id:
         row_scope = _load_canonical_semantic_fragment_payload(conn, "semantic_scope_fragment", row_scope_id)
+    expected_row_field = _expected_token_shop_row_field(
+        trace_scope,
+        target_id,
+        str(target.get("label") or ""),
+        str(target.get("joinGoal") or ""),
+    )
+    if expected_row_field and not _token_shop_payload_matches_expected_row(row_scope, expected_row_field):
+        row_scope = {}
     ui_binding_fragments = _load_canonical_semantic_fragment_payloads(
         conn,
         "ui_binding_fragment",
         f"ui-binding:token-shop:{target_id}:%",
     )
+    if expected_row_field:
+        ui_binding_fragments = [
+            fragment
+            for fragment in ui_binding_fragments
+            if _token_shop_payload_matches_expected_row(fragment, expected_row_field)
+        ]
     owner_controller_fragments = [
         fragment
         for fragment in _load_canonical_semantic_fragment_payloads(conn, "owner_controller_fragment")
         if target_id in list(fragment.get("targetIds") or [])
     ]
+    if expected_row_field:
+        owner_controller_fragments = [
+            fragment
+            for fragment in owner_controller_fragments
+            if _token_shop_payload_matches_expected_row(fragment, expected_row_field)
+        ]
     presentation_paths = [
         path
         for fragment in ui_binding_fragments
@@ -2138,7 +3260,25 @@ def _derive_token_shop_reconstruction_fragment(
     ]
     owner_blob_row = dict(owner_blob_rows[0] or {}) if owner_blob_rows else {}
     native_reconstruction = dict(runtime_table_fragment.get("nativeReconstruction") or {})
-    assessment = dict(assessment_summary or {})
+    trace_graph = dict(payload.get("traceGraph") or {})
+    graph_plan_fragment_payload = _load_canonical_semantic_fragment_payload(
+        conn,
+        "graph_plan_fragment",
+        f"target-graph-plan:{trace_scope}",
+    )
+    graph_plan_trace_graph = dict(graph_plan_fragment_payload.get("traceGraph") or {})
+    trace_graph_has_structure = any(
+        isinstance(trace_graph.get(key), list) and trace_graph.get(key)
+        for key in ("nodes", "edges", "negativeEdges", "claimLedger")
+    )
+    if not trace_graph_has_structure and graph_plan_trace_graph:
+        trace_graph = graph_plan_trace_graph
+    assessment_fragment_payload = _load_canonical_semantic_fragment_payload(
+        conn,
+        "assessment_fragment",
+        f"target-assessment:{trace_scope}",
+    )
+    assessment = dict(assessment_summary or assessment_fragment_payload.get("decisionSummary") or {})
     row_local_graph = dict(row_scope.get("rowLocalGraph") or {})
     semantic_graph = dict(row_scope.get("semanticGraph") or {})
     missing_seams = list(row_scope.get("missingSeams") or [])
@@ -2170,14 +3310,56 @@ def _derive_token_shop_reconstruction_fragment(
         or shell_window.get("shellField")
         or ""
     ).strip()
-    expected_row_field = _expected_token_shop_row_field(
-        trace_scope,
-        target_id,
-        str(target.get("label") or ""),
-        str(target.get("joinGoal") or ""),
-    )
     if expected_row_field:
         row_shell_field = expected_row_field
+    assessment_blocked_seams = _unique_strings(
+        [str(value).strip() for value in (assessment.get("blockedEdgeTypes") or []) if str(value).strip()]
+    )
+    if not row_local_graph:
+        row_local_graph = _derive_token_shop_row_local_graph(row_recovery)
+    trace_present_edge_types = _unique_strings(
+        [
+            str(edge.get("type") or "").strip()
+            for edge in (trace_graph.get("edges") or [])
+            if isinstance(edge, dict)
+            and str(edge.get("type") or "").strip()
+            and str(edge.get("status") or "present").strip().lower() in {"present", "proved", "known"}
+        ]
+    )
+    trace_negative_edge_types = _unique_strings(
+        [
+            str(edge.get("type") or "").strip()
+            for edge in (trace_graph.get("negativeEdges") or [])
+            if isinstance(edge, dict) and str(edge.get("type") or "").strip()
+        ]
+    )
+    row_local_graph_has_structure = bool(
+        str(((row_local_graph.get("rowShell") or {}).get("field")) or "").strip()
+        or list(row_local_graph.get("actionMethods") or [])
+        or list(row_local_graph.get("prefabCandidates") or [])
+        or list(row_local_graph.get("updateHooks") or [])
+        or list(row_local_graph.get("formulaFields") or [])
+    )
+    if not row_local_graph_has_structure:
+        evidence_open_seams = _unique_strings(
+            [
+                *trace_negative_edge_types,
+                *assessment_blocked_seams,
+            ]
+        )
+        if evidence_open_seams:
+            missing_seams = [{"id": seam_id, "status": "missing"} for seam_id in evidence_open_seams]
+        if trace_present_edge_types:
+            row_local_graph["edgeTypes"] = _unique_strings(
+                [
+                    *[str(value).strip() for value in (row_local_graph.get("edgeTypes") or []) if str(value).strip()],
+                    *trace_present_edge_types,
+                ]
+            )
+    elif not missing_seams:
+        missing_seams = _derive_token_shop_row_missing_seams(row_local_graph, row_recovery)
+    if not missing_seams and assessment_blocked_seams and expected_row_field:
+        missing_seams = [{"id": seam_id, "status": "missing"} for seam_id in assessment_blocked_seams]
 
     slot_roles = sorted(
         {
@@ -2236,6 +3418,9 @@ def _derive_token_shop_reconstruction_fragment(
     text_candidate_count = int(row_local_graph.get("textCandidateCount") or 0)
     detached_text_candidate_count = int(row_local_graph.get("detachedTextCandidateCount") or 0)
     literal_title_recovered = bool(row_local_graph.get("literalTitleRecovered"))
+    missing_seam_ids = _unique_strings(
+        [str(item.get("id") or "") for item in missing_seams if isinstance(item, dict) and str(item.get("id") or "").strip()]
+    )
     literal_status = str(
         compatibility_status.get("literalStatus")
         or ("open" if "exact-shell-to-title" in missing_seam_ids and not literal_title_recovered and text_candidate_count <= 0 else "closed")
@@ -2248,7 +3433,7 @@ def _derive_token_shop_reconstruction_fragment(
             else (runtime_model_status or None) or ""
         )
     ) or None
-    semantic_status = str(compatibility_status.get("semanticStatus") or ("open" if missing_seam_ids else "closed"))
+    semantic_status = "open" if missing_seam_ids else str(compatibility_status.get("semanticStatus") or "closed")
     overall_status = str(compatibility_status.get("status") or ("semantic-open" if semantic_status == "open" else "semantic-closed"))
 
     support = _collect_trace_support_metadata(
@@ -2309,7 +3494,7 @@ def _derive_token_shop_reconstruction_fragment(
             "literalStatus": literal_status,
             "runtimeStatus": runtime_status,
             "schemaOwnerStatus": None,
-            "requiredGapKinds": missing_seam_ids or blocked_edge_types,
+            "requiredGapKinds": missing_seam_ids or assessment_blocked_seams or blocked_edge_types,
             "nonBlockingSeams": non_blocking_seams,
             "unresolvedLiteralTargets": (["final-title-string"] if literal_status == "open" else []),
             "unresolvedRuntimeTargets": (
@@ -2560,6 +3745,17 @@ COMPOSITE_SUBJECT_SEAM_CLOSURE_RULES = {
                 "getter-to-parameter-shell",
                 "metadata-row0-parameter-shell",
                 "deterministic-evaluator",
+            ],
+        },
+        "planner-safe-cost-output": {
+            "requiredKnownEdges": [
+                "getter-family",
+                "getter-to-parameter-shell",
+                "metadata-row0-parameter-shell",
+                "deterministic-evaluator",
+                "exact-shell-to-title",
+                "native-reconstruction",
+                "automated-calibration-closure",
             ],
         },
     },
@@ -3596,6 +4792,7 @@ def _derive_target_assessment_fragment(
             verdict = "keep researching"
         summary_messages = dict(rules.get("messages") or {})
         summary = str(summary_messages.get("research" if verdict == "keep researching" else verdict) or "").strip()
+    summary = _dedupe_repeated_sentences(summary)
 
     promoted_owner = str(native_summary.get("promotedOwner") or "").strip()
     promoted_methods = [str(value) for value in (native_summary.get("promotedMethods") or []) if str(value).strip()]
@@ -3607,13 +4804,19 @@ def _derive_target_assessment_fragment(
         if promoted_fields:
             chain_bits.append("fields {}".format(", ".join(promoted_fields[:4])))
         if chain_bits:
-            summary = "{} Native reconstruction now ties this lane to {} via {}.".format(
+            summary = _append_unique_sentence(
                 summary,
-                promoted_owner,
-                " and ".join(chain_bits),
-            ).strip()
+                "Native reconstruction now ties this lane to {} via {}.".format(
+                    promoted_owner,
+                    " and ".join(chain_bits),
+                ),
+            )
         else:
-            summary = "{} Native reconstruction now ties this lane to {}.".format(summary, promoted_owner).strip()
+            summary = _append_unique_sentence(
+                summary,
+                "Native reconstruction now ties this lane to {}.".format(promoted_owner),
+            )
+    summary = _dedupe_repeated_sentences(summary)
 
     support = _collect_trace_support_metadata(
         trace_scope,
@@ -3771,6 +4974,46 @@ def _expected_token_shop_row_field(
     return f"{match.group(1).upper()}Button"
 
 
+def _extract_token_shop_shell_field(value: Any) -> str:
+    if isinstance(value, dict):
+        for key in ("shellField", "field", "subjectLabel", "subjectId", "label"):
+            extracted = _extract_token_shop_shell_field(value.get(key))
+            if extracted:
+                return extracted
+        for nested_key in ("rowShell", "shellWindow"):
+            extracted = _extract_token_shop_shell_field(value.get(nested_key))
+            if extracted:
+                return extracted
+        for list_key in ("controllerBlock", "ownerFieldBlock", "terms", "targetIds"):
+            extracted = _extract_token_shop_shell_field(value.get(list_key))
+            if extracted:
+                return extracted
+        return ""
+    if isinstance(value, list):
+        for item in value:
+            extracted = _extract_token_shop_shell_field(item)
+            if extracted:
+                return extracted
+        return ""
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    match = re.search(r"(ATU\d+Button)", text, re.IGNORECASE)
+    if not match:
+        return ""
+    return match.group(1).upper()
+
+
+def _token_shop_payload_matches_expected_row(payload: dict[str, Any], expected_row_field: str) -> bool:
+    expected_row_field = str(expected_row_field or "").strip()
+    if not expected_row_field:
+        return True
+    payload_field = _extract_token_shop_shell_field(payload)
+    if not payload_field:
+        return False
+    return payload_field == expected_row_field
+
+
 def _normalize_token_shop_execution_context_payload(
     trace_scope: str,
     payload: dict[str, Any] | None,
@@ -3917,6 +5160,12 @@ def _derive_token_shop_execution_plan_fragment(
     target = dict(payload.get("target") or {})
     if str(target.get("familyId") or "") != "token-shop":
         return None
+    if not token_shop_reconstruction_fragment:
+        token_shop_reconstruction_fragment = _load_canonical_semantic_fragment_payload(
+            conn,
+            "token_shop_reconstruction_fragment",
+            f"token-shop-reconstruction:{trace_scope}",
+        )
     native_trace = dict(payload.get("nativeTrace") or {})
     native_summary = dict(payload.get("nativeReconstruction") or native_trace.get("summary") or {})
     source_ids = _unique_strings([str(entry.get("sourceId") or "") for entry in (payload.get("sourceRoles") or []) if str(entry.get("sourceId") or "").strip()])
@@ -3927,8 +5176,35 @@ def _derive_token_shop_execution_plan_fragment(
     join_goal = str(target.get("joinGoal") or "").strip()
     claim_stages: list[dict[str, Any]] = []
     depth_plan: list[dict[str, Any]] = []
+    expected_row_field = _expected_token_shop_row_field(
+        trace_scope,
+        str(target.get("id") or ""),
+        str(target.get("label") or ""),
+        join_goal,
+    )
+    reconstruction = dict(token_shop_reconstruction_fragment or {})
+    reconstruction_missing_seams = _unique_strings(
+        [
+            str(item.get("id") or "").strip()
+            for item in (reconstruction.get("missingSeams") or [])
+            if isinstance(item, dict) and str(item.get("id") or "").strip()
+        ]
+    )
+    reconstruction_status = dict(reconstruction.get("status") or {})
+    reconstruction_semantic_open = str(reconstruction_status.get("semanticStatus") or "").strip().lower() == "open"
+    prefer_reconstruction = bool(
+        reconstruction
+        and (
+            str(reconstruction.get("scopeType") or "").strip() == "token-shop-row-reconstruction"
+            or reconstruction_missing_seams
+            or reconstruction_semantic_open
+        )
+    )
 
-    if token_shop_scope:
+    if not prefer_reconstruction and token_shop_scope and (
+        not expected_row_field
+        or _token_shop_payload_matches_expected_row(token_shop_scope, expected_row_field)
+    ):
         row_scope = dict(token_shop_scope)
         row_local_graph = dict(row_scope.get("rowLocalGraph") or {})
         row_shell = dict(row_local_graph.get("rowShell") or {})
@@ -4002,39 +5278,70 @@ def _derive_token_shop_execution_plan_fragment(
                     }
                 )
     elif token_shop_reconstruction_fragment:
-        reconstruction = dict(token_shop_reconstruction_fragment)
         row_shell = dict(reconstruction.get("rowShell") or {})
         presentation = dict(reconstruction.get("presentation") or {})
         assessment = dict(reconstruction.get("assessment") or {})
         blocked_edge_types = _unique_strings([str(value) for value in (assessment.get("blockedEdgeTypes") or [])])
-        follow_up_terms = _unique_strings(
-            [
-                str(row_shell.get("field") or ""),
-                *[str(value) for value in (presentation.get("slotRoles") or [])],
-                *[str(value) for value in (native_trace.get("searchTerms") or [])],
+        row_scope_type = str(reconstruction.get("scopeType") or "").strip()
+        if row_scope_type == "token-shop-row-reconstruction":
+            row_shell_field = str(row_shell.get("field") or expected_row_field or trace_scope).strip()
+            follow_up_terms = _unique_strings(
+                [
+                    row_shell_field,
+                    *[str(value) for value in (presentation.get("slotRoles") or [])],
+                    *[str(value) for value in (native_trace.get("searchTerms") or [])],
+                ]
+            )
+            join_goal = (
+                f"Reconstruct the Token Shop {row_shell_field} row from current canonical fragments and close the remaining adjacent seams: {', '.join(reconstruction_missing_seams or blocked_edge_types)}."
+                if (reconstruction_missing_seams or blocked_edge_types)
+                else f"Recheck the recovered Token Shop {row_shell_field} row and verify that no adjacent seam has reopened."
+            )
+            claim_stages = [
+                {
+                    "id": "row-local-graph",
+                    "label": f"{row_shell_field} row-local graph",
+                    "status": "open" if (reconstruction_missing_seams or blocked_edge_types) else "closed",
+                    "missingSeamIds": reconstruction_missing_seams or blocked_edge_types,
+                }
             ]
-        )
-        join_goal = (
-            f"Reconstruct the Token Shop family shell from current canonical fragments and audit the remaining family seams: {', '.join(blocked_edge_types)}."
-            if blocked_edge_types
-            else "Recheck the Token Shop family shell from current canonical fragments and verify no family seam reopened."
-        )
-        claim_stages = [
-            {
-                "id": "family-shell",
-                "label": "Token Shop family shell",
-                "status": "open" if blocked_edge_types else "closed",
-                "missingSeamIds": blocked_edge_types,
-            }
-        ]
-        depth_plan = [
-            {
-                "hop": 1,
-                "goal": join_goal,
-                "terms": follow_up_terms[:12],
-                "sourceIds": source_ids,
-            }
-        ]
+            depth_plan = [
+                {
+                    "hop": 1,
+                    "goal": join_goal,
+                    "terms": follow_up_terms[:12],
+                    "sourceIds": source_ids,
+                }
+            ]
+        else:
+            follow_up_terms = _unique_strings(
+                [
+                    str(row_shell.get("field") or ""),
+                    *[str(value) for value in (presentation.get("slotRoles") or [])],
+                    *[str(value) for value in (native_trace.get("searchTerms") or [])],
+                ]
+            )
+            join_goal = (
+                f"Reconstruct the Token Shop family shell from current canonical fragments and audit the remaining family seams: {', '.join(blocked_edge_types)}."
+                if blocked_edge_types
+                else "Recheck the Token Shop family shell from current canonical fragments and verify no family seam reopened."
+            )
+            claim_stages = [
+                {
+                    "id": "family-shell",
+                    "label": "Token Shop family shell",
+                    "status": "open" if blocked_edge_types else "closed",
+                    "missingSeamIds": blocked_edge_types,
+                }
+            ]
+            depth_plan = [
+                {
+                    "hop": 1,
+                    "goal": join_goal,
+                    "terms": follow_up_terms[:12],
+                    "sourceIds": source_ids,
+                }
+            ]
 
     if not join_goal:
         return None
@@ -5287,6 +6594,20 @@ def _derive_generic_mechanics_views_from_subject_contract(payload: dict[str, Any
                         "payload": {"subjectId": subject_id},
                     }
                 )
+        for fact_kind, fact_value in _row_detail_derived_fact_pairs(row_detail):
+            value = str(fact_value or "").strip()
+            if not value:
+                continue
+            facts.append(
+                {
+                    "entityId": row_entity_id,
+                    "traceScope": trace_scope,
+                    "fieldKey": field_key,
+                    "factKind": fact_kind,
+                    "factValue": value,
+                    "payload": {"subjectId": subject_id, "source": "row-detail-derived"},
+                }
+            )
         blocked_fields = dict(row_detail.get("blockedFields") or {})
         for blocked_field, blocked_reason in blocked_fields.items():
             if str(blocked_reason).strip():
@@ -5664,7 +6985,7 @@ def _find_runtime_coverage_system_unit_for_config(
         row = conn.execute(
             """
             SELECT system_id, version, payload_json
-            FROM materialized_system_unit_views
+            FROM system_unit_views
             WHERE system_id = ?
               AND version = ?
             ORDER BY built_at DESC
@@ -5686,7 +7007,7 @@ def _find_runtime_coverage_system_unit_for_config(
     rows = conn.execute(
         """
         SELECT system_id, version, payload_json
-        FROM materialized_system_unit_views
+        FROM system_unit_views
         ORDER BY built_at DESC
         """
     ).fetchall()
@@ -5797,23 +7118,31 @@ def _derive_subject_state_delta_from_newer_gap_rows(
 ) -> dict[str, Any]:
     satisfied_seam_ids = {str(value).strip() for value in (satisfied_seam_ids or set()) if str(value).strip()}
     concretely_supported_seam_ids: set[str] = set()
+    can_reopen_clear_state = False
     for gap_row in gap_rows:
         gap_kind = str(gap_row.get("gapKind") or "").strip()
         field_key = str(gap_row.get("fieldKey") or "").strip()
         payload = dict(gap_row.get("payload") or {})
         if gap_kind == "runtime-cost-coverage":
             concretely_supported_seam_ids.add("runtime-next-cost-formula")
+            can_reopen_clear_state = True
             continue
         if gap_kind == "blocked-lane":
             lane_id = str(payload.get("laneId") or field_key or "").strip()
             if lane_id:
                 concretely_supported_seam_ids.add(lane_id)
+            payload_terms = [str(term).strip() for term in (payload.get("terms") or []) if str(term).strip()]
+            payload_reason = str(payload.get("reason") or "").strip()
+            if payload_terms or payload_reason.startswith("missing-db-term-evidence:"):
+                can_reopen_clear_state = True
             continue
         if gap_kind in {"playerFacingSupportText", "effectText", "rowDetail", "row-detail"}:
             if gap_kind == "row-detail":
                 concretely_supported_seam_ids.add("rowDetail")
             elif gap_kind:
                 concretely_supported_seam_ids.add(gap_kind)
+            if payload.get("isGrounded") is False or str(payload.get("reason") or "").strip().startswith("missing-"):
+                can_reopen_clear_state = True
     missing_edges: list[str] = []
     blocked_edges: list[str] = []
     next_terms: list[str] = []
@@ -5861,6 +7190,7 @@ def _derive_subject_state_delta_from_newer_gap_rows(
     return {
         "missingEdges": missing_edges,
         "blockedEdges": blocked_edges,
+        "canReopenClearState": can_reopen_clear_state,
         "nextSeam": {
             "id": next_seam_id or None,
             "status": "open" if next_seam_id else "clear",
@@ -7043,6 +8373,138 @@ def _apply_composite_subject_seam_closure(
     return state_payload, decision_summary, claim_stages, closed_seams
 
 
+def _normalize_subject_state_edge_consistency(
+    state_payload: dict[str, Any] | None,
+    decision_summary: dict[str, Any] | None = None,
+    claim_stages: list[dict[str, Any]] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
+    state_payload = dict(state_payload or {})
+    decision_summary = dict(decision_summary or {})
+    claim_stages = [dict(stage) for stage in (claim_stages or []) if isinstance(stage, dict)]
+    known_edge_set = {
+        str(value).strip()
+        for value in [
+            *list(state_payload.get("knownEdges") or []),
+            *list(state_payload.get("nonblockingEdges") or []),
+        ]
+        if str(value).strip()
+    }
+    state_payload["missingEdges"] = _unique_strings(
+        [
+            str(value).strip()
+            for value in (state_payload.get("missingEdges") or [])
+            if str(value).strip() and str(value).strip() not in known_edge_set
+        ]
+    )
+    state_payload["blockedEdges"] = _unique_strings(
+        [
+            str(value).strip()
+            for value in (state_payload.get("blockedEdges") or [])
+            if str(value).strip() and str(value).strip() not in known_edge_set
+        ]
+    )
+    decision_summary["baselineGap"] = _unique_strings(
+        [
+            str(value).strip()
+            for value in (decision_summary.get("baselineGap") or [])
+            if str(value).strip() and str(value).strip() not in known_edge_set
+        ]
+    )
+    decision_summary["blockedEdgeTypes"] = _unique_strings(
+        [
+            str(value).strip()
+            for value in (decision_summary.get("blockedEdgeTypes") or [])
+            if str(value).strip() and str(value).strip() not in known_edge_set
+        ]
+    )
+    next_seam_payload = dict(state_payload.get("nextSeam") or {})
+    next_seam_id = str(next_seam_payload.get("id") or "").strip()
+    next_seam_status = str(next_seam_payload.get("status") or "").strip().lower()
+    if next_seam_id in known_edge_set or next_seam_status in {"closed", "covered", "resolved", "none"}:
+        remaining_open_edges = _unique_strings(
+            [
+                *[str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()],
+                *[str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()],
+            ]
+        )
+        state_payload["nextSeam"] = {
+            **next_seam_payload,
+            "id": remaining_open_edges[0] if remaining_open_edges else None,
+            "status": "open" if remaining_open_edges else "clear",
+            "terms": list(next_seam_payload.get("terms") or []) if remaining_open_edges else [],
+        }
+    claim_stages = _normalize_claim_stages_against_subject_state(state_payload, claim_stages)
+    return state_payload, decision_summary, claim_stages
+
+
+def _normalize_claim_stages_against_subject_state(
+    state_payload: dict[str, Any] | None,
+    claim_stages: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    state_payload = dict(state_payload or {})
+    known_edge_set = {
+        str(value).strip()
+        for value in (state_payload.get("knownEdges") or [])
+        if str(value).strip()
+    }
+    open_edge_set = {
+        str(value).strip()
+        for value in (
+            list(state_payload.get("missingEdges") or [])
+            + list(state_payload.get("blockedEdges") or [])
+        )
+        if str(value).strip()
+    }
+    normalized_stages: list[dict[str, Any]] = []
+    for stage in [dict(item) for item in (claim_stages or []) if isinstance(item, dict)]:
+        missing_seam_ids = _unique_strings(
+            [
+                str(seam_id).strip()
+                for seam_id in (stage.get("missingSeamIds") or [])
+                if str(seam_id).strip()
+                and str(seam_id).strip() in open_edge_set
+                and str(seam_id).strip() not in known_edge_set
+            ]
+        )
+        stage["missingSeamIds"] = missing_seam_ids
+        stage["status"] = "open" if missing_seam_ids else "closed"
+        normalized_stages.append(stage)
+    return normalized_stages
+
+
+def _subject_state_has_stale_claim_stage_closure(payload: dict[str, Any] | None) -> bool:
+    payload = dict(payload or {})
+    normalized_stages = _normalize_claim_stages_against_subject_state(
+        payload,
+        payload.get("claimStages") or [],
+    )
+    original_signature = _json_dumps(
+        [
+            {
+                "id": str(stage.get("id") or "").strip(),
+                "status": str(stage.get("status") or "").strip(),
+                "missingSeamIds": _unique_strings(
+                    [str(seam_id).strip() for seam_id in (stage.get("missingSeamIds") or []) if str(seam_id).strip()]
+                ),
+            }
+            for stage in [dict(item) for item in (payload.get("claimStages") or []) if isinstance(item, dict)]
+        ]
+    )
+    normalized_signature = _json_dumps(
+        [
+            {
+                "id": str(stage.get("id") or "").strip(),
+                "status": str(stage.get("status") or "").strip(),
+                "missingSeamIds": _unique_strings(
+                    [str(seam_id).strip() for seam_id in (stage.get("missingSeamIds") or []) if str(seam_id).strip()]
+                ),
+            }
+            for stage in normalized_stages
+        ]
+    )
+    return original_signature != normalized_signature
+
+
 def _compact_subject_state_dependency_bundle(
     latest_bundle: dict[str, Any] | None,
     latest_native_trace: dict[str, Any] | None = None,
@@ -8131,6 +9593,7 @@ def _derive_shard_bonus_cluster_generic_views(
     unlock_requirement_accessors = [term for term in native_terms if re.match(r"^get_SU\d+FinalUnlockReq$", term)]
     final_su_bonus_fields = [term for term in native_terms if re.match(r"^FinalSU\d+Bonus\d+$", term)]
     final_su_bonus_accessors = [term for term in native_terms if re.match(r"^get_FinalSU\d+Bonus\d+$", term)]
+    action_hook_terms = [term for term in native_terms if term == "BuyCellBoost"]
     bonus_calc_accessors = [term for term in native_terms if re.match(r"^get_SU\d+Bonus\d+Calc$", term)]
     ui_context_anchors = [term for term in native_terms if term in {"LevelText", "DescText", "ValueText", "DescriptionText"}]
     title_asset_candidates = [term for term in native_terms if re.match(r"^SMilestone-\d+$", term)]
@@ -8155,6 +9618,7 @@ def _derive_shard_bonus_cluster_generic_views(
             ("unlock-requirement-accessor", unlock_requirement_accessors),
             ("bonus-field-sample", final_su_bonus_fields),
             ("bonus-accessor-sample", final_su_bonus_accessors),
+            ("action-hook-sample", action_hook_terms),
             ("adjacent-field", adjacent_fields),
         ],
         "title-effect": [
@@ -8191,22 +9655,34 @@ def _derive_shard_bonus_cluster_generic_views(
                 },
             }
         )
-    if next_seam_id:
+    missing_edges_by_cluster = {
+        "finalsu-bonus": ["player-facing-row-identity", "exact-finalsu-row-remap"],
+        "title-effect": ["title-asset-range", "presentation-slot-family"],
+        "effect-text-handler": ["exact-text-handler-token", "presentation-slot-family"],
+    }
+    blockers = list(missing_edges_by_cluster.get(cluster_kind) or [])
+    if (
+        cluster_kind == "finalsu-bonus"
+        and action_hook_terms
+        and final_su_bonus_fields
+        and final_su_bonus_accessors
+    ):
+        blockers = [
+            edge_id
+            for edge_id in blockers
+            if edge_id != "player-facing-row-identity"
+        ]
+    cluster_next_seam_id = str(blockers[0] if blockers else "").strip()
+    if cluster_next_seam_id:
         gaps.append(
             {
                 "entityId": subject_id,
                 "traceScope": trace_scope,
                 "fieldKey": "",
                 "gapKind": "next-seam",
-                "payload": {"subjectId": subject_id, "seamId": next_seam_id},
+                "payload": {"subjectId": subject_id, "seamId": cluster_next_seam_id},
             }
         )
-    missing_edges_by_cluster = {
-        "finalsu-bonus": ["player-facing-row-identity", "exact-finalsu-row-remap"],
-        "title-effect": ["title-asset-range", "presentation-slot-family"],
-        "effect-text-handler": ["exact-text-handler-token", "presentation-slot-family"],
-    }
-    blockers = missing_edges_by_cluster.get(cluster_kind) or []
     for edge_id in blockers:
         gaps.append(
             {
@@ -8221,19 +9697,20 @@ def _derive_shard_bonus_cluster_generic_views(
                 },
             }
         )
-    gaps.append(
-        {
-            "entityId": subject_id,
-            "traceScope": trace_scope,
-            "fieldKey": "",
-            "gapKind": "blocked-lane",
-            "payload": {
-                "subjectId": subject_id,
-                "laneId": cluster_kind,
-                "reason": blocked_input_reason or f"{subject_label} remains quarantined to one explicit shard-side seam",
-            },
-        }
-    )
+    if blockers:
+        gaps.append(
+            {
+                "entityId": subject_id,
+                "traceScope": trace_scope,
+                "fieldKey": "",
+                "gapKind": "blocked-lane",
+                "payload": {
+                    "subjectId": subject_id,
+                    "laneId": cluster_kind,
+                    "reason": blocked_input_reason or f"{subject_label} remains quarantined to one explicit shard-side seam",
+                },
+            }
+        )
     generic_views = {
         "entities": entities,
         "facts": facts,
@@ -8251,6 +9728,8 @@ def _derive_shard_bonus_cluster_generic_views(
         known_edges.append("finalsu-bonus-field-family")
     if final_su_bonus_accessors and cluster_kind == "finalsu-bonus":
         known_edges.append("finalsu-bonus-accessor-family")
+    if action_hook_terms and cluster_kind == "finalsu-bonus":
+        known_edges.append("player-facing-row-identity")
     if bonus_calc_accessors and cluster_kind in {"title-effect", "effect-text-handler"}:
         known_edges.append("bonus-calc-family")
     if generic_writer_terms and cluster_kind == "effect-text-handler":
@@ -8270,8 +9749,8 @@ def _derive_shard_bonus_cluster_generic_views(
         "blockedEdges": [],
         "blockedInputReason": blocked_input_reason or f"{subject_label} remains quarantined to one explicit shard-side seam",
         "nextSeam": {
-            "id": next_seam_id or "local-runtime-population-bridge",
-            "status": "blocked",
+            "id": cluster_next_seam_id or None,
+            "status": "blocked" if cluster_next_seam_id else "clear",
         },
         "sourceTraceScope": str((fragment_inputs.get("sourceTraceScopes") or [""])[0] or ""),
         "sourceSubjectId": str((fragment_inputs.get("sourceSubjectIds") or [""])[0] or ""),
@@ -8826,14 +10305,15 @@ def _derive_multiverse_ui_cluster_generic_views(
                 },
             }
         )
-    if next_seam_id:
+    cluster_next_seam_id = str(blockers[0] if blockers else "").strip()
+    if cluster_next_seam_id:
         gaps.append(
             {
                 "entityId": subject_id,
                 "traceScope": trace_scope,
                 "fieldKey": "",
                 "gapKind": "next-seam",
-                "payload": {"subjectId": subject_id, "seamId": next_seam_id},
+                "payload": {"subjectId": subject_id, "seamId": cluster_next_seam_id},
             }
         )
     generic_views = {
@@ -8907,7 +10387,7 @@ def _derive_multiverse_ui_cluster_generic_views(
         "blockedEdges": [],
         "blockedInputReason": blocked_input_reason or f"{subject_label} remains quarantined to one explicit multiverse seam",
         "nextSeam": {
-            "id": (next_seam_id or "broad-row-identity-remap") if blockers else None,
+            "id": cluster_next_seam_id if blockers else None,
             "status": "blocked" if blockers else "clear",
         },
         "sourceTraceScope": str((fragment_inputs.get("sourceTraceScopes") or [""])[0] or ""),
@@ -9110,16 +10590,32 @@ def _derive_token_shop_range_row_details_from_support_surfaces(
         for field, evidence in late_field_evidence.items():
             action_hook = str(evidence.get("actionHook") or "").strip()
             effect_term = str(evidence.get("effectTerm") or "").strip()
-            evidence_terms = _unique_strings(
+            title_terms = _unique_strings(
                 [
-                    field.replace("Level", "Button"),
-                    action_hook,
-                    effect_term,
                     "Tier 3 Max Level Increaser" if "Tier 3 Max Level Increaser" in late_title_terms else "",
+                ]
+            )
+            effect_terms = _unique_strings(
+                [
+                    effect_term,
                     "Campaign Fragments" if "Campaign Fragments" in late_effect_terms else "",
+                ]
+            )
+            prefab_terms = _unique_strings(
+                [
                     "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser"
                     if "NewTokenUPGPrefab.T4.Tier3MaxLevelIncreaser" in late_prefab_terms
                     else "",
+                ]
+            )
+            action_terms = _unique_strings([action_hook])
+            evidence_terms = _unique_strings(
+                [
+                    field.replace("Level", "Button"),
+                    *action_terms,
+                    *effect_terms,
+                    *title_terms,
+                    *prefab_terms,
                 ]
             )
             is_grounded = bool(action_hook and field.replace("Level", "Button") in evidence_terms)
@@ -9145,6 +10641,13 @@ def _derive_token_shop_range_row_details_from_support_surfaces(
                     }
                 ),
                 "boundedEvidenceTerms": evidence_terms,
+                "boundedEvidenceByKind": {
+                    "shellTerms": [field.replace("Level", "Button")],
+                    "actionTerms": action_terms,
+                    "effectTerms": effect_terms,
+                    "titleTerms": title_terms,
+                    "prefabTerms": prefab_terms,
+                },
             })
         return row_details_by_field
 
@@ -9180,11 +10683,21 @@ def _row_detail_supports_player_facing_text(row_detail: dict[str, Any]) -> bool:
     identity = str(row_detail.get("identity") or "").strip()
     identity_source = str(row_detail.get("identitySource") or "").strip().lower()
     bounded_evidence_terms = [str(term).strip() for term in (row_detail.get("boundedEvidenceTerms") or []) if str(term).strip()]
+    bounded_evidence_by_kind = dict(row_detail.get("boundedEvidenceByKind") or {})
+    typed_title_terms = [
+        str(term).strip()
+        for term in (bounded_evidence_by_kind.get("titleTerms") or [])
+        if str(term).strip()
+    ]
     if identity and _looks_like_title_surface_term(identity):
         return True
     if "title surface" in identity_source or "title text" in identity_source:
         return True
-    return any(_looks_like_title_surface_term(term) and term == identity for term in bounded_evidence_terms)
+    if typed_title_terms:
+        return True
+    if any(_looks_like_title_surface_term(term) for term in bounded_evidence_terms):
+        return True
+    return False
 
 
 def _normalize_row_detail_blocked_fields(row_detail: dict[str, Any]) -> dict[str, Any]:
@@ -9198,6 +10711,101 @@ def _normalize_row_detail_blocked_fields(row_detail: dict[str, Any]) -> dict[str
         blocked_fields.pop("playerFacingSupportText", None)
     normalized["blockedFields"] = blocked_fields
     return normalized
+
+
+def _row_detail_derived_fact_pairs(row_detail: dict[str, Any]) -> list[tuple[str, str]]:
+    normalized = _normalize_row_detail_blocked_fields(row_detail)
+    if not bool(normalized.get("isGrounded")):
+        return []
+    values: list[tuple[str, str]] = []
+    identity = str(normalized.get("identity") or "").strip()
+    bounded_terms = [
+        str(term).strip()
+        for term in (normalized.get("boundedEvidenceTerms") or [])
+        if str(term).strip()
+    ]
+    bounded_evidence_by_kind = dict(normalized.get("boundedEvidenceByKind") or {})
+    typed_title_terms = _unique_strings(
+        [
+            str(term).strip()
+            for term in (bounded_evidence_by_kind.get("titleTerms") or [])
+            if str(term).strip()
+        ]
+    )
+    typed_prefab_terms = _unique_strings(
+        [
+            str(term).strip()
+            for term in (bounded_evidence_by_kind.get("prefabTerms") or [])
+            if str(term).strip()
+        ]
+    )
+    typed_action_terms = _unique_strings(
+        [
+            str(term).strip()
+            for term in (bounded_evidence_by_kind.get("actionTerms") or [])
+            if str(term).strip()
+        ]
+    )
+    typed_update_terms = _unique_strings(
+        [
+            str(term).strip()
+            for term in (bounded_evidence_by_kind.get("updateTerms") or [])
+            if str(term).strip()
+        ]
+    )
+    identity_source = str(normalized.get("identitySource") or "").strip().lower()
+
+    prefab_candidates = _unique_strings(
+        [
+            *typed_prefab_terms,
+            *([identity] if _looks_like_prefab_identity_term(identity) else []),
+            *([term for term in bounded_terms if _looks_like_prefab_identity_term(term)] if not typed_prefab_terms else []),
+        ]
+    )
+    for value in prefab_candidates:
+        values.append(("prefab-candidate", value))
+
+    title_values = _unique_strings(
+        [
+            *typed_title_terms,
+            *([identity] if _looks_like_title_surface_term(identity) else []),
+            *([term for term in bounded_terms if _looks_like_title_surface_term(term)] if not typed_title_terms else []),
+        ]
+    )
+    if not title_values and ("title surface" in identity_source or "title text" in identity_source):
+        if identity:
+            title_values = [identity]
+    for value in title_values:
+        values.append(("literal-title-text", value))
+
+    action_values = _unique_strings(
+        [
+            *typed_action_terms,
+            *([identity] if identity.startswith(("Buy", "Set", "Update", "Initialize", "Check", "Fill", "get_", "set_")) else []),
+            *(
+                [
+                    term
+                    for term in bounded_terms
+                    if term.startswith(("Buy", "Set", "Update", "Initialize", "Check", "Fill", "get_", "set_"))
+                ]
+                if not typed_action_terms
+                else []
+            ),
+        ]
+    )
+    for value in action_values:
+        values.append(("action-method", value))
+
+    update_values = _unique_strings(
+        [
+            *typed_update_terms,
+            *([identity] if _looks_like_title_hook_term(identity) else []),
+            *([term for term in bounded_terms if _looks_like_title_hook_term(term)] if not typed_update_terms else []),
+        ]
+    )
+    for value in update_values:
+        values.append(("display-update-hook", value))
+    return values
 
 
 def _aggregate_row_detail_blocked_fields(
@@ -9394,6 +11002,342 @@ def _grounded_token_shop_support_title_and_update_terms(
         ]
     )
     return title_terms, update_hook_terms
+
+
+def _asset_seed_surface_seam_hint(surface_id: str, family_id: str = "", trace_scope: str = "") -> str:
+    normalized = str(surface_id or "").strip().lower()
+    family_id = str(family_id or "").strip().lower()
+    trace_scope = str(trace_scope or "").strip().lower()
+    if normalized in {"title-text-surfaces", "text-hooks"}:
+        return "title-localization-gap"
+    if normalized == "effect-lane":
+        return "effect-surface-gap"
+    if normalized == "prefab-roster":
+        return "shell-to-prefab"
+    if normalized == "action-lane":
+        return "exact-shell-to-action-hook"
+    if normalized in {"family-shells", "bridge-proxies"}:
+        return "rowDetail"
+    if normalized in {"metadata-neighborhood", "metadata-anchor-lane"}:
+        return "metadata-neighborhood"
+    if "prefab" in normalized:
+        return "shell-to-prefab"
+    if "title" in normalized or "text" in normalized:
+        return "title-localization-gap"
+    if "action" in normalized:
+        return "exact-shell-to-action-hook"
+    if "effect" in normalized:
+        return "effect-surface-gap"
+    if family_id == "multiverse-market-save-owner":
+        if normalized in {"save-owner-span", "accessor-bridge"}:
+            return "typed-market-field-recovery"
+        if normalized == "ordered-overlap":
+            return "broad-row-identity-remap"
+    if family_id == "shard-cost":
+        if normalized in {"metadata-row0-structure", "cost-model-boundary"}:
+            return "planner-safe-cost-output"
+        if normalized == "runtime-cache-lifecycle":
+            return "save-owner-recovery"
+    return ""
+
+
+def _asset_seed_term_score(term: str) -> int:
+    value = str(term or "").strip()
+    if not value:
+        return -10
+    if value.startswith(("get_", "set_", "Set", "Buy", "Check", "Increase", "Final")):
+        return 6
+    if "." in value or value.startswith("New"):
+        return 5
+    if _looks_like_title_surface_term(value):
+        return 4
+    if _looks_like_shell_identity_term(value):
+        return 3
+    if re.fullmatch(r"[A-Z]{2,}\d+(?:Button|Level)", value):
+        return 3
+    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", value):
+        return 2
+    return 1
+
+
+def _derive_row_local_asset_terms(
+    field_key: str,
+    resolver_payload: dict[str, Any] | None,
+    row_detail: dict[str, Any] | None,
+    shared_terms: list[str] | None = None,
+) -> list[str]:
+    normalized_field_key = str(field_key or "").strip()
+    if not normalized_field_key:
+        return []
+    row_detail = dict(row_detail or {})
+    shared_terms = [str(term).strip() for term in (shared_terms or []) if str(term).strip()]
+    row_variants = _unique_strings(
+        [
+            normalized_field_key,
+            normalized_field_key.replace("Level", "Button") if normalized_field_key.endswith("Level") else "",
+            normalized_field_key.replace("Button", "Level") if normalized_field_key.endswith("Button") else "",
+            str(row_detail.get("identity") or "").strip(),
+            *list(row_detail.get("boundedEvidenceTerms") or []),
+        ]
+    )
+    row_variants = [term for term in row_variants if term]
+    row_markers: set[str] = set()
+    for term in row_variants:
+        row_markers.add(term.lower())
+        marker_match = re.match(r"^([A-Za-z]{2,}\d+)", term)
+        if marker_match:
+            row_markers.add(marker_match.group(1).lower())
+    support_terms: list[str] = []
+    for surface in [dict(item) for item in (dict(resolver_payload or {}).get("supportSurfaces") or []) if isinstance(item, dict)]:
+        for raw_term in (surface.get("terms") or []):
+            term = str(raw_term).strip()
+            if not term:
+                continue
+            lowered = term.lower()
+            if row_markers and not any(marker and marker in lowered for marker in row_markers):
+                continue
+            support_terms.append(term)
+    prioritized_terms = _unique_strings([*row_variants, *support_terms, *shared_terms])
+    prioritized_terms = [term for term in prioritized_terms if _asset_seed_term_score(term) > 0]
+    prioritized_terms.sort(key=lambda term: (-_asset_seed_term_score(term), len(term), term))
+    return prioritized_terms[:20]
+
+
+def _default_asset_seed_execution_routine_for_family(
+    family_id: str,
+    trace_scope: str,
+) -> str:
+    family_id = str(family_id or "").strip()
+    trace_scope = str(trace_scope or "").strip()
+    token_shop_scope_routines = {
+        "token-shop-atu4-mod": "token-shop-mod-trace",
+        "token-shop-atu5-mk1-title": "token-shop-mk1-title-trace",
+        "token-shop-atu7-mk3-bridge": "token-shop-mk3-bridge-trace",
+        "token-shop-atu3-cells-effect": "token-shop-atu3-effect-trace",
+        "token-shop-atu3-chest-consumer": "token-shop-atu3-consumer-trace",
+        "token-shop-atu3-chest-consumer-read": "token-shop-atu3-consumer-read-trace",
+    }
+    if trace_scope in token_shop_scope_routines:
+        return token_shop_scope_routines[trace_scope]
+    if re.match(r"^token-shop-atu(?:8|9|10|11|12)-mk\d-bridge$", trace_scope):
+        return "token-shop-shell-bridge-trace"
+    if trace_scope in {"token-shop-atu13-token-t2-bridge", "token-shop-atu20-token-t3-bridge"}:
+        return "token-shop-shell-bridge-trace"
+    if family_id == "token-shop":
+        return "token-shop-family-trace"
+    if family_id == "shard-cost":
+        return "shard-cost-trace"
+    if family_id in {"shard-owned-state", "shard"}:
+        return "shard-owned-state-trace"
+    if family_id == "multiverse-market-save-owner":
+        return "multiverse-market-save-owner-trace"
+    return "inferred-generic-explore"
+
+
+def _derive_asset_probe_seed_rows(
+    trace_scope: str,
+    resolver_payload: dict[str, Any] | None,
+    contract_payload: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    trace_scope = str(trace_scope or "").strip()
+    if not trace_scope:
+        return []
+    resolver_payload = dict(resolver_payload or {})
+    contract_payload = dict(contract_payload or {})
+    family_id = str(
+        resolver_payload.get("familyId")
+        or contract_payload.get("familyId")
+        or _infer_runtime_family_id(trace_scope)
+        or ""
+    ).strip()
+    routine_hint = str(
+        resolver_payload.get("traceRoutineHint")
+        or contract_payload.get("traceRoutineHint")
+        or _default_asset_seed_execution_routine_for_family(family_id, trace_scope)
+        or ""
+    ).strip()
+    grounded_fields = dict(contract_payload.get("groundedFields") or {})
+    shared_terms = _unique_strings(
+        [
+            str(value).strip()
+            for value in [
+                str(grounded_fields.get("literalTitleText") or "").strip(),
+                str(grounded_fields.get("rowShellField") or "").strip(),
+                *list(grounded_fields.get("actionMethods") or []),
+                *list(grounded_fields.get("prefabCandidates") or []),
+                *list(grounded_fields.get("displayUpdateHooks") or []),
+            ]
+            if str(value).strip()
+        ]
+    )
+    seed_rows: list[dict[str, Any]] = []
+    for surface in [dict(item) for item in (resolver_payload.get("supportSurfaces") or []) if isinstance(item, dict)]:
+        surface_id = str(surface.get("id") or "").strip()
+        surface_terms = _unique_strings(
+            [
+                str(term).strip()
+                for term in (surface.get("terms") or [])
+                if str(term).strip()
+            ]
+        )
+        if not surface_id or not surface_terms:
+            continue
+        seam_hint = _asset_seed_surface_seam_hint(surface_id, family_id, trace_scope)
+        normalized_terms = [
+            term
+            for term in _unique_strings([*surface_terms, *shared_terms])
+            if _asset_seed_term_score(term) > 0
+        ]
+        if not normalized_terms:
+            continue
+        normalized_terms.sort(key=lambda term: (-_asset_seed_term_score(term), len(term), term))
+        selected_terms = normalized_terms[:12]
+        seed_key = f"surface:{surface_id}"
+        seed_rows.append(
+            {
+                "seed_key": seed_key,
+                "system_id": _system_id_from_trace_scope(trace_scope),
+                "family_id": family_id,
+                "seam_hint": seam_hint,
+                "routine_hint": routine_hint,
+                "seed_kind": "support-surface",
+                "source_surface_id": surface_id,
+                "support_score": len(selected_terms),
+                "payload": {
+                    "traceScope": trace_scope,
+                    "familyId": family_id,
+                    "surfaceId": surface_id,
+                    "seamHint": seam_hint,
+                    "routineHint": routine_hint,
+                    "terms": selected_terms,
+                    "source": "resolver-support-surface",
+                },
+                "provenance": {
+                    "surfaceId": surface_id,
+                    "source": "resolver_target_support_surface_fragments",
+                },
+                "terms": [{"term_role": "candidate", "term_value": term, "ordinal": ordinal} for ordinal, term in enumerate(selected_terms)],
+            }
+        )
+    for field_key, row_detail in dict(grounded_fields.get("rowDetailsByField") or {}).items():
+        normalized_field_key = str(field_key or "").strip()
+        row_detail = dict(row_detail or {})
+        blocked_fields = {
+            str(key).strip(): str(value).strip()
+            for key, value in dict(row_detail.get("blockedFields") or {}).items()
+            if str(key).strip() and str(value).strip()
+        }
+        if not normalized_field_key or not blocked_fields:
+            continue
+        row_terms = _derive_row_local_asset_terms(
+            normalized_field_key,
+            resolver_payload,
+            row_detail,
+            shared_terms,
+        )
+        if not row_terms:
+            continue
+        for gap_kind, reason in blocked_fields.items():
+            normalized_reason = str(reason or "").strip()
+            if normalized_reason.startswith("not-applicable:"):
+                continue
+            seam_hint = {
+                "playerFacingSupportText": "title-localization-gap",
+                "effectText": "effect-surface-gap",
+                "rowDetail": "shell-to-prefab",
+                "row-detail": "shell-to-prefab",
+            }.get(gap_kind, gap_kind)
+            selected_terms = row_terms[:12]
+            seed_key = f"row-detail:{normalized_field_key}:{gap_kind}"
+            seed_rows.append(
+                {
+                    "seed_key": seed_key,
+                    "system_id": _system_id_from_trace_scope(trace_scope),
+                    "family_id": family_id,
+                    "seam_hint": seam_hint,
+                    "routine_hint": routine_hint,
+                    "seed_kind": "row-detail-gap",
+                    "source_surface_id": normalized_field_key,
+                    "support_score": len(selected_terms) + 4,
+                    "payload": {
+                        "traceScope": trace_scope,
+                        "fieldKey": normalized_field_key,
+                        "gapKind": gap_kind,
+                        "reason": normalized_reason,
+                        "seamHint": seam_hint,
+                        "routineHint": routine_hint,
+                        "terms": selected_terms,
+                        "source": "subject-contract-row-detail",
+                    },
+                    "provenance": {
+                        "fieldKey": normalized_field_key,
+                        "gapKind": gap_kind,
+                        "source": "subject_contract_grounded_field_views",
+                    },
+                    "terms": [{"term_role": "candidate", "term_value": term, "ordinal": ordinal} for ordinal, term in enumerate(selected_terms)],
+                }
+            )
+    support_summary = dict(contract_payload.get("supportSummary") or {})
+    for lane_id, lane_payload in dict(support_summary.get("sharedLanes") or {}).items():
+        normalized_lane_id = str(lane_id or "").strip()
+        lane_payload = dict(lane_payload or {})
+        if not normalized_lane_id:
+            continue
+        missing_terms = _unique_strings(
+            [
+                str(term).strip()
+                for term in [
+                    *list(lane_payload.get("missingTerms") or []),
+                    *list(lane_payload.get("advisoryMissingTerms") or []),
+                ]
+                if str(term).strip()
+            ]
+        )
+        if not missing_terms:
+            continue
+        context_terms = _unique_strings(
+            [
+                str(term).strip()
+                for term in [
+                    *missing_terms,
+                    *list(lane_payload.get("foundTerms") or []),
+                    *shared_terms,
+                ]
+                if str(term).strip()
+            ]
+        )
+        context_terms = [term for term in context_terms if _asset_seed_term_score(term) > 0]
+        if not context_terms:
+            continue
+        context_terms.sort(key=lambda term: (-_asset_seed_term_score(term), len(term), term))
+        selected_terms = context_terms[:12]
+        seed_rows.append(
+            {
+                "seed_key": f"shared-lane:{normalized_lane_id}",
+                "system_id": _system_id_from_trace_scope(trace_scope),
+                "family_id": family_id,
+                "seam_hint": normalized_lane_id,
+                "routine_hint": routine_hint,
+                "seed_kind": "shared-lane-gap",
+                "source_surface_id": normalized_lane_id,
+                "support_score": len(selected_terms) + max(len(missing_terms), 1),
+                "payload": {
+                    "traceScope": trace_scope,
+                    "laneId": normalized_lane_id,
+                    "seamHint": normalized_lane_id,
+                    "routineHint": routine_hint,
+                    "terms": selected_terms,
+                    "missingTerms": missing_terms,
+                    "source": "subject-contract-shared-lane",
+                },
+                "provenance": {
+                    "laneId": normalized_lane_id,
+                    "source": "subject_contract_lane_term_fragments",
+                },
+                "terms": [{"term_role": "candidate", "term_value": term, "ordinal": ordinal} for ordinal, term in enumerate(selected_terms)],
+            }
+        )
+    return seed_rows
 
 
 def _is_title_localization_seam(seam_id: str) -> bool:
@@ -9601,13 +11545,26 @@ def _derive_generic_mechanics_views_from_subject_inputs(
     title_surface_terms, support_update_hook_terms = _grounded_token_shop_support_title_and_update_terms(
         grounded_support_surfaces
     )
+    subject_kind = str(subject_state.get("subjectKind") or "").strip()
+    row_local_subject = bool(
+        subject_id.startswith("row:")
+        or (
+            subject_kind == "row-local"
+            and not subject_id.startswith("range:")
+        )
+    )
+    row_local_update_hooks = _unique_strings(
+        [str(value).strip() for value in (row_local_graph.get("updateHooks") or []) if str(value).strip()]
+    )
     grounded_display_update_hooks = _unique_strings(
         [
-            *[str(value).strip() for value in (row_local_graph.get("updateHooks") or []) if str(value).strip()],
-            *support_update_hook_terms,
+            *row_local_update_hooks,
+            *([] if row_local_subject else support_update_hook_terms),
         ]
     )
-    grounded_literal_title_recovered = bool(row_local_graph.get("literalTitleRecovered")) or bool(title_surface_terms)
+    grounded_literal_title_recovered = bool(row_local_graph.get("literalTitleRecovered")) or (
+        bool(title_surface_terms) and not row_local_subject
+    )
 
     payload = {
         "traceScope": trace_scope,
@@ -9881,8 +11838,6 @@ _RUNTIME_RELATION_HANDOFF_SPECS: list[dict[str, Any]] = [
         "subjectPrefixes": ("row:ATU3",),
         "factKinds": [
             "exact-cellboost-to-booster-bonus-handoff",
-            "typed-shared-effect-owner",
-            "runtime-model-gap",
         ],
     },
 ]
@@ -10724,6 +12679,13 @@ def _derive_subject_identity(
     if not effective_family_id:
         effective_family_id = _infer_family_id_from_target_id(compatibility_target_id)
     fallback_subject_id = str(execution_context.get("targetId") or compatibility_target_id or trace_scope).strip()
+    if _is_planner_synthetic_subject_kind(selected_subject_kind):
+        selected_subject_kind = ""
+        if (
+            not selected_subject_key
+            or selected_subject_key == str(execution_context.get("selectedSubjectKey") or "").strip()
+        ):
+            selected_subject_key = ""
     aliases = _unique_strings(
         [
             compatibility_target_id,
@@ -10854,7 +12816,7 @@ def _derive_subject_identity(
 
     return {
         "subjectId": fallback_subject_id,
-        "subjectKind": selected_subject_kind or ("range-family" if "family" in trace_scope else "target"),
+        "subjectKind": selected_subject_kind or ("family-graph" if effective_family_id and "family" in trace_scope else ("range-family" if "family" in trace_scope else "target")),
         "subjectKey": selected_subject_key or fallback_subject_id,
         "subjectLabel": str(execution_context.get("label") or fallback_subject_id),
         "targetAliases": aliases,
@@ -11605,6 +13567,7 @@ def _build_materialized_trace_dependency_proof(
 
 _TRACE_COMPARE_VOLATILE_KEYS = {
     "builtAt",
+    "requestSignature",
     "generatedAt",
     "jobId",
     "launcherLog",
@@ -11642,10 +13605,8 @@ def _strip_trace_compare_volatiles(value: Any) -> Any:
 
 
 def _stable_trace_fragment_compare_payload(fragment_kind: str, payload: Any) -> Any:
-    stable = _stable_proof_value(payload)
+    stable = _strip_trace_compare_volatiles(_stable_proof_value(payload))
     fragment_kind = str(fragment_kind or "").strip()
-    if fragment_kind in {"traceRun", "nativeTrace", "nativeReconstruction", "tracePayload"}:
-        stable = _strip_trace_compare_volatiles(stable)
     if fragment_kind == "traceRun" and isinstance(stable, dict):
         stable.pop("materializedAt", None)
     return stable
@@ -11712,6 +13673,7 @@ def _derive_fragment_dependency_inputs(
         }
     if fragment_kind == "assessment_fragment":
         return {
+            "reducerInputVersion": "target-assessment-v2",
             "target": payload.get("target"),
             "traceGraph": payload.get("traceGraph"),
             "nativeReconstruction": payload.get("nativeReconstruction"),
@@ -11758,7 +13720,7 @@ def _derive_fragment_dependency_inputs(
     if fragment_kind == "token_shop_reconstruction_fragment":
         row_scope_key = str(((payload.get("rowRecovery") or {}).get("semanticScopeId")) or "")
         return {
-            "reducerInputVersion": "token-shop-reconstruction-ui-binding-v4",
+            "reducerInputVersion": "token-shop-reconstruction-row-strict-v5",
             "formula": payload.get("formula_fragment"),
             "runtimeTable": payload.get("runtime_table_fragment"),
             "rowScope": derived_payloads.get(("semantic_scope_fragment", row_scope_key)),
@@ -11780,6 +13742,7 @@ def _derive_fragment_dependency_inputs(
         row_scope_key = str(((payload.get("rowRecovery") or {}).get("semanticScopeId")) or "")
         family_id = str(target.get("familyId") or "")
         return {
+            "reducerInputVersion": "execution-plan-row-strict-v5",
             "target": payload.get("target"),
             "nativeTrace": payload.get("nativeTrace"),
             "nativeReconstruction": payload.get("nativeReconstruction"),
@@ -12381,10 +14344,10 @@ def _build_target_bundle_projection(
         "materialization": {
             "traceScope": trace_scope,
             "requestSignature": request_signature,
-            "traceView": "materialized_trace_view",
-            "systemView": "canonical_system_trace_view",
-            "semanticView": "canonical_semantic_fragment",
-            "semanticCoverageView": "canonical_semantic_fragment",
+            "traceView": "trace_payload_history",
+            "systemView": "canonical_system_trace_history",
+            "semanticView": "canonical_semantic_fragments",
+            "semanticCoverageView": "canonical_semantic_fragments",
             "dbBacked": True,
         },
     }
@@ -12446,6 +14409,7 @@ class GhidraCacheDB:
         self.db_path = db_path
         self.jobs_dir = jobs_dir
         self.timing_span_factory = None
+        self.write_observer = None
         self._subject_contract_term_evidence_cache: dict[tuple[str, str, str], dict[str, Any]] = {}
         self._relation_native_trace_view_cache: dict[tuple[str, str, str, str], list[dict[str, Any]]] = {}
         self._last_jobs_scan_checked_at = 0.0
@@ -12468,7 +14432,26 @@ class GhidraCacheDB:
     @contextmanager
     def connect(self) -> Iterator[sqlite3.Connection]:
         conn = sqlite3.connect(str(self.db_path), timeout=120.0)
+        write_counts_by_table: dict[str, int] = {}
+        write_counts_by_verb: dict[str, int] = {}
+        write_statement_count = 0
+
+        def _observe_sql(statement: str) -> None:
+            nonlocal write_statement_count
+            match = WRITE_SQL_RE.match(str(statement or ""))
+            if not match:
+                return
+            verb = str(match.group(1) or "").upper()
+            table = str(match.group(2) or "").strip().lower()
+            if not verb or not table:
+                return
+            write_statement_count += 1
+            write_counts_by_verb[verb] = write_counts_by_verb.get(verb, 0) + 1
+            write_counts_by_table[table] = write_counts_by_table.get(table, 0) + 1
+
         conn.row_factory = sqlite3.Row
+        conn.set_trace_callback(_observe_sql)
+        initial_total_changes = conn.total_changes
         conn.execute("PRAGMA foreign_keys=ON")
         conn.execute("PRAGMA busy_timeout=120000")
         conn.execute("PRAGMA synchronous=NORMAL")
@@ -12483,6 +14466,20 @@ class GhidraCacheDB:
             conn.rollback()
             raise
         finally:
+            observer = self.write_observer
+            if callable(observer):
+                try:
+                    observer(
+                        {
+                            "totalChanges": max(0, int(conn.total_changes) - int(initial_total_changes)),
+                            "writeStatementCount": int(write_statement_count),
+                            "writesByTable": dict(sorted(write_counts_by_table.items())),
+                            "writesByVerb": dict(sorted(write_counts_by_verb.items())),
+                        }
+                    )
+                except Exception:
+                    pass
+            conn.set_trace_callback(None)
             conn.close()
 
     def _init_db(self) -> None:
@@ -12500,10 +14497,10 @@ class GhidraCacheDB:
             current_version = int(current_version_row["value"]) if current_version_row and str(current_version_row["value"]).isdigit() else 0
             process_term_columns = {str(row["name"]) for row in conn.execute("PRAGMA table_info(process_term_index)").fetchall()}
             trace_fragment_columns = {str(row["name"]) for row in conn.execute("PRAGMA table_info(trace_fragments)").fetchall()}
-            native_trace_view_columns = {str(row["name"]) for row in conn.execute("PRAGMA table_info(materialized_native_trace_views)").fetchall()}
-            target_bundle_view_columns = {str(row["name"]) for row in conn.execute("PRAGMA table_info(materialized_target_bundle_views)").fetchall()}
+            native_trace_view_columns = {str(row["name"]) for row in conn.execute("PRAGMA table_info(native_trace_views)").fetchall()}
+            target_bundle_view_columns = {str(row["name"]) for row in conn.execute("PRAGMA table_info(target_bundle_views)").fetchall()}
             semantic_fragment_columns = {str(row["name"]) for row in conn.execute("PRAGMA table_info(canonical_semantic_fragments)").fetchall()}
-            system_unit_view_columns = {str(row["name"]) for row in conn.execute("PRAGMA table_info(materialized_system_unit_views)").fetchall()}
+            system_unit_view_columns = {str(row["name"]) for row in conn.execute("PRAGMA table_info(system_unit_views)").fetchall()}
             needs_structural_migration = (
                 not process_term_columns
                 or "source_kind" not in process_term_columns
@@ -12654,6 +14651,45 @@ class GhidraCacheDB:
                     PRIMARY KEY(project_name, project_file, signature)
                 );
 
+                CREATE TABLE IF NOT EXISTS term_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    normalized_term TEXT NOT NULL,
+                    term TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, normalized_term)
+                );
+                CREATE INDEX IF NOT EXISTS idx_term_views_project
+                    ON term_views(project_name, project_file, updated_at DESC, term ASC);
+
+                CREATE TABLE IF NOT EXISTS trace_scope_term_mentions (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    normalized_term TEXT NOT NULL,
+                    term TEXT NOT NULL,
+                    source_kind TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, normalized_term, source_kind)
+                );
+                CREATE INDEX IF NOT EXISTS idx_trace_scope_term_mentions_scope
+                    ON trace_scope_term_mentions(project_name, project_file, trace_scope, normalized_term, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS job_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    signature TEXT NOT NULL,
+                    wanted_terms_json TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, signature)
+                );
+                CREATE INDEX IF NOT EXISTS idx_job_views_project
+                    ON job_views(project_name, project_file, updated_at DESC, signature ASC);
+
                 CREATE TABLE IF NOT EXISTS process_exact_index (
                     project_name TEXT NOT NULL,
                     project_file TEXT NOT NULL,
@@ -12760,6 +14796,21 @@ class GhidraCacheDB:
                 );
                 CREATE INDEX IF NOT EXISTS idx_materialized_native_trace_views_latest
                     ON materialized_native_trace_views(project_name, project_file, built_at DESC, request_signature DESC);
+
+                CREATE TABLE IF NOT EXISTS native_trace_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    request_signature TEXT NOT NULL,
+                    requested_terms_json TEXT NOT NULL,
+                    search_terms_json TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT NOT NULL,
+                    built_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, request_signature)
+                );
+                CREATE INDEX IF NOT EXISTS idx_native_trace_views_latest
+                    ON native_trace_views(project_name, project_file, built_at DESC, request_signature DESC);
 
                 CREATE TABLE IF NOT EXISTS canonical_system_trace_views (
                     project_name TEXT NOT NULL,
@@ -12980,6 +15031,1358 @@ class GhidraCacheDB:
                     exported_path TEXT,
                     PRIMARY KEY(system_id, version)
                 );
+
+                CREATE TABLE IF NOT EXISTS system_unit_views (
+                    system_id TEXT NOT NULL,
+                    version TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT NOT NULL,
+                    built_at TEXT NOT NULL,
+                    exported_path TEXT,
+                    PRIMARY KEY(system_id, version)
+                );
+
+                CREATE TABLE IF NOT EXISTS acquisition_diagnostic_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    request_signature TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    acquisition_term TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT NOT NULL,
+                    built_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, request_signature, trace_scope, acquisition_term)
+                );
+                CREATE INDEX IF NOT EXISTS idx_acquisition_diagnostic_views_scope
+                    ON acquisition_diagnostic_views(project_name, project_file, trace_scope, acquisition_term, built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS graph_anchor_checks (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    seam_id TEXT NOT NULL,
+                    anchor_term TEXT NOT NULL,
+                    anchor_role TEXT NOT NULL DEFAULT 'generic',
+                    check_status TEXT NOT NULL,
+                    checked_count INTEGER NOT NULL DEFAULT 0,
+                    last_request_signature TEXT NOT NULL DEFAULT '',
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT NOT NULL,
+                    built_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, seam_id, anchor_term, anchor_role)
+                );
+                CREATE INDEX IF NOT EXISTS idx_graph_anchor_checks_scope
+                    ON graph_anchor_checks(project_name, project_file, trace_scope, seam_id, check_status, checked_count DESC, built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS knowledge_nodes (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    node_id TEXT NOT NULL,
+                    node_kind TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    canonical_label TEXT NOT NULL DEFAULT '',
+                    normalized_key TEXT NOT NULL DEFAULT '',
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, node_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_knowledge_nodes_scope
+                    ON knowledge_nodes(project_name, project_file, system_id, trace_scope, node_kind, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS knowledge_edges (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    source_node_id TEXT NOT NULL,
+                    edge_kind TEXT NOT NULL,
+                    target_node_id TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    field_key TEXT NOT NULL DEFAULT '',
+                    edge_status TEXT NOT NULL DEFAULT 'active',
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, source_node_id, edge_kind, target_node_id, field_key)
+                );
+                CREATE INDEX IF NOT EXISTS idx_knowledge_edges_scope
+                    ON knowledge_edges(project_name, project_file, system_id, trace_scope, edge_kind, edge_status, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS evidence_graph_edges (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    graph_scope TEXT NOT NULL,
+                    source_node_id TEXT NOT NULL,
+                    edge_kind TEXT NOT NULL,
+                    target_node_id TEXT NOT NULL,
+                    field_key TEXT NOT NULL DEFAULT '',
+                    edge_status TEXT NOT NULL DEFAULT 'active',
+                    source_layer TEXT NOT NULL DEFAULT 'traceGraph',
+                    relation_role TEXT NOT NULL DEFAULT 'structural',
+                    value_semantics TEXT NOT NULL DEFAULT 'unknown',
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, graph_scope, source_node_id, edge_kind, target_node_id, field_key, edge_status, source_layer)
+                );
+                CREATE INDEX IF NOT EXISTS idx_evidence_graph_edges_scope
+                    ON evidence_graph_edges(project_name, project_file, trace_scope, relation_role, edge_kind, edge_status, updated_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_evidence_graph_edges_source
+                    ON evidence_graph_edges(project_name, project_file, source_node_id, edge_kind, edge_status, updated_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_evidence_graph_edges_target
+                    ON evidence_graph_edges(project_name, project_file, target_node_id, edge_kind, edge_status, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS canonical_graph_edges (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    source_node_id TEXT NOT NULL,
+                    edge_kind TEXT NOT NULL,
+                    target_node_id TEXT NOT NULL,
+                    field_key TEXT NOT NULL DEFAULT '',
+                    edge_status TEXT NOT NULL DEFAULT 'present',
+                    relation_role TEXT NOT NULL DEFAULT 'structural',
+                    value_semantics TEXT NOT NULL DEFAULT 'unknown',
+                    positive_observation_count INTEGER NOT NULL DEFAULT 0,
+                    negative_observation_count INTEGER NOT NULL DEFAULT 0,
+                    support_scope_count INTEGER NOT NULL DEFAULT 0,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, source_node_id, edge_kind, target_node_id, field_key)
+                );
+                CREATE INDEX IF NOT EXISTS idx_canonical_graph_edges_source
+                    ON canonical_graph_edges(project_name, project_file, source_node_id, edge_kind, edge_status, updated_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_canonical_graph_edges_target
+                    ON canonical_graph_edges(project_name, project_file, target_node_id, edge_kind, edge_status, updated_at DESC);
+                CREATE INDEX IF NOT EXISTS idx_canonical_graph_edges_kind
+                    ON canonical_graph_edges(project_name, project_file, edge_kind, edge_status, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS knowledge_facts (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    entity_id TEXT NOT NULL,
+                    fact_kind TEXT NOT NULL,
+                    fact_value TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    field_key TEXT NOT NULL DEFAULT '',
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, entity_id, field_key, fact_kind, fact_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_knowledge_facts_scope
+                    ON knowledge_facts(project_name, project_file, system_id, trace_scope, fact_kind, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS knowledge_boundaries (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    boundary_kind TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    verdict TEXT NOT NULL DEFAULT '',
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, boundary_kind)
+                );
+                CREATE INDEX IF NOT EXISTS idx_knowledge_boundaries_scope
+                    ON knowledge_boundaries(project_name, project_file, system_id, trace_scope, boundary_kind, verdict, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS knowledge_gaps (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    gap_id TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    field_key TEXT NOT NULL DEFAULT '',
+                    gap_kind TEXT NOT NULL,
+                    seam_id TEXT NOT NULL DEFAULT '',
+                    gap_status TEXT NOT NULL DEFAULT 'open',
+                    priority REAL NOT NULL DEFAULT 0,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, gap_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_knowledge_gaps_scope
+                    ON knowledge_gaps(project_name, project_file, system_id, trace_scope, gap_status, gap_kind, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS acquisition_attempts (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    attempt_id TEXT NOT NULL,
+                    request_signature TEXT NOT NULL DEFAULT '',
+                    system_id TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    seam_id TEXT NOT NULL DEFAULT '',
+                    routine_id TEXT NOT NULL DEFAULT '',
+                    attempt_status TEXT NOT NULL,
+                    requested_terms_json TEXT NOT NULL,
+                    selected_anchors_json TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, attempt_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_acquisition_attempts_scope
+                    ON acquisition_attempts(project_name, project_file, system_id, trace_scope, seam_id, attempt_status, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS acquisition_attempt_term_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    attempt_id TEXT NOT NULL,
+                    term_role TEXT NOT NULL,
+                    term_value TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, attempt_id, term_role, term_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_acquisition_attempt_term_fragments_scope
+                    ON acquisition_attempt_term_fragments(project_name, project_file, attempt_id, term_role, ordinal, term_value);
+
+                CREATE TABLE IF NOT EXISTS knowledge_gap_term_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    gap_id TEXT NOT NULL,
+                    term_role TEXT NOT NULL,
+                    term_value TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, gap_id, term_role, term_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_knowledge_gap_term_fragments_scope
+                    ON knowledge_gap_term_fragments(project_name, project_file, gap_id, term_role, ordinal, term_value);
+
+                CREATE TABLE IF NOT EXISTS subject_state_next_seam_term_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    seam_id TEXT NOT NULL,
+                    term_value TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, seam_id, term_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_state_next_seam_term_fragments_scope
+                    ON subject_state_next_seam_term_fragments(project_name, project_file, trace_scope, subject_id, seam_id, ordinal, term_value);
+
+                CREATE TABLE IF NOT EXISTS subject_identity_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    subject_kind TEXT NOT NULL DEFAULT '',
+                    subject_key TEXT NOT NULL DEFAULT '',
+                    subject_label TEXT NOT NULL DEFAULT '',
+                    subject_class TEXT NOT NULL DEFAULT '',
+                    subject_path_id TEXT NOT NULL DEFAULT '',
+                    semantic_key TEXT NOT NULL DEFAULT '',
+                    identity_owner TEXT NOT NULL DEFAULT '',
+                    identity_reason TEXT NOT NULL DEFAULT '',
+                    proof_count INTEGER NOT NULL DEFAULT 0,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_identity_views_scope
+                    ON subject_identity_views(project_name, project_file, system_id, trace_scope, subject_kind, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS subject_state_snapshot_history (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    first_built_at TEXT NOT NULL,
+                    last_built_at TEXT NOT NULL,
+                    seen_count INTEGER NOT NULL DEFAULT 1,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, payload_hash)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_state_snapshot_history_scope
+                    ON subject_state_snapshot_history(project_name, project_file, trace_scope, subject_id, last_built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS subject_edge_fact_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    edge_type TEXT NOT NULL,
+                    edge_status TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, edge_type, edge_status)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_edge_fact_fragments_scope
+                    ON subject_edge_fact_fragments(project_name, project_file, trace_scope, subject_id, edge_status, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS subject_target_alias_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    alias_value TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, alias_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_target_alias_fragments_scope
+                    ON subject_target_alias_fragments(project_name, project_file, trace_scope, subject_id, ordinal, alias_value);
+
+                CREATE TABLE IF NOT EXISTS subject_decision_summary_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    verdict TEXT NOT NULL DEFAULT '',
+                    summary TEXT NOT NULL DEFAULT '',
+                    proved_edge_count INTEGER NOT NULL DEFAULT 0,
+                    negative_edge_count INTEGER NOT NULL DEFAULT 0,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_decision_summary_views_scope
+                    ON subject_decision_summary_views(project_name, project_file, trace_scope, verdict, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS subject_decision_edge_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    edge_role TEXT NOT NULL,
+                    edge_value TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, edge_role, edge_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_decision_edge_fragments_scope
+                    ON subject_decision_edge_fragments(project_name, project_file, trace_scope, subject_id, edge_role, ordinal, edge_value);
+
+                CREATE TABLE IF NOT EXISTS subject_claim_stage_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    stage_id TEXT NOT NULL,
+                    stage_label TEXT NOT NULL DEFAULT '',
+                    stage_status TEXT NOT NULL DEFAULT '',
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, stage_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_claim_stage_views_scope
+                    ON subject_claim_stage_views(project_name, project_file, trace_scope, subject_id, ordinal, stage_status);
+
+                CREATE TABLE IF NOT EXISTS subject_claim_stage_missing_seam_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    stage_id TEXT NOT NULL,
+                    seam_id TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, stage_id, seam_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_claim_stage_missing_seam_fragments_scope
+                    ON subject_claim_stage_missing_seam_fragments(project_name, project_file, trace_scope, subject_id, stage_id, ordinal, seam_id);
+
+                CREATE TABLE IF NOT EXISTS subject_depth_plan_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    step_json TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, ordinal)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_depth_plan_fragments_scope
+                    ON subject_depth_plan_fragments(project_name, project_file, trace_scope, subject_id, ordinal);
+
+                CREATE TABLE IF NOT EXISTS subject_contract_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    subject_kind TEXT NOT NULL DEFAULT '',
+                    subject_key TEXT NOT NULL DEFAULT '',
+                    subject_label TEXT NOT NULL DEFAULT '',
+                    semantic_key TEXT NOT NULL DEFAULT '',
+                    identity_owner TEXT NOT NULL DEFAULT '',
+                    identity_reason TEXT NOT NULL DEFAULT '',
+                    blocked_input_reason TEXT NOT NULL DEFAULT '',
+                    trace_routine_hint TEXT NOT NULL DEFAULT '',
+                    selected_owner_subject_id TEXT NOT NULL DEFAULT '',
+                    selected_shared_lane TEXT NOT NULL DEFAULT '',
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_contract_views_scope
+                    ON subject_contract_views(project_name, project_file, system_id, trace_scope, subject_kind, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS subject_contract_snapshot_history (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    first_built_at TEXT NOT NULL,
+                    last_built_at TEXT NOT NULL,
+                    seen_count INTEGER NOT NULL DEFAULT 1,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, payload_hash)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_contract_snapshot_history_scope
+                    ON subject_contract_snapshot_history(project_name, project_file, trace_scope, subject_id, last_built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS subject_contract_target_alias_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    alias_value TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, alias_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_contract_target_alias_fragments_scope
+                    ON subject_contract_target_alias_fragments(project_name, project_file, trace_scope, subject_id, ordinal, alias_value);
+
+                CREATE TABLE IF NOT EXISTS subject_contract_grounded_field_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    field_key TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, field_key)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_contract_grounded_field_views_scope
+                    ON subject_contract_grounded_field_views(project_name, project_file, trace_scope, subject_id, field_key, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS subject_contract_support_entry_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    entry_key TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, entry_key)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_contract_support_entry_views_scope
+                    ON subject_contract_support_entry_views(project_name, project_file, trace_scope, subject_id, entry_key, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS subject_contract_provenance_entry_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    entry_key TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, entry_key)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_contract_provenance_entry_views_scope
+                    ON subject_contract_provenance_entry_views(project_name, project_file, trace_scope, subject_id, entry_key, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS subject_contract_blocked_reason_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    reason_key TEXT NOT NULL,
+                    reason_value TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, reason_key)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_contract_blocked_reason_views_scope
+                    ON subject_contract_blocked_reason_views(project_name, project_file, trace_scope, subject_id, ordinal, reason_key);
+
+                CREATE TABLE IF NOT EXISTS resolver_target_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    target_id TEXT NOT NULL DEFAULT '',
+                    subject_id TEXT NOT NULL DEFAULT '',
+                    subject_kind TEXT NOT NULL DEFAULT '',
+                    subject_key TEXT NOT NULL DEFAULT '',
+                    subject_label TEXT NOT NULL DEFAULT '',
+                    family_id TEXT NOT NULL DEFAULT '',
+                    label TEXT NOT NULL DEFAULT '',
+                    target_class TEXT NOT NULL DEFAULT '',
+                    why_exists TEXT NOT NULL DEFAULT '',
+                    summary TEXT NOT NULL DEFAULT '',
+                    trace_routine_hint TEXT NOT NULL DEFAULT '',
+                    family_trace_profile TEXT NOT NULL DEFAULT '',
+                    disable_native_trace INTEGER NOT NULL DEFAULT 0,
+                    default_presentation_update_hook TEXT NOT NULL DEFAULT '',
+                    synthesized INTEGER NOT NULL DEFAULT 0,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope)
+                );
+                CREATE INDEX IF NOT EXISTS idx_resolver_target_views_scope
+                    ON resolver_target_views(project_name, project_file, system_id, trace_scope, family_id, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS resolver_target_snapshot_history (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    first_built_at TEXT NOT NULL,
+                    last_built_at TEXT NOT NULL,
+                    seen_count INTEGER NOT NULL DEFAULT 1,
+                    PRIMARY KEY(project_name, project_file, trace_scope, payload_hash)
+                );
+                CREATE INDEX IF NOT EXISTS idx_resolver_target_snapshot_history_scope
+                    ON resolver_target_snapshot_history(project_name, project_file, trace_scope, last_built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS resolver_target_term_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    term_role TEXT NOT NULL,
+                    term_value TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, term_role, term_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_resolver_target_term_fragments_scope
+                    ON resolver_target_term_fragments(project_name, project_file, trace_scope, term_role, ordinal, term_value);
+
+                CREATE TABLE IF NOT EXISTS resolver_target_support_surface_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    payload_json TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, ordinal)
+                );
+                CREATE INDEX IF NOT EXISTS idx_resolver_target_support_surface_fragments_scope
+                    ON resolver_target_support_surface_fragments(project_name, project_file, trace_scope, ordinal);
+
+                CREATE TABLE IF NOT EXISTS resolver_target_support_row_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    payload_json TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, ordinal)
+                );
+                CREATE INDEX IF NOT EXISTS idx_resolver_target_support_row_fragments_scope
+                    ON resolver_target_support_row_fragments(project_name, project_file, trace_scope, ordinal);
+
+                CREATE TABLE IF NOT EXISTS resolver_target_json_component_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    component_key TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, component_key)
+                );
+                CREATE INDEX IF NOT EXISTS idx_resolver_target_json_component_views_scope
+                    ON resolver_target_json_component_views(project_name, project_file, trace_scope, component_key, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS resolver_target_string_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    fragment_role TEXT NOT NULL,
+                    fragment_value TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, fragment_role, fragment_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_resolver_target_string_fragments_scope
+                    ON resolver_target_string_fragments(project_name, project_file, trace_scope, fragment_role, ordinal, fragment_value);
+
+                CREATE TABLE IF NOT EXISTS target_bundle_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    request_signature TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    target_id TEXT NOT NULL DEFAULT '',
+                    family_id TEXT NOT NULL DEFAULT '',
+                    target_label TEXT NOT NULL DEFAULT '',
+                    dataset_id TEXT NOT NULL DEFAULT '',
+                    status TEXT NOT NULL DEFAULT '',
+                    semantic_status TEXT NOT NULL DEFAULT '',
+                    literal_status TEXT NOT NULL DEFAULT '',
+                    grounded_conclusion TEXT NOT NULL DEFAULT '',
+                    execution_context_semantic_key TEXT NOT NULL DEFAULT '',
+                    execution_plan_semantic_key TEXT NOT NULL DEFAULT '',
+                    graph_plan_semantic_key TEXT NOT NULL DEFAULT '',
+                    narrative_semantic_key TEXT NOT NULL DEFAULT '',
+                    bridge_comparison_semantic_key TEXT NOT NULL DEFAULT '',
+                    bridge_policy_semantic_key TEXT NOT NULL DEFAULT '',
+                    token_shop_reconstruction_semantic_key TEXT NOT NULL DEFAULT '',
+                    generated_at TEXT NOT NULL DEFAULT '',
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, request_signature)
+                );
+                CREATE INDEX IF NOT EXISTS idx_target_bundle_views_scope
+                    ON target_bundle_views(project_name, project_file, system_id, trace_scope, updated_at DESC, request_signature DESC);
+
+                CREATE TABLE IF NOT EXISTS trace_payload_history (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    request_signature TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT NOT NULL,
+                    first_built_at TEXT NOT NULL,
+                    last_built_at TEXT NOT NULL,
+                    seen_count INTEGER NOT NULL DEFAULT 1,
+                    PRIMARY KEY(project_name, project_file, trace_scope, request_signature, payload_hash)
+                );
+                CREATE INDEX IF NOT EXISTS idx_trace_payload_history_scope
+                    ON trace_payload_history(project_name, project_file, trace_scope, request_signature, last_built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS canonical_system_trace_history (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    request_signature TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    reducer_version TEXT NOT NULL,
+                    first_built_at TEXT NOT NULL,
+                    last_built_at TEXT NOT NULL,
+                    seen_count INTEGER NOT NULL DEFAULT 1,
+                    PRIMARY KEY(project_name, project_file, trace_scope, request_signature, payload_hash)
+                );
+                CREATE INDEX IF NOT EXISTS idx_canonical_system_trace_history_scope
+                    ON canonical_system_trace_history(project_name, project_file, trace_scope, request_signature, last_built_at DESC);
+
+                CREATE TABLE IF NOT EXISTS target_bundle_json_component_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    request_signature TEXT NOT NULL,
+                    component_key TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, request_signature, component_key)
+                );
+                CREATE INDEX IF NOT EXISTS idx_target_bundle_json_component_views_scope
+                    ON target_bundle_json_component_views(project_name, project_file, trace_scope, request_signature, component_key, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS subject_contract_lane_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    lane_id TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    selected_subject_id TEXT NOT NULL DEFAULT '',
+                    selected_subject_kind TEXT NOT NULL DEFAULT '',
+                    selection_source TEXT NOT NULL DEFAULT '',
+                    blocked_input_reason TEXT NOT NULL DEFAULT '',
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, lane_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_contract_lane_views_scope
+                    ON subject_contract_lane_views(project_name, project_file, system_id, trace_scope, lane_id, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS subject_contract_lane_term_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    lane_id TEXT NOT NULL,
+                    term_role TEXT NOT NULL,
+                    term_value TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, subject_id, lane_id, term_role, term_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_subject_contract_lane_term_fragments_scope
+                    ON subject_contract_lane_term_fragments(project_name, project_file, trace_scope, subject_id, lane_id, term_role, ordinal, term_value);
+
+                CREATE TABLE IF NOT EXISTS asset_probe_seed_views (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    seed_key TEXT NOT NULL,
+                    system_id TEXT NOT NULL,
+                    family_id TEXT NOT NULL DEFAULT '',
+                    seam_hint TEXT NOT NULL DEFAULT '',
+                    routine_hint TEXT NOT NULL DEFAULT '',
+                    seed_kind TEXT NOT NULL DEFAULT '',
+                    source_surface_id TEXT NOT NULL DEFAULT '',
+                    support_score INTEGER NOT NULL DEFAULT 0,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(project_name, project_file, trace_scope, seed_key)
+                );
+                CREATE INDEX IF NOT EXISTS idx_asset_probe_seed_views_scope
+                    ON asset_probe_seed_views(project_name, project_file, system_id, trace_scope, family_id, seam_hint, support_score DESC, updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS asset_probe_seed_term_fragments (
+                    project_name TEXT NOT NULL,
+                    project_file TEXT NOT NULL,
+                    trace_scope TEXT NOT NULL,
+                    seed_key TEXT NOT NULL,
+                    term_role TEXT NOT NULL,
+                    term_value TEXT NOT NULL,
+                    ordinal INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY(project_name, project_file, trace_scope, seed_key, term_role, term_value)
+                );
+                CREATE INDEX IF NOT EXISTS idx_asset_probe_seed_term_fragments_scope
+                    ON asset_probe_seed_term_fragments(project_name, project_file, trace_scope, seed_key, term_role, ordinal, term_value);
+
+                DROP VIEW IF EXISTS db_central_subject_metadata_v;
+                CREATE VIEW db_central_subject_metadata_v AS
+                SELECT
+                    scv.project_name,
+                    scv.project_file,
+                    CASE
+                        WHEN scv.trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN scv.trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN scv.trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN scv.trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END AS system_id,
+                    scv.trace_scope,
+                    scv.subject_id,
+                    COALESCE(scv.subject_kind, '') AS subject_kind,
+                    COALESCE(scv.subject_label, '') AS subject_label,
+                    COALESCE(scv.selected_owner_subject_id, '') AS selected_owner_subject_id,
+                    COALESCE(scv.selected_shared_lane, '') AS selected_shared_lane,
+                    COALESCE(scv.trace_routine_hint, '') AS trace_routine_hint,
+                    json_object(
+                        'traceScope', scv.trace_scope,
+                        'subjectId', scv.subject_id,
+                        'subjectKind', COALESCE(scv.subject_kind, ''),
+                        'subjectLabel', COALESCE(scv.subject_label, ''),
+                        'selectedOwnerSubjectId', COALESCE(scv.selected_owner_subject_id, ''),
+                        'selectedSharedLane', COALESCE(scv.selected_shared_lane, ''),
+                        'traceRoutineHint', COALESCE(scv.trace_routine_hint, '')
+                    ) AS payload_json,
+                    '{}' AS provenance_json,
+                    'db-central-subject-contract-v1' AS reducer_version,
+                    scv.updated_at AS built_at
+                FROM subject_contract_views AS scv;
+
+                DROP VIEW IF EXISTS db_central_subject_state_v;
+                CREATE VIEW db_central_subject_state_v AS
+                SELECT
+                    siv.project_name,
+                    siv.project_file,
+                    CASE
+                        WHEN siv.trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN siv.trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN siv.trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN siv.trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END AS system_id,
+                    siv.trace_scope,
+                    siv.subject_id,
+                    COALESCE(siv.subject_kind, '') AS subject_kind,
+                    COALESCE(siv.subject_label, '') AS subject_label,
+                    COALESCE(
+                        (
+                            SELECT ssnstf.seam_id
+                            FROM subject_state_next_seam_term_fragments AS ssnstf
+                            WHERE ssnstf.project_name = siv.project_name
+                              AND ssnstf.project_file = siv.project_file
+                              AND ssnstf.trace_scope = siv.trace_scope
+                              AND ssnstf.subject_id = siv.subject_id
+                            ORDER BY ssnstf.seam_id ASC, ssnstf.ordinal ASC
+                            LIMIT 1
+                        ),
+                        CASE
+                            WHEN EXISTS(
+                                SELECT 1
+                                FROM subject_edge_fact_fragments AS seff_open
+                                WHERE seff_open.project_name = siv.project_name
+                                  AND seff_open.project_file = siv.project_file
+                                  AND seff_open.trace_scope = siv.trace_scope
+                                  AND seff_open.subject_id = siv.subject_id
+                                  AND seff_open.edge_status IN ('missing', 'blocked')
+                            ) THEN (
+                                SELECT seff_open.edge_type
+                                FROM subject_edge_fact_fragments AS seff_open
+                                WHERE seff_open.project_name = siv.project_name
+                                  AND seff_open.project_file = siv.project_file
+                                  AND seff_open.trace_scope = siv.trace_scope
+                                  AND seff_open.subject_id = siv.subject_id
+                                  AND seff_open.edge_status IN ('missing', 'blocked')
+                                ORDER BY CASE WHEN seff_open.edge_status = 'missing' THEN 0 ELSE 1 END, seff_open.edge_type ASC
+                                LIMIT 1
+                            )
+                            ELSE ''
+                        END
+                    ) AS next_seam_id,
+                    CASE
+                        WHEN EXISTS(
+                            SELECT 1
+                            FROM subject_edge_fact_fragments AS seff_open
+                            WHERE seff_open.project_name = siv.project_name
+                              AND seff_open.project_file = siv.project_file
+                              AND seff_open.trace_scope = siv.trace_scope
+                              AND seff_open.subject_id = siv.subject_id
+                              AND seff_open.edge_status IN ('missing', 'blocked')
+                        ) THEN 'open'
+                        ELSE 'clear'
+                    END AS next_seam_status,
+                    (
+                        SELECT COUNT(*)
+                        FROM subject_edge_fact_fragments AS seff_known
+                        WHERE seff_known.project_name = siv.project_name
+                          AND seff_known.project_file = siv.project_file
+                          AND seff_known.trace_scope = siv.trace_scope
+                          AND seff_known.subject_id = siv.subject_id
+                          AND seff_known.edge_status = 'known'
+                    ) AS known_edge_count,
+                    (
+                        SELECT COUNT(*)
+                        FROM subject_edge_fact_fragments AS seff_missing
+                        WHERE seff_missing.project_name = siv.project_name
+                          AND seff_missing.project_file = siv.project_file
+                          AND seff_missing.trace_scope = siv.trace_scope
+                          AND seff_missing.subject_id = siv.subject_id
+                          AND seff_missing.edge_status = 'missing'
+                    ) AS missing_edge_count,
+                    (
+                        SELECT COUNT(*)
+                        FROM subject_edge_fact_fragments AS seff_blocked
+                        WHERE seff_blocked.project_name = siv.project_name
+                          AND seff_blocked.project_file = siv.project_file
+                          AND seff_blocked.trace_scope = siv.trace_scope
+                          AND seff_blocked.subject_id = siv.subject_id
+                          AND seff_blocked.edge_status = 'blocked'
+                    ) AS blocked_edge_count,
+                    (
+                        SELECT COUNT(*)
+                        FROM subject_edge_fact_fragments AS seff_nonblocking
+                        WHERE seff_nonblocking.project_name = siv.project_name
+                          AND seff_nonblocking.project_file = siv.project_file
+                          AND seff_nonblocking.trace_scope = siv.trace_scope
+                          AND seff_nonblocking.subject_id = siv.subject_id
+                          AND seff_nonblocking.edge_status = 'nonblocking'
+                    ) AS nonblocking_edge_count,
+                    json_object(
+                        'traceScope', siv.trace_scope,
+                        'subjectId', siv.subject_id,
+                        'subjectKind', COALESCE(siv.subject_kind, ''),
+                        'subjectLabel', COALESCE(siv.subject_label, ''),
+                        'nextSeam', json_object(
+                            'id', COALESCE(
+                                (
+                                    SELECT ssnstf.seam_id
+                                    FROM subject_state_next_seam_term_fragments AS ssnstf
+                                    WHERE ssnstf.project_name = siv.project_name
+                                      AND ssnstf.project_file = siv.project_file
+                                      AND ssnstf.trace_scope = siv.trace_scope
+                                      AND ssnstf.subject_id = siv.subject_id
+                                    ORDER BY ssnstf.seam_id ASC, ssnstf.ordinal ASC
+                                    LIMIT 1
+                                ),
+                                CASE
+                                    WHEN EXISTS(
+                                        SELECT 1
+                                        FROM subject_edge_fact_fragments AS seff_open
+                                        WHERE seff_open.project_name = siv.project_name
+                                          AND seff_open.project_file = siv.project_file
+                                          AND seff_open.trace_scope = siv.trace_scope
+                                          AND seff_open.subject_id = siv.subject_id
+                                          AND seff_open.edge_status IN ('missing', 'blocked')
+                                    ) THEN (
+                                        SELECT seff_open.edge_type
+                                        FROM subject_edge_fact_fragments AS seff_open
+                                        WHERE seff_open.project_name = siv.project_name
+                                          AND seff_open.project_file = siv.project_file
+                                          AND seff_open.trace_scope = siv.trace_scope
+                                          AND seff_open.subject_id = siv.subject_id
+                                          AND seff_open.edge_status IN ('missing', 'blocked')
+                                        ORDER BY CASE WHEN seff_open.edge_status = 'missing' THEN 0 ELSE 1 END, seff_open.edge_type ASC
+                                        LIMIT 1
+                                    )
+                                    ELSE ''
+                                END
+                            ),
+                            'status',
+                            CASE
+                                WHEN EXISTS(
+                                    SELECT 1
+                                    FROM subject_edge_fact_fragments AS seff_open
+                                    WHERE seff_open.project_name = siv.project_name
+                                      AND seff_open.project_file = siv.project_file
+                                      AND seff_open.trace_scope = siv.trace_scope
+                                      AND seff_open.subject_id = siv.subject_id
+                                      AND seff_open.edge_status IN ('missing', 'blocked')
+                                ) THEN 'open'
+                                ELSE 'clear'
+                            END
+                        )
+                    ) AS payload_json,
+                    '{}' AS provenance_json,
+                    'db-central-subject-state-v1' AS reducer_version,
+                    siv.updated_at AS built_at
+                FROM subject_identity_views AS siv;
+
+                DROP VIEW IF EXISTS db_central_subject_edge_facts_v;
+                CREATE VIEW db_central_subject_edge_facts_v AS
+                SELECT
+                    seff.project_name,
+                    seff.project_file,
+                    CASE
+                        WHEN seff.trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN seff.trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN seff.trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN seff.trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END AS system_id,
+                    seff.trace_scope,
+                    seff.subject_id,
+                    seff.edge_type,
+                    seff.edge_status,
+                    seff.payload_json,
+                    seff.provenance_json,
+                    seff.reducer_version,
+                    seff.updated_at AS built_at
+                FROM subject_edge_fact_fragments AS seff;
+
+                DROP VIEW IF EXISTS db_central_subject_next_seam_terms_v;
+                CREATE VIEW db_central_subject_next_seam_terms_v AS
+                SELECT
+                    ssnstf.project_name,
+                    ssnstf.project_file,
+                    CASE
+                        WHEN ssnstf.trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN ssnstf.trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN ssnstf.trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN ssnstf.trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END AS system_id,
+                    ssnstf.trace_scope,
+                    ssnstf.subject_id,
+                    ssnstf.seam_id,
+                    ssnstf.term_value,
+                    ssnstf.ordinal
+                FROM subject_state_next_seam_term_fragments AS ssnstf;
+
+                DROP VIEW IF EXISTS db_central_subject_identity_v;
+                CREATE VIEW db_central_subject_identity_v AS
+                SELECT
+                    siv.project_name,
+                    siv.project_file,
+                    siv.system_id,
+                    siv.trace_scope,
+                    siv.subject_id,
+                    siv.subject_kind,
+                    siv.subject_key,
+                    siv.subject_label,
+                    siv.subject_class,
+                    siv.subject_path_id,
+                    siv.semantic_key,
+                    siv.identity_owner,
+                    siv.identity_reason,
+                    siv.proof_count,
+                    siv.updated_at AS built_at
+                FROM subject_identity_views AS siv;
+
+                DROP VIEW IF EXISTS db_central_subject_decision_summary_v;
+                CREATE VIEW db_central_subject_decision_summary_v AS
+                SELECT
+                    sdsv.project_name,
+                    sdsv.project_file,
+                    CASE
+                        WHEN sdsv.trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN sdsv.trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN sdsv.trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN sdsv.trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END AS system_id,
+                    sdsv.trace_scope,
+                    sdsv.subject_id,
+                    sdsv.verdict,
+                    sdsv.summary,
+                    sdsv.proved_edge_count,
+                    sdsv.negative_edge_count,
+                    sdsv.updated_at AS built_at
+                FROM subject_decision_summary_views AS sdsv;
+
+                DROP VIEW IF EXISTS db_central_subject_contract_lanes_v;
+                CREATE VIEW db_central_subject_contract_lanes_v AS
+                SELECT
+                    sclv.project_name,
+                    sclv.project_file,
+                    sclv.system_id,
+                    sclv.trace_scope,
+                    sclv.subject_id,
+                    sclv.lane_id,
+                    sclv.selected_subject_id,
+                    sclv.selected_subject_kind,
+                    sclv.selection_source,
+                    sclv.blocked_input_reason,
+                    sclv.payload_json,
+                    sclv.provenance_json,
+                    'subject-contract-lanes-v1' AS reducer_version,
+                    sclv.updated_at AS built_at
+                FROM subject_contract_lane_views AS sclv;
+
+                DROP VIEW IF EXISTS db_central_subject_contract_lane_terms_v;
+                CREATE VIEW db_central_subject_contract_lane_terms_v AS
+                SELECT
+                    scltf.project_name,
+                    scltf.project_file,
+                    CASE
+                        WHEN scltf.trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN scltf.trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN scltf.trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN scltf.trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END AS system_id,
+                    scltf.trace_scope,
+                    scltf.subject_id,
+                    scltf.lane_id,
+                    scltf.term_role,
+                    scltf.term_value,
+                    scltf.ordinal
+                FROM subject_contract_lane_term_fragments AS scltf;
+
+                DROP VIEW IF EXISTS db_central_asset_probe_seeds_v;
+                CREATE VIEW db_central_asset_probe_seeds_v AS
+                SELECT
+                    apsv.project_name,
+                    apsv.project_file,
+                    apsv.system_id,
+                    apsv.trace_scope,
+                    apsv.seed_key,
+                    apsv.family_id,
+                    apsv.seam_hint,
+                    apsv.routine_hint,
+                    apsv.seed_kind,
+                    apsv.source_surface_id,
+                    apsv.support_score,
+                    apsv.payload_json,
+                    apsv.provenance_json,
+                    'asset-probe-seed-v1' AS reducer_version,
+                    apsv.updated_at AS built_at
+                FROM asset_probe_seed_views AS apsv;
+
+                DROP VIEW IF EXISTS db_central_asset_probe_seed_terms_v;
+                CREATE VIEW db_central_asset_probe_seed_terms_v AS
+                SELECT
+                    apstf.project_name,
+                    apstf.project_file,
+                    apstf.trace_scope,
+                    apstf.seed_key,
+                    apstf.term_role,
+                    apstf.term_value,
+                    apstf.ordinal
+                FROM asset_probe_seed_term_fragments AS apstf;
+
+                DROP VIEW IF EXISTS db_central_entity_rows_v;
+                CREATE VIEW db_central_entity_rows_v AS
+                SELECT
+                    kn.project_name,
+                    kn.project_file,
+                    kn.system_id,
+                    kn.trace_scope,
+                    kn.node_id AS entity_id,
+                    kn.node_kind AS entity_kind,
+                    kn.payload_json,
+                    kn.provenance_json,
+                    'knowledge-nodes-v1' AS reducer_version,
+                    kn.updated_at AS built_at
+                FROM knowledge_nodes AS kn;
+
+                DROP VIEW IF EXISTS db_central_fact_rows_v;
+                CREATE VIEW db_central_fact_rows_v AS
+                SELECT
+                    kf.project_name,
+                    kf.project_file,
+                    kf.system_id,
+                    kf.trace_scope,
+                    kf.entity_id,
+                    kf.field_key,
+                    kf.fact_kind,
+                    kf.fact_value,
+                    kf.payload_json,
+                    kf.provenance_json,
+                    'knowledge-facts-v1' AS reducer_version,
+                    kf.updated_at AS built_at
+                FROM knowledge_facts AS kf;
+
+                DROP VIEW IF EXISTS db_central_relation_rows_v;
+                CREATE VIEW db_central_relation_rows_v AS
+                SELECT
+                    ke.project_name,
+                    ke.project_file,
+                    ke.system_id,
+                    ke.trace_scope,
+                    ke.source_node_id AS source_entity_id,
+                    ke.field_key,
+                    ke.edge_kind AS relation_kind,
+                    ke.target_node_id AS target_entity_id,
+                    ke.payload_json,
+                    ke.provenance_json,
+                    'knowledge-edges-v1' AS reducer_version,
+                    ke.updated_at AS built_at
+                FROM knowledge_edges AS ke;
+
+                DROP VIEW IF EXISTS db_central_evidence_graph_edges_v;
+                CREATE VIEW db_central_evidence_graph_edges_v AS
+                SELECT
+                    ege.project_name,
+                    ege.project_file,
+                    ege.system_id,
+                    ege.trace_scope,
+                    ege.graph_scope,
+                    ege.source_node_id,
+                    ege.edge_kind,
+                    ege.target_node_id,
+                    ege.field_key,
+                    ege.edge_status,
+                    ege.source_layer,
+                    ege.relation_role,
+                    ege.value_semantics,
+                    ege.payload_json,
+                    ege.provenance_json,
+                    'evidence-graph-edges-v1' AS reducer_version,
+                    ege.updated_at AS built_at
+                FROM evidence_graph_edges AS ege;
+
+                DROP VIEW IF EXISTS db_central_canonical_graph_edges_v;
+                CREATE VIEW db_central_canonical_graph_edges_v AS
+                SELECT
+                    cge.project_name,
+                    cge.project_file,
+                    cge.source_node_id,
+                    cge.edge_kind,
+                    cge.target_node_id,
+                    cge.field_key,
+                    cge.edge_status,
+                    cge.relation_role,
+                    cge.value_semantics,
+                    cge.positive_observation_count,
+                    cge.negative_observation_count,
+                    cge.support_scope_count,
+                    cge.payload_json,
+                    cge.provenance_json,
+                    'canonical-graph-edges-v1' AS reducer_version,
+                    cge.updated_at AS built_at
+                FROM canonical_graph_edges AS cge;
+
+                DROP VIEW IF EXISTS db_central_graph_anchor_checks_v;
+                CREATE VIEW db_central_graph_anchor_checks_v AS
+                SELECT
+                    gac.project_name,
+                    gac.project_file,
+                    gac.trace_scope,
+                    gac.seam_id,
+                    gac.anchor_term,
+                    gac.anchor_role,
+                    gac.check_status,
+                    gac.checked_count,
+                    gac.last_request_signature,
+                    gac.payload_json,
+                    gac.provenance_json,
+                    gac.reducer_version,
+                    gac.built_at
+                FROM graph_anchor_checks AS gac;
+
+                DROP VIEW IF EXISTS db_central_gap_rows_v;
+                CREATE VIEW db_central_gap_rows_v AS
+                SELECT
+                    kg.project_name,
+                    kg.project_file,
+                    kg.system_id,
+                    kg.trace_scope,
+                    kg.subject_id AS entity_id,
+                    kg.field_key,
+                    kg.gap_kind,
+                    kg.seam_id,
+                    kg.gap_status,
+                    kg.payload_json,
+                    kg.provenance_json,
+                    'knowledge-gaps-v1' AS reducer_version,
+                    kg.updated_at AS built_at
+                FROM knowledge_gaps AS kg;
+
+                DROP VIEW IF EXISTS db_central_active_gap_rows_v;
+                CREATE VIEW db_central_active_gap_rows_v AS
+                SELECT *
+                FROM db_central_gap_rows_v
+                WHERE COALESCE(gap_status, 'open') = 'open';
+
+                DROP VIEW IF EXISTS db_central_boundary_rows_v;
+                CREATE VIEW db_central_boundary_rows_v AS
+                SELECT
+                    kb.project_name,
+                    kb.project_file,
+                    kb.system_id,
+                    kb.trace_scope,
+                    kb.subject_id,
+                    kb.boundary_kind,
+                    kb.verdict,
+                    kb.payload_json,
+                    kb.provenance_json,
+                    'knowledge-boundaries-v1' AS reducer_version,
+                    kb.updated_at AS built_at
+                FROM knowledge_boundaries AS kb;
+
+                DROP VIEW IF EXISTS db_central_open_workflow_gaps_v;
+                CREATE VIEW db_central_open_workflow_gaps_v AS
+                SELECT
+                    dgrv.project_name,
+                    dgrv.project_file,
+                    dgrv.system_id,
+                    dgrv.trace_scope,
+                    dgrv.entity_id AS subject_id,
+                    dgrv.field_key,
+                    dgrv.gap_kind,
+                    dgrv.seam_id,
+                    dgrv.gap_status,
+                    dgrv.payload_json,
+                    dgrv.provenance_json,
+                    dgrv.reducer_version,
+                    dgrv.built_at
+                FROM db_central_active_gap_rows_v AS dgrv
+                UNION ALL
+                SELECT
+                    dssv.project_name,
+                    dssv.project_file,
+                    dssv.system_id,
+                    dssv.trace_scope,
+                    dssv.subject_id,
+                    '' AS field_key,
+                    'next-seam' AS gap_kind,
+                    dssv.next_seam_id AS seam_id,
+                    CASE
+                        WHEN dssv.next_seam_status = '' THEN 'open'
+                        ELSE dssv.next_seam_status
+                    END AS gap_status,
+                    dssv.payload_json,
+                    dssv.provenance_json,
+                    dssv.reducer_version,
+                    dssv.built_at
+                FROM db_central_subject_state_v AS dssv
+                WHERE dssv.next_seam_id <> '' AND dssv.next_seam_status <> 'clear';
+
+                DROP VIEW IF EXISTS db_central_scope_summary_v;
+                CREATE VIEW db_central_scope_summary_v AS
+                SELECT
+                    dssv.project_name,
+                    dssv.project_file,
+                    dssv.system_id,
+                    dssv.trace_scope,
+                    dssv.subject_id,
+                    dssv.subject_kind,
+                    dssv.subject_label,
+                    dssv.next_seam_id,
+                    dssv.next_seam_status,
+                    dssv.known_edge_count,
+                    dssv.missing_edge_count,
+                    dssv.blocked_edge_count,
+                    dssv.nonblocking_edge_count,
+                    (
+                        SELECT COUNT(*)
+                        FROM db_central_fact_rows_v AS df
+                        WHERE df.project_name = dssv.project_name
+                          AND df.project_file = dssv.project_file
+                          AND df.trace_scope = dssv.trace_scope
+                    ) AS fact_count,
+                    (
+                        SELECT COUNT(*)
+                        FROM db_central_relation_rows_v AS dr
+                        WHERE dr.project_name = dssv.project_name
+                          AND dr.project_file = dssv.project_file
+                          AND dr.trace_scope = dssv.trace_scope
+                    ) AS relation_count,
+                    (
+                        SELECT COUNT(*)
+                        FROM db_central_gap_rows_v AS dg
+                        WHERE dg.project_name = dssv.project_name
+                          AND dg.project_file = dssv.project_file
+                          AND dg.trace_scope = dssv.trace_scope
+                    ) AS gap_count,
+                    dssv.built_at
+                FROM db_central_subject_state_v AS dssv;
+
+                DROP VIEW IF EXISTS db_central_acquisition_attempts_v;
+                CREATE VIEW db_central_acquisition_attempts_v AS
+                SELECT
+                    aa.project_name,
+                    aa.project_file,
+                    aa.system_id,
+                    aa.attempt_id,
+                    aa.request_signature,
+                    aa.trace_scope,
+                    aa.subject_id,
+                    aa.seam_id,
+                    aa.routine_id,
+                    COALESCE(json_extract(aa.requested_terms_json, '$[0]'), '') AS acquisition_term,
+                    aa.attempt_status,
+                    COALESCE(json_extract(aa.payload_json, '$.outcome'), '') AS attempt_outcome,
+                    COALESCE(json_extract(aa.payload_json, '$.detail'), '') AS detail,
+                    COALESCE(json_extract(aa.payload_json, '$.selectedTraceScope'), '') AS selected_trace_scope,
+                    COALESCE(json_extract(aa.payload_json, '$.selectedTargetId'), '') AS selected_target_id,
+                    COALESCE(json_extract(aa.payload_json, '$.relationCoverage.covered'), 0) AS relation_covered,
+                    aa.payload_json,
+                    '{}' AS provenance_json,
+                    'acquisition-attempt-v1' AS reducer_version,
+                    aa.updated_at AS built_at
+                FROM acquisition_attempts AS aa;
+
+                DROP VIEW IF EXISTS db_central_acquisition_attempt_terms_v;
+                CREATE VIEW db_central_acquisition_attempt_terms_v AS
+                SELECT
+                    aatf.project_name,
+                    aatf.project_file,
+                    aa.system_id,
+                    aatf.attempt_id,
+                    aa.trace_scope,
+                    aa.subject_id,
+                    aa.seam_id,
+                    aatf.term_role,
+                    aatf.term_value,
+                    aatf.ordinal
+                FROM acquisition_attempt_term_fragments AS aatf
+                LEFT JOIN acquisition_attempts AS aa
+                  ON aa.project_name = aatf.project_name
+                 AND aa.project_file = aatf.project_file
+                 AND aa.attempt_id = aatf.attempt_id;
+
+                DROP VIEW IF EXISTS db_central_knowledge_gap_terms_v;
+                CREATE VIEW db_central_knowledge_gap_terms_v AS
+                SELECT
+                    kgtf.project_name,
+                    kgtf.project_file,
+                    kg.system_id,
+                    kgtf.gap_id,
+                    kg.trace_scope,
+                    kg.subject_id,
+                    kg.gap_kind,
+                    kg.seam_id,
+                    kgtf.term_role,
+                    kgtf.term_value,
+                    kgtf.ordinal
+                FROM knowledge_gap_term_fragments AS kgtf
+                LEFT JOIN knowledge_gaps AS kg
+                  ON kg.project_name = kgtf.project_name
+                 AND kg.project_file = kgtf.project_file
+                 AND kg.gap_id = kgtf.gap_id;
                 """
             )
             if current_version != DB_SCHEMA_VERSION:
@@ -12990,6 +16393,28 @@ class GhidraCacheDB:
                     """,
                     (str(DB_SCHEMA_VERSION),),
                 )
+            self._bootstrap_central_workflow_from_materialized(conn)
+            conn.executescript(
+                """
+                DROP TABLE IF EXISTS materialized_job_views;
+                DROP TABLE IF EXISTS materialized_term_views;
+                DROP TABLE IF EXISTS materialized_trace_views;
+                DROP TABLE IF EXISTS materialized_native_trace_views;
+                DROP TABLE IF EXISTS canonical_system_trace_views;
+                DROP TABLE IF EXISTS materialized_target_bundle_views;
+                DROP TABLE IF EXISTS materialized_resolver_target_views;
+                DROP TABLE IF EXISTS materialized_subject_edge_facts;
+                DROP TABLE IF EXISTS materialized_subject_state_views;
+                DROP TABLE IF EXISTS materialized_subject_contract_views;
+                DROP TABLE IF EXISTS materialized_entity_views;
+                DROP TABLE IF EXISTS materialized_fact_views;
+                DROP TABLE IF EXISTS materialized_relation_views;
+                DROP TABLE IF EXISTS materialized_gap_views;
+                DROP TABLE IF EXISTS materialized_boundary_views;
+                DROP TABLE IF EXISTS materialized_acquisition_diagnostics_views;
+                DROP TABLE IF EXISTS materialized_system_unit_views;
+                """
+            )
 
     def _job_row_to_dict(self, row: sqlite3.Row | None) -> dict[str, Any] | None:
         if row is None:
@@ -13003,6 +16428,3987 @@ class GhidraCacheDB:
         data["per_term_jobs"] = _json_loads(data.pop("per_term_jobs_json", None), [])
         data["graph_backfilled_terms"] = _json_loads(data.pop("graph_backfilled_terms_json", None), [])
         return data
+
+    def _bootstrap_central_workflow_from_materialized(self, conn: sqlite3.Connection) -> None:
+        canonical_graph_edge_count = int((conn.execute("SELECT COUNT(*) AS c FROM canonical_graph_edges").fetchone() or {"c": 0})["c"] or 0)
+        if canonical_graph_edge_count == 0:
+            self._rebuild_canonical_graph_edges(conn)
+        knowledge_node_count = int((conn.execute("SELECT COUNT(*) AS c FROM knowledge_nodes").fetchone() or {"c": 0})["c"] or 0)
+        if knowledge_node_count == 0:
+            conn.execute(
+                """
+                INSERT INTO knowledge_nodes(
+                    project_name, project_file, node_id, node_kind, system_id, trace_scope,
+                    canonical_label, normalized_key, payload_json, provenance_json, updated_at
+                )
+                SELECT
+                    project_name,
+                    project_file,
+                    entity_id,
+                    entity_kind,
+                    CASE
+                        WHEN trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END,
+                    trace_scope,
+                    COALESCE(json_extract(payload_json, '$.label'), json_extract(payload_json, '$.subjectLabel'), entity_id),
+                    lower(entity_id),
+                    payload_json,
+                    provenance_json,
+                    built_at
+                FROM materialized_entity_views
+                """
+            )
+        knowledge_edge_count = int((conn.execute("SELECT COUNT(*) AS c FROM knowledge_edges").fetchone() or {"c": 0})["c"] or 0)
+        if knowledge_edge_count == 0:
+            conn.execute(
+                """
+                INSERT INTO knowledge_edges(
+                    project_name, project_file, source_node_id, edge_kind, target_node_id, system_id,
+                    trace_scope, field_key, edge_status, payload_json, provenance_json, updated_at
+                )
+                SELECT
+                    project_name,
+                    project_file,
+                    source_entity_id,
+                    relation_kind,
+                    target_entity_id,
+                    CASE
+                        WHEN trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END,
+                    trace_scope,
+                    field_key,
+                    'active',
+                    payload_json,
+                    provenance_json,
+                    built_at
+                FROM materialized_relation_views
+                """
+            )
+        knowledge_fact_count = int((conn.execute("SELECT COUNT(*) AS c FROM knowledge_facts").fetchone() or {"c": 0})["c"] or 0)
+        if knowledge_fact_count == 0:
+            conn.execute(
+                """
+                INSERT INTO knowledge_facts(
+                    project_name, project_file, entity_id, fact_kind, fact_value, system_id,
+                    trace_scope, field_key, payload_json, provenance_json, updated_at
+                )
+                SELECT
+                    project_name,
+                    project_file,
+                    entity_id,
+                    fact_kind,
+                    fact_value,
+                    CASE
+                        WHEN trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END,
+                    trace_scope,
+                    field_key,
+                    payload_json,
+                    provenance_json,
+                    built_at
+                FROM materialized_fact_views
+                """
+            )
+        knowledge_boundary_count = int((conn.execute("SELECT COUNT(*) AS c FROM knowledge_boundaries").fetchone() or {"c": 0})["c"] or 0)
+        if knowledge_boundary_count == 0:
+            conn.execute(
+                """
+                INSERT INTO knowledge_boundaries(
+                    project_name, project_file, subject_id, boundary_kind, system_id,
+                    trace_scope, verdict, payload_json, provenance_json, updated_at
+                )
+                SELECT
+                    project_name,
+                    project_file,
+                    subject_id,
+                    boundary_kind,
+                    CASE
+                        WHEN trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END,
+                    trace_scope,
+                    verdict,
+                    payload_json,
+                    provenance_json,
+                    built_at
+                FROM materialized_boundary_views
+                """
+            )
+        knowledge_gap_count = int((conn.execute("SELECT COUNT(*) AS c FROM knowledge_gaps").fetchone() or {"c": 0})["c"] or 0)
+        if knowledge_gap_count == 0:
+            conn.execute(
+                """
+                INSERT INTO knowledge_gaps(
+                    project_name, project_file, gap_id, system_id, trace_scope, subject_id,
+                    field_key, gap_kind, seam_id, gap_status, priority, payload_json, provenance_json, updated_at
+                )
+                SELECT
+                    project_name,
+                    project_file,
+                    trace_scope || ':' || entity_id || ':' || COALESCE(NULLIF(field_key, ''), 'field') || ':' || gap_kind || ':' ||
+                        COALESCE(NULLIF(json_extract(payload_json, '$.seamId'), ''), NULLIF(json_extract(payload_json, '$.edgeType'), ''), gap_kind),
+                    CASE
+                        WHEN trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END,
+                    trace_scope,
+                    entity_id,
+                    field_key,
+                    gap_kind,
+                    COALESCE(NULLIF(json_extract(payload_json, '$.seamId'), ''), NULLIF(json_extract(payload_json, '$.edgeType'), ''), gap_kind),
+                    'open',
+                    COALESCE(json_extract(payload_json, '$.priority'), 0),
+                    payload_json,
+                    provenance_json,
+                    built_at
+                FROM materialized_gap_views
+                """
+            )
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO knowledge_gap_term_fragments(
+                    project_name, project_file, gap_id, term_role, term_value, ordinal
+                )
+                SELECT
+                    kg.project_name,
+                    kg.project_file,
+                    kg.gap_id,
+                    src.term_role,
+                    src.term_value,
+                    src.ordinal
+                FROM knowledge_gaps AS kg
+                JOIN (
+                    SELECT
+                        project_name,
+                        project_file,
+                        trace_scope,
+                        entity_id,
+                        field_key,
+                        gap_kind,
+                        COALESCE(NULLIF(json_extract(payload_json, '$.seamId'), ''), NULLIF(json_extract(payload_json, '$.edgeType'), ''), gap_kind) AS seam_id,
+                        'term' AS term_role,
+                        json_each.value AS term_value,
+                        json_each.key AS ordinal
+                    FROM materialized_gap_views, json_each(COALESCE(json_extract(payload_json, '$.terms'), '[]'))
+                    UNION ALL
+                    SELECT
+                        project_name, project_file, trace_scope, entity_id, field_key, gap_kind,
+                        COALESCE(NULLIF(json_extract(payload_json, '$.seamId'), ''), NULLIF(json_extract(payload_json, '$.edgeType'), ''), gap_kind),
+                        'action', json_each.value, json_each.key
+                    FROM materialized_gap_views, json_each(COALESCE(json_extract(payload_json, '$.actionTerms'), '[]'))
+                    UNION ALL
+                    SELECT
+                        project_name, project_file, trace_scope, entity_id, field_key, gap_kind,
+                        COALESCE(NULLIF(json_extract(payload_json, '$.seamId'), ''), NULLIF(json_extract(payload_json, '$.edgeType'), ''), gap_kind),
+                        'owner-block', json_each.value, json_each.key
+                    FROM materialized_gap_views, json_each(COALESCE(json_extract(payload_json, '$.ownerFieldBlock'), '[]'))
+                    UNION ALL
+                    SELECT
+                        project_name, project_file, trace_scope, entity_id, field_key, gap_kind,
+                        COALESCE(NULLIF(json_extract(payload_json, '$.seamId'), ''), NULLIF(json_extract(payload_json, '$.edgeType'), ''), gap_kind),
+                        'updater', json_each.value, json_each.key
+                    FROM materialized_gap_views, json_each(COALESCE(json_extract(payload_json, '$.updaterTerms'), '[]'))
+                ) AS src
+                  ON kg.project_name = src.project_name
+                 AND kg.project_file = src.project_file
+                 AND kg.trace_scope = src.trace_scope
+                 AND kg.subject_id = src.entity_id
+                 AND kg.field_key = src.field_key
+                 AND kg.gap_kind = src.gap_kind
+                 AND kg.seam_id = src.seam_id
+                WHERE src.term_value IS NOT NULL AND CAST(src.term_value AS TEXT) <> ''
+                """
+            )
+        contract_lane_count = int((conn.execute("SELECT COUNT(*) AS c FROM subject_contract_lane_views").fetchone() or {"c": 0})["c"] or 0)
+        if contract_lane_count == 0:
+            contract_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, subject_id, payload_json, provenance_json, built_at
+                FROM materialized_subject_contract_views
+                """
+            ).fetchall()
+            for row in contract_rows:
+                self._replace_subject_contract_lane_fragments(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["trace_scope"] or ""),
+                    str(row["subject_id"] or ""),
+                    _json_loads(row["payload_json"], {}),
+                    _json_loads(row["provenance_json"], {}),
+                    built_at=str(row["built_at"] or ""),
+                )
+        subject_identity_count = int((conn.execute("SELECT COUNT(*) AS c FROM subject_identity_views").fetchone() or {"c": 0})["c"] or 0)
+        if subject_identity_count == 0:
+            state_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, subject_id, payload_json, provenance_json, built_at
+                FROM materialized_subject_state_views
+                """
+            ).fetchall()
+            for row in state_rows:
+                self._replace_subject_state_projection_fragments(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["trace_scope"] or ""),
+                    str(row["subject_id"] or ""),
+                    _json_loads(row["payload_json"], {}),
+                    _json_loads(row["provenance_json"], {}),
+                    built_at=str(row["built_at"] or ""),
+                )
+        subject_edge_fact_count = int((conn.execute("SELECT COUNT(*) AS c FROM subject_edge_fact_fragments").fetchone() or {"c": 0})["c"] or 0)
+        if subject_edge_fact_count == 0:
+            edge_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, subject_id, edge_type, edge_status, payload_json, provenance_json, reducer_version, built_at
+                FROM materialized_subject_edge_facts
+                """
+            ).fetchall()
+            for row in edge_rows:
+                self._replace_subject_edge_fact_fragments(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["trace_scope"] or ""),
+                    str(row["subject_id"] or ""),
+                    [
+                        {
+                            "edgeType": str(row["edge_type"] or ""),
+                            "status": str(row["edge_status"] or ""),
+                            **dict(_json_loads(row["payload_json"], {})),
+                        }
+                    ],
+                    built_at=str(row["built_at"] or ""),
+                )
+        subject_state_history_count = int((conn.execute("SELECT COUNT(*) AS c FROM subject_state_snapshot_history").fetchone() or {"c": 0})["c"] or 0)
+        if subject_state_history_count == 0:
+            state_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, subject_id, payload_json, provenance_json, built_at
+                FROM materialized_subject_state_views
+                """
+            ).fetchall()
+            for row in state_rows:
+                self._upsert_subject_state_snapshot_history(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["trace_scope"] or ""),
+                    str(row["subject_id"] or ""),
+                    _json_loads(row["payload_json"], {}),
+                    _json_loads(row["provenance_json"], {}),
+                    built_at=str(row["built_at"] or ""),
+                )
+        subject_contract_count = int((conn.execute("SELECT COUNT(*) AS c FROM subject_contract_views").fetchone() or {"c": 0})["c"] or 0)
+        if subject_contract_count == 0:
+            contract_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, subject_id, payload_json, provenance_json, built_at
+                FROM materialized_subject_contract_views
+                """
+            ).fetchall()
+            for row in contract_rows:
+                self._replace_subject_contract_projection_fragments(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["trace_scope"] or ""),
+                    str(row["subject_id"] or ""),
+                    _json_loads(row["payload_json"], {}),
+                    _json_loads(row["provenance_json"], {}),
+                    built_at=str(row["built_at"] or ""),
+                )
+        subject_contract_history_count = int((conn.execute("SELECT COUNT(*) AS c FROM subject_contract_snapshot_history").fetchone() or {"c": 0})["c"] or 0)
+        if subject_contract_history_count == 0:
+            contract_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, subject_id, payload_json, provenance_json, built_at
+                FROM materialized_subject_contract_views
+                """
+            ).fetchall()
+            for row in contract_rows:
+                self._upsert_subject_contract_snapshot_history(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["trace_scope"] or ""),
+                    str(row["subject_id"] or ""),
+                    _json_loads(row["payload_json"], {}),
+                    _json_loads(row["provenance_json"], {}),
+                    built_at=str(row["built_at"] or ""),
+                )
+        resolver_target_count = int((conn.execute("SELECT COUNT(*) AS c FROM resolver_target_views").fetchone() or {"c": 0})["c"] or 0)
+        if resolver_target_count == 0:
+            resolver_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, payload_json, provenance_json, built_at
+                FROM materialized_resolver_target_views
+                """
+            ).fetchall()
+            for row in resolver_rows:
+                self._replace_resolver_target_projection_fragments(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["trace_scope"] or ""),
+                    _json_loads(row["payload_json"], {}),
+                    _json_loads(row["provenance_json"], {}),
+                    built_at=str(row["built_at"] or ""),
+                )
+        resolver_target_history_count = int((conn.execute("SELECT COUNT(*) AS c FROM resolver_target_snapshot_history").fetchone() or {"c": 0})["c"] or 0)
+        if resolver_target_history_count == 0:
+            resolver_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, payload_json, provenance_json, built_at
+                FROM materialized_resolver_target_views
+                """
+            ).fetchall()
+            for row in resolver_rows:
+                self._upsert_resolver_target_snapshot_history(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["trace_scope"] or ""),
+                    _json_loads(row["payload_json"], {}),
+                    _json_loads(row["provenance_json"], {}),
+                    built_at=str(row["built_at"] or ""),
+                )
+        seed_scopes = {
+            (str(row["project_name"] or ""), str(row["project_file"] or ""), str(row["trace_scope"] or ""))
+            for row in conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope
+                FROM resolver_target_views
+                UNION
+                SELECT project_name, project_file, trace_scope
+                FROM subject_contract_views
+                """
+            ).fetchall()
+            if str(row["trace_scope"] or "").strip()
+        }
+        for project_name_value, project_file_value, trace_scope_value in seed_scopes:
+            self._sync_asset_probe_seeds_for_scope(
+                conn,
+                project_name_value,
+                project_file_value,
+                trace_scope_value,
+            )
+        target_bundle_count = int((conn.execute("SELECT COUNT(*) AS c FROM target_bundle_views").fetchone() or {"c": 0})["c"] or 0)
+        if target_bundle_count == 0:
+            bundle_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, built_at
+                FROM materialized_target_bundle_views
+                """
+            ).fetchall()
+            for row in bundle_rows:
+                self._replace_target_bundle_projection_fragments(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["trace_scope"] or ""),
+                    str(row["request_signature"] or ""),
+                    _json_loads(row["payload_json"], {}),
+                    _json_loads(row["provenance_json"], {}),
+                    built_at=str(row["built_at"] or ""),
+                )
+        native_trace_count = int((conn.execute("SELECT COUNT(*) AS c FROM native_trace_views").fetchone() or {"c": 0})["c"] or 0)
+        if native_trace_count == 0:
+            native_trace_rows = conn.execute(
+                """
+                SELECT project_name, project_file, request_signature, requested_terms_json, search_terms_json,
+                       payload_json, provenance_json, reducer_version, built_at
+                FROM materialized_native_trace_views
+                """
+            ).fetchall()
+            for row in native_trace_rows:
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO native_trace_views(
+                        project_name, project_file, request_signature, requested_terms_json, search_terms_json,
+                        payload_json, provenance_json, reducer_version, built_at
+                    ) VALUES(?,?,?,?,?,?,?,?,?)
+                    """,
+                    (
+                        str(row["project_name"] or ""),
+                        str(row["project_file"] or ""),
+                        str(row["request_signature"] or ""),
+                        str(row["requested_terms_json"] or "[]"),
+                        str(row["search_terms_json"] or "[]"),
+                        str(row["payload_json"] or "{}"),
+                        str(row["provenance_json"] or "{}"),
+                        str(row["reducer_version"] or ""),
+                        str(row["built_at"] or ""),
+                    ),
+                )
+        system_unit_count = int((conn.execute("SELECT COUNT(*) AS c FROM system_unit_views").fetchone() or {"c": 0})["c"] or 0)
+        if system_unit_count == 0:
+            system_unit_rows = conn.execute(
+                """
+                SELECT system_id, version, payload_json, provenance_json, reducer_version, built_at, exported_path
+                FROM materialized_system_unit_views
+                """
+            ).fetchall()
+            for row in system_unit_rows:
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO system_unit_views(
+                        system_id, version, payload_json, provenance_json, reducer_version, built_at, exported_path
+                    ) VALUES(?,?,?,?,?,?,?)
+                    """,
+                    (
+                        str(row["system_id"] or ""),
+                        str(row["version"] or ""),
+                        str(row["payload_json"] or "{}"),
+                        str(row["provenance_json"] or "{}"),
+                        str(row["reducer_version"] or ""),
+                        str(row["built_at"] or ""),
+                        str(row["exported_path"] or ""),
+                    ),
+                )
+        acquisition_diagnostic_count = int((conn.execute("SELECT COUNT(*) AS c FROM acquisition_diagnostic_views").fetchone() or {"c": 0})["c"] or 0)
+        if acquisition_diagnostic_count == 0:
+            diagnostic_rows = conn.execute(
+                """
+                SELECT project_name, project_file, request_signature, trace_scope, acquisition_term,
+                       payload_json, provenance_json, reducer_version, built_at
+                FROM materialized_acquisition_diagnostics_views
+                """
+            ).fetchall()
+            for row in diagnostic_rows:
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO acquisition_diagnostic_views(
+                        project_name, project_file, request_signature, trace_scope, acquisition_term,
+                        payload_json, provenance_json, reducer_version, built_at
+                    ) VALUES(?,?,?,?,?,?,?,?,?)
+                    """,
+                    (
+                        str(row["project_name"] or ""),
+                        str(row["project_file"] or ""),
+                        str(row["request_signature"] or ""),
+                        str(row["trace_scope"] or ""),
+                        str(row["acquisition_term"] or ""),
+                        str(row["payload_json"] or "{}"),
+                        str(row["provenance_json"] or "{}"),
+                        str(row["reducer_version"] or ""),
+                        str(row["built_at"] or ""),
+                    ),
+                )
+        graph_anchor_check_count = int((conn.execute("SELECT COUNT(*) AS c FROM graph_anchor_checks").fetchone() or {"c": 0})["c"] or 0)
+        if graph_anchor_check_count == 0:
+            diagnostic_rows = conn.execute(
+                """
+                SELECT project_name, project_file, request_signature, trace_scope, acquisition_term,
+                       payload_json, provenance_json, reducer_version, built_at
+                FROM acquisition_diagnostic_views
+                ORDER BY built_at ASC
+                """
+            ).fetchall()
+            for row in diagnostic_rows:
+                self._upsert_graph_anchor_check_from_diagnostic(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["request_signature"] or ""),
+                    str(row["trace_scope"] or ""),
+                    str(row["acquisition_term"] or ""),
+                    dict(_json_loads(row["payload_json"], {})),
+                    dict(_json_loads(row["provenance_json"], {})),
+                    str(row["reducer_version"] or ""),
+                    str(row["built_at"] or ""),
+                )
+        term_view_count = int((conn.execute("SELECT COUNT(*) AS c FROM term_views").fetchone() or {"c": 0})["c"] or 0)
+        if term_view_count == 0:
+            term_rows = conn.execute(
+                """
+                SELECT project_name, project_file, normalized_term, term, payload_json, provenance_json, updated_at
+                FROM materialized_term_views
+                """
+            ).fetchall()
+            for row in term_rows:
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO term_views(
+                        project_name, project_file, normalized_term, term, payload_json, provenance_json, updated_at
+                    ) VALUES(?,?,?,?,?,?,?)
+                    """,
+                    (
+                        str(row["project_name"] or ""),
+                        str(row["project_file"] or ""),
+                        str(row["normalized_term"] or ""),
+                        str(row["term"] or ""),
+                        str(row["payload_json"] or "{}"),
+                        str(row["provenance_json"] or "{}"),
+                        str(row["updated_at"] or ""),
+                    ),
+                )
+        trace_scope_term_mentions_count = int((conn.execute("SELECT COUNT(*) AS c FROM trace_scope_term_mentions").fetchone() or {"c": 0})["c"] or 0)
+        if trace_scope_term_mentions_count == 0:
+            self._rebuild_trace_scope_term_mentions(conn)
+        job_view_count = int((conn.execute("SELECT COUNT(*) AS c FROM job_views").fetchone() or {"c": 0})["c"] or 0)
+        if job_view_count == 0:
+            job_rows = conn.execute(
+                """
+                SELECT project_name, project_file, signature, wanted_terms_json, payload_json, provenance_json, updated_at
+                FROM materialized_job_views
+                """
+            ).fetchall()
+            for row in job_rows:
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO job_views(
+                        project_name, project_file, signature, wanted_terms_json, payload_json, provenance_json, updated_at
+                    ) VALUES(?,?,?,?,?,?,?)
+                    """,
+                    (
+                        str(row["project_name"] or ""),
+                        str(row["project_file"] or ""),
+                        str(row["signature"] or ""),
+                        str(row["wanted_terms_json"] or "[]"),
+                        str(row["payload_json"] or "{}"),
+                        str(row["provenance_json"] or "{}"),
+                        str(row["updated_at"] or ""),
+                    ),
+                )
+        trace_history_count = int((conn.execute("SELECT COUNT(*) AS c FROM trace_payload_history").fetchone() or {"c": 0})["c"] or 0)
+        if trace_history_count == 0:
+            trace_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
+                FROM materialized_trace_views
+                """
+            ).fetchall()
+            for row in trace_rows:
+                self._upsert_trace_payload_history(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["trace_scope"] or ""),
+                    str(row["request_signature"] or ""),
+                    _json_loads(row["payload_json"], {}),
+                    _json_loads(row["provenance_json"], {}),
+                    reducer_version=str(row["reducer_version"] or ""),
+                    built_at=str(row["built_at"] or ""),
+                )
+        canonical_trace_history_count = int((conn.execute("SELECT COUNT(*) AS c FROM canonical_system_trace_history").fetchone() or {"c": 0})["c"] or 0)
+        if canonical_trace_history_count == 0:
+            trace_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
+                FROM canonical_system_trace_views
+                """
+            ).fetchall()
+            for row in trace_rows:
+                self._upsert_canonical_system_trace_history(
+                    conn,
+                    str(row["project_name"] or ""),
+                    str(row["project_file"] or ""),
+                    str(row["trace_scope"] or ""),
+                    str(row["request_signature"] or ""),
+                    _json_loads(row["payload_json"], {}),
+                    _json_loads(row["provenance_json"], {}),
+                    reducer_version=str(row["reducer_version"] or ""),
+                    built_at=str(row["built_at"] or ""),
+                )
+        acquisition_attempt_count = int((conn.execute("SELECT COUNT(*) AS c FROM acquisition_attempts").fetchone() or {"c": 0})["c"] or 0)
+        if acquisition_attempt_count == 0:
+            conn.execute(
+                """
+                INSERT INTO acquisition_attempts(
+                    project_name, project_file, attempt_id, request_signature, system_id, trace_scope, subject_id,
+                    seam_id, routine_id, attempt_status, requested_terms_json, selected_anchors_json, payload_json, created_at, updated_at
+                )
+                SELECT
+                    project_name,
+                    project_file,
+                    request_signature || ':' || trace_scope || ':' || acquisition_term,
+                    request_signature,
+                    CASE
+                        WHEN trace_scope LIKE 'token-shop%' THEN 'token-shop'
+                        WHEN trace_scope LIKE 'shard%' THEN 'shards'
+                        WHEN trace_scope LIKE 'multiverse-market%' THEN 'multiverse-market'
+                        WHEN trace_scope LIKE 'player-%' THEN 'player-state'
+                        ELSE 'unknown'
+                    END,
+                    trace_scope,
+                    COALESCE(NULLIF(json_extract(payload_json, '$.subjectId'), ''), trace_scope),
+                    COALESCE(json_extract(payload_json, '$.seamId'), ''),
+                    COALESCE(json_extract(payload_json, '$.executionRoutineId'), ''),
+                    COALESCE(NULLIF(json_extract(payload_json, '$.status'), ''), NULLIF(json_extract(payload_json, '$.outcome'), ''), 'observed'),
+                    json_array(acquisition_term),
+                    json_array(COALESCE(json_extract(payload_json, '$.nextRecommended.term'), acquisition_term)),
+                    payload_json,
+                    built_at,
+                    built_at
+                FROM materialized_acquisition_diagnostics_views
+                """
+            )
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO acquisition_attempt_term_fragments(
+                    project_name, project_file, attempt_id, term_role, term_value, ordinal
+                )
+                SELECT
+                    project_name,
+                    project_file,
+                    request_signature || ':' || trace_scope || ':' || acquisition_term,
+                    'requested',
+                    acquisition_term,
+                    0
+                FROM materialized_acquisition_diagnostics_views
+                WHERE acquisition_term <> ''
+                """
+            )
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO acquisition_attempt_term_fragments(
+                    project_name, project_file, attempt_id, term_role, term_value, ordinal
+                )
+                SELECT
+                    project_name,
+                    project_file,
+                    request_signature || ':' || trace_scope || ':' || acquisition_term,
+                    'requested',
+                    json_each.value,
+                    json_each.key
+                FROM materialized_acquisition_diagnostics_views, json_each(COALESCE(json_extract(payload_json, '$.expectedCoverage'), '[]'))
+                WHERE json_each.value IS NOT NULL AND CAST(json_each.value AS TEXT) <> ''
+                """
+            )
+        next_seam_term_count = int((conn.execute("SELECT COUNT(*) AS c FROM subject_state_next_seam_term_fragments").fetchone() or {"c": 0})["c"] or 0)
+        if next_seam_term_count == 0:
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO subject_state_next_seam_term_fragments(
+                    project_name, project_file, trace_scope, subject_id, seam_id, term_value, ordinal
+                )
+                SELECT
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_id,
+                    json_extract(payload_json, '$.nextSeam.id'),
+                    json_each.value,
+                    json_each.key
+                FROM materialized_subject_state_views, json_each(COALESCE(json_extract(payload_json, '$.nextSeam.terms'), '[]'))
+                WHERE COALESCE(json_extract(payload_json, '$.nextSeam.id'), '') <> ''
+                  AND json_each.value IS NOT NULL
+                  AND CAST(json_each.value AS TEXT) <> ''
+                """
+            )
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO acquisition_attempt_term_fragments(
+                    project_name, project_file, attempt_id, term_role, term_value, ordinal
+                )
+                SELECT
+                    project_name,
+                    project_file,
+                    request_signature || ':' || trace_scope || ':' || acquisition_term,
+                    'anchor',
+                    json_each.value,
+                    json_each.key
+                FROM materialized_acquisition_diagnostics_views, json_each(COALESCE(json_extract(payload_json, '$.relationCoverage.progressArtifacts'), '[]'))
+                WHERE json_each.value IS NOT NULL AND CAST(json_each.value AS TEXT) <> ''
+                """
+            )
+
+    def _replace_acquisition_attempt_term_fragments(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        attempt_id: str,
+        fragments: list[tuple[str, str, int]],
+    ) -> None:
+        conn.execute(
+            """
+            DELETE FROM acquisition_attempt_term_fragments
+            WHERE project_name = ? AND project_file = ? AND attempt_id = ?
+            """,
+            (project_name, project_file, attempt_id),
+        )
+        for term_role, term_value, ordinal in fragments:
+            conn.execute(
+                """
+                INSERT INTO acquisition_attempt_term_fragments(
+                    project_name, project_file, attempt_id, term_role, term_value, ordinal
+                ) VALUES(?,?,?,?,?,?)
+                """,
+                (
+                    project_name,
+                    project_file,
+                    attempt_id,
+                    str(term_role or "").strip(),
+                    str(term_value or "").strip(),
+                    int(ordinal or 0),
+                ),
+            )
+
+    def _upsert_acquisition_attempt_from_diagnostic(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        request_signature: str,
+        trace_scope: str,
+        acquisition_term: str,
+        payload: dict[str, Any],
+    ) -> None:
+        normalized_payload = dict(payload or {})
+        trace_scope = str(trace_scope or "").strip()
+        acquisition_term = str(acquisition_term or "").strip()
+        request_signature = str(request_signature or "").strip()
+        attempt_id = f"{request_signature or 'adhoc'}:{trace_scope}:{acquisition_term}"
+        subject_id = str(normalized_payload.get("subjectId") or trace_scope).strip()
+        seam_id = str(normalized_payload.get("seamId") or "").strip()
+        routine_id = str(normalized_payload.get("executionRoutineId") or "").strip()
+        attempt_status = str(normalized_payload.get("status") or normalized_payload.get("outcome") or "observed").strip()
+        relation_coverage = dict(normalized_payload.get("relationCoverage") or {})
+        requested_terms = _unique_strings(
+            [
+                *[str(value).strip() for value in (normalized_payload.get("expectedCoverage") or []) if str(value).strip()],
+                *[str(value).strip() for value in (relation_coverage.get("evidenceTerms") or []) if str(value).strip()],
+                acquisition_term,
+            ]
+        )
+        selected_anchors = _unique_strings(
+            [
+                *[str(value).strip() for value in (relation_coverage.get("progressArtifacts") or []) if str(value).strip()],
+                *[str(value).strip() for value in (relation_coverage.get("missingArtifacts") or []) if str(value).strip()],
+                str(dict(normalized_payload.get("nextRecommended") or {}).get("term") or "").strip(),
+            ]
+        )
+        timestamp = datetime.now().isoformat(timespec="microseconds")
+        conn.execute(
+            """
+            INSERT INTO acquisition_attempts(
+                project_name, project_file, attempt_id, request_signature, system_id, trace_scope,
+                subject_id, seam_id, routine_id, attempt_status, requested_terms_json,
+                selected_anchors_json, payload_json, created_at, updated_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ON CONFLICT(project_name, project_file, attempt_id) DO UPDATE SET
+                request_signature=excluded.request_signature,
+                system_id=excluded.system_id,
+                trace_scope=excluded.trace_scope,
+                subject_id=excluded.subject_id,
+                seam_id=excluded.seam_id,
+                routine_id=excluded.routine_id,
+                attempt_status=excluded.attempt_status,
+                requested_terms_json=excluded.requested_terms_json,
+                selected_anchors_json=excluded.selected_anchors_json,
+                payload_json=excluded.payload_json,
+                updated_at=excluded.updated_at
+            """,
+            (
+                project_name,
+                project_file,
+                attempt_id,
+                request_signature,
+                _system_id_from_trace_scope(trace_scope),
+                trace_scope,
+                subject_id,
+                seam_id,
+                routine_id,
+                attempt_status,
+                _json_dumps(requested_terms),
+                _json_dumps(selected_anchors),
+                _json_dumps(normalized_payload),
+                timestamp,
+                timestamp,
+            ),
+        )
+        fragments: list[tuple[str, str, int]] = []
+        for ordinal, term in enumerate(requested_terms):
+            fragments.append(("requested", str(term).strip(), ordinal))
+        for ordinal, term in enumerate(selected_anchors):
+            fragments.append(("anchor", str(term).strip(), ordinal))
+        self._replace_acquisition_attempt_term_fragments(conn, project_name, project_file, attempt_id, fragments)
+
+    def _replace_knowledge_gap_term_fragments(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        gap_id: str,
+        fragments: list[tuple[str, str, int]],
+    ) -> None:
+        desired_rows = [
+            {
+                "term_role": str(term_role or "").strip(),
+                "term_value": str(term_value or "").strip(),
+                "ordinal": int(ordinal or 0),
+            }
+            for term_role, term_value, ordinal in fragments
+            if str(term_role or "").strip() and str(term_value or "").strip()
+        ]
+        existing_rows = [
+            {
+                "term_role": str(row["term_role"] or ""),
+                "term_value": str(row["term_value"] or ""),
+                "ordinal": int(row["ordinal"] or 0),
+            }
+            for row in conn.execute(
+                """
+                SELECT term_role, term_value, ordinal
+                FROM knowledge_gap_term_fragments
+                WHERE project_name = ? AND project_file = ? AND gap_id = ?
+                ORDER BY term_role ASC, ordinal ASC, term_value ASC
+                """,
+                (project_name, project_file, gap_id),
+            ).fetchall()
+        ]
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="knowledge_gap_term_fragments",
+            scope_columns=["project_name", "project_file", "gap_id"],
+            scope_values=(project_name, project_file, gap_id),
+            key_fields=["term_role", "term_value"],
+            value_fields=["ordinal"],
+            desired_rows=desired_rows,
+            existing_rows=existing_rows,
+            row_columns=["term_role", "term_value", "ordinal"],
+        )
+
+    def _replace_subject_state_next_seam_term_fragments(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        seam_id: str,
+        terms: list[str],
+    ) -> None:
+        normalized_seam_id = str(seam_id or "").strip()
+        desired_rows = (
+            [
+                {
+                    "seam_id": normalized_seam_id,
+                    "term_value": term,
+                    "ordinal": ordinal,
+                }
+                for ordinal, term in enumerate(
+                    _unique_strings([str(value).strip() for value in (terms or []) if str(value).strip()])
+                )
+            ]
+            if normalized_seam_id
+            else []
+        )
+        existing_rows = [
+            {
+                "seam_id": str(row["seam_id"] or ""),
+                "term_value": str(row["term_value"] or ""),
+                "ordinal": int(row["ordinal"] or 0),
+            }
+            for row in conn.execute(
+                """
+                SELECT seam_id, term_value, ordinal
+                FROM subject_state_next_seam_term_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY ordinal ASC, term_value ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        if _fragment_signature(existing_rows, ["seam_id", "term_value", "ordinal"]) == _fragment_signature(
+            desired_rows, ["seam_id", "term_value", "ordinal"]
+        ):
+            return
+        conn.execute(
+            """
+            DELETE FROM subject_state_next_seam_term_fragments
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+            """,
+            (project_name, project_file, trace_scope, subject_id),
+        )
+        if not normalized_seam_id:
+            return
+        for item in desired_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_state_next_seam_term_fragments(
+                    project_name, project_file, trace_scope, subject_id, seam_id, term_value, ordinal
+                ) VALUES(?,?,?,?,?,?,?)
+                """,
+                (
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_id,
+                    normalized_seam_id,
+                    str(item["term_value"]),
+                    int(item["ordinal"]),
+                ),
+            )
+
+    def _replace_subject_contract_lane_fragments(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        payload: dict[str, Any],
+        provenance: dict[str, Any] | None = None,
+        *,
+        built_at: str = "",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        subject_id = str(subject_id or "").strip()
+        if not trace_scope or not subject_id:
+            return
+        contract_payload = dict(payload or {})
+        support_summary = dict(contract_payload.get("supportSummary") or {})
+        shared_lanes = dict(support_summary.get("sharedLanes") or {})
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        system_id = _system_id_from_trace_scope(trace_scope)
+        provenance_payload = dict(provenance or {})
+        desired_lane_rows: list[dict[str, Any]] = []
+        desired_term_rows: list[dict[str, Any]] = []
+        for lane_id, lane_payload_value in shared_lanes.items():
+            lane_id = str(lane_id or "").strip()
+            if not lane_id or not isinstance(lane_payload_value, dict):
+                continue
+            lane_payload = dict(lane_payload_value or {})
+            selected_subject_id = str(lane_payload.get("selectedSubjectId") or subject_id).strip() or subject_id
+            selected_subject_kind = str(lane_payload.get("selectedSubjectKind") or "").strip()
+            selection_source = str(lane_payload.get("selectionSource") or "").strip()
+            blocked_input_reason = str(
+                lane_payload.get("blockedReason")
+                or lane_payload.get("blockedInputReason")
+                or ""
+            ).strip()
+            row_provenance = {
+                "payloadHash": _dependency_hash_payload(lane_payload),
+                "traceScope": trace_scope,
+                "subjectId": subject_id,
+                "laneId": lane_id,
+                "upstreamPayloadHash": str(provenance_payload.get("payloadHash") or ""),
+            }
+            desired_lane_rows.append(
+                {
+                    "lane_id": lane_id,
+                    "selected_subject_id": selected_subject_id,
+                    "selected_subject_kind": selected_subject_kind,
+                    "selection_source": selection_source,
+                    "blocked_input_reason": blocked_input_reason,
+                    "payload_json": _json_dumps(lane_payload),
+                    "provenance_json": _json_dumps(row_provenance),
+                }
+            )
+            for term_role, source_values in (
+                ("missing", lane_payload.get("missingTerms") or []),
+                ("advisory", lane_payload.get("advisoryMissingTerms") or []),
+                ("found", lane_payload.get("foundTerms") or []),
+            ):
+                for ordinal, term in enumerate(
+                    _unique_strings([str(value).strip() for value in source_values if str(value).strip()])
+                ):
+                    desired_term_rows.append(
+                        {
+                            "lane_id": lane_id,
+                            "term_role": term_role,
+                            "term_value": term,
+                            "ordinal": ordinal,
+                        }
+                    )
+        existing_lane_rows = [
+            {
+                "lane_id": str(row["lane_id"] or ""),
+                "selected_subject_id": str(row["selected_subject_id"] or ""),
+                "selected_subject_kind": str(row["selected_subject_kind"] or ""),
+                "selection_source": str(row["selection_source"] or ""),
+                "blocked_input_reason": str(row["blocked_input_reason"] or ""),
+                "payload_json": str(row["payload_json"] or ""),
+                "provenance_json": str(row["provenance_json"] or ""),
+            }
+            for row in conn.execute(
+                """
+                SELECT lane_id, selected_subject_id, selected_subject_kind, selection_source,
+                       blocked_input_reason, payload_json, provenance_json
+                FROM subject_contract_lane_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY lane_id ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        existing_term_rows = [
+            {
+                "lane_id": str(row["lane_id"] or ""),
+                "term_role": str(row["term_role"] or ""),
+                "term_value": str(row["term_value"] or ""),
+                "ordinal": int(row["ordinal"] or 0),
+            }
+            for row in conn.execute(
+                """
+                SELECT lane_id, term_role, term_value, ordinal
+                FROM subject_contract_lane_term_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY lane_id ASC, term_role ASC, ordinal ASC, term_value ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        if _fragment_signature(
+            existing_lane_rows,
+            ["lane_id", "selected_subject_id", "selected_subject_kind", "selection_source", "blocked_input_reason", "payload_json", "provenance_json"],
+        ) == _fragment_signature(
+            desired_lane_rows,
+            ["lane_id", "selected_subject_id", "selected_subject_kind", "selection_source", "blocked_input_reason", "payload_json", "provenance_json"],
+        ) and _fragment_signature(existing_term_rows, ["lane_id", "term_role", "term_value", "ordinal"]) == _fragment_signature(
+            desired_term_rows, ["lane_id", "term_role", "term_value", "ordinal"]
+        ):
+            return
+        normalized_desired_lane_rows = [
+            {
+                **item,
+                "system_id": system_id,
+            }
+            for item in desired_lane_rows
+        ]
+        normalized_existing_lane_rows = [
+            {
+                **item,
+                "system_id": system_id,
+            }
+            for item in existing_lane_rows
+        ]
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="subject_contract_lane_views",
+            scope_columns=["project_name", "project_file", "trace_scope", "subject_id"],
+            scope_values=(project_name, project_file, trace_scope, subject_id),
+            key_fields=["lane_id"],
+            value_fields=[
+                "system_id",
+                "selected_subject_id",
+                "selected_subject_kind",
+                "selection_source",
+                "blocked_input_reason",
+                "payload_json",
+                "provenance_json",
+            ],
+            desired_rows=normalized_desired_lane_rows,
+            existing_rows=normalized_existing_lane_rows,
+            row_columns=[
+                "lane_id",
+                "system_id",
+                "selected_subject_id",
+                "selected_subject_kind",
+                "selection_source",
+                "blocked_input_reason",
+                "payload_json",
+                "provenance_json",
+            ],
+            timestamp_column="updated_at",
+            timestamp_value=timestamp,
+        )
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="subject_contract_lane_term_fragments",
+            scope_columns=["project_name", "project_file", "trace_scope", "subject_id"],
+            scope_values=(project_name, project_file, trace_scope, subject_id),
+            key_fields=["lane_id", "term_role", "term_value"],
+            value_fields=["ordinal"],
+            desired_rows=desired_term_rows,
+            existing_rows=existing_term_rows,
+            row_columns=["lane_id", "term_role", "term_value", "ordinal"],
+        )
+
+    def _replace_subject_state_projection_fragments(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        payload: dict[str, Any],
+        provenance: dict[str, Any] | None = None,
+        *,
+        built_at: str = "",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        subject_id = str(subject_id or "").strip()
+        if not trace_scope or not subject_id:
+            return
+        state_payload = dict(payload or {})
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        system_id = _system_id_from_trace_scope(trace_scope)
+        desired_identity_row = {
+            "system_id": system_id,
+            "subject_kind": str(state_payload.get("subjectKind") or "").strip(),
+            "subject_key": str(state_payload.get("subjectKey") or "").strip(),
+            "subject_label": str(state_payload.get("subjectLabel") or "").strip(),
+            "subject_class": str(state_payload.get("subjectClass") or "").strip(),
+            "subject_path_id": str(state_payload.get("subjectPathId") or "").strip(),
+            "semantic_key": str(state_payload.get("semanticKey") or "").strip(),
+            "identity_owner": str(state_payload.get("identityOwner") or "").strip(),
+            "identity_reason": str(state_payload.get("identityReason") or "").strip(),
+            "proof_count": len([item for item in (state_payload.get("proofs") or []) if item]),
+        }
+        desired_alias_rows = [
+            {"alias_value": alias_value, "ordinal": ordinal}
+            for ordinal, alias_value in enumerate(
+                _unique_strings([str(value).strip() for value in (state_payload.get("targetAliases") or []) if str(value).strip()])
+            )
+        ]
+        decision_summary = dict(state_payload.get("decisionSummary") or {})
+        desired_decision_row = {
+            "verdict": str(decision_summary.get("verdict") or "").strip(),
+            "summary": str(decision_summary.get("summary") or "").strip(),
+            "proved_edge_count": int(decision_summary.get("provedEdgeCount") or 0),
+            "negative_edge_count": int(decision_summary.get("negativeEdgeCount") or 0),
+        }
+        desired_decision_edge_rows: list[dict[str, Any]] = []
+        for edge_role, source_values in (
+            ("baseline", decision_summary.get("baselineGap") or []),
+            ("blocked", decision_summary.get("blockedEdgeTypes") or []),
+            ("supporting", decision_summary.get("supportingEdgeTypes") or []),
+        ):
+            for ordinal, edge_value in enumerate(
+                _unique_strings([str(value).strip() for value in source_values if str(value).strip()])
+            ):
+                desired_decision_edge_rows.append(
+                    {"edge_role": edge_role, "edge_value": edge_value, "ordinal": ordinal}
+                )
+        desired_claim_stage_rows: list[dict[str, Any]] = []
+        desired_claim_stage_missing_rows: list[dict[str, Any]] = []
+        for ordinal, stage in enumerate([dict(item) for item in (state_payload.get("claimStages") or []) if isinstance(item, dict)]):
+            stage_id = str(stage.get("id") or "").strip()
+            if not stage_id:
+                continue
+            desired_claim_stage_rows.append(
+                {
+                    "stage_id": stage_id,
+                    "stage_label": str(stage.get("label") or "").strip(),
+                    "stage_status": str(stage.get("status") or "").strip(),
+                    "ordinal": ordinal,
+                }
+            )
+            for missing_ordinal, seam_id in enumerate(
+                _unique_strings([str(value).strip() for value in (stage.get("missingSeamIds") or []) if str(value).strip()])
+            ):
+                desired_claim_stage_missing_rows.append(
+                    {"stage_id": stage_id, "seam_id": seam_id, "ordinal": missing_ordinal}
+                )
+        desired_depth_plan_rows = [
+            {"step_json": _json_dumps(step), "ordinal": ordinal}
+            for ordinal, step in enumerate(list(state_payload.get("depthPlan") or []))
+        ]
+        existing_identity_row = conn.execute(
+            """
+            SELECT system_id, subject_kind, subject_key, subject_label, subject_class, subject_path_id,
+                   semantic_key, identity_owner, identity_reason, proof_count
+            FROM subject_identity_views
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+            """,
+            (project_name, project_file, trace_scope, subject_id),
+        ).fetchone()
+        existing_identity = {
+            "system_id": str(existing_identity_row["system_id"] or "") if existing_identity_row else "",
+            "subject_kind": str(existing_identity_row["subject_kind"] or "") if existing_identity_row else "",
+            "subject_key": str(existing_identity_row["subject_key"] or "") if existing_identity_row else "",
+            "subject_label": str(existing_identity_row["subject_label"] or "") if existing_identity_row else "",
+            "subject_class": str(existing_identity_row["subject_class"] or "") if existing_identity_row else "",
+            "subject_path_id": str(existing_identity_row["subject_path_id"] or "") if existing_identity_row else "",
+            "semantic_key": str(existing_identity_row["semantic_key"] or "") if existing_identity_row else "",
+            "identity_owner": str(existing_identity_row["identity_owner"] or "") if existing_identity_row else "",
+            "identity_reason": str(existing_identity_row["identity_reason"] or "") if existing_identity_row else "",
+            "proof_count": int(existing_identity_row["proof_count"] or 0) if existing_identity_row else 0,
+        }
+        existing_decision_row = conn.execute(
+            """
+            SELECT verdict, summary, proved_edge_count, negative_edge_count
+            FROM subject_decision_summary_views
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+            """,
+            (project_name, project_file, trace_scope, subject_id),
+        ).fetchone()
+        existing_decision = {
+            "verdict": str(existing_decision_row["verdict"] or "") if existing_decision_row else "",
+            "summary": str(existing_decision_row["summary"] or "") if existing_decision_row else "",
+            "proved_edge_count": int(existing_decision_row["proved_edge_count"] or 0) if existing_decision_row else 0,
+            "negative_edge_count": int(existing_decision_row["negative_edge_count"] or 0) if existing_decision_row else 0,
+        }
+        existing_alias_rows = [
+            {"alias_value": str(row["alias_value"] or ""), "ordinal": int(row["ordinal"] or 0)}
+            for row in conn.execute(
+                """
+                SELECT alias_value, ordinal
+                FROM subject_target_alias_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY ordinal ASC, alias_value ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        existing_decision_edge_rows = [
+            {"edge_role": str(row["edge_role"] or ""), "edge_value": str(row["edge_value"] or ""), "ordinal": int(row["ordinal"] or 0)}
+            for row in conn.execute(
+                """
+                SELECT edge_role, edge_value, ordinal
+                FROM subject_decision_edge_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY edge_role ASC, ordinal ASC, edge_value ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        existing_claim_stage_rows = [
+            {
+                "stage_id": str(row["stage_id"] or ""),
+                "stage_label": str(row["stage_label"] or ""),
+                "stage_status": str(row["stage_status"] or ""),
+                "ordinal": int(row["ordinal"] or 0),
+            }
+            for row in conn.execute(
+                """
+                SELECT stage_id, stage_label, stage_status, ordinal
+                FROM subject_claim_stage_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY ordinal ASC, stage_id ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        existing_claim_stage_missing_rows = [
+            {"stage_id": str(row["stage_id"] or ""), "seam_id": str(row["seam_id"] or ""), "ordinal": int(row["ordinal"] or 0)}
+            for row in conn.execute(
+                """
+                SELECT stage_id, seam_id, ordinal
+                FROM subject_claim_stage_missing_seam_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY stage_id ASC, ordinal ASC, seam_id ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        existing_depth_plan_rows = [
+            {"step_json": str(row["step_json"] or ""), "ordinal": int(row["ordinal"] or 0)}
+            for row in conn.execute(
+                """
+                SELECT step_json, ordinal
+                FROM subject_depth_plan_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY ordinal ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        if (
+            existing_identity == desired_identity_row
+            and existing_decision == desired_decision_row
+            and _fragment_signature(existing_alias_rows, ["alias_value", "ordinal"]) == _fragment_signature(desired_alias_rows, ["alias_value", "ordinal"])
+            and _fragment_signature(existing_decision_edge_rows, ["edge_role", "edge_value", "ordinal"]) == _fragment_signature(desired_decision_edge_rows, ["edge_role", "edge_value", "ordinal"])
+            and _fragment_signature(existing_claim_stage_rows, ["stage_id", "stage_label", "stage_status", "ordinal"]) == _fragment_signature(desired_claim_stage_rows, ["stage_id", "stage_label", "stage_status", "ordinal"])
+            and _fragment_signature(existing_claim_stage_missing_rows, ["stage_id", "seam_id", "ordinal"]) == _fragment_signature(desired_claim_stage_missing_rows, ["stage_id", "seam_id", "ordinal"])
+            and _fragment_signature(existing_depth_plan_rows, ["step_json", "ordinal"]) == _fragment_signature(desired_depth_plan_rows, ["step_json", "ordinal"])
+        ):
+            self._upsert_subject_state_snapshot_history(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                state_payload,
+                dict(provenance or {}),
+                    built_at=timestamp,
+                )
+            return
+        for table_name in (
+            "subject_target_alias_fragments",
+            "subject_decision_edge_fragments",
+            "subject_claim_stage_missing_seam_fragments",
+            "subject_claim_stage_views",
+            "subject_depth_plan_fragments",
+        ):
+            conn.execute(
+                f"""
+                DELETE FROM {table_name}
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            )
+        conn.execute(
+            """
+            DELETE FROM subject_identity_views
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+            """,
+            (project_name, project_file, trace_scope, subject_id),
+        )
+        conn.execute(
+            """
+            DELETE FROM subject_decision_summary_views
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+            """,
+            (project_name, project_file, trace_scope, subject_id),
+        )
+        conn.execute(
+            """
+            INSERT INTO subject_identity_views(
+                project_name, project_file, trace_scope, subject_id, system_id, subject_kind,
+                subject_key, subject_label, subject_class, subject_path_id, semantic_key,
+                identity_owner, identity_reason, proof_count, updated_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                desired_identity_row["system_id"],
+                desired_identity_row["subject_kind"],
+                desired_identity_row["subject_key"],
+                desired_identity_row["subject_label"],
+                desired_identity_row["subject_class"],
+                desired_identity_row["subject_path_id"],
+                desired_identity_row["semantic_key"],
+                desired_identity_row["identity_owner"],
+                desired_identity_row["identity_reason"],
+                desired_identity_row["proof_count"],
+                timestamp,
+            ),
+        )
+        for item in desired_alias_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_target_alias_fragments(
+                    project_name, project_file, trace_scope, subject_id, alias_value, ordinal
+                ) VALUES(?,?,?,?,?,?)
+                """,
+                (project_name, project_file, trace_scope, subject_id, str(item["alias_value"]), int(item["ordinal"])),
+            )
+        conn.execute(
+            """
+            INSERT INTO subject_decision_summary_views(
+                project_name, project_file, trace_scope, subject_id, verdict, summary,
+                proved_edge_count, negative_edge_count, updated_at
+            ) VALUES(?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                desired_decision_row["verdict"],
+                desired_decision_row["summary"],
+                desired_decision_row["proved_edge_count"],
+                desired_decision_row["negative_edge_count"],
+                timestamp,
+            ),
+        )
+        for item in desired_decision_edge_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_decision_edge_fragments(
+                    project_name, project_file, trace_scope, subject_id, edge_role, edge_value, ordinal
+                ) VALUES(?,?,?,?,?,?,?)
+                """,
+                (project_name, project_file, trace_scope, subject_id, str(item["edge_role"]), str(item["edge_value"]), int(item["ordinal"])),
+            )
+        for item in desired_claim_stage_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_claim_stage_views(
+                    project_name, project_file, trace_scope, subject_id, stage_id, stage_label, stage_status, ordinal
+                ) VALUES(?,?,?,?,?,?,?,?)
+                """,
+                (
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_id,
+                    str(item["stage_id"]),
+                    str(item["stage_label"]),
+                    str(item["stage_status"]),
+                    int(item["ordinal"]),
+                ),
+            )
+        for item in desired_claim_stage_missing_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_claim_stage_missing_seam_fragments(
+                    project_name, project_file, trace_scope, subject_id, stage_id, seam_id, ordinal
+                ) VALUES(?,?,?,?,?,?,?)
+                """,
+                (project_name, project_file, trace_scope, subject_id, str(item["stage_id"]), str(item["seam_id"]), int(item["ordinal"])),
+            )
+        for item in desired_depth_plan_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_depth_plan_fragments(
+                    project_name, project_file, trace_scope, subject_id, step_json, ordinal
+                ) VALUES(?,?,?,?,?,?)
+                """,
+                (project_name, project_file, trace_scope, subject_id, str(item["step_json"]), int(item["ordinal"])),
+            )
+        self._upsert_subject_state_snapshot_history(
+            conn,
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            state_payload,
+            dict(provenance or {}),
+            built_at=timestamp,
+        )
+
+    def _replace_subject_edge_fact_fragments(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        edge_facts: list[dict[str, Any]],
+        *,
+        built_at: str = "",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        subject_id = str(subject_id or "").strip()
+        if not trace_scope or not subject_id:
+            return
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        desired_rows: list[dict[str, Any]] = []
+        seen_edge_keys: set[tuple[str, str]] = set()
+        for item in edge_facts:
+            edge_type = str(item.get("edgeType") or "").strip()
+            edge_status = str(item.get("status") or "").strip()
+            if not edge_type or not edge_status:
+                continue
+            edge_key = (edge_type, edge_status)
+            if edge_key in seen_edge_keys:
+                continue
+            seen_edge_keys.add(edge_key)
+            desired_rows.append(
+                {
+                    "edge_type": edge_type,
+                    "edge_status": edge_status,
+                    "payload_json": _json_dumps(dict(item)),
+                    "provenance_json": _json_dumps(
+                        {
+                            "reducer": "central-subject-edge-facts-v1",
+                            "traceScope": trace_scope,
+                            "subjectId": subject_id,
+                            "status": edge_status,
+                            "payloadHash": _dependency_hash_payload(dict(item)),
+                        }
+                    ),
+                    "reducer_version": "central-subject-edge-facts-v1",
+                }
+            )
+        existing_rows = [
+            {
+                "edge_type": str(row["edge_type"] or ""),
+                "edge_status": str(row["edge_status"] or ""),
+                "payload_json": str(row["payload_json"] or ""),
+                "provenance_json": str(row["provenance_json"] or ""),
+                "reducer_version": str(row["reducer_version"] or ""),
+            }
+            for row in conn.execute(
+                """
+                SELECT edge_type, edge_status, payload_json, provenance_json, reducer_version
+                FROM subject_edge_fact_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY edge_status ASC, edge_type ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        if _fragment_signature(existing_rows, ["edge_type", "edge_status", "payload_json", "provenance_json", "reducer_version"]) == _fragment_signature(desired_rows, ["edge_type", "edge_status", "payload_json", "provenance_json", "reducer_version"]):
+            return
+        conn.execute(
+            """
+            DELETE FROM subject_edge_fact_fragments
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+            """,
+            (project_name, project_file, trace_scope, subject_id),
+        )
+        for item in desired_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_edge_fact_fragments(
+                    project_name, project_file, trace_scope, subject_id, edge_type, edge_status,
+                    payload_json, provenance_json, reducer_version, updated_at
+                ) VALUES(?,?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_id,
+                    str(item["edge_type"]),
+                    str(item["edge_status"]),
+                    str(item["payload_json"]),
+                    str(item["provenance_json"]),
+                    str(item["reducer_version"]),
+                    timestamp,
+                ),
+            )
+
+    def _replace_subject_contract_projection_fragments(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        payload: dict[str, Any],
+        provenance: dict[str, Any] | None = None,
+        *,
+        built_at: str = "",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        subject_id = str(subject_id or "").strip()
+        if not trace_scope or not subject_id:
+            return
+        contract_payload = dict(payload or {})
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        desired_contract_row = {
+            "system_id": _system_id_from_trace_scope(trace_scope),
+            "subject_kind": str(contract_payload.get("subjectKind") or "").strip(),
+            "subject_key": str(contract_payload.get("subjectKey") or "").strip(),
+            "subject_label": str(contract_payload.get("subjectLabel") or "").strip(),
+            "semantic_key": str(contract_payload.get("semanticKey") or "").strip(),
+            "identity_owner": str(contract_payload.get("identityOwner") or "").strip(),
+            "identity_reason": str(contract_payload.get("identityReason") or "").strip(),
+            "blocked_input_reason": str(contract_payload.get("blockedInputReason") or "").strip(),
+            "trace_routine_hint": str(contract_payload.get("traceRoutineHint") or "").strip(),
+            "selected_owner_subject_id": str(contract_payload.get("selectedOwnerSubjectId") or "").strip(),
+            "selected_shared_lane": str(contract_payload.get("selectedSharedLane") or "").strip(),
+        }
+        desired_alias_rows = [
+            {"alias_value": alias_value, "ordinal": ordinal}
+            for ordinal, alias_value in enumerate(
+                _unique_strings([str(value).strip() for value in (contract_payload.get("targetAliases") or []) if str(value).strip()])
+            )
+        ]
+        desired_grounded_field_rows = [
+            {"field_key": str(field_key).strip(), "payload_json": _json_dumps(field_payload)}
+            for field_key, field_payload in dict(contract_payload.get("groundedFields") or {}).items()
+            if str(field_key).strip()
+        ]
+        desired_support_rows = [
+            {"entry_key": str(entry_key).strip(), "payload_json": _json_dumps(entry_payload)}
+            for entry_key, entry_payload in dict(contract_payload.get("supportSummary") or {}).items()
+            if str(entry_key).strip() and str(entry_key).strip() != "sharedLanes"
+        ]
+        desired_provenance_rows = [
+            {"entry_key": str(entry_key).strip(), "payload_json": _json_dumps(entry_payload)}
+            for entry_key, entry_payload in dict(contract_payload.get("provenanceSummary") or {}).items()
+            if str(entry_key).strip() and str(entry_key).strip() != "sharedLanes"
+        ]
+        desired_blocked_reason_rows = [
+            {"reason_key": str(reason_key).strip(), "reason_value": str(reason_value).strip(), "ordinal": ordinal}
+            for ordinal, (reason_key, reason_value) in enumerate(
+                [
+                    (str(key).strip(), str(value).strip())
+                    for key, value in dict(contract_payload.get("blockedInputReasons") or {}).items()
+                    if str(key).strip()
+                    and value is not None
+                    and str(value).strip()
+                    and str(value).strip().lower() != "none"
+                ]
+            )
+        ]
+        existing_contract_row = conn.execute(
+            """
+            SELECT system_id, subject_kind, subject_key, subject_label, semantic_key, identity_owner,
+                   identity_reason, blocked_input_reason, trace_routine_hint,
+                   selected_owner_subject_id, selected_shared_lane
+            FROM subject_contract_views
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+            """,
+            (project_name, project_file, trace_scope, subject_id),
+        ).fetchone()
+        existing_contract = {
+            "system_id": str(existing_contract_row["system_id"] or "") if existing_contract_row else "",
+            "subject_kind": str(existing_contract_row["subject_kind"] or "") if existing_contract_row else "",
+            "subject_key": str(existing_contract_row["subject_key"] or "") if existing_contract_row else "",
+            "subject_label": str(existing_contract_row["subject_label"] or "") if existing_contract_row else "",
+            "semantic_key": str(existing_contract_row["semantic_key"] or "") if existing_contract_row else "",
+            "identity_owner": str(existing_contract_row["identity_owner"] or "") if existing_contract_row else "",
+            "identity_reason": str(existing_contract_row["identity_reason"] or "") if existing_contract_row else "",
+            "blocked_input_reason": str(existing_contract_row["blocked_input_reason"] or "") if existing_contract_row else "",
+            "trace_routine_hint": str(existing_contract_row["trace_routine_hint"] or "") if existing_contract_row else "",
+            "selected_owner_subject_id": str(existing_contract_row["selected_owner_subject_id"] or "") if existing_contract_row else "",
+            "selected_shared_lane": str(existing_contract_row["selected_shared_lane"] or "") if existing_contract_row else "",
+        }
+        existing_alias_rows = [
+            {"alias_value": str(row["alias_value"] or ""), "ordinal": int(row["ordinal"] or 0)}
+            for row in conn.execute(
+                """
+                SELECT alias_value, ordinal
+                FROM subject_contract_target_alias_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY ordinal ASC, alias_value ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        existing_grounded_field_rows = [
+            {"field_key": str(row["field_key"] or ""), "payload_json": str(row["payload_json"] or "")}
+            for row in conn.execute(
+                """
+                SELECT field_key, payload_json
+                FROM subject_contract_grounded_field_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY field_key ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        existing_support_rows = [
+            {"entry_key": str(row["entry_key"] or ""), "payload_json": str(row["payload_json"] or "")}
+            for row in conn.execute(
+                """
+                SELECT entry_key, payload_json
+                FROM subject_contract_support_entry_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY entry_key ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        existing_provenance_rows = [
+            {"entry_key": str(row["entry_key"] or ""), "payload_json": str(row["payload_json"] or "")}
+            for row in conn.execute(
+                """
+                SELECT entry_key, payload_json
+                FROM subject_contract_provenance_entry_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY entry_key ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        existing_blocked_reason_rows = [
+            {"reason_key": str(row["reason_key"] or ""), "reason_value": str(row["reason_value"] or ""), "ordinal": int(row["ordinal"] or 0)}
+            for row in conn.execute(
+                """
+                SELECT reason_key, reason_value, ordinal
+                FROM subject_contract_blocked_reason_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                ORDER BY ordinal ASC, reason_key ASC
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            ).fetchall()
+        ]
+        if (
+            existing_contract == desired_contract_row
+            and _fragment_signature(existing_alias_rows, ["alias_value", "ordinal"]) == _fragment_signature(desired_alias_rows, ["alias_value", "ordinal"])
+            and _fragment_signature(existing_grounded_field_rows, ["field_key", "payload_json"]) == _fragment_signature(desired_grounded_field_rows, ["field_key", "payload_json"])
+            and _fragment_signature(existing_support_rows, ["entry_key", "payload_json"]) == _fragment_signature(desired_support_rows, ["entry_key", "payload_json"])
+            and _fragment_signature(existing_provenance_rows, ["entry_key", "payload_json"]) == _fragment_signature(desired_provenance_rows, ["entry_key", "payload_json"])
+            and _fragment_signature(existing_blocked_reason_rows, ["reason_key", "reason_value", "ordinal"]) == _fragment_signature(desired_blocked_reason_rows, ["reason_key", "reason_value", "ordinal"])
+        ):
+            self._upsert_subject_contract_snapshot_history(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                contract_payload,
+                dict(provenance or {}),
+                built_at=timestamp,
+            )
+            return
+        for table_name in (
+            "subject_contract_target_alias_fragments",
+            "subject_contract_grounded_field_views",
+            "subject_contract_support_entry_views",
+            "subject_contract_provenance_entry_views",
+            "subject_contract_blocked_reason_views",
+        ):
+            conn.execute(
+                f"""
+                DELETE FROM {table_name}
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+                """,
+                (project_name, project_file, trace_scope, subject_id),
+            )
+        conn.execute(
+            """
+            DELETE FROM subject_contract_views
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+            """,
+            (project_name, project_file, trace_scope, subject_id),
+        )
+        conn.execute(
+            """
+            INSERT INTO subject_contract_views(
+                project_name, project_file, trace_scope, subject_id, system_id, subject_kind, subject_key,
+                subject_label, semantic_key, identity_owner, identity_reason, blocked_input_reason,
+                trace_routine_hint, selected_owner_subject_id, selected_shared_lane, updated_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """,
+            (
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                desired_contract_row["system_id"],
+                desired_contract_row["subject_kind"],
+                desired_contract_row["subject_key"],
+                desired_contract_row["subject_label"],
+                desired_contract_row["semantic_key"],
+                desired_contract_row["identity_owner"],
+                desired_contract_row["identity_reason"],
+                desired_contract_row["blocked_input_reason"],
+                desired_contract_row["trace_routine_hint"],
+                desired_contract_row["selected_owner_subject_id"],
+                desired_contract_row["selected_shared_lane"],
+                timestamp,
+            ),
+        )
+        for item in desired_alias_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_contract_target_alias_fragments(
+                    project_name, project_file, trace_scope, subject_id, alias_value, ordinal
+                ) VALUES(?,?,?,?,?,?)
+                """,
+                (project_name, project_file, trace_scope, subject_id, str(item["alias_value"]), int(item["ordinal"])),
+            )
+        for item in desired_grounded_field_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_contract_grounded_field_views(
+                    project_name, project_file, trace_scope, subject_id, field_key, payload_json, updated_at
+                ) VALUES(?,?,?,?,?,?,?)
+                """,
+                (project_name, project_file, trace_scope, subject_id, str(item["field_key"]), str(item["payload_json"]), timestamp),
+            )
+        for item in desired_support_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_contract_support_entry_views(
+                    project_name, project_file, trace_scope, subject_id, entry_key, payload_json, updated_at
+                ) VALUES(?,?,?,?,?,?,?)
+                """,
+                (project_name, project_file, trace_scope, subject_id, str(item["entry_key"]), str(item["payload_json"]), timestamp),
+            )
+        for item in desired_provenance_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_contract_provenance_entry_views(
+                    project_name, project_file, trace_scope, subject_id, entry_key, payload_json, updated_at
+                ) VALUES(?,?,?,?,?,?,?)
+                """,
+                (project_name, project_file, trace_scope, subject_id, str(item["entry_key"]), str(item["payload_json"]), timestamp),
+            )
+        for item in desired_blocked_reason_rows:
+            conn.execute(
+                """
+                INSERT INTO subject_contract_blocked_reason_views(
+                    project_name, project_file, trace_scope, subject_id, reason_key, reason_value, ordinal
+                ) VALUES(?,?,?,?,?,?,?)
+                """,
+                (project_name, project_file, trace_scope, subject_id, str(item["reason_key"]), str(item["reason_value"]), int(item["ordinal"])),
+            )
+        self._upsert_subject_contract_snapshot_history(
+            conn,
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            contract_payload,
+            dict(provenance or {}),
+            built_at=timestamp,
+        )
+        self._sync_asset_probe_seeds_for_scope(
+            conn,
+            project_name,
+            project_file,
+            trace_scope,
+            contract_payload=contract_payload,
+            built_at=timestamp,
+        )
+
+    def _upsert_subject_state_snapshot_history(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        payload: dict[str, Any],
+        provenance: dict[str, Any] | None = None,
+        *,
+        built_at: str = "",
+    ) -> None:
+        payload_dict = dict(payload or {})
+        payload_json = _json_dumps(payload_dict)
+        provenance_json = _json_dumps(dict(provenance or {}))
+        payload_hash = _dependency_hash_payload(payload_dict)
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        conn.execute(
+            """
+            INSERT INTO subject_state_snapshot_history(
+                project_name, project_file, trace_scope, subject_id, payload_hash, payload_json, provenance_json,
+                first_built_at, last_built_at, seen_count
+            ) VALUES(?,?,?,?,?,?,?,?,?,1)
+            ON CONFLICT(project_name, project_file, trace_scope, subject_id, payload_hash) DO UPDATE SET
+                provenance_json=excluded.provenance_json,
+                last_built_at=excluded.last_built_at,
+                seen_count=subject_state_snapshot_history.seen_count + 1
+            """,
+            (
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                payload_hash,
+                payload_json,
+                provenance_json,
+                timestamp,
+                timestamp,
+            ),
+        )
+
+    def _upsert_subject_contract_snapshot_history(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        subject_id: str,
+        payload: dict[str, Any],
+        provenance: dict[str, Any] | None = None,
+        *,
+        built_at: str = "",
+    ) -> None:
+        payload_dict = dict(payload or {})
+        payload_json = _json_dumps(payload_dict)
+        provenance_json = _json_dumps(dict(provenance or {}))
+        payload_hash = _dependency_hash_payload(payload_dict)
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        conn.execute(
+            """
+            INSERT INTO subject_contract_snapshot_history(
+                project_name, project_file, trace_scope, subject_id, payload_hash, payload_json, provenance_json,
+                first_built_at, last_built_at, seen_count
+            ) VALUES(?,?,?,?,?,?,?,?,?,1)
+            ON CONFLICT(project_name, project_file, trace_scope, subject_id, payload_hash) DO UPDATE SET
+                provenance_json=excluded.provenance_json,
+                last_built_at=excluded.last_built_at,
+                seen_count=subject_contract_snapshot_history.seen_count + 1
+            """,
+            (
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                payload_hash,
+                payload_json,
+                provenance_json,
+                timestamp,
+                timestamp,
+            ),
+        )
+
+    def _load_current_contract_payload_for_scope(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> dict[str, Any]:
+        row = conn.execute(
+            """
+            SELECT payload_json
+            FROM subject_contract_snapshot_history
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            ORDER BY last_built_at DESC
+            LIMIT 1
+            """,
+            (project_name, project_file, trace_scope),
+        ).fetchone()
+        return _json_loads(str(row["payload_json"] or ""), {}) if row else {}
+
+    def _load_current_resolver_payload_for_scope(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> dict[str, Any]:
+        row = conn.execute(
+            """
+            SELECT payload_json
+            FROM resolver_target_snapshot_history
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            ORDER BY last_built_at DESC
+            LIMIT 1
+            """,
+            (project_name, project_file, trace_scope),
+        ).fetchone()
+        return _json_loads(str(row["payload_json"] or ""), {}) if row else {}
+
+    def _sync_asset_probe_seeds_for_scope(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        *,
+        resolver_payload: dict[str, Any] | None = None,
+        contract_payload: dict[str, Any] | None = None,
+        built_at: str = "",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        if not trace_scope:
+            return
+        resolver_payload = dict(resolver_payload or self._load_current_resolver_payload_for_scope(conn, project_name, project_file, trace_scope) or {})
+        contract_payload = dict(contract_payload or self._load_current_contract_payload_for_scope(conn, project_name, project_file, trace_scope) or {})
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        desired_rows = _derive_asset_probe_seed_rows(trace_scope, resolver_payload, contract_payload)
+        existing_seed_rows = [
+            {
+                "seed_key": str(row["seed_key"] or ""),
+                "system_id": str(row["system_id"] or ""),
+                "family_id": str(row["family_id"] or ""),
+                "seam_hint": str(row["seam_hint"] or ""),
+                "routine_hint": str(row["routine_hint"] or ""),
+                "seed_kind": str(row["seed_kind"] or ""),
+                "source_surface_id": str(row["source_surface_id"] or ""),
+                "support_score": int(row["support_score"] or 0),
+                "payload_json": str(row["payload_json"] or ""),
+                "provenance_json": str(row["provenance_json"] or ""),
+            }
+            for row in conn.execute(
+                """
+                SELECT seed_key, system_id, family_id, seam_hint, routine_hint, seed_kind,
+                       source_surface_id, support_score, payload_json, provenance_json
+                FROM asset_probe_seed_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                ORDER BY seed_key ASC
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall()
+        ]
+        desired_seed_rows = [
+            {
+                "seed_key": str(item["seed_key"]),
+                "system_id": str(item["system_id"]),
+                "family_id": str(item["family_id"]),
+                "seam_hint": str(item["seam_hint"]),
+                "routine_hint": str(item["routine_hint"]),
+                "seed_kind": str(item["seed_kind"]),
+                "source_surface_id": str(item["source_surface_id"]),
+                "support_score": int(item["support_score"]),
+                "payload_json": _json_dumps(dict(item.get("payload") or {})),
+                "provenance_json": _json_dumps(dict(item.get("provenance") or {})),
+            }
+            for item in desired_rows
+        ]
+        existing_term_rows = [
+            {
+                "seed_key": str(row["seed_key"] or ""),
+                "term_role": str(row["term_role"] or ""),
+                "term_value": str(row["term_value"] or ""),
+                "ordinal": int(row["ordinal"] or 0),
+            }
+            for row in conn.execute(
+                """
+                SELECT seed_key, term_role, term_value, ordinal
+                FROM asset_probe_seed_term_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                ORDER BY seed_key ASC, term_role ASC, ordinal ASC, term_value ASC
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall()
+        ]
+        desired_term_rows = [
+            {
+                "seed_key": str(item["seed_key"]),
+                "term_role": str(term_row["term_role"]),
+                "term_value": str(term_row["term_value"]),
+                "ordinal": int(term_row["ordinal"]),
+            }
+            for item in desired_rows
+            for term_row in list(item.get("terms") or [])
+        ]
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="asset_probe_seed_views",
+            scope_columns=["project_name", "project_file", "trace_scope"],
+            scope_values=(project_name, project_file, trace_scope),
+            key_fields=["seed_key"],
+            value_fields=["system_id", "family_id", "seam_hint", "routine_hint", "seed_kind", "source_surface_id", "support_score", "payload_json", "provenance_json"],
+            desired_rows=desired_seed_rows,
+            existing_rows=existing_seed_rows,
+            row_columns=["seed_key", "system_id", "family_id", "seam_hint", "routine_hint", "seed_kind", "source_surface_id", "support_score", "payload_json", "provenance_json"],
+            timestamp_column="updated_at",
+            timestamp_value=timestamp,
+        )
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="asset_probe_seed_term_fragments",
+            scope_columns=["project_name", "project_file", "trace_scope"],
+            scope_values=(project_name, project_file, trace_scope),
+            key_fields=["seed_key", "term_role", "term_value"],
+            value_fields=["ordinal"],
+            desired_rows=desired_term_rows,
+            existing_rows=existing_term_rows,
+            row_columns=["seed_key", "term_role", "term_value", "ordinal"],
+        )
+
+    def _replace_resolver_target_projection_fragments(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        payload: dict[str, Any],
+        provenance: dict[str, Any] | None = None,
+        *,
+        built_at: str = "",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        if not trace_scope:
+            return
+        resolver_payload = dict(payload or {})
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        desired_row = {
+            "system_id": _system_id_from_trace_scope(trace_scope),
+            "target_id": str(resolver_payload.get("targetId") or "").strip(),
+            "subject_id": str(resolver_payload.get("subjectId") or "").strip(),
+            "subject_kind": str(resolver_payload.get("subjectKind") or "").strip(),
+            "subject_key": str(resolver_payload.get("subjectKey") or "").strip(),
+            "subject_label": str(resolver_payload.get("subjectLabel") or "").strip(),
+            "family_id": str(resolver_payload.get("familyId") or "").strip(),
+            "label": str(resolver_payload.get("label") or "").strip(),
+            "target_class": str(resolver_payload.get("targetClass") or "").strip(),
+            "why_exists": str(resolver_payload.get("whyExists") or "").strip(),
+            "summary": str(resolver_payload.get("summary") or "").strip(),
+            "trace_routine_hint": str(resolver_payload.get("traceRoutineHint") or "").strip(),
+            "family_trace_profile": str(resolver_payload.get("familyTraceProfile") or "").strip(),
+            "disable_native_trace": 1 if bool(resolver_payload.get("disableNativeTrace")) else 0,
+            "default_presentation_update_hook": str(resolver_payload.get("defaultPresentationUpdateHook") or "").strip(),
+            "synthesized": 1 if bool(resolver_payload.get("synthesized")) else 0,
+        }
+        desired_term_rows: list[dict[str, Any]] = []
+        for term_role, source_values in (
+            ("anchor", resolver_payload.get("anchorTerms") or []),
+            ("accepted-anchor", resolver_payload.get("acceptedAnchors") or []),
+            ("resolution-alias", resolver_payload.get("resolutionAliases") or []),
+            ("native-trace", resolver_payload.get("nativeTraceTerms") or []),
+        ):
+            normalized_values = sorted(
+                _unique_strings([str(value).strip() for value in source_values if str(value).strip()]),
+                key=lambda value: (str(value).lower(), str(value)),
+            )
+            for ordinal, term_value in enumerate(normalized_values):
+                desired_term_rows.append({"term_role": term_role, "term_value": term_value, "ordinal": ordinal})
+        desired_surface_rows = [
+            {"ordinal": ordinal, "payload_json": _json_dumps(surface)}
+            for ordinal, surface in enumerate([dict(item) for item in (resolver_payload.get("supportSurfaces") or []) if isinstance(item, dict)])
+        ]
+        desired_support_rows = [
+            {"ordinal": ordinal, "payload_json": _json_dumps(row)}
+            for ordinal, row in enumerate([dict(item) for item in (resolver_payload.get("supportRows") or []) if isinstance(item, dict)])
+        ]
+        desired_component_rows = [
+            {"component_key": component_key, "payload_json": _json_dumps(component_payload)}
+            for component_key, component_payload in (
+                ("shellWindow", dict(resolver_payload.get("shellWindow") or {})),
+                ("outputSummaryRules", dict(resolver_payload.get("outputSummaryRules") or {})),
+                ("targetNarrative", dict(resolver_payload.get("targetNarrative") or {})),
+            )
+            if _should_persist_projection_component(component_payload)
+        ]
+        desired_string_rows: list[dict[str, Any]] = []
+        for fragment_role, source_values in (
+            ("blocked-edge", resolver_payload.get("blockedEdgeTypes") or []),
+            ("cleared-edge", resolver_payload.get("clearedEdgeTypes") or []),
+            ("canonical-support", resolver_payload.get("canonicalSupports") or []),
+            ("defining-view", resolver_payload.get("definingViews") or []),
+            ("supporting-view-kind", resolver_payload.get("supportingViewKinds") or []),
+            ("target-alias", resolver_payload.get("targetAliases") or []),
+        ):
+            for ordinal, fragment_value in enumerate(_unique_strings([str(value).strip() for value in source_values if str(value).strip()])):
+                desired_string_rows.append({"fragment_role": fragment_role, "fragment_value": fragment_value, "ordinal": ordinal})
+        existing_row = conn.execute(
+            """
+            SELECT system_id, target_id, subject_id, subject_kind, subject_key, subject_label, family_id, label,
+                   target_class, why_exists, summary, trace_routine_hint, family_trace_profile,
+                   disable_native_trace, default_presentation_update_hook, synthesized
+            FROM resolver_target_views
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            """,
+            (project_name, project_file, trace_scope),
+        ).fetchone()
+        existing_main = {
+            "system_id": str(existing_row["system_id"] or "") if existing_row else "",
+            "target_id": str(existing_row["target_id"] or "") if existing_row else "",
+            "subject_id": str(existing_row["subject_id"] or "") if existing_row else "",
+            "subject_kind": str(existing_row["subject_kind"] or "") if existing_row else "",
+            "subject_key": str(existing_row["subject_key"] or "") if existing_row else "",
+            "subject_label": str(existing_row["subject_label"] or "") if existing_row else "",
+            "family_id": str(existing_row["family_id"] or "") if existing_row else "",
+            "label": str(existing_row["label"] or "") if existing_row else "",
+            "target_class": str(existing_row["target_class"] or "") if existing_row else "",
+            "why_exists": str(existing_row["why_exists"] or "") if existing_row else "",
+            "summary": str(existing_row["summary"] or "") if existing_row else "",
+            "trace_routine_hint": str(existing_row["trace_routine_hint"] or "") if existing_row else "",
+            "family_trace_profile": str(existing_row["family_trace_profile"] or "") if existing_row else "",
+            "disable_native_trace": int(existing_row["disable_native_trace"] or 0) if existing_row else 0,
+            "default_presentation_update_hook": str(existing_row["default_presentation_update_hook"] or "") if existing_row else "",
+            "synthesized": int(existing_row["synthesized"] or 0) if existing_row else 0,
+        }
+        existing_term_rows = [
+            {"term_role": str(row["term_role"] or ""), "term_value": str(row["term_value"] or ""), "ordinal": int(row["ordinal"] or 0)}
+            for row in conn.execute(
+                """
+                SELECT term_role, term_value, ordinal
+                FROM resolver_target_term_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                ORDER BY term_role ASC, ordinal ASC, term_value ASC
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall()
+        ]
+        existing_surface_rows = [
+            {"ordinal": int(row["ordinal"] or 0), "payload_json": str(row["payload_json"] or "")}
+            for row in conn.execute(
+                """
+                SELECT ordinal, payload_json
+                FROM resolver_target_support_surface_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                ORDER BY ordinal ASC
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall()
+        ]
+        existing_support_rows = [
+            {"ordinal": int(row["ordinal"] or 0), "payload_json": str(row["payload_json"] or "")}
+            for row in conn.execute(
+                """
+                SELECT ordinal, payload_json
+                FROM resolver_target_support_row_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                ORDER BY ordinal ASC
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall()
+        ]
+        existing_component_rows = [
+            {"component_key": str(row["component_key"] or ""), "payload_json": str(row["payload_json"] or "")}
+            for row in conn.execute(
+                """
+                SELECT component_key, payload_json
+                FROM resolver_target_json_component_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                ORDER BY component_key ASC
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall()
+        ]
+        existing_string_rows = [
+            {"fragment_role": str(row["fragment_role"] or ""), "fragment_value": str(row["fragment_value"] or ""), "ordinal": int(row["ordinal"] or 0)}
+            for row in conn.execute(
+                """
+                SELECT fragment_role, fragment_value, ordinal
+                FROM resolver_target_string_fragments
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                ORDER BY fragment_role ASC, ordinal ASC, fragment_value ASC
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall()
+        ]
+        if (
+            existing_main == desired_row
+            and _fragment_signature(existing_term_rows, ["term_role", "term_value", "ordinal"]) == _fragment_signature(desired_term_rows, ["term_role", "term_value", "ordinal"])
+            and _fragment_signature(existing_surface_rows, ["ordinal", "payload_json"]) == _fragment_signature(desired_surface_rows, ["ordinal", "payload_json"])
+            and _fragment_signature(existing_support_rows, ["ordinal", "payload_json"]) == _fragment_signature(desired_support_rows, ["ordinal", "payload_json"])
+            and _fragment_signature(existing_component_rows, ["component_key", "payload_json"]) == _fragment_signature(desired_component_rows, ["component_key", "payload_json"])
+            and _fragment_signature(existing_string_rows, ["fragment_role", "fragment_value", "ordinal"]) == _fragment_signature(desired_string_rows, ["fragment_role", "fragment_value", "ordinal"])
+        ):
+            self._upsert_resolver_target_snapshot_history(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                resolver_payload,
+                dict(provenance or {}),
+                built_at=timestamp,
+            )
+            return
+        if existing_main != desired_row:
+            conn.execute(
+                """
+                INSERT INTO resolver_target_views(
+                    project_name, project_file, trace_scope, system_id, target_id, subject_id, subject_kind, subject_key,
+                    subject_label, family_id, label, target_class, why_exists, summary, trace_routine_hint,
+                    family_trace_profile, disable_native_trace, default_presentation_update_hook, synthesized, updated_at
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(project_name, project_file, trace_scope) DO UPDATE SET
+                    system_id=excluded.system_id,
+                    target_id=excluded.target_id,
+                    subject_id=excluded.subject_id,
+                    subject_kind=excluded.subject_kind,
+                    subject_key=excluded.subject_key,
+                    subject_label=excluded.subject_label,
+                    family_id=excluded.family_id,
+                    label=excluded.label,
+                    target_class=excluded.target_class,
+                    why_exists=excluded.why_exists,
+                    summary=excluded.summary,
+                    trace_routine_hint=excluded.trace_routine_hint,
+                    family_trace_profile=excluded.family_trace_profile,
+                    disable_native_trace=excluded.disable_native_trace,
+                    default_presentation_update_hook=excluded.default_presentation_update_hook,
+                    synthesized=excluded.synthesized,
+                    updated_at=excluded.updated_at
+                """,
+                (
+                    project_name, project_file, trace_scope, desired_row["system_id"], desired_row["target_id"], desired_row["subject_id"],
+                    desired_row["subject_kind"], desired_row["subject_key"], desired_row["subject_label"], desired_row["family_id"],
+                    desired_row["label"], desired_row["target_class"], desired_row["why_exists"], desired_row["summary"],
+                    desired_row["trace_routine_hint"], desired_row["family_trace_profile"], desired_row["disable_native_trace"],
+                    desired_row["default_presentation_update_hook"], desired_row["synthesized"], timestamp,
+                ),
+            )
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="resolver_target_term_fragments",
+            scope_columns=["project_name", "project_file", "trace_scope"],
+            scope_values=(project_name, project_file, trace_scope),
+            key_fields=["term_role", "term_value"],
+            value_fields=["ordinal"],
+            desired_rows=desired_term_rows,
+            existing_rows=existing_term_rows,
+            row_columns=["term_role", "term_value", "ordinal"],
+        )
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="resolver_target_support_surface_fragments",
+            scope_columns=["project_name", "project_file", "trace_scope"],
+            scope_values=(project_name, project_file, trace_scope),
+            key_fields=["ordinal"],
+            value_fields=["payload_json"],
+            desired_rows=desired_surface_rows,
+            existing_rows=existing_surface_rows,
+            row_columns=["ordinal", "payload_json"],
+        )
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="resolver_target_support_row_fragments",
+            scope_columns=["project_name", "project_file", "trace_scope"],
+            scope_values=(project_name, project_file, trace_scope),
+            key_fields=["ordinal"],
+            value_fields=["payload_json"],
+            desired_rows=desired_support_rows,
+            existing_rows=existing_support_rows,
+            row_columns=["ordinal", "payload_json"],
+        )
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="resolver_target_json_component_views",
+            scope_columns=["project_name", "project_file", "trace_scope"],
+            scope_values=(project_name, project_file, trace_scope),
+            key_fields=["component_key"],
+            value_fields=["payload_json"],
+            desired_rows=desired_component_rows,
+            existing_rows=existing_component_rows,
+            row_columns=["component_key", "payload_json"],
+            timestamp_column="updated_at",
+            timestamp_value=timestamp,
+        )
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="resolver_target_string_fragments",
+            scope_columns=["project_name", "project_file", "trace_scope"],
+            scope_values=(project_name, project_file, trace_scope),
+            key_fields=["fragment_role", "fragment_value"],
+            value_fields=["ordinal"],
+            desired_rows=desired_string_rows,
+            existing_rows=existing_string_rows,
+            row_columns=["fragment_role", "fragment_value", "ordinal"],
+        )
+        self._upsert_resolver_target_snapshot_history(
+            conn,
+            project_name,
+            project_file,
+            trace_scope,
+            resolver_payload,
+            dict(provenance or {}),
+            built_at=timestamp,
+        )
+        self._sync_asset_probe_seeds_for_scope(
+            conn,
+            project_name,
+            project_file,
+            trace_scope,
+            resolver_payload=resolver_payload,
+            built_at=timestamp,
+        )
+
+    def _upsert_resolver_target_snapshot_history(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        payload: dict[str, Any],
+        provenance: dict[str, Any] | None = None,
+        *,
+        built_at: str = "",
+    ) -> None:
+        payload_dict = dict(payload or {})
+        payload_json = _json_dumps(payload_dict)
+        provenance_json = _json_dumps(dict(provenance or {}))
+        payload_hash = _dependency_hash_payload(payload_dict)
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        conn.execute(
+            """
+            INSERT INTO resolver_target_snapshot_history(
+                project_name, project_file, trace_scope, payload_hash, payload_json, provenance_json,
+                first_built_at, last_built_at, seen_count
+            ) VALUES(?,?,?,?,?,?,?,?,1)
+            ON CONFLICT(project_name, project_file, trace_scope, payload_hash) DO UPDATE SET
+                provenance_json=excluded.provenance_json,
+                last_built_at=excluded.last_built_at,
+                seen_count=resolver_target_snapshot_history.seen_count + 1
+            """,
+            (
+                project_name,
+                project_file,
+                trace_scope,
+                payload_hash,
+                payload_json,
+                provenance_json,
+                timestamp,
+                timestamp,
+            ),
+        )
+
+    def _upsert_trace_payload_history(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        request_signature: str,
+        payload: dict[str, Any],
+        provenance: dict[str, Any] | None = None,
+        *,
+        reducer_version: str = "",
+        built_at: str = "",
+    ) -> None:
+        payload_dict = dict(payload or {})
+        payload_json = _json_dumps(payload_dict)
+        provenance_json = _json_dumps(dict(provenance or {}))
+        payload_hash = _dependency_hash_payload(payload_dict)
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        existing_same_hash = conn.execute(
+            """
+            SELECT request_signature
+            FROM trace_payload_history
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND payload_hash = ?
+            ORDER BY last_built_at DESC
+            LIMIT 1
+            """,
+            (project_name, project_file, trace_scope, payload_hash),
+        ).fetchone()
+        request_signature_value = str(existing_same_hash["request_signature"] if existing_same_hash else request_signature or "").strip()
+        conn.execute(
+            """
+            INSERT INTO trace_payload_history(
+                project_name, project_file, trace_scope, request_signature, payload_hash, payload_json, provenance_json,
+                reducer_version, first_built_at, last_built_at, seen_count
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,1)
+            ON CONFLICT(project_name, project_file, trace_scope, request_signature, payload_hash) DO UPDATE SET
+                provenance_json=excluded.provenance_json,
+                reducer_version=excluded.reducer_version,
+                last_built_at=excluded.last_built_at,
+                seen_count=trace_payload_history.seen_count + 1
+            """,
+            (
+                project_name,
+                project_file,
+                trace_scope,
+                request_signature_value,
+                payload_hash,
+                payload_json,
+                provenance_json,
+                str(reducer_version or ""),
+                timestamp,
+                timestamp,
+            ),
+        )
+
+    def _upsert_canonical_system_trace_history(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        request_signature: str,
+        payload: dict[str, Any],
+        provenance: dict[str, Any] | None = None,
+        *,
+        reducer_version: str = "",
+        built_at: str = "",
+    ) -> None:
+        payload_dict = dict(payload or {})
+        payload_json = _json_dumps(payload_dict)
+        provenance_json = _json_dumps(dict(provenance or {}))
+        payload_hash = _dependency_hash_payload(payload_dict)
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        existing_same_hash = conn.execute(
+            """
+            SELECT request_signature
+            FROM canonical_system_trace_history
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND payload_hash = ?
+            ORDER BY last_built_at DESC
+            LIMIT 1
+            """,
+            (project_name, project_file, trace_scope, payload_hash),
+        ).fetchone()
+        request_signature_value = str(existing_same_hash["request_signature"] if existing_same_hash else request_signature or "").strip()
+        conn.execute(
+            """
+            INSERT INTO canonical_system_trace_history(
+                project_name, project_file, trace_scope, request_signature, payload_hash, payload_json, provenance_json,
+                reducer_version, first_built_at, last_built_at, seen_count
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,1)
+            ON CONFLICT(project_name, project_file, trace_scope, request_signature, payload_hash) DO UPDATE SET
+                provenance_json=excluded.provenance_json,
+                reducer_version=excluded.reducer_version,
+                last_built_at=excluded.last_built_at,
+                seen_count=canonical_system_trace_history.seen_count + 1
+            """,
+            (
+                project_name,
+                project_file,
+                trace_scope,
+                request_signature_value,
+                payload_hash,
+                payload_json,
+                provenance_json,
+                str(reducer_version or ""),
+                timestamp,
+                timestamp,
+            ),
+        )
+
+    def _replace_target_bundle_projection_fragments(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        request_signature: str,
+        payload: dict[str, Any],
+        provenance: dict[str, Any] | None = None,
+        *,
+        built_at: str = "",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        request_signature = str(request_signature or "").strip()
+        if not trace_scope or not request_signature:
+            return
+        bundle_payload = dict(payload or {})
+        target_payload = dict(bundle_payload.get("target") or {})
+        timestamp = str(built_at or "").strip() or datetime.now().isoformat(timespec="microseconds")
+        desired_row = {
+            "system_id": _system_id_from_trace_scope(trace_scope),
+            "target_id": str(target_payload.get("id") or trace_scope).strip(),
+            "family_id": str(target_payload.get("familyId") or "").strip(),
+            "target_label": str(target_payload.get("label") or "").strip(),
+            "dataset_id": str(bundle_payload.get("dataset") or "").strip(),
+            "status": str(bundle_payload.get("status") or "").strip(),
+            "semantic_status": str(bundle_payload.get("semanticStatus") or "").strip(),
+            "literal_status": str(bundle_payload.get("literalStatus") or "").strip(),
+            "grounded_conclusion": str(bundle_payload.get("groundedConclusion") or "").strip(),
+            "execution_context_semantic_key": str(bundle_payload.get("executionContextSemanticKey") or "").strip(),
+            "execution_plan_semantic_key": str(bundle_payload.get("executionPlanSemanticKey") or "").strip(),
+            "graph_plan_semantic_key": str(bundle_payload.get("graphPlanSemanticKey") or "").strip(),
+            "narrative_semantic_key": str(bundle_payload.get("narrativeSemanticKey") or "").strip(),
+            "bridge_comparison_semantic_key": str(bundle_payload.get("bridgeComparisonSemanticKey") or "").strip(),
+            "bridge_policy_semantic_key": str(bundle_payload.get("bridgePolicySemanticKey") or "").strip(),
+            "token_shop_reconstruction_semantic_key": str(bundle_payload.get("tokenShopReconstructionSemanticKey") or "").strip(),
+            "generated_at": str(bundle_payload.get("generatedAt") or "").strip(),
+        }
+        desired_component_rows = [
+            {"component_key": component_key, "payload_json": _json_dumps(bundle_payload.get(component_key))}
+            for component_key in (
+                "assetSet",
+                "bridgeCheck",
+                "bridgePolicy",
+                "canonicalSemanticViews",
+                "currentBoundary",
+                "decisionSummary",
+                "executionContext",
+                "executionPlan",
+                "graphPlan",
+                "materialization",
+                "nativeView",
+                "plannerResolution",
+                "runtimeStatus",
+                "semanticCoverage",
+                "solvedVsBlockedDiff",
+                "sourceFamilies",
+                "systemViews",
+                "target",
+                "tokenShopReconstruction",
+                "traceParams",
+                "traceRegistry",
+            )
+            if _should_persist_projection_component(bundle_payload.get(component_key))
+        ]
+        existing_row = conn.execute(
+            """
+            SELECT system_id, target_id, family_id, target_label, dataset_id, status, semantic_status, literal_status,
+                   grounded_conclusion, execution_context_semantic_key, execution_plan_semantic_key, graph_plan_semantic_key,
+                   narrative_semantic_key, bridge_comparison_semantic_key, bridge_policy_semantic_key,
+                   token_shop_reconstruction_semantic_key, generated_at
+            FROM target_bundle_views
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
+            """,
+            (project_name, project_file, trace_scope, request_signature),
+        ).fetchone()
+        existing_main = {
+            "system_id": str(existing_row["system_id"] or "") if existing_row else "",
+            "target_id": str(existing_row["target_id"] or "") if existing_row else "",
+            "family_id": str(existing_row["family_id"] or "") if existing_row else "",
+            "target_label": str(existing_row["target_label"] or "") if existing_row else "",
+            "dataset_id": str(existing_row["dataset_id"] or "") if existing_row else "",
+            "status": str(existing_row["status"] or "") if existing_row else "",
+            "semantic_status": str(existing_row["semantic_status"] or "") if existing_row else "",
+            "literal_status": str(existing_row["literal_status"] or "") if existing_row else "",
+            "grounded_conclusion": str(existing_row["grounded_conclusion"] or "") if existing_row else "",
+            "execution_context_semantic_key": str(existing_row["execution_context_semantic_key"] or "") if existing_row else "",
+            "execution_plan_semantic_key": str(existing_row["execution_plan_semantic_key"] or "") if existing_row else "",
+            "graph_plan_semantic_key": str(existing_row["graph_plan_semantic_key"] or "") if existing_row else "",
+            "narrative_semantic_key": str(existing_row["narrative_semantic_key"] or "") if existing_row else "",
+            "bridge_comparison_semantic_key": str(existing_row["bridge_comparison_semantic_key"] or "") if existing_row else "",
+            "bridge_policy_semantic_key": str(existing_row["bridge_policy_semantic_key"] or "") if existing_row else "",
+            "token_shop_reconstruction_semantic_key": str(existing_row["token_shop_reconstruction_semantic_key"] or "") if existing_row else "",
+            "generated_at": str(existing_row["generated_at"] or "") if existing_row else "",
+        }
+        existing_component_rows = [
+            {"component_key": str(row["component_key"] or ""), "payload_json": str(row["payload_json"] or "")}
+            for row in conn.execute(
+                """
+                SELECT component_key, payload_json
+                FROM target_bundle_json_component_views
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
+                ORDER BY component_key ASC
+                """,
+                (project_name, project_file, trace_scope, request_signature),
+            ).fetchall()
+        ]
+        if (
+            existing_main == desired_row
+            and _fragment_signature(existing_component_rows, ["component_key", "payload_json"]) == _fragment_signature(desired_component_rows, ["component_key", "payload_json"])
+        ):
+            return
+        if existing_main != desired_row:
+            conn.execute(
+                """
+                INSERT INTO target_bundle_views(
+                    project_name, project_file, trace_scope, request_signature, system_id, target_id, family_id,
+                    target_label, dataset_id, status, semantic_status, literal_status, grounded_conclusion,
+                    execution_context_semantic_key, execution_plan_semantic_key, graph_plan_semantic_key,
+                    narrative_semantic_key, bridge_comparison_semantic_key, bridge_policy_semantic_key,
+                    token_shop_reconstruction_semantic_key, generated_at, updated_at
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(project_name, project_file, trace_scope, request_signature) DO UPDATE SET
+                    system_id=excluded.system_id,
+                    target_id=excluded.target_id,
+                    family_id=excluded.family_id,
+                    target_label=excluded.target_label,
+                    dataset_id=excluded.dataset_id,
+                    status=excluded.status,
+                    semantic_status=excluded.semantic_status,
+                    literal_status=excluded.literal_status,
+                    grounded_conclusion=excluded.grounded_conclusion,
+                    execution_context_semantic_key=excluded.execution_context_semantic_key,
+                    execution_plan_semantic_key=excluded.execution_plan_semantic_key,
+                    graph_plan_semantic_key=excluded.graph_plan_semantic_key,
+                    narrative_semantic_key=excluded.narrative_semantic_key,
+                    bridge_comparison_semantic_key=excluded.bridge_comparison_semantic_key,
+                    bridge_policy_semantic_key=excluded.bridge_policy_semantic_key,
+                    token_shop_reconstruction_semantic_key=excluded.token_shop_reconstruction_semantic_key,
+                    generated_at=excluded.generated_at,
+                    updated_at=excluded.updated_at
+                """,
+                (
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    request_signature,
+                    desired_row["system_id"],
+                    desired_row["target_id"],
+                    desired_row["family_id"],
+                    desired_row["target_label"],
+                    desired_row["dataset_id"],
+                    desired_row["status"],
+                    desired_row["semantic_status"],
+                    desired_row["literal_status"],
+                    desired_row["grounded_conclusion"],
+                    desired_row["execution_context_semantic_key"],
+                    desired_row["execution_plan_semantic_key"],
+                    desired_row["graph_plan_semantic_key"],
+                    desired_row["narrative_semantic_key"],
+                    desired_row["bridge_comparison_semantic_key"],
+                    desired_row["bridge_policy_semantic_key"],
+                    desired_row["token_shop_reconstruction_semantic_key"],
+                    desired_row["generated_at"],
+                    timestamp,
+                ),
+            )
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="target_bundle_json_component_views",
+            scope_columns=["project_name", "project_file", "trace_scope", "request_signature"],
+            scope_values=(project_name, project_file, trace_scope, request_signature),
+            key_fields=["component_key"],
+            value_fields=["payload_json"],
+            desired_rows=desired_component_rows,
+            existing_rows=existing_component_rows,
+            row_columns=["component_key", "payload_json"],
+            timestamp_column="updated_at",
+            timestamp_value=timestamp,
+        )
+
+    def _upsert_knowledge_node(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        *,
+        node_id: str,
+        node_kind: str,
+        trace_scope: str,
+        payload: dict[str, Any],
+        provenance: dict[str, Any],
+    ) -> None:
+        conn.execute(
+            """
+            INSERT INTO knowledge_nodes(
+                project_name, project_file, node_id, node_kind, system_id, trace_scope,
+                canonical_label, normalized_key, payload_json, provenance_json, updated_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
+            ON CONFLICT(project_name, project_file, node_id) DO UPDATE SET
+                node_kind=excluded.node_kind,
+                system_id=excluded.system_id,
+                trace_scope=excluded.trace_scope,
+                canonical_label=excluded.canonical_label,
+                normalized_key=excluded.normalized_key,
+                payload_json=excluded.payload_json,
+                provenance_json=excluded.provenance_json,
+                updated_at=excluded.updated_at
+            """,
+            (
+                project_name,
+                project_file,
+                str(node_id or "").strip(),
+                str(node_kind or "").strip(),
+                _system_id_from_trace_scope(trace_scope),
+                str(trace_scope or "").strip(),
+                str(payload.get("label") or payload.get("subjectLabel") or node_id or "").strip(),
+                str(node_id or "").strip().lower(),
+                _json_dumps(dict(payload or {})),
+                _json_dumps(dict(provenance or {})),
+                datetime.now().isoformat(timespec="microseconds"),
+            ),
+        )
+
+    def _sync_knowledge_edges_for_scope(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        relation_rows: list[dict[str, Any]],
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        conn.execute(
+            """
+            DELETE FROM knowledge_edges
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            """,
+            (project_name, project_file, trace_scope),
+        )
+        timestamp = datetime.now().isoformat(timespec="microseconds")
+        for row in relation_rows:
+            payload = dict(row.get("payload") or {})
+            source_entity_id = str(row.get("sourceEntityId") or "").strip()
+            field_key = str(row.get("fieldKey") or "").strip()
+            relation_kind = str(row.get("relationKind") or "").strip()
+            target_entity_id = str(row.get("targetEntityId") or "").strip()
+            conn.execute(
+                """
+                INSERT INTO knowledge_edges(
+                    project_name, project_file, source_node_id, edge_kind, target_node_id, system_id,
+                    trace_scope, field_key, edge_status, payload_json, provenance_json, updated_at
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    project_name,
+                    project_file,
+                    source_entity_id,
+                    relation_kind,
+                    target_entity_id,
+                    _system_id_from_trace_scope(trace_scope),
+                    trace_scope,
+                    field_key,
+                    "active",
+                    _json_dumps(payload),
+                    _json_dumps(
+                        {
+                            "payloadHash": _dependency_hash_payload(payload),
+                            "traceScope": trace_scope,
+                            "sourceEntityId": source_entity_id,
+                            "relationKind": relation_kind,
+                            "targetEntityId": target_entity_id,
+                        }
+                    ),
+                    timestamp,
+                ),
+            )
+
+    def _sync_evidence_graph_edges_for_scope(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        edge_rows: list[dict[str, Any]],
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        existing_rows = conn.execute(
+            """
+            SELECT source_node_id, edge_kind, target_node_id, field_key, edge_status, source_layer, relation_role, value_semantics, payload_json, provenance_json, graph_scope
+            FROM evidence_graph_edges
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            """,
+            (project_name, project_file, trace_scope),
+        ).fetchall()
+        existing_concrete_count = sum(
+            1 for row in existing_rows if str(row["source_layer"] or "").strip() != "traceGraph-abstract"
+        )
+        new_concrete_count = sum(
+            1 for row in edge_rows if str(row.get("sourceLayer") or "").strip() != "traceGraph-abstract"
+        )
+        if existing_rows and not edge_rows:
+            return
+        if existing_concrete_count > 0 and new_concrete_count == 0:
+            return
+        if existing_concrete_count > new_concrete_count and new_concrete_count <= max(1, existing_concrete_count // 3):
+            return
+        conn.execute(
+            """
+            DELETE FROM evidence_graph_edges
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            """,
+            (project_name, project_file, trace_scope),
+        )
+        timestamp = datetime.now().isoformat(timespec="microseconds")
+        for row in edge_rows:
+            payload = dict(row.get("payload") or {})
+            conn.execute(
+                """
+                INSERT INTO evidence_graph_edges(
+                    project_name, project_file, system_id, trace_scope, graph_scope,
+                    source_node_id, edge_kind, target_node_id, field_key, edge_status,
+                    source_layer, relation_role, value_semantics, payload_json, provenance_json, updated_at
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    project_name,
+                    project_file,
+                    _system_id_from_trace_scope(trace_scope),
+                    trace_scope,
+                    str(row.get("graphScope") or trace_scope).strip(),
+                    str(row.get("sourceNodeId") or "").strip(),
+                    str(row.get("edgeKind") or "").strip(),
+                    str(row.get("targetNodeId") or "").strip(),
+                    str(row.get("fieldKey") or "").strip(),
+                    str(row.get("edgeStatus") or "active").strip() or "active",
+                    str(row.get("sourceLayer") or "traceGraph").strip() or "traceGraph",
+                    str(row.get("relationRole") or "structural").strip() or "structural",
+                    str(row.get("valueSemantics") or "unknown").strip() or "unknown",
+                    _json_dumps(payload),
+                    _json_dumps(
+                        {
+                            "payloadHash": _dependency_hash_payload(payload),
+                            "traceScope": trace_scope,
+                            "graphScope": str(row.get("graphScope") or trace_scope).strip(),
+                            "sourceNodeId": str(row.get("sourceNodeId") or "").strip(),
+                            "edgeKind": str(row.get("edgeKind") or "").strip(),
+                            "targetNodeId": str(row.get("targetNodeId") or "").strip(),
+                            "fieldKey": str(row.get("fieldKey") or "").strip(),
+                            "sourceLayer": str(row.get("sourceLayer") or "traceGraph").strip() or "traceGraph",
+                            "relationRole": str(row.get("relationRole") or "structural").strip() or "structural",
+                            "valueSemantics": str(row.get("valueSemantics") or "unknown").strip() or "unknown",
+                        }
+                    ),
+                    timestamp,
+                ),
+            )
+        self._sync_canonical_graph_edges_for_edge_identities(
+            conn,
+            project_name,
+            project_file,
+            [
+                {
+                    "sourceNodeId": str(row["source_node_id"] or "").strip(),
+                    "edgeKind": str(row["edge_kind"] or "").strip(),
+                    "targetNodeId": str(row["target_node_id"] or "").strip(),
+                    "fieldKey": str(row["field_key"] or "").strip(),
+                }
+                for row in existing_rows
+            ]
+            + [
+                {
+                    "sourceNodeId": str(row.get("sourceNodeId") or "").strip(),
+                    "edgeKind": str(row.get("edgeKind") or "").strip(),
+                    "targetNodeId": str(row.get("targetNodeId") or "").strip(),
+                    "fieldKey": str(row.get("fieldKey") or "").strip(),
+                }
+                for row in edge_rows
+            ],
+        )
+
+    def _rebuild_canonical_graph_edges(self, conn: sqlite3.Connection) -> None:
+        rows = conn.execute(
+            """
+            SELECT project_name, project_file, trace_scope, graph_scope, source_node_id, edge_kind,
+                   target_node_id, field_key, edge_status, source_layer, relation_role,
+                   value_semantics, payload_json, provenance_json, updated_at
+            FROM evidence_graph_edges
+            WHERE source_layer != 'traceGraph-abstract'
+            ORDER BY updated_at DESC
+            """
+        ).fetchall()
+        grouped_rows: dict[tuple[str, str, str, str, str, str], list[sqlite3.Row]] = {}
+        for row in rows:
+            key = (
+                str(row["project_name"] or "").strip(),
+                str(row["project_file"] or "").strip(),
+                str(row["source_node_id"] or "").strip(),
+                str(row["edge_kind"] or "").strip(),
+                str(row["target_node_id"] or "").strip(),
+                str(row["field_key"] or "").strip(),
+            )
+            if not key[0] or not key[1] or not key[2] or not key[3] or not key[4]:
+                continue
+            grouped_rows.setdefault(key, []).append(row)
+        conn.execute("DELETE FROM canonical_graph_edges")
+        for key, edge_rows in grouped_rows.items():
+            self._upsert_canonical_graph_edge_from_observations(conn, key, edge_rows)
+
+    def _sync_canonical_graph_edges_for_edge_identities(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        edge_identity_rows: list[dict[str, Any]],
+    ) -> None:
+        identity_keys = {
+            (
+                str(project_name or "").strip(),
+                str(project_file or "").strip(),
+                str(row.get("sourceNodeId") or "").strip(),
+                str(row.get("edgeKind") or "").strip(),
+                str(row.get("targetNodeId") or "").strip(),
+                str(row.get("fieldKey") or "").strip(),
+            )
+            for row in (edge_identity_rows or [])
+            if str(row.get("sourceNodeId") or "").strip()
+            and str(row.get("edgeKind") or "").strip()
+            and str(row.get("targetNodeId") or "").strip()
+        }
+        for key in identity_keys:
+            observation_rows = conn.execute(
+                """
+                SELECT project_name, project_file, trace_scope, graph_scope, source_node_id, edge_kind,
+                       target_node_id, field_key, edge_status, source_layer, relation_role,
+                       value_semantics, payload_json, provenance_json, updated_at
+                FROM evidence_graph_edges
+                WHERE project_name = ? AND project_file = ?
+                  AND source_node_id = ? AND edge_kind = ? AND target_node_id = ? AND field_key = ?
+                  AND source_layer != 'traceGraph-abstract'
+                ORDER BY updated_at DESC
+                """,
+                key,
+            ).fetchall()
+            if not observation_rows:
+                conn.execute(
+                    """
+                    DELETE FROM canonical_graph_edges
+                    WHERE project_name = ? AND project_file = ?
+                      AND source_node_id = ? AND edge_kind = ? AND target_node_id = ? AND field_key = ?
+                    """,
+                    key,
+                )
+                continue
+            self._upsert_canonical_graph_edge_from_observations(conn, key, observation_rows)
+
+    def _upsert_canonical_graph_edge_from_observations(
+        self,
+        conn: sqlite3.Connection,
+        key: tuple[str, str, str, str, str, str],
+        observation_rows: list[sqlite3.Row],
+    ) -> None:
+        project_name, project_file, source_node_id, edge_kind, target_node_id, field_key = key
+        positive_rows = [row for row in observation_rows if str(row["edge_status"] or "").strip() != "negative"]
+        negative_rows = [row for row in observation_rows if str(row["edge_status"] or "").strip() == "negative"]
+        representative_row = positive_rows[0] if positive_rows else observation_rows[0]
+        support_trace_scopes = _unique_strings([str(row["trace_scope"] or "").strip() for row in observation_rows if str(row["trace_scope"] or "").strip()])
+        support_graph_scopes = _unique_strings([str(row["graph_scope"] or "").strip() for row in observation_rows if str(row["graph_scope"] or "").strip()])
+        support_source_layers = _unique_strings([str(row["source_layer"] or "").strip() for row in observation_rows if str(row["source_layer"] or "").strip()])
+        latest_updated_at = max(str(row["updated_at"] or "") for row in observation_rows)
+        payload = {
+            "sourceNodeId": source_node_id,
+            "edgeKind": edge_kind,
+            "targetNodeId": target_node_id,
+            "fieldKey": field_key,
+            "supportTraceScopes": support_trace_scopes,
+            "supportGraphScopes": support_graph_scopes,
+            "sourceLayers": support_source_layers,
+            "observationCount": len(observation_rows),
+            "positiveObservationCount": len(positive_rows),
+            "negativeObservationCount": len(negative_rows),
+            "samplePayload": _json_loads(representative_row["payload_json"], {}),
+        }
+        provenance = {
+            "observationCount": len(observation_rows),
+            "positiveObservationCount": len(positive_rows),
+            "negativeObservationCount": len(negative_rows),
+            "supportTraceScopes": support_trace_scopes,
+            "supportGraphScopes": support_graph_scopes,
+            "payloadHashes": _unique_strings(
+                [
+                    str(_json_loads(row["provenance_json"], {}).get("payloadHash") or "").strip()
+                    for row in observation_rows
+                ]
+            ),
+        }
+        conn.execute(
+            """
+            INSERT INTO canonical_graph_edges(
+                project_name, project_file, source_node_id, edge_kind, target_node_id, field_key,
+                edge_status, relation_role, value_semantics,
+                positive_observation_count, negative_observation_count, support_scope_count,
+                payload_json, provenance_json, updated_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ON CONFLICT(project_name, project_file, source_node_id, edge_kind, target_node_id, field_key)
+            DO UPDATE SET
+                edge_status = excluded.edge_status,
+                relation_role = excluded.relation_role,
+                value_semantics = excluded.value_semantics,
+                positive_observation_count = excluded.positive_observation_count,
+                negative_observation_count = excluded.negative_observation_count,
+                support_scope_count = excluded.support_scope_count,
+                payload_json = excluded.payload_json,
+                provenance_json = excluded.provenance_json,
+                updated_at = excluded.updated_at
+            """,
+            (
+                project_name,
+                project_file,
+                source_node_id,
+                edge_kind,
+                target_node_id,
+                field_key,
+                "present" if positive_rows else "negative",
+                str(representative_row["relation_role"] or "structural").strip() or "structural",
+                str(representative_row["value_semantics"] or "unknown").strip() or "unknown",
+                len(positive_rows),
+                len(negative_rows),
+                len(support_trace_scopes),
+                _json_dumps(payload),
+                _json_dumps(provenance),
+                latest_updated_at,
+            ),
+        )
+
+    def _load_richest_historical_trace_graph_payload(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> dict[str, Any]:
+        trace_scope = str(trace_scope or "").strip()
+        if not trace_scope:
+            return {}
+        rows = conn.execute(
+            """
+            SELECT payload_json
+            FROM canonical_system_trace_history
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            ORDER BY last_built_at DESC
+            LIMIT 32
+            """,
+            (project_name, project_file, trace_scope),
+        ).fetchall()
+        best_payload: dict[str, Any] = {}
+        best_score = -1
+        for row in rows:
+            payload = _json_loads(row["payload_json"], {})
+            score = _trace_graph_richness_score(payload)
+            if score > best_score:
+                best_score = score
+                best_payload = dict(payload or {})
+        return best_payload
+
+    def _extract_evidence_graph_edges_from_dependency_fragments(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        if not trace_scope:
+            return []
+        rows = conn.execute(
+            """
+            SELECT payload_json
+            FROM trace_fragments
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND fragment_kind = 'dependency_fragment' AND invalidated_at IS NULL
+            ORDER BY updated_at DESC
+            LIMIT 128
+            """,
+            (project_name, project_file, trace_scope),
+        ).fetchall()
+        trace_graph_edges: list[dict[str, Any]] = []
+        negative_edges: list[dict[str, Any]] = []
+        for row in rows:
+            payload = _json_loads(row["payload_json"], {})
+            edge = dict(payload.get("edge") or {})
+            if edge:
+                if str(edge.get("status") or "").strip() == "missing":
+                    negative_edges.append(edge)
+                else:
+                    trace_graph_edges.append(edge)
+            negative_edges.extend(
+                dict(item)
+                for item in (payload.get("negativeEdges") or [])
+                if isinstance(item, dict)
+            )
+            trace_graph_edges.extend(
+                dict(item)
+                for item in (payload.get("traceEdges") or [])
+                if isinstance(item, dict)
+            )
+        if not trace_graph_edges and not negative_edges:
+            return []
+        synthetic_payload = {
+            "traceGraph": {
+                "nodes": [],
+                "edges": trace_graph_edges,
+                "negativeEdges": negative_edges,
+            }
+        }
+        return _extract_evidence_graph_edges_from_trace_payload(trace_scope, synthetic_payload)
+
+    def _extract_evidence_graph_edges_from_system_fragments(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        if not trace_scope:
+            return []
+        rows = conn.execute(
+            """
+            SELECT fragment_kind, payload_json
+            FROM trace_fragments
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+              AND fragment_kind IN ('ui_binding_fragment', 'formula_fragment', 'runtime_table_fragment')
+              AND invalidated_at IS NULL
+            ORDER BY updated_at DESC
+            LIMIT 64
+            """,
+            (project_name, project_file, trace_scope),
+        ).fetchall()
+        latest_by_kind: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            fragment_kind = str(row["fragment_kind"] or "").strip()
+            if fragment_kind and fragment_kind not in latest_by_kind:
+                latest_by_kind[fragment_kind] = dict(_json_loads(row["payload_json"], {}))
+        ui_binding_fragment = dict(latest_by_kind.get("ui_binding_fragment") or {})
+        formula_fragment = dict(latest_by_kind.get("formula_fragment") or {})
+        runtime_table_fragment = dict(latest_by_kind.get("runtime_table_fragment") or {})
+        shell_window = dict(ui_binding_fragment.get("shellWindow") or {})
+        presentation_update = dict(ui_binding_fragment.get("presentationUpdatePath") or {})
+        surfaces = [dict(value) for value in (ui_binding_fragment.get("surfaces") or []) if isinstance(value, dict)]
+        shell_field = str(shell_window.get("shellField") or "").strip()
+        owner_field_block = _unique_strings([str(value).strip() for value in (shell_window.get("ownerFieldBlock") or []) if str(value).strip()])
+        recovered_formula_fields = _unique_strings(
+            [str(value).strip() for value in (formula_fragment.get("recoveredFormulaFields") or []) if str(value).strip()]
+        )
+        recovered_formula_values = [
+            dict(value)
+            for value in (formula_fragment.get("recoveredFormulaValues") or [])
+            if isinstance(value, dict)
+        ]
+        update_hooks = _unique_strings(
+            [str(value).strip() for value in (presentation_update.get("updateHookCandidates") or []) if str(value).strip()]
+        )
+        interaction_paths = [
+            dict(value)
+            for value in (presentation_update.get("interactionToRenderPaths") or [])
+            if isinstance(value, dict)
+        ]
+        slots_by_role = {
+            str(role).strip(): [dict(item) for item in values if isinstance(item, dict)]
+            for role, values in dict(presentation_update.get("slots") or {}).items()
+            if str(role).strip()
+        }
+        native_reconstruction = dict(runtime_table_fragment.get("nativeReconstruction") or {})
+        promoted_methods = _unique_strings(
+            [str(value).strip() for value in (native_reconstruction.get("promotedMethods") or []) if str(value).strip()]
+        )
+        managed_graph = dict(native_reconstruction.get("managedGraph") or {})
+        managed_graph_edges = [dict(value) for value in (managed_graph.get("edges") or []) if isinstance(value, dict)]
+        edge_rows: list[dict[str, Any]] = []
+        seen: set[tuple[str, str, str, str]] = set()
+
+        def append_edge(source_id: str, edge_kind: str, target_id: str, payload_extra: dict[str, Any]) -> None:
+            source_id = str(source_id or "").strip()
+            edge_kind = str(edge_kind or "").strip()
+            target_id = str(target_id or "").strip()
+            if not source_id or not edge_kind or not target_id:
+                return
+            field_key = shell_field
+            key = (source_id, edge_kind, target_id, field_key)
+            if key in seen:
+                return
+            seen.add(key)
+            classification = _classify_evidence_graph_edge(edge_kind, source_id, target_id)
+            edge_rows.append(
+                {
+                    "traceScope": trace_scope,
+                    "graphScope": trace_scope,
+                    "sourceNodeId": source_id,
+                    "edgeKind": edge_kind,
+                    "targetNodeId": target_id,
+                    "fieldKey": field_key,
+                    "edgeStatus": "present",
+                    "sourceLayer": "system-fragment-derived",
+                    "relationRole": classification["relationRole"],
+                    "valueSemantics": classification["valueSemantics"],
+                    "payload": dict(payload_extra or {}),
+                }
+            )
+
+        if shell_field:
+            for formula_field in recovered_formula_fields:
+                append_edge(
+                    shell_field,
+                    "serialized-adjacency",
+                    formula_field,
+                    {"derivedFrom": ["ui_binding_fragment.shellWindow", "formula_fragment.recoveredFormulaFields"]},
+                )
+        for promoted_method in promoted_methods:
+            for update_hook in update_hooks:
+                append_edge(
+                    promoted_method,
+                    "exact-display-update-path",
+                    update_hook,
+                    {"derivedFrom": ["runtime_table_fragment.nativeReconstruction.promotedMethods", "ui_binding_fragment.presentationUpdatePath.updateHookCandidates"]},
+                )
+        for role, slot_rows in slots_by_role.items():
+            slot_names = _unique_strings(
+                [
+                    str(item.get("name") or "").strip()
+                    for item in slot_rows
+                    if str(item.get("name") or "").strip() and _looks_like_concrete_graph_term(str(item.get("name") or "").strip())
+                ]
+            )
+            for slot_name in slot_names:
+                for update_hook in update_hooks:
+                    append_edge(
+                        update_hook,
+                        "binds-ui-slot",
+                        slot_name,
+                        {"derivedFrom": [f"ui_binding_fragment.presentationUpdatePath.slots.{role}", "ui_binding_fragment.presentationUpdatePath.updateHookCandidates"], "slotRole": role},
+                    )
+                if role in {"cost", "level", "bonus", "requirement"}:
+                    for formula_field in recovered_formula_fields:
+                        append_edge(
+                            slot_name,
+                            "reads-field",
+                            formula_field,
+                            {"derivedFrom": [f"ui_binding_fragment.presentationUpdatePath.slots.{role}", "formula_fragment.recoveredFormulaFields"], "slotRole": role},
+                        )
+            for interaction_path in interaction_paths:
+                interaction_name = str(interaction_path.get("interaction") or "").strip()
+                render_node = str(interaction_path.get("renderNode") or "").strip()
+                render_role = str(interaction_path.get("renderRole") or "").strip()
+                if interaction_name and render_node and render_role == role:
+                    append_edge(
+                        interaction_name,
+                        "binds-ui-slot",
+                        render_node,
+                        {"derivedFrom": ["ui_binding_fragment.presentationUpdatePath.interactionToRenderPaths"], "slotRole": role},
+                    )
+        for entry in recovered_formula_values:
+            formula_field = str(entry.get("field") or "").strip()
+            raw_value = str(entry.get("value") or "").strip()
+            if formula_field and raw_value and _looks_like_concrete_graph_term(raw_value):
+                append_edge(
+                    formula_field,
+                    "value-of",
+                    raw_value,
+                    {"derivedFrom": ["formula_fragment.recoveredFormulaValues"], "objectOffset": entry.get("objectOffset"), "group": entry.get("group")},
+                )
+
+        surface_methods: list[str] = []
+        surface_classes: list[str] = []
+        surface_prefabs: list[str] = []
+        surface_literals: list[str] = []
+        for surface in surfaces:
+            for anchor_spec in (surface.get("anchorSpecs") or []):
+                if not isinstance(anchor_spec, dict):
+                    continue
+                kind = str(anchor_spec.get("kind") or "").strip().lower()
+                value = str(anchor_spec.get("value") or "").strip()
+                if not value or not _looks_like_concrete_graph_term(value):
+                    continue
+                if kind == "method":
+                    surface_methods.append(value)
+                elif kind == "class":
+                    surface_classes.append(value)
+                elif "prefab" in value.lower():
+                    surface_prefabs.append(value)
+                elif kind == "string" and (value.startswith(":") or (" " in value and len(value) > 6)):
+                    surface_literals.append(value)
+        surface_methods = _unique_strings(surface_methods)
+        surface_classes = _unique_strings(surface_classes)
+        surface_prefabs = _unique_strings(surface_prefabs)
+        surface_literals = _unique_strings(surface_literals)
+        action_methods = [value for value in surface_methods if value.startswith("Buy")]
+        update_methods = [
+            value
+            for value in surface_methods
+            if value.startswith(("Set", "Update", "Check", "Initialize"))
+        ]
+        getter_methods = [value for value in surface_methods if value.startswith("get_") or value.startswith("Get")]
+
+        if shell_field:
+            for action_method in action_methods:
+                append_edge(
+                    shell_field,
+                    "exact-shell-to-action-hook",
+                    action_method,
+                    {"derivedFrom": ["ui_binding_fragment.surfaces"], "rule": "surface-action-method"},
+                )
+            for prefab_term in surface_prefabs:
+                append_edge(
+                    shell_field,
+                    "surface-prefab-neighborhood",
+                    prefab_term,
+                    {"derivedFrom": ["ui_binding_fragment.surfaces"], "rule": "surface-prefab-neighborhood"},
+                )
+            for title_literal in surface_literals[:2]:
+                append_edge(
+                    shell_field,
+                    "surface-literal-neighborhood",
+                    title_literal,
+                    {"derivedFrom": ["ui_binding_fragment.surfaces"], "rule": "surface-literal-neighborhood"},
+                )
+        for action_method in action_methods:
+            for prefab_term in surface_prefabs:
+                append_edge(
+                    action_method,
+                    "exact-shell-to-prefab",
+                    prefab_term,
+                    {"derivedFrom": ["ui_binding_fragment.surfaces"], "rule": "action-to-prefab-surface"},
+                )
+            for update_method in update_methods:
+                if action_method == update_method:
+                    continue
+                append_edge(
+                    action_method,
+                    "exact-display-update-path",
+                    update_method,
+                    {"derivedFrom": ["ui_binding_fragment.surfaces"], "rule": "action-to-update-surface"},
+                )
+        for formula_field in _unique_strings([*owner_field_block, *recovered_formula_fields]):
+            for getter_method in getter_methods:
+                if not _graph_names_overlap(formula_field, getter_method):
+                    continue
+                append_edge(
+                    getter_method,
+                    "returns-value-from",
+                    formula_field,
+                    {"derivedFrom": ["ui_binding_fragment.surfaces", "ui_binding_fragment.shellWindow"], "rule": "getter-family-match"},
+                )
+                append_edge(
+                    formula_field,
+                    "getter-family",
+                    getter_method,
+                    {"derivedFrom": ["ui_binding_fragment.surfaces", "ui_binding_fragment.shellWindow"], "rule": "getter-family-match"},
+                )
+
+        for managed_edge in managed_graph_edges:
+            source_id = str(managed_edge.get("from") or "").strip()
+            edge_kind = str(managed_edge.get("type") or "").strip()
+            target_id = str(managed_edge.get("to") or "").strip()
+            if not source_id or not edge_kind or not target_id:
+                continue
+            if edge_kind in {"owns-field", "uses-raw-value", "owns-method", "related-term"} and _looks_like_concrete_graph_term(source_id) and _looks_like_concrete_graph_term(target_id):
+                append_edge(
+                    source_id,
+                    edge_kind,
+                    target_id,
+                    {"derivedFrom": ["runtime_table_fragment.nativeReconstruction.managedGraph"]},
+                )
+        managed_fields = _unique_strings([row.get("targetNodeId") for row in edge_rows if row.get("edgeKind") in {"owns-field", "uses-raw-value"}])
+        managed_methods = _unique_strings([row.get("targetNodeId") for row in edge_rows if row.get("edgeKind") == "owns-method"])
+        for managed_field in managed_fields:
+            for managed_method in managed_methods:
+                if not _graph_names_overlap(managed_field, managed_method):
+                    continue
+                append_edge(
+                    managed_method,
+                    "returns-value-from",
+                    managed_field,
+                    {"derivedFrom": ["runtime_table_fragment.nativeReconstruction.managedGraph"], "rule": "managed-getter-family"},
+                )
+        return edge_rows
+
+    def _extract_evidence_graph_edges_from_knowledge_facts(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        if not trace_scope:
+            return []
+        rows = conn.execute(
+            """
+            SELECT entity_id, field_key, fact_kind, fact_value, payload_json
+            FROM knowledge_facts
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            """,
+            (project_name, project_file, trace_scope),
+        ).fetchall()
+        if not rows:
+            return []
+        buckets: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            entity_id = str(row["entity_id"] or "").strip()
+            if not entity_id:
+                continue
+            bucket = buckets.setdefault(
+                entity_id,
+                {
+                    "fieldKey": "",
+                    "shellFields": [],
+                    "actionMethods": [],
+                    "prefabCandidates": [],
+                    "titleTexts": [],
+                    "updateHooks": [],
+                },
+            )
+            field_key = str(row["field_key"] or "").strip()
+            if field_key and not bucket["fieldKey"]:
+                bucket["fieldKey"] = field_key
+            fact_kind = str(row["fact_kind"] or "").strip()
+            fact_value = str(row["fact_value"] or "").strip()
+            if not fact_kind or not fact_value:
+                continue
+            if fact_kind == "shell-field":
+                bucket["shellFields"].append(fact_value)
+            elif fact_kind == "action-method":
+                bucket["actionMethods"].append(fact_value)
+            elif fact_kind == "prefab-candidate":
+                bucket["prefabCandidates"].append(fact_value)
+            elif fact_kind == "literal-title-text":
+                bucket["titleTexts"].append(fact_value)
+            elif fact_kind == "display-update-hook":
+                bucket["updateHooks"].append(fact_value)
+        edge_rows: list[dict[str, Any]] = []
+        seen: set[tuple[str, str, str, str]] = set()
+
+        def append_edge(source_id: str, edge_kind: str, target_id: str, field_key: str, payload_extra: dict[str, Any]) -> None:
+            source_id = str(source_id or "").strip()
+            edge_kind = str(edge_kind or "").strip()
+            target_id = str(target_id or "").strip()
+            field_key = str(field_key or "").strip()
+            if not source_id or not edge_kind or not target_id:
+                return
+            key = (source_id, edge_kind, target_id, field_key)
+            if key in seen:
+                return
+            seen.add(key)
+            classification = _classify_evidence_graph_edge(edge_kind, source_id, target_id)
+            edge_rows.append(
+                {
+                    "traceScope": trace_scope,
+                    "graphScope": trace_scope,
+                    "sourceNodeId": source_id,
+                    "edgeKind": edge_kind,
+                    "targetNodeId": target_id,
+                    "fieldKey": field_key,
+                    "edgeStatus": "present",
+                    "sourceLayer": "knowledge-facts",
+                    "relationRole": classification["relationRole"],
+                    "valueSemantics": classification["valueSemantics"],
+                    "payload": dict(payload_extra or {}),
+                }
+            )
+
+        for entity_id, bucket in buckets.items():
+            field_key = str(bucket.get("fieldKey") or "").strip()
+            shell_fields = _unique_strings(bucket.get("shellFields") or [])
+            action_methods = _unique_strings(bucket.get("actionMethods") or [])
+            prefab_candidates = _unique_strings(bucket.get("prefabCandidates") or [])
+            title_texts = _unique_strings(bucket.get("titleTexts") or [])
+            update_hooks = _unique_strings(bucket.get("updateHooks") or [])
+            for shell_field in shell_fields:
+                for action_method in action_methods:
+                    append_edge(
+                        shell_field,
+                        "exact-shell-to-action-hook",
+                        action_method,
+                        field_key,
+                        {
+                            "entityId": entity_id,
+                            "fieldKey": field_key,
+                            "factSource": "knowledge-facts",
+                            "derivedFromFacts": ["shell-field", "action-method"],
+                        },
+                    )
+                for prefab_candidate in prefab_candidates:
+                    append_edge(
+                        shell_field,
+                        "exact-shell-to-prefab",
+                        prefab_candidate,
+                        field_key,
+                        {
+                            "entityId": entity_id,
+                            "fieldKey": field_key,
+                            "factSource": "knowledge-facts",
+                            "derivedFromFacts": ["shell-field", "prefab-candidate"],
+                        },
+                    )
+            for action_method in action_methods:
+                for update_hook in update_hooks:
+                    append_edge(
+                        action_method,
+                        "exact-display-update-path",
+                        update_hook,
+                        field_key,
+                        {
+                            "entityId": entity_id,
+                            "fieldKey": field_key,
+                            "factSource": "knowledge-facts",
+                            "derivedFromFacts": ["action-method", "display-update-hook"],
+                        },
+                    )
+        return edge_rows
+
+    def _extract_evidence_graph_edges_from_acquisition_diagnostics(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        if not trace_scope:
+            return []
+        diagnostic_rows = conn.execute(
+            """
+            SELECT request_signature, acquisition_term, payload_json, built_at
+            FROM acquisition_diagnostic_views
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            ORDER BY built_at DESC
+            """,
+            (project_name, project_file, trace_scope),
+        ).fetchall()
+        if not diagnostic_rows:
+            return []
+        diagnostics_by_request: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        for row in diagnostic_rows:
+            request_signature = str(row["request_signature"] or "").strip()
+            if not request_signature:
+                continue
+            diagnostics_by_request[request_signature].append(
+                {
+                    "acquisitionTerm": str(row["acquisition_term"] or "").strip(),
+                    "payload": dict(_json_loads(row["payload_json"], {})),
+                    "builtAt": str(row["built_at"] or ""),
+                }
+            )
+        if not diagnostics_by_request:
+            return []
+        native_rows = conn.execute(
+            """
+            SELECT request_signature, payload_json
+            FROM native_trace_views
+            WHERE project_name = ? AND project_file = ? AND request_signature IN ({})
+            """.format(",".join("?" for _ in diagnostics_by_request)),
+            (project_name, project_file, *diagnostics_by_request.keys()),
+        ).fetchall()
+        native_context_by_request: dict[str, dict[str, Any]] = {}
+        for row in native_rows:
+            native_payload = dict(_json_loads(row["payload_json"], {}))
+            native_context_by_request[str(row["request_signature"] or "").strip()] = dict(
+                native_payload.get("requestContext") or {}
+            )
+
+        def _infer_field_key(source_node_id: str) -> str:
+            source_node_id = str(source_node_id or "").strip()
+            if source_node_id.endswith("Button"):
+                return f"{source_node_id[:-6]}Level"
+            if source_node_id.endswith("Level"):
+                return source_node_id
+            return ""
+
+        edge_rows: list[dict[str, Any]] = []
+        seen: set[tuple[str, str, str, str]] = set()
+        exact_outcomes = {"exact-hit", "exact-hit-nonclosing"}
+        exact_statuses = {"exact-evidence-found", "exact-evidence-nonclosing"}
+        for request_signature, request_rows in diagnostics_by_request.items():
+            request_context = dict(native_context_by_request.get(request_signature) or {})
+            if str(request_context.get("coverageMode") or "").strip() != "relation-shaped":
+                continue
+            seam_id = str(
+                request_context.get("seamId")
+                or next(
+                    (
+                        dict(item.get("payload") or {}).get("seamId")
+                        for item in request_rows
+                        if str(dict(item.get("payload") or {}).get("seamId") or "").strip()
+                    ),
+                    "",
+                )
+            ).strip()
+            subject_id = str(request_context.get("subjectId") or "").strip()
+            if not seam_id or not subject_id:
+                continue
+            source_node_id, separator, target_node_id = subject_id.partition(f":{seam_id}:")
+            source_node_id = str(source_node_id or "").strip()
+            target_node_id = str(target_node_id or "").strip()
+            if not separator or not source_node_id or not target_node_id:
+                continue
+            relation_covered = any(
+                bool(dict(dict(item.get("payload") or {}).get("relationCoverage") or {}).get("covered"))
+                for item in request_rows
+            )
+            if not relation_covered:
+                continue
+            exact_hit_terms = {
+                str(item.get("acquisitionTerm") or "").strip()
+                for item in request_rows
+                if (
+                    str(dict(item.get("payload") or {}).get("outcome") or "").strip() in exact_outcomes
+                    or str(dict(item.get("payload") or {}).get("status") or "").strip() in exact_statuses
+                )
+                and str(item.get("acquisitionTerm") or "").strip()
+            }
+            if source_node_id not in exact_hit_terms or target_node_id not in exact_hit_terms:
+                continue
+            field_key = _infer_field_key(source_node_id)
+            edge_key = (source_node_id, seam_id, target_node_id, field_key)
+            if edge_key in seen:
+                continue
+            seen.add(edge_key)
+            classification = _classify_evidence_graph_edge(seam_id, source_node_id, target_node_id)
+            edge_rows.append(
+                {
+                    "traceScope": trace_scope,
+                    "graphScope": trace_scope,
+                    "sourceNodeId": source_node_id,
+                    "edgeKind": seam_id,
+                    "targetNodeId": target_node_id,
+                    "fieldKey": field_key,
+                    "edgeStatus": "present",
+                    "sourceLayer": "verification-run",
+                    "relationRole": classification["relationRole"],
+                    "valueSemantics": classification["valueSemantics"],
+                    "payload": {
+                        "requestSignature": request_signature,
+                        "subjectId": subject_id,
+                        "seamId": seam_id,
+                        "exactHitTerms": sorted(exact_hit_terms),
+                        "derivedFrom": "acquisition-diagnostics",
+                    },
+                }
+            )
+        return edge_rows
+
+    def _sync_knowledge_facts_for_scope(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        fact_rows: list[dict[str, Any]],
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        conn.execute(
+            """
+            DELETE FROM knowledge_facts
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            """,
+            (project_name, project_file, trace_scope),
+        )
+        timestamp = datetime.now().isoformat(timespec="microseconds")
+        for row in fact_rows:
+            payload = dict(row.get("payload") or {})
+            entity_id = str(row.get("entityId") or "").strip()
+            field_key = str(row.get("fieldKey") or "").strip()
+            fact_kind = str(row.get("factKind") or "").strip()
+            fact_value = str(row.get("factValue") or "").strip()
+            conn.execute(
+                """
+                INSERT INTO knowledge_facts(
+                    project_name, project_file, entity_id, fact_kind, fact_value, system_id,
+                    trace_scope, field_key, payload_json, provenance_json, updated_at
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    project_name,
+                    project_file,
+                    entity_id,
+                    fact_kind,
+                    fact_value,
+                    _system_id_from_trace_scope(trace_scope),
+                    trace_scope,
+                    field_key,
+                    _json_dumps(payload),
+                    _json_dumps(
+                        {
+                            "payloadHash": _dependency_hash_payload(payload),
+                            "traceScope": trace_scope,
+                            "entityId": entity_id,
+                            "fieldKey": field_key,
+                            "factKind": fact_kind,
+                            "factValue": fact_value,
+                        }
+                    ),
+                    timestamp,
+                ),
+            )
+
+    def _sync_knowledge_boundaries_for_scope(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        boundary_rows: list[dict[str, Any]],
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        conn.execute(
+            """
+            DELETE FROM knowledge_boundaries
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            """,
+            (project_name, project_file, trace_scope),
+        )
+        timestamp = datetime.now().isoformat(timespec="microseconds")
+        for row in boundary_rows:
+            payload = dict(row.get("payload") or {})
+            subject_id = str(row.get("subjectId") or "").strip()
+            boundary_kind = str(row.get("boundaryKind") or "").strip()
+            verdict = str(row.get("verdict") or "").strip()
+            conn.execute(
+                """
+                INSERT INTO knowledge_boundaries(
+                    project_name, project_file, subject_id, boundary_kind, system_id,
+                    trace_scope, verdict, payload_json, provenance_json, updated_at
+                ) VALUES(?,?,?,?,?,?,?,?,?,?)
+                """,
+                (
+                    project_name,
+                    project_file,
+                    subject_id,
+                    boundary_kind,
+                    _system_id_from_trace_scope(trace_scope),
+                    trace_scope,
+                    verdict,
+                    _json_dumps(payload),
+                    _json_dumps(
+                        {
+                            "payloadHash": _dependency_hash_payload(payload),
+                            "traceScope": trace_scope,
+                            "subjectId": subject_id,
+                            "boundaryKind": boundary_kind,
+                            "verdict": verdict,
+                        }
+                    ),
+                    timestamp,
+                ),
+            )
+
+    def _sync_knowledge_gaps_for_scope(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        gap_rows: list[dict[str, Any]],
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        timestamp = datetime.now().isoformat(timespec="microseconds")
+        system_id = _system_id_from_trace_scope(trace_scope)
+        latest_term_status: dict[tuple[str, str], dict[str, Any]] = {}
+        for status_row in conn.execute(
+            """
+            SELECT acquisition_term, payload_json, built_at
+            FROM acquisition_diagnostic_views
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+            ORDER BY built_at DESC
+            """,
+            (project_name, project_file, trace_scope),
+        ).fetchall():
+            term = str(status_row["acquisition_term"] or "").strip()
+            if not term:
+                continue
+            try:
+                status_payload = json.loads(str(status_row["payload_json"] or "{}"))
+            except json.JSONDecodeError:
+                status_payload = {}
+            seam_id = str(status_payload.get("seamId") or "").strip()
+            normalized_term = term.lower()
+            key = (seam_id, normalized_term)
+            if key not in latest_term_status:
+                latest_term_status[key] = {
+                    "status": str(status_payload.get("status") or "").strip(),
+                    "outcome": str(status_payload.get("outcome") or "").strip(),
+                }
+
+        def _term_status_for_gap(seam_id: str, term: str) -> dict[str, Any]:
+            normalized_term = str(term or "").strip().lower()
+            if not normalized_term:
+                return {}
+            return dict(
+                latest_term_status.get((str(seam_id or "").strip(), normalized_term))
+                or latest_term_status.get(("", normalized_term))
+                or {}
+            )
+
+        def _term_is_gap_covered(seam_id: str, term: str) -> bool:
+            status_payload = _term_status_for_gap(seam_id, term)
+            status = str(status_payload.get("status") or "").strip()
+            outcome = str(status_payload.get("outcome") or "").strip()
+            return status in {"exact-evidence-found", "knowledge-covered-skip"} or outcome in {"exact-hit", "skip-db-covered"}
+
+        def _prune_gap_payload(payload: dict[str, Any], seam_id: str) -> dict[str, Any]:
+            payload = dict(payload or {})
+            for key in ("terms", "preferredActionTerms", "actionTerms", "ownerFieldBlock", "updaterTerms", "expectedEvidence"):
+                if key in payload:
+                    payload[key] = [
+                        term
+                        for term in _unique_strings([str(value).strip() for value in (payload.get(key) or []) if str(value).strip()])
+                        if not _term_is_gap_covered(seam_id, term)
+                    ]
+            for key in ("term", "requiredTerm"):
+                value = str(payload.get(key) or "").strip()
+                if value and _term_is_gap_covered(seam_id, value):
+                    payload[key] = ""
+            return payload
+
+        def _gap_payload_has_open_work(gap_kind: str, seam_id: str, payload: dict[str, Any]) -> bool:
+            payload = dict(payload or {})
+            candidate_terms = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in [
+                        payload.get("term"),
+                        payload.get("requiredTerm"),
+                        *list(payload.get("terms") or []),
+                        *list(payload.get("preferredActionTerms") or []),
+                        *list(payload.get("actionTerms") or []),
+                        *list(payload.get("ownerFieldBlock") or []),
+                        *list(payload.get("updaterTerms") or []),
+                        *list(payload.get("expectedEvidence") or []),
+                    ]
+                    if str(value).strip()
+                ]
+            )
+            reason = str(payload.get("reason") or "").strip()
+            if gap_kind in {"rowDetail", "row-detail"}:
+                return payload.get("isGrounded") is False or reason.startswith("missing-") or bool(candidate_terms)
+            if gap_kind == "playerFacingSupportText":
+                return reason.startswith("missing-") or bool(candidate_terms)
+            if gap_kind == "effectText":
+                return (
+                    not reason.startswith("not-applicable:")
+                    and (reason.startswith("missing-") or bool(candidate_terms))
+                )
+            if gap_kind == "runtime-cost-coverage":
+                return bool(candidate_terms)
+            if gap_kind == "blocked-lane":
+                return reason.startswith("missing-db-term-evidence:") or bool(candidate_terms)
+            if gap_kind in {"missing-edge", "blocked-edge", "next-seam"}:
+                if bool(candidate_terms):
+                    return True
+                return str(seam_id or "").strip() in {
+                    "exact-display-update-path",
+                    "runtime-final-max-level",
+                    "runtime-next-cost-formula",
+                    "playerFacingSupportText",
+                    "effectText",
+                    "tokenBankState",
+                }
+            return bool(candidate_terms)
+
+        existing_rows = [
+            {
+                "gap_id": str(row["gap_id"] or ""),
+                "system_id": str(row["system_id"] or ""),
+                "trace_scope": trace_scope,
+                "subject_id": str(row["subject_id"] or ""),
+                "field_key": str(row["field_key"] or ""),
+                "gap_kind": str(row["gap_kind"] or ""),
+                "seam_id": str(row["seam_id"] or ""),
+                "gap_status": str(row["gap_status"] or ""),
+                "priority": float(row["priority"] or 0.0),
+                "payload_json": str(row["payload_json"] or ""),
+                "provenance_json": str(row["provenance_json"] or ""),
+            }
+            for row in conn.execute(
+                """
+                SELECT gap_id, system_id, subject_id, field_key, gap_kind, seam_id, gap_status, priority,
+                       payload_json, provenance_json
+                FROM knowledge_gaps
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                ORDER BY gap_id ASC
+                """,
+                (project_name, project_file, trace_scope),
+            ).fetchall()
+        ]
+        existing_gap_ids = {str(row["gap_id"] or "") for row in existing_rows if str(row["gap_id"] or "")}
+        desired_rows: list[dict[str, Any]] = []
+        desired_gap_ids: set[str] = set()
+        for row in gap_rows:
+            payload = dict(row.get("payload") or {})
+            entity_id = str(row.get("entityId") or "").strip()
+            field_key = str(row.get("fieldKey") or "").strip()
+            gap_kind = str(row.get("gapKind") or "").strip()
+            seam_id = str(payload.get("seamId") or payload.get("edgeType") or gap_kind).strip()
+            payload = _prune_gap_payload(payload, seam_id)
+            gap_id = ":".join(
+                [
+                    trace_scope,
+                    entity_id or "subject",
+                    field_key or "field",
+                    gap_kind or "gap",
+                    seam_id or "seam",
+                ]
+            )
+            gap_status = "open" if _gap_payload_has_open_work(gap_kind, seam_id, payload) else "closed"
+            desired_gap_ids.add(gap_id)
+            desired_rows.append(
+                {
+                    "gap_id": gap_id,
+                    "system_id": system_id,
+                    "trace_scope": trace_scope,
+                    "subject_id": entity_id,
+                    "field_key": field_key,
+                    "gap_kind": gap_kind,
+                    "seam_id": seam_id,
+                    "gap_status": gap_status,
+                    "priority": float(payload.get("priority") or 0.0),
+                    "payload_json": _json_dumps(payload),
+                    "provenance_json": _json_dumps(
+                        {
+                            "payloadHash": _dependency_hash_payload(payload),
+                            "traceScope": trace_scope,
+                            "entityId": entity_id,
+                            "fieldKey": field_key,
+                            "gapKind": gap_kind,
+                        }
+                    ),
+                }
+            )
+            term_fragments: list[tuple[str, str, int]] = []
+            for ordinal, term in enumerate(_unique_strings([str(value).strip() for value in (payload.get("terms") or []) if str(value).strip()])):
+                term_fragments.append(("term", term, ordinal))
+            for ordinal, term in enumerate(_unique_strings([str(value).strip() for value in (payload.get("actionTerms") or []) if str(value).strip()])):
+                term_fragments.append(("action", term, ordinal))
+            for ordinal, term in enumerate(_unique_strings([str(value).strip() for value in (payload.get("ownerFieldBlock") or []) if str(value).strip()])):
+                term_fragments.append(("owner-block", term, ordinal))
+            for ordinal, term in enumerate(_unique_strings([str(value).strip() for value in (payload.get("updaterTerms") or []) if str(value).strip()])):
+                term_fragments.append(("updater", term, ordinal))
+            self._replace_knowledge_gap_term_fragments(conn, project_name, project_file, gap_id, term_fragments)
+        removed_gap_ids = sorted(existing_gap_ids - desired_gap_ids)
+        for gap_id in removed_gap_ids:
+            conn.execute(
+                """
+                DELETE FROM knowledge_gap_term_fragments
+                WHERE project_name = ? AND project_file = ? AND gap_id = ?
+                """,
+                (project_name, project_file, gap_id),
+            )
+        _sync_scoped_projection_rows(
+            conn,
+            table_name="knowledge_gaps",
+            scope_columns=["project_name", "project_file"],
+            scope_values=(project_name, project_file),
+            key_fields=["gap_id"],
+            value_fields=[
+                "system_id",
+                "trace_scope",
+                "subject_id",
+                "field_key",
+                "gap_kind",
+                "seam_id",
+                "gap_status",
+                "priority",
+                "payload_json",
+                "provenance_json",
+            ],
+            desired_rows=desired_rows,
+            existing_rows=existing_rows,
+            row_columns=[
+                "gap_id",
+                "system_id",
+                "trace_scope",
+                "subject_id",
+                "field_key",
+                "gap_kind",
+                "seam_id",
+                "gap_status",
+                "priority",
+                "payload_json",
+                "provenance_json",
+            ],
+            timestamp_column="updated_at",
+            timestamp_value=timestamp,
+        )
 
     def upsert_job(self, job_info: dict[str, Any], lease_owner: str | None = None) -> None:
         job_id = str(job_info.get("job_id", "")).strip()
@@ -13477,7 +20883,7 @@ class GhidraCacheDB:
                     )
                     conn.execute(
                         """
-                        DELETE FROM materialized_term_views
+                        DELETE FROM term_views
                         WHERE project_name = ? AND project_file = ? AND normalized_term = ?
                         """,
                         (project_name, project_file, normalized_term),
@@ -13489,17 +20895,10 @@ class GhidraCacheDB:
                         """,
                         (project_name, project_file, normalized_term),
                     )
-                    conn.execute(
-                        """
-                        DELETE FROM graph_links
-                        WHERE project_name = ? AND project_file = ? AND source_term = ?
-                        """,
-                        (project_name, project_file, normalized_term),
-                    )
             else:
                 conn.execute("DELETE FROM canonical_term_aspects")
-                conn.execute("DELETE FROM materialized_term_views")
-                conn.execute("DELETE FROM materialized_job_views")
+                conn.execute("DELETE FROM term_views")
+                conn.execute("DELETE FROM job_views")
                 conn.execute("DELETE FROM process_exact_index")
                 conn.execute("DELETE FROM process_term_index")
                 conn.execute("DELETE FROM graph_links")
@@ -13666,7 +21065,7 @@ class GhidraCacheDB:
                 provenance = {aspect_kind: aspect["provenance"] for aspect_kind, aspect in aspects.items()}
                 conn.execute(
                     """
-                    INSERT INTO materialized_term_views(
+                    INSERT INTO term_views(
                         project_name, project_file, normalized_term, term, payload_json, provenance_json, updated_at
                     ) VALUES(?,?,?,?,?,?,?)
                     """,
@@ -13696,6 +21095,7 @@ class GhidraCacheDB:
                     ),
                 )
 
+                desired_graph_links: list[tuple[str, str, str, str, str, str]] = []
                 for aspect_kind in ("owner_candidates", "related_terms", "graph_backfill_link", "managed_graph_owner", "managed_graph_edge"):
                     aspect_payload = aspects.get(aspect_kind, {}).get("payload") or []
                     for entry in aspect_payload:
@@ -13709,12 +21109,7 @@ class GhidraCacheDB:
                             continue
                         if not target_term:
                             continue
-                        conn.execute(
-                            """
-                            INSERT OR REPLACE INTO graph_links(
-                                project_name, project_file, target_term, source_term, kind, source_ref, start_time
-                            ) VALUES(?,?,?,?,?,?,?)
-                            """,
+                        desired_graph_links.append(
                             (
                                 project_name,
                                 project_file,
@@ -13722,8 +21117,54 @@ class GhidraCacheDB:
                                 normalized_term,
                                 kind,
                                 "canonical-term:{}".format(normalized_term),
-                                datetime.now().isoformat(),
-                            ),
+                            )
+                        )
+                desired_graph_links = sorted(set(desired_graph_links))
+                if scoped_refresh:
+                    existing_graph_links = sorted(
+                        (
+                            str(row["project_name"] or ""),
+                            str(row["project_file"] or ""),
+                            str(row["target_term"] or ""),
+                            str(row["source_term"] or ""),
+                            str(row["kind"] or ""),
+                            str(row["source_ref"] or ""),
+                        )
+                        for row in conn.execute(
+                            """
+                            SELECT project_name, project_file, target_term, source_term, kind, source_ref
+                            FROM graph_links
+                            WHERE project_name = ? AND project_file = ? AND source_term = ?
+                            """,
+                            (project_name, project_file, normalized_term),
+                        ).fetchall()
+                    )
+                    if existing_graph_links != desired_graph_links:
+                        conn.execute(
+                            """
+                            DELETE FROM graph_links
+                            WHERE project_name = ? AND project_file = ? AND source_term = ?
+                            """,
+                            (project_name, project_file, normalized_term),
+                        )
+                        for graph_link in desired_graph_links:
+                            conn.execute(
+                                """
+                                INSERT OR REPLACE INTO graph_links(
+                                    project_name, project_file, target_term, source_term, kind, source_ref, start_time
+                                ) VALUES(?,?,?,?,?,?,?)
+                                """,
+                                (*graph_link, datetime.now().isoformat()),
+                            )
+                else:
+                    for graph_link in desired_graph_links:
+                        conn.execute(
+                            """
+                            INSERT OR REPLACE INTO graph_links(
+                                project_name, project_file, target_term, source_term, kind, source_ref, start_time
+                            ) VALUES(?,?,?,?,?,?,?)
+                            """,
+                            (*graph_link, datetime.now().isoformat()),
                         )
 
             if scoped_refresh and rebuild_job_views:
@@ -13761,7 +21202,7 @@ class GhidraCacheDB:
                     )
                     conn.execute(
                         """
-                        DELETE FROM materialized_job_views
+                        DELETE FROM job_views
                         WHERE project_name = ? AND project_file = ? AND signature = ?
                         """,
                         (
@@ -13814,7 +21255,7 @@ class GhidraCacheDB:
                     for term in wanted_terms:
                         term_row = conn.execute(
                             """
-                            SELECT * FROM materialized_term_views
+                            SELECT * FROM term_views
                             WHERE project_name = ? AND project_file = ? AND normalized_term = ?
                             """,
                             (project_name, project_file, term.lower()),
@@ -13861,7 +21302,7 @@ class GhidraCacheDB:
                     combined_result["managedGraph"] = _merge_managed_graphs(graphs)
                     conn.execute(
                         """
-                        INSERT INTO materialized_job_views(
+                        INSERT INTO job_views(
                             project_name, project_file, signature, wanted_terms_json, payload_json, provenance_json, updated_at
                         ) VALUES(?,?,?,?,?,?,?)
                         """,
@@ -13939,11 +21380,25 @@ class GhidraCacheDB:
         with self.connect() as conn:
             row = conn.execute(
                 """
-                SELECT * FROM materialized_job_views
+                SELECT * FROM job_views
                 WHERE project_name = ? AND project_file = ? AND signature = ?
                 """,
                 (project_name, project_file, signature),
             ).fetchone()
+        if row is None:
+            try:
+                with self.connect() as conn:
+                    row = conn.execute(
+                        """
+                        SELECT * FROM materialized_job_views
+                        WHERE project_name = ? AND project_file = ? AND signature = ?
+                        """,
+                        (project_name, project_file, signature),
+                    ).fetchone()
+            except sqlite3.OperationalError as error:
+                if "no such table" not in str(error).lower():
+                    raise
+                row = None
         if row is None:
             return None
         return {
@@ -13976,7 +21431,7 @@ class GhidraCacheDB:
         with self.connect() as conn:
             row = conn.execute(
                 """
-                SELECT * FROM materialized_term_views
+                SELECT * FROM term_views
                 WHERE project_name = ? AND project_file = ? AND normalized_term = ?
                 """,
                 (project_name, project_file, normalized),
@@ -13999,6 +21454,248 @@ class GhidraCacheDB:
             "result": payload,
             "terms": [str(row["term"])],
         }
+
+    def _rebuild_trace_scope_term_mentions(
+        self,
+        conn: sqlite3.Connection,
+        *,
+        trace_scopes: list[str] | None = None,
+    ) -> None:
+        requested_scopes = sorted({str(scope or "").strip() for scope in (trace_scopes or []) if str(scope or "").strip()})
+        if requested_scopes:
+            placeholders = ",".join("?" for _ in requested_scopes)
+            trace_rows = conn.execute(
+                f"""
+                SELECT trace_scope, source_term
+                FROM trace_fragments
+                WHERE project_name = ? AND project_file = ?
+                  AND is_valid = 1 AND invalidated_at IS NULL
+                  AND trace_scope IN ({placeholders})
+                """,
+                ("cifi-full", "libil2cpp.so", *requested_scopes),
+            ).fetchall()
+            canonical_rows = conn.execute(
+                f"""
+                SELECT trace_scope, fragment_key
+                FROM canonical_trace_fragments
+                WHERE project_name = ? AND project_file = ?
+                  AND trace_scope IN ({placeholders})
+                """,
+                ("cifi-full", "libil2cpp.so", *requested_scopes),
+            ).fetchall()
+            existing_rows = conn.execute(
+                f"""
+                SELECT trace_scope, normalized_term, term, source_kind
+                FROM trace_scope_term_mentions
+                WHERE project_name = ? AND project_file = ?
+                  AND trace_scope IN ({placeholders})
+                """,
+                ("cifi-full", "libil2cpp.so", *requested_scopes),
+            ).fetchall()
+        else:
+            trace_rows = conn.execute(
+                """
+                SELECT trace_scope, source_term
+                FROM trace_fragments
+                WHERE project_name = ? AND project_file = ?
+                  AND is_valid = 1 AND invalidated_at IS NULL
+                """,
+                ("cifi-full", "libil2cpp.so"),
+            ).fetchall()
+            canonical_rows = conn.execute(
+                """
+                SELECT trace_scope, fragment_key
+                FROM canonical_trace_fragments
+                WHERE project_name = ? AND project_file = ?
+                """,
+                ("cifi-full", "libil2cpp.so"),
+            ).fetchall()
+            existing_rows = conn.execute(
+                """
+                SELECT trace_scope, normalized_term, term, source_kind
+                FROM trace_scope_term_mentions
+                WHERE project_name = ? AND project_file = ?
+                """,
+                ("cifi-full", "libil2cpp.so"),
+            ).fetchall()
+        desired_rows_by_scope: dict[str, list[dict[str, Any]]] = {}
+        existing_rows_by_scope: dict[str, list[dict[str, Any]]] = {}
+        for row in existing_rows:
+            trace_scope = str(row["trace_scope"] or "").strip()
+            if not trace_scope:
+                continue
+            existing_rows_by_scope.setdefault(trace_scope, []).append(
+                {
+                    "normalized_term": str(row["normalized_term"] or ""),
+                    "term": str(row["term"] or ""),
+                    "source_kind": str(row["source_kind"] or ""),
+                }
+            )
+        seen: set[tuple[str, str, str]] = set()
+        timestamp = datetime.now().isoformat()
+        for row in trace_rows:
+            trace_scope = str(row["trace_scope"] or "").strip()
+            term = str(row["source_term"] or "").strip()
+            normalized_term = _normalize_resolution_term(term)
+            if not trace_scope or not term or not normalized_term:
+                continue
+            key = (trace_scope, normalized_term, "source-term")
+            if key in seen:
+                continue
+            seen.add(key)
+            desired_rows_by_scope.setdefault(trace_scope, []).append(
+                {
+                    "normalized_term": normalized_term,
+                    "term": term,
+                    "source_kind": "source-term",
+                }
+            )
+        for row in canonical_rows:
+            trace_scope = str(row["trace_scope"] or "").strip()
+            term = str(row["fragment_key"] or "").strip()
+            if term == "__self__":
+                continue
+            normalized_term = _normalize_resolution_term(term)
+            if not trace_scope or not term or not normalized_term:
+                continue
+            key = (trace_scope, normalized_term, "fragment-key")
+            if key in seen:
+                continue
+            seen.add(key)
+            desired_rows_by_scope.setdefault(trace_scope, []).append(
+                {
+                    "normalized_term": normalized_term,
+                    "term": term,
+                    "source_kind": "fragment-key",
+                }
+            )
+        scopes_to_sync = requested_scopes or sorted(set(desired_rows_by_scope.keys()) | set(existing_rows_by_scope.keys()))
+        for trace_scope in scopes_to_sync:
+            _sync_scoped_projection_rows(
+                conn,
+                table_name="trace_scope_term_mentions",
+                scope_columns=["project_name", "project_file", "trace_scope"],
+                scope_values=("cifi-full", "libil2cpp.so", trace_scope),
+                key_fields=["normalized_term", "source_kind"],
+                value_fields=["term"],
+                desired_rows=desired_rows_by_scope.get(trace_scope, []),
+                existing_rows=existing_rows_by_scope.get(trace_scope, []),
+                row_columns=["normalized_term", "term", "source_kind"],
+                timestamp_column="updated_at",
+                timestamp_value=timestamp,
+            )
+
+    def list_trace_scope_term_mentions(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> list[dict[str, Any]]:
+        candidate_scope = str(trace_scope or "").strip()
+        if not candidate_scope:
+            return []
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT trace_scope, normalized_term, term, source_kind, updated_at
+                FROM trace_scope_term_mentions
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+                ORDER BY updated_at DESC, normalized_term ASC
+                """,
+                (project_name, project_file, candidate_scope),
+            ).fetchall()
+        return [
+            {
+                "traceScope": str(row["trace_scope"] or ""),
+                "normalizedTerm": str(row["normalized_term"] or ""),
+                "term": str(row["term"] or ""),
+                "sourceKind": str(row["source_kind"] or ""),
+                "updatedAt": str(row["updated_at"] or ""),
+            }
+            for row in rows
+        ]
+
+    def list_central_term_frontier_rows(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> list[dict[str, Any]]:
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                WITH aspect_counts AS (
+                    SELECT
+                        project_name,
+                        project_file,
+                        normalized_term,
+                        COUNT(*) AS aspect_total,
+                        SUM(CASE WHEN aspect_kind = 'acquisition_exact_term' THEN 1 ELSE 0 END) AS direct_acquisition_count,
+                        SUM(CASE WHEN aspect_kind = 'native_search_attempt' THEN 1 ELSE 0 END) AS native_attempt_count,
+                        SUM(CASE WHEN aspect_kind = 'native_signal_fragment' THEN 1 ELSE 0 END) AS native_signal_count,
+                        SUM(CASE WHEN aspect_kind = 'bridge_plan' THEN 1 ELSE 0 END) AS bridge_plan_count,
+                        SUM(CASE WHEN aspect_kind = 'term_bridge_core' THEN 1 ELSE 0 END) AS bridge_core_count,
+                        SUM(CASE WHEN aspect_kind = 'managed_graph_edge' THEN 1 ELSE 0 END) AS graph_edge_count,
+                        SUM(CASE WHEN aspect_kind = 'managed_graph_owner' THEN 1 ELSE 0 END) AS graph_owner_count,
+                        SUM(CASE WHEN aspect_kind = 'owner_candidates' THEN 1 ELSE 0 END) AS owner_candidate_count,
+                        SUM(CASE WHEN aspect_kind = 'metadata_neighborhoods' THEN 1 ELSE 0 END) AS metadata_count,
+                        SUM(CASE WHEN aspect_kind = 'related_terms' THEN 1 ELSE 0 END) AS related_term_count,
+                        SUM(CASE WHEN aspect_kind = 'ascii_targets' THEN 1 ELSE 0 END) AS ascii_target_count,
+                        SUM(CASE WHEN aspect_kind = 'managed_reconstruction' THEN 1 ELSE 0 END) AS reconstruction_count,
+                        SUM(CASE WHEN aspect_kind = 'managed_graph_full' THEN 1 ELSE 0 END) AS graph_full_count
+                    FROM canonical_term_aspects
+                    WHERE project_name = ? AND project_file = ?
+                    GROUP BY project_name, project_file, normalized_term
+                )
+                SELECT
+                    tv.normalized_term,
+                    tv.term,
+                    tv.updated_at,
+                    COALESCE(ac.aspect_total, 0) AS aspect_total,
+                    COALESCE(ac.direct_acquisition_count, 0) AS direct_acquisition_count,
+                    COALESCE(ac.native_attempt_count, 0) AS native_attempt_count,
+                    COALESCE(ac.native_signal_count, 0) AS native_signal_count,
+                    COALESCE(ac.bridge_plan_count, 0) AS bridge_plan_count,
+                    COALESCE(ac.bridge_core_count, 0) AS bridge_core_count,
+                    COALESCE(ac.graph_edge_count, 0) AS graph_edge_count,
+                    COALESCE(ac.graph_owner_count, 0) AS graph_owner_count,
+                    COALESCE(ac.owner_candidate_count, 0) AS owner_candidate_count,
+                    COALESCE(ac.metadata_count, 0) AS metadata_count,
+                    COALESCE(ac.related_term_count, 0) AS related_term_count,
+                    COALESCE(ac.ascii_target_count, 0) AS ascii_target_count,
+                    COALESCE(ac.reconstruction_count, 0) AS reconstruction_count,
+                    COALESCE(ac.graph_full_count, 0) AS graph_full_count
+                FROM term_views AS tv
+                LEFT JOIN aspect_counts AS ac
+                  ON ac.project_name = tv.project_name
+                 AND ac.project_file = tv.project_file
+                 AND ac.normalized_term = tv.normalized_term
+                WHERE tv.project_name = ? AND tv.project_file = ?
+                ORDER BY tv.updated_at DESC, tv.term ASC
+                """,
+                (project_name, project_file, project_name, project_file),
+            ).fetchall()
+        return [
+            {
+                "normalizedTerm": str(row["normalized_term"] or ""),
+                "term": str(row["term"] or ""),
+                "updatedAt": str(row["updated_at"] or ""),
+                "aspectTotal": int(row["aspect_total"] or 0),
+                "directAcquisitionCount": int(row["direct_acquisition_count"] or 0),
+                "nativeAttemptCount": int(row["native_attempt_count"] or 0),
+                "nativeSignalCount": int(row["native_signal_count"] or 0),
+                "bridgePlanCount": int(row["bridge_plan_count"] or 0),
+                "bridgeCoreCount": int(row["bridge_core_count"] or 0),
+                "graphEdgeCount": int(row["graph_edge_count"] or 0),
+                "graphOwnerCount": int(row["graph_owner_count"] or 0),
+                "ownerCandidateCount": int(row["owner_candidate_count"] or 0),
+                "metadataCount": int(row["metadata_count"] or 0),
+                "relatedTermCount": int(row["related_term_count"] or 0),
+                "asciiTargetCount": int(row["ascii_target_count"] or 0),
+                "reconstructionCount": int(row["reconstruction_count"] or 0),
+                "graphFullCount": int(row["graph_full_count"] or 0),
+            }
+            for row in rows
+        ]
 
     def find_fast_term_evidence_summaries(
         self,
@@ -14050,7 +21747,7 @@ class GhidraCacheDB:
             term_rows = conn.execute(
                 f"""
                 SELECT normalized_term, term, payload_json, provenance_json, updated_at
-                FROM materialized_term_views
+                FROM term_views
                 WHERE project_name = ? AND project_file = ? AND normalized_term IN ({placeholders})
                 """,
                 (project_name, project_file, *normalized_terms),
@@ -14184,7 +21881,7 @@ class GhidraCacheDB:
             term_rows = conn.execute(
                 f"""
                 SELECT normalized_term, term, payload_json, provenance_json, updated_at
-                FROM materialized_term_views
+                FROM term_views
                 WHERE project_name = ? AND project_file = ? AND normalized_term IN ({placeholders})
                 """,
                 (project_name, project_file, *normalized_terms),
@@ -14434,7 +22131,7 @@ class GhidraCacheDB:
             for term in all_terms:
                 row = conn.execute(
                     """
-                    SELECT * FROM materialized_term_views
+                    SELECT * FROM term_views
                     WHERE project_name = ? AND project_file = ? AND normalized_term = ?
                     """,
                     (project_name, project_file, term.lower()),
@@ -14578,13 +22275,24 @@ class GhidraCacheDB:
             "result": combined_result,
         }
 
+        existing = self.find_materialized_native_trace_view(project_name, project_file, request_signature)
+        if (
+            existing
+            and list(existing.get("requestedTerms") or []) == requested_terms
+            and list(existing.get("searchTerms") or []) == search_terms
+            and _stable_native_trace_payload(dict(existing.get("payload") or {})) == _stable_native_trace_payload(payload)
+            and dict(existing.get("provenance") or {}) == provenance
+            and str(existing.get("reducerVersion") or "") == "db-native-trace-v1"
+        ):
+            return payload
+
         attempts = 12
         for attempt in range(attempts):
             try:
                 with self.connect() as conn:
                     conn.execute(
                         """
-                        INSERT INTO materialized_native_trace_views(
+                        INSERT INTO native_trace_views(
                             project_name, project_file, request_signature, requested_terms_json, search_terms_json,
                             payload_json, provenance_json, reducer_version, built_at
                         ) VALUES(?,?,?,?,?,?,?,?,?)
@@ -14608,6 +22316,7 @@ class GhidraCacheDB:
                             datetime.now().isoformat(),
                         ),
                     )
+                    self._prune_native_trace_retention(conn)
                 break
             except sqlite3.OperationalError as exc:
                 if "database is locked" not in str(exc).lower() or attempt >= attempts - 1:
@@ -14616,12 +22325,20 @@ class GhidraCacheDB:
         self._relation_native_trace_view_cache.clear()
         return payload
 
-    def find_materialized_native_trace_view(self, project_name: str, project_file: str, request_signature: str) -> dict[str, Any] | None:
-        self.sync_from_jobs_if_needed()
+    def find_materialized_native_trace_view(
+        self,
+        project_name: str,
+        project_file: str,
+        request_signature: str,
+        *,
+        sync_jobs: bool = True,
+    ) -> dict[str, Any] | None:
+        if sync_jobs:
+            self.sync_from_jobs_if_needed()
         with self.connect() as conn:
             row = conn.execute(
                 """
-                SELECT * FROM materialized_native_trace_views
+                SELECT * FROM native_trace_views
                 WHERE project_name = ? AND project_file = ? AND request_signature = ?
                 """,
                 (project_name, project_file, request_signature),
@@ -14663,7 +22380,7 @@ class GhidraCacheDB:
             with self.connect() as conn:
                 rows = conn.execute(
                     """
-                    SELECT * FROM materialized_native_trace_views
+                    SELECT * FROM native_trace_views
                     WHERE project_name = ? AND project_file = ?
                     ORDER BY built_at DESC
                     LIMIT 128
@@ -14680,7 +22397,7 @@ class GhidraCacheDB:
                 ):
                     relation_rows = conn.execute(
                         """
-                        SELECT * FROM materialized_native_trace_views
+                        SELECT * FROM native_trace_views
                         WHERE project_name = ? AND project_file = ?
                           AND payload_json LIKE ?
                           AND (? = '' OR payload_json LIKE ?)
@@ -14766,6 +22483,71 @@ class GhidraCacheDB:
             "level",
             "data",
         }
+        normalized_term = str(term or "").strip()
+        evidence_refs: list[dict[str, str]] = []
+        if normalized_term:
+            canonical_rows = [
+                row
+                for row in self.list_central_canonical_graph_edges(
+                    project_name,
+                    project_file,
+                    node_id=normalized_term,
+                )
+                if str(row.get("edgeStatus") or "").strip() != "negative"
+            ]
+            for row in canonical_rows[:24]:
+                source_node_id = str(row.get("sourceNodeId") or "").strip()
+                target_node_id = str(row.get("targetNodeId") or "").strip()
+                if source_node_id.lower() == normalized_term.lower():
+                    other_node = target_node_id
+                elif target_node_id.lower() == normalized_term.lower():
+                    other_node = source_node_id
+                else:
+                    continue
+                if not other_node or other_node.lower() == normalized_term.lower():
+                    continue
+                evidence_refs.append(
+                    {
+                        "value": normalized_term,
+                        "sourceTerm": other_node,
+                        "kind": str(row.get("edgeKind") or "").strip(),
+                        "sourceRef": "db:canonical-graph",
+                    }
+                )
+            if evidence_refs:
+                return evidence_refs
+            concrete_rows = [
+                row
+                for row in self.list_central_evidence_graph_edges(
+                    project_name,
+                    project_file,
+                    node_id=normalized_term,
+                )
+                if str(row.get("sourceLayer") or "").strip() != "traceGraph-abstract"
+            ]
+            for row in concrete_rows[:24]:
+                if str(row.get("edgeStatus") or "").strip() == "negative":
+                    continue
+                source_node_id = str(row.get("sourceNodeId") or "").strip()
+                target_node_id = str(row.get("targetNodeId") or "").strip()
+                if source_node_id.lower() == normalized_term.lower():
+                    other_node = target_node_id
+                elif target_node_id.lower() == normalized_term.lower():
+                    other_node = source_node_id
+                else:
+                    continue
+                if not other_node or other_node.lower() == normalized_term.lower():
+                    continue
+                evidence_refs.append(
+                    {
+                        "value": normalized_term,
+                        "sourceTerm": other_node,
+                        "kind": str(row.get("edgeKind") or "").strip(),
+                        "sourceRef": f"db:evidence-graph:{str(row.get('traceScope') or '').strip()}",
+                    }
+                )
+        if evidence_refs:
+            return evidence_refs
         with self.connect() as conn:
             rows = conn.execute(
                 """
@@ -14775,7 +22557,7 @@ class GhidraCacheDB:
                   AND target_term = ?
                 ORDER BY start_time DESC
                 """,
-                (project_name, project_file, term.lower()),
+                (project_name, project_file, normalized_term.lower()),
             ).fetchall()
         filtered_rows = []
         for row in rows:
@@ -16000,7 +23782,7 @@ class GhidraCacheDB:
         with self.connect() as conn:
             term_rows = conn.execute(
                 """
-                SELECT * FROM materialized_term_views
+                SELECT * FROM term_views
                 ORDER BY project_name, project_file, normalized_term
                 """
             ).fetchall()
@@ -16206,7 +23988,25 @@ class GhidraCacheDB:
                     "start_time": str(dataset.get("generatedAt", "")) or now,
                 }
             )
-        for semantic_fragment in dataset.get("semanticFragments", []) or []:
+        semantic_fragments = [fragment for fragment in (dataset.get("semanticFragments", []) or []) if isinstance(fragment, dict)]
+        existing_semantic_keys = {
+            (
+                str(fragment.get("fragment_kind", "")).strip(),
+                str(fragment.get("fragment_key", "")).strip(),
+            )
+            for fragment in semantic_fragments
+            if str(fragment.get("fragment_kind", "")).strip() and str(fragment.get("fragment_key", "")).strip()
+        }
+        for synthesized_fragment in _synthesize_semantic_fragments_from_trace_dataset(trace_scope, dataset):
+            fragment_identity = (
+                str(synthesized_fragment.get("fragment_kind", "")).strip(),
+                str(synthesized_fragment.get("fragment_key", "")).strip(),
+            )
+            if fragment_identity in existing_semantic_keys:
+                continue
+            existing_semantic_keys.add(fragment_identity)
+            semantic_fragments.append(synthesized_fragment)
+        for semantic_fragment in semantic_fragments:
             if not isinstance(semantic_fragment, dict):
                 continue
             fragment_kind = str(semantic_fragment.get("fragment_kind", "")).strip()
@@ -16510,10 +24310,11 @@ class GhidraCacheDB:
                     ).fetchall()
                 else:
                     conn.execute("DELETE FROM canonical_trace_fragments")
-                    conn.execute("DELETE FROM materialized_trace_views")
-                    conn.execute("DELETE FROM canonical_system_trace_views")
                     conn.execute("DELETE FROM canonical_semantic_fragments")
-                    conn.execute("DELETE FROM materialized_target_bundle_views")
+                    conn.execute("DELETE FROM target_bundle_json_component_views")
+                    conn.execute("DELETE FROM target_bundle_views")
+                    conn.execute("DELETE FROM trace_payload_history")
+                    conn.execute("DELETE FROM canonical_system_trace_history")
                     rows = conn.execute(
                         """
                         SELECT * FROM trace_fragments
@@ -16569,11 +24370,23 @@ class GhidraCacheDB:
                         }
                     trace_view_rows = conn.execute(
                         f"""
-                        SELECT *
-                        FROM materialized_trace_views
-                        WHERE trace_scope IN ({placeholders})
+                        SELECT tph.project_name, tph.project_file, tph.trace_scope, tph.request_signature,
+                               tph.payload_json, tph.provenance_json, tph.reducer_version, tph.last_built_at
+                        FROM trace_payload_history AS tph
+                        INNER JOIN (
+                            SELECT project_name, project_file, trace_scope, request_signature, MAX(last_built_at) AS max_last_built_at
+                            FROM trace_payload_history
+                            WHERE trace_scope IN ({placeholders})
+                            GROUP BY project_name, project_file, trace_scope, request_signature
+                        ) AS latest
+                          ON latest.project_name = tph.project_name
+                         AND latest.project_file = tph.project_file
+                         AND latest.trace_scope = tph.trace_scope
+                         AND latest.request_signature = tph.request_signature
+                         AND latest.max_last_built_at = tph.last_built_at
+                        WHERE tph.trace_scope IN ({placeholders})
                         """,
-                        tuple(requested_scopes),
+                        tuple(requested_scopes) + tuple(requested_scopes),
                     ).fetchall()
                     for row in trace_view_rows:
                         key = (
@@ -16586,15 +24399,27 @@ class GhidraCacheDB:
                             "payload": _json_loads(row["payload_json"], {}),
                             "provenance": _json_loads(row["provenance_json"], {}),
                             "reducerVersion": str(row["reducer_version"] or ""),
-                            "builtAt": str(row["built_at"] or ""),
+                            "builtAt": str(row["last_built_at"] or ""),
                         }
                     system_trace_rows = conn.execute(
                         f"""
-                        SELECT *
-                        FROM canonical_system_trace_views
-                        WHERE trace_scope IN ({placeholders})
+                        SELECT csth.project_name, csth.project_file, csth.trace_scope, csth.request_signature,
+                               csth.payload_json, csth.provenance_json, csth.reducer_version, csth.last_built_at
+                        FROM canonical_system_trace_history AS csth
+                        INNER JOIN (
+                            SELECT project_name, project_file, trace_scope, request_signature, MAX(last_built_at) AS max_last_built_at
+                            FROM canonical_system_trace_history
+                            WHERE trace_scope IN ({placeholders})
+                            GROUP BY project_name, project_file, trace_scope, request_signature
+                        ) AS latest
+                          ON latest.project_name = csth.project_name
+                         AND latest.project_file = csth.project_file
+                         AND latest.trace_scope = csth.trace_scope
+                         AND latest.request_signature = csth.request_signature
+                         AND latest.max_last_built_at = csth.last_built_at
+                        WHERE csth.trace_scope IN ({placeholders})
                         """,
-                        tuple(requested_scopes),
+                        tuple(requested_scopes) + tuple(requested_scopes),
                     ).fetchall()
                     for row in system_trace_rows:
                         key = (
@@ -16607,7 +24432,7 @@ class GhidraCacheDB:
                             "payload": _json_loads(row["payload_json"], {}),
                             "provenance": _json_loads(row["provenance_json"], {}),
                             "reducerVersion": str(row["reducer_version"] or ""),
-                            "builtAt": str(row["built_at"] or ""),
+                            "builtAt": str(row["last_built_at"] or ""),
                         }
             for key, fragment_rows in grouped.items():
                 project_name, project_file, trace_scope, request_signature, fragment_kind, fragment_key = key
@@ -16725,6 +24550,41 @@ class GhidraCacheDB:
                         """,
                         key,
                     )
+            with self._timing_span("reducerMaterializerRebuild.refreshScopeTermMentions"):
+                self._rebuild_trace_scope_term_mentions(conn, trace_scopes=requested_scopes if scoped_refresh else None)
+
+            latest_projection_request_by_scope: dict[tuple[str, str, str], str] = {}
+            latest_projection_rank_by_scope: dict[tuple[str, str, str], tuple[int, int, str]] = {}
+            for project_name, project_file, trace_scope, request_signature in trace_groups.keys():
+                trace_payload = dict(trace_groups[(project_name, project_file, trace_scope, request_signature)].get("payload") or {})
+                payload_rank = _materialized_target_bundle_payload_rank(
+                    trace_payload,
+                    built_at=str(trace_payload.get("generatedAt") or ""),
+                    request_signature=request_signature,
+                )
+                scope_key = (project_name, project_file, trace_scope)
+                current_rank = latest_projection_rank_by_scope.get(scope_key)
+                if current_rank is None or payload_rank > current_rank:
+                    latest_projection_rank_by_scope[scope_key] = payload_rank
+                    latest_projection_request_by_scope[scope_key] = request_signature
+
+            if scoped_refresh and latest_projection_request_by_scope:
+                with self._timing_span("reducerMaterializerRebuild.pruneHistoricalTargetBundleProjections"):
+                    for (project_name, project_file, trace_scope), latest_request_signature in latest_projection_request_by_scope.items():
+                        conn.execute(
+                            """
+                            DELETE FROM target_bundle_json_component_views
+                            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature <> ?
+                            """,
+                            (project_name, project_file, trace_scope, latest_request_signature),
+                        )
+                        conn.execute(
+                            """
+                            DELETE FROM target_bundle_views
+                            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature <> ?
+                            """,
+                            (project_name, project_file, trace_scope, latest_request_signature),
+                        )
 
             if scoped_refresh and trace_groups:
                 with self._timing_span("reducerMaterializerRebuild.loadPreviousSemanticFragments"):
@@ -16751,22 +24611,25 @@ class GhidraCacheDB:
                                 "provenance": _json_loads(row["provenance_json"], {}),
                             }
                 with self._timing_span("reducerMaterializerRebuild.loadPreviousTargetBundles"):
-                    for project_name, project_file, trace_scope, request_signature in trace_groups.keys():
+                    for (project_name, project_file, trace_scope), request_signature in latest_projection_request_by_scope.items():
                         row = conn.execute(
                             """
-                            SELECT payload_json, provenance_json, reducer_version, built_at
-                            FROM materialized_target_bundle_views
+                            SELECT updated_at
+                            FROM target_bundle_views
                             WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
                             """,
                             (project_name, project_file, trace_scope, request_signature),
                         ).fetchone()
                         if row is None:
                             continue
+                        payload_row = self.find_central_target_bundle_view(project_name, project_file, trace_scope, request_signature)
+                        if payload_row is None:
+                            continue
                         previous_target_bundle_lookup[(project_name, project_file, trace_scope, request_signature)] = {
-                            "payload": _json_loads(row["payload_json"], {}),
-                            "provenance": _json_loads(row["provenance_json"], {}),
-                            "reducerVersion": str(row["reducer_version"] or ""),
-                            "builtAt": str(row["built_at"] or ""),
+                            "payload": dict(payload_row.get("payload") or {}),
+                            "provenance": dict(payload_row.get("provenance") or {}),
+                            "reducerVersion": str(payload_row.get("reducerVersion") or ""),
+                            "builtAt": str(row["updated_at"] or ""),
                         }
 
             canonical_semantic_lookup: dict[tuple[str, str, str, str], dict[str, Any]] = {}
@@ -16840,11 +24703,21 @@ class GhidraCacheDB:
                 }
                 previous_semantic_entry = previous_semantic_lookup.get(semantic_key)
                 previous_semantic_group_proof = dict((previous_semantic_entry or {}).get("provenance") or {}).get("semanticGroupProof") or {}
-                if not (
+                semantic_payload_unchanged = bool(
+                    previous_semantic_entry
+                    and _dependency_hash_payload(dict(previous_semantic_entry.get("payload") or {}))
+                    == _dependency_hash_payload(canonical_payload)
+                    and _dependency_hash_payload(list(previous_semantic_entry.get("alternates") or []))
+                    == _dependency_hash_payload(alternates)
+                    and _dependency_hash_payload(dict(previous_semantic_entry.get("provenance") or {}))
+                    == _dependency_hash_payload(provenance)
+                )
+                semantic_group_hash_unchanged = bool(
                     scoped_refresh
                     and previous_semantic_entry
                     and previous_semantic_group_proof.get("combinedHash") == semantic_group_proof.get("combinedHash")
-                ):
+                )
+                if not (semantic_payload_unchanged or semantic_group_hash_unchanged):
                     conn.execute(
                         """
                         INSERT OR REPLACE INTO canonical_semantic_fragments(
@@ -16902,25 +24775,37 @@ class GhidraCacheDB:
                         }
                     ),
                 }
-                conn.execute(
-                    """
-                    INSERT OR REPLACE INTO canonical_semantic_fragments(
-                        project_name, project_file, fragment_kind, fragment_key, canonical_payload_json,
-                        alternate_payloads_json, provenance_json, reducer_version, built_at
-                    ) VALUES(?,?,?,?,?,?,?,?,?)
-                    """,
-                    (
-                        semantic_key[0],
-                        semantic_key[1],
-                        semantic_key[2],
-                        semantic_key[3],
-                        _json_dumps(payload),
-                        _json_dumps(alternates),
-                        _json_dumps(provenance),
-                        str(entry.get("reducer_version") or "semantic-fragment-derived-v1"),
-                        datetime.now().isoformat(),
-                    ),
+                reducer_version_value = str(entry.get("reducer_version") or "semantic-fragment-derived-v1")
+                previous_semantic_entry = previous_semantic_lookup.get(semantic_key)
+                semantic_payload_unchanged = bool(
+                    previous_semantic_entry
+                    and _dependency_hash_payload(dict(previous_semantic_entry.get("payload") or {}))
+                    == _dependency_hash_payload(payload)
+                    and _dependency_hash_payload(list(previous_semantic_entry.get("alternates") or []))
+                    == _dependency_hash_payload(alternates)
+                    and _dependency_hash_payload(dict(previous_semantic_entry.get("provenance") or {}))
+                    == _dependency_hash_payload(provenance)
                 )
+                if not semantic_payload_unchanged:
+                    conn.execute(
+                        """
+                        INSERT OR REPLACE INTO canonical_semantic_fragments(
+                            project_name, project_file, fragment_kind, fragment_key, canonical_payload_json,
+                            alternate_payloads_json, provenance_json, reducer_version, built_at
+                        ) VALUES(?,?,?,?,?,?,?,?,?)
+                        """,
+                        (
+                            semantic_key[0],
+                            semantic_key[1],
+                            semantic_key[2],
+                            semantic_key[3],
+                            _json_dumps(payload),
+                            _json_dumps(alternates),
+                            _json_dumps(provenance),
+                            reducer_version_value,
+                            datetime.now().isoformat(),
+                        ),
+                    )
                 canonical_semantic_lookup[semantic_key] = {
                     "payload": payload,
                     "alternates": alternates,
@@ -16985,6 +24870,7 @@ class GhidraCacheDB:
                         }
                     )
 
+            current_target_bundle_payloads: dict[tuple[str, str, str], dict[str, Any]] = {}
             with self._timing_span("reducerMaterializerRebuild.writeMaterializedViews"):
                 for (project_name, project_file, trace_scope, request_signature), value in trace_groups.items():
                     payload = dict(value["payload"])
@@ -17009,30 +24895,17 @@ class GhidraCacheDB:
                         and previous_trace_view
                         and previous_trace_proof.get("combinedHash") == trace_dependency_proof.get("combinedHash")
                     ):
-                        if scoped_refresh and previous_trace_view is not None:
-                            conn.execute(
-                                """
-                                DELETE FROM materialized_trace_views
-                                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
-                                """,
-                                trace_view_key,
-                            )
-                        conn.execute(
-                            """
-                            INSERT INTO materialized_trace_views(
-                                project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
-                            ) VALUES(?,?,?,?,?,?,?,?)
-                            """,
-                            (
-                                project_name,
-                                project_file,
-                                trace_scope,
-                                request_signature,
-                                _json_dumps(payload),
-                                _json_dumps(trace_view_provenance),
-                                "trace-fragment-best-rank-v1",
-                                datetime.now().isoformat(),
-                            ),
+                        built_at = datetime.now().isoformat()
+                        self._upsert_trace_payload_history(
+                            conn,
+                            project_name,
+                            project_file,
+                            trace_scope,
+                            request_signature,
+                            payload,
+                            trace_view_provenance,
+                            reducer_version="trace-fragment-best-rank-v1",
+                            built_at=built_at,
                         )
 
                     system_payload = {
@@ -17067,31 +24940,20 @@ class GhidraCacheDB:
                         and previous_system_view
                         and previous_system_proof.get("combinedHash") == system_dependency_proof.get("combinedHash")
                     ):
-                        if scoped_refresh and previous_system_view is not None:
-                            conn.execute(
-                                """
-                                DELETE FROM canonical_system_trace_views
-                                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
-                                """,
-                                trace_view_key,
-                            )
-                        conn.execute(
-                            """
-                            INSERT INTO canonical_system_trace_views(
-                                project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
-                            ) VALUES(?,?,?,?,?,?,?,?)
-                            """,
-                            (
-                                project_name,
-                                project_file,
-                                trace_scope,
-                                request_signature,
-                                _json_dumps(system_payload),
-                                _json_dumps(system_trace_provenance),
-                                "system-trace-best-rank-v1",
-                                datetime.now().isoformat(),
-                            ),
+                        built_at = datetime.now().isoformat()
+                        self._upsert_canonical_system_trace_history(
+                            conn,
+                            project_name,
+                            project_file,
+                            trace_scope,
+                            request_signature,
+                            system_payload,
+                            system_trace_provenance,
+                            reducer_version="system-trace-best-rank-v1",
+                            built_at=built_at,
                         )
+                    if scoped_refresh and latest_projection_request_by_scope.get((project_name, project_file, trace_scope)) != request_signature:
+                        continue
                     semantic_keys = [
                         (kind, str((payload.get(kind) or {}).get("semanticKey", "")))
                         for kind in SYSTEM_TRACE_FRAGMENT_KINDS
@@ -17164,6 +25026,7 @@ class GhidraCacheDB:
                         trace_scope,
                         request_signature,
                     )
+                    current_target_bundle_payloads[(project_name, project_file, trace_scope)] = dict(target_bundle_payload or {})
                     target_bundle_provenance = {
                         "trace": value["provenance"],
                         "system": system_provenance,
@@ -17181,39 +25044,102 @@ class GhidraCacheDB:
                         },
                         "payloadSignals": _collect_payload_provenance_signals(target_bundle_payload),
                     }
-                    if scoped_refresh:
-                        conn.execute(
-                            """
-                            DELETE FROM materialized_target_bundle_views
-                            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
-                            """,
-                            (project_name, project_file, trace_scope, request_signature),
-                        )
-                    conn.execute(
-                        """
-                        INSERT INTO materialized_target_bundle_views(
-                            project_name, project_file, trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
-                        ) VALUES(?,?,?,?,?,?,?,?)
-                        """,
-                        (
-                            project_name,
-                            project_file,
-                            trace_scope,
-                            request_signature,
-                            _json_dumps(target_bundle_payload),
-                            _json_dumps(target_bundle_provenance),
-                            "target-bundle-v1",
-                            datetime.now().isoformat(),
-                        ),
+                    built_at = datetime.now().isoformat()
+                    self._replace_target_bundle_projection_fragments(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                        request_signature,
+                        target_bundle_payload,
+                        target_bundle_provenance,
+                        built_at=built_at,
                     )
                     post_materialization_scopes.add((project_name, project_file, trace_scope))
+
+            if not scoped_refresh:
+                conn.execute("DELETE FROM evidence_graph_edges")
+            for (project_name, project_file, trace_scope), latest_request_signature in latest_projection_request_by_scope.items():
+                trace_payload = dict(
+                    trace_groups.get((project_name, project_file, trace_scope, latest_request_signature), {}).get("payload") or {}
+                )
+                current_target_bundle_payload = dict(
+                    current_target_bundle_payloads.get((project_name, project_file, trace_scope))
+                    or previous_target_bundle_lookup.get((project_name, project_file, trace_scope, latest_request_signature), {}).get("payload")
+                    or {}
+                )
+                if not trace_payload.get("rowRecovery") and dict(current_target_bundle_payload.get("rowRecovery") or {}):
+                    trace_payload["rowRecovery"] = dict(current_target_bundle_payload.get("rowRecovery") or {})
+                if not trace_payload.get("rowRecovery"):
+                    reconstruction_entry = canonical_semantic_lookup.get(
+                        (project_name, project_file, "token_shop_reconstruction_fragment", f"token-shop-reconstruction:{trace_scope}")
+                    )
+                    reconstruction_payload = dict((reconstruction_entry or {}).get("payload") or {})
+                    if dict(reconstruction_payload.get("rowRecovery") or {}):
+                        trace_payload["rowRecovery"] = dict(reconstruction_payload.get("rowRecovery") or {})
+                graph_plan_entry = canonical_semantic_lookup.get(
+                    (project_name, project_file, "graph_plan_fragment", f"target-graph-plan:{trace_scope}")
+                )
+                if graph_plan_entry and isinstance(graph_plan_entry.get("payload"), dict):
+                    graph_payload = dict(graph_plan_entry["payload"])
+                    if dict(graph_payload.get("traceGraph") or {}):
+                        trace_payload["traceGraph"] = dict(graph_payload.get("traceGraph") or {})
+                current_graph_score = _trace_graph_richness_score(trace_payload)
+                if current_graph_score <= 2:
+                    historical_payload = self._load_richest_historical_trace_graph_payload(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                    )
+                    if _trace_graph_richness_score(historical_payload) > current_graph_score:
+                        trace_payload["traceGraph"] = dict((historical_payload.get("traceGraph") or {}))
+                edge_rows = _extract_evidence_graph_edges_from_trace_payload(trace_scope, trace_payload)
+                if not edge_rows:
+                    edge_rows = self._extract_evidence_graph_edges_from_dependency_fragments(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                    )
+                fact_edge_rows = self._extract_evidence_graph_edges_from_knowledge_facts(
+                    conn,
+                    project_name,
+                    project_file,
+                    trace_scope,
+                )
+                if fact_edge_rows:
+                    edge_rows = [*edge_rows, *fact_edge_rows]
+                system_fragment_edge_rows = self._extract_evidence_graph_edges_from_system_fragments(
+                    conn,
+                    project_name,
+                    project_file,
+                    trace_scope,
+                )
+                if system_fragment_edge_rows:
+                    edge_rows = [*edge_rows, *system_fragment_edge_rows]
+                diagnostic_edge_rows = self._extract_evidence_graph_edges_from_acquisition_diagnostics(
+                    conn,
+                    project_name,
+                    project_file,
+                    trace_scope,
+                )
+                if diagnostic_edge_rows:
+                    edge_rows = [*edge_rows, *diagnostic_edge_rows]
+                self._sync_evidence_graph_edges_for_scope(
+                    conn,
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    edge_rows,
+                )
 
             if scoped_refresh:
                 current_trace_group_keys = set(trace_groups.keys())
                 for key in sorted(set(previous_materialized_trace_lookup.keys()) - current_trace_group_keys):
                     conn.execute(
                         """
-                        DELETE FROM materialized_trace_views
+                        DELETE FROM trace_payload_history
                         WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
                         """,
                         key,
@@ -17221,18 +25147,81 @@ class GhidraCacheDB:
                 for key in sorted(set(previous_system_trace_lookup.keys()) - current_trace_group_keys):
                     conn.execute(
                         """
-                        DELETE FROM canonical_system_trace_views
+                        DELETE FROM canonical_system_trace_history
                         WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
                         """,
                         key,
                     )
                 self._prune_trace_retention(conn, trace_scopes=requested_scopes if scoped_refresh else None)
+                self._prune_native_trace_retention(conn)
         with self._timing_span("reducerMaterializerRebuild.refreshScopeMaterializations"):
             for project_name, project_file, trace_scope in sorted(post_materialization_scopes):
                 try:
                     self.refresh_scope_materializations(project_name, project_file, trace_scope)
                 except Exception:
                     continue
+        with self._timing_span("reducerMaterializerRebuild.refreshEvidenceGraphAfterMaterialization"):
+            with self.connect() as conn:
+                for project_name, project_file, trace_scope in sorted(post_materialization_scopes):
+                    trace_payload = dict(
+                        trace_groups.get((project_name, project_file, trace_scope, latest_request_signature), {}).get("payload") or {}
+                    )
+                    graph_plan_entry = canonical_semantic_lookup.get(
+                        (project_name, project_file, "graph_plan_fragment", f"target-graph-plan:{trace_scope}")
+                    )
+                    if graph_plan_entry and isinstance(graph_plan_entry.get("payload"), dict):
+                        graph_payload = dict(graph_plan_entry["payload"])
+                        if dict(graph_payload.get("traceGraph") or {}):
+                            trace_payload["traceGraph"] = dict(graph_payload.get("traceGraph") or {})
+                    current_graph_score = _trace_graph_richness_score(trace_payload)
+                    if current_graph_score <= 2:
+                        historical_payload = self._load_richest_historical_trace_graph_payload(
+                            conn,
+                            project_name,
+                            project_file,
+                            trace_scope,
+                        )
+                        if _trace_graph_richness_score(historical_payload) > current_graph_score:
+                            trace_payload["traceGraph"] = dict((historical_payload.get("traceGraph") or {}))
+                    edge_rows = _extract_evidence_graph_edges_from_trace_payload(trace_scope, trace_payload)
+                    if not edge_rows:
+                        edge_rows = self._extract_evidence_graph_edges_from_dependency_fragments(
+                            conn,
+                            project_name,
+                            project_file,
+                            trace_scope,
+                        )
+                    fact_edge_rows = self._extract_evidence_graph_edges_from_knowledge_facts(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                    )
+                    if fact_edge_rows:
+                        edge_rows = [*edge_rows, *fact_edge_rows]
+                    system_fragment_edge_rows = self._extract_evidence_graph_edges_from_system_fragments(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                    )
+                    if system_fragment_edge_rows:
+                        edge_rows = [*edge_rows, *system_fragment_edge_rows]
+                    diagnostic_edge_rows = self._extract_evidence_graph_edges_from_acquisition_diagnostics(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                    )
+                    if diagnostic_edge_rows:
+                        edge_rows = [*edge_rows, *diagnostic_edge_rows]
+                    self._sync_evidence_graph_edges_for_scope(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                        edge_rows,
+                    )
 
     def _prune_trace_retention(
         self,
@@ -17266,29 +25255,29 @@ class GhidraCacheDB:
             where_sql,
             params,
         )
-        purged_materialized_trace = _retain_latest_rows(
+        purged_trace_payload_history = _retain_latest_rows(
             conn,
-            "materialized_trace_views",
+            "trace_payload_history",
             ["project_name", "project_file", "trace_scope"],
-            "built_at DESC, request_signature DESC",
+            "last_built_at DESC, request_signature DESC",
             TRACE_MATERIALIZED_SCOPE_HISTORY_LIMIT,
             where_sql,
             params,
         )
-        purged_system_trace = _retain_latest_rows(
+        purged_system_trace_history = _retain_latest_rows(
             conn,
-            "canonical_system_trace_views",
+            "canonical_system_trace_history",
             ["project_name", "project_file", "trace_scope"],
-            "built_at DESC, request_signature DESC",
+            "last_built_at DESC, request_signature DESC",
             TRACE_MATERIALIZED_SCOPE_HISTORY_LIMIT,
             where_sql,
             params,
         )
         purged_target_bundle = _retain_latest_rows(
             conn,
-            "materialized_target_bundle_views",
+            "target_bundle_views",
             ["project_name", "project_file", "trace_scope"],
-            "built_at DESC, request_signature DESC",
+            "updated_at DESC, request_signature DESC",
             TRACE_MATERIALIZED_SCOPE_HISTORY_LIMIT,
             where_sql,
             params,
@@ -17296,9 +25285,24 @@ class GhidraCacheDB:
         return {
             "traceSuperseded": purged_trace_superseded,
             "canonicalTraceCache": purged_canonical_trace,
-            "materializedTraceViews": purged_materialized_trace,
-            "canonicalSystemTraceViews": purged_system_trace,
-            "materializedTargetBundles": purged_target_bundle,
+            "tracePayloadHistory": purged_trace_payload_history,
+            "canonicalSystemTraceHistory": purged_system_trace_history,
+            "targetBundleViews": purged_target_bundle,
+        }
+
+    def _prune_native_trace_retention(
+        self,
+        conn: sqlite3.Connection,
+    ) -> dict[str, int]:
+        purged_by_search = _retain_latest_rows(
+            conn,
+            "native_trace_views",
+            ["project_name", "project_file", "requested_terms_json", "search_terms_json"],
+            "built_at DESC, request_signature DESC",
+            NATIVE_TRACE_SEARCH_HISTORY_LIMIT,
+        )
+        return {
+            "nativeTraceSearchHistory": purged_by_search,
         }
 
     def _prune_evidence_retention(
@@ -17350,19 +25354,22 @@ class GhidraCacheDB:
         with self.connect() as conn:
             row = conn.execute(
                 """
-                SELECT * FROM materialized_trace_views
+                SELECT payload_json, provenance_json, reducer_version, last_built_at
+                FROM trace_payload_history
                 WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
+                ORDER BY last_built_at DESC
+                LIMIT 1
                 """,
                 (project_name, project_file, trace_scope, request_signature),
             ).fetchone()
-        if row is None:
-            return None
-        return {
-            "payload": _json_loads(row["payload_json"], {}),
-            "provenance": _json_loads(row["provenance_json"], {}),
-            "reducerVersion": str(row["reducer_version"]),
-            "builtAt": str(row["built_at"]),
-        }
+        if row is not None:
+            return {
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"] or ""),
+                "builtAt": str(row["last_built_at"] or ""),
+            }
+        return None
 
     def find_latest_materialized_trace_view(
         self,
@@ -17373,21 +25380,60 @@ class GhidraCacheDB:
         with self.connect() as conn:
             row = conn.execute(
                 """
-                SELECT * FROM materialized_trace_views
+                SELECT payload_json, provenance_json, reducer_version, request_signature, last_built_at
+                FROM trace_payload_history
                 WHERE project_name = ? AND project_file = ? AND trace_scope = ?
-                ORDER BY built_at DESC, request_signature DESC
+                ORDER BY last_built_at DESC, request_signature DESC
                 LIMIT 1
                 """,
                 (project_name, project_file, trace_scope),
             ).fetchone()
-        if row is None:
-            return None
-        return {
-            "payload": _json_loads(row["payload_json"], {}),
-            "provenance": _json_loads(row["provenance_json"], {}),
-            "reducerVersion": str(row["reducer_version"]),
-            "builtAt": str(row["built_at"]),
-        }
+        if row is not None:
+            return {
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"] or ""),
+                "builtAt": str(row["last_built_at"] or ""),
+            }
+        return None
+
+    def list_latest_materialized_trace_views(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> list[dict[str, Any]]:
+        with self.connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT tph.trace_scope, tph.request_signature, tph.payload_json, tph.provenance_json, tph.reducer_version, tph.last_built_at
+                FROM trace_payload_history AS tph
+                INNER JOIN (
+                    SELECT trace_scope, MAX(last_built_at) AS max_last_built_at
+                    FROM trace_payload_history
+                    WHERE project_name = ? AND project_file = ?
+                    GROUP BY trace_scope
+                ) AS latest
+                  ON latest.trace_scope = tph.trace_scope
+                 AND latest.max_last_built_at = tph.last_built_at
+                WHERE tph.project_name = ? AND tph.project_file = ?
+                ORDER BY tph.trace_scope ASC, tph.request_signature DESC
+                """,
+                (project_name, project_file, project_name, project_file),
+            ).fetchall()
+        latest_by_scope: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            trace_scope_value = str(row["trace_scope"] or "")
+            if trace_scope_value in latest_by_scope:
+                continue
+            latest_by_scope[trace_scope_value] = {
+                "traceScope": trace_scope_value,
+                "requestSignature": str(row["request_signature"] or ""),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"] or ""),
+                "builtAt": str(row["last_built_at"] or ""),
+            }
+        return [latest_by_scope[key] for key in sorted(latest_by_scope)]
 
     def find_canonical_system_trace_view(
         self,
@@ -17399,8 +25445,11 @@ class GhidraCacheDB:
         with self.connect() as conn:
             row = conn.execute(
                 """
-                SELECT * FROM canonical_system_trace_views
+                SELECT payload_json, provenance_json, reducer_version, last_built_at
+                FROM canonical_system_trace_history
                 WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
+                ORDER BY last_built_at DESC
+                LIMIT 1
                 """,
                 (project_name, project_file, trace_scope, request_signature),
             ).fetchone()
@@ -17409,8 +25458,8 @@ class GhidraCacheDB:
         return {
             "payload": _json_loads(row["payload_json"], {}),
             "provenance": _json_loads(row["provenance_json"], {}),
-            "reducerVersion": str(row["reducer_version"]),
-            "builtAt": str(row["built_at"]),
+            "reducerVersion": str(row["reducer_version"] or ""),
+            "builtAt": str(row["last_built_at"] or ""),
         }
 
     def find_materialized_target_bundle_view(
@@ -17420,22 +25469,7 @@ class GhidraCacheDB:
         trace_scope: str,
         request_signature: str,
     ) -> dict[str, Any] | None:
-        with self.connect() as conn:
-            row = conn.execute(
-                """
-                SELECT * FROM materialized_target_bundle_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND request_signature = ?
-                """,
-                (project_name, project_file, trace_scope, request_signature),
-            ).fetchone()
-        if row is None:
-            return None
-        return {
-            "payload": _json_loads(row["payload_json"], {}),
-            "provenance": _json_loads(row["provenance_json"], {}),
-            "reducerVersion": str(row["reducer_version"]),
-            "builtAt": str(row["built_at"]),
-        }
+        return self.find_central_target_bundle_view(project_name, project_file, trace_scope, request_signature)
 
     def find_latest_materialized_target_bundle_view(
         self,
@@ -17443,35 +25477,174 @@ class GhidraCacheDB:
         project_file: str,
         trace_scope: str,
     ) -> dict[str, Any] | None:
-        with self.connect() as conn:
-            rows = conn.execute(
-                """
-                SELECT * FROM materialized_target_bundle_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
-                ORDER BY built_at DESC, request_signature DESC
-                """,
-                (project_name, project_file, trace_scope),
-            ).fetchall()
-        if not rows:
-            return None
-        best_row = max(
-            rows,
-            key=lambda row: _materialized_target_bundle_payload_rank(
-                _json_loads(row["payload_json"], {}),
-                built_at=str(row["built_at"]),
-                request_signature=str(row["request_signature"]),
-            ),
-        )
-        return {
-            "traceScope": str(best_row["trace_scope"]),
-            "requestSignature": str(best_row["request_signature"]),
-            "payload": _json_loads(best_row["payload_json"], {}),
-            "provenance": _json_loads(best_row["provenance_json"], {}),
-            "reducerVersion": str(best_row["reducer_version"]),
-            "builtAt": str(best_row["built_at"]),
-        }
+        return self.find_latest_central_target_bundle_view(project_name, project_file, trace_scope)
 
     def list_latest_materialized_target_bundle_views(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> list[dict[str, Any]]:
+        return self.list_latest_central_target_bundle_views(project_name, project_file)
+
+    def list_central_target_bundle_views(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str | None = None,
+    ) -> list[dict[str, Any]]:
+        where_clause = ""
+        params: tuple[Any, ...] = (project_name, project_file)
+        if str(trace_scope or "").strip():
+            where_clause = " AND trace_scope = ?"
+            params = (project_name, project_file, str(trace_scope or "").strip())
+        with self.connect() as conn:
+            rows = conn.execute(
+                f"""
+                SELECT *
+                FROM target_bundle_views
+                WHERE project_name = ? AND project_file = ?{where_clause}
+                ORDER BY trace_scope ASC, updated_at DESC, request_signature DESC
+                """,
+                params,
+            ).fetchall()
+            component_rows = conn.execute(
+                f"""
+                SELECT trace_scope, request_signature, component_key, payload_json
+                FROM target_bundle_json_component_views
+                WHERE project_name = ? AND project_file = ?{where_clause}
+                ORDER BY trace_scope ASC, request_signature DESC, component_key ASC
+                """,
+                params,
+            ).fetchall()
+        components_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in component_rows:
+            components_by_key.setdefault(
+                (str(row["trace_scope"] or ""), str(row["request_signature"] or "")),
+                {},
+            )[str(row["component_key"] or "")] = _json_loads(row["payload_json"], None)
+        results: list[dict[str, Any]] = []
+        for row in rows:
+            key = (str(row["trace_scope"] or ""), str(row["request_signature"] or ""))
+            component_bucket = dict(components_by_key.get(key) or {})
+            payload = {
+                "dataset": str(row["dataset_id"] or ""),
+                "status": str(row["status"] or ""),
+                "semanticStatus": str(row["semantic_status"] or ""),
+                "literalStatus": str(row["literal_status"] or ""),
+                "groundedConclusion": str(row["grounded_conclusion"] or ""),
+                "executionContextSemanticKey": str(row["execution_context_semantic_key"] or ""),
+                "executionPlanSemanticKey": str(row["execution_plan_semantic_key"] or ""),
+                "graphPlanSemanticKey": str(row["graph_plan_semantic_key"] or ""),
+                "narrativeSemanticKey": str(row["narrative_semantic_key"] or ""),
+                "bridgeComparisonSemanticKey": str(row["bridge_comparison_semantic_key"] or ""),
+                "bridgePolicySemanticKey": str(row["bridge_policy_semantic_key"] or ""),
+                "tokenShopReconstructionSemanticKey": str(row["token_shop_reconstruction_semantic_key"] or ""),
+                "generatedAt": str(row["generated_at"] or ""),
+                **component_bucket,
+            }
+            payload.setdefault(
+                "target",
+                {
+                    "id": str(row["target_id"] or ""),
+                    "familyId": str(row["family_id"] or ""),
+                    "label": str(row["target_label"] or ""),
+                },
+            )
+            results.append(
+                {
+                    "traceScope": str(row["trace_scope"] or ""),
+                    "requestSignature": str(row["request_signature"] or ""),
+                    "payload": payload,
+                    "provenance": {},
+                    "reducerVersion": "db-central-target-bundle-v1",
+                    "builtAt": str(row["updated_at"] or ""),
+                }
+            )
+        return results
+
+    def _inflate_central_target_bundle_rows(
+        self,
+        rows: list[sqlite3.Row],
+        component_rows: list[sqlite3.Row],
+    ) -> list[dict[str, Any]]:
+        components_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in component_rows:
+            components_by_key.setdefault(
+                (str(row["trace_scope"] or ""), str(row["request_signature"] or "")),
+                {},
+            )[str(row["component_key"] or "")] = _json_loads(row["payload_json"], None)
+        results: list[dict[str, Any]] = []
+        for row in rows:
+            key = (str(row["trace_scope"] or ""), str(row["request_signature"] or ""))
+            component_bucket = dict(components_by_key.get(key) or {})
+            payload = {
+                "dataset": str(row["dataset_id"] or ""),
+                "status": str(row["status"] or ""),
+                "semanticStatus": str(row["semantic_status"] or ""),
+                "literalStatus": str(row["literal_status"] or ""),
+                "groundedConclusion": str(row["grounded_conclusion"] or ""),
+                "executionContextSemanticKey": str(row["execution_context_semantic_key"] or ""),
+                "executionPlanSemanticKey": str(row["execution_plan_semantic_key"] or ""),
+                "graphPlanSemanticKey": str(row["graph_plan_semantic_key"] or ""),
+                "narrativeSemanticKey": str(row["narrative_semantic_key"] or ""),
+                "bridgeComparisonSemanticKey": str(row["bridge_comparison_semantic_key"] or ""),
+                "bridgePolicySemanticKey": str(row["bridge_policy_semantic_key"] or ""),
+                "tokenShopReconstructionSemanticKey": str(row["token_shop_reconstruction_semantic_key"] or ""),
+                "generatedAt": str(row["generated_at"] or ""),
+                **component_bucket,
+            }
+            payload.setdefault(
+                "target",
+                {
+                    "id": str(row["target_id"] or ""),
+                    "familyId": str(row["family_id"] or ""),
+                    "label": str(row["target_label"] or ""),
+                },
+            )
+            results.append(
+                {
+                    "traceScope": str(row["trace_scope"] or ""),
+                    "requestSignature": str(row["request_signature"] or ""),
+                    "payload": payload,
+                    "provenance": {},
+                    "reducerVersion": "db-central-target-bundle-v1",
+                    "builtAt": str(row["updated_at"] or ""),
+                }
+            )
+        return results
+
+    def find_central_target_bundle_view(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        request_signature: str,
+    ) -> dict[str, Any] | None:
+        rows = self.list_central_target_bundle_views(project_name, project_file, trace_scope)
+        for row in rows:
+            if str(row.get("requestSignature") or "") == str(request_signature or ""):
+                return row
+        return None
+
+    def find_latest_central_target_bundle_view(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+    ) -> dict[str, Any] | None:
+        rows = self.list_central_target_bundle_views(project_name, project_file, trace_scope)
+        if not rows:
+            return None
+        return max(
+            rows,
+            key=lambda row: _materialized_target_bundle_payload_rank(
+                dict(row.get("payload") or {}),
+                built_at=str(row.get("builtAt") or ""),
+                request_signature=str(row.get("requestSignature") or ""),
+            ),
+        )
+
+    def list_latest_central_target_bundle_views(
         self,
         project_name: str,
         project_file: str,
@@ -17480,36 +25653,152 @@ class GhidraCacheDB:
             rows = conn.execute(
                 """
                 SELECT *
-                FROM materialized_target_bundle_views
+                FROM target_bundle_views
                 WHERE project_name = ? AND project_file = ?
-                ORDER BY trace_scope ASC, built_at DESC, request_signature DESC
+                ORDER BY trace_scope ASC, updated_at DESC, request_signature DESC
                 """,
                 (project_name, project_file),
             ).fetchall()
-        latest_by_scope: dict[str, tuple[tuple[int, int, str], dict[str, Any]]] = {}
+            if not rows:
+                return []
+            rank_component_rows = conn.execute(
+                """
+                SELECT trace_scope, request_signature, component_key, payload_json
+                FROM target_bundle_json_component_views
+                WHERE project_name = ? AND project_file = ?
+                  AND component_key IN ('plannerResolution', 'traceRegistry', 'traceRun', 'postRunDiscoveries', 'nativeTrace')
+                ORDER BY trace_scope ASC, request_signature DESC, component_key ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+        rank_components_by_key: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in rank_component_rows:
+            rank_components_by_key.setdefault(
+                (str(row["trace_scope"] or ""), str(row["request_signature"] or "")),
+                {},
+            )[str(row["component_key"] or "")] = _json_loads(row["payload_json"], None)
+        latest_by_scope: dict[str, tuple[tuple[int, int, str], sqlite3.Row]] = {}
+        selected_keys: set[tuple[str, str]] = set()
         for row in rows:
             trace_scope = str(row["trace_scope"] or "")
             if not trace_scope:
                 continue
-            payload = _json_loads(row["payload_json"], {})
-            candidate = {
-                "traceScope": trace_scope,
-                "requestSignature": str(row["request_signature"]),
-                "payload": payload,
-                "provenance": _json_loads(row["provenance_json"], {}),
-                "reducerVersion": str(row["reducer_version"]),
-                "builtAt": str(row["built_at"]),
+            request_signature = str(row["request_signature"] or "")
+            component_bucket = rank_components_by_key.get((trace_scope, request_signature)) or {}
+            payload = {
+                "plannerResolution": component_bucket.get("plannerResolution"),
+                "traceRegistry": component_bucket.get("traceRegistry"),
+                "traceRun": component_bucket.get("traceRun"),
+                "postRunDiscoveries": component_bucket.get("postRunDiscoveries"),
+                "nativeTrace": component_bucket.get("nativeTrace"),
+                "target": {
+                    "id": str(row["target_id"] or ""),
+                    "familyId": str(row["family_id"] or ""),
+                    "label": str(row["target_label"] or ""),
+                },
             }
             rank = _materialized_target_bundle_payload_rank(
                 payload,
-                built_at=str(row["built_at"]),
-                request_signature=str(row["request_signature"]),
+                built_at=str(row["updated_at"] or ""),
+                request_signature=request_signature,
             )
             existing = latest_by_scope.get(trace_scope)
             if existing and existing[0] >= rank:
                 continue
-            latest_by_scope[trace_scope] = (rank, candidate)
-        return [entry for _, entry in sorted(latest_by_scope.values(), key=lambda item: item[1]["traceScope"])]
+            latest_by_scope[trace_scope] = (rank, row)
+        selected_rows = [row for _, row in sorted(latest_by_scope.values(), key=lambda item: item[1]["trace_scope"])]
+        for row in selected_rows:
+            selected_keys.add((str(row["trace_scope"] or ""), str(row["request_signature"] or "")))
+        if not selected_keys:
+            return []
+        selected_key_clauses = " OR ".join("(trace_scope = ? AND request_signature = ?)" for _ in selected_keys)
+        selected_key_params: list[Any] = [project_name, project_file]
+        for trace_scope, request_signature in sorted(selected_keys):
+            selected_key_params.extend([trace_scope, request_signature])
+        with self.connect() as conn:
+            component_rows = conn.execute(
+                f"""
+                SELECT trace_scope, request_signature, component_key, payload_json
+                FROM target_bundle_json_component_views
+                WHERE project_name = ? AND project_file = ?
+                  AND ({selected_key_clauses})
+                ORDER BY trace_scope ASC, request_signature DESC, component_key ASC
+                """,
+                tuple(selected_key_params),
+            ).fetchall()
+        return self._inflate_central_target_bundle_rows(selected_rows, component_rows)
+
+    def list_central_asset_probe_seed_views(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        with self.connect() as conn:
+            params: list[Any] = [project_name, project_file]
+            query = """
+                SELECT project_name, project_file, system_id, trace_scope, seed_key, family_id, seam_hint,
+                       routine_hint, seed_kind, source_surface_id, support_score, payload_json,
+                       provenance_json, reducer_version, built_at
+                FROM db_central_asset_probe_seeds_v
+                WHERE project_name = ? AND project_file = ?
+            """
+            if str(trace_scope or "").strip():
+                query += " AND trace_scope = ?"
+                params.append(str(trace_scope or "").strip())
+            query += " ORDER BY support_score DESC, built_at DESC, trace_scope ASC, seed_key ASC"
+            rows = conn.execute(query, tuple(params)).fetchall()
+            return [
+                {
+                    "projectName": str(row["project_name"] or ""),
+                    "projectFile": str(row["project_file"] or ""),
+                    "systemId": str(row["system_id"] or ""),
+                    "traceScope": str(row["trace_scope"] or ""),
+                    "seedKey": str(row["seed_key"] or ""),
+                    "familyId": str(row["family_id"] or ""),
+                    "seamHint": str(row["seam_hint"] or ""),
+                    "routineHint": str(row["routine_hint"] or ""),
+                    "seedKind": str(row["seed_kind"] or ""),
+                    "sourceSurfaceId": str(row["source_surface_id"] or ""),
+                    "supportScore": int(row["support_score"] or 0),
+                    "payload": _json_loads(str(row["payload_json"] or ""), {}),
+                    "provenance": _json_loads(str(row["provenance_json"] or ""), {}),
+                    "reducerVersion": str(row["reducer_version"] or ""),
+                    "builtAt": str(row["built_at"] or ""),
+                }
+                for row in rows
+            ]
+
+    def list_central_asset_probe_seed_terms(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        with self.connect() as conn:
+            params: list[Any] = [project_name, project_file]
+            query = """
+                SELECT project_name, project_file, trace_scope, seed_key, term_role, term_value, ordinal
+                FROM db_central_asset_probe_seed_terms_v
+                WHERE project_name = ? AND project_file = ?
+            """
+            if str(trace_scope or "").strip():
+                query += " AND trace_scope = ?"
+                params.append(str(trace_scope or "").strip())
+            query += " ORDER BY trace_scope ASC, seed_key ASC, term_role ASC, ordinal ASC, term_value ASC"
+            rows = conn.execute(query, tuple(params)).fetchall()
+            return [
+                {
+                    "projectName": str(row["project_name"] or ""),
+                    "projectFile": str(row["project_file"] or ""),
+                    "traceScope": str(row["trace_scope"] or ""),
+                    "seedKey": str(row["seed_key"] or ""),
+                    "termRole": str(row["term_role"] or ""),
+                    "termValue": str(row["term_value"] or ""),
+                    "ordinal": int(row["ordinal"] or 0),
+                }
+                for row in rows
+            ]
 
     def find_materialized_resolver_target_view(
         self,
@@ -17517,25 +25806,21 @@ class GhidraCacheDB:
         project_file: str,
         trace_scope: str,
     ) -> dict[str, Any] | None:
-        with self.connect() as conn:
-            row = conn.execute(
-                """
-                SELECT * FROM materialized_resolver_target_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
-                """,
-                (project_name, project_file, trace_scope),
-            ).fetchone()
-        if row is None:
-            return None
-        return {
-            "traceScope": str(row["trace_scope"]),
-            "payload": _json_loads(row["payload_json"], {}),
-            "provenance": _json_loads(row["provenance_json"], {}),
-            "reducerVersion": str(row["reducer_version"]),
-            "builtAt": str(row["built_at"]),
-        }
+        central_rows = self.list_central_resolver_target_views(project_name, project_file)
+        for row in central_rows:
+            if str(row.get("traceScope") or "") == str(trace_scope or ""):
+                return row
+        return None
 
     def list_materialized_resolver_target_views(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> list[dict[str, Any]]:
+        central_rows = self.list_central_resolver_target_views(project_name, project_file)
+        return central_rows
+
+    def list_central_resolver_target_views(
         self,
         project_name: str,
         project_file: str,
@@ -17543,22 +25828,140 @@ class GhidraCacheDB:
         with self.connect() as conn:
             rows = conn.execute(
                 """
-                SELECT * FROM materialized_resolver_target_views
+                SELECT *
+                FROM resolver_target_views
                 WHERE project_name = ? AND project_file = ?
                 ORDER BY trace_scope ASC
                 """,
                 (project_name, project_file),
             ).fetchall()
-        return [
-            {
-                "traceScope": str(row["trace_scope"]),
-                "payload": _json_loads(row["payload_json"], {}),
-                "provenance": _json_loads(row["provenance_json"], {}),
-                "reducerVersion": str(row["reducer_version"]),
-                "builtAt": str(row["built_at"]),
+            term_rows = conn.execute(
+                """
+                SELECT trace_scope, term_role, term_value, ordinal
+                FROM resolver_target_term_fragments
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, term_role ASC, ordinal ASC, term_value ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            surface_rows = conn.execute(
+                """
+                SELECT trace_scope, ordinal, payload_json
+                FROM resolver_target_support_surface_fragments
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, ordinal ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            support_rows = conn.execute(
+                """
+                SELECT trace_scope, ordinal, payload_json
+                FROM resolver_target_support_row_fragments
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, ordinal ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            component_rows = conn.execute(
+                """
+                SELECT trace_scope, component_key, payload_json
+                FROM resolver_target_json_component_views
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, component_key ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            string_rows = conn.execute(
+                """
+                SELECT trace_scope, fragment_role, fragment_value, ordinal
+                FROM resolver_target_string_fragments
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, fragment_role ASC, ordinal ASC, fragment_value ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+        terms_by_scope: dict[str, dict[str, list[str]]] = {}
+        for row in term_rows:
+            scope = str(row["trace_scope"] or "")
+            role = str(row["term_role"] or "").strip()
+            value = str(row["term_value"] or "").strip()
+            if not scope or not role or not value:
+                continue
+            bucket = terms_by_scope.setdefault(scope, {})
+            bucket.setdefault(role, [])
+            if value not in bucket[role]:
+                bucket[role].append(value)
+        surfaces_by_scope: dict[str, list[dict[str, Any]]] = {}
+        for row in surface_rows:
+            surfaces_by_scope.setdefault(str(row["trace_scope"] or ""), []).append(_json_loads(row["payload_json"], {}))
+        support_rows_by_scope: dict[str, list[dict[str, Any]]] = {}
+        for row in support_rows:
+            support_rows_by_scope.setdefault(str(row["trace_scope"] or ""), []).append(_json_loads(row["payload_json"], {}))
+        components_by_scope: dict[str, dict[str, Any]] = {}
+        for row in component_rows:
+            components_by_scope.setdefault(str(row["trace_scope"] or ""), {})[str(row["component_key"] or "")] = _json_loads(row["payload_json"], {})
+        strings_by_scope: dict[str, dict[str, list[str]]] = {}
+        for row in string_rows:
+            scope = str(row["trace_scope"] or "")
+            role = str(row["fragment_role"] or "").strip()
+            value = str(row["fragment_value"] or "").strip()
+            if not scope or not role or not value:
+                continue
+            bucket = strings_by_scope.setdefault(scope, {})
+            bucket.setdefault(role, [])
+            if value not in bucket[role]:
+                bucket[role].append(value)
+        results: list[dict[str, Any]] = []
+        for row in rows:
+            scope = str(row["trace_scope"] or "")
+            term_bucket = dict(terms_by_scope.get(scope) or {})
+            string_bucket = dict(strings_by_scope.get(scope) or {})
+            component_bucket = dict(components_by_scope.get(scope) or {})
+            payload = {
+                "semanticKey": f"target-definition:{scope}",
+                "traceScope": scope,
+                "targetId": str(row["target_id"] or ""),
+                "subjectId": str(row["subject_id"] or ""),
+                "subjectKind": str(row["subject_kind"] or ""),
+                "subjectKey": str(row["subject_key"] or ""),
+                "subjectLabel": str(row["subject_label"] or ""),
+                "targetAliases": list(string_bucket.get("target-alias") or []),
+                "familyId": str(row["family_id"] or "") or None,
+                "label": str(row["label"] or ""),
+                "targetClass": str(row["target_class"] or ""),
+                "whyExists": str(row["why_exists"] or ""),
+                "supportRows": list(support_rows_by_scope.get(scope, [])),
+                "supportSurfaces": list(surfaces_by_scope.get(scope, [])),
+                "shellWindow": dict(component_bucket.get("shellWindow") or {}),
+                "anchorTerms": list(term_bucket.get("anchor") or []),
+                "acceptedAnchors": list(term_bucket.get("accepted-anchor") or []),
+                "resolutionAliases": list(term_bucket.get("resolution-alias") or []),
+                "outputSummaryRules": dict(component_bucket.get("outputSummaryRules") or {}),
+                "blockedEdgeTypes": list(string_bucket.get("blocked-edge") or []),
+                "clearedEdgeTypes": list(string_bucket.get("cleared-edge") or []),
+                "traceRoutineHint": str(row["trace_routine_hint"] or "") or None,
+                "familyTraceProfile": str(row["family_trace_profile"] or "") or None,
+                "disableNativeTrace": bool(row["disable_native_trace"] or 0),
+                "defaultPresentationUpdateHook": str(row["default_presentation_update_hook"] or "") or None,
+                "nativeTraceTerms": list(term_bucket.get("native-trace") or []),
+                "summary": str(row["summary"] or ""),
+                "targetNarrative": dict(component_bucket.get("targetNarrative") or {}),
+                "canonicalSupports": list(string_bucket.get("canonical-support") or []),
+                "definingViews": list(string_bucket.get("defining-view") or []),
+                "supportingViewKinds": list(string_bucket.get("supporting-view-kind") or []),
+                "updatedAt": str(row["updated_at"] or ""),
+                "synthesized": bool(row["synthesized"] or 0),
             }
-            for row in rows
-        ]
+            results.append(
+                {
+                    "traceScope": scope,
+                    "payload": payload,
+                    "provenance": {},
+                    "reducerVersion": "db-central-resolver-target-v1",
+                    "builtAt": str(row["updated_at"] or ""),
+                }
+            )
+        return results
 
     def backfill_resolver_target_trace_policy(
         self,
@@ -17599,26 +26002,14 @@ class GhidraCacheDB:
         }
         built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
-            conn.execute(
-                """
-                INSERT INTO materialized_resolver_target_views(
-                    project_name, project_file, trace_scope, payload_json, provenance_json, reducer_version, built_at
-                ) VALUES(?,?,?,?,?,?,?)
-                ON CONFLICT(project_name, project_file, trace_scope) DO UPDATE SET
-                    payload_json=excluded.payload_json,
-                    provenance_json=excluded.provenance_json,
-                    reducer_version=excluded.reducer_version,
-                    built_at=excluded.built_at
-                """,
-                (
-                    project_name,
-                    project_file,
-                    str(trace_scope or ""),
-                    _json_dumps(updated_payload),
-                    _json_dumps(updated_provenance),
-                    str(existing.get("reducerVersion") or "materialized-resolver-target-view-v1"),
-                    built_at,
-                ),
+            self._replace_resolver_target_projection_fragments(
+                conn,
+                project_name,
+                project_file,
+                str(trace_scope or ""),
+                updated_payload,
+                updated_provenance,
+                built_at=built_at,
             )
         return {
             "payload": updated_payload,
@@ -17700,17 +26091,37 @@ class GhidraCacheDB:
         normalized_payload = dict(payload or {})
         normalized_payload["traceScope"] = str(trace_scope or "").strip()
         normalized_payload["acquisitionTerm"] = str(acquisition_term or "").strip()
-        built_at = datetime.now().isoformat(timespec="microseconds")
         normalized_provenance = dict(provenance or {})
         normalized_provenance.setdefault("reducer", reducer_version)
         normalized_provenance.setdefault("requestSignature", str(request_signature or "").strip())
         normalized_provenance.setdefault("traceScope", str(trace_scope or "").strip())
         normalized_provenance.setdefault("acquisitionTerm", str(acquisition_term or "").strip())
         normalized_provenance.setdefault("payloadHash", _dependency_hash_payload(normalized_payload))
+        existing = next(
+            (
+                row
+                for row in self.list_latest_materialized_acquisition_diagnostics_views(
+                    project_name,
+                    project_file,
+                )
+                if str(row.get("traceScope") or "").strip() == str(trace_scope or "").strip()
+                and str(row.get("acquisitionTerm") or "").strip() == str(acquisition_term or "").strip()
+            ),
+            None,
+        )
+        if (
+            existing
+            and dict(existing.get("payload") or {}) == normalized_payload
+            and _stable_diagnostic_provenance(dict(existing.get("provenance") or {}))
+            == _stable_diagnostic_provenance(normalized_provenance)
+            and str(existing.get("reducerVersion") or "") == reducer_version
+        ):
+            return normalized_payload
+        built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
             conn.execute(
                 """
-                INSERT INTO materialized_acquisition_diagnostics_views(
+                INSERT INTO acquisition_diagnostic_views(
                     project_name, project_file, request_signature, trace_scope, acquisition_term,
                     payload_json, provenance_json, reducer_version, built_at
                 ) VALUES(?,?,?,?,?,?,?,?,?)
@@ -17732,7 +26143,236 @@ class GhidraCacheDB:
                     built_at,
                 ),
             )
+            self._upsert_acquisition_attempt_from_diagnostic(
+                conn,
+                project_name,
+                project_file,
+                str(request_signature or "").strip(),
+                str(trace_scope or "").strip(),
+                str(acquisition_term or "").strip(),
+                normalized_payload,
+            )
+            self._upsert_graph_anchor_check_from_diagnostic(
+                conn,
+                project_name,
+                project_file,
+                str(request_signature or "").strip(),
+                str(trace_scope or "").strip(),
+                str(acquisition_term or "").strip(),
+                normalized_payload,
+                normalized_provenance,
+                reducer_version,
+                built_at,
+            )
         return normalized_payload
+
+    def _upsert_graph_anchor_check_from_diagnostic(
+        self,
+        conn: sqlite3.Connection,
+        project_name: str,
+        project_file: str,
+        request_signature: str,
+        trace_scope: str,
+        acquisition_term: str,
+        payload: dict[str, Any] | None,
+        provenance: dict[str, Any] | None,
+        reducer_version: str,
+        built_at: str,
+    ) -> None:
+        payload = dict(payload or {})
+        provenance = dict(provenance or {})
+        trace_scope = str(trace_scope or "").strip()
+        acquisition_term = str(acquisition_term or "").strip()
+        if not trace_scope or not acquisition_term:
+            return
+        request_context: dict[str, Any] = {}
+        if request_signature:
+            row = conn.execute(
+                """
+                SELECT payload_json
+                FROM native_trace_views
+                WHERE project_name = ? AND project_file = ? AND request_signature = ?
+                ORDER BY built_at DESC
+                LIMIT 1
+                """,
+                (project_name, project_file, request_signature),
+            ).fetchone()
+            if row:
+                request_context = dict(_json_loads(row["payload_json"], {}).get("requestContext") or {})
+        seam_id = str(payload.get("seamId") or request_context.get("seamId") or "").strip()
+        if not seam_id:
+            return
+        source_node_id = ""
+        target_node_id = ""
+        subject_id = str(request_context.get("subjectId") or "").strip()
+        if seam_id == "graph-extension" and ":" in subject_id:
+            source_node_id, _, target_node_id = subject_id.partition(":")
+            source_node_id = str(source_node_id or "").strip()
+            target_node_id = str(target_node_id or "").strip()
+        normalized_term = acquisition_term.lower()
+        anchor_role = "generic"
+        if target_node_id and normalized_term == target_node_id.lower():
+            anchor_role = "target"
+        elif source_node_id and normalized_term == source_node_id.lower():
+            anchor_role = "source"
+        status = str(payload.get("status") or "").strip()
+        outcome = str(payload.get("outcome") or "").strip()
+        if status in {"exact-evidence-found", "knowledge-covered-skip"} or outcome in {"exact-hit", "skip-db-covered"}:
+            check_status = "covered"
+        elif status in {
+            "true-missing-evidence",
+            "exact-evidence-nonclosing",
+            "relation-coverage-missing",
+            "recent-nonclosing-skip",
+        } or outcome in {"missing-hit", "skip-nonclosing", "relation-gap"}:
+            check_status = "checked-nonclosing"
+        else:
+            return
+        existing = conn.execute(
+            """
+            SELECT checked_count, last_request_signature
+            FROM graph_anchor_checks
+            WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND seam_id = ? AND anchor_term = ? AND anchor_role = ?
+            """,
+            (project_name, project_file, trace_scope, seam_id, acquisition_term, anchor_role),
+        ).fetchone()
+        checked_count = int((existing["checked_count"] if existing else 0) or 0)
+        last_request = str((existing["last_request_signature"] if existing else "") or "").strip()
+        if check_status == "covered":
+            checked_count = 0
+        elif request_signature and request_signature != last_request:
+            checked_count += 1
+        check_payload = {
+            "status": check_status,
+            "sourceStatus": status,
+            "outcome": outcome,
+            "sourceNodeId": source_node_id,
+            "targetNodeId": target_node_id,
+            "requestSignature": request_signature,
+        }
+        check_provenance = {
+            **provenance,
+            "requestSignature": request_signature,
+            "traceScope": trace_scope,
+            "anchorTerm": acquisition_term,
+            "anchorRole": anchor_role,
+            "seamId": seam_id,
+        }
+        conn.execute(
+            """
+            INSERT INTO graph_anchor_checks(
+                project_name, project_file, trace_scope, seam_id, anchor_term, anchor_role,
+                check_status, checked_count, last_request_signature,
+                payload_json, provenance_json, reducer_version, built_at
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ON CONFLICT(project_name, project_file, trace_scope, seam_id, anchor_term, anchor_role) DO UPDATE SET
+                check_status=excluded.check_status,
+                checked_count=excluded.checked_count,
+                last_request_signature=excluded.last_request_signature,
+                payload_json=excluded.payload_json,
+                provenance_json=excluded.provenance_json,
+                reducer_version=excluded.reducer_version,
+                built_at=excluded.built_at
+            """,
+            (
+                project_name,
+                project_file,
+                trace_scope,
+                seam_id,
+                acquisition_term,
+                anchor_role,
+                check_status,
+                checked_count,
+                request_signature,
+                _json_dumps(check_payload),
+                _json_dumps(check_provenance),
+                reducer_version,
+                built_at,
+            ),
+        )
+
+    def upsert_graph_anchor_check(
+        self,
+        project_name: str,
+        project_file: str,
+        trace_scope: str,
+        seam_id: str,
+        anchor_term: str,
+        *,
+        anchor_role: str = "target",
+        check_status: str = "checked-nonclosing",
+        checked_count_delta: int = 1,
+        request_signature: str = "",
+        payload: dict[str, Any] | None = None,
+        provenance: dict[str, Any] | None = None,
+        reducer_version: str = "graph-anchor-check-v1",
+    ) -> None:
+        trace_scope = str(trace_scope or "").strip()
+        seam_id = str(seam_id or "").strip()
+        anchor_term = str(anchor_term or "").strip()
+        anchor_role = str(anchor_role or "target").strip() or "target"
+        check_status = str(check_status or "").strip()
+        if not trace_scope or not seam_id or not anchor_term or not check_status:
+            return
+        built_at = datetime.now().isoformat(timespec="microseconds")
+        with self.connect() as conn:
+            existing = conn.execute(
+                """
+                SELECT checked_count, last_request_signature
+                FROM graph_anchor_checks
+                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND seam_id = ? AND anchor_term = ? AND anchor_role = ?
+                """,
+                (project_name, project_file, trace_scope, seam_id, anchor_term, anchor_role),
+            ).fetchone()
+            checked_count = int((existing["checked_count"] if existing else 0) or 0)
+            last_request = str((existing["last_request_signature"] if existing else "") or "").strip()
+            if check_status == "covered":
+                checked_count = 0
+            elif request_signature and request_signature != last_request:
+                checked_count += max(int(checked_count_delta or 0), 0)
+            elif not request_signature:
+                checked_count += max(int(checked_count_delta or 0), 0)
+            normalized_payload = dict(payload or {})
+            normalized_payload.setdefault("requestSignature", request_signature)
+            normalized_payload.setdefault("status", check_status)
+            normalized_provenance = dict(provenance or {})
+            normalized_provenance.setdefault("requestSignature", request_signature)
+            normalized_provenance.setdefault("traceScope", trace_scope)
+            normalized_provenance.setdefault("anchorTerm", anchor_term)
+            normalized_provenance.setdefault("anchorRole", anchor_role)
+            normalized_provenance.setdefault("seamId", seam_id)
+            conn.execute(
+                """
+                INSERT INTO graph_anchor_checks(
+                    project_name, project_file, trace_scope, seam_id, anchor_term, anchor_role,
+                    check_status, checked_count, last_request_signature,
+                    payload_json, provenance_json, reducer_version, built_at
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ON CONFLICT(project_name, project_file, trace_scope, seam_id, anchor_term, anchor_role) DO UPDATE SET
+                    check_status=excluded.check_status,
+                    checked_count=excluded.checked_count,
+                    last_request_signature=excluded.last_request_signature,
+                    payload_json=excluded.payload_json,
+                    provenance_json=excluded.provenance_json,
+                    reducer_version=excluded.reducer_version,
+                    built_at=excluded.built_at
+                """,
+                (
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    seam_id,
+                    anchor_term,
+                    anchor_role,
+                    check_status,
+                    checked_count,
+                    request_signature,
+                    _json_dumps(normalized_payload),
+                    _json_dumps(normalized_provenance),
+                    reducer_version,
+                    built_at,
+                ),
+            )
 
     def list_latest_materialized_acquisition_diagnostics_views(
         self,
@@ -17744,7 +26384,7 @@ class GhidraCacheDB:
         request_signature = str(request_signature or "").strip()
         query = """
             SELECT *
-            FROM materialized_acquisition_diagnostics_views
+            FROM acquisition_diagnostic_views
             WHERE project_name = ? AND project_file = ?
         """
         params: list[Any] = [project_name, project_file]
@@ -17790,6 +26430,58 @@ class GhidraCacheDB:
             )
         return results
 
+    def list_central_graph_anchor_checks(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+        seam_id: str = "",
+        anchor_role: str = "",
+        check_status: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        seam_id = str(seam_id or "").strip()
+        anchor_role = str(anchor_role or "").strip()
+        check_status = str(check_status or "").strip()
+        query = """
+            SELECT *
+            FROM db_central_graph_anchor_checks_v
+            WHERE project_name = ? AND project_file = ?
+        """
+        params: list[Any] = [project_name, project_file]
+        if trace_scope:
+            query += " AND trace_scope = ?"
+            params.append(trace_scope)
+        if seam_id:
+            query += " AND seam_id = ?"
+            params.append(seam_id)
+        if anchor_role:
+            query += " AND anchor_role = ?"
+            params.append(anchor_role)
+        if check_status:
+            query += " AND check_status = ?"
+            params.append(check_status)
+        query += " ORDER BY built_at DESC, trace_scope ASC, anchor_term ASC"
+        with self.connect() as conn:
+            rows = conn.execute(query, tuple(params)).fetchall()
+        return [
+            {
+                "traceScope": str(row["trace_scope"] or ""),
+                "seamId": str(row["seam_id"] or ""),
+                "anchorTerm": str(row["anchor_term"] or ""),
+                "anchorRole": str(row["anchor_role"] or ""),
+                "checkStatus": str(row["check_status"] or ""),
+                "checkedCount": int(row["checked_count"] or 0),
+                "lastRequestSignature": str(row["last_request_signature"] or ""),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"] or ""),
+                "builtAt": str(row["built_at"] or ""),
+            }
+            for row in rows
+        ]
+
     def list_latest_materialized_acquisition_diagnostics_for_scope(
         self,
         project_name: str,
@@ -17802,7 +26494,7 @@ class GhidraCacheDB:
         request_signature = str(request_signature or "").strip()
         query = """
             SELECT *
-            FROM materialized_acquisition_diagnostics_views
+            FROM acquisition_diagnostic_views
             WHERE project_name = ? AND project_file = ? AND trace_scope = ?
         """
         params: list[Any] = [project_name, project_file, trace_scope]
@@ -18031,6 +26723,8 @@ class GhidraCacheDB:
                 return True
             if lowered in {"class", "method", "string", "path id", "cost", "description"}:
                 return True
+            if lowered.startswith(("closed-by-", "covered-by-")):
+                return True
             if lowered.endswith(("maxoverlay", "costtext", "desctext", "titletext", "leveltext", "reqtext")):
                 return True
             return False
@@ -18119,8 +26813,177 @@ class GhidraCacheDB:
             exact_requested_terms = _filter_requested_seam_terms(list(next_seam_term_set)) or [selected_seam_id]
         support_rows = [dict(item) for item in (resolver_payload.get("supportRows") or []) if isinstance(item, dict)]
         support_surfaces = [dict(item) for item in (resolver_payload.get("supportSurfaces") or []) if isinstance(item, dict)]
-        subject_label = str(subject_state.get("subjectLabel") or resolver_payload.get("subjectLabel") or "").strip()
+        trace_scope = str(knowledge.get("traceScope") or resolver_payload.get("traceScope") or "").strip()
+        subject_id = str(subject_state.get("subjectId") or resolver_payload.get("subjectId") or trace_scope).strip()
+        subject_key = str(subject_state.get("subjectKey") or subject_id).strip() or subject_id
+        subject_label = str(subject_state.get("subjectLabel") or resolver_payload.get("subjectLabel") or subject_id).strip() or subject_id
         subject_path_id = str(subject_state.get("subjectPathId") or "").strip()
+        target_aliases = {
+            str(value).strip()
+            for value in (subject_state.get("targetAliases") or [])
+            if str(value).strip()
+        }
+
+        subject_match_roots = _unique_strings(
+            [
+                subject_id,
+                subject_key,
+                subject_label,
+                *[str(value).strip() for value in target_aliases if str(value).strip()],
+            ]
+        )
+
+        def _subject_scope_row_matches(entity_id: str, field_key: str) -> bool:
+            normalized_entity = str(entity_id or "").strip()
+            normalized_field = str(field_key or "").strip()
+            if subject_label and normalized_field == subject_label:
+                return True
+            for root in subject_match_roots:
+                if not root:
+                    continue
+                if normalized_entity == root or normalized_entity.startswith(f"{root}#"):
+                    return True
+            return normalized_entity in target_aliases
+
+        def _preferred_local_seam_contract() -> tuple[list[str], list[str], list[str]]:
+            if "runtime-next-cost-formula" in seam_id_lower:
+                return (
+                    [
+                        "runtime-cost-coverage",
+                        "runtime-final-max-level",
+                    ],
+                    [
+                        "buy-method-cost-read",
+                        "runtime-next-cost-accessor",
+                        "runtime-next-cost-formula",
+                    ],
+                    [
+                        "buy-method-cost-read",
+                        "runtime-next-cost-accessor",
+                        "runtime-next-cost-formula",
+                    ],
+                )
+            if any(
+                token in seam_id_lower
+                for token in ("runtime-next-cost", "runtime-model", "formula", "consumer", "read-site", "typed-owner", "cost")
+            ):
+                return (
+                    [
+                        "runtime-cost-coverage",
+                        "runtime-final-max-level",
+                    ],
+                    [
+                        "buy-method-cost-read",
+                        "runtime-next-cost-accessor",
+                    ],
+                    [
+                        "buy-method-cost-read",
+                        "runtime-next-cost-accessor",
+                        "runtime-next-cost-formula",
+                    ],
+                )
+            return ([], [], [])
+
+        def _seam_supports_local_relation_probe() -> bool:
+            return any(
+                token in seam_id_lower
+                for token in ("runtime-next-cost", "runtime-model", "formula", "consumer", "read-site", "typed-owner", "cost")
+            )
+
+        def _record_local_seam_term(
+            terms_by_score: dict[str, float],
+            value: Any,
+            score: float,
+        ) -> None:
+            normalized = str(value or "").strip()
+            if not normalized:
+                return
+            if _is_generic_probe_junk(normalized):
+                return
+            terms_by_score[normalized] = max(float(terms_by_score.get(normalized) or 0.0), float(score))
+
+        def _collect_local_seam_terms(
+            fact_rows: list[dict[str, Any]],
+            relation_rows: list[dict[str, Any]],
+        ) -> list[str]:
+            terms_by_score: dict[str, float] = {}
+
+            def _consume_row_terms(kind: str, payload: dict[str, Any], direct_terms: list[str]) -> None:
+                kind = str(kind or "").strip()
+                base_score = 80.0
+                if kind == selected_seam_id:
+                    base_score = 180.0
+                elif kind in required_relation_kinds or kind in progress_relation_kinds:
+                    base_score = 150.0
+                elif kind in preferred_fact_kinds:
+                    base_score = 135.0
+                for term in direct_terms:
+                    _record_local_seam_term(terms_by_score, term, base_score + 40.0)
+                for key, bonus in (
+                    ("accessorTerm", 42.0),
+                    ("shellField", 8.0),
+                    ("ownerFieldStem", 14.0),
+                ):
+                    _record_local_seam_term(terms_by_score, payload.get(key), base_score + bonus)
+                for key, bonus in (
+                    ("actionTerms", 38.0),
+                    ("updaterTerms", 34.0),
+                    ("candidateTerms", 28.0),
+                    ("startTerms", 24.0),
+                    ("continuationTerms", 20.0),
+                    ("ownerFieldBlock", 16.0),
+                    ("evidenceTerms", 12.0),
+                ):
+                    for term in (payload.get(key) or []):
+                        _record_local_seam_term(terms_by_score, term, base_score + bonus)
+
+            for row in fact_rows:
+                _consume_row_terms(
+                    str(row.get("factKind") or "").strip(),
+                    dict(row.get("payload") or {}),
+                    [str(row.get("factValue") or "").strip()],
+                )
+            for row in relation_rows:
+                _consume_row_terms(
+                    str(row.get("relationKind") or "").strip(),
+                    dict(row.get("payload") or {}),
+                    [str(row.get("targetEntityId") or "").strip()],
+                )
+            return [
+                term
+                for term, _score in sorted(
+                    terms_by_score.items(),
+                    key=lambda item: (-float(item[1]), str(item[0])),
+                )
+            ]
+
+        (
+            preferred_fact_kinds,
+            required_relation_kinds,
+            progress_relation_kinds,
+        ) = _preferred_local_seam_contract()
+        local_subject_fact_rows = []
+        local_subject_relation_rows = []
+        if trace_scope and (preferred_fact_kinds or required_relation_kinds):
+            local_subject_fact_rows = [
+                row
+                for row in self.list_latest_materialized_fact_views("cifi-full", "libil2cpp.so", trace_scope=trace_scope)
+                if _subject_scope_row_matches(str(row.get("entityId") or ""), str(row.get("fieldKey") or ""))
+                and (
+                    not preferred_fact_kinds
+                    or str(row.get("factKind") or "").strip() in preferred_fact_kinds
+                )
+            ]
+            local_subject_relation_rows = [
+                row
+                for row in self.list_latest_materialized_relation_views("cifi-full", "libil2cpp.so", trace_scope=trace_scope)
+                if _subject_scope_row_matches(str(row.get("sourceEntityId") or ""), str(row.get("fieldKey") or ""))
+                and (
+                    not required_relation_kinds
+                    or str(row.get("relationKind") or "").strip() in required_relation_kinds
+                )
+            ]
+        local_subject_seam_terms = _collect_local_seam_terms(local_subject_fact_rows, local_subject_relation_rows)
         primary_support_row = {}
         for row in support_rows:
             row_field = str(row.get("field") or row.get("shellField") or "").strip()
@@ -18142,13 +27005,18 @@ class GhidraCacheDB:
         seam_context_terms = {
             *requested_term_set,
             *primary_support_terms,
+            *local_subject_seam_terms,
         }
         if not requested_term_set:
             seam_context_terms.update(next_seam_term_set)
+        if local_subject_seam_terms:
+            exact_requested_terms = _filter_requested_seam_terms(
+                [*local_subject_seam_terms, *exact_requested_terms]
+            )[:12]
         relation_probes: list[dict[str, Any]] = []
         if any(token in seam_id_lower for token in ("runtime-model", "consumer", "read-site", "typed-owner")):
             relation_probes = self._build_runtime_model_relation_probes(
-                trace_scope=str(knowledge.get("traceScope") or resolver_payload.get("traceScope") or "").strip(),
+                trace_scope=trace_scope,
                 family_id=str(knowledge.get("familyId") or resolver_payload.get("familyId") or "").strip(),
                 primary_support_row=primary_support_row,
                 requested_terms=exact_requested_terms,
@@ -18179,6 +27047,13 @@ class GhidraCacheDB:
 
         selected_surface_ids: list[str] = []
         selected_anchors: list[str] = []
+        selected_anchors.extend(
+            [
+                term
+                for term in local_subject_seam_terms
+                if _looks_like_anchor(term)
+            ][:8]
+        )
         selected_anchors.extend(exact_requested_terms)
         if primary_support_row:
             selected_anchors.extend(
@@ -18208,6 +27083,63 @@ class GhidraCacheDB:
                 if _looks_like_anchor(str(value))
             ]
         selected_anchors = _unique_strings([term for term in selected_anchors if term])[:12]
+        local_relation_kind_set = {
+            str(row.get("relationKind") or "").strip()
+            for row in local_subject_relation_rows
+            if str(row.get("relationKind") or "").strip()
+        }
+        local_fact_kind_set = {
+            str(row.get("factKind") or "").strip()
+            for row in local_subject_fact_rows
+            if str(row.get("factKind") or "").strip()
+        }
+        if (
+            not relation_probes
+            and trace_scope
+            and _seam_supports_local_relation_probe()
+            and local_subject_seam_terms
+        ):
+            relation_probes = [
+                {
+                    "probeId": f"subject-local:{trace_scope}:{selected_seam_id}",
+                    "label": f"{subject_label} seam coverage via materialized subject-local evidence",
+                    "traceScope": trace_scope,
+                    "relationScope": trace_scope,
+                    "subjectId": subject_id,
+                    "subjectMatchRoots": list(subject_match_roots),
+                    "routine": str(
+                        knowledge.get("executionRoutineHint")
+                        or resolver_payload.get("traceRoutineHint")
+                        or trace_scope
+                    ).strip() or trace_scope,
+                    "probeMode": "relation-shaped",
+                    "expectedTerms": list(exact_requested_terms or local_subject_seam_terms[:12]),
+                    "anchors": list(selected_anchors or local_subject_seam_terms[:6]),
+                    "requiredCoverageSeamIds": [selected_seam_id],
+                    "requiredFactKinds": [
+                        kind for kind in preferred_fact_kinds if kind in local_fact_kind_set
+                    ],
+                    "requiredRelationKinds": [
+                        kind for kind in required_relation_kinds if kind
+                    ],
+                    "progressRelationKinds": [
+                        kind for kind in progress_relation_kinds if kind
+                    ],
+                    "coverageStatus": (
+                        "covered"
+                        if (
+                            all(kind in local_relation_kind_set for kind in required_relation_kinds)
+                            and all(kind in local_fact_kind_set for kind in preferred_fact_kinds)
+                        )
+                        else "uncovered"
+                    ),
+                    "surfaceIds": [],
+                    "whyChosen": [
+                        "subject-local materialized seam evidence",
+                        f"open seam {selected_seam_id}",
+                    ],
+                }
+            ]
         if (
             str(subject_state.get("subjectKind") or "").strip() == "range-family"
             and selected_seam_id == "exact-display-update-path"
@@ -18228,17 +27160,13 @@ class GhidraCacheDB:
                     exact_requested_terms = _unique_strings(local_requested_terms)[:12]
         selected_surface_ids = _unique_strings([surface_id for surface_id in selected_surface_ids if surface_id])
 
-        trace_scope = str(knowledge.get("traceScope") or resolver_payload.get("traceScope") or "").strip()
         execution_routine_id = str(
             knowledge.get("executionRoutineHint")
             or resolver_payload.get("traceRoutineHint")
             or trace_scope
             or "generic-explore"
         ).strip()
-        subject_id = str(subject_state.get("subjectId") or resolver_payload.get("subjectId") or trace_scope).strip()
         subject_kind = str(subject_state.get("subjectKind") or resolver_payload.get("subjectKind") or "").strip()
-        subject_key = str(subject_state.get("subjectKey") or subject_id).strip() or subject_id
-        subject_label = str(subject_state.get("subjectLabel") or resolver_payload.get("subjectLabel") or subject_id).strip() or subject_id
         target_id = str(knowledge.get("targetId") or resolver_payload.get("targetId") or trace_scope).strip() or trace_scope
         family_id = str(knowledge.get("familyId") or resolver_payload.get("familyId") or "").strip()
         seam_goal = (
@@ -18585,7 +27513,7 @@ class GhidraCacheDB:
 
         resolver_targets = {
             str(row.get("traceScope") or ""): dict(row.get("payload") or {})
-            for row in self.list_materialized_resolver_target_views(project_name, project_file)
+            for row in self.list_central_resolver_target_views(project_name, project_file)
         }
         contract_by_scope = {
             str(row.get("traceScope") or ""): dict(row.get("payload") or {})
@@ -18935,7 +27863,8 @@ class GhidraCacheDB:
         with self.connect() as conn:
             rows = conn.execute(
                 """
-                SELECT * FROM materialized_subject_edge_facts
+                SELECT trace_scope, subject_id, edge_type, edge_status, payload_json, provenance_json, reducer_version, built_at
+                FROM db_central_subject_edge_facts_v
                 WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
                 ORDER BY edge_status ASC, edge_type ASC
                 """,
@@ -18962,24 +27891,10 @@ class GhidraCacheDB:
         trace_scope: str,
         subject_id: str,
     ) -> dict[str, Any] | None:
-        with self.connect() as conn:
-            row = conn.execute(
-                """
-                SELECT * FROM materialized_subject_state_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
-                """,
-                (project_name, project_file, trace_scope, subject_id),
-            ).fetchone()
-        if row is None:
-            return None
-        return {
-            "traceScope": str(row["trace_scope"]),
-            "subjectId": str(row["subject_id"]),
-            "payload": _json_loads(row["payload_json"], {}),
-            "provenance": _json_loads(row["provenance_json"], {}),
-            "reducerVersion": str(row["reducer_version"]),
-            "builtAt": str(row["built_at"]),
-        }
+        for row in self.list_central_subject_state_views(project_name, project_file):
+            if str(row.get("traceScope") or "") == str(trace_scope or "") and str(row.get("subjectId") or "") == str(subject_id or ""):
+                return row
+        return None
 
     def list_materialized_subject_state_views(
         self,
@@ -18987,25 +27902,10 @@ class GhidraCacheDB:
         project_file: str,
         trace_scope: str,
     ) -> list[dict[str, Any]]:
-        with self.connect() as conn:
-            rows = conn.execute(
-                """
-                SELECT * FROM materialized_subject_state_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
-                ORDER BY built_at DESC, subject_id ASC
-                """,
-                (project_name, project_file, trace_scope),
-            ).fetchall()
         return [
-            {
-                "traceScope": str(row["trace_scope"]),
-                "subjectId": str(row["subject_id"]),
-                "payload": _json_loads(row["payload_json"], {}),
-                "provenance": _json_loads(row["provenance_json"], {}),
-                "reducerVersion": str(row["reducer_version"]),
-                "builtAt": str(row["built_at"]),
-            }
-            for row in rows
+            row
+            for row in self.list_central_subject_state_views(project_name, project_file)
+            if str(row.get("traceScope") or "") == str(trace_scope or "")
         ]
 
     def list_latest_materialized_subject_state_views(
@@ -19013,36 +27913,550 @@ class GhidraCacheDB:
         project_name: str,
         project_file: str,
     ) -> list[dict[str, Any]]:
+        return self.list_central_subject_state_views(project_name, project_file)
+
+    def list_central_subject_state_views(
+        self,
+        project_name: str,
+        project_file: str,
+    ) -> list[dict[str, Any]]:
         with self.connect() as conn:
-            rows = conn.execute(
+            identity_rows = conn.execute(
                 """
-                SELECT mssv.*
-                FROM materialized_subject_state_views AS mssv
-                INNER JOIN (
-                    SELECT trace_scope, subject_id, MAX(built_at) AS max_built_at
-                    FROM materialized_subject_state_views
-                    WHERE project_name = ? AND project_file = ?
-                    GROUP BY trace_scope, subject_id
-                ) AS latest
-                  ON latest.trace_scope = mssv.trace_scope
-                 AND latest.subject_id = mssv.subject_id
-                 AND latest.max_built_at = mssv.built_at
-                WHERE mssv.project_name = ? AND mssv.project_file = ?
-                ORDER BY mssv.trace_scope ASC, mssv.subject_id ASC
+                SELECT *
+                FROM db_central_subject_identity_v
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, subject_id ASC
                 """,
-                (project_name, project_file, project_name, project_file),
+                (project_name, project_file),
             ).fetchall()
-        return [
-            {
-                "traceScope": str(row["trace_scope"]),
-                "subjectId": str(row["subject_id"]),
-                "payload": _json_loads(row["payload_json"], {}),
-                "provenance": _json_loads(row["provenance_json"], {}),
-                "reducerVersion": str(row["reducer_version"]),
-                "builtAt": str(row["built_at"]),
+            edge_rows = conn.execute(
+                """
+                SELECT trace_scope, subject_id, edge_type, edge_status
+                FROM db_central_subject_edge_facts_v
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, subject_id ASC, edge_status ASC, edge_type ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            seam_term_rows = conn.execute(
+                """
+                SELECT trace_scope, subject_id, seam_id, term_value, ordinal
+                FROM db_central_subject_next_seam_terms_v
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, subject_id ASC, ordinal ASC, term_value ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            decision_rows = conn.execute(
+                """
+                SELECT trace_scope, subject_id, verdict, summary, proved_edge_count, negative_edge_count, built_at
+                FROM db_central_subject_decision_summary_v
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, subject_id ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            alias_rows = conn.execute(
+                """
+                SELECT trace_scope, subject_id, alias_value, ordinal
+                FROM subject_target_alias_fragments
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, subject_id ASC, ordinal ASC, alias_value ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            decision_edge_rows = conn.execute(
+                """
+                SELECT trace_scope, subject_id, edge_role, edge_value, ordinal
+                FROM subject_decision_edge_fragments
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, subject_id ASC, edge_role ASC, ordinal ASC, edge_value ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            claim_stage_rows = conn.execute(
+                """
+                SELECT trace_scope, subject_id, stage_id, stage_label, stage_status, ordinal
+                FROM subject_claim_stage_views
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, subject_id ASC, ordinal ASC, stage_id ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            claim_stage_missing_rows = conn.execute(
+                """
+                SELECT trace_scope, subject_id, stage_id, seam_id, ordinal
+                FROM subject_claim_stage_missing_seam_fragments
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, subject_id ASC, stage_id ASC, ordinal ASC, seam_id ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            depth_plan_rows = conn.execute(
+                """
+                SELECT trace_scope, subject_id, step_json, ordinal
+                FROM subject_depth_plan_fragments
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, subject_id ASC, ordinal ASC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+            history_rows = conn.execute(
+                """
+                SELECT trace_scope, subject_id, payload_json, last_built_at
+                FROM subject_state_snapshot_history
+                WHERE project_name = ? AND project_file = ?
+                ORDER BY trace_scope ASC, subject_id ASC, last_built_at DESC
+                """,
+                (project_name, project_file),
+            ).fetchall()
+        latest_history_by_subject: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in history_rows:
+            key = (str(row["trace_scope"] or ""), str(row["subject_id"] or ""))
+            if key in latest_history_by_subject:
+                continue
+            latest_history_by_subject[key] = {
+                "payload": dict(_json_loads(row["payload_json"], {})),
+                "builtAt": str(row["last_built_at"] or ""),
             }
-            for row in rows
-        ]
+        edges_by_subject: dict[tuple[str, str], dict[str, list[str]]] = {}
+        for row in edge_rows:
+            key = (str(row["trace_scope"] or ""), str(row["subject_id"] or ""))
+            bucket = edges_by_subject.setdefault(key, {"known": [], "missing": [], "blocked": [], "nonblocking": []})
+            status = str(row["edge_status"] or "").strip()
+            edge_type = str(row["edge_type"] or "").strip()
+            if status in bucket and edge_type and edge_type not in bucket[status]:
+                bucket[status].append(edge_type)
+        seam_terms_by_subject: dict[tuple[str, str, str], list[str]] = {}
+        for row in seam_term_rows:
+            key = (
+                str(row["trace_scope"] or ""),
+                str(row["subject_id"] or ""),
+                str(row["seam_id"] or ""),
+            )
+            seam_terms_by_subject.setdefault(key, []).append(str(row["term_value"] or "").strip())
+        decisions_by_subject: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in decision_rows:
+            decisions_by_subject[(str(row["trace_scope"] or ""), str(row["subject_id"] or ""))] = {
+                "verdict": str(row["verdict"] or ""),
+                "summary": str(row["summary"] or ""),
+                "provedEdgeCount": int(row["proved_edge_count"] or 0),
+                "negativeEdgeCount": int(row["negative_edge_count"] or 0),
+                "builtAt": str(row["built_at"] or ""),
+            }
+        aliases_by_subject: dict[tuple[str, str], list[str]] = {}
+        for row in alias_rows:
+            key = (str(row["trace_scope"] or ""), str(row["subject_id"] or ""))
+            alias_value = str(row["alias_value"] or "").strip()
+            if alias_value and alias_value not in aliases_by_subject.setdefault(key, []):
+                aliases_by_subject[key].append(alias_value)
+        decision_edges_by_subject: dict[tuple[str, str], dict[str, list[str]]] = {}
+        for row in decision_edge_rows:
+            key = (str(row["trace_scope"] or ""), str(row["subject_id"] or ""))
+            bucket = decision_edges_by_subject.setdefault(key, {"baseline": [], "blocked": [], "supporting": []})
+            role = str(row["edge_role"] or "").strip()
+            value = str(row["edge_value"] or "").strip()
+            if role in bucket and value and value not in bucket[role]:
+                bucket[role].append(value)
+        claim_stage_missing_by_subject: dict[tuple[str, str, str], list[str]] = {}
+        for row in claim_stage_missing_rows:
+            key = (
+                str(row["trace_scope"] or ""),
+                str(row["subject_id"] or ""),
+                str(row["stage_id"] or ""),
+            )
+            seam_id = str(row["seam_id"] or "").strip()
+            if seam_id and seam_id not in claim_stage_missing_by_subject.setdefault(key, []):
+                claim_stage_missing_by_subject[key].append(seam_id)
+        claim_stages_by_subject: dict[tuple[str, str], list[dict[str, Any]]] = {}
+        for row in claim_stage_rows:
+            trace_scope = str(row["trace_scope"] or "")
+            subject_id = str(row["subject_id"] or "")
+            stage_id = str(row["stage_id"] or "").strip()
+            if not stage_id:
+                continue
+            claim_stages_by_subject.setdefault((trace_scope, subject_id), []).append(
+                {
+                    "id": stage_id,
+                    "label": str(row["stage_label"] or "").strip(),
+                    "status": str(row["stage_status"] or "").strip(),
+                    "missingSeamIds": list(claim_stage_missing_by_subject.get((trace_scope, subject_id, stage_id), [])),
+                }
+            )
+        depth_plan_by_subject: dict[tuple[str, str], list[Any]] = {}
+        for row in depth_plan_rows:
+            key = (str(row["trace_scope"] or ""), str(row["subject_id"] or ""))
+            depth_plan_by_subject.setdefault(key, []).append(_json_loads(row["step_json"], {}))
+        results: list[dict[str, Any]] = []
+        for row in identity_rows:
+            trace_scope = str(row["trace_scope"] or "")
+            subject_id = str(row["subject_id"] or "")
+            history_payload = dict((latest_history_by_subject.get((trace_scope, subject_id)) or {}).get("payload") or {})
+            history_subject_kind = str(history_payload.get("subjectKind") or "").strip()
+            preserve_history_identity = bool(history_payload) and not _is_planner_synthetic_subject_kind(history_subject_kind)
+            payload: dict[str, Any] = {
+                "traceScope": trace_scope,
+                "subjectId": subject_id,
+                "subjectKind": str(row["subject_kind"] or ""),
+                "subjectKey": str(row["subject_key"] or ""),
+                "subjectLabel": str(row["subject_label"] or ""),
+                "subjectClass": str(row["subject_class"] or ""),
+                "subjectPathId": str(row["subject_path_id"] or ""),
+                "semanticKey": str(row["semantic_key"] or ""),
+                "identityOwner": str(row["identity_owner"] or ""),
+                "identityReason": str(row["identity_reason"] or "") or None,
+                "proofs": [{} for _ in range(int(row["proof_count"] or 0))],
+                "targetAliases": list(aliases_by_subject.get((trace_scope, subject_id), [])),
+            }
+            edge_bucket = edges_by_subject.get((trace_scope, subject_id), {})
+            payload["knownEdges"] = list(edge_bucket.get("known") or [])
+            payload["missingEdges"] = list(edge_bucket.get("missing") or [])
+            payload["blockedEdges"] = list(edge_bucket.get("blocked") or [])
+            payload["nonblockingEdges"] = list(edge_bucket.get("nonblocking") or [])
+            next_seam = dict(payload.get("nextSeam") or {})
+            open_edges = _unique_strings(
+                [
+                    *payload["missingEdges"],
+                    *payload["blockedEdges"],
+                ]
+            )
+            next_seam_id = str(open_edges[0] if open_edges else "").strip()
+            next_seam["id"] = next_seam_id or None
+            next_seam["status"] = "open" if next_seam_id else "clear"
+            next_seam["terms"] = _unique_strings(
+                seam_terms_by_subject.get((trace_scope, subject_id, next_seam_id), [])
+                or [str(value).strip() for value in (next_seam.get("terms") or []) if str(value).strip()]
+            )
+            payload["nextSeam"] = next_seam
+            decision_summary = dict(decisions_by_subject.get((trace_scope, subject_id)) or {})
+            decision_edges = dict(decision_edges_by_subject.get((trace_scope, subject_id)) or {})
+            payload["decisionSummary"] = {
+                "verdict": str(decision_summary.get("verdict") or ""),
+                "summary": str(decision_summary.get("summary") or ""),
+                "provedEdgeCount": int(decision_summary.get("provedEdgeCount") or len(payload["knownEdges"])),
+                "negativeEdgeCount": int(decision_summary.get("negativeEdgeCount") or 0),
+                "baselineGap": list(decision_edges.get("baseline") or []),
+                "blockedEdgeTypes": list(decision_edges.get("blocked") or []),
+                "supportingEdgeTypes": list(decision_edges.get("supporting") or []),
+            }
+            payload["claimStages"] = list(claim_stages_by_subject.get((trace_scope, subject_id), []))
+            payload["depthPlan"] = list(depth_plan_by_subject.get((trace_scope, subject_id), []))
+            if history_payload:
+                # The central fragment layer is intentionally normalized, but some seam semantics
+                # (especially the exact next seam and its edge sets) are still best preserved by
+                # the latest DB snapshot history. Prefer that authoritative state when present so
+                # planner reads do not regress into stale synthetic seam projections.
+                payload = {
+                    **payload,
+                    "subjectKind": str(
+                        (history_payload.get("subjectKind") if preserve_history_identity else payload.get("subjectKind"))
+                        or payload.get("subjectKind")
+                        or ""
+                    ),
+                    "subjectKey": str(
+                        (history_payload.get("subjectKey") if preserve_history_identity else payload.get("subjectKey"))
+                        or payload.get("subjectKey")
+                        or ""
+                    ),
+                    "subjectLabel": str(
+                        (history_payload.get("subjectLabel") if preserve_history_identity else payload.get("subjectLabel"))
+                        or payload.get("subjectLabel")
+                        or ""
+                    ),
+                    "subjectClass": str(
+                        (history_payload.get("subjectClass") if preserve_history_identity else payload.get("subjectClass"))
+                        or payload.get("subjectClass")
+                        or ""
+                    ),
+                    "subjectPathId": str(
+                        (history_payload.get("subjectPathId") if preserve_history_identity else payload.get("subjectPathId"))
+                        or payload.get("subjectPathId")
+                        or ""
+                    ),
+                    "semanticKey": str(
+                        (history_payload.get("semanticKey") if preserve_history_identity else payload.get("semanticKey"))
+                        or payload.get("semanticKey")
+                        or ""
+                    ),
+                    "identityOwner": str(
+                        (history_payload.get("identityOwner") if preserve_history_identity else payload.get("identityOwner"))
+                        or payload.get("identityOwner")
+                        or ""
+                    ),
+                    "identityReason": (
+                        history_payload.get("identityReason") if preserve_history_identity else payload.get("identityReason")
+                    ) or payload.get("identityReason"),
+                    "proofs": list(history_payload.get("proofs") or payload.get("proofs") or []),
+                    "targetAliases": list(history_payload.get("targetAliases") or payload.get("targetAliases") or []),
+                    "knownEdges": list(history_payload.get("knownEdges") or payload.get("knownEdges") or []),
+                    "missingEdges": list(history_payload.get("missingEdges") or payload.get("missingEdges") or []),
+                    "blockedEdges": list(history_payload.get("blockedEdges") or payload.get("blockedEdges") or []),
+                    "nonblockingEdges": list(history_payload.get("nonblockingEdges") or payload.get("nonblockingEdges") or []),
+                    "nextSeam": dict(history_payload.get("nextSeam") or payload.get("nextSeam") or {}),
+                    "decisionSummary": dict(history_payload.get("decisionSummary") or payload.get("decisionSummary") or {}),
+                    "claimStages": list(payload.get("claimStages") or []),
+                    "depthPlan": list(history_payload.get("depthPlan") or payload.get("depthPlan") or []),
+                }
+            payload["knownEdges"] = list(payload.get("knownEdges") or [])
+            payload["missingEdges"] = list(payload.get("missingEdges") or [])
+            payload["blockedEdges"] = list(payload.get("blockedEdges") or [])
+            payload["nonblockingEdges"] = list(payload.get("nonblockingEdges") or [])
+            next_seam = dict(payload.get("nextSeam") or {})
+            next_seam_id = str(next_seam.get("id") or "").strip()
+            next_seam_status = str(next_seam.get("status") or "").strip().lower()
+            if next_seam_status in {"", "clear", "closed", "covered", "resolved", "none"} or not next_seam_id:
+                next_seam = {
+                    "id": None,
+                    "status": "clear",
+                    "terms": [],
+                }
+            else:
+                next_seam["id"] = next_seam_id
+                next_seam["status"] = next_seam_status or "open"
+                next_seam["terms"] = _unique_strings(
+                    [str(value).strip() for value in (next_seam.get("terms") or []) if str(value).strip()]
+                )
+            payload["nextSeam"] = next_seam
+            payload, payload["decisionSummary"], payload["claimStages"] = _normalize_subject_state_edge_consistency(
+                payload,
+                payload.get("decisionSummary") or {},
+                payload.get("claimStages") or [],
+            )
+            results.append(
+                {
+                    "traceScope": trace_scope,
+                    "subjectId": subject_id,
+                    "payload": payload,
+                    "provenance": {},
+                    "reducerVersion": "db-central-subject-state-v1",
+                    "builtAt": str(
+                        (latest_history_by_subject.get((trace_scope, subject_id)) or {}).get("builtAt")
+                        or row["built_at"]
+                        or ""
+                    ),
+                }
+            )
+        return results
+
+    def list_central_subject_contract_lane_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        with self.connect() as conn:
+            lane_query = """
+                SELECT *
+                FROM db_central_subject_contract_lanes_v
+                WHERE project_name = ? AND project_file = ?
+            """
+            lane_params: list[Any] = [project_name, project_file]
+            if trace_scope:
+                lane_query += " AND trace_scope = ?"
+                lane_params.append(trace_scope)
+            lane_query += " ORDER BY trace_scope ASC, subject_id ASC, lane_id ASC"
+            lane_rows = conn.execute(lane_query, tuple(lane_params)).fetchall()
+
+            term_query = """
+                SELECT trace_scope, subject_id, lane_id, term_role, term_value, ordinal
+                FROM db_central_subject_contract_lane_terms_v
+                WHERE project_name = ? AND project_file = ?
+            """
+            term_params: list[Any] = [project_name, project_file]
+            if trace_scope:
+                term_query += " AND trace_scope = ?"
+                term_params.append(trace_scope)
+            term_query += " ORDER BY trace_scope ASC, subject_id ASC, lane_id ASC, term_role ASC, ordinal ASC, term_value ASC"
+            term_rows = conn.execute(term_query, tuple(term_params)).fetchall()
+        terms_by_lane: dict[tuple[str, str, str], dict[str, list[str]]] = {}
+        for row in term_rows:
+            key = (
+                str(row["trace_scope"] or ""),
+                str(row["subject_id"] or ""),
+                str(row["lane_id"] or ""),
+            )
+            bucket = terms_by_lane.setdefault(key, {"missing": [], "advisory": [], "found": []})
+            role = str(row["term_role"] or "").strip()
+            value = str(row["term_value"] or "").strip()
+            if role in bucket and value and value not in bucket[role]:
+                bucket[role].append(value)
+        results: list[dict[str, Any]] = []
+        for row in lane_rows:
+            trace_scope_value = str(row["trace_scope"] or "")
+            subject_id_value = str(row["subject_id"] or "")
+            lane_id_value = str(row["lane_id"] or "")
+            payload = dict(_json_loads(row["payload_json"], {}))
+            term_bucket = terms_by_lane.get((trace_scope_value, subject_id_value, lane_id_value), {})
+            payload["missingTerms"] = list(term_bucket.get("missing") or [])
+            payload["advisoryMissingTerms"] = list(term_bucket.get("advisory") or [])
+            payload["foundTerms"] = list(term_bucket.get("found") or [])
+            results.append(
+                {
+                    "traceScope": trace_scope_value,
+                    "subjectId": subject_id_value,
+                    "laneId": lane_id_value,
+                    "selectedSubjectId": str(row["selected_subject_id"] or ""),
+                    "selectedSubjectKind": str(row["selected_subject_kind"] or ""),
+                    "selectionSource": str(row["selection_source"] or ""),
+                    "blockedInputReason": str(row["blocked_input_reason"] or ""),
+                    "payload": payload,
+                    "provenance": _json_loads(row["provenance_json"], {}),
+                    "reducerVersion": str(row["reducer_version"] or ""),
+                    "builtAt": str(row["built_at"] or ""),
+                }
+            )
+        return results
+
+    def list_central_subject_metadata_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        lane_rows = self.list_central_subject_contract_lane_views(project_name, project_file, trace_scope=trace_scope)
+        with self.connect() as conn:
+            query = """
+                SELECT *
+                FROM subject_contract_views
+                WHERE project_name = ? AND project_file = ?
+            """
+            params: list[Any] = [project_name, project_file]
+            if trace_scope:
+                query += " AND trace_scope = ?"
+                params.append(trace_scope)
+            query += " ORDER BY trace_scope ASC, subject_id ASC"
+            contract_rows = conn.execute(query, tuple(params)).fetchall()
+            alias_rows = conn.execute(
+                f"""
+                SELECT trace_scope, subject_id, alias_value, ordinal
+                FROM subject_contract_target_alias_fragments
+                WHERE project_name = ? AND project_file = ?{" AND trace_scope = ?" if trace_scope else ""}
+                ORDER BY trace_scope ASC, subject_id ASC, ordinal ASC, alias_value ASC
+                """,
+                tuple(params),
+            ).fetchall()
+            grounded_rows = conn.execute(
+                f"""
+                SELECT trace_scope, subject_id, field_key, payload_json
+                FROM subject_contract_grounded_field_views
+                WHERE project_name = ? AND project_file = ?{" AND trace_scope = ?" if trace_scope else ""}
+                ORDER BY trace_scope ASC, subject_id ASC, field_key ASC
+                """,
+                tuple(params),
+            ).fetchall()
+            support_rows = conn.execute(
+                f"""
+                SELECT trace_scope, subject_id, entry_key, payload_json
+                FROM subject_contract_support_entry_views
+                WHERE project_name = ? AND project_file = ?{" AND trace_scope = ?" if trace_scope else ""}
+                ORDER BY trace_scope ASC, subject_id ASC, entry_key ASC
+                """,
+                tuple(params),
+            ).fetchall()
+            provenance_rows = conn.execute(
+                f"""
+                SELECT trace_scope, subject_id, entry_key, payload_json
+                FROM subject_contract_provenance_entry_views
+                WHERE project_name = ? AND project_file = ?{" AND trace_scope = ?" if trace_scope else ""}
+                ORDER BY trace_scope ASC, subject_id ASC, entry_key ASC
+                """,
+                tuple(params),
+            ).fetchall()
+            blocked_rows = conn.execute(
+                f"""
+                SELECT trace_scope, subject_id, reason_key, reason_value, ordinal
+                FROM subject_contract_blocked_reason_views
+                WHERE project_name = ? AND project_file = ?{" AND trace_scope = ?" if trace_scope else ""}
+                ORDER BY trace_scope ASC, subject_id ASC, ordinal ASC, reason_key ASC
+                """,
+                tuple(params),
+            ).fetchall()
+        aliases_by_subject: dict[tuple[str, str], list[str]] = {}
+        for row in alias_rows:
+            key = (str(row["trace_scope"] or ""), str(row["subject_id"] or ""))
+            alias_value = str(row["alias_value"] or "").strip()
+            if alias_value and alias_value not in aliases_by_subject.setdefault(key, []):
+                aliases_by_subject[key].append(alias_value)
+        grounded_by_subject: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in grounded_rows:
+            grounded_by_subject.setdefault((str(row["trace_scope"] or ""), str(row["subject_id"] or "")), {})[
+                str(row["field_key"] or "")
+            ] = _json_loads(row["payload_json"], {})
+        support_by_subject: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in support_rows:
+            support_by_subject.setdefault((str(row["trace_scope"] or ""), str(row["subject_id"] or "")), {})[
+                str(row["entry_key"] or "")
+            ] = _json_loads(row["payload_json"], {})
+        provenance_by_subject: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in provenance_rows:
+            provenance_by_subject.setdefault((str(row["trace_scope"] or ""), str(row["subject_id"] or "")), {})[
+                str(row["entry_key"] or "")
+            ] = _json_loads(row["payload_json"], {})
+        blocked_by_subject: dict[tuple[str, str], dict[str, str]] = {}
+        for row in blocked_rows:
+            reason_value = str(row["reason_value"] or "").strip()
+            if not reason_value or reason_value.lower() == "none":
+                continue
+            blocked_by_subject.setdefault((str(row["trace_scope"] or ""), str(row["subject_id"] or "")), {})[
+                str(row["reason_key"] or "")
+            ] = reason_value
+        lanes_by_subject: dict[tuple[str, str], dict[str, Any]] = {}
+        lane_provenance_by_subject: dict[tuple[str, str], dict[str, Any]] = {}
+        for row in lane_rows:
+            key = (str(row.get("traceScope") or ""), str(row.get("subjectId") or ""))
+            lane_id = str(row.get("laneId") or "").strip()
+            if not lane_id:
+                continue
+            lanes_by_subject.setdefault(key, {})[lane_id] = dict(row.get("payload") or {})
+            lane_provenance_by_subject.setdefault(key, {})[lane_id] = dict(row.get("provenance") or {})
+        results: list[dict[str, Any]] = []
+        for row in contract_rows:
+            trace_scope_value = str(row["trace_scope"] or "")
+            subject_id_value = str(row["subject_id"] or "")
+            key = (trace_scope_value, subject_id_value)
+            payload = {
+                "traceScope": trace_scope_value,
+                "subjectId": subject_id_value,
+                "subjectKind": str(row["subject_kind"] or ""),
+                "subjectKey": str(row["subject_key"] or ""),
+                "subjectLabel": str(row["subject_label"] or ""),
+                "semanticKey": str(row["semantic_key"] or ""),
+                "identityOwner": str(row["identity_owner"] or ""),
+                "identityReason": str(row["identity_reason"] or "") or None,
+                "blockedInputReason": str(row["blocked_input_reason"] or "") or None,
+                "traceRoutineHint": str(row["trace_routine_hint"] or "") or None,
+                "selectedOwnerSubjectId": str(row["selected_owner_subject_id"] or "") or None,
+                "selectedSharedLane": str(row["selected_shared_lane"] or "") or None,
+                "targetAliases": list(aliases_by_subject.get(key, [])),
+                "groundedFields": dict(grounded_by_subject.get(key, {})),
+                "supportSummary": {
+                    **dict(support_by_subject.get(key, {})),
+                    "sharedLanes": dict(lanes_by_subject.get(key, {})),
+                },
+                "provenanceSummary": {
+                    **dict(provenance_by_subject.get(key, {})),
+                    "sharedLanes": dict(lane_provenance_by_subject.get(key, {})),
+                },
+                "blockedInputReasons": dict(blocked_by_subject.get(key, {})),
+            }
+            payload["core"] = _contract_core_view(payload)
+            payload["enriched"] = _contract_enriched_view(payload)
+            results.append(
+                {
+                    "traceScope": trace_scope_value,
+                    "subjectId": subject_id_value,
+                    "payload": payload,
+                    "provenance": {},
+                    "reducerVersion": "db-central-subject-contract-v1",
+                    "builtAt": str(row["updated_at"] or ""),
+                }
+            )
+        return results
 
     def list_latest_materialized_subject_contract_views(
         self,
@@ -19052,38 +28466,7 @@ class GhidraCacheDB:
         trace_scope: str = "",
     ) -> list[dict[str, Any]]:
         trace_scope = str(trace_scope or "").strip()
-        query = """
-            SELECT mscv.*
-            FROM materialized_subject_contract_views AS mscv
-            INNER JOIN (
-                SELECT trace_scope, subject_id, MAX(built_at) AS max_built_at
-                FROM materialized_subject_contract_views
-                WHERE project_name = ? AND project_file = ?
-                GROUP BY trace_scope, subject_id
-            ) AS latest
-              ON latest.trace_scope = mscv.trace_scope
-             AND latest.subject_id = mscv.subject_id
-             AND latest.max_built_at = mscv.built_at
-            WHERE mscv.project_name = ? AND mscv.project_file = ?
-        """
-        params: list[Any] = [project_name, project_file, project_name, project_file]
-        if trace_scope:
-            query += " AND mscv.trace_scope = ?"
-            params.append(trace_scope)
-        query += " ORDER BY mscv.trace_scope ASC, mscv.subject_id ASC"
-        with self.connect() as conn:
-            rows = conn.execute(query, tuple(params)).fetchall()
-        return [
-            {
-                "traceScope": str(row["trace_scope"]),
-                "subjectId": str(row["subject_id"]),
-                "payload": _json_loads(row["payload_json"], {}),
-                "provenance": _json_loads(row["provenance_json"], {}),
-                "reducerVersion": str(row["reducer_version"]),
-                "builtAt": str(row["built_at"]),
-            }
-            for row in rows
-        ]
+        return self.list_central_subject_metadata_views(project_name, project_file, trace_scope=trace_scope)
 
     def find_materialized_subject_contract_view(
         self,
@@ -19092,26 +28475,25 @@ class GhidraCacheDB:
         trace_scope: str,
         subject_id: str,
     ) -> dict[str, Any] | None:
-        with self.connect() as conn:
-            row = conn.execute(
-                """
-                SELECT * FROM materialized_subject_contract_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
-                """,
-                (project_name, project_file, trace_scope, subject_id),
-            ).fetchone()
-        if row is None:
-            return None
-        return {
-            "traceScope": str(row["trace_scope"]),
-            "subjectId": str(row["subject_id"]),
-            "payload": _json_loads(row["payload_json"], {}),
-            "provenance": _json_loads(row["provenance_json"], {}),
-            "reducerVersion": str(row["reducer_version"]),
-            "builtAt": str(row["built_at"]),
-        }
+        for row in self.list_central_subject_metadata_views(project_name, project_file, trace_scope=str(trace_scope or "")):
+            if str(row.get("subjectId") or "") == str(subject_id or ""):
+                return row
+        return None
 
     def list_latest_materialized_entity_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        return self.list_central_entity_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+
+    def list_central_entity_views(
         self,
         project_name: str,
         project_file: str,
@@ -19121,7 +28503,7 @@ class GhidraCacheDB:
         trace_scope = str(trace_scope or "").strip()
         query = """
             SELECT *
-            FROM materialized_entity_views
+            FROM db_central_entity_rows_v
             WHERE project_name = ? AND project_file = ?
         """
         params: list[Any] = [project_name, project_file]
@@ -19156,39 +28538,35 @@ class GhidraCacheDB:
         provenance: dict[str, Any] | None = None,
         reducer_version: str = "materialized-entity-view-v1",
     ) -> None:
-        built_at = datetime.now().isoformat(timespec="microseconds")
         normalized_payload = dict(payload or {})
         normalized_provenance = dict(provenance or {})
         normalized_provenance.setdefault("payloadHash", _dependency_hash_payload(normalized_payload))
         with self.connect() as conn:
-            conn.execute(
-                """
-                INSERT INTO materialized_entity_views(
-                    project_name, project_file, entity_id, entity_kind, trace_scope,
-                    payload_json, provenance_json, reducer_version, built_at
-                ) VALUES(?,?,?,?,?,?,?,?,?)
-                ON CONFLICT(project_name, project_file, entity_id) DO UPDATE SET
-                    entity_kind=excluded.entity_kind,
-                    trace_scope=excluded.trace_scope,
-                    payload_json=excluded.payload_json,
-                    provenance_json=excluded.provenance_json,
-                    reducer_version=excluded.reducer_version,
-                    built_at=excluded.built_at
-                """,
-                (
-                    project_name,
-                    project_file,
-                    str(entity_id or "").strip(),
-                    str(entity_kind or "").strip(),
-                    str(trace_scope or "").strip(),
-                    _json_dumps(normalized_payload),
-                    _json_dumps(normalized_provenance),
-                    reducer_version,
-                    built_at,
-                    ),
-                )
+            self._upsert_knowledge_node(
+                conn,
+                project_name,
+                project_file,
+                node_id=str(entity_id or "").strip(),
+                node_kind=str(entity_kind or "").strip(),
+                trace_scope=str(trace_scope or "").strip(),
+                payload=normalized_payload,
+                provenance=normalized_provenance,
+            )
 
     def list_latest_materialized_fact_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        return self.list_central_fact_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+
+    def list_central_fact_views(
         self,
         project_name: str,
         project_file: str,
@@ -19198,7 +28576,7 @@ class GhidraCacheDB:
         trace_scope = str(trace_scope or "").strip()
         query = """
             SELECT *
-            FROM materialized_fact_views
+            FROM db_central_fact_rows_v
             WHERE project_name = ? AND project_file = ?
         """
         params: list[Any] = [project_name, project_file]
@@ -19247,50 +28625,21 @@ class GhidraCacheDB:
                 continue
             seen_keys.add(key)
             deduped_rows.append(dict(row))
+        existing_rows = self.list_central_fact_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+        if _materialized_fact_rows_signature(existing_rows) == _materialized_fact_rows_signature(deduped_rows):
+            return
         with self.connect() as conn:
-            conn.execute(
-                """
-                DELETE FROM materialized_fact_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
-                """,
-                (project_name, project_file, trace_scope),
+            self._sync_knowledge_facts_for_scope(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                deduped_rows,
             )
-            for row in deduped_rows:
-                payload = dict(row.get("payload") or {})
-                provenance = {
-                    "payloadHash": _dependency_hash_payload(payload),
-                    "traceScope": trace_scope,
-                    "entityId": str(row.get("entityId") or "").strip(),
-                    "fieldKey": str(row.get("fieldKey") or "").strip(),
-                    "factKind": str(row.get("factKind") or "").strip(),
-                }
-                conn.execute(
-                    """
-                    INSERT INTO materialized_fact_views(
-                        project_name, project_file, entity_id, trace_scope, field_key, fact_kind, fact_value,
-                        payload_json, provenance_json, reducer_version, built_at
-                    ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
-                    ON CONFLICT(project_name, project_file, entity_id, field_key, fact_kind, fact_value) DO UPDATE SET
-                        trace_scope=excluded.trace_scope,
-                        payload_json=excluded.payload_json,
-                        provenance_json=excluded.provenance_json,
-                        reducer_version=excluded.reducer_version,
-                        built_at=excluded.built_at
-                    """,
-                    (
-                        project_name,
-                        project_file,
-                        str(row.get("entityId") or "").strip(),
-                        trace_scope,
-                        str(row.get("fieldKey") or "").strip(),
-                        str(row.get("factKind") or "").strip(),
-                        str(row.get("factValue") or "").strip(),
-                        _json_dumps(payload),
-                        _json_dumps(provenance),
-                        reducer_version,
-                        built_at,
-                    ),
-                )
 
     def replace_materialized_relation_views(
         self,
@@ -19316,52 +28665,36 @@ class GhidraCacheDB:
                 continue
             seen_keys.add(key)
             deduped_rows.append(dict(row))
+        existing_rows = self.list_central_relation_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+        if _materialized_relation_rows_signature(existing_rows) == _materialized_relation_rows_signature(deduped_rows):
+            return
         with self.connect() as conn:
-            conn.execute(
-                """
-                DELETE FROM materialized_relation_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
-                """,
-                (project_name, project_file, trace_scope),
+            self._sync_knowledge_edges_for_scope(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                deduped_rows,
             )
-            for row in deduped_rows:
-                payload = dict(row.get("payload") or {})
-                provenance = {
-                    "payloadHash": _dependency_hash_payload(payload),
-                    "traceScope": trace_scope,
-                    "sourceEntityId": str(row.get("sourceEntityId") or "").strip(),
-                    "relationKind": str(row.get("relationKind") or "").strip(),
-                    "targetEntityId": str(row.get("targetEntityId") or "").strip(),
-                }
-                conn.execute(
-                    """
-                    INSERT INTO materialized_relation_views(
-                        project_name, project_file, source_entity_id, trace_scope, field_key, relation_kind, target_entity_id,
-                        payload_json, provenance_json, reducer_version, built_at
-                    ) VALUES(?,?,?,?,?,?,?,?,?,?,?)
-                    ON CONFLICT(project_name, project_file, source_entity_id, field_key, relation_kind, target_entity_id) DO UPDATE SET
-                        trace_scope=excluded.trace_scope,
-                        payload_json=excluded.payload_json,
-                        provenance_json=excluded.provenance_json,
-                        reducer_version=excluded.reducer_version,
-                        built_at=excluded.built_at
-                    """,
-                    (
-                        project_name,
-                        project_file,
-                        str(row.get("sourceEntityId") or "").strip(),
-                        trace_scope,
-                        str(row.get("fieldKey") or "").strip(),
-                        str(row.get("relationKind") or "").strip(),
-                        str(row.get("targetEntityId") or "").strip(),
-                        _json_dumps(payload),
-                        _json_dumps(provenance),
-                        reducer_version,
-                        built_at,
-                    ),
-                )
 
     def list_latest_materialized_relation_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        return self.list_central_relation_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+
+    def list_central_relation_views(
         self,
         project_name: str,
         project_file: str,
@@ -19371,7 +28704,7 @@ class GhidraCacheDB:
         trace_scope = str(trace_scope or "").strip()
         query = """
             SELECT *
-            FROM materialized_relation_views
+            FROM db_central_relation_rows_v
             WHERE project_name = ? AND project_file = ?
         """
         params: list[Any] = [project_name, project_file]
@@ -19388,6 +28721,98 @@ class GhidraCacheDB:
                 "fieldKey": str(row["field_key"]),
                 "relationKind": str(row["relation_kind"]),
                 "targetEntityId": str(row["target_entity_id"]),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"]),
+                "builtAt": str(row["built_at"]),
+            }
+            for row in rows
+        ]
+
+    def list_central_evidence_graph_edges(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+        node_id: str = "",
+    ) -> list[dict[str, Any]]:
+        trace_scope = str(trace_scope or "").strip()
+        node_id = str(node_id or "").strip()
+        query = """
+            SELECT *
+            FROM db_central_evidence_graph_edges_v
+            WHERE project_name = ? AND project_file = ?
+        """
+        params: list[Any] = [project_name, project_file]
+        if trace_scope:
+            query += " AND trace_scope = ?"
+            params.append(trace_scope)
+        if node_id:
+            lowered_node_id = node_id.lower()
+            query += " AND (LOWER(source_node_id) = ? OR LOWER(target_node_id) = ?)"
+            params.extend([lowered_node_id, lowered_node_id])
+        query += " ORDER BY trace_scope ASC, relation_role ASC, edge_kind ASC, source_node_id ASC, target_node_id ASC"
+        with self.connect() as conn:
+            rows = conn.execute(query, tuple(params)).fetchall()
+        return [
+            {
+                "traceScope": str(row["trace_scope"]),
+                "graphScope": str(row["graph_scope"]),
+                "sourceNodeId": str(row["source_node_id"]),
+                "edgeKind": str(row["edge_kind"]),
+                "targetNodeId": str(row["target_node_id"]),
+                "fieldKey": str(row["field_key"]),
+                "edgeStatus": str(row["edge_status"]),
+                "sourceLayer": str(row["source_layer"]),
+                "relationRole": str(row["relation_role"]),
+                "valueSemantics": str(row["value_semantics"]),
+                "payload": _json_loads(row["payload_json"], {}),
+                "provenance": _json_loads(row["provenance_json"], {}),
+                "reducerVersion": str(row["reducer_version"]),
+                "builtAt": str(row["built_at"]),
+            }
+            for row in rows
+        ]
+
+    def list_central_canonical_graph_edges(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        node_id: str = "",
+        edge_kind: str = "",
+    ) -> list[dict[str, Any]]:
+        node_id = str(node_id or "").strip()
+        edge_kind = str(edge_kind or "").strip()
+        query = """
+            SELECT *
+            FROM db_central_canonical_graph_edges_v
+            WHERE project_name = ? AND project_file = ?
+        """
+        params: list[Any] = [project_name, project_file]
+        if node_id:
+            lowered_node_id = node_id.lower()
+            query += " AND (LOWER(source_node_id) = ? OR LOWER(target_node_id) = ?)"
+            params.extend([lowered_node_id, lowered_node_id])
+        if edge_kind:
+            query += " AND edge_kind = ?"
+            params.append(edge_kind)
+        query += " ORDER BY edge_kind ASC, source_node_id ASC, target_node_id ASC"
+        with self.connect() as conn:
+            rows = conn.execute(query, tuple(params)).fetchall()
+        return [
+            {
+                "sourceNodeId": str(row["source_node_id"]),
+                "edgeKind": str(row["edge_kind"]),
+                "targetNodeId": str(row["target_node_id"]),
+                "fieldKey": str(row["field_key"]),
+                "edgeStatus": str(row["edge_status"]),
+                "relationRole": str(row["relation_role"]),
+                "valueSemantics": str(row["value_semantics"]),
+                "positiveObservationCount": int(row["positive_observation_count"] or 0),
+                "negativeObservationCount": int(row["negative_observation_count"] or 0),
+                "supportScopeCount": int(row["support_scope_count"] or 0),
                 "payload": _json_loads(row["payload_json"], {}),
                 "provenance": _json_loads(row["provenance_json"], {}),
                 "reducerVersion": str(row["reducer_version"]),
@@ -19419,43 +28844,21 @@ class GhidraCacheDB:
                 continue
             seen_keys.add(key)
             deduped_rows.append(dict(row))
+        existing_rows = self.list_central_gap_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+        if _materialized_gap_rows_signature(existing_rows) == _materialized_gap_rows_signature(deduped_rows):
+            return
         with self.connect() as conn:
-            conn.execute(
-                """
-                DELETE FROM materialized_gap_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
-                """,
-                (project_name, project_file, trace_scope),
+            self._sync_knowledge_gaps_for_scope(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                deduped_rows,
             )
-            for row in deduped_rows:
-                payload = dict(row.get("payload") or {})
-                provenance = {
-                    "payloadHash": _dependency_hash_payload(payload),
-                    "traceScope": trace_scope,
-                    "entityId": str(row.get("entityId") or "").strip(),
-                    "fieldKey": str(row.get("fieldKey") or "").strip(),
-                    "gapKind": str(row.get("gapKind") or "").strip(),
-                }
-                conn.execute(
-                    """
-                    INSERT INTO materialized_gap_views(
-                        project_name, project_file, entity_id, trace_scope, field_key, gap_kind,
-                        payload_json, provenance_json, reducer_version, built_at
-                    ) VALUES(?,?,?,?,?,?,?,?,?,?)
-                    """,
-                    (
-                        project_name,
-                        project_file,
-                        str(row.get("entityId") or "").strip(),
-                        trace_scope,
-                        str(row.get("fieldKey") or "").strip(),
-                        str(row.get("gapKind") or "").strip(),
-                        _json_dumps(payload),
-                        _json_dumps(provenance),
-                        reducer_version,
-                        built_at,
-                    ),
-                )
 
     def list_latest_materialized_gap_views(
         self,
@@ -19464,12 +28867,27 @@ class GhidraCacheDB:
         *,
         trace_scope: str = "",
     ) -> list[dict[str, Any]]:
+        return self.list_central_gap_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+
+    def list_central_gap_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+        include_closed: bool = False,
+    ) -> list[dict[str, Any]]:
         trace_scope = str(trace_scope or "").strip()
+        source_view = "db_central_gap_rows_v" if include_closed else "db_central_active_gap_rows_v"
         query = """
             SELECT *
-            FROM materialized_gap_views
+            FROM {source_view}
             WHERE project_name = ? AND project_file = ?
-        """
+        """.replace("{source_view}", source_view)
         params: list[Any] = [project_name, project_file]
         if trace_scope:
             query += " AND trace_scope = ?"
@@ -19483,6 +28901,7 @@ class GhidraCacheDB:
                 "traceScope": str(row["trace_scope"]),
                 "fieldKey": str(row["field_key"]),
                 "gapKind": str(row["gap_kind"]),
+                "gapStatus": str(row["gap_status"] or ""),
                 "payload": _json_loads(row["payload_json"], {}),
                 "provenance": _json_loads(row["provenance_json"], {}),
                 "reducerVersion": str(row["reducer_version"]),
@@ -19513,45 +28932,36 @@ class GhidraCacheDB:
                 continue
             seen_keys.add(key)
             deduped_rows.append(dict(row))
+        existing_rows = self.list_central_boundary_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+        if _materialized_boundary_rows_signature(existing_rows) == _materialized_boundary_rows_signature(deduped_rows):
+            return
         with self.connect() as conn:
-            conn.execute(
-                """
-                DELETE FROM materialized_boundary_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ?
-                """,
-                (project_name, project_file, trace_scope),
+            self._sync_knowledge_boundaries_for_scope(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                deduped_rows,
             )
-            for row in deduped_rows:
-                payload = dict(row.get("payload") or {})
-                provenance = {
-                    "payloadHash": _dependency_hash_payload(payload),
-                    "traceScope": trace_scope,
-                    "subjectId": str(row.get("subjectId") or "").strip(),
-                    "boundaryKind": str(row.get("boundaryKind") or "").strip(),
-                    "verdict": str(row.get("verdict") or "").strip(),
-                }
-                conn.execute(
-                    """
-                    INSERT INTO materialized_boundary_views(
-                        project_name, project_file, trace_scope, subject_id, boundary_kind, verdict,
-                        payload_json, provenance_json, reducer_version, built_at
-                    ) VALUES(?,?,?,?,?,?,?,?,?,?)
-                    """,
-                    (
-                        project_name,
-                        project_file,
-                        trace_scope,
-                        str(row.get("subjectId") or "").strip(),
-                        str(row.get("boundaryKind") or "").strip(),
-                        str(row.get("verdict") or "").strip(),
-                        _json_dumps(payload),
-                        _json_dumps(provenance),
-                        reducer_version,
-                        built_at,
-                    ),
-                )
 
     def list_latest_materialized_boundary_views(
+        self,
+        project_name: str,
+        project_file: str,
+        *,
+        trace_scope: str = "",
+    ) -> list[dict[str, Any]]:
+        return self.list_central_boundary_views(
+            project_name,
+            project_file,
+            trace_scope=trace_scope,
+        )
+
+    def list_central_boundary_views(
         self,
         project_name: str,
         project_file: str,
@@ -19561,7 +28971,7 @@ class GhidraCacheDB:
         trace_scope = str(trace_scope or "").strip()
         query = """
             SELECT *
-            FROM materialized_boundary_views
+            FROM db_central_boundary_rows_v
             WHERE project_name = ? AND project_file = ?
         """
         params: list[Any] = [project_name, project_file]
@@ -19573,8 +28983,8 @@ class GhidraCacheDB:
             rows = conn.execute(query, tuple(params)).fetchall()
         return [
             {
-                "traceScope": str(row["trace_scope"]),
                 "subjectId": str(row["subject_id"]),
+                "traceScope": str(row["trace_scope"]),
                 "boundaryKind": str(row["boundary_kind"]),
                 "verdict": str(row["verdict"]),
                 "payload": _json_loads(row["payload_json"], {}),
@@ -20481,6 +29891,24 @@ class GhidraCacheDB:
         provenance: dict[str, Any] | None = None,
         reducer_version: str = "",
     ) -> None:
+        existing = self.find_materialization_stage_view(
+            project_name,
+            project_file,
+            trace_scope,
+            subject_id,
+            stage_kind,
+        )
+        normalized_payload = dict(payload or {})
+        normalized_provenance = dict(provenance or {})
+        if (
+            existing
+            and str(existing.get("stageStatus") or "") == str(stage_status or "")
+            and str(existing.get("upstreamSignature") or "") == str(upstream_signature or "")
+            and dict(existing.get("payload") or {}) == normalized_payload
+            and dict(existing.get("provenance") or {}) == normalized_provenance
+            and str(existing.get("reducerVersion") or "") == str(reducer_version or "")
+        ):
+            return
         built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
             conn.execute(
@@ -20505,8 +29933,8 @@ class GhidraCacheDB:
                     stage_kind,
                     stage_status,
                     upstream_signature,
-                    _json_dumps(payload or {}),
-                    _json_dumps(provenance or {}),
+                    _json_dumps(normalized_payload),
+                    _json_dumps(normalized_provenance),
                     reducer_version,
                     built_at,
                 ),
@@ -21104,7 +30532,7 @@ class GhidraCacheDB:
         with self.connect() as conn:
             gap_query = """
                 SELECT entity_id, field_key, gap_kind, payload_json, built_at
-                FROM materialized_gap_views
+                FROM db_central_gap_rows_v
                 WHERE project_name = ?
                   AND project_file = ?
                   AND trace_scope = ?
@@ -21162,7 +30590,7 @@ class GhidraCacheDB:
                     for item in newer_scope_gap_rows[:64]
                 ],
                 "subjectIdentity": subject_identity,
-                "reducerVersion": "materialized-subject-state-view-v14",
+                "reducerVersion": "materialized-subject-state-view-v15",
             }
         )
         existing_provenance = dict((existing or {}).get("provenance") or {})
@@ -21194,6 +30622,7 @@ class GhidraCacheDB:
         stale_claim_stage_state = (
             _claim_stage_signature(existing_payload.get("claimStages") or [])
             != _claim_stage_signature(execution_plan.get("claimStages") or [])
+            or _subject_state_has_stale_claim_stage_closure(existing_payload)
         )
         if (
             existing
@@ -21201,21 +30630,6 @@ class GhidraCacheDB:
             and not stale_multiverse_save_owner_state
             and not stale_claim_stage_state
         ):
-            with self.connect() as conn:
-                conn.execute(
-                    """
-                    DELETE FROM materialized_subject_state_views
-                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
-                    """,
-                    (project_name, project_file, trace_scope, subject_id),
-                )
-                conn.execute(
-                    """
-                    DELETE FROM materialized_subject_edge_facts
-                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
-                    """,
-                    (project_name, project_file, trace_scope, subject_id),
-                )
             existing_payload = {
                 **existing_payload,
                 "subjectId": str(subject_identity.get("subjectId") or existing_payload.get("subjectId") or ""),
@@ -21226,6 +30640,12 @@ class GhidraCacheDB:
                 "identityReason": str(subject_identity.get("identityReason") or existing_payload.get("identityReason") or ""),
                 "subjectPathId": str(subject_identity.get("subjectPathId") or existing_payload.get("subjectPathId") or ""),
             }
+            existing_payload = _sanitize_subject_identity_payload_fields(
+                existing_payload,
+                fallback_subject_id=subject_id,
+                fallback_subject_kind=str(subject_identity.get("subjectKind") or "target"),
+                fallback_subject_label=str(subject_identity.get("subjectLabel") or subject_id),
+            )
             self.upsert_materialization_stage_view(
                 project_name,
                 project_file,
@@ -21243,9 +30663,9 @@ class GhidraCacheDB:
                 },
                 provenance={
                     "payloadHash": str(existing_provenance.get("payloadHash") or ""),
-                    "reducer": "materialized-subject-state-view-v14",
+                    "reducer": "materialized-subject-state-view-v15",
                 },
-                reducer_version="materialized-subject-state-view-v14",
+                reducer_version="materialized-subject-state-view-v15",
             )
             return existing_payload
         support_proofs: list[dict[str, Any]] = []
@@ -21471,6 +30891,12 @@ class GhidraCacheDB:
             identity_reason=str(subject_identity.get("identityReason") or ""),
             subject_path_id=str(subject_identity.get("subjectPathId") or ""),
         )
+        state_payload = _sanitize_subject_identity_payload_fields(
+            state_payload,
+            fallback_subject_id=subject_id,
+            fallback_subject_kind=str(subject_identity.get("subjectKind") or subject_class or "target"),
+            fallback_subject_label=str(subject_identity.get("subjectLabel") or subject_id),
+        )
         claim_stages = [dict(stage) for stage in (execution_plan.get("claimStages") or []) if isinstance(stage, dict)]
         state_payload, decision_summary, claim_stages, _closed_composite_seams = _apply_composite_subject_seam_closure(
             trace_scope,
@@ -21478,6 +30904,11 @@ class GhidraCacheDB:
             decision_summary,
             claim_stages,
         )
+        closed_composite_seam_set = {
+            str(seam_id).strip()
+            for seam_id in (_closed_composite_seams or [])
+            if str(seam_id).strip()
+        }
         current_open_edge_ids = _unique_strings(
             [
                 *[str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()],
@@ -21497,13 +30928,13 @@ class GhidraCacheDB:
                 if not claim_stage["missingSeamIds"]:
                     claim_stage["status"] = "closed"
         claim_stages_for_subject = [dict(stage) for stage in claim_stages if isinstance(stage, dict)]
-        if claim_stages_for_subject and subject_class != "row-local":
+        if claim_stages_for_subject:
             planned_open_seam_ids = _unique_strings(
                 [
                     str(seam_id).strip()
                     for stage in claim_stages_for_subject
                     for seam_id in (stage.get("missingSeamIds") or [])
-                    if str(seam_id).strip()
+                    if str(seam_id).strip() and str(seam_id).strip() not in closed_composite_seam_set
                 ]
             )
             if not planned_open_seam_ids:
@@ -21521,6 +30952,9 @@ class GhidraCacheDB:
                         ],
                     ]
                 )
+                planned_open_seam_ids = [
+                    seam_id for seam_id in planned_open_seam_ids if seam_id not in closed_composite_seam_set
+                ]
                 if planned_open_seam_ids:
                     for claim_stage in claim_stages_for_subject:
                         claim_stage["missingSeamIds"] = list(planned_open_seam_ids)
@@ -21584,6 +31018,7 @@ class GhidraCacheDB:
                 str(value).strip()
                 for value in (state_payload.get("missingEdges") or []) + (state_payload.get("blockedEdges") or [])
                 if str(value).strip() in required_coverage_seam_ids
+                and str(value).strip() not in closed_composite_seam_set
             ]
         )
         covered_required_seam_ids = [
@@ -21647,6 +31082,62 @@ class GhidraCacheDB:
             if str(claim_stage.get("id") or "").strip() == "family-subject":
                 claim_stage["missingSeamIds"] = list(unresolved_required_seam_ids)
                 claim_stage["status"] = "open" if unresolved_required_seam_ids else "closed"
+        runtime_model_claim_closed = any(
+            str(stage.get("id") or "").strip() == "runtime-model"
+            and str(stage.get("status") or "").strip() == "closed"
+            and not [str(value).strip() for value in (stage.get("missingSeamIds") or []) if str(value).strip()]
+            for stage in claim_stages
+            if isinstance(stage, dict)
+        )
+        if runtime_model_claim_closed:
+            state_payload["missingEdges"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (state_payload.get("missingEdges") or [])
+                    if str(value).strip() and str(value).strip() != "runtime-model-gap"
+                ]
+            )
+            state_payload["blockedEdges"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (state_payload.get("blockedEdges") or [])
+                    if str(value).strip() and str(value).strip() != "runtime-model-gap"
+                ]
+            )
+            state_payload["knownEdges"] = _unique_strings(
+                [
+                    *[str(value).strip() for value in (state_payload.get("knownEdges") or []) if str(value).strip()],
+                    "runtime-model-gap",
+                ]
+            )
+            next_seam_payload = dict(state_payload.get("nextSeam") or {})
+            if str(next_seam_payload.get("id") or "").strip() == "runtime-model-gap":
+                remaining_open_edges = _unique_strings(
+                    [
+                        *[str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()],
+                        *[str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()],
+                    ]
+                )
+                state_payload["nextSeam"] = {
+                    **next_seam_payload,
+                    "id": remaining_open_edges[0] if remaining_open_edges else None,
+                    "status": "open" if remaining_open_edges else "clear",
+                    "reason": "claim-stage-runtime-model-closed",
+                }
+            decision_summary["baselineGap"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (decision_summary.get("baselineGap") or [])
+                    if str(value).strip() and str(value).strip() != "runtime-model-gap"
+                ]
+            )
+            decision_summary["blockedEdgeTypes"] = _unique_strings(
+                [
+                    str(value).strip()
+                    for value in (decision_summary.get("blockedEdgeTypes") or [])
+                    if str(value).strip() and str(value).strip() != "runtime-model-gap"
+                ]
+            )
         if trace_scope == "multiverse-market-save-owner-boundary":
             bounded_multiverse_negative_edges = _unique_strings(
                 [
@@ -21937,7 +31428,7 @@ class GhidraCacheDB:
             for fact_row in conn.execute(
                 """
                 SELECT entity_id, field_key
-                FROM materialized_fact_views
+                FROM db_central_fact_rows_v
                 WHERE project_name = ?
                   AND project_file = ?
                   AND trace_scope = ?
@@ -21952,7 +31443,7 @@ class GhidraCacheDB:
             for relation_row in conn.execute(
                 """
                 SELECT source_entity_id, field_key, relation_kind
-                FROM materialized_relation_views
+                FROM db_central_relation_rows_v
                 WHERE project_name = ?
                   AND project_file = ?
                   AND trace_scope = ?
@@ -21969,7 +31460,7 @@ class GhidraCacheDB:
             for gap_row in conn.execute(
                 """
                 SELECT entity_id, field_key, gap_kind, payload_json
-                FROM materialized_gap_views
+                FROM db_central_gap_rows_v
                 WHERE project_name = ?
                   AND project_file = ?
                   AND trace_scope = ?
@@ -21988,7 +31479,7 @@ class GhidraCacheDB:
             for gap_row in conn.execute(
                 """
                 SELECT entity_id, field_key, gap_kind, payload_json
-                FROM materialized_gap_views
+                FROM db_central_gap_rows_v
                 WHERE project_name = ?
                   AND project_file = ?
                   AND trace_scope = ?
@@ -22083,6 +31574,18 @@ class GhidraCacheDB:
                 for value in (newer_gap_delta.get("blockedEdges") or [])
                 if str(value).strip()
             ]
+            current_next_seam = dict(state_payload.get("nextSeam") or {})
+            current_state_is_clear = (
+                not [str(value).strip() for value in (state_payload.get("missingEdges") or []) if str(value).strip()]
+                and not [str(value).strip() for value in (state_payload.get("blockedEdges") or []) if str(value).strip()]
+                and (
+                    not str(current_next_seam.get("id") or "").strip()
+                    or str(current_next_seam.get("status") or "").strip().lower() in {"", "clear", "closed", "covered", "resolved", "none"}
+                )
+            )
+            if current_state_is_clear and not bool(newer_gap_delta.get("canReopenClearState")):
+                newer_missing_edges = []
+                newer_blocked_edges = []
             if newer_missing_edges or newer_blocked_edges:
                 state_payload["missingEdges"] = _unique_strings(
                     [
@@ -22103,23 +31606,35 @@ class GhidraCacheDB:
                         **next_seam_payload,
                         **derived_next_seam,
                     }
-        state_payload = _normalize_subject_state_edge_conflicts(state_payload)
-        known_edge_set = {str(value).strip() for value in (state_payload.get("knownEdges") or []) if str(value).strip()}
-        decision_summary["baselineGap"] = _unique_strings(
-            [
-                str(value).strip()
-                for value in (decision_summary.get("baselineGap") or [])
-                if str(value).strip() and str(value).strip() not in known_edge_set
-            ]
+        next_seam_payload = dict(state_payload.get("nextSeam") or {})
+        if next_seam_payload:
+            state_payload["nextSeam"] = {
+                **next_seam_payload,
+                "terms": _normalize_row_local_next_seam_terms(
+                    subject_id,
+                    list(next_seam_payload.get("terms") or []),
+                )[:12],
+            }
+        state_payload, decision_summary, claim_stages, _late_closed_composite_seams = _apply_composite_subject_seam_closure(
+            trace_scope,
+            state_payload,
+            decision_summary,
+            claim_stages,
         )
-        decision_summary["blockedEdgeTypes"] = _unique_strings(
-            [
-                str(value).strip()
-                for value in (decision_summary.get("blockedEdgeTypes") or [])
-                if str(value).strip() and str(value).strip() not in known_edge_set
-            ]
+        state_payload = _normalize_subject_state_edge_conflicts(state_payload)
+        state_payload = _sanitize_subject_identity_payload_fields(
+            state_payload,
+            fallback_subject_id=subject_id,
+            fallback_subject_kind=str(subject_identity.get("subjectKind") or subject_class or "target"),
+            fallback_subject_label=str(subject_identity.get("subjectLabel") or subject_id),
+        )
+        state_payload, decision_summary, claim_stages = _normalize_subject_state_edge_consistency(
+            state_payload,
+            decision_summary,
+            claim_stages,
         )
         state_payload["decisionSummary"] = decision_summary
+        state_payload["claimStages"] = list(claim_stages)
         edge_hashes = [
             _dependency_hash_payload(
                 {
@@ -22136,7 +31651,7 @@ class GhidraCacheDB:
             for item in edge_facts
         ]
         state_provenance = {
-            "reducer": "materialized-subject-state-view-v14",
+            "reducer": "materialized-subject-state-view-v15",
             "traceScope": trace_scope,
             "subjectId": subject_id,
             "inputs": {
@@ -22177,7 +31692,16 @@ class GhidraCacheDB:
                     str(item.get("builtAt") or ""),
                 ),
             )
-            preferred_payload = dict(preferred_historical.get("payload") or {})
+            preferred_payload = _sanitize_subject_identity_payload_fields(
+                dict(preferred_historical.get("payload") or {}),
+                fallback_subject_id=subject_id,
+                fallback_subject_kind=str(subject_identity.get("subjectKind") or subject_class or "target"),
+                fallback_subject_label=str(subject_identity.get("subjectLabel") or subject_id),
+            )
+            preferred_payload["claimStages"] = _normalize_claim_stages_against_subject_state(
+                preferred_payload,
+                preferred_payload.get("claimStages") or [],
+            )
             preferred_open_edges = _subject_state_open_edge_set(preferred_payload)
             candidate_open_edges = _subject_state_open_edge_set(state_payload)
             preferred_is_not_less_closed = preferred_open_edges.issubset(candidate_open_edges)
@@ -22212,27 +31736,59 @@ class GhidraCacheDB:
                     },
                     provenance={
                         "payloadHash": str(preferred_provenance.get("payloadHash") or ""),
-                        "reducer": "materialized-subject-state-view-v14",
+                        "reducer": "materialized-subject-state-view-v15",
                         "selection": "preferred-historical",
                     },
-                    reducer_version="materialized-subject-state-view-v14",
+                    reducer_version="materialized-subject-state-view-v15",
                 )
                 with self.connect() as conn:
-                    conn.execute(
-                        """
-                        DELETE FROM materialized_subject_state_views
-                        WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
-                        """,
-                        (project_name, project_file, trace_scope, subject_id),
+                    preferred_edge_facts: list[dict[str, Any]] = []
+                    for edge_status, edge_values in (
+                        ("known", list(preferred_payload.get("knownEdges") or [])),
+                        ("missing", list(preferred_payload.get("missingEdges") or [])),
+                        ("blocked", list(preferred_payload.get("blockedEdges") or [])),
+                        ("nonblocking", list(preferred_payload.get("nonblockingEdges") or [])),
+                    ):
+                        for edge_type in [str(value).strip() for value in edge_values if str(value).strip()]:
+                            preferred_edge_facts.append({"edgeType": edge_type, "status": edge_status})
+                    self._replace_subject_edge_fact_fragments(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                        subject_id,
+                        preferred_edge_facts,
                     )
-                    conn.execute(
-                        """
-                        DELETE FROM materialized_subject_edge_facts
-                        WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
-                        """,
-                        (project_name, project_file, trace_scope, subject_id),
+                    self._replace_subject_state_next_seam_term_fragments(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                        subject_id,
+                        str(dict(preferred_payload.get("nextSeam") or {}).get("id") or "").strip(),
+                        list(dict(preferred_payload.get("nextSeam") or {}).get("terms") or []),
                     )
-                return _normalize_subject_state_edge_conflicts(dict(preferred_historical.get("payload") or {}))
+                    self._replace_subject_state_projection_fragments(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                        subject_id,
+                        preferred_payload,
+                        preferred_provenance,
+                        built_at=str(preferred_historical.get("builtAt") or ""),
+                    )
+                return _normalize_subject_state_edge_conflicts(dict(preferred_payload))
+        existing_edge_rows = self.find_materialized_subject_edge_facts(project_name, project_file, trace_scope, subject_id)
+        with self.connect() as conn:
+            self._replace_subject_edge_fact_fragments(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                edge_facts,
+            )
         existing_edge_rows = self.find_materialized_subject_edge_facts(project_name, project_file, trace_scope, subject_id)
         existing_edge_signatures = sorted(
             [
@@ -22264,19 +31820,23 @@ class GhidraCacheDB:
             and existing_edge_signatures == next_edge_signatures
         ):
             with self.connect() as conn:
-                conn.execute(
-                    """
-                    DELETE FROM materialized_subject_state_views
-                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
-                    """,
-                    (project_name, project_file, trace_scope, subject_id),
+                self._replace_subject_state_next_seam_term_fragments(
+                    conn,
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_id,
+                    str(dict(state_payload.get("nextSeam") or {}).get("id") or "").strip(),
+                    list(dict(state_payload.get("nextSeam") or {}).get("terms") or []),
                 )
-                conn.execute(
-                    """
-                    DELETE FROM materialized_subject_edge_facts
-                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
-                    """,
-                    (project_name, project_file, trace_scope, subject_id),
+                self._replace_subject_state_projection_fragments(
+                    conn,
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_id,
+                    state_payload,
+                    state_provenance,
                 )
             self.upsert_materialization_stage_view(
                 project_name,
@@ -22295,104 +31855,31 @@ class GhidraCacheDB:
                 },
                 provenance={
                     "payloadHash": str(state_provenance.get("payloadHash") or ""),
-                    "reducer": "materialized-subject-state-view-v14",
+                    "reducer": "materialized-subject-state-view-v15",
                 },
-                reducer_version="materialized-subject-state-view-v14",
+                reducer_version="materialized-subject-state-view-v15",
             )
-            return _normalize_subject_state_edge_conflicts(dict(existing.get("payload") or {}))
+            return _normalize_subject_state_edge_conflicts(dict(state_payload))
         built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
-            conn.execute(
-                """
-                DELETE FROM materialized_subject_state_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
-                """,
-                (project_name, project_file, trace_scope, subject_id),
+            self._replace_subject_state_next_seam_term_fragments(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                str(dict(state_payload.get("nextSeam") or {}).get("id") or "").strip(),
+                list(dict(state_payload.get("nextSeam") or {}).get("terms") or []),
             )
-            conn.execute(
-                """
-                DELETE FROM materialized_subject_edge_facts
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
-                """,
-                (project_name, project_file, trace_scope, subject_id),
-            )
-            stale_keys = {
-                (str(row["edge_type"]), str(row["edge_status"]))
-                for row in conn.execute(
-                    """
-                    SELECT edge_type, edge_status FROM materialized_subject_edge_facts
-                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
-                    """,
-                    (project_name, project_file, trace_scope, subject_id),
-                ).fetchall()
-            }
-            current_keys = {
-                (str(item.get("edgeType") or ""), str(item.get("status") or ""))
-                for item in edge_facts
-            }
-            for edge_type, edge_status in sorted(stale_keys - current_keys):
-                conn.execute(
-                    """
-                    DELETE FROM materialized_subject_edge_facts
-                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ? AND edge_type = ? AND edge_status = ?
-                    """,
-                    (project_name, project_file, trace_scope, subject_id, edge_type, edge_status),
-                )
-            for item in edge_facts:
-                edge_payload = dict(item)
-                edge_provenance = {
-                    "reducer": "materialized-subject-edge-facts-v1",
-                    "traceScope": trace_scope,
-                    "subjectId": subject_id,
-                    "status": str(item.get("status") or ""),
-                    "payloadHash": _dependency_hash_payload(edge_payload),
-                }
-                conn.execute(
-                    """
-                    INSERT INTO materialized_subject_edge_facts(
-                        project_name, project_file, trace_scope, subject_id, edge_type, edge_status,
-                        payload_json, provenance_json, reducer_version, built_at
-                    ) VALUES(?,?,?,?,?,?,?,?,?,?)
-                    ON CONFLICT(project_name, project_file, trace_scope, subject_id, edge_type, edge_status) DO UPDATE SET
-                        payload_json=excluded.payload_json,
-                        provenance_json=excluded.provenance_json,
-                        reducer_version=excluded.reducer_version,
-                        built_at=excluded.built_at
-                    """,
-                    (
-                        project_name,
-                        project_file,
-                        trace_scope,
-                        subject_id,
-                        str(item.get("edgeType") or ""),
-                        str(item.get("status") or ""),
-                        _json_dumps(edge_payload),
-                        _json_dumps(edge_provenance),
-                        "materialized-subject-edge-facts-v1",
-                        built_at,
-                    ),
-                )
-            conn.execute(
-                """
-                INSERT INTO materialized_subject_state_views(
-                    project_name, project_file, trace_scope, subject_id, payload_json, provenance_json, reducer_version, built_at
-                ) VALUES(?,?,?,?,?,?,?,?)
-                ON CONFLICT(project_name, project_file, trace_scope, subject_id) DO UPDATE SET
-                    payload_json=excluded.payload_json,
-                    provenance_json=excluded.provenance_json,
-                    reducer_version=excluded.reducer_version,
-                    built_at=excluded.built_at
-                """,
-                (
-                    project_name,
-                    project_file,
-                    trace_scope,
-                    subject_id,
-                    _json_dumps(state_payload),
-                    _json_dumps(state_provenance),
-                    "materialized-subject-state-view-v14",
-                    built_at,
-                ),
+            self._replace_subject_state_projection_fragments(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                state_payload,
+                state_provenance,
+                built_at=built_at,
             )
         self.upsert_materialization_stage_view(
             project_name,
@@ -22411,9 +31898,9 @@ class GhidraCacheDB:
             },
             provenance={
                 "payloadHash": str(state_provenance.get("payloadHash") or ""),
-                "reducer": "materialized-subject-state-view-v14",
+                "reducer": "materialized-subject-state-view-v15",
             },
-            reducer_version="materialized-subject-state-view-v14",
+            reducer_version="materialized-subject-state-view-v15",
         )
         return state_payload
 
@@ -22504,13 +31991,22 @@ class GhidraCacheDB:
             and str(existing_inputs.get("dependencySignature") or "").strip() == contract_dependency_signature
         )
         if contract_fast_path:
+            existing_payload = _sanitize_subject_identity_payload_fields(
+                existing_payload,
+                fallback_subject_id=subject_id,
+                fallback_subject_kind=str(subject_state.get("subjectKind") or "target"),
+                fallback_subject_label=str(subject_state.get("subjectLabel") or subject_id),
+            )
             with self.connect() as conn:
-                conn.execute(
-                    """
-                    DELETE FROM materialized_subject_contract_views
-                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
-                    """,
-                    (project_name, project_file, trace_scope, subject_id),
+                self._replace_subject_contract_projection_fragments(
+                    conn,
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_id,
+                    existing_payload,
+                    existing_provenance,
+                    built_at=str((existing or {}).get("builtAt") or ""),
                 )
             aggregate_stage, core_stage, enriched_stage = _contract_stage_payloads(existing_payload)
             self.upsert_materialization_stage_view(
@@ -22718,7 +32214,7 @@ class GhidraCacheDB:
                         native_rows = conn.execute(
                             """
                             SELECT payload_json
-                            FROM materialized_native_trace_views
+                            FROM native_trace_views
                             WHERE project_name = ?
                               AND project_file = ?
                               AND requested_terms_json LIKE ?
@@ -22841,11 +32337,12 @@ class GhidraCacheDB:
                     for row in (generic_mechanics_views.get("facts") or [])
                     if isinstance(row, dict)
                 }
+                latest_target_bundle_rows = self.list_latest_central_target_bundle_views(project_name, project_file)[:24]
                 with self.connect() as conn:
                     for fact_row in conn.execute(
                         """
                         SELECT trace_scope, entity_id, field_key, fact_kind, fact_value, payload_json
-                        FROM materialized_fact_views
+                        FROM db_central_fact_rows_v
                         WHERE project_name = ?
                           AND project_file = ?
                           AND fact_kind IN ('runtime-cost-coverage', 'runtime-next-cost-accessor', 'runtime-final-max-level')
@@ -22874,7 +32371,7 @@ class GhidraCacheDB:
                     for relation_row in conn.execute(
                         """
                         SELECT trace_scope, source_entity_id, field_key, relation_kind, target_entity_id, payload_json
-                        FROM materialized_relation_views
+                        FROM db_central_relation_rows_v
                         WHERE project_name = ?
                           AND project_file = ?
                           AND relation_kind IN ('buy-method-cost-read', 'runtime-next-cost-formula', 'runtime-next-cost-accessor', 'runtime-final-max-level')
@@ -22897,7 +32394,7 @@ class GhidraCacheDB:
                     native_runtime_rows = conn.execute(
                         """
                         SELECT payload_json
-                        FROM materialized_native_trace_views
+                        FROM native_trace_views
                         WHERE project_name = ?
                           AND project_file = ?
                           AND payload_json LIKE ?
@@ -22906,19 +32403,14 @@ class GhidraCacheDB:
                         """,
                         (project_name, project_file, f'%"{trace_scope}"%'),
                     ).fetchall()
-                    target_bundle_rows = conn.execute(
-                        """
-                        SELECT trace_scope, payload_json
-                        FROM materialized_target_bundle_views
-                        WHERE project_name = ?
-                          AND project_file = ?
-                        ORDER BY built_at DESC
-                        LIMIT 24
-                        """,
-                        (project_name, project_file),
-                    ).fetchall()
                 runtime_payload_rows = _runtime_coverage_payload_rows_from_materialized_views(
-                    target_bundle_rows=target_bundle_rows,
+                    target_bundle_rows=[
+                        {
+                            "trace_scope": str(row.get("traceScope") or "").strip(),
+                            "payload_json": _json_dumps(dict(row.get("payload") or {})),
+                        }
+                        for row in latest_target_bundle_rows
+                    ],
                     native_trace_rows=native_runtime_rows,
                     native_trace_scope=trace_scope,
                 )
@@ -23431,6 +32923,12 @@ class GhidraCacheDB:
             "blockedInputReason": blocked_input_reason,
             "blockedInputReasons": shared_blocked_reasons,
         }
+        payload = _sanitize_subject_identity_payload_fields(
+            payload,
+            fallback_subject_id=subject_id,
+            fallback_subject_kind=str(subject_state.get("subjectKind") or "target"),
+            fallback_subject_label=str(subject_state.get("subjectLabel") or subject_id),
+        )
         final_missing_edges, final_blocked_edges, final_nonblocking_edges, final_next_seam = (
             _strip_range_family_aggregate_descriptive_seams(
                 subject_kind=str(payload.get("subjectKind") or ""),
@@ -23503,12 +33001,15 @@ class GhidraCacheDB:
                     cleaned_gap_rows,
                 )
             with self.connect() as conn:
-                conn.execute(
-                    """
-                    DELETE FROM materialized_subject_contract_views
-                    WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
-                    """,
-                    (project_name, project_file, trace_scope, subject_id),
+                self._replace_subject_contract_lane_fragments(
+                    conn,
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    subject_id,
+                    payload,
+                    provenance,
+                    built_at=str(existing.get("builtAt") or ""),
                 )
             aggregate_stage, core_stage, enriched_stage = _contract_stage_payloads(payload)
             self.upsert_materialization_stage_view(
@@ -23559,34 +33060,25 @@ class GhidraCacheDB:
             return dict(existing.get("payload") or {})
         built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
-            conn.execute(
-                """
-                DELETE FROM materialized_subject_contract_views
-                WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id <> ?
-                """,
-                (project_name, project_file, trace_scope, subject_id),
+            self._replace_subject_contract_lane_fragments(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                payload,
+                provenance,
+                built_at=built_at,
             )
-            conn.execute(
-                """
-                INSERT INTO materialized_subject_contract_views(
-                    project_name, project_file, trace_scope, subject_id, payload_json, provenance_json, reducer_version, built_at
-                ) VALUES(?,?,?,?,?,?,?,?)
-                ON CONFLICT(project_name, project_file, trace_scope, subject_id) DO UPDATE SET
-                    payload_json=excluded.payload_json,
-                    provenance_json=excluded.provenance_json,
-                    reducer_version=excluded.reducer_version,
-                    built_at=excluded.built_at
-                """,
-                (
-                    project_name,
-                    project_file,
-                    trace_scope,
-                    subject_id,
-                    _json_dumps(payload),
-                    _json_dumps(provenance),
-                    "materialized-subject-contract-view-v3",
-                    built_at,
-                ),
+            self._replace_subject_contract_projection_fragments(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                subject_id,
+                payload,
+                provenance,
+                built_at=built_at,
             )
         current_gap_rows = self.list_latest_materialized_gap_views(
             project_name,
@@ -23846,6 +33338,12 @@ class GhidraCacheDB:
             "updatedAt": datetime.now().isoformat(timespec="seconds"),
             "synthesized": False,
         }
+        payload = _sanitize_subject_identity_payload_fields(
+            payload,
+            fallback_subject_id=str(subject_state.get("subjectId") or compatibility_target_id or trace_scope),
+            fallback_subject_kind=str(subject_state.get("subjectKind") or "target"),
+            fallback_subject_label=str(subject_state.get("subjectLabel") or compatibility_target_id or trace_scope),
+        )
         provenance = {
             "reducer": "materialized-resolver-target-view-v1",
             "traceScope": trace_scope,
@@ -23918,34 +33416,38 @@ class GhidraCacheDB:
                 "acceptedAnchors": _sanitize_resolver_anchor_terms(anchor_terms),
                 "resolutionAliases": _sanitize_resolver_anchor_terms(resolution_aliases),
             }
+            existing_payload = _sanitize_subject_identity_payload_fields(
+                existing_payload,
+                fallback_subject_id=str(subject_state.get("subjectId") or compatibility_target_id or trace_scope),
+                fallback_subject_kind=str(subject_state.get("subjectKind") or "target"),
+                fallback_subject_label=str(subject_state.get("subjectLabel") or compatibility_target_id or trace_scope),
+            )
             if _json_dumps(existing.get("payload") or {}) != _json_dumps(existing_payload):
                 built_at = datetime.now().isoformat(timespec="microseconds")
+                updated_provenance = {
+                    **dict((existing or {}).get("provenance") or {}),
+                    "payloadHash": _dependency_hash_payload(existing_payload),
+                }
                 with self.connect() as conn:
-                    conn.execute(
-                        """
-                        INSERT INTO materialized_resolver_target_views(
-                            project_name, project_file, trace_scope, payload_json, provenance_json, reducer_version, built_at
-                        ) VALUES(?,?,?,?,?,?,?)
-                        ON CONFLICT(project_name, project_file, trace_scope) DO UPDATE SET
-                            payload_json=excluded.payload_json,
-                            provenance_json=excluded.provenance_json,
-                            reducer_version=excluded.reducer_version,
-                            built_at=excluded.built_at
-                        """,
-                        (
-                            project_name,
-                            project_file,
-                            trace_scope,
-                            _json_dumps(existing_payload),
-                            _json_dumps(
-                                {
-                                    **dict((existing or {}).get("provenance") or {}),
-                                    "payloadHash": _dependency_hash_payload(existing_payload),
-                                }
-                            ),
-                            "materialized-resolver-target-view-v1",
-                            built_at,
-                        ),
+                    self._replace_resolver_target_projection_fragments(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                        existing_payload,
+                        updated_provenance,
+                        built_at=built_at,
+                    )
+            else:
+                with self.connect() as conn:
+                    self._replace_resolver_target_projection_fragments(
+                        conn,
+                        project_name,
+                        project_file,
+                        trace_scope,
+                        existing_payload,
+                        dict((existing or {}).get("provenance") or {}),
+                        built_at=str((existing or {}).get("builtAt") or ""),
                     )
             self.upsert_materialization_stage_view(
                 project_name,
@@ -23963,13 +33465,30 @@ class GhidraCacheDB:
                     "disableNativeTrace": bool(existing_payload.get("disableNativeTrace")),
                 },
                 provenance={
-                    "payloadHash": str(dict((existing or {}).get("provenance") or {}).get("payloadHash") or ""),
+                    "payloadHash": str(
+                        (
+                            updated_provenance
+                            if _json_dumps(existing.get("payload") or {}) != _json_dumps(existing_payload)
+                            else dict((existing or {}).get("provenance") or {})
+                        ).get("payloadHash")
+                        or ""
+                    ),
                     "reducer": "materialized-resolver-target-view-v1",
                 },
                 reducer_version="materialized-resolver-target-view-v1",
             )
             return existing_payload
         if existing and _json_dumps(existing.get("payload") or {}) == _json_dumps(payload):
+            with self.connect() as conn:
+                self._replace_resolver_target_projection_fragments(
+                    conn,
+                    project_name,
+                    project_file,
+                    trace_scope,
+                    dict(existing.get("payload") or {}),
+                    dict(existing.get("provenance") or {}),
+                    built_at=str(existing.get("builtAt") or ""),
+                )
             self.upsert_materialization_stage_view(
                 project_name,
                 project_file,
@@ -23994,26 +33513,14 @@ class GhidraCacheDB:
             return dict(existing.get("payload") or {})
         built_at = datetime.now().isoformat(timespec="microseconds")
         with self.connect() as conn:
-            conn.execute(
-                """
-                INSERT INTO materialized_resolver_target_views(
-                    project_name, project_file, trace_scope, payload_json, provenance_json, reducer_version, built_at
-                ) VALUES(?,?,?,?,?,?,?)
-                ON CONFLICT(project_name, project_file, trace_scope) DO UPDATE SET
-                    payload_json=excluded.payload_json,
-                    provenance_json=excluded.provenance_json,
-                    reducer_version=excluded.reducer_version,
-                    built_at=excluded.built_at
-                """,
-                (
-                    project_name,
-                    project_file,
-                    trace_scope,
-                    _json_dumps(payload),
-                    _json_dumps(provenance),
-                    "materialized-resolver-target-view-v1",
-                    built_at,
-                ),
+            self._replace_resolver_target_projection_fragments(
+                conn,
+                project_name,
+                project_file,
+                trace_scope,
+                payload,
+                provenance,
+                built_at=built_at,
             )
         self.upsert_materialization_stage_view(
             project_name,
@@ -25899,7 +35406,7 @@ class GhidraCacheDB:
         with self.connect() as conn:
             conn.execute(
                 """
-                INSERT INTO materialized_system_unit_views(
+                INSERT INTO system_unit_views(
                     system_id, version, payload_json, provenance_json, reducer_version, built_at, exported_path
                 ) VALUES(?,?,?,?,?,?,?)
                 ON CONFLICT(system_id, version) DO UPDATE SET
@@ -25933,11 +35440,20 @@ class GhidraCacheDB:
         with self.connect() as conn:
             row = conn.execute(
                 """
-                SELECT * FROM materialized_system_unit_views
+                SELECT * FROM system_unit_views
                 WHERE system_id = ? AND version = ?
                 """,
                 (system_id, version),
             ).fetchone()
+        if row is None:
+            with self.connect() as conn:
+                row = conn.execute(
+                    """
+                    SELECT * FROM materialized_system_unit_views
+                    WHERE system_id = ? AND version = ?
+                    """,
+                    (system_id, version),
+                ).fetchone()
         if row is None:
             return None
         return {
@@ -26122,21 +35638,29 @@ class GhidraCacheDB:
         return invalidated
 
     def get_stats(self) -> dict[str, int]:
+        def count_query(conn: sqlite3.Connection, sql: str) -> int:
+            try:
+                return int(conn.execute(sql).fetchone()[0])
+            except sqlite3.OperationalError as error:
+                if "no such table" not in str(error).lower():
+                    raise
+                return 0
+
         with self.connect() as conn:
-            evidence_rows = int(conn.execute("SELECT COUNT(*) FROM evidence").fetchone()[0])
-            valid_evidence_rows = int(conn.execute("SELECT COUNT(*) FROM evidence WHERE is_valid = 1 AND invalidated_at IS NULL").fetchone()[0])
-            canonical_term_aspects = int(conn.execute("SELECT COUNT(*) FROM canonical_term_aspects").fetchone()[0])
-            materialized_terms = int(conn.execute("SELECT COUNT(*) FROM materialized_term_views").fetchone()[0])
-            materialized_jobs = int(conn.execute("SELECT COUNT(*) FROM materialized_job_views").fetchone()[0])
-            trace_fragments = int(conn.execute("SELECT COUNT(*) FROM trace_fragments").fetchone()[0])
-            valid_trace_fragments = int(conn.execute("SELECT COUNT(*) FROM trace_fragments WHERE is_valid = 1 AND invalidated_at IS NULL").fetchone()[0])
-            canonical_trace_fragments = int(conn.execute("SELECT COUNT(*) FROM canonical_trace_fragments").fetchone()[0])
-            materialized_trace_views = int(conn.execute("SELECT COUNT(*) FROM materialized_trace_views").fetchone()[0])
-            materialized_native_trace_views = int(conn.execute("SELECT COUNT(*) FROM materialized_native_trace_views").fetchone()[0])
-            canonical_system_trace_views = int(conn.execute("SELECT COUNT(*) FROM canonical_system_trace_views").fetchone()[0])
-            materialized_target_bundle_views = int(conn.execute("SELECT COUNT(*) FROM materialized_target_bundle_views").fetchone()[0])
-            canonical_semantic_fragments = int(conn.execute("SELECT COUNT(*) FROM canonical_semantic_fragments").fetchone()[0])
-            materialized_system_unit_views = int(conn.execute("SELECT COUNT(*) FROM materialized_system_unit_views").fetchone()[0])
+            evidence_rows = count_query(conn, "SELECT COUNT(*) FROM evidence")
+            valid_evidence_rows = count_query(conn, "SELECT COUNT(*) FROM evidence WHERE is_valid = 1 AND invalidated_at IS NULL")
+            canonical_term_aspects = count_query(conn, "SELECT COUNT(*) FROM canonical_term_aspects")
+            materialized_terms = count_query(conn, "SELECT COUNT(*) FROM materialized_term_views")
+            materialized_jobs = count_query(conn, "SELECT COUNT(*) FROM materialized_job_views")
+            trace_fragments = count_query(conn, "SELECT COUNT(*) FROM trace_fragments")
+            valid_trace_fragments = count_query(conn, "SELECT COUNT(*) FROM trace_fragments WHERE is_valid = 1 AND invalidated_at IS NULL")
+            canonical_trace_fragments = count_query(conn, "SELECT COUNT(*) FROM canonical_trace_fragments")
+            materialized_trace_views = count_query(conn, "SELECT COUNT(*) FROM materialized_trace_views")
+            materialized_native_trace_views = count_query(conn, "SELECT COUNT(*) FROM materialized_native_trace_views")
+            canonical_system_trace_views = count_query(conn, "SELECT COUNT(*) FROM canonical_system_trace_views")
+            materialized_target_bundle_views = count_query(conn, "SELECT COUNT(*) FROM materialized_target_bundle_views")
+            canonical_semantic_fragments = count_query(conn, "SELECT COUNT(*) FROM canonical_semantic_fragments")
+            materialized_system_unit_views = count_query(conn, "SELECT COUNT(*) FROM materialized_system_unit_views")
         return {
             "evidenceRows": evidence_rows,
             "validEvidenceRows": valid_evidence_rows,
@@ -26289,7 +35813,9 @@ class GhidraCacheDB:
         with self.connect() as conn:
             evidence_stats = self._prune_evidence_retention(conn)
             trace_stats = self._prune_trace_retention(conn)
+            native_trace_stats = self._prune_native_trace_retention(conn)
         return {
             **evidence_stats,
             **trace_stats,
+            **native_trace_stats,
         }

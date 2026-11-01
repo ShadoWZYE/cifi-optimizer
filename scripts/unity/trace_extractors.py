@@ -20,6 +20,7 @@ GHIDRA_PROJECT_FILE = ROOT / "workbench" / "ghidra-projects" / "cifi-full.gpr"
 GHIDRA_WRAPPER = ROOT / "scripts" / "unity" / "ghidra_headless.py"
 GHIDRA_JOBS_DIR = ROOT / "workbench" / "ghidra-jobs"
 CACHE_DB_FILE = ROOT / "workbench" / "ghidra-cache" / "ghidra_cache.sqlite3"
+NATIVE_GRAPH_INDEX_FALLBACK_PATH = ROOT / "workbench" / "ghidra-cache" / "native_graph_index.json"
 METADATA_PATH = ROOT / "workbench" / "apk" / "base" / "global-metadata.dat"
 LEVEL0_PATH = ROOT / "workbench" / "unity" / "joined" / "level0"
 
@@ -90,6 +91,35 @@ UI_SLOT_MARKERS = (
     "Box",
     "Layout",
 )
+
+TOKEN_SHOP_RUNTIME_SEMANTIC_TERMS = {
+    "ArcadeUpgradeSO",
+    "CreateUpgradeClass",
+    "SetCostRelatedAttributes",
+    "CalculateAndSetUpgradeCalculations",
+    "BuyAndApplyUpgrade",
+    "Upgrade",
+    "currentIndex",
+    "costTexts",
+    "levelTexts",
+    "costExponent",
+    "additiveIncrease",
+    "baseCost",
+    "calculationType",
+    "get_cost",
+    "set_cost",
+    "get_costExponent",
+    "set_costExponent",
+    "get_additiveIncrease",
+    "set_additiveIncrease",
+    "get_finalSetValue",
+    "get_calculationsType",
+    "CostBox",
+    "CostText",
+    "LevelText",
+    "TokenUPGTitleText_TMPro",
+    "TokenDescText_TMPro",
+}
 
 
 def extract_field_names(metadata_blob: bytes) -> list[str]:
@@ -361,6 +391,44 @@ def _dedupe_terms(values: list[str]) -> list[str]:
     return output
 
 
+def _bridge_term_lookup_variants(term: str) -> list[str]:
+    trimmed = str(term or "").strip()
+    if not trimmed:
+        return []
+    variants = [trimmed]
+    property_name = ""
+    if trimmed.startswith(("get_", "set_")):
+        property_name = trimmed.split("_", 1)[1]
+    elif trimmed.startswith("<") and trimmed.endswith(">k__BackingField"):
+        property_name = trimmed[1:-16]
+    elif _is_fieldish_name(trimmed) or (_is_methodish_name(trimmed) and not _is_ownerish_name(trimmed)):
+        property_name = trimmed
+    if property_name:
+        pascal_name = property_name[:1].upper() + property_name[1:]
+        camel_name = property_name[:1].lower() + property_name[1:]
+        variants.extend(
+            [
+                property_name,
+                pascal_name,
+                camel_name,
+                f"get_{property_name}",
+                f"get_{pascal_name}",
+                f"set_{property_name}",
+                f"set_{pascal_name}",
+                f"<{property_name}>k__BackingField",
+                f"<{pascal_name}>k__BackingField",
+            ]
+        )
+    output: list[str] = []
+    seen_exact: set[str] = set()
+    for value in variants:
+        if value in seen_exact:
+            continue
+        seen_exact.add(value)
+        output.append(value)
+    return output
+
+
 def _cap_process_project_search_terms(terms: list[str]) -> list[str]:
     capped: list[str] = []
     total_chars = 0
@@ -436,15 +504,36 @@ def _collect_adjacent_neighborhood_terms(
 
 def _get_canonical_term_view(term: str) -> dict[str, Any]:
     index = load_native_graph_index()
-    return (
+    per_term = (
         index.get("projects", {})
         .get("cifi-full", {})
         .get("libil2cpp.so", {})
         .get("perTerm", {})
-        .get(term, {})
-        .get("canonicalTermView", {})
-        or {}
     )
+    if isinstance(per_term, dict):
+        for candidate in _bridge_term_lookup_variants(term):
+            entry = per_term.get(candidate, {})
+            view = dict(entry.get("canonicalTermView", {}) or {})
+            if view:
+                return view
+    fallback_index = TRACE_EXTRACTOR_CACHE.get("native-graph-index-fallback")
+    if fallback_index is None and NATIVE_GRAPH_INDEX_FALLBACK_PATH.exists():
+        fallback_index = _load_json_file(NATIVE_GRAPH_INDEX_FALLBACK_PATH) or {}
+        TRACE_EXTRACTOR_CACHE["native-graph-index-fallback"] = fallback_index
+    if isinstance(fallback_index, dict):
+        fallback_per_term = (
+            fallback_index.get("projects", {})
+            .get("cifi-full", {})
+            .get("libil2cpp.so", {})
+            .get("perTerm", {})
+        )
+        if isinstance(fallback_per_term, dict):
+            for candidate in _bridge_term_lookup_variants(term):
+                entry = fallback_per_term.get(candidate, {})
+                view = dict(entry.get("canonicalTermView", {}) or {})
+                if view:
+                    return view
+    return {}
 
 
 def _score_bridge_pivot(
@@ -543,6 +632,22 @@ def _build_generic_term_bridge_match(term: str) -> dict[str, Any]:
     }
 
 
+def _derive_property_family_terms(term: str) -> list[str]:
+    trimmed = str(term or "").strip()
+    if not trimmed:
+        return []
+    property_name = ""
+    if trimmed.startswith(("get_", "set_")):
+        property_name = trimmed.split("_", 1)[1]
+    elif trimmed.startswith("<") and trimmed.endswith(">k__BackingField"):
+        property_name = trimmed[1:-16]
+    elif _is_fieldish_name(trimmed) or (_is_methodish_name(trimmed) and not _is_ownerish_name(trimmed)):
+        property_name = trimmed
+    if not property_name or not _is_safe_native_anchor(property_name):
+        return []
+    return _dedupe_terms(_bridge_term_lookup_variants(property_name))
+
+
 def build_generic_native_bridge_plan(
     anchor_values: list[str],
     family_hint: str | None = None,
@@ -591,6 +696,7 @@ def build_generic_native_bridge_plan(
             *term_owner_candidates,
             *term_method_candidates,
             *term_sibling_terms,
+            *_derive_property_family_terms(term),
         ])
 
         owner_candidates = _dedupe_terms([*owner_candidates, *term_owner_candidates])
@@ -690,6 +796,44 @@ def _is_token_shop_shell(field_name: str) -> bool:
     return field_name.startswith(TOKEN_SHOP_SHELL_PATTERN) and field_name.endswith("Button")
 
 
+def _is_token_shop_runtime_semantic_term(value: str) -> bool:
+    return value in TOKEN_SHOP_RUNTIME_SEMANTIC_TERMS
+
+
+def _find_token_shop_shell_index(fields: list[dict[str, object]], shell_name: str) -> int | None:
+    return next(
+        (
+            index
+            for index, entry in enumerate(fields)
+            if str(entry.get("field", "")).strip() == shell_name
+        ),
+        None,
+    )
+
+
+def _build_token_shop_shell_context(
+    fields: list[dict[str, object]],
+    shell_index: int,
+) -> dict[str, Any]:
+    shell_entry = fields[shell_index]
+    owner_block = [
+        str(entry.get("field"))
+        for entry in fields[max(0, shell_index - 5) : shell_index]
+        if entry.get("field")
+    ]
+    controller_block = [
+        str(entry.get("field"))
+        for entry in fields[shell_index : min(len(fields), shell_index + 4)]
+        if entry.get("field")
+    ]
+    return {
+        "shellField": str(shell_entry.get("field", "")),
+        "shellPathId": shell_entry.get("path_id"),
+        "ownerFieldBlock": owner_block,
+        "controllerBlock": controller_block,
+    }
+
+
 def _score_token_shop_field_match(term_tokens: set[str], field_name: str) -> int:
     field_tokens = set(_split_bridge_tokens(field_name))
     if not term_tokens or not field_tokens:
@@ -707,10 +851,14 @@ def _score_token_shop_field_match(term_tokens: set[str], field_name: str) -> int
     return score
 
 
-def build_token_shop_native_bridge_plan(anchor_values: list[str]) -> dict[str, Any]:
+def build_token_shop_native_bridge_plan(
+    anchor_values: list[str],
+    request_context: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     token_shop = load_token_shop_extract()
     fields = list(token_shop.get("fields", []))
     normalized_terms = normalize_native_search_terms(anchor_values)
+    normalized_request_context = _normalize_relation_request_context(request_context)
     bridged_terms: list[str] = []
     native_core_terms: list[str] = []
     context_terms: list[str] = []
@@ -737,7 +885,79 @@ def build_token_shop_native_bridge_plan(anchor_values: list[str]) -> dict[str, A
     for term in normalized_terms:
         add_native_core(term)
 
+    explicit_shell_anchors = _dedupe_terms(
+        [
+            term
+            for term in [
+                *normalized_terms,
+                *list(normalized_request_context.get("anchors") or []),
+            ]
+            if _is_token_shop_shell(str(term))
+        ]
+    )
+    shell_context_by_name: dict[str, dict[str, Any]] = {}
+    for shell_name in explicit_shell_anchors:
+        shell_index = _find_token_shop_shell_index(fields, shell_name)
+        if shell_index is None:
+            continue
+        shell_context_by_name[shell_name] = _build_token_shop_shell_context(fields, shell_index)
+
+    primary_shell_context = next(iter(shell_context_by_name.values()), None)
+
     for term in normalized_terms:
+        if _is_token_shop_shell(term):
+            shell_context = shell_context_by_name.get(term)
+            if shell_context is None:
+                shell_index = _find_token_shop_shell_index(fields, term)
+                if shell_index is None:
+                    continue
+                shell_context = _build_token_shop_shell_context(fields, shell_index)
+            for value in shell_context["ownerFieldBlock"]:
+                add_native_core(value)
+            for value in shell_context["controllerBlock"]:
+                add_context(value)
+            matches.append(
+                {
+                    "requestedTerm": term,
+                    "matchedField": term,
+                    "matchScore": 1000,
+                    **shell_context,
+                }
+            )
+            continue
+
+        if primary_shell_context and (
+            _is_token_shop_runtime_semantic_term(term) or _is_ui_slot_like_term(term)
+        ):
+            generic_match = _build_generic_term_bridge_match(term)
+            for value in primary_shell_context["ownerFieldBlock"]:
+                add_native_core(value)
+            for value in primary_shell_context["controllerBlock"]:
+                add_context(value)
+            for value in _derive_property_family_terms(term):
+                add_native_core(value)
+            for value in generic_match.get("ownerCandidates", []):
+                add_native_core(value)
+            for value in generic_match.get("methodCandidates", []):
+                add_native_core(value)
+            for value in generic_match.get("siblingTerms", []):
+                add_context(value)
+            for value in generic_match.get("contextTerms", []):
+                add_context(value)
+            matches.append(
+                {
+                    "requestedTerm": term,
+                    "matchedField": term,
+                    "matchScore": 900,
+                    "bridgeKind": generic_match.get("bridgeKind", "semantic-row-runtime"),
+                    "genericOwnerCandidates": generic_match.get("ownerCandidates", []),
+                    "genericMethodCandidates": generic_match.get("methodCandidates", []),
+                    "genericSiblingTerms": generic_match.get("siblingTerms", []),
+                    **primary_shell_context,
+                }
+            )
+            continue
+
         term_tokens = {
             token for token in _split_bridge_tokens(term)
             if token not in {"buy", "get", "set", "button", "overlay", "content"}
@@ -767,17 +987,9 @@ def build_token_shop_native_bridge_plan(anchor_values: list[str]) -> dict[str, A
         if not _is_token_shop_shell(str(fields[shell_index].get("field", ""))):
             continue
 
-        shell_entry = fields[shell_index]
-        owner_block = [
-            str(entry.get("field"))
-            for entry in fields[max(0, shell_index - 5):shell_index]
-            if entry.get("field")
-        ]
-        controller_block = [
-            str(entry.get("field"))
-            for entry in fields[shell_index:min(len(fields), shell_index + 4)]
-            if entry.get("field")
-        ]
+        shell_context = _build_token_shop_shell_context(fields, shell_index)
+        owner_block = list(shell_context["ownerFieldBlock"])
+        controller_block = list(shell_context["controllerBlock"])
         for value in owner_block:
             add_native_core(value)
         for value in controller_block:
@@ -788,10 +1000,7 @@ def build_token_shop_native_bridge_plan(anchor_values: list[str]) -> dict[str, A
                 "requestedTerm": term,
                 "matchedField": str(fields[best_index].get("field", "")),
                 "matchScore": best_score if exact_index is None else 1000,
-                "shellField": str(shell_entry.get("field", "")),
-                "shellPathId": shell_entry.get("path_id"),
-                "ownerFieldBlock": owner_block,
-                "controllerBlock": controller_block,
+                **shell_context,
             }
         )
 
@@ -1276,6 +1485,8 @@ def find_cached_native_trace(anchor_values: list[str], project: str = "cifi-full
                 continue
             output_file = Path(str(entry.get("output_file", "")))
             result = _load_json_file(output_file) if output_file else None
+            if not result and str(job_info.get("cache_mode") or "").startswith("per-term"):
+                result = _build_canonical_fallback_native_payload(wanted_terms, family_hint=family_hint)
             if not result or _native_result_is_stale(result, wanted_terms):
                 continue
             candidates.append((str(job_info.get("start_time", "")), job_info, result))
@@ -1298,6 +1509,8 @@ def find_cached_native_trace(anchor_values: list[str], project: str = "cifi-full
                 continue
             output_file = Path(job_info.get("output_file", ""))
             result = _load_json_file(output_file) if output_file else None
+            if not result and str(job_info.get("cache_mode") or "").startswith("per-term"):
+                result = _build_canonical_fallback_native_payload(wanted_terms, family_hint=family_hint)
             if not result or _native_result_is_stale(result, wanted_terms):
                 continue
             candidates.append((str(job_info.get("start_time", "")), job_info, result))
@@ -1322,14 +1535,31 @@ def find_cached_native_trace(anchor_values: list[str], project: str = "cifi-full
 
 
 def _is_relation_shaped_request_context(request_context: dict[str, Any] | None) -> bool:
-    return str((request_context or {}).get("coverageMode") or "").strip() == "relation-shaped"
+    request_context = dict(request_context or {})
+    if str(request_context.get("coverageMode") or "").strip() == "relation-shaped":
+        return True
+    relation_probe = dict(request_context.get("relationProbe") or {})
+    if str(request_context.get("relationType") or relation_probe.get("relationType") or "").strip():
+        return True
+    for key in ("expectedTerms", "anchors", "requiredCoverageSeamIds", "requiredFactKinds"):
+        if request_context.get(key) or relation_probe.get(key):
+            return True
+    return False
 
 
 def _normalize_relation_request_context(request_context: dict[str, Any] | None) -> dict[str, Any]:
     request_context = dict(request_context or {})
     relation_probe = dict(request_context.get("relationProbe") or {})
     return {
-        "coverageMode": str(request_context.get("coverageMode") or "").strip(),
+        "coverageMode": (
+            str(request_context.get("coverageMode") or "").strip()
+            or ("relation-shaped" if _is_relation_shaped_request_context(request_context) else "")
+        ),
+        "relationType": str(
+            request_context.get("relationType")
+            or relation_probe.get("relationType")
+            or ""
+        ).strip(),
         "relationScope": str(
             request_context.get("relationScope")
             or relation_probe.get("traceScope")
@@ -1514,10 +1744,147 @@ def _trim_native_search_terms_for_edge_only(
     return trimmed[:max_search_terms]
 
 
+def _trim_native_search_terms_for_relation_shape(
+    requested_terms: list[str],
+    bridge_plan: dict[str, Any],
+    max_search_terms: int,
+) -> list[str]:
+    max_search_terms = max(1, int(max_search_terms or 0))
+    if max_search_terms <= 0:
+        return list(requested_terms)
+    trimmed: list[str] = []
+    seen: set[str] = set()
+
+    def add_term(value: str) -> None:
+        candidate = str(value or "").strip()
+        if not candidate:
+            return
+        lowered = candidate.lower()
+        if lowered in seen:
+            return
+        seen.add(lowered)
+        trimmed.append(candidate)
+
+    prioritized_terms = [str(value).strip() for value in requested_terms if str(value).strip()]
+    relation_variants = _unique_native_search_terms_in_order(
+        [
+            variant
+            for term in requested_terms
+            for variant in _bridge_term_lookup_variants(str(term).strip())
+        ]
+    )
+    anchor_terms = [str(value).strip() for value in requested_terms if str(value).strip()]
+    candidate_extras = [
+        *[
+            str(match.get("shellField") or "").strip()
+            for match in (bridge_plan.get("matches") or [])
+            if isinstance(match, dict)
+        ],
+        *[
+            str(match.get("matchedField") or "").strip()
+            for match in (bridge_plan.get("matches") or [])
+            if isinstance(match, dict)
+        ],
+        *[
+            str(value).strip()
+            for match in (bridge_plan.get("matches") or [])
+            if isinstance(match, dict)
+            for value in (match.get("selectedNativeCoreTerms") or [])[:3]
+        ],
+        *[
+            str(value).strip()
+            for value in (bridge_plan.get("nativeCoreTerms") or [])
+            if str(value).strip()
+        ],
+    ]
+    ranked_extras = []
+    for value in candidate_extras:
+        candidate = str(value or "").strip()
+        if not candidate:
+            continue
+        overlap_score = max((_term_overlap_score(candidate, anchor) for anchor in anchor_terms), default=0)
+        ranked_extras.append((overlap_score, candidate))
+    ranked_extras.sort(key=lambda item: (-item[0], item[1]))
+    prioritized_terms.extend(relation_variants)
+    prioritized_terms.extend(candidate for _, candidate in ranked_extras)
+    for value in prioritized_terms:
+        add_term(value)
+        if len(trimmed) >= max_search_terms:
+            return trimmed[:max_search_terms]
+    return trimmed[:max_search_terms]
+
+
 def _native_payload_relation_contract(payload: dict[str, Any] | None) -> dict[str, Any]:
     if not isinstance(payload, dict):
         return {}
     return _normalize_relation_request_context(dict(payload.get("requestContext") or {}))
+
+
+def _native_payload_resolved_terms(payload: dict[str, Any] | None) -> set[str]:
+    if not isinstance(payload, dict):
+        return set()
+    summary = dict(payload.get("summary") or {})
+    if not summary and isinstance(payload.get("result"), dict):
+        summary = _summarize_native_result(
+            payload.get("result"),
+            list(payload.get("requestedTerms", []) or []),
+            None,
+            dict(payload.get("requestContext") or {}),
+        )
+    resolved_terms: set[str] = set()
+    for term_summary in summary.get("termSummaries", []) or []:
+        if not isinstance(term_summary, dict):
+            continue
+        term = str(term_summary.get("term") or "").strip()
+        if not term:
+            continue
+        bridge_kind = str(term_summary.get("bridgeKind") or "").strip()
+        if bridge_kind and bridge_kind not in {"unresolved", "metadata-only"}:
+            resolved_terms.add(term)
+            continue
+        if int(term_summary.get("directFunctionCount") or 0) > 0:
+            resolved_terms.add(term)
+            continue
+        if int(term_summary.get("fuzzyFunctionCount") or 0) > 0:
+            resolved_terms.add(term)
+            continue
+        if int(term_summary.get("referenceFunctionCount") or 0) > 0:
+            resolved_terms.add(term)
+    for bucket_name in ("reconstructedMethods", "reconstructedFields", "rawValueTerms", "reconstructedOwners"):
+        for value in summary.get(bucket_name, []) or []:
+            trimmed = str(value or "").strip()
+            if trimmed:
+                resolved_terms.add(trimmed)
+    return resolved_terms
+
+
+def _native_payload_signal_score(payload: dict[str, Any] | None) -> int:
+    if not isinstance(payload, dict):
+        return 0
+    summary = dict(payload.get("summary") or {})
+    if not summary and isinstance(payload.get("result"), dict):
+        summary = _summarize_native_result(
+            payload.get("result"),
+            list(payload.get("requestedTerms", []) or []),
+            None,
+            dict(payload.get("requestContext") or {}),
+        )
+    score = len(_native_payload_resolved_terms(payload)) * 100
+    for bucket_name in (
+        "reconstructedOwners",
+        "reconstructedMethods",
+        "reconstructedFields",
+        "rawValueTerms",
+    ):
+        score += len([value for value in (summary.get(bucket_name) or []) if str(value or "").strip()]) * 10
+    for term_summary in summary.get("termSummaries", []) or []:
+        if not isinstance(term_summary, dict):
+            continue
+        for bucket_name in ("ownerCandidates", "methodCandidates", "fieldCandidates", "siblingCandidates"):
+            score += len([value for value in (term_summary.get(bucket_name) or []) if str(value or "").strip()])
+    if payload.get("canonicalFallback"):
+        score += 25
+    return score
 
 
 def _native_payload_covers_request(
@@ -1537,6 +1904,8 @@ def _native_payload_covers_request(
     request_terms = set(normalized_request_context.get("expectedTerms") or [])
     payload_terms = set(payload_contract.get("expectedTerms") or [])
     if request_terms and not request_terms.issubset(payload_terms):
+        return False
+    if request_terms and not (request_terms & _native_payload_resolved_terms(payload)):
         return False
     request_anchors = set(normalized_request_context.get("anchors") or [])
     payload_anchors = set(payload_contract.get("anchors") or [])
@@ -1564,24 +1933,25 @@ def _find_reusable_native_anchor(
     normalized_term = str(term or "").strip()
     if not normalized_term:
         return None
-    cached = find_cached_native_trace([normalized_term], family_hint=family_hint)
-    if cached and _native_result_has_signal(cached.get("result")):
-        return {
-            "term": normalized_term,
-            "source": "exact-native-cache",
-            "jobId": cached.get("jobId"),
-            "requestSignature": cached.get("requestSignature"),
-            "searchTerms": list(cached.get("searchTerms", [])),
-        }
-    canonical_term = get_trace_cache_db().find_canonical_term_view("cifi-full", "libil2cpp.so", normalized_term)
-    if canonical_term and _native_result_has_signal(canonical_term.get("result")):
-        return {
-            "term": normalized_term,
-            "source": "canonical-term-view",
-            "jobId": ((canonical_term.get("job") or {}).get("job_id")),
-            "requestSignature": "",
-            "searchTerms": [normalized_term],
-        }
+    for candidate in _bridge_term_lookup_variants(normalized_term):
+        cached = find_cached_native_trace([candidate], family_hint=family_hint)
+        if cached and _native_result_has_signal(cached.get("result")):
+            return {
+                "term": normalized_term,
+                "source": "exact-native-cache",
+                "jobId": cached.get("jobId"),
+                "requestSignature": cached.get("requestSignature"),
+                "searchTerms": list(cached.get("searchTerms", [])),
+            }
+        canonical_term = get_trace_cache_db().find_canonical_term_view("cifi-full", "libil2cpp.so", candidate)
+        if canonical_term and _native_result_has_signal(canonical_term.get("result")):
+            return {
+                "term": normalized_term,
+                "source": "canonical-term-view",
+                "jobId": ((canonical_term.get("job") or {}).get("job_id")),
+                "requestSignature": "",
+                "searchTerms": [candidate],
+            }
     return None
 
 
@@ -1655,7 +2025,7 @@ def _find_covering_materialized_native_trace(
     with get_trace_cache_db().connect() as conn:
         rows = conn.execute(
             """
-            SELECT * FROM materialized_native_trace_views
+            SELECT * FROM native_trace_views
             WHERE project_name = ? AND project_file = ?
             ORDER BY built_at DESC
             """,
@@ -1760,6 +2130,71 @@ def _native_result_has_signal(result_payload: dict[str, Any] | None) -> bool:
     return False
 
 
+def _build_canonical_fallback_native_payload(
+    requested_terms: list[str],
+    family_hint: str | None = None,
+) -> dict[str, Any] | None:
+    candidate_views: list[dict[str, Any]] = []
+    for term in requested_terms:
+        canonical_view = _get_canonical_term_view(term)
+        if isinstance(canonical_view, dict) and canonical_view:
+            candidate_views.append(canonical_view)
+    if not candidate_views:
+        return None
+    from ghidra_headless import _finalize_result_payload, _merge_result_payloads
+
+    merged_payload: dict[str, Any] = {}
+    for view in candidate_views:
+        merged_payload = _merge_result_payloads(
+            merged_payload,
+            view,
+            requested_terms,
+            None,
+            [],
+        )
+    metadata_neighborhoods = dict(merged_payload.get("metadataNeighborhoods") or {})
+    search_expansions = dict(
+        merged_payload.get("searchExpansions")
+        or {
+            "requestedTerms": normalize_native_search_terms(requested_terms),
+            "nativeSearchTerms": [],
+            "byRequestedTerm": {},
+        }
+    )
+    ascii_targets = dict(merged_payload.get("ascii_targets") or {})
+    finalized = _finalize_result_payload(
+        merged_payload,
+        requested_terms,
+        metadata_neighborhoods,
+        search_expansions,
+        ascii_targets=ascii_targets,
+        family_hint=family_hint,
+    )
+    for bucket_name in (
+        "ascii_targets",
+        "metadataNeighborhoods",
+        "functions",
+        "fuzzyFunctions",
+        "referenceFunctions",
+        "termBridges",
+    ):
+        bucket = finalized.get(bucket_name)
+        if not isinstance(bucket, dict):
+            continue
+        for term in requested_terms:
+            if bucket.get(term):
+                continue
+            for variant in _bridge_term_lookup_variants(term):
+                if variant == term:
+                    continue
+                variant_value = bucket.get(variant)
+                if variant_value:
+                    bucket[term] = variant_value
+                    break
+    finalized.setdefault("errors", []).append("canonical-native-fallback")
+    return finalized
+
+
 def plan_native_trace_extraction(
     anchor_values: list[str],
     family_hint: str | None = None,
@@ -1777,7 +2212,10 @@ def plan_native_trace_extraction(
         normalized_request_context,
     )
     if family_hint == "token-shop":
-        bridge_plan = build_token_shop_native_bridge_plan(requested_terms)
+        bridge_plan = build_token_shop_native_bridge_plan(
+            requested_terms,
+            request_context=normalized_request_context,
+        )
     else:
         bridge_plan = build_generic_native_bridge_plan(requested_terms, family_hint=family_hint)
     search_terms = _unique_native_search_terms_in_order(bridge_plan.get("nativeCoreTerms", []))
@@ -1792,6 +2230,13 @@ def plan_native_trace_extraction(
                 *list(normalized_request_context.get("anchors") or []),
             ]
         )
+        relation_max_search_terms = int(normalized_request_context.get("maxSearchTerms") or 0)
+        if relation_max_search_terms > 0 and bool(normalized_request_context.get("minimalSearchExpansion")):
+            search_terms = _trim_native_search_terms_for_relation_shape(
+                requested_terms,
+                bridge_plan,
+                relation_max_search_terms,
+            )
     fallback_terms = _unique_native_search_terms_in_order(bridge_plan.get("secondStageTerms", []))
     if bool(normalized_request_context.get("edgeOnly")):
         edge_only_max_search_terms = int(normalized_request_context.get("maxSearchTerms") or 6)
@@ -1856,8 +2301,11 @@ def execute_native_trace_extraction(
         }
 
     allow_cached_native_hit_reuse = (
-        not _is_relation_shaped_request_context(request_context)
-        and not bool(request_context.get("edgeOnly"))
+        not bool(request_context.get("edgeOnly"))
+        and (
+            not _is_relation_shaped_request_context(request_context)
+            or bool(request_context.get("minimalSearchExpansion"))
+        )
     )
     cached = find_cached_native_trace(search_terms, family_hint=family_hint)
     if cached and allow_cached_native_hit_reuse:
@@ -1889,15 +2337,27 @@ def execute_native_trace_extraction(
             "--max-cpu",
             "14",
         ]
-        proc = subprocess.run(
-            cmd,
-            cwd=str(ROOT),
-            env=process_env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            check=False,
-        )
+        outer_timeout = max(int(timeout or 0) + 5, 15)
+        try:
+            proc = subprocess.run(
+                cmd,
+                cwd=str(ROOT),
+                env=process_env,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                check=False,
+                timeout=outer_timeout,
+            )
+        except subprocess.TimeoutExpired as error:
+            stdout_text = error.stdout if isinstance(error.stdout, str) else ""
+            proc = subprocess.CompletedProcess(
+                cmd,
+                returncode=124,
+                stdout=(stdout_text or "") + f"\nprocess-project wall timeout after {outer_timeout}s",
+                stderr=None,
+            )
+            return proc, {}
         try:
             payload = json.loads(proc.stdout)
         except json.JSONDecodeError:
@@ -1955,6 +2415,14 @@ def execute_native_trace_extraction(
     result["searchTerms"] = process_search_terms
     if not payload:
         result["stdout"] = proc.stdout[-2000:]
+        canonical_fallback = _build_canonical_fallback_native_payload(
+            requested_terms,
+            family_hint=family_hint,
+        )
+        if canonical_fallback and _native_result_has_signal(canonical_fallback):
+            result["result"] = canonical_fallback
+            result["status"] = "completed"
+            result["canonicalFallback"] = True
         return result
 
     result.update(
@@ -1973,6 +2441,15 @@ def execute_native_trace_extraction(
                 result["result"] = json.loads(path.read_text(encoding="utf-8"))
             except json.JSONDecodeError:
                 result["result"] = {"error": "invalid-json", "path": str(path)}
+    if not result.get("result") and str(payload.get("cache_mode") or "").startswith("per-term"):
+        canonical_from_terms = _build_canonical_fallback_native_payload(
+            requested_terms,
+            family_hint=family_hint,
+        )
+        if canonical_from_terms and _native_result_has_signal(canonical_from_terms):
+            result["result"] = canonical_from_terms
+            result["canonicalFallback"] = True
+            result["cacheHit"] = True
 
     fallback_terms = list(extraction_plan.get("fallbackTerms", []))
     if not _native_result_has_signal(result.get("result")) and fallback_terms:
@@ -2022,6 +2499,29 @@ def execute_native_trace_extraction(
                         "cacheHit": bool(fallback_result.get("cacheHit", False)),
                     }
                 )
+    needs_canonical_fallback = not _native_result_has_signal(result.get("result"))
+    if _is_relation_shaped_request_context(request_context):
+        expected_terms = {
+            str(term).strip()
+            for term in (request_context.get("expectedTerms") or [])
+            if str(term).strip()
+        }
+        payload_for_resolution = {
+            "result": result.get("result"),
+            "requestContext": request_context,
+            "requestedTerms": requested_terms,
+        }
+        if expected_terms and not (expected_terms & _native_payload_resolved_terms(payload_for_resolution)):
+            needs_canonical_fallback = True
+    if needs_canonical_fallback:
+        canonical_fallback = _build_canonical_fallback_native_payload(
+            requested_terms,
+            family_hint=family_hint,
+        )
+        if canonical_fallback and _native_result_has_signal(canonical_fallback):
+            result["result"] = canonical_fallback
+            result["status"] = "completed"
+            result["canonicalFallback"] = True
     return result
 
 
@@ -2167,6 +2667,31 @@ def persist_native_trace_extraction(
             evidence_rows,
             rebuild_materialized=not edge_only_relation_probe,
         )
+    if extraction_result.get("canonicalFallback"):
+        return {
+            "available": True,
+            "project": "cifi-full",
+            "requestedTerms": requested_terms,
+            "searchTerms": search_terms,
+            "returncode": int(extraction_result.get("returncode", 0) or 0),
+            "status": str(extraction_result.get("status", "completed") or "completed"),
+            "jobId": extraction_result.get("jobId"),
+            "job": extraction_result.get("job"),
+            "result": extraction_result.get("result"),
+            "summary": extraction_result.get("summary")
+            or _summarize_native_result(
+                extraction_result.get("result"),
+                requested_terms,
+                extraction_plan.get("familyHint"),
+                dict(extraction_plan.get("requestContext") or {}),
+            ),
+            "cacheHit": bool(extraction_result.get("cacheHit", False)),
+            "canonicalFallback": True,
+            "requestSignature": request_signature,
+            "extractionPlan": extraction_plan,
+            "requestContext": dict(extraction_plan.get("requestContext") or {}),
+            "materializedFromDb": False,
+        }
     return db.materialize_native_trace_view(
         "cifi-full",
         "libil2cpp.so",
@@ -2186,12 +2711,16 @@ def _hydrate_materialized_native_trace(
     reuse_report: dict[str, Any],
 ) -> dict[str, Any]:
     payload = dict(materialized_view.get("payload") or {})
-    payload["summary"] = _summarize_native_result(
-        payload.get("result"),
-        list(extraction_plan.get("requestedTerms", [])),
-        family_hint,
-        dict(extraction_plan.get("requestContext") or {}),
-    )
+    existing_summary = dict(payload.get("summary") or {})
+    if existing_summary:
+        payload["summary"] = existing_summary
+    else:
+        payload["summary"] = _summarize_native_result(
+            payload.get("result"),
+            list(extraction_plan.get("requestedTerms", [])),
+            family_hint,
+            dict(extraction_plan.get("requestContext") or {}),
+        )
     payload["requestSignature"] = extraction_plan.get("requestSignature")
     payload["extractionPlan"] = extraction_plan
     payload["materializedFromDb"] = True
@@ -2228,6 +2757,7 @@ def collect_native_trace(
             "cifi-full",
             "libil2cpp.so",
             str(extraction_plan.get("requestSignature", "")),
+            sync_jobs=False,
         )
         if existing and _native_payload_covers_request(dict(existing.get("payload") or {}), normalized_request_context):
             return _hydrate_materialized_native_trace(
@@ -2387,7 +2917,79 @@ def collect_native_trace(
                 family_hint,
                 dict(missing_extraction_plan.get("requestContext") or {}),
             )
-            persist_native_trace_extraction(missing_extraction_plan, extraction_result)
+            persisted_payload = persist_native_trace_extraction(missing_extraction_plan, extraction_result)
+            if (
+                _is_relation_shaped_request_context(normalized_request_context)
+                and not bool(persisted_payload.get("materializedFromDb", True))
+            ):
+                persisted_payload["reuseReport"] = _build_native_reuse_report(
+                    selected_anchors=requested_terms,
+                    reused_anchor_sources=reused_anchor_sources,
+                    attempted_new_trace_anchors=missing_requested_terms,
+                    newly_resolved_anchors=[
+                        term for term in missing_requested_terms
+                        if term in _native_payload_resolved_terms(persisted_payload)
+                    ],
+                    missing_after_execution=[
+                        term for term in missing_requested_terms
+                        if term not in _native_payload_resolved_terms(persisted_payload)
+                    ],
+                    exact_materialized_reuse=False,
+                    executed_search_terms=executed_search_terms,
+                )
+                persisted_payload["cacheHit"] = bool(persisted_payload.get("cacheHit", False))
+                return persisted_payload
+            if (
+                _is_relation_shaped_request_context(normalized_request_context)
+                and (
+                    extraction_result.get("canonicalFallback")
+                    or _native_payload_signal_score(extraction_result)
+                    > _native_payload_signal_score(persisted_payload)
+                )
+            ):
+                extraction_payload = {
+                    "result": extraction_result.get("result"),
+                    "summary": extraction_result.get("summary"),
+                    "requestContext": missing_extraction_plan.get("requestContext"),
+                    "requestedTerms": list(missing_extraction_plan.get("requestedTerms", [])),
+                    "canonicalFallback": extraction_result.get("canonicalFallback"),
+                }
+                persisted_payload_view = {
+                    "result": persisted_payload.get("result"),
+                    "summary": persisted_payload.get("summary"),
+                    "requestContext": missing_extraction_plan.get("requestContext"),
+                    "requestedTerms": list(missing_extraction_plan.get("requestedTerms", [])),
+                    "canonicalFallback": persisted_payload.get("canonicalFallback"),
+                }
+                extraction_resolved = _native_payload_resolved_terms(
+                    extraction_payload
+                )
+                persisted_resolved = _native_payload_resolved_terms(
+                    persisted_payload_view
+                )
+                extraction_score = _native_payload_signal_score(extraction_payload)
+                persisted_score = _native_payload_signal_score(persisted_payload_view)
+                if (
+                    extraction_resolved - persisted_resolved
+                    or extraction_score > persisted_score
+                    or not _native_payload_covers_request(persisted_payload_view, normalized_request_context)
+                ):
+                    extraction_result["reuseReport"] = _build_native_reuse_report(
+                        selected_anchors=requested_terms,
+                        reused_anchor_sources=reused_anchor_sources,
+                        attempted_new_trace_anchors=missing_requested_terms,
+                        newly_resolved_anchors=[
+                            term for term in missing_requested_terms if term in extraction_resolved
+                        ],
+                        missing_after_execution=[
+                            term for term in missing_requested_terms if term not in extraction_resolved
+                        ],
+                        exact_materialized_reuse=False,
+                        executed_search_terms=executed_search_terms,
+                    )
+                    extraction_result["materializedFromDb"] = False
+                    extraction_result["cacheHit"] = bool(extraction_result.get("cacheHit", False))
+                    return extraction_result
     materialized = get_trace_cache_db().materialize_native_trace_view(
         "cifi-full",
         "libil2cpp.so",

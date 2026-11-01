@@ -14,11 +14,15 @@ function unwrapEntryMap(payload) {
 }
 
 export function composeDbCoverageSource({
+  hasConsumerProjections = false,
   hasGenericMechanics = false,
   hasBoundaryModel = false,
   hasSubjectMetadata = false
 } = {}) {
   const labels = [];
+  if (hasConsumerProjections) {
+    labels.push("consumer-projection-v2");
+  }
   if (hasGenericMechanics) {
     labels.push("generic-mechanics");
   }
@@ -37,23 +41,33 @@ export function normalizeDbSystemBundle(input = {}) {
   const subjectMetadataPayload = normalizeObject(nestedBundle.subjectMetadata);
   const genericMechanicsPayload = normalizeObject(nestedBundle.genericMechanics);
   const boundariesPayload = normalizeObject(nestedBundle.boundaries);
+  const consumerProjectionsPayload = normalizeObject(nestedBundle.consumerProjections);
   const subjectMetadata = unwrapEntryMap(subjectMetadataPayload);
   const genericScopes = unwrapEntryMap(genericMechanicsPayload);
   const boundaries = unwrapEntryMap(boundariesPayload);
+  const consumerProjections = Array.isArray(consumerProjectionsPayload?.rows)
+    ? consumerProjectionsPayload.rows.filter(Boolean)
+    : Array.isArray(nestedBundle.consumerProjections)
+      ? nestedBundle.consumerProjections.filter(Boolean)
+      : [];
   const hasAny = Boolean(
     (subjectMetadata && Object.keys(subjectMetadata).length) ||
     (genericScopes && Object.keys(genericScopes).length) ||
     (boundaries && Object.keys(boundaries).length)
   );
+  const hasConsumerProjections = consumerProjections.length > 0;
 
   return {
     subjectMetadataPayload,
     genericMechanicsPayload,
     boundariesPayload,
+    consumerProjectionsPayload,
     subjectMetadata,
     genericScopes,
     boundaries,
-    hasAny
+    consumerProjections,
+    hasAny,
+    hasConsumerProjections
   };
 }
 
@@ -71,6 +85,10 @@ export function getDbSystemGenericScopes(input) {
 
 export function getDbSystemBoundaries(input) {
   return normalizeDbSystemBundle(input).boundaries;
+}
+
+export function getDbSystemConsumerProjections(input) {
+  return normalizeDbSystemBundle(input).consumerProjections;
 }
 
 export function getDbSystemSubjectMetadataEntries(input) {

@@ -97,24 +97,135 @@ function fetchLatestMaterializedScopePayload(db, tableName, traceScope) {
   };
 }
 
+function fetchLatestRichTracePayload(db, traceScope) {
+  const richKeys = new Set([
+    "traceRun",
+    "nativeTrace",
+    "nativeReconstruction",
+    "tracePayload",
+    "plannerResolution",
+    "target",
+    "rowRecovery",
+    "relationCoverage",
+    "traceRegistry"
+  ]);
+  const latestTraceRows = db
+    .prepare(
+      `
+      SELECT payload_json
+      FROM materialized_trace_views
+      WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+      ORDER BY built_at DESC, request_signature DESC
+      LIMIT 16
+    `
+    )
+    .all("cifi-full", "libil2cpp.so", traceScope);
+  for (const row of latestTraceRows) {
+    const candidate = JSON.parse(row.payload_json || "{}");
+    if (
+      [...richKeys].some(
+        (key) =>
+          candidate[key] !== null &&
+          candidate[key] !== undefined &&
+          JSON.stringify(candidate[key]) !== "{}" &&
+          JSON.stringify(candidate[key]) !== "[]"
+      )
+    ) {
+      return candidate;
+    }
+  }
+  const fragmentRows = db
+    .prepare(
+      `
+      SELECT fragment_kind, canonical_payload_json
+      FROM canonical_trace_fragments
+      WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+        AND fragment_kind IN (
+          'traceRun',
+          'nativeTrace',
+          'nativeReconstruction',
+          'tracePayload',
+          'plannerResolution',
+          'target',
+          'rowRecovery',
+          'traceRegistry'
+        )
+      ORDER BY updated_at DESC, request_signature DESC, fragment_key DESC
+    `
+    )
+    .all("cifi-full", "libil2cpp.so", traceScope);
+  const payload = {};
+  for (const row of fragmentRows) {
+    if (!row.fragment_kind || payload[row.fragment_kind]) {
+      continue;
+    }
+    payload[row.fragment_kind] = JSON.parse(row.canonical_payload_json || "{}");
+  }
+  return payload;
+}
+
 function fetchLatestMaterializedTargetBundle(traceScope) {
   return withDb((db) => {
-    const row = db
+    const richKeys = new Set([
+      "traceKnowledge",
+      "postRunDiscoveries",
+      "relationCoverage",
+      "plannerResolution",
+      "target",
+      "traceRun",
+      "nativeTrace"
+    ]);
+    const rows = db
       .prepare(
         `
         SELECT trace_scope, request_signature, payload_json, provenance_json, reducer_version, built_at
         FROM materialized_target_bundle_views
         WHERE project_name = ? AND project_file = ? AND trace_scope = ?
         ORDER BY built_at DESC, request_signature DESC
-        LIMIT 1
+        LIMIT 24
       `
       )
-      .get("cifi-full", "libil2cpp.so", traceScope);
-    if (!row) {
+      .all("cifi-full", "libil2cpp.so", traceScope);
+    if (!rows.length) {
       throw new Error(
         `Missing materialized target bundle view for trace scope "${traceScope}". ` +
           `Refresh DB-backed trace materializations before generating system units.`
       );
+    }
+    let row = rows[0];
+    let payload = JSON.parse(row.payload_json);
+    let bestScore = [...richKeys].reduce(
+      (total, key) =>
+        total +
+        (payload[key] !== null &&
+        payload[key] !== undefined &&
+        JSON.stringify(payload[key]) !== "{}" &&
+        JSON.stringify(payload[key]) !== "[]"
+          ? 1
+          : 0),
+      0
+    );
+    for (const candidateRow of rows.slice(1)) {
+      const candidatePayload = JSON.parse(candidateRow.payload_json);
+      const score = [...richKeys].reduce(
+        (total, key) =>
+          total +
+          (candidatePayload[key] !== null &&
+          candidatePayload[key] !== undefined &&
+          JSON.stringify(candidatePayload[key]) !== "{}" &&
+          JSON.stringify(candidatePayload[key]) !== "[]"
+            ? 1
+            : 0),
+        0
+      );
+      if (score > bestScore) {
+        row = candidateRow;
+        payload = candidatePayload;
+        bestScore = score;
+        if (bestScore >= 4) {
+          break;
+        }
+      }
     }
     const subjectState = fetchLatestMaterializedScopePayload(
       db,
@@ -131,7 +242,6 @@ function fetchLatestMaterializedTargetBundle(traceScope) {
       "materialized_resolver_target_views",
       traceScope
     );
-    const payload = JSON.parse(row.payload_json);
     if (subjectState?.payload) {
       payload.subjectState = subjectState.payload;
     }
@@ -140,6 +250,22 @@ function fetchLatestMaterializedTargetBundle(traceScope) {
     }
     if (resolverTarget?.payload) {
       payload.target = resolverTarget.payload;
+    }
+    if (
+      payload.plannerResolution == null ||
+      payload.traceRegistry == null ||
+      payload.traceRun == null
+    ) {
+      const richTracePayload = fetchLatestRichTracePayload(db, traceScope);
+      for (const [key, value] of Object.entries(richTracePayload)) {
+        if (
+          payload[key] == null ||
+          JSON.stringify(payload[key]) === "{}" ||
+          JSON.stringify(payload[key]) === "[]"
+        ) {
+          payload[key] = value;
+        }
+      }
     }
     const builtAt = [
       row.built_at,
@@ -2250,6 +2376,21 @@ async function buildDailyTokeniumLaneClues(typeSupport) {
 
 async function traceRunSection(traceScope, provenanceSources) {
   const materialized = fetchLatestMaterializedTargetBundle(traceScope);
+  const data = materialized.payload ? sanitizeTraceBundleExport(materialized.payload) : null;
+  if (data && typeof data === "object") {
+    const plannerResolution =
+      data.plannerResolution && typeof data.plannerResolution === "object"
+        ? data.plannerResolution
+        : null;
+    const traceRegistry =
+      data.traceRegistry && typeof data.traceRegistry === "object" ? data.traceRegistry : {};
+    if (plannerResolution) {
+      traceRegistry.selectedFamilyId ??= plannerResolution.matchedFamilyId ?? null;
+      traceRegistry.selectedSubjectKind ??= plannerResolution.selectedSubjectKind ?? null;
+      traceRegistry.selectedSubjectKey ??= plannerResolution.selectedSubjectKey ?? null;
+      data.traceRegistry = traceRegistry;
+    }
+  }
   return {
     sourcePath: `db:materialized-target-bundle:${traceScope}`,
     provenanceSources,
@@ -2257,7 +2398,7 @@ async function traceRunSection(traceScope, provenanceSources) {
     requestSignature: materialized.requestSignature ?? null,
     builtAt: materialized.builtAt ?? null,
     reducerVersion: materialized.reducerVersion ?? null,
-    data: materialized.payload ? sanitizeTraceBundleExport(materialized.payload) : null
+    data
   };
 }
 

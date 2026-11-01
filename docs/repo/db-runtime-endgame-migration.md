@@ -123,6 +123,56 @@ After that, exports can read those record tables from DB instead of committed JS
 3. Demote `data/system-units/*.json` to explicit fallback/export status everywhere.
 4. Remove remaining validators/tests that imply shipped JSON is runtime truth.
 
+## Central DB migration slice
+
+The first additive central-schema slice is now:
+
+### New canonical workflow tables
+
+- `knowledge_nodes`
+- `knowledge_edges`
+- `knowledge_gaps`
+- `acquisition_attempts`
+
+### New fragment tables
+
+- `acquisition_attempt_term_fragments`
+- `knowledge_gap_term_fragments`
+
+These are the first explicit payload/provenance dissections in the migration. The rule is:
+
+- keep the raw JSON payload during transition
+- normalize repeated planner-critical arrays into row fragments
+- query those fragments through SQL views instead of reparsing the same JSON in app/server code
+
+This lets the DB become the in-memory workflow engine while preserving the original payload for audit/debug continuity.
+
+These are the long-term direct-write targets for normalized knowledge and workflow history. They exist so future work can stop encoding planner state only inside materialized payload blobs.
+
+### New SQL-owned read models
+
+- `db_central_subject_metadata_v`
+- `db_central_subject_state_v`
+- `db_central_entity_rows_v`
+- `db_central_fact_rows_v`
+- `db_central_relation_rows_v`
+- `db_central_gap_rows_v`
+- `db_central_boundary_rows_v`
+- `db_central_open_workflow_gaps_v`
+- `db_central_scope_summary_v`
+
+These views are intentionally derived inside SQLite from the current materialized truth surfaces. This keeps migration logic in the DB layer and avoids adding another Python rematerialization pass just to serve app/planner consumers.
+
+### Migration rule
+
+When a consumer needs subject metadata, generic mechanics, boundaries, or open workflow gaps:
+
+1. prefer the `db_central_*` views
+2. treat older `materialized_*` tables as transitional implementation inputs
+3. only add Python-side reshaping when SQLite cannot express the projection
+
+That keeps most read-time work inside the DB engine and narrows Python to orchestration rather than knowledge reconstruction.
+
 ## Non-goals for this migration
 
 - do not redesign every presentation model at once

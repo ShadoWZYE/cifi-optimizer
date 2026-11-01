@@ -337,6 +337,31 @@ function withAppStateDb(fn) {
   }
 }
 
+function hasDbObject(db, name, type = null) {
+  const row = type
+    ? db
+        .prepare(
+          `
+            SELECT name
+            FROM sqlite_master
+            WHERE type = ? AND name = ?
+            LIMIT 1
+          `
+        )
+        .get(type, name)
+    : db
+        .prepare(
+          `
+            SELECT name
+            FROM sqlite_master
+            WHERE name = ?
+            LIMIT 1
+          `
+        )
+        .get(name);
+  return Boolean(row?.name);
+}
+
 function loadSystemUnitSnapshots(systemIds) {
   const units = {};
   const missing = [];
@@ -369,7 +394,7 @@ function handleSystemUnits(response, requestUrl) {
     withCacheDb((db) => {
       const statement = db.prepare(`
         SELECT system_id, version, payload_json, provenance_json, reducer_version, built_at, exported_path
-        FROM materialized_system_unit_views
+        FROM system_unit_views
         WHERE system_id = ? AND version = 'v1'
       `);
       const units = {};
@@ -396,7 +421,7 @@ function handleSystemUnits(response, requestUrl) {
       const result = loadFromDb();
       if (!result.missing.length) {
         writeJson(response, 200, {
-          source: "materialized_system_unit_views",
+          source: "system_unit_views",
           mode: "db",
           builtAt: result.builtAt,
           units: result.units
@@ -449,7 +474,7 @@ async function handleSystemUnitsRefresh(request, response) {
         : servedSystemUnitIds;
       const statement = db.prepare(`
         SELECT system_id, built_at
-        FROM materialized_system_unit_views
+        FROM system_unit_views
         WHERE version = 'v1' AND system_id = ?
       `);
       return filteredSystemIds.map((systemId) => statement.get(systemId)).filter(Boolean);
@@ -567,6 +592,164 @@ function handleSubjectMetadata(response, requestUrl) {
   writeJson(response, result.statusCode, result.body);
 }
 
+function buildCentralSubjectContractPayload(db, traceScope) {
+  const contractRow = db
+    .prepare(
+      `
+        SELECT *
+        FROM subject_contract_views
+        WHERE project_name = ? AND project_file = ? AND trace_scope = ?
+        LIMIT 1
+      `
+    )
+    .get("cifi-full", "libil2cpp.so", traceScope);
+  if (!contractRow) {
+    return null;
+  }
+  const subjectId = String(contractRow.subject_id || "").trim();
+  const aliases = db
+    .prepare(
+      `
+        SELECT alias_value
+        FROM subject_contract_target_alias_fragments
+        WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+        ORDER BY ordinal ASC, alias_value ASC
+      `
+    )
+    .all("cifi-full", "libil2cpp.so", traceScope, subjectId)
+    .map((row) => String(row.alias_value || "").trim())
+    .filter(Boolean);
+  const groundedFields = Object.fromEntries(
+    db
+      .prepare(
+        `
+          SELECT field_key, payload_json
+          FROM subject_contract_grounded_field_views
+          WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+          ORDER BY field_key ASC
+        `
+      )
+      .all("cifi-full", "libil2cpp.so", traceScope, subjectId)
+      .map((row) => [String(row.field_key || "").trim(), JSON.parse(row.payload_json || "{}")])
+      .filter(([key]) => key)
+  );
+  const supportSummary = Object.fromEntries(
+    db
+      .prepare(
+        `
+          SELECT entry_key, payload_json
+          FROM subject_contract_support_entry_views
+          WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+          ORDER BY entry_key ASC
+        `
+      )
+      .all("cifi-full", "libil2cpp.so", traceScope, subjectId)
+      .map((row) => [String(row.entry_key || "").trim(), JSON.parse(row.payload_json || "{}")])
+      .filter(([key]) => key)
+  );
+  const provenanceSummary = Object.fromEntries(
+    db
+      .prepare(
+        `
+          SELECT entry_key, payload_json
+          FROM subject_contract_provenance_entry_views
+          WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+          ORDER BY entry_key ASC
+        `
+      )
+      .all("cifi-full", "libil2cpp.so", traceScope, subjectId)
+      .map((row) => [String(row.entry_key || "").trim(), JSON.parse(row.payload_json || "{}")])
+      .filter(([key]) => key)
+  );
+  const blockedInputReasons = Object.fromEntries(
+    db
+      .prepare(
+        `
+          SELECT reason_key, reason_value
+          FROM subject_contract_blocked_reason_views
+          WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+          ORDER BY ordinal ASC, reason_key ASC
+        `
+      )
+      .all("cifi-full", "libil2cpp.so", traceScope, subjectId)
+      .map((row) => [String(row.reason_key || "").trim(), String(row.reason_value || "").trim()])
+      .filter(([key]) => key)
+  );
+  const sharedLanes = Object.fromEntries(
+    db
+      .prepare(
+        `
+          SELECT lane_id, payload_json
+          FROM subject_contract_lane_views
+          WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+          ORDER BY lane_id ASC
+        `
+      )
+      .all("cifi-full", "libil2cpp.so", traceScope, subjectId)
+      .map((row) => [String(row.lane_id || "").trim(), JSON.parse(row.payload_json || "{}")])
+      .filter(([key]) => key)
+  );
+  const sharedLaneProvenance = Object.fromEntries(
+    db
+      .prepare(
+        `
+          SELECT lane_id, provenance_json
+          FROM subject_contract_lane_views
+          WHERE project_name = ? AND project_file = ? AND trace_scope = ? AND subject_id = ?
+          ORDER BY lane_id ASC
+        `
+      )
+      .all("cifi-full", "libil2cpp.so", traceScope, subjectId)
+      .map((row) => [String(row.lane_id || "").trim(), JSON.parse(row.provenance_json || "{}")])
+      .filter(([key]) => key)
+  );
+  supportSummary.sharedLanes = sharedLanes;
+  provenanceSummary.sharedLanes = sharedLaneProvenance;
+  const payload = {
+    traceScope,
+    subjectId,
+    subjectKind: String(contractRow.subject_kind || "").trim(),
+    subjectKey: String(contractRow.subject_key || "").trim(),
+    subjectLabel: String(contractRow.subject_label || "").trim(),
+    semanticKey: String(contractRow.semantic_key || "").trim(),
+    identityOwner: String(contractRow.identity_owner || "").trim(),
+    identityReason: String(contractRow.identity_reason || "").trim() || null,
+    blockedInputReason: String(contractRow.blocked_input_reason || "").trim() || null,
+    traceRoutineHint: String(contractRow.trace_routine_hint || "").trim() || null,
+    selectedOwnerSubjectId: String(contractRow.selected_owner_subject_id || "").trim() || null,
+    selectedSharedLane: String(contractRow.selected_shared_lane || "").trim() || null,
+    targetAliases: aliases,
+    groundedFields,
+    supportSummary,
+    provenanceSummary,
+    blockedInputReasons
+  };
+  payload.core = {
+    traceScope: payload.traceScope,
+    subjectId: payload.subjectId,
+    subjectKind: payload.subjectKind,
+    subjectKey: payload.subjectKey,
+    subjectLabel: payload.subjectLabel,
+    semanticKey: payload.semanticKey,
+    identityOwner: payload.identityOwner,
+    identityReason: payload.identityReason,
+    blockedInputReason: payload.blockedInputReason,
+    targetAliases: payload.targetAliases,
+    groundedFields: payload.groundedFields,
+    supportSummary: payload.supportSummary,
+    blockedInputReasons: payload.blockedInputReasons
+  };
+  payload.enriched = {
+    groundedFields: payload.groundedFields,
+    supportSummary: payload.supportSummary,
+    provenanceSummary: payload.provenanceSummary
+  };
+  return {
+    payload,
+    builtAt: String(contractRow.updated_at || "")
+  };
+}
+
 function querySystemSubjectMetadata(requestUrl) {
   const systemId = String(requestUrl.searchParams.get("systemId") || "").trim();
   const requestedScopes = String(requestUrl.searchParams.get("scopes") || "")
@@ -597,26 +780,20 @@ function querySystemSubjectMetadata(requestUrl) {
       };
     }
     const result = withCacheDb((db) => {
-      const statement = db.prepare(`
-        SELECT trace_scope, payload_json, built_at
-        FROM materialized_subject_contract_views
-        WHERE project_name = ? AND project_file = ? AND trace_scope = ?
-        ORDER BY built_at DESC
-        LIMIT 1
-      `);
       const contracts = {};
       const missing = [];
       let latestBuiltAt = null;
       for (const traceScope of requestedScopes) {
-        const row = statement.get("cifi-full", "libil2cpp.so", traceScope);
+        const row = buildCentralSubjectContractPayload(db, traceScope);
         if (!row) {
           missing.push(traceScope);
           continue;
         }
-        const payload = JSON.parse(row.payload_json);
+        const payload = row.payload;
         contracts[traceScope] = mode === "full" ? payload : payload?.core || payload;
-        if (!latestBuiltAt || String(row.built_at) > latestBuiltAt) {
-          latestBuiltAt = String(row.built_at);
+        const builtAt = String(row.builtAt || "");
+        if (!latestBuiltAt || builtAt > latestBuiltAt) {
+          latestBuiltAt = builtAt;
         }
       }
       return { contracts, missing, builtAt: latestBuiltAt };
@@ -624,7 +801,7 @@ function querySystemSubjectMetadata(requestUrl) {
     return {
       statusCode: 200,
       body: {
-        source: "materialized_db_subject_metadata_views",
+        source: "db_central_subject_metadata_v",
         systemId,
         mode: "db",
         contractMode: mode,
@@ -670,6 +847,10 @@ function querySystemGenericMechanics(requestUrl) {
       };
     }
     const result = withCacheDb((db) => {
+      const entitySource = "db_central_entity_rows_v";
+      const factSource = "db_central_fact_rows_v";
+      const relationSource = "db_central_relation_rows_v";
+      const gapSource = "db_central_gap_rows_v";
       const scopeFilter =
         requestedScopes.length > 0
           ? ` AND trace_scope IN (${requestedScopes.map(() => "?").join(",")})`
@@ -678,7 +859,7 @@ function querySystemGenericMechanics(requestUrl) {
       const entityRows = db
         .prepare(
           `SELECT trace_scope, entity_id, entity_kind, payload_json, built_at
-           FROM materialized_entity_views
+           FROM ${entitySource}
            WHERE project_name = ? AND project_file = ?${scopeFilter}
            ORDER BY trace_scope ASC, entity_kind ASC, entity_id ASC`
         )
@@ -686,7 +867,7 @@ function querySystemGenericMechanics(requestUrl) {
       const factRows = db
         .prepare(
           `SELECT trace_scope, entity_id, field_key, fact_kind, fact_value, payload_json, built_at
-           FROM materialized_fact_views
+           FROM ${factSource}
            WHERE project_name = ? AND project_file = ?${scopeFilter}
            ORDER BY trace_scope ASC, entity_id ASC, field_key ASC, fact_kind ASC, fact_value ASC`
         )
@@ -694,7 +875,7 @@ function querySystemGenericMechanics(requestUrl) {
       const relationRows = db
         .prepare(
           `SELECT trace_scope, source_entity_id, field_key, relation_kind, target_entity_id, payload_json, built_at
-           FROM materialized_relation_views
+           FROM ${relationSource}
            WHERE project_name = ? AND project_file = ?${scopeFilter}
            ORDER BY trace_scope ASC, source_entity_id ASC, field_key ASC, relation_kind ASC, target_entity_id ASC`
         )
@@ -702,7 +883,7 @@ function querySystemGenericMechanics(requestUrl) {
       const gapRows = db
         .prepare(
           `SELECT trace_scope, entity_id, field_key, gap_kind, payload_json, built_at
-           FROM materialized_gap_views
+           FROM ${gapSource}
            WHERE project_name = ? AND project_file = ?${scopeFilter}
            ORDER BY trace_scope ASC, entity_id ASC, field_key ASC, gap_kind ASC`
         )
@@ -832,13 +1013,15 @@ function querySystemDbBundle(requestUrl) {
   if (!contractsUrl.searchParams.get("mode")) {
     contractsUrl.searchParams.set("mode", "core");
   }
+  const consumerProjectionResult = querySystemConsumerProjections(requestUrl);
   const contractResult = querySystemSubjectMetadata(contractsUrl);
   const genericResult = querySystemGenericMechanics(requestUrl);
   const boundaryResult = querySystemBoundaries(requestUrl);
   if (
     genericResult.statusCode >= 400 &&
     contractResult.statusCode >= 400 &&
-    boundaryResult.statusCode >= 400
+    boundaryResult.statusCode >= 400 &&
+    consumerProjectionResult.statusCode >= 400
   ) {
     return {
       statusCode:
@@ -846,12 +1029,15 @@ function querySystemDbBundle(requestUrl) {
           ? contractResult.statusCode
           : genericResult.statusCode >= 400
             ? genericResult.statusCode
-            : boundaryResult.statusCode,
+            : boundaryResult.statusCode >= 400
+              ? boundaryResult.statusCode
+              : consumerProjectionResult.statusCode,
       body: {
         error: "Failed to load system DB bundle.",
         subjectMetadata: contractResult.body,
         genericMechanics: genericResult.body,
-        boundaries: boundaryResult.body
+        boundaries: boundaryResult.body,
+        consumerProjections: consumerProjectionResult.body
       }
     };
   }
@@ -864,13 +1050,122 @@ function querySystemDbBundle(requestUrl) {
       builtAt: maxBuiltAt(
         contractResult.statusCode < 400 ? (contractResult.body?.builtAt ?? null) : null,
         genericResult.statusCode < 400 ? (genericResult.body?.builtAt ?? null) : null,
-        boundaryResult.statusCode < 400 ? (boundaryResult.body?.builtAt ?? null) : null
+        boundaryResult.statusCode < 400 ? (boundaryResult.body?.builtAt ?? null) : null,
+        consumerProjectionResult.statusCode < 400
+          ? (consumerProjectionResult.body?.builtAt ?? null)
+          : null
       ),
       subjectMetadata: contractResult.statusCode < 400 ? contractResult.body : null,
       genericMechanics: genericResult.statusCode < 400 ? genericResult.body : null,
-      boundaries: boundaryResult.statusCode < 400 ? boundaryResult.body : null
+      boundaries: boundaryResult.statusCode < 400 ? boundaryResult.body : null,
+      consumerProjections:
+        consumerProjectionResult.statusCode < 400 ? consumerProjectionResult.body : null
     }
   };
+}
+
+function querySystemConsumerProjections(requestUrl) {
+  const systemId = String(requestUrl.searchParams.get("systemId") || "").trim();
+  const requestedScopes = String(requestUrl.searchParams.get("scopes") || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (!systemId) {
+    return {
+      statusCode: 400,
+      body: { error: "systemId is required." }
+    };
+  }
+  const projectionKindsBySystemId = {
+    "token-shop": ["token-shop-row-structure"],
+    shards: ["shard-cost-structure"],
+    "multiverse-market": [
+      "save-owner-structure",
+      "runtime-bridge-structure",
+      "structural-neighborhood-structure"
+    ]
+  };
+  const projectionKinds = projectionKindsBySystemId[systemId] || [];
+  if (!projectionKinds.length) {
+    return {
+      statusCode: 200,
+      body: {
+        builtAt: null,
+        count: 0,
+        rows: []
+      }
+    };
+  }
+  try {
+    if (!existsSync(cacheDbPath)) {
+      return {
+        statusCode: 503,
+        body: { error: "Missing cache DB for consumer projection API." }
+      };
+    }
+    const result = withCacheDb((db) => {
+      if (!hasDbObject(db, "consumer_projections_v2", "table")) {
+        return {
+          builtAt: null,
+          count: 0,
+          rows: []
+        };
+      }
+      const kindClause = `projection_kind IN (${projectionKinds.map(() => "?").join(",")})`;
+      let scopeClause = "";
+      let scopeParams = [];
+      if (systemId === "multiverse-market") {
+        scopeClause =
+          " AND (trace_scope LIKE 'multiverse-%' OR payload_json LIKE '%Multiverse%' OR payload_json LIKE '%Market%' OR payload_json LIKE '%Inscrypt%')";
+      } else if (requestedScopes.length) {
+        scopeClause = ` AND trace_scope IN (${requestedScopes.map(() => "?").join(",")})`;
+        scopeParams = requestedScopes;
+      }
+      const params = [...projectionKinds, ...scopeParams];
+      const rows = db
+        .prepare(
+          `SELECT projection_kind, subject_id, trace_scope, projection_status, payload_json, provenance_json, updated_at
+           FROM consumer_projections_v2
+           WHERE ${kindClause}
+             AND projection_status = 'active'${scopeClause}
+           ORDER BY updated_at DESC, subject_id ASC`
+        )
+        .all(...params)
+        .map((row) => {
+          let payload = {};
+          let provenance = {};
+          try {
+            payload = JSON.parse(row.payload_json || "{}");
+          } catch {}
+          try {
+            provenance = JSON.parse(row.provenance_json || "{}");
+          } catch {}
+          return {
+            projectionKind: row.projection_kind,
+            subjectId: row.subject_id,
+            traceScope: row.trace_scope,
+            projectionStatus: row.projection_status,
+            payload,
+            provenance,
+            updatedAt: row.updated_at
+          };
+        });
+      const builtAt = rows.reduce((latest, row) => maxBuiltAt(latest, row.updatedAt || null), null);
+      return {
+        builtAt,
+        count: rows.length,
+        rows
+      };
+    });
+    return { statusCode: 200, body: result };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: {
+        error: error instanceof Error ? error.message : String(error)
+      }
+    };
+  }
 }
 
 function querySystemBoundaries(requestUrl) {
@@ -894,6 +1189,7 @@ function querySystemBoundaries(requestUrl) {
       };
     }
     const result = withCacheDb((db) => {
+      const boundarySource = "db_central_boundary_rows_v";
       const scopeFilter =
         requestedScopes.length > 0
           ? ` AND trace_scope IN (${requestedScopes.map(() => "?").join(",")})`
@@ -902,7 +1198,7 @@ function querySystemBoundaries(requestUrl) {
       const boundaryRows = db
         .prepare(
           `SELECT trace_scope, subject_id, boundary_kind, verdict, payload_json, built_at
-           FROM materialized_boundary_views
+           FROM ${boundarySource}
            WHERE project_name = ? AND project_file = ?${scopeFilter}
            ORDER BY trace_scope ASC, subject_id ASC, boundary_kind ASC`
         )
@@ -962,6 +1258,7 @@ function createTraceGapRunState(overrides = {}) {
   return {
     runId: null,
     status: "idle",
+    engine: "v2",
     mode: "execute",
     repeat: 1,
     startedAt: null,
@@ -974,11 +1271,17 @@ function createTraceGapRunState(overrides = {}) {
     selectedSeam: "",
     subject: "",
     subjectLabel: "",
+    goal: "",
+    obligationKind: "",
     executionScope: "",
     family: "",
     unresolvedAnchor: "",
     blockedEdges: "",
     verdict: "",
+    backendId: "",
+    executionCoreId: "",
+    executionMode: "",
+    requestSignature: "",
     summary: "",
     recoveredSummary: "",
     tracedSummary: "",
@@ -994,15 +1297,328 @@ function createTraceGapRunState(overrides = {}) {
     progressDetected: false,
     rerankCount: 0,
     currentIteration: 0,
+    openObligationCount: 0,
+    closedObligationCount: 0,
+    totalObligationCount: 0,
     lastOutputAt: null,
     stopRequestedAt: null,
     logEntries: [],
     lineCount: 0,
     stdoutBuffer: "",
     stderrBuffer: "",
+    stdoutCapture: "",
     child: null,
     ...overrides
   };
+}
+
+function parseTraceGapV2PayloadFromLogs() {
+  const stdoutText = String(traceGapRun.stdoutCapture || "").trim();
+  if (!stdoutText) {
+    return null;
+  }
+  try {
+    return { payload: JSON.parse(stdoutText), rawJson: stdoutText };
+  } catch {}
+  const candidateStarts = [];
+  for (let index = 0; index < stdoutText.length; index += 1) {
+    if (stdoutText[index] === "{") {
+      candidateStarts.push(index);
+    }
+  }
+  for (let index = candidateStarts.length - 1; index >= 0; index -= 1) {
+    const candidate = stdoutText.slice(candidateStarts[index]).trim();
+    if (!candidate) {
+      continue;
+    }
+    try {
+      return { payload: JSON.parse(candidate), rawJson: candidate };
+    } catch {}
+  }
+  return null;
+}
+
+function trimTraceGapV2PayloadLogs(parsedPayload) {
+  const rawJson = String(parsedPayload?.rawJson || "");
+  if (!rawJson) {
+    return;
+  }
+  const jsonLines = rawJson.split("\n");
+  const stdoutEntries = traceGapRun.logEntries.filter((entry) => entry.stream === "stdout");
+  if (!jsonLines.length || jsonLines.length > stdoutEntries.length) {
+    return;
+  }
+  let stdoutMatchStart = -1;
+  for (
+    let jsonIndex = jsonLines.length - 1, stdoutIndex = stdoutEntries.length - 1;
+    jsonIndex >= 0;
+    jsonIndex -= 1, stdoutIndex -= 1
+  ) {
+    const entry = stdoutEntries[stdoutIndex];
+    if (!entry || String(entry.text || "") !== jsonLines[jsonIndex]) {
+      return;
+    }
+    stdoutMatchStart = Number(entry.index || 0);
+  }
+  if (stdoutMatchStart > 0) {
+    traceGapRun.logEntries = traceGapRun.logEntries.filter(
+      (entry) => !(entry.stream === "stdout" && Number(entry.index || 0) >= stdoutMatchStart)
+    );
+  }
+}
+
+function classifyTraceGapLogKind(stream, text) {
+  const trimmed = String(text || "").trim();
+  if (!trimmed) {
+    return "output";
+  }
+  if (
+    trimmed.startsWith("[progress]") ||
+    trimmed.startsWith("[phase ") ||
+    /^recovered=.*\s+traced=.*\s+attempted=.*\s+missing=.*\s+newEdges=.*\s+netProgress=\S+$/.test(
+      trimmed
+    ) ||
+    /^(subject|subjectLabel|executionScope|family|unresolvedAnchor|blockedEdges|verdict|seam|nextSeam)=/.test(
+      trimmed
+    )
+  ) {
+    return "status";
+  }
+  if (stream === "stderr") {
+    return "error";
+  }
+  return "output";
+}
+
+function formatTraceGapShortList(values, limit = 4) {
+  const items = Array.isArray(values)
+    ? values.map((value) => String(value || "").trim()).filter(Boolean)
+    : [];
+  if (!items.length) {
+    return "";
+  }
+  if (items.length <= limit) {
+    return items.join(",");
+  }
+  return `${items.slice(0, limit).join(",")} (+${items.length - limit} more)`;
+}
+
+function describeTraceGapV2Relation(source) {
+  if (!source || typeof source !== "object") {
+    return "";
+  }
+  const payload = source.payload && typeof source.payload === "object" ? source.payload : null;
+  return String(
+    (payload && (payload.bridgeRelationKind || payload.knownRelationKind || payload.goal)) ||
+      source.relationKind ||
+      ""
+  ).trim();
+}
+
+function applyTraceGapV2SummaryFromPayload(payload) {
+  if (!payload || typeof payload !== "object") {
+    return;
+  }
+  const next =
+    payload.nextObligation && typeof payload.nextObligation === "object"
+      ? payload.nextObligation
+      : null;
+  const obligation =
+    payload.obligation && typeof payload.obligation === "object" ? payload.obligation : null;
+  const execution =
+    payload.execution && typeof payload.execution === "object" ? payload.execution : null;
+  const topLevelExecutionBackend =
+    payload.executionBackend && typeof payload.executionBackend === "object"
+      ? payload.executionBackend
+      : null;
+  const topLevelBackendExport =
+    payload.backendExport && typeof payload.backendExport === "object"
+      ? payload.backendExport
+      : null;
+  const runs = Array.isArray(payload.runs) ? payload.runs : [];
+  const lastRun = runs.length ? runs[runs.length - 1] : null;
+  const obligationCounts =
+    payload.obligationCounts && typeof payload.obligationCounts === "object"
+      ? payload.obligationCounts
+      : null;
+  const repeatCount = Math.max(1, Number(payload.repeat || traceGapRun.repeat || 1));
+  traceGapRun.repeat = repeatCount;
+  if (runs.length > 0) {
+    traceGapRun.currentIteration = Math.min(repeatCount, runs.length);
+  } else if (traceGapRun.mode === "dry-run") {
+    traceGapRun.currentIteration = 0;
+  }
+  if (obligationCounts) {
+    traceGapRun.openObligationCount = Math.max(0, Number(obligationCounts.open || 0));
+    traceGapRun.closedObligationCount = Math.max(0, Number(obligationCounts.closed || 0));
+    traceGapRun.totalObligationCount = Math.max(
+      traceGapRun.openObligationCount + traceGapRun.closedObligationCount,
+      Number(obligationCounts.total || 0)
+    );
+  }
+  const activeSummarySource = next || obligation || execution || null;
+  if (activeSummarySource) {
+    const relationHint = describeTraceGapV2Relation(activeSummarySource);
+    const sourceNodeId = String(activeSummarySource.sourceNodeId || execution?.sourceNodeId || "");
+    const targetNodeId = String(activeSummarySource.targetNodeId || execution?.targetNodeId || "");
+    const obligationKind = String(activeSummarySource.obligationKind || "").trim();
+    const goal = String(
+      (activeSummarySource.payload && activeSummarySource.payload.goal) || ""
+    ).trim();
+    traceGapRun.selectedTarget = String(targetNodeId || traceGapRun.selectedTarget || "");
+    traceGapRun.selectedLabel = String(
+      targetNodeId || obligationKind || traceGapRun.selectedLabel || ""
+    );
+    traceGapRun.obligationKind = obligationKind || traceGapRun.obligationKind || "";
+    traceGapRun.selectedSeam = String(
+      activeSummarySource.relationKind || traceGapRun.selectedSeam || ""
+    );
+    traceGapRun.executionScope = String(
+      activeSummarySource.preferredTraceScope ||
+        execution?.traceScope ||
+        traceGapRun.executionScope ||
+        ""
+    );
+    traceGapRun.subject = `${String(sourceNodeId || "unknown")} -> ${String(targetNodeId || "unknown")}`;
+    traceGapRun.subjectLabel = String(
+      obligationKind
+        ? `${obligationKind}${relationHint ? ` via ${relationHint}` : ""}`
+        : relationHint || traceGapRun.subjectLabel || ""
+    );
+    traceGapRun.goal = goal || traceGapRun.goal || "";
+    traceGapRun.unresolvedAnchor = String(targetNodeId || traceGapRun.unresolvedAnchor || "");
+    traceGapRun.blockedEdges = String(relationHint || traceGapRun.blockedEdges || "");
+    traceGapRun.summary = String(goal || traceGapRun.summary || "V2 obligation queued.");
+    traceGapRun.family = obligationKind || traceGapRun.family || "";
+  }
+  if (execution && typeof execution === "object") {
+    const attempted = formatTraceGapShortList(execution.requestedTerms);
+    if (attempted) {
+      updateTraceGapCumulativeSummary({ attempted });
+    }
+    if (!traceGapRun.attemptedSummary) {
+      traceGapRun.attemptedSummary = attempted || traceGapRun.attemptedSummary || "";
+    }
+    const traced = formatTraceGapShortList(execution.selectedAnchors || execution.requestedTerms);
+    if (traced) {
+      updateTraceGapCumulativeSummary({ traced });
+    }
+    if (!traceGapRun.executionScope) {
+      traceGapRun.executionScope = String(execution.traceScope || "");
+    }
+    traceGapRun.requestSignature = String(
+      execution.requestSignature || traceGapRun.requestSignature || ""
+    );
+  }
+  if (topLevelExecutionBackend) {
+    traceGapRun.backendId = String(
+      topLevelExecutionBackend.backendId || traceGapRun.backendId || ""
+    );
+    traceGapRun.executionCoreId = String(
+      topLevelExecutionBackend.executionCoreId || traceGapRun.executionCoreId || ""
+    );
+  }
+  if (topLevelBackendExport) {
+    traceGapRun.executionMode = String(
+      topLevelBackendExport.mode || traceGapRun.executionMode || ""
+    );
+    traceGapRun.requestSignature = String(
+      topLevelBackendExport.requestSignature || traceGapRun.requestSignature || ""
+    );
+  }
+  if (next) {
+    traceGapRun.activityLabel = "Next V2 obligation queued";
+  }
+  if (lastRun && typeof lastRun === "object") {
+    const applied = lastRun.applied && typeof lastRun.applied === "object" ? lastRun.applied : null;
+    const execution =
+      lastRun.execution && typeof lastRun.execution === "object" ? lastRun.execution : null;
+    if (execution) {
+      const attempted = formatTraceGapShortList(execution.requestedTerms);
+      if (attempted) {
+        updateTraceGapCumulativeSummary({ attempted });
+        traceGapRun.attemptedSummary = attempted;
+      }
+      const traced = formatTraceGapShortList(execution.selectedAnchors || execution.requestedTerms);
+      if (traced) {
+        updateTraceGapCumulativeSummary({ traced });
+      }
+      if (!traceGapRun.executionScope) {
+        traceGapRun.executionScope = String(execution.traceScope || "");
+      }
+      if (!traceGapRun.selectedTarget) {
+        traceGapRun.selectedTarget = String(execution.targetNodeId || "");
+      }
+      if (!traceGapRun.unresolvedAnchor) {
+        traceGapRun.unresolvedAnchor = String(execution.targetNodeId || "");
+      }
+    }
+    if (applied) {
+      const importedParts = [];
+      const graphObs = Number(applied.importedGraphObservationCount || 0);
+      const irObs = Number(applied.importedIrObservationCount || 0);
+      if (graphObs > 0) {
+        importedParts.push(`graphObs:${graphObs}`);
+      }
+      if (irObs > 0) {
+        importedParts.push(`irObs:${irObs}`);
+      }
+      if (importedParts.length) {
+        updateTraceGapCumulativeSummary({ recovered: importedParts.join(",") });
+      }
+      const strengthenedEdgeCount = Number(applied.strengthenedEdgeCount || 0);
+      const newEdgesSummary =
+        strengthenedEdgeCount > 0 ? `strengthened:${strengthenedEdgeCount}` : "none";
+      updateTraceGapCumulativeSummary({
+        newEdges: newEdgesSummary,
+        netProgress:
+          String(applied.outcome || "")
+            .trim()
+            .toLowerCase() === "strengthened"
+            ? "yes"
+            : "no"
+      });
+      traceGapRun.verdict = String(applied.outcome || traceGapRun.verdict || "");
+      traceGapRun.recoveredSummary = importedParts.length
+        ? importedParts.join(",")
+        : traceGapRun.recoveredSummary;
+      traceGapRun.newEdgesSummary = newEdgesSummary;
+      traceGapRun.progressSummary =
+        String(applied.outcome || "")
+          .trim()
+          .toLowerCase() === "strengthened"
+          ? "yes"
+          : "no";
+      traceGapRun.summary = `V2 outcome: ${String(applied.outcome || "unknown")}`;
+      traceGapRun.requestSignature = String(
+        applied.requestSignature || traceGapRun.requestSignature || ""
+      );
+    } else if (execution && traceGapRun.mode === "dry-run" && !traceGapRun.summary) {
+      traceGapRun.summary = "V2 execution preview ready.";
+    }
+    const executionBackend =
+      lastRun.executionBackend && typeof lastRun.executionBackend === "object"
+        ? lastRun.executionBackend
+        : null;
+    if (executionBackend) {
+      traceGapRun.backendId = String(executionBackend.backendId || traceGapRun.backendId || "");
+      traceGapRun.executionCoreId = String(
+        executionBackend.executionCoreId || traceGapRun.executionCoreId || ""
+      );
+    }
+    if (lastRun.backendExport && typeof lastRun.backendExport === "object") {
+      const mode = String(lastRun.backendExport.mode || "").trim();
+      if (mode) {
+        traceGapRun.executionMode = mode;
+      }
+      traceGapRun.requestSignature = String(
+        lastRun.backendExport.requestSignature || traceGapRun.requestSignature || ""
+      );
+    }
+  }
+  if (!traceGapRun.summary && activeSummarySource) {
+    traceGapRun.summary = "V2 obligation queued.";
+  }
 }
 
 function parseTraceGapSummaryList(value) {
@@ -1085,7 +1701,7 @@ function updateTraceGapCumulativeSummary(fields) {
 }
 
 function getPublicTraceGapRun() {
-  const { child, stdoutBuffer, stderrBuffer, ...publicRun } = traceGapRun;
+  const { child, stdoutBuffer, stderrBuffer, stdoutCapture, ...publicRun } = traceGapRun;
   return {
     ...publicRun,
     isRunning: publicRun.status === "running",
@@ -1135,6 +1751,10 @@ function resolvePythonCommand() {
 }
 
 function appendTraceGapLog(stream, chunk) {
+  if (traceGapRun.engine === "v2" && stream === "stdout") {
+    traceGapRun.stdoutCapture = `${String(traceGapRun.stdoutCapture || "")}${chunk.toString("utf8")}`;
+    return;
+  }
   const bufferKey = stream === "stderr" ? "stderrBuffer" : "stdoutBuffer";
   const existing = traceGapRun[bufferKey] || "";
   const combined = `${existing}${chunk.toString("utf8")}`;
@@ -1146,6 +1766,9 @@ function appendTraceGapLog(stream, chunk) {
 }
 
 function flushTraceGapLogBuffer(stream) {
+  if (traceGapRun.engine === "v2" && stream === "stdout") {
+    return;
+  }
   const bufferKey = stream === "stderr" ? "stderrBuffer" : "stdoutBuffer";
   const remainder = String(traceGapRun[bufferKey] || "");
   if (remainder) {
@@ -1156,11 +1779,13 @@ function flushTraceGapLogBuffer(stream) {
 
 function pushTraceGapLogLine(stream, line) {
   const text = String(line || "");
+  const kind = classifyTraceGapLogKind(stream, text);
   traceGapRun.lineCount += 1;
   traceGapRun.lastOutputAt = new Date().toISOString();
   traceGapRun.logEntries.push({
     index: traceGapRun.lineCount,
     stream,
+    kind,
     text,
     at: traceGapRun.lastOutputAt
   });
@@ -1236,6 +1861,14 @@ function updateTraceGapRunSummary(line) {
   const value = keyValue[2].trim();
   if (key === "unresolvedAnchor") {
     traceGapRun.unresolvedAnchor = value;
+  } else if (key === "iteration") {
+    const match = /^(\d+)\s*\/\s*(\d+)$/.exec(value);
+    if (match) {
+      const total = Math.max(1, Number(match[2] || traceGapRun.repeat || 1));
+      const current = Math.max(0, Math.min(total, Number(match[1] || 0)));
+      traceGapRun.repeat = total;
+      traceGapRun.currentIteration = current;
+    }
   } else if (key === "subject") {
     traceGapRun.subject = value;
   } else if (key === "subjectLabel") {
@@ -1300,68 +1933,70 @@ function handleTraceGapOverview(response, requestUrl) {
       const tables = [
         {
           key: "targetBundles",
-          label: "Target bundles",
-          table: "materialized_target_bundle_views",
-          columns: ["trace_scope", "request_signature"]
+          label: "Central target bundles",
+          table: "target_bundle_views",
+          columns: ["trace_scope", "request_signature"],
+          timestampColumn: "updated_at"
         },
         {
           key: "resolverTargets",
-          label: "Resolver targets",
-          table: "materialized_resolver_target_views",
-          columns: ["trace_scope"]
+          label: "Central resolver targets",
+          table: "resolver_target_views",
+          columns: ["trace_scope"],
+          timestampColumn: "updated_at"
         },
         {
           key: "subjectStates",
-          label: "Subject states",
-          table: "materialized_subject_state_views",
+          label: "Central subject states",
+          table: "db_central_subject_state_v",
           columns: ["trace_scope", "subject_id"]
         },
         {
           key: "subjectMetadata",
-          label: "DB subject metadata",
-          table: "materialized_subject_contract_views",
+          label: "Central subject metadata",
+          table: "db_central_subject_metadata_v",
           columns: ["trace_scope", "subject_id"]
         },
         {
           key: "entities",
-          label: "Generic entities",
-          table: "materialized_entity_views",
+          label: "Central entities",
+          table: "db_central_entity_rows_v",
           columns: ["trace_scope", "entity_id"]
         },
         {
           key: "facts",
-          label: "Generic facts",
-          table: "materialized_fact_views",
+          label: "Central facts",
+          table: "db_central_fact_rows_v",
           columns: ["trace_scope", "entity_id", "field_key", "fact_kind"]
         },
         {
           key: "relations",
-          label: "Generic relations",
-          table: "materialized_relation_views",
+          label: "Central relations",
+          table: "db_central_relation_rows_v",
           columns: ["trace_scope", "source_entity_id", "field_key", "relation_kind"]
         },
         {
           key: "gaps",
-          label: "Generic gaps",
-          table: "materialized_gap_views",
+          label: "Central gaps",
+          table: "db_central_gap_rows_v",
           columns: ["trace_scope", "entity_id", "field_key", "gap_kind"]
         },
         {
           key: "boundaries",
-          label: "Inferred boundaries",
-          table: "materialized_boundary_views",
+          label: "Central boundaries",
+          table: "db_central_boundary_rows_v",
           columns: ["trace_scope", "subject_id", "boundary_kind", "verdict"]
         },
         {
           key: "nativeTraceViews",
-          label: "Native trace views",
-          table: "materialized_native_trace_views",
+          label: "Central native trace views",
+          table: "native_trace_views",
           columns: ["request_signature"]
         },
         {
           key: "acquisitionDiagnostics",
-          label: "Acquisition diagnostics",
-          table: "materialized_acquisition_diagnostics_views",
+          label: "Central acquisition diagnostics",
+          table: "acquisition_diagnostic_views",
           columns: ["trace_scope", "request_signature"]
         },
         {
@@ -1374,6 +2009,7 @@ function handleTraceGapOverview(response, requestUrl) {
 
       const tableRows = Object.fromEntries(
         tables.map((tableConfig) => {
+          const timestampColumn = tableConfig.timestampColumn || "built_at";
           const count = Number(
             db
               .prepare(
@@ -1381,11 +2017,13 @@ function handleTraceGapOverview(response, requestUrl) {
               )
               .get("cifi-full", "libil2cpp.so").count || 0
           );
-          const selectColumns = ["built_at", ...tableConfig.columns].join(", ");
+          const selectColumns = [`${timestampColumn} AS built_at`, ...tableConfig.columns].join(
+            ", "
+          );
           const latestRow =
             db
               .prepare(
-                `SELECT ${selectColumns} FROM ${tableConfig.table} WHERE project_name = ? AND project_file = ? ORDER BY built_at DESC LIMIT 1`
+                `SELECT ${selectColumns} FROM ${tableConfig.table} WHERE project_name = ? AND project_file = ? ORDER BY ${timestampColumn} DESC LIMIT 1`
               )
               .get("cifi-full", "libil2cpp.so") || null;
           let scopeCount = null;
@@ -1401,7 +2039,7 @@ function handleTraceGapOverview(response, requestUrl) {
             scopeLatestRow =
               db
                 .prepare(
-                  `SELECT ${selectColumns} FROM ${tableConfig.table} WHERE project_name = ? AND project_file = ? AND trace_scope = ? ORDER BY built_at DESC LIMIT 1`
+                  `SELECT ${selectColumns} FROM ${tableConfig.table} WHERE project_name = ? AND project_file = ? AND trace_scope = ? ORDER BY ${timestampColumn} DESC LIMIT 1`
                 )
                 .get("cifi-full", "libil2cpp.so", scopeHint) || null;
           }
@@ -1500,32 +2138,36 @@ function handleTraceGapOverview(response, requestUrl) {
           const baseParams = ["cifi-full", "libil2cpp.so"];
           const scopeParams = scopeHint ? [...baseParams, scopeHint] : baseParams;
           const scopeClause = scopeHint ? " AND trace_scope = ?" : "";
+          const entitySource = "db_central_entity_rows_v";
+          const factSource = "db_central_fact_rows_v";
+          const relationSource = "db_central_relation_rows_v";
+          const gapSource = "db_central_gap_rows_v";
           const counts = {
             entities: Number(
               db
                 .prepare(
-                  `SELECT COUNT(*) AS count FROM materialized_entity_views WHERE project_name = ? AND project_file = ?${scopeClause}`
+                  `SELECT COUNT(*) AS count FROM ${entitySource} WHERE project_name = ? AND project_file = ?${scopeClause}`
                 )
                 .get(...scopeParams).count || 0
             ),
             facts: Number(
               db
                 .prepare(
-                  `SELECT COUNT(*) AS count FROM materialized_fact_views WHERE project_name = ? AND project_file = ?${scopeClause}`
+                  `SELECT COUNT(*) AS count FROM ${factSource} WHERE project_name = ? AND project_file = ?${scopeClause}`
                 )
                 .get(...scopeParams).count || 0
             ),
             relations: Number(
               db
                 .prepare(
-                  `SELECT COUNT(*) AS count FROM materialized_relation_views WHERE project_name = ? AND project_file = ?${scopeClause}`
+                  `SELECT COUNT(*) AS count FROM ${relationSource} WHERE project_name = ? AND project_file = ?${scopeClause}`
                 )
                 .get(...scopeParams).count || 0
             ),
             gaps: Number(
               db
                 .prepare(
-                  `SELECT COUNT(*) AS count FROM materialized_gap_views WHERE project_name = ? AND project_file = ?${scopeClause}`
+                  `SELECT COUNT(*) AS count FROM ${gapSource} WHERE project_name = ? AND project_file = ?${scopeClause}`
                 )
                 .get(...scopeParams).count || 0
             )
@@ -1541,39 +2183,30 @@ function handleTraceGapOverview(response, requestUrl) {
             }
             const subjectRows = db
               .prepare(
-                `SELECT mssv.trace_scope, mssv.payload_json
-                 FROM materialized_subject_state_views AS mssv
-                 INNER JOIN (
-                   SELECT trace_scope, subject_id, MAX(built_at) AS max_built_at
-                   FROM materialized_subject_state_views
-                   WHERE project_name = ? AND project_file = ?
-                   GROUP BY trace_scope, subject_id
-                 ) AS latest
-                   ON latest.trace_scope = mssv.trace_scope
-                  AND latest.subject_id = mssv.subject_id
-                  AND latest.max_built_at = mssv.built_at
-                 WHERE mssv.project_name = ? AND mssv.project_file = ?`
+                `SELECT trace_scope, next_seam_id, next_seam_status, missing_edge_count, blocked_edge_count
+                 FROM db_central_subject_state_v
+                 WHERE project_name = ? AND project_file = ?`
               )
-              .all("cifi-full", "libil2cpp.so", "cifi-full", "libil2cpp.so");
+              .all("cifi-full", "libil2cpp.so");
             const openScopes = new Set();
             const knownScopes = new Set();
             for (const row of subjectRows) {
               knownScopes.add(row.trace_scope);
-              let payload = {};
-              try {
-                payload = JSON.parse(row.payload_json || "{}");
-              } catch {}
-              const nextSeam = payload.nextSeam && payload.nextSeam.id;
-              const blockedEdges = Array.isArray(payload.blockedEdges) ? payload.blockedEdges : [];
-              const missingEdges = Array.isArray(payload.missingEdges) ? payload.missingEdges : [];
-              if (nextSeam || blockedEdges.length || missingEdges.length) {
+              const nextSeam = row.next_seam_id;
+              const blockedEdges = Number(row.blocked_edge_count || 0);
+              const missingEdges = Number(row.missing_edge_count || 0);
+              if (
+                (row.next_seam_status && row.next_seam_status !== "clear" && nextSeam) ||
+                blockedEdges > 0 ||
+                missingEdges > 0
+              ) {
                 openScopes.add(row.trace_scope);
               }
             }
             const gapScopeRows = db
               .prepare(
                 `SELECT trace_scope, COUNT(*) AS count
-                 FROM materialized_gap_views
+                 FROM ${gapSource}
                  WHERE project_name = ? AND project_file = ?
                  GROUP BY trace_scope`
               )
@@ -1596,7 +2229,7 @@ function handleTraceGapOverview(response, requestUrl) {
               ? db
                   .prepare(
                     `SELECT gap_kind, COUNT(*) AS count
-                   FROM materialized_gap_views
+                   FROM ${gapSource}
                    WHERE project_name = ? AND project_file = ? AND trace_scope = ?
                    GROUP BY gap_kind
                    ORDER BY count DESC, gap_kind ASC`
@@ -1605,7 +2238,7 @@ function handleTraceGapOverview(response, requestUrl) {
               : db
                   .prepare(
                     `SELECT gap_kind, COUNT(*) AS count
-                   FROM materialized_gap_views
+                   FROM ${gapSource}
                    WHERE project_name = ? AND project_file = ?
                    GROUP BY gap_kind
                    ORDER BY count DESC, gap_kind ASC
@@ -1621,7 +2254,7 @@ function handleTraceGapOverview(response, requestUrl) {
               ? db
                   .prepare(
                     `SELECT entity_id, field_key, gap_kind, payload_json, built_at
-                   FROM materialized_gap_views
+                   FROM ${gapSource}
                    WHERE project_name = ? AND project_file = ? AND trace_scope = ?
                    ORDER BY built_at DESC, entity_id ASC, field_key ASC, gap_kind ASC
                    LIMIT 12`
@@ -1630,7 +2263,7 @@ function handleTraceGapOverview(response, requestUrl) {
               : db
                   .prepare(
                     `SELECT trace_scope, entity_id, field_key, gap_kind, payload_json, built_at
-                   FROM materialized_gap_views
+                   FROM ${gapSource}
                    WHERE project_name = ? AND project_file = ?
                    ORDER BY built_at DESC, trace_scope ASC, entity_id ASC, field_key ASC, gap_kind ASC
                    LIMIT 12`
@@ -1649,7 +2282,7 @@ function handleTraceGapOverview(response, requestUrl) {
               ? db
                   .prepare(
                     `SELECT entity_id, field_key, fact_kind, fact_value, built_at
-                   FROM materialized_fact_views
+                   FROM ${factSource}
                    WHERE project_name = ? AND project_file = ? AND trace_scope = ?
                    ORDER BY built_at DESC, entity_id ASC, field_key ASC, fact_kind ASC
                    LIMIT 12`
@@ -1658,7 +2291,7 @@ function handleTraceGapOverview(response, requestUrl) {
               : db
                   .prepare(
                     `SELECT trace_scope, entity_id, field_key, fact_kind, fact_value, built_at
-                   FROM materialized_fact_views
+                   FROM ${factSource}
                    WHERE project_name = ? AND project_file = ?
                    ORDER BY built_at DESC, trace_scope ASC, entity_id ASC, field_key ASC, fact_kind ASC
                    LIMIT 12`
@@ -1678,6 +2311,325 @@ function handleTraceGapOverview(response, requestUrl) {
             gapKindCounts,
             latestGapRows,
             latestFactRows
+          };
+        })(),
+        centralWorkflow: (() => {
+          const hasCentralGapView = hasDbObject(db, "db_central_open_workflow_gaps_v", "view");
+          const hasAttemptView = hasDbObject(db, "db_central_acquisition_attempts_v", "view");
+          const hasAttemptTermsView = hasDbObject(
+            db,
+            "db_central_acquisition_attempt_terms_v",
+            "view"
+          );
+          const hasGapTermsView = hasDbObject(db, "db_central_knowledge_gap_terms_v", "view");
+          if (!hasCentralGapView && !hasAttemptView) {
+            return null;
+          }
+          const baseParams = ["cifi-full", "libil2cpp.so"];
+          const scopeParams = scopeHint ? [...baseParams, scopeHint] : baseParams;
+          const scopeClause = scopeHint ? " AND trace_scope = ?" : "";
+          const openGapCount = hasCentralGapView
+            ? Number(
+                db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM db_central_open_workflow_gaps_v
+                     WHERE project_name = ? AND project_file = ?${scopeClause}`
+                  )
+                  .get(...scopeParams).count || 0
+              )
+            : 0;
+          const attemptCount = hasAttemptView
+            ? Number(
+                db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM db_central_acquisition_attempts_v
+                     WHERE project_name = ? AND project_file = ?${scopeClause}`
+                  )
+                  .get(...scopeParams).count || 0
+              )
+            : 0;
+          const latestAttempts = hasAttemptView
+            ? db
+                .prepare(
+                  `SELECT trace_scope, subject_id, seam_id, acquisition_term, attempt_status, attempt_outcome, built_at
+                   FROM db_central_acquisition_attempts_v
+                   WHERE project_name = ? AND project_file = ?${scopeClause}
+                   ORDER BY built_at DESC, trace_scope ASC, acquisition_term ASC
+                   LIMIT 12`
+                )
+                .all(...scopeParams)
+                .map((row) => ({
+                  traceScope: row.trace_scope,
+                  subjectId: row.subject_id,
+                  seamId: row.seam_id,
+                  acquisitionTerm: row.acquisition_term,
+                  attemptStatus: row.attempt_status,
+                  attemptOutcome: row.attempt_outcome,
+                  builtAt: row.built_at
+                }))
+            : [];
+          return {
+            openGapCount,
+            attemptCount,
+            termFragmentCounts: {
+              attemptTerms: hasAttemptTermsView
+                ? Number(
+                    db
+                      .prepare(
+                        `SELECT COUNT(*) AS count
+                         FROM db_central_acquisition_attempt_terms_v
+                         WHERE project_name = ? AND project_file = ?${scopeClause}`
+                      )
+                      .get(...scopeParams).count || 0
+                  )
+                : 0,
+              gapTerms: hasGapTermsView
+                ? Number(
+                    db
+                      .prepare(
+                        `SELECT COUNT(*) AS count
+                         FROM db_central_knowledge_gap_terms_v
+                         WHERE project_name = ? AND project_file = ?${scopeClause}`
+                      )
+                      .get(...scopeParams).count || 0
+                  )
+                : 0
+            },
+            latestAttempts
+          };
+        })(),
+        v2Workflow: (() => {
+          const hasObligations = hasDbObject(db, "graph_obligations_v2", "table");
+          const hasAttempts = hasDbObject(db, "execution_attempts_v2", "table");
+          const hasEvents = hasDbObject(db, "trace_events_v2", "table");
+          const hasConsumerProjections = hasDbObject(db, "consumer_projections_v2", "table");
+          const hasGraphEdges = hasDbObject(db, "graph_edges_v2", "table");
+          if (
+            !hasObligations &&
+            !hasAttempts &&
+            !hasEvents &&
+            !hasConsumerProjections &&
+            !hasGraphEdges
+          ) {
+            return null;
+          }
+          const scopeClause = scopeHint ? " WHERE trace_scope = ?" : "";
+          const openObligationClause = scopeHint
+            ? " WHERE obligation_status = 'open' AND preferred_trace_scope = ?"
+            : " WHERE obligation_status = 'open'";
+          const openObligationCount = hasObligations
+            ? Number(
+                db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM graph_obligations_v2${openObligationClause}`
+                  )
+                  .get(...(scopeHint ? [scopeHint] : [])).count || 0
+              )
+            : 0;
+          const closedObligationClause = scopeHint
+            ? " WHERE obligation_status = 'closed' AND preferred_trace_scope = ?"
+            : " WHERE obligation_status = 'closed'";
+          const closedObligationCount = hasObligations
+            ? Number(
+                db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM graph_obligations_v2${closedObligationClause}`
+                  )
+                  .get(...(scopeHint ? [scopeHint] : [])).count || 0
+              )
+            : 0;
+          const totalObligationClause = scopeHint ? " WHERE preferred_trace_scope = ?" : "";
+          const totalObligationCount = hasObligations
+            ? Number(
+                db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM graph_obligations_v2${totalObligationClause}`
+                  )
+                  .get(...(scopeHint ? [scopeHint] : [])).count || 0
+              )
+            : 0;
+          const attemptCount = hasAttempts
+            ? Number(
+                db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM execution_attempts_v2${scopeClause}`
+                  )
+                  .get(...(scopeHint ? [scopeHint] : [])).count || 0
+              )
+            : 0;
+          const eventCount = hasEvents
+            ? Number(
+                db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM trace_events_v2${scopeClause}`
+                  )
+                  .get(...(scopeHint ? [scopeHint] : [])).count || 0
+              )
+            : 0;
+          const projectionScopeClause = scopeHint ? " WHERE trace_scope = ?" : "";
+          const projectionCount = hasConsumerProjections
+            ? Number(
+                db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM consumer_projections_v2${projectionScopeClause}`
+                  )
+                  .get(...(scopeHint ? [scopeHint] : [])).count || 0
+              )
+            : 0;
+          const knowledgeEdgeCount = hasGraphEdges
+            ? Number(
+                db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM graph_edges_v2
+                     WHERE edge_status = 'present'`
+                  )
+                  .get().count || 0
+              )
+            : 0;
+          const candidateEdgeCount = hasGraphEdges
+            ? Number(
+                db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM graph_edges_v2
+                     WHERE edge_status = 'candidate'`
+                  )
+                  .get().count || 0
+              )
+            : 0;
+          const negativeEdgeCount = hasGraphEdges
+            ? Number(
+                db
+                  .prepare(
+                    `SELECT COUNT(*) AS count
+                     FROM graph_edges_v2
+                     WHERE edge_status = 'negative'`
+                  )
+                  .get().count || 0
+              )
+            : 0;
+          const latestAttempts = hasAttempts
+            ? db
+                .prepare(
+                  `SELECT trace_scope, relation_kind, obligation_id, source_node_id, target_node_id, attempt_status, updated_at, payload_json
+                   FROM execution_attempts_v2${scopeClause}
+                   ORDER BY updated_at DESC
+                   LIMIT 12`
+                )
+                .all(...(scopeHint ? [scopeHint] : []))
+                .map((row) => {
+                  let payload = {};
+                  try {
+                    payload = JSON.parse(row.payload_json || "{}");
+                  } catch {}
+                  const executionBackend =
+                    payload && typeof payload.executionBackend === "object"
+                      ? payload.executionBackend
+                      : {};
+                  const executionExport =
+                    payload && typeof payload.executionExport === "object"
+                      ? payload.executionExport
+                      : payload && typeof payload.backendExport === "object"
+                        ? payload.backendExport
+                        : {};
+                  return {
+                    traceScope: row.trace_scope,
+                    relationKind: row.relation_kind,
+                    obligationId: row.obligation_id,
+                    sourceNodeId: row.source_node_id,
+                    targetNodeId: row.target_node_id,
+                    attemptStatus: row.attempt_status,
+                    updatedAt: row.updated_at,
+                    backendId: String(executionBackend.backendId || payload.backendId || "").trim(),
+                    executionCoreId: String(
+                      executionBackend.executionCoreId || payload.executionCoreId || ""
+                    ).trim(),
+                    executionMode: String(executionExport.mode || "").trim()
+                  };
+                })
+            : [];
+          const latestObligations = hasObligations
+            ? db
+                .prepare(
+                  `SELECT preferred_trace_scope, relation_kind, source_node_id, target_node_id, obligation_kind, obligation_status, updated_at
+                   FROM graph_obligations_v2${scopeHint ? " WHERE preferred_trace_scope = ?" : ""}
+                   ORDER BY updated_at DESC
+                   LIMIT 12`
+                )
+                .all(...(scopeHint ? [scopeHint] : []))
+                .map((row) => ({
+                  traceScope: row.preferred_trace_scope,
+                  relationKind: row.relation_kind,
+                  sourceNodeId: row.source_node_id,
+                  targetNodeId: row.target_node_id,
+                  obligationKind: row.obligation_kind,
+                  obligationStatus: row.obligation_status,
+                  updatedAt: row.updated_at
+                }))
+            : [];
+          const latestEvents = hasEvents
+            ? db
+                .prepare(
+                  `SELECT trace_scope, source_kind, request_signature, created_at
+                   FROM trace_events_v2${scopeClause}
+                   ORDER BY created_at DESC
+                   LIMIT 12`
+                )
+                .all(...(scopeHint ? [scopeHint] : []))
+                .map((row) => ({
+                  traceScope: row.trace_scope,
+                  sourceKind: row.source_kind,
+                  requestSignature: row.request_signature,
+                  createdAt: row.created_at
+                }))
+            : [];
+          const latestConsumerProjections = hasConsumerProjections
+            ? db
+                .prepare(
+                  `SELECT projection_kind, subject_id, trace_scope, projection_status, payload_json, updated_at
+                   FROM consumer_projections_v2${projectionScopeClause}
+                   ORDER BY updated_at DESC
+                   LIMIT 12`
+                )
+                .all(...(scopeHint ? [scopeHint] : []))
+                .map((row) => {
+                  let payload = {};
+                  try {
+                    payload = JSON.parse(row.payload_json || "{}");
+                  } catch {}
+                  return {
+                    projectionKind: row.projection_kind,
+                    subjectId: row.subject_id,
+                    traceScope: row.trace_scope,
+                    projectionStatus: row.projection_status,
+                    payload,
+                    updatedAt: row.updated_at
+                  };
+                })
+            : [];
+          return {
+            openObligationCount,
+            closedObligationCount,
+            totalObligationCount,
+            knowledgeEdgeCount,
+            candidateEdgeCount,
+            negativeEdgeCount,
+            attemptCount,
+            eventCount,
+            projectionCount,
+            latestAttempts,
+            latestObligations,
+            latestEvents,
+            latestConsumerProjections
           };
         })()
       };
@@ -1784,35 +2736,31 @@ async function handleTraceGapRun(request, response) {
       return;
     }
     const payload = await readJsonBody(request);
+    const engine = "v2";
     const mode = payload?.mode === "dry-run" ? "dry-run" : "execute";
-    const repeat = Math.min(50, Math.max(1, Number(payload?.repeat || 1)));
+    const repeat = Math.min(100, Math.max(1, Number(payload?.repeat || 1)));
     const python = resolvePythonCommand();
     const args = [
       ...python.prefixArgs,
       "-u",
-      "scripts/unity/unity_trace_bundle.py",
-      "--best-gap",
-      "--profile-timing",
-      "--repeat",
-      String(repeat)
+      "scripts/unity/unity_trace_bundle_v2.py",
+      ...(mode === "dry-run"
+        ? ["execute-best-gap-v2", "--dry-run"]
+        : ["run-best-gap-v2", "--repeat", String(repeat), "--native-timeout", "10"])
     ];
-    if (mode === "dry-run") {
-      args.push("--dry-run");
-    } else {
-      args.push("--level", "structured");
-    }
 
     traceGapRun = createTraceGapRunState({
       runId: `trace-gap-${Date.now()}`,
       status: "running",
+      engine,
       mode,
       repeat,
       startedAt: new Date().toISOString(),
       command: [python.command, ...args],
       activityLabel:
         mode === "dry-run"
-          ? "Launching DB-backed best-gap dry run"
-          : "Launching DB-backed best-gap execution",
+          ? `Launching ${engine.toUpperCase()} best-gap dry run`
+          : `Launching ${engine.toUpperCase()} best-gap execution`,
       currentIteration: mode === "dry-run" ? 0 : 1
     });
     broadcastTraceGapState();
@@ -1846,6 +2794,11 @@ async function handleTraceGapRun(request, response) {
           : "failed";
       traceGapRun.exitCode = code ?? 1;
       traceGapRun.finishedAt = new Date().toISOString();
+      if (traceGapRun.engine === "v2" && traceGapRun.status === "completed") {
+        const parsedPayload = parseTraceGapV2PayloadFromLogs();
+        applyTraceGapV2SummaryFromPayload(parsedPayload?.payload || null);
+        trimTraceGapV2PayloadLogs(parsedPayload);
+      }
       if (traceGapRun.status === "stopped") {
         traceGapRun.activityLabel = "Trace-gap run stopped";
       } else if (
@@ -1856,7 +2809,9 @@ async function handleTraceGapRun(request, response) {
         traceGapRun.activityLabel = "Dry-run completed without a selected target";
       } else if (traceGapRun.status === "completed") {
         traceGapRun.activityLabel =
-          traceGapRun.mode === "dry-run" ? "Dry-run completed" : "Trace-gap execution completed";
+          traceGapRun.mode === "dry-run"
+            ? `${traceGapRun.engine.toUpperCase()} dry-run completed`
+            : `${traceGapRun.engine.toUpperCase()} trace-gap execution completed`;
       } else {
         traceGapRun.activityLabel = "Trace-gap execution failed";
       }

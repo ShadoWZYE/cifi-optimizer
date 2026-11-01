@@ -1,4 +1,5 @@
 import {
+  getDbSystemConsumerProjections,
   getDbSystemGenericScopes,
   getDbSystemSubjectMetadata,
   hasDbSystemBundle,
@@ -23,4 +24,8 @@ export function getTokenShopDbSubjectMetadata(input) {
 
 export function getTokenShopDbGenericScopes(input) {
   return getDbSystemGenericScopes(input);
+}
+
+export function getTokenShopDbConsumerProjections(input) {
+  return getDbSystemConsumerProjections(input);
 }

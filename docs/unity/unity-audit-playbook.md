@@ -128,6 +128,74 @@ Important primary files:
 7. Run `node scripts/contracts/generate-system-units.mjs` only after DB-backed trace/materializer state is in place or needs to be reprojected into read models.
 8. Use raw metadata, `level0`, object-header scans, or serialized payload parsing as instrument-level support work inside that trace/materializer path, not as the default export-archaeology fallback.
 
+### LDPlayer ADB validation commands
+
+Use the live emulator only as a validation surface, not as the primary grounding source.
+
+Current known local bridge path:
+
+- `adb`
+
+Basic health check:
+
+```powershell
+$adb = (Get-Command adb -ErrorAction Stop).Source
+& $adb devices
+& $adb shell pm list packages | Select-String 'Octocube|CIFI|cifi'
+& $adb shell dumpsys window windows | Select-String 'mCurrentFocus|mFocusedApp'
+```
+
+Pull accessible app storage:
+
+```powershell
+$adb = (Get-Command adb -ErrorAction Stop).Source
+& $adb shell ls /storage/emulated/0/Android/data/com.OctocubeGamesCompany.CIFI/files
+& $adb pull /storage/emulated/0/Android/data/com.OctocubeGamesCompany.CIFI/files workbench\ldplayer-files
+```
+
+Capture the current emulator surface for validation:
+
+```powershell
+$adb = (Get-Command adb -ErrorAction Stop).Source
+& $adb shell screencap -p /sdcard/Download/cifi-live.png
+Start-Sleep -Milliseconds 500
+& $adb shell uiautomator dump /sdcard/Download/cifi-live-ui.xml
+& $adb pull /sdcard/Download/cifi-live.png workbench\cifi-live.png
+& $adb pull /sdcard/Download/cifi-live-ui.xml workbench\cifi-live-ui.xml
+```
+
+Operator rule:
+
+- if the emulator is not already on the intended screen, navigate first and then capture
+- treat `workbench\cifi-live.png` and `workbench\cifi-live-ui.xml` as disposable validation artifacts, not canonical extraction inputs
+
+Current proven token-shop navigation on the `900x1600` LDPlayer surface:
+
+```powershell
+$adb = (Get-Command adb -ErrorAction Stop).Source
+
+# open NAV CONSOLE from the main ship screen
+& $adb shell input tap 823 1535
+Start-Sleep -Milliseconds 1200
+
+# open TOKEN SHOP from the top-left shop tile
+& $adb shell input tap 170 920
+Start-Sleep -Milliseconds 1600
+```
+
+Current token-shop operator note:
+
+- the shop reopens at the profile's last viewed in-shop position
+- validating Tier 1 may require scrolling inside the list before the expected early rows are visible
+
+Current useful Tier-1-facing in-shop swipe:
+
+```powershell
+$adb = (Get-Command adb -ErrorAction Stop).Source
+& $adb shell input swipe 450 700 450 1150 350
+Start-Sleep -Milliseconds 900
+```
+
 ## Long-run expectations
 
 While cacheable parsing, native summaries, or Ghidra-backed reduction are still converging, long trace runs are expected.
@@ -335,7 +403,5 @@ If those gaps remain open, keep the system in extraction and verification docs r
 - Full save/export decoding is still unresolved.
 - `MultiverseMarket` is only partially decoded; the post-validated late block still needs a second-pass parser.
 - Community naming should not be substituted for in-game names unless clearly labeled as external.
-
-
 
 

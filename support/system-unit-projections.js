@@ -100,7 +100,8 @@ export function buildShardSystemView(shardsSystemUnit, shardDb) {
       subjectMetadata: normalizedShardDbBundle.subjectMetadata,
       genericMechanics: normalizedShardDbBundle.genericScopes,
       boundaries: normalizedShardDbBundle.boundaries,
-      hasAny: normalizedShardDbBundle.hasAny
+      consumerProjections: normalizedShardDbBundle.consumerProjections,
+      hasAny: normalizedShardDbBundle.hasAny || normalizedShardDbBundle.hasConsumerProjections
     },
     family: {
       grounded: {
@@ -163,7 +164,8 @@ export function buildSpendSystemView({
 }) {
   const normalizedDbBundle = normalizeTokenShopDbBundle(systemDb?.tokenShop);
   const normalizedMultiverseDbBundle = normalizeDbSystemBundle(systemDb?.multiverseMarket);
-  const hasDbTokenShopBundle = normalizedDbBundle.hasAny === true;
+  const hasDbTokenShopBundle =
+    normalizedDbBundle.hasAny === true || normalizedDbBundle.hasConsumerProjections === true;
   const hasDbTokenShopDailyTokeniumCoverage = hasDbSystemCoverageForSubjects(normalizedDbBundle, {
     subjectIds: ["range:token-shop:ATU14Button-ATU19Button", "row:ATU3Button"],
     traceScopes: ["token-shop-daily-tokenium-family", "token-shop-atu3-cells-effect"]
@@ -252,7 +254,8 @@ export function buildSpendSystemView({
         subjectMetadata: normalizedDbBundle.subjectMetadata,
         genericMechanics: normalizedDbBundle.genericScopes,
         boundaries: normalizedDbBundle.boundaries,
-        hasAny: normalizedDbBundle.hasAny
+        consumerProjections: normalizedDbBundle.consumerProjections,
+        hasAny: normalizedDbBundle.hasAny || normalizedDbBundle.hasConsumerProjections
       },
       rows: {
         extract: tokenShopSystemUnit?.sections?.rows?.extract?.data ?? null,
@@ -310,7 +313,9 @@ export function buildSpendSystemView({
         subjectMetadata: normalizedMultiverseDbBundle.subjectMetadata,
         genericMechanics: normalizedMultiverseDbBundle.genericScopes,
         boundaries: normalizedMultiverseDbBundle.boundaries,
-        hasAny: normalizedMultiverseDbBundle.hasAny
+        consumerProjections: normalizedMultiverseDbBundle.consumerProjections,
+        hasAny:
+          normalizedMultiverseDbBundle.hasAny || normalizedMultiverseDbBundle.hasConsumerProjections
       },
       saveOwner: {
         extract: multiverseMarketSystemUnit?.sections?.saveOwner?.extract?.data ?? null,

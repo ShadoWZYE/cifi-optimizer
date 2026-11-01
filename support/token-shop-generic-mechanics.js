@@ -89,6 +89,15 @@ function buildRowDetailFromGenericScope(scopePayload, fieldName) {
     detailNote: valuesByKind.get("detail-note")?.[0] || null,
     blockedFields
   };
+  const runtimeProjection = {
+    displayEntries: [],
+    displayFormula: null,
+    displayValue: null,
+    displayValueLabel: null,
+    effectiveMaxLevel: null,
+    finalMaxAccessor: null,
+    nextCostAccessor: null
+  };
   const boundedEvidenceTerms = uniqueStrings(valuesByKind.get("bounded-evidence-term") || []);
   if (boundedEvidenceTerms.length) {
     rowDetail.boundedEvidenceTerms = boundedEvidenceTerms;
@@ -113,6 +122,73 @@ function buildRowDetailFromGenericScope(scopePayload, fieldName) {
       isClosed: true
     };
     delete rowDetail.blockedFields["runtime-cost-coverage"];
+  }
+  rowFacts.forEach((fact) => {
+    const factKind = String(fact?.factKind || "").trim();
+    const factValue = String(fact?.factValue || "").trim();
+    const payload = fact?.payload && typeof fact.payload === "object" ? fact.payload : {};
+    if (!factKind) {
+      return;
+    }
+    if (factKind === "runtime-final-max-level") {
+      runtimeProjection.finalMaxAccessor = factValue || runtimeProjection.finalMaxAccessor;
+      const effectiveMaxLevel = Number(
+        payload.effectiveMaxLevel ?? payload.maxLevel ?? payload.value ?? Number.NaN
+      );
+      if (Number.isFinite(effectiveMaxLevel)) {
+        runtimeProjection.effectiveMaxLevel = effectiveMaxLevel;
+      }
+      return;
+    }
+    if (factKind === "runtime-next-cost-accessor") {
+      runtimeProjection.nextCostAccessor = factValue || runtimeProjection.nextCostAccessor;
+      return;
+    }
+    if (factKind === "runtime-effective-max-level") {
+      const effectiveMaxLevel = Number(payload.value ?? factValue ?? Number.NaN);
+      if (Number.isFinite(effectiveMaxLevel)) {
+        runtimeProjection.effectiveMaxLevel = effectiveMaxLevel;
+      }
+      return;
+    }
+    if (factKind === "runtime-display-value") {
+      const numericValue = Number(payload.value ?? factValue ?? Number.NaN);
+      runtimeProjection.displayValue = Number.isFinite(numericValue)
+        ? numericValue
+        : runtimeProjection.displayValue;
+      runtimeProjection.displayValueLabel =
+        String(payload.displayLabel || payload.valueLabel || factValue || "").trim() ||
+        runtimeProjection.displayValueLabel;
+      const entries = Array.isArray(payload.entries) ? payload.entries : [];
+      if (entries.length) {
+        runtimeProjection.displayEntries = entries
+          .map((entry) => (entry && typeof entry === "object" ? entry : null))
+          .filter(Boolean);
+      }
+      if (payload.formula && typeof payload.formula === "object") {
+        runtimeProjection.displayFormula = payload.formula;
+      }
+      return;
+    }
+    if (factKind === "runtime-display-entry") {
+      runtimeProjection.displayEntries.push(
+        payload && typeof payload === "object" ? payload : { value: factValue }
+      );
+      return;
+    }
+    if (factKind === "runtime-display-formula" && payload && typeof payload === "object") {
+      runtimeProjection.displayFormula = payload;
+    }
+  });
+  if (
+    runtimeProjection.displayEntries.length ||
+    Number.isFinite(runtimeProjection.displayValue) ||
+    runtimeProjection.displayFormula ||
+    Number.isFinite(runtimeProjection.effectiveMaxLevel) ||
+    runtimeProjection.finalMaxAccessor ||
+    runtimeProjection.nextCostAccessor
+  ) {
+    rowDetail.runtimeProjection = runtimeProjection;
   }
   return rowDetail;
 }
@@ -829,6 +905,10 @@ export function applyTokenShopGenericRowDetailToRow(row, rowDetail) {
     rowDetail.runtimeCostCoverage && typeof rowDetail.runtimeCostCoverage === "object"
       ? rowDetail.runtimeCostCoverage
       : null;
+  const runtimeProjection =
+    rowDetail.runtimeProjection && typeof rowDetail.runtimeProjection === "object"
+      ? rowDetail.runtimeProjection
+      : null;
   const runtimeCoverageNote = runtimeCostCoverage?.isClosed
     ? `Runtime cost owner coverage closed by DB evidence${
         runtimeCostCoverage.evidenceSource ? ` (${runtimeCostCoverage.evidenceSource})` : ""
@@ -866,6 +946,10 @@ export function applyTokenShopGenericRowDetailToRow(row, rowDetail) {
         : row.note,
     rowDetail,
     runtimeCostCoverage: runtimeCostCoverage || row.runtimeCostCoverage || null,
+    runtimeProjection: runtimeProjection || row.runtimeProjection || null,
+    runtimeEffectiveMaxLevel: Number.isFinite(Number(runtimeProjection?.effectiveMaxLevel))
+      ? Number(runtimeProjection.effectiveMaxLevel)
+      : row.runtimeEffectiveMaxLevel,
     costFormulaConfidence:
       runtimeCostCoverage?.isClosed && currentCostFormulaConfidence === "projected"
         ? "verified"

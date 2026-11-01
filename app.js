@@ -147,6 +147,7 @@ const DEFAULT_SERVER_CAPABILITIES = Object.freeze({
 function hasDbCoverage(summary) {
   const coverageSource = String(summary?.coverageSource || "").trim();
   return (
+    coverageSource === "consumer-projection-v2" ||
     coverageSource === "db-subject-metadata" ||
     coverageSource.includes("boundary-model") ||
     coverageSource.includes("generic-mechanics")
@@ -1931,7 +1932,7 @@ function bindOptimizerActions() {
 
 function bindTraceGapActions() {
   $("#traceGapRepeat")?.addEventListener("input", (event) => {
-    state.traceGapRepeat = clampNumber(event.target.value || 1, 1, 50);
+    state.traceGapRepeat = clampNumber(event.target.value || 1, 1, 100);
   });
   $("#traceGapDryRunBtn")?.addEventListener("click", () => runTraceGap("dry-run"));
   $("#traceGapRunBtn")?.addEventListener("click", () => {
@@ -2615,7 +2616,7 @@ async function runTraceGap(mode = "execute") {
     setStatus("traceGapStatus", "Trace-gap API is unavailable on this app launch.", "warning");
     return;
   }
-  const repeat = clampNumber($("#traceGapRepeat")?.value || state.traceGapRepeat || 1, 1, 50);
+  const repeat = clampNumber($("#traceGapRepeat")?.value || state.traceGapRepeat || 1, 1, 100);
   state.traceGapRepeat = repeat;
   setStatus(
     "traceGapStatus",
@@ -2631,7 +2632,7 @@ async function runTraceGap(mode = "execute") {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ mode, repeat })
+      body: JSON.stringify({ mode, repeat, engine: "v2" })
     });
     const payload = await response.json();
     if (!response.ok) {
@@ -2767,7 +2768,7 @@ function renderTraceGapPanel() {
     return;
   }
 
-  repeatInput.value = String(clampNumber(state.traceGapRepeat || 1, 1, 50));
+  repeatInput.value = String(clampNumber(state.traceGapRepeat || 1, 1, 100));
 
   if (!SERVER_CAPABILITIES.traceGapApi) {
     dryRunBtn.disabled = true;
@@ -2787,6 +2788,13 @@ function renderTraceGapPanel() {
   }
 
   const run = state.traceGapRun;
+  const absoluteWorkflowCounts = state.traceGapOverview?.v2Workflow || null;
+  const absoluteOpenObligations = Number(
+    absoluteWorkflowCounts?.openObligationCount ?? run?.openObligationCount ?? 0
+  );
+  const absoluteKnowledgeEdges = Number(absoluteWorkflowCounts?.knowledgeEdgeCount ?? 0);
+  const absoluteCandidateEdges = Number(absoluteWorkflowCounts?.candidateEdgeCount ?? 0);
+  const absoluteNegativeEdges = Number(absoluteWorkflowCounts?.negativeEdgeCount ?? 0);
   const isRunning = run?.status === "running";
   const isStopping = run?.status === "stopping";
   const isActive = isTraceGapActive(run);
@@ -2828,6 +2836,9 @@ function renderTraceGapPanel() {
     `<span class="pill ${run.status === "running" ? "" : "pill-neutral"}">${escapeHtml(run.status || "idle")}</span>`,
     `<span class="pill pill-neutral">${escapeHtml(run.mode || "execute")}</span>`,
     `<span class="pill pill-neutral">repeat ${escapeHtml(String(run.repeat || 1))}</span>`,
+    `<span class="pill pill-neutral">iteration ${escapeHtml(`${Number(run.currentIteration || 0)}/${Number(run.repeat || 1)}`)}</span>`,
+    `<span class="pill pill-neutral">open ${escapeHtml(String(absoluteOpenObligations))}</span>`,
+    `<span class="pill pill-neutral">present ${escapeHtml(String(absoluteKnowledgeEdges))}</span>`,
     run.selectedSeam
       ? `<span class="pill pill-neutral">${escapeHtml(run.selectedSeam)}</span>`
       : "",
@@ -2842,34 +2853,61 @@ function renderTraceGapPanel() {
       : run.lastOutputAt
         ? `Last output ${escapeHtml(formatUiDateTime(run.lastOutputAt))}.`
         : "No diagnostic output captured yet.";
+  const sessionTitle = run.subject || run.selectedTarget || "Current trace-gap run";
+  const sessionSubtitle = run.goal || run.activityLabel || "Trace-gap run state";
   setContainerHtmlPreserveSelection(
     summary,
     `
     <article class="preview-card trace-gap-summary-card">
       <div class="recommendation-head">
         <div>
-          <strong>${escapeHtml(run.selectedLabel || run.selectedTarget || "Current trace-gap run")}</strong>
-          <p class="meta">${escapeHtml(run.activityLabel || "Trace-gap run state")}</p>
+          <strong>${escapeHtml(sessionTitle)}</strong>
+          <p class="meta">${escapeHtml(sessionSubtitle)}</p>
         </div>
         <span class="score">${escapeHtml(run.status || "idle")}</span>
       </div>
       <div class="pill-row">
+        ${run.verdict ? `<span class="pill pill-neutral">${escapeHtml(run.verdict)}</span>` : ""}
+        ${run.obligationKind ? `<span class="pill pill-neutral">${escapeHtml(run.obligationKind)}</span>` : ""}
         ${run.selectedTarget ? `<span class="pill pill-neutral">${escapeHtml(run.selectedTarget)}</span>` : ""}
         ${run.executionScope ? `<span class="pill pill-neutral">${escapeHtml(run.executionScope)}</span>` : ""}
-        ${run.family ? `<span class="pill pill-neutral">${escapeHtml(run.family)}</span>` : ""}
+        ${run.executionMode ? `<span class="pill pill-neutral">${escapeHtml(run.executionMode)}</span>` : ""}
+        ${run.backendId ? `<span class="pill pill-neutral">${escapeHtml(run.backendId)}</span>` : ""}
+        <span class="pill pill-neutral">${escapeHtml(`iteration ${Number(run.currentIteration || 0)}/${Number(run.repeat || 1)}`)}</span>
+        <span class="pill pill-neutral">${escapeHtml(`open ${absoluteOpenObligations}`)}</span>
+        <span class="pill pill-neutral">${escapeHtml(`present ${absoluteKnowledgeEdges}`)}</span>
       </div>
       <p class="meta">${escapeHtml(run.summary || "No planner summary captured yet.")}</p>
-      <div class="validation-grid">
-        ${makeTraceGapInfoCard("Selected seam", run.selectedSeam || "Pending planner seam")}
-        ${makeTraceGapInfoCard("Subject", run.subjectLabel || run.subject || "Pending subject selection")}
-        ${makeTraceGapInfoCard("Blocked edges", run.blockedEdges || "none")}
-        ${makeTraceGapInfoCard("Unresolved anchor", run.unresolvedAnchor || "none")}
-        ${makeTraceGapInfoCard("Recovered", run.recoveredSummary || "none")}
-        ${makeTraceGapInfoCard("Traced", run.tracedSummary || "none")}
-        ${makeTraceGapInfoCard("New edges", run.newEdgesSummary || "none")}
-        ${makeTraceGapInfoCard("Net progress", run.progressSummary || "unknown")}
-        ${makeTraceGapInfoCard("Started", formatUiDateTime(run.startedAt))}
-        ${makeTraceGapInfoCard("Finished", formatUiDateTime(run.finishedAt))}
+      <div class="trace-gap-session-grid">
+        ${makeTraceGapDetailCard("Current graph question", [
+          ["Subject", run.subject || "Pending subject selection"],
+          ["Question shape", run.subjectLabel || "Pending obligation label"],
+          ["Selected seam", run.selectedSeam || "Pending planner seam"],
+          ["Unresolved anchor", run.unresolvedAnchor || "none"],
+          ["Blocked edges", run.blockedEdges || "none"],
+          ["Scope", run.executionScope || "none"]
+        ])}
+        ${makeTraceGapDetailCard("Latest outcome", [
+          ["Verdict", run.verdict || "unknown"],
+          ["Recovered", run.recoveredSummary || "none"],
+          ["Traced", run.tracedSummary || "none"],
+          ["Attempted", run.attemptedSummary || "none"],
+          ["New edges", run.newEdgesSummary || "none"],
+          ["Net progress", run.progressSummary || "unknown"]
+        ])}
+        ${makeTraceGapDetailCard("Execution backend", [
+          ["Backend", run.backendId || "pending"],
+          ["Execution core", run.executionCoreId || "pending"],
+          ["Mode", run.executionMode || run.mode || "unknown"],
+          ["Iteration", `${Number(run.currentIteration || 0)}/${Number(run.repeat || 1)}`],
+          ["Open obligations", String(absoluteOpenObligations)],
+          ["Present edges", String(absoluteKnowledgeEdges)],
+          ["Candidate edges", String(absoluteCandidateEdges)],
+          ["Negative edges", String(absoluteNegativeEdges)],
+          ["Request signature", run.requestSignature || "n/a"],
+          ["Started", formatUiDateTime(run.startedAt)],
+          ["Finished", formatUiDateTime(run.finishedAt)]
+        ])}
       </div>
       <p class="meta">${lastOutputNote}</p>
     </article>
@@ -2879,6 +2917,23 @@ function renderTraceGapPanel() {
 
   const commandText = Array.isArray(run.command) ? run.command.join(" ") : "";
   renderTraceGapDiagnostics(diagnostics, run, commandText);
+}
+
+function renderTraceGapLogLine(entry) {
+  const kind = String(entry?.kind || "")
+    .trim()
+    .toLowerCase();
+  const stream = String(entry?.stream || "stdout");
+  const classes = ["trace-gap-log-line"];
+  if (kind === "error") {
+    classes.push("is-error");
+  } else if (kind === "status") {
+    classes.push("is-status");
+  } else if (stream === "stderr") {
+    classes.push("is-error");
+  }
+  const label = kind || stream;
+  return `<div class="${classes.join(" ")}"><span class="trace-gap-log-meta">${escapeHtml(String(entry?.index ?? ""))} ${escapeHtml(label)}</span><span>${escapeHtml(String(entry?.text || ""))}</span></div>`;
 }
 
 function renderTraceGapDiagnostics(container, run, commandText) {
@@ -2898,25 +2953,24 @@ function renderTraceGapDiagnostics(container, run, commandText) {
   if (!existingDiagnostics || !existingCommand) {
     const logMarkup =
       Array.isArray(run.logEntries) && run.logEntries.length
-        ? run.logEntries
-            .map(
-              (entry) =>
-                `<div class="trace-gap-log-line ${entry.stream === "stderr" ? "is-stderr" : ""}"><span class="trace-gap-log-meta">${escapeHtml(String(entry.index))} ${escapeHtml(entry.stream)}</span><span>${escapeHtml(entry.text)}</span></div>`
-            )
-            .join("")
+        ? run.logEntries.map((entry) => renderTraceGapLogLine(entry)).join("")
         : `<p class="meta">No diagnostic lines captured yet.</p>`;
     setContainerHtmlPreserveSelection(
       container,
       `
       <details class="field-collapse" data-trace-gap-section="diagnostics" ${state.traceGapUi.diagnosticsOpen ? "open" : ""}>
-        <summary>Open live diagnostics</summary>
-        <p class="meta">The output below is the live local process stream for this DB-backed best-gap run.</p>
+        <summary>Live session diagnostics</summary>
+        <p class="meta">Status lines are V2 progress output. Only actual backend failures are colored as errors.</p>
         <div class="trace-gap-log">${logMarkup}</div>
       </details>
       <details class="field-collapse" data-trace-gap-section="command" ${state.traceGapUi.commandOpen ? "open" : ""}>
-        <summary>Open command and run metadata</summary>
+        <summary>Execution metadata</summary>
         <div class="preview-card">
           <p class="meta">Run id: <code>${escapeHtml(run.runId || "unknown")}</code></p>
+          <p class="meta">Backend: <code>${escapeHtml(run.backendId || "unknown")}</code></p>
+          <p class="meta">Execution core: <code>${escapeHtml(run.executionCoreId || "unknown")}</code></p>
+          <p class="meta">Execution mode: <code>${escapeHtml(run.executionMode || run.mode || "unknown")}</code></p>
+          <p class="meta">Request signature: <code>${escapeHtml(run.requestSignature || "n/a")}</code></p>
           <p class="meta">Command:</p>
           <pre>${escapeHtml(commandText || "Unavailable")}</pre>
           <p class="meta">Captured lines: ${escapeHtml(String(run.lineCount || 0))}</p>
@@ -2929,7 +2983,7 @@ function renderTraceGapDiagnostics(container, run, commandText) {
           <p class="meta">Exit code: ${escapeHtml(run.exitCode === null || run.exitCode === undefined ? "running" : String(run.exitCode))}</p>
         </div>
       </details>
-    `
+      `
     );
     bindTraceGapDiagnosticsUi(container);
     return;
@@ -2941,12 +2995,7 @@ function renderTraceGapDiagnostics(container, run, commandText) {
       logContainer.scrollHeight - logContainer.scrollTop - logContainer.clientHeight < 24;
     const nextMarkup =
       Array.isArray(run.logEntries) && run.logEntries.length
-        ? run.logEntries
-            .map(
-              (entry) =>
-                `<div class="trace-gap-log-line ${entry.stream === "stderr" ? "is-stderr" : ""}"><span class="trace-gap-log-meta">${escapeHtml(String(entry.index))} ${escapeHtml(entry.stream)}</span><span>${escapeHtml(entry.text)}</span></div>`
-            )
-            .join("")
+        ? run.logEntries.map((entry) => renderTraceGapLogLine(entry)).join("")
         : `<p class="meta">No diagnostic lines captured yet.</p>`;
     if (logContainer.innerHTML !== nextMarkup) {
       setContainerHtmlPreserveSelection(logContainer, nextMarkup);
@@ -2962,6 +3011,10 @@ function renderTraceGapDiagnostics(container, run, commandText) {
       commandCard,
       `
       <p class="meta">Run id: <code>${escapeHtml(run.runId || "unknown")}</code></p>
+      <p class="meta">Backend: <code>${escapeHtml(run.backendId || "unknown")}</code></p>
+      <p class="meta">Execution core: <code>${escapeHtml(run.executionCoreId || "unknown")}</code></p>
+      <p class="meta">Execution mode: <code>${escapeHtml(run.executionMode || run.mode || "unknown")}</code></p>
+      <p class="meta">Request signature: <code>${escapeHtml(run.requestSignature || "n/a")}</code></p>
       <p class="meta">Command:</p>
       <pre>${escapeHtml(commandText || "Unavailable")}</pre>
       <p class="meta">Captured lines: ${escapeHtml(String(run.lineCount || 0))}</p>
@@ -2976,6 +3029,22 @@ function renderTraceGapDiagnostics(container, run, commandText) {
     );
   }
   bindTraceGapDiagnosticsUi(container);
+}
+
+function makeTraceGapDetailCard(title, rows) {
+  const body = Array.isArray(rows)
+    ? rows
+        .map(([label, value]) => {
+          return `<p class="meta"><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value || "n/a")}</p>`;
+        })
+        .join("")
+    : "";
+  return `
+    <article class="validation-card trace-gap-detail-card">
+      <strong>${escapeHtml(title)}</strong>
+      ${body}
+    </article>
+  `;
 }
 
 function bindTraceGapDiagnosticsUi(container) {
@@ -3006,6 +3075,14 @@ function renderTraceGapDbOverview() {
   if (!overview?.tables) {
     return `<article class="validation-card"><strong>DB overview pending</strong><p class="meta">Refresh status or start a run to load materializer health.</p></article>`;
   }
+  const dbPathCard = `
+    <article class="validation-card">
+      <strong>Central runtime DB</strong>
+      <p class="meta">Path: <code>${escapeHtml(String(overview.dbPath || "unknown"))}</code></p>
+      <p class="meta">Generated: ${escapeHtml(formatUiDateTime(overview.generatedAt))}</p>
+      <p class="meta">Scope filter: ${escapeHtml(String(overview.scopeHint || "all scopes"))}</p>
+    </article>
+  `;
   const scopeStageSummary = overview.scopeStageSummary;
   const summaryCard = scopeStageSummary
     ? `
@@ -3016,6 +3093,68 @@ function renderTraceGapDbOverview() {
           <p class="meta">Stages: ${escapeHtml(
             Object.entries(scopeStageSummary.stages || {})
               .map(([stageKind, stageStatus]) => `${stageKind}=${stageStatus}`)
+              .join(" | ") || "none"
+          )}</p>
+        </article>
+      `
+    : "";
+  const centralWorkflow = overview.centralWorkflow || null;
+  const v2Workflow = overview.v2Workflow || null;
+  const workflowCard = centralWorkflow
+    ? `
+        <article class="validation-card">
+          <strong>Central workflow layer</strong>
+          <p class="meta">Open workflow gaps: ${escapeHtml(String(centralWorkflow.openGapCount ?? 0))}</p>
+          <p class="meta">Acquisition attempts: ${escapeHtml(String(centralWorkflow.attemptCount ?? 0))}</p>
+          <p class="meta">Term fragments: attempts ${escapeHtml(String(centralWorkflow.termFragmentCounts?.attemptTerms ?? 0))} | gaps ${escapeHtml(String(centralWorkflow.termFragmentCounts?.gapTerms ?? 0))}</p>
+          <p class="meta">Latest attempts: ${escapeHtml(
+            (centralWorkflow.latestAttempts || [])
+              .slice(0, 4)
+              .map(
+                (item) =>
+                  `${item.traceScope || "scope"}:${item.seamId || "seam"}:${item.acquisitionTerm || "term"}=${item.attemptStatus || item.attemptOutcome || "unknown"}`
+              )
+              .join(" | ") || "none"
+          )}</p>
+        </article>
+      `
+    : "";
+  const v2WorkflowCard = v2Workflow
+    ? `
+        <article class="validation-card">
+          <strong>V2 graph workflow</strong>
+          <p class="meta">Open obligations: ${escapeHtml(String(v2Workflow.openObligationCount ?? 0))}</p>
+          <p class="meta">Present edges: ${escapeHtml(String(v2Workflow.knowledgeEdgeCount ?? 0))}</p>
+          <p class="meta">Candidate edges: ${escapeHtml(String(v2Workflow.candidateEdgeCount ?? 0))} | Negative edges: ${escapeHtml(String(v2Workflow.negativeEdgeCount ?? 0))}</p>
+          <p class="meta">Execution attempts: ${escapeHtml(String(v2Workflow.attemptCount ?? 0))}</p>
+          <p class="meta">Trace events: ${escapeHtml(String(v2Workflow.eventCount ?? 0))}</p>
+          <p class="meta">Consumer projections: ${escapeHtml(String(v2Workflow.projectionCount ?? 0))}</p>
+          <p class="meta">Latest attempts: ${escapeHtml(
+            (v2Workflow.latestAttempts || [])
+              .slice(0, 4)
+              .map((item) => {
+                const backendLabel =
+                  item.executionCoreId || item.backendId || item.executionMode || "";
+                return `${item.traceScope || "scope"}:${item.targetNodeId || "target"}=${item.attemptStatus || "unknown"}${backendLabel ? ` [${backendLabel}]` : ""}`;
+              })
+              .join(" | ") || "none"
+          )}</p>
+          <p class="meta">Latest obligations: ${escapeHtml(
+            (v2Workflow.latestObligations || [])
+              .slice(0, 4)
+              .map(
+                (item) =>
+                  `${item.traceScope || "scope"}:${item.targetNodeId || "target"}:${item.obligationKind || "kind"}=${item.obligationStatus || "unknown"}`
+              )
+              .join(" | ") || "none"
+          )}</p>
+          <p class="meta">Latest projections: ${escapeHtml(
+            (v2Workflow.latestConsumerProjections || [])
+              .slice(0, 4)
+              .map((item) => {
+                const completeness = item.payload?.projectionCompleteness || "partial";
+                return `${item.traceScope || "scope"}:${item.subjectId || "subject"}:${item.projectionKind || "projection"}=${completeness}`;
+              })
               .join(" | ") || "none"
           )}</p>
         </article>
@@ -3093,16 +3232,7 @@ function renderTraceGapDbOverview() {
           </article>
         `
       : "";
-  return `${summaryCard}${genericCard}${tableCards}${stageCards}`;
-}
-
-function makeTraceGapInfoCard(title, value) {
-  return `
-    <article class="validation-card">
-      <strong>${escapeHtml(title)}</strong>
-      <p class="meta">${escapeHtml(value || "n/a")}</p>
-    </article>
-  `;
+  return `${dbPathCard}${workflowCard}${v2WorkflowCard}${summaryCard}${genericCard}${tableCards}${stageCards}`;
 }
 
 function snapshotTextSelectionWithin(container) {

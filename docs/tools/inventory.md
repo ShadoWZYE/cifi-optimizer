@@ -42,12 +42,34 @@ Long native or Ghidra-backed trace runs are expected while cacheable parsing is 
 | Command | Purpose |
 | --- | --- |
 | `node scripts/unity/run_extract.mjs trace ...` | Main extraction/trace wrapper |
-| `python scripts/unity/unity_trace_bundle.py ...` | Direct trace orchestration |
+| `python scripts/unity/unity_trace_bundle_v2.py ...` | Direct V2 graph-obligation planning/execution |
 | `python scripts/unity/ghidra_headless.py ...` | Native pipeline, DB rebuilds, lifecycle maintenance |
-| `launch-trace-gap.bat` | Run best-gap follow-up from DB state |
+| `python scripts/unity/ghidra_cache_db_v2.py ...` | V2 schema/bootstrap/obligation DB helper |
+| `launch-trace-gap.bat` | Run the active V2 trace-gap preflight and execution flow |
 | `node scripts/contracts/generate-system-units.mjs` | Export DB-backed system-unit snapshots |
 | `node scripts/contracts/validate-datasets.mjs` | Validate active dataset and export contracts |
-| `node scripts/ui/capture-local-surface.mjs ...` | Capture a local rendered UI surface for validation |
+| `node scripts/ui/capture-local-surface.mjs ...` | Capture a local rendered UI surface for validation; prefer this over raw Playwright/manual browser probing for local UI checks |
+
+### emulator validation
+
+| Command | Purpose |
+| --- | --- |
+| `adb devices` | Confirm the running LDPlayer ADB bridge is attached |
+| `adb shell pm list packages` | Confirm `com.OctocubeGamesCompany.CIFI` is installed in the running instance |
+| `adb shell dumpsys window windows` | Confirm the currently focused Android activity |
+| `adb shell screencap -p /sdcard/Download/cifi-live.png` | Capture the current emulator screen for validation |
+| `adb shell uiautomator dump /sdcard/Download/cifi-live-ui.xml` | Capture the current UI hierarchy for validation |
+| `adb pull /sdcard/Download/cifi-live.png workbench\cifi-live.png` | Pull the latest validation screenshot into the repo workbench |
+| `adb pull /sdcard/Download/cifi-live-ui.xml workbench\cifi-live-ui.xml` | Pull the latest validation UI dump into the repo workbench |
+
+Emulator rule:
+
+- use LDPlayer/ADB only as a validation surface for current UI state or app-storage inspection
+- do not promote screenshots or UI dumps into canonical mechanic truth when DB-backed trace/materialized evidence already exists
+- current working token-shop route on the `900x1600` LDPlayer surface is:
+  - `shell input tap 823 1535` to open `NAV CONSOLE`
+  - `shell input tap 170 920` to open `TOKEN SHOP`
+  - token-shop reopens at the last in-shop position, so use in-list swipes such as `shell input swipe 450 700 450 1150 350` to move back toward earlier Tier 1 rows before validating the visible shelf
 
 ## Active Tools
 
@@ -55,8 +77,10 @@ Long native or Ghidra-backed trace runs are expected while cacheable parsing is 
 
 | Path | Role | Notes |
 | --- | --- | --- |
-| `scripts/unity/unity_trace_bundle.py` | Active pipeline | DB-first subject resolution, execution planning, best-gap follow-up, trace persistence |
-| `scripts/unity/ghidra_cache_db.py` | Active pipeline | Canonical reducer/materializer owner for evidence, semantic fragments, execution plans, system views |
+| `scripts/unity/unity_trace_bundle_v2.py` | Active pipeline | V2 graph-obligation planning, execution orchestration, result application, and repeat batching |
+| `scripts/unity/ghidra_cache_db_v2.py` | Active pipeline | V2 raw evidence, IR, graph, execution-memory, obligations, and consumer projections |
+| `scripts/unity/unity_trace_bundle.py` | Compatibility fallback | Older V1 trace orchestration retained only for migration/history |
+| `scripts/unity/ghidra_cache_db.py` | Compatibility fallback | Older V1 reducer/materializer owner retained only for migration/history |
 | `scripts/unity/ghidra_headless.py` | Active pipeline | Ghidra wrapper, DB rebuilds, invalidation, lifecycle audit/purge |
 | `scripts/unity/trace_extractors.py` | Active pipeline | Native/managed extraction helpers used by the DB-first trace path |
 | `scripts/contracts/system_unit_db.py` | Active bridge | Reads/materializes DB-backed system-unit and trace views for export/runtime helpers |
@@ -87,6 +111,7 @@ Long native or Ghidra-backed trace runs are expected while cacheable parsing is 
 | `workbench/app-state.sqlite3` | Active runtime store | Separate app-state DB for mutable user/profile state. Do not mix this with canonical extraction/materializer truth in `workbench/ghidra-cache/ghidra_cache.sqlite3`. |
 | `GET /api/player-profile` | Active runtime API | Returns the current DB-backed active player profile used by the app/capture validation path. |
 | `POST /api/player-profile` | Active runtime API | Upserts the current DB-backed active player profile. |
+| `GET /api/trace-gap/overview` | Active runtime API | Returns the Trace Gap Deck DB overview from the central runtime tables/views. Use this when validating the gap UI instead of reading legacy `materialized_*` tables directly. |
 | `CIFI_APP_STATE_DB_PATH` | Dev-server override | Optional environment override for the app-state DB path. Use this for tests or isolated validation runs instead of mutating the default local app-state DB. |
 
 ### Shard planners
@@ -107,7 +132,7 @@ Supported `run_extract.mjs` commands:
 | `uabea` | supported | Run the built C# asset extractor |
 | `asset` | supported | Run asset extraction |
 | `asset:run` | supported | Build and run asset extraction |
-| `trace` | supported | Run the DB-first trace path |
+| `trace` | supported | Run the active V2 graph-obligation trace path |
 | `compile` | supported | Regenerate system-unit exports |
 
 Asset extraction flags:
@@ -119,15 +144,41 @@ Asset extraction flags:
 Trace examples:
 
 ```bash
-node scripts/unity/run_extract.mjs trace --family token-shop
-node scripts/unity/run_extract.mjs trace --query "ATU4Button" --level structured
-python scripts/unity/unity_trace_bundle.py --best-gap --dry-run
+node scripts/unity/run_extract.mjs trace --dry-run
+node scripts/unity/run_extract.mjs trace --repeat 5 --native-timeout 10
+python scripts/unity/unity_trace_bundle_v2.py best-gap-v2 --dry-run
+python scripts/unity/unity_trace_bundle_v2.py run-best-gap-v2 --native-timeout 10
 launch-trace-gap.bat
+```
+
+V2 rebuild examples:
+
+```bash
+python scripts/unity/ghidra_cache_db_v2.py init
+python scripts/unity/ghidra_cache_db_v2.py derive-obligations
+python scripts/unity/ghidra_cache_db_v2.py derive-projections
+python scripts/unity/ghidra_cache_db_v2.py list-projections --kind token-shop-row-structure --limit 10
+python scripts/unity/unity_trace_bundle_v2.py execute-best-gap-v2
+python scripts/unity/unity_trace_bundle_v2.py run-best-gap-v2 --native-timeout 10
+python scripts/unity/unity_trace_bundle_v2.py run-best-gap-v2 --repeat 5 --native-timeout 10
+python scripts/unity/unity_trace_bundle_v2.py apply-result-v2 <attempt-id> [--request-signature <sig>]
+python scripts/unity/unity_trace_bundle_v2.py apply-export-result-v2 <attempt-id> <trace-export.json> [--request-signature <sig>]
+
+Backend adapter used by the V2 runner:
+`scripts/unity/trace_backend_v2.py`
+
+Execution-core bridge currently used by the backend:
+`scripts/unity/trace_execution_core_v2.py`
+
+Current default backend mode:
+- native V2 backend (`NativeTraceBackendV2`)
+- native evidence-acquisition execution core (`NativeGraphExtensionExecutionCoreV2`)
+- backend-dataset-first result ingestion into V2 IR/graph observations, with export artifacts kept as compatibility fallback
 ```
 
 Trace operating rule:
 
-- prefer `extract:trace` or `unity_trace_bundle.py` as the default recovery path
+- prefer `extract:trace` or `unity_trace_bundle_v2.py` as the default recovery path
 - expect DB/cache/materialized artifacts to be the primary success signal
 - use `--export` or exported JSON outputs only when a snapshot/debug artifact is explicitly needed
 - if the expected DB/materialized artifact is missing after a run, fix the trace/probe/materializer path before moving to adjacent targets
@@ -185,6 +236,7 @@ it should live under `data/archive/` or be documented as archival, not as active
 
 Before adding or reviving a tool:
 
-1. Prefer extending `unity_trace_bundle.py`, `ghidra_cache_db.py`, or `ghidra_headless.py`.
-2. Prefer DB-backed materialization over new committed intermediate JSON.
-3. Only keep standalone generators when they still produce a live input that the DB/export layer cannot yet derive.
+1. Prefer extending `unity_trace_bundle_v2.py`, `ghidra_cache_db_v2.py`, or `ghidra_headless.py` for active work.
+2. Treat `unity_trace_bundle.py` and `ghidra_cache_db.py` as migration/history surfaces unless a V2 gap forces compatibility work.
+3. Prefer DB-backed materialization over new committed intermediate JSON.
+4. Only keep standalone generators when they still produce a live input that the DB/export layer cannot yet derive.
